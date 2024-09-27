@@ -19,6 +19,14 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.MyEnum"),
+            )
+    premadeThriftType_module_HackEnum = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.HackEnum"),
+            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )
@@ -34,10 +42,6 @@ var (
             SetName("module.MyDataItemAlias").
             SetUnderlyingType(premadeThriftType_module_MyDataItem),
             )
-    premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum"),
-            )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
             )
@@ -47,6 +51,10 @@ var (
     premadeThriftType_set_float = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_float),
+            )
+    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyStruct"),
             )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
@@ -64,25 +72,37 @@ var (
             SetKeyType(premadeThriftType_string).
             SetValueType(premadeThriftType_i64),
             )
+    premadeThriftType_module_Containers = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Containers"),
+            )
     premadeThriftType_module_MyEnumAlias = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.MyEnumAlias").
             SetUnderlyingType(premadeThriftType_module_MyEnum),
             )
-    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.MyStruct"),
-            )
     premadeThriftType_module_MyUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.MyUnion"),
             )
-    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
     premadeThriftType_module_ReservedKeyword = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ReservedKeyword"),
+            )
+    premadeThriftType_module_UnionToBeRenamed = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.UnionToBeRenamed"),
+            )
+    premadeThriftType_module_MyException = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyException"),
+            )
+    premadeThriftType_module_MyExceptionWithMessage = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyExceptionWithMessage"),
+            )
+    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),

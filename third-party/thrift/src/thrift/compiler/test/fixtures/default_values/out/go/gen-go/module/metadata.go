@@ -26,6 +26,14 @@ var (
         metadata.NewThriftStructType().
             SetName("module.TrivialStruct"),
             )
+    premadeThriftType_module_StructWithNoCustomDefaultValues = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.StructWithNoCustomDefaultValues"),
+            )
+    premadeThriftType_module_StructWithCustomDefaultValues = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.StructWithCustomDefaultValues"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

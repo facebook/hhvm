@@ -19,6 +19,74 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_scope_Transitive = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Transitive"),
+            )
+    premadeThriftType_scope_Program = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Program"),
+            )
+    premadeThriftType_scope_Struct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Struct"),
+            )
+    premadeThriftType_scope_Union = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Union"),
+            )
+    premadeThriftType_scope_Exception = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Exception"),
+            )
+    premadeThriftType_scope_Field = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Field"),
+            )
+    premadeThriftType_scope_Typedef = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Typedef"),
+            )
+    premadeThriftType_scope_Service = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Service"),
+            )
+    premadeThriftType_scope_Interaction = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Interaction"),
+            )
+    premadeThriftType_scope_Function = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Function"),
+            )
+    premadeThriftType_scope_EnumValue = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.EnumValue"),
+            )
+    premadeThriftType_scope_Const = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Const"),
+            )
+    premadeThriftType_scope_Enum = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Enum"),
+            )
+    premadeThriftType_scope_Structured = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Structured"),
+            )
+    premadeThriftType_scope_Interface = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Interface"),
+            )
+    premadeThriftType_scope_RootDefinition = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.RootDefinition"),
+            )
+    premadeThriftType_scope_Definition = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.Definition"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

@@ -22,6 +22,14 @@ var (
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
             )
+    premadeThriftType_module_Foo = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Foo"),
+            )
+    premadeThriftType_module_Foo2 = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Foo2"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

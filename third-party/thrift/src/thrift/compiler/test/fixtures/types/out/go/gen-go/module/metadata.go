@@ -21,8 +21,28 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module_has_bitwise_ops = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.has_bitwise_ops"),
+            )
+    premadeThriftType_module_is_unscoped = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.is_unscoped"),
+            )
+    premadeThriftType_module_MyForwardRefEnum = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.MyForwardRefEnum"),
+            )
+    premadeThriftType_module_empty_struct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.empty_struct"),
+            )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            )
+    premadeThriftType_module_decorated_struct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.decorated_struct"),
             )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
@@ -55,12 +75,24 @@ var (
             SetName("included.SomeMap").
             SetUnderlyingType(premadeThriftType_map_i32_string),
             )
+    premadeThriftType_module_ContainerStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ContainerStruct"),
+            )
+    premadeThriftType_module_CppTypeStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CppTypeStruct"),
+            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )
-    premadeThriftType_module_MyForwardRefEnum = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyForwardRefEnum"),
+    premadeThriftType_module_VirtualStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.VirtualStruct"),
+            )
+    premadeThriftType_module_MyStructWithForwardRefEnum = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyStructWithForwardRefEnum"),
             )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
@@ -68,6 +100,10 @@ var (
     premadeThriftType_module_TrivialNumeric = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.TrivialNumeric"),
+            )
+    premadeThriftType_module_TrivialNestedWithDefault = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.TrivialNestedWithDefault"),
             )
     premadeThriftType_map_string_i32 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
@@ -78,15 +114,35 @@ var (
         metadata.NewThriftStructType().
             SetName("module.ComplexString"),
             )
+    premadeThriftType_module_ComplexNestedWithDefault = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ComplexNestedWithDefault"),
+            )
     premadeThriftType_byte = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE.Ptr(),
             )
     premadeThriftType_i16 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
             )
+    premadeThriftType_module_MinPadding = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MinPadding"),
+            )
+    premadeThriftType_module_MinPaddingWithCustomType = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MinPaddingWithCustomType"),
+            )
     premadeThriftType_module_MyDataItem = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyDataItem"),
+            )
+    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyStruct"),
+            )
+    premadeThriftType_module_Renaming = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Renaming"),
             )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
@@ -115,6 +171,10 @@ var (
             SetName("module.SomeListOfTypeMap_2468").
             SetUnderlyingType(premadeThriftType_included_SomeListOfTypeMap),
             )
+    premadeThriftType_module_AnnotatedTypes = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.AnnotatedTypes"),
+            )
     premadeThriftType_module_ForwardUsageStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ForwardUsageStruct"),
@@ -136,6 +196,10 @@ var (
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_module_IncompleteMapDep),
             )
+    premadeThriftType_module_IncompleteMap = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.IncompleteMap"),
+            )
     premadeThriftType_module_CompleteMapDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.CompleteMapDep"),
@@ -145,6 +209,10 @@ var (
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_module_CompleteMapDep),
             )
+    premadeThriftType_module_CompleteMap = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CompleteMap"),
+            )
     premadeThriftType_module_IncompleteListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.IncompleteListDep"),
@@ -153,6 +221,10 @@ var (
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_IncompleteListDep),
             )
+    premadeThriftType_module_IncompleteList = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.IncompleteList"),
+            )
     premadeThriftType_module_CompleteListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.CompleteListDep"),
@@ -160,6 +232,10 @@ var (
     premadeThriftType_list_module_CompleteListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_CompleteListDep),
+            )
+    premadeThriftType_module_CompleteList = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CompleteList"),
             )
     premadeThriftType_module_AdaptedListDep = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -180,6 +256,10 @@ var (
     premadeThriftType_list_module_DependentAdaptedListDep = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_DependentAdaptedListDep),
+            )
+    premadeThriftType_module_DependentAdaptedList = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.DependentAdaptedList"),
             )
     premadeThriftType_module_list_i32_9187 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
@@ -211,6 +291,14 @@ var (
             SetName("module.i32_9314").
             SetUnderlyingType(premadeThriftType_i32),
             )
+    premadeThriftType_module_AllocatorAware = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.AllocatorAware"),
+            )
+    premadeThriftType_module_AllocatorAware2 = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.AllocatorAware2"),
+            )
     premadeThriftType_module_IntTypedef = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.IntTypedef").
@@ -220,6 +308,14 @@ var (
         metadata.NewThriftTypedefType().
             SetName("module.UintTypedef").
             SetUnderlyingType(premadeThriftType_module_IntTypedef),
+            )
+    premadeThriftType_module_TypedefStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.TypedefStruct"),
+            )
+    premadeThriftType_module_StructWithDoubleUnderscores = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.StructWithDoubleUnderscores"),
             )
     premadeThriftType_map_module_TBinary_i64 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().

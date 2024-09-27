@@ -22,12 +22,68 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_rust_Name = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Name"),
+            )
+    premadeThriftType_rust_Copy = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Copy"),
+            )
+    premadeThriftType_rust_RequestContext = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.RequestContext"),
+            )
+    premadeThriftType_rust_Arc = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Arc"),
+            )
+    premadeThriftType_rust_Box = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Box"),
+            )
+    premadeThriftType_rust_Exhaustive = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Exhaustive"),
+            )
+    premadeThriftType_rust_Ord = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Ord"),
+            )
+    premadeThriftType_rust_NewType = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.NewType"),
+            )
+    premadeThriftType_rust_Type = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Type"),
+            )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
+    premadeThriftType_rust_Serde = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Serde"),
+            )
+    premadeThriftType_rust_Mod = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Mod"),
+            )
+    premadeThriftType_rust_Adapter = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Adapter"),
             )
     premadeThriftType_list_string = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_rust_Derive = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.Derive"),
+            )
+    premadeThriftType_rust_ServiceExn = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("rust.ServiceExn"),
             )
 )
 

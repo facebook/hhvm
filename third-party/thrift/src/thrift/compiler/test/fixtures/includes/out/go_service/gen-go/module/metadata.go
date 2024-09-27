@@ -33,6 +33,10 @@ var (
             SetName("includes.IncludedInt64").
             SetUnderlyingType(premadeThriftType_i64),
             )
+    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.MyStruct"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

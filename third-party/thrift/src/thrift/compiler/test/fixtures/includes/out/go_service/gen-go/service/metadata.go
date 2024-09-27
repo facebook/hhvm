@@ -27,6 +27,11 @@ var (
         metadata.NewThriftStructType().
             SetName("includes.Included"),
             )
+    premadeThriftType_service_IncludesIncluded = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("service.IncludesIncluded").
+            SetUnderlyingType(premadeThriftType_includes_Included),
+            )
     premadeThriftType_transitive_Foo = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("transitive.Foo"),
@@ -35,6 +40,11 @@ var (
         metadata.NewThriftTypedefType().
             SetName("includes.TransitiveFoo").
             SetUnderlyingType(premadeThriftType_transitive_Foo),
+            )
+    premadeThriftType_service_IncludesTransitiveFoo = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("service.IncludesTransitiveFoo").
+            SetUnderlyingType(premadeThriftType_includes_TransitiveFoo),
             )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),

@@ -24,6 +24,22 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_module_Fields = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Fields"),
+            )
+    premadeThriftType_module_FieldsInjectedToEmptyStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.FieldsInjectedToEmptyStruct"),
+            )
+    premadeThriftType_module_FieldsInjectedToStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.FieldsInjectedToStruct"),
+            )
+    premadeThriftType_module_FieldsInjectedWithIncludedStruct = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.FieldsInjectedWithIncludedStruct"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

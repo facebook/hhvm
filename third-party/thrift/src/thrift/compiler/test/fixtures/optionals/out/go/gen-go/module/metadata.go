@@ -19,6 +19,10 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module_Animal = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("module.Animal"),
+            )
     premadeThriftType_double = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE.Ptr(),
             )
@@ -31,6 +35,10 @@ var (
             )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
+    premadeThriftType_module_Vehicle = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Vehicle"),
             )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
@@ -47,22 +55,18 @@ var (
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_module_PersonID),
             )
-    premadeThriftType_module_Animal = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.Animal"),
-            )
     premadeThriftType_map_module_Animal_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_module_Animal).
             SetValueType(premadeThriftType_string),
             )
-    premadeThriftType_module_Vehicle = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Vehicle"),
-            )
     premadeThriftType_list_module_Vehicle = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module_Vehicle),
+            )
+    premadeThriftType_module_Person = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Person"),
             )
 )
 

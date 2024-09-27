@@ -19,6 +19,14 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_thrift_RpcPriority = metadata.NewThriftType().SetTEnum(
+        metadata.NewThriftEnumType().
+            SetName("thrift.RpcPriority"),
+            )
+    premadeThriftType_thrift_Experimental = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Experimental"),
+            )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
             )
@@ -31,20 +39,76 @@ var (
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_i32),
             )
+    premadeThriftType_thrift_ReserveIds = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.ReserveIds"),
+            )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
+    premadeThriftType_thrift_RequiresBackwardCompatibility = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.RequiresBackwardCompatibility"),
+            )
+    premadeThriftType_thrift_TerseWrite = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.TerseWrite"),
+            )
+    premadeThriftType_thrift_Box = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Box"),
+            )
+    premadeThriftType_thrift_Mixin = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Mixin"),
+            )
+    premadeThriftType_thrift_SerializeInFieldIdOrder = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.SerializeInFieldIdOrder"),
+            )
+    premadeThriftType_thrift_BitmaskEnum = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.BitmaskEnum"),
+            )
+    premadeThriftType_thrift_ExceptionMessage = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.ExceptionMessage"),
+            )
+    premadeThriftType_thrift_InternBox = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.InternBox"),
+            )
+    premadeThriftType_thrift_Serial = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Serial"),
             )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
-    premadeThriftType_thrift_RpcPriority = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("thrift.RpcPriority"),
+    premadeThriftType_thrift_Uri = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Uri"),
+            )
+    premadeThriftType_thrift_Priority = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.Priority"),
             )
     premadeThriftType_map_string_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_string).
             SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.DeprecatedUnvalidatedAnnotations"),
+            )
+    premadeThriftType_thrift_AllowReservedIdentifier = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.AllowReservedIdentifier"),
+            )
+    premadeThriftType_thrift_AllowReservedFilename = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("thrift.AllowReservedFilename"),
             )
 )
 

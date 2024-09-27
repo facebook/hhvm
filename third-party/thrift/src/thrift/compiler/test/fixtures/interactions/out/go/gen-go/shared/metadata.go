@@ -25,6 +25,10 @@ var (
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
             )
+    premadeThriftType_shared_DoSomethingResult = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("shared.DoSomethingResult"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

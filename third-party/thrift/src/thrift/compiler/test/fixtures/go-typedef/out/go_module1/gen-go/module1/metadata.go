@@ -75,6 +75,10 @@ var (
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_module1_PartName),
             )
+    premadeThriftType_module1_Automobile = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module1.Automobile"),
+            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )
@@ -87,14 +91,18 @@ var (
             SetKeyType(premadeThriftType_module1_MapKey).
             SetValueType(premadeThriftType_string),
             )
-    premadeThriftType_module1_Automobile = metadata.NewThriftType().SetTStruct(
+    premadeThriftType_module1_MapContainer = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
-            SetName("module1.Automobile"),
+            SetName("module1.MapContainer"),
             )
     premadeThriftType_module1_Car = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module1.Car").
             SetUnderlyingType(premadeThriftType_module1_Automobile),
+            )
+    premadeThriftType_module1_Pair = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module1.Pair"),
             )
     premadeThriftType_list_module1_Automobile = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
@@ -104,9 +112,23 @@ var (
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module1_Car),
             )
+    premadeThriftType_module1_Collection = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module1.Collection"),
+            )
+    premadeThriftType_module1_State = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module1.State").
+            SetUnderlyingType(premadeThriftType_string),
+            )
     premadeThriftType_module2_Enum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module2.Enum"),
+            )
+    premadeThriftType_module1_Enum = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("module1.Enum").
+            SetUnderlyingType(premadeThriftType_module2_Enum),
             )
 )
 

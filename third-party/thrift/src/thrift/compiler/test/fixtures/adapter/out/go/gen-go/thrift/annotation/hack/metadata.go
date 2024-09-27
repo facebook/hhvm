@@ -22,9 +22,49 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_hack_FieldWrapper = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.FieldWrapper"),
+            )
+    premadeThriftType_hack_Wrapper = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.Wrapper"),
+            )
+    premadeThriftType_hack_Adapter = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.Adapter"),
+            )
+    premadeThriftType_hack_SkipCodegen = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.SkipCodegen"),
+            )
+    premadeThriftType_hack_Name = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.Name"),
+            )
     premadeThriftType_list_string = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_string),
+            )
+    premadeThriftType_hack_UnionEnumAttributes = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.UnionEnumAttributes"),
+            )
+    premadeThriftType_hack_StructTrait = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.StructTrait"),
+            )
+    premadeThriftType_hack_Attributes = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.Attributes"),
+            )
+    premadeThriftType_hack_StructAsTrait = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.StructAsTrait"),
+            )
+    premadeThriftType_hack_ModuleInternal = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("hack.ModuleInternal"),
             )
 )
 

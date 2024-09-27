@@ -24,6 +24,10 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_module_CustomException = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CustomException"),
+            )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )

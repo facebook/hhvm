@@ -22,6 +22,14 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_module_GetEntityRequest = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.GetEntityRequest"),
+            )
+    premadeThriftType_module_GetEntityResponse = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.GetEntityResponse"),
+            )
     premadeThriftType_list_string = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_string),
@@ -37,14 +45,6 @@ var (
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_module_NonComparableStruct).
             SetValueType(premadeThriftType_i64),
-            )
-    premadeThriftType_module_GetEntityResponse = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.GetEntityResponse"),
-            )
-    premadeThriftType_module_GetEntityRequest = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.GetEntityRequest"),
             )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),

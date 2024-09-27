@@ -19,19 +19,91 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
     premadeThriftType_cpp_RefType = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("cpp.RefType"),
             )
-    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )
     premadeThriftType_cpp_EnumUnderlyingType = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("cpp.EnumUnderlyingType"),
+            )
+    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            )
+    premadeThriftType_cpp_Type = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Type"),
+            )
+    premadeThriftType_cpp_Ref = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Ref"),
+            )
+    premadeThriftType_cpp_Name = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Name"),
+            )
+    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            )
+    premadeThriftType_cpp_Lazy = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Lazy"),
+            )
+    premadeThriftType_cpp_DisableLazyChecksum = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.DisableLazyChecksum"),
+            )
+    premadeThriftType_cpp_Adapter = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Adapter"),
+            )
+    premadeThriftType_cpp_PackIsset = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.PackIsset"),
+            )
+    premadeThriftType_cpp_MinimizePadding = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.MinimizePadding"),
+            )
+    premadeThriftType_cpp_ScopedEnumAsUnionType = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.ScopedEnumAsUnionType"),
+            )
+    premadeThriftType_cpp_FieldInterceptor = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.FieldInterceptor"),
+            )
+    premadeThriftType_cpp_UseOpEncode = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.UseOpEncode"),
+            )
+    premadeThriftType_cpp_EnumType = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.EnumType"),
+            )
+    premadeThriftType_cpp_Frozen2Exclude = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Frozen2Exclude"),
+            )
+    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Frozen2RequiresCompleteContainerParams"),
+            )
+    premadeThriftType_cpp_ProcessInEbThreadUnsafe = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.ProcessInEbThreadUnsafe"),
+            )
+    premadeThriftType_cpp_RuntimeAnnotation = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.RuntimeAnnotation"),
+            )
+    premadeThriftType_cpp_UseCursorSerialization = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.UseCursorSerialization"),
+            )
+    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.GenerateDeprecatedHeaderClientMethods"),
             )
 )
 

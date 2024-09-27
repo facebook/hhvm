@@ -46,8 +46,20 @@ var (
             SetName("module.containerTypedef").
             SetUnderlyingType(premadeThriftType_map_i16_string),
             )
+    premadeThriftType_module_ComplexUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.ComplexUnion"),
+            )
+    premadeThriftType_module_ListUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.ListUnion"),
+            )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
+            )
+    premadeThriftType_module_DataUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.DataUnion"),
             )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
@@ -56,9 +68,21 @@ var (
         metadata.NewThriftStructType().
             SetName("module.Val"),
             )
+    premadeThriftType_module_ValUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.ValUnion"),
+            )
+    premadeThriftType_module_VirtualComplexUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.VirtualComplexUnion"),
+            )
     premadeThriftType_module_NonCopyableStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.NonCopyableStruct"),
+            )
+    premadeThriftType_module_NonCopyableUnion = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.NonCopyableUnion"),
             )
 )
 

@@ -22,16 +22,6 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
-    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
-    premadeThriftType_module_Banal = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Banal"),
-            )
     premadeThriftType_module_Fiery = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Fiery"),
@@ -39,6 +29,32 @@ var (
     premadeThriftType_module_Serious = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Serious"),
+            )
+    premadeThriftType_module_ComplexFieldNames = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ComplexFieldNames"),
+            )
+    premadeThriftType_module_CustomFieldNames = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.CustomFieldNames"),
+            )
+    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            )
+    premadeThriftType_module_ExceptionWithPrimitiveField = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ExceptionWithPrimitiveField"),
+            )
+    premadeThriftType_module_ExceptionWithStructuredAnnotation = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ExceptionWithStructuredAnnotation"),
+            )
+    premadeThriftType_module_Banal = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Banal"),
+            )
+    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
+        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )
 )
 

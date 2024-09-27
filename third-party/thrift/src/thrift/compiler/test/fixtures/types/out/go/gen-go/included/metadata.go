@@ -39,6 +39,11 @@ var (
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_included_SomeMap),
             )
+    premadeThriftType_included_SomeListOfTypeMap = metadata.NewThriftType().SetTTypedef(
+        metadata.NewThriftTypedefType().
+            SetName("included.SomeListOfTypeMap").
+            SetUnderlyingType(premadeThriftType_list_included_SomeMap),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

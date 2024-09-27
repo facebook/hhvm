@@ -25,6 +25,10 @@ var (
         metadata.NewThriftStructType().
             SetName("IncludesAlso.Also"),
             )
+    premadeThriftType_matching_names_IncludesAlso = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("matching_names.IncludesAlso"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

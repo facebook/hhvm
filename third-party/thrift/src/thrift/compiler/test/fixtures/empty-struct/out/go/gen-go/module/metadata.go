@@ -19,6 +19,14 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module_Empty = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.Empty"),
+            )
+    premadeThriftType_module_Nada = metadata.NewThriftType().SetTUnion(
+        metadata.NewThriftUnionType().
+            SetName("module.Nada"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

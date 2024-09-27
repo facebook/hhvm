@@ -22,6 +22,10 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_foo_Fields = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("foo.Fields"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

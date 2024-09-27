@@ -19,6 +19,10 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_IncludesAlso_Also = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("IncludesAlso.Also"),
+            )
 )
 
 var structMetadatas = []*metadata.ThriftStruct{

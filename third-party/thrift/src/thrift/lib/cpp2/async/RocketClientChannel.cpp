@@ -837,7 +837,6 @@ void RocketClientChannel::sendRequestStream(
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
-      static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
@@ -879,7 +878,6 @@ void RocketClientChannel::sendRequestSink(
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       RpcKind::SINK,
-      static_cast<ProtocolId>(header->getProtocolId()),
       methodMetadata.name_managed(),
       firstResponseTimeout,
       getInteractionHandle(rpcOptions),
@@ -900,7 +898,6 @@ void RocketClientChannel::sendRequestSink(
           std::move(*metadata.name_ref()),
           clientCallback,
           evb_),
-      // rpcOptions.getMemAllocType(),
       header->getDesiredCompressionConfig());
 }
 
@@ -922,7 +919,6 @@ void RocketClientChannel::sendThriftRequest(
   auto metadata = apache::thrift::detail::makeRequestRpcMetadata(
       rpcOptions,
       kind,
-      static_cast<ProtocolId>(header->getProtocolId()),
       std::move(methodName),
       timeout,
       getInteractionHandle(rpcOptions),

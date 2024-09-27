@@ -53,7 +53,6 @@ inline constexpr std::string_view kHeaderProxiedAnyexType = "panyext";
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,
     RpcKind kind,
-    ProtocolId protocolId,
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,

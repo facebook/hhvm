@@ -36,7 +36,6 @@ namespace apache::thrift::detail {
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,
     RpcKind kind,
-    ProtocolId protocolId,
     ManagedStringView&& methodName,
     std::optional<std::chrono::milliseconds> clientTimeout,
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
@@ -44,7 +43,7 @@ RequestRpcMetadata makeRequestRpcMetadata(
     ssize_t payloadSize,
     transport::THeader& header) {
   RequestRpcMetadata metadata;
-  metadata.protocol() = protocolId;
+  metadata.protocol() = static_cast<ProtocolId>(header.getProtocolId());
   metadata.kind() = kind;
   metadata.name() = ManagedStringViewWithConversions(std::move(methodName));
 

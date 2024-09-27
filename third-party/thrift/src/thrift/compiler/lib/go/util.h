@@ -47,6 +47,8 @@ class codegen_data {
   bool gen_metadata = true;
   // whether to generate DefaultGet method
   bool gen_default_get = true;
+  // whether to use reflect codec
+  bool use_reflect_codec = false;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.

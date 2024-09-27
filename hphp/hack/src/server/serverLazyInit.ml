@@ -665,8 +665,11 @@ let calculate_fanout_and_defer_or_do_type_check
           ~dirty_master_deps:master_deps
       in
       (env, to_recheck)
-    ) else
+    ) else (
       (* Start with full fan-out immediately *)
+      Hh_logger.log
+        "Prechecked algorithm is disabled. Computing the full fanout from %d changed files since the saved state revision."
+        (Relative_path.Set.cardinal dirty_files_changed_decls);
       let to_recheck =
         if genv.local_config.SLC.fetch_remote_old_decls then
           get_files_to_recheck dirty_files_changed_decls
@@ -678,6 +681,7 @@ let calculate_fanout_and_defer_or_do_type_check
           files
       in
       (env, to_recheck)
+    )
   in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck =

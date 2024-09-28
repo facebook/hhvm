@@ -29,7 +29,6 @@ type ty_partition = {
 
 let rec split_ty_by_tuple
     ~(expansions : SSet.t)
-    ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
     (sub_predicates : type_predicate list) : env * TyPartition.t =
@@ -59,14 +58,16 @@ let rec split_ty_by_tuple
        spanning
     *)
     let (env, predicate_datatype) = DataType.(of_ty env Tuple) in
-    if DataType.are_disjoint env ty_datatype predicate_datatype then
+    let (env, relation) =
+      DataType.relate env ~scrutinee:ty predicate_datatype
+    in
+    if SetRelation.is_disjoint relation then
       (env, TyPartition.mk_right ty)
     else
       (env, TyPartition.mk_span ty)
 
 and split_ty_by_shape
     ~(expansions : SSet.t)
-    ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
     { sp_fields = field_predicate_map } : env * TyPartition.t =
@@ -151,20 +152,21 @@ and split_ty_by_shape
        spanning
     *)
     let (env, predicate_datatype) = DataType.(of_ty env Shape) in
-    if DataType.are_disjoint env ty_datatype predicate_datatype then
+    let (env, relation) =
+      DataType.relate env ~scrutinee:ty predicate_datatype
+    in
+    if SetRelation.is_disjoint relation then
       (env, TyPartition.mk_right ty)
     else
       (env, TyPartition.mk_span ty)
 
-and split_ty_by_tag
-    ~(ty_datatype : DataType.t) (env : env) (ty : locl_ty) (tag : type_tag) :
+and split_ty_by_tag (env : env) (ty : locl_ty) (tag : type_tag) :
     env * TyPartition.t =
   let (env, predicate_datatype) = DataType.of_tag env tag in
-  let predicate_complement_datatype = DataType.complement predicate_datatype in
-  if DataType.are_disjoint env ty_datatype predicate_datatype then
+  let (env, relation) = DataType.relate env ~scrutinee:ty predicate_datatype in
+  if SetRelation.is_disjoint relation then
     (env, TyPartition.mk_right ty)
-  else if DataType.are_disjoint env ty_datatype predicate_complement_datatype
-  then
+  else if SetRelation.is_subset relation then
     (env, TyPartition.mk_left ty)
   else
     (env, TyPartition.mk_span ty)
@@ -175,14 +177,13 @@ and split_ty
     (ty : locl_ty)
     ~(predicate : type_predicate) : env * TyPartition.t =
   let (env, ety) = Env.expand_type env ty in
-  let partition_f ((env : env), (ty_datatype : DataType.t)) :
-      env * TyPartition.t =
+  let partition_f (env : env) : env * TyPartition.t =
     match snd predicate with
     | IsTupleOf { tp_required = sub_predicates } ->
-      split_ty_by_tuple ~expansions ~ty_datatype env ety sub_predicates
+      split_ty_by_tuple ~expansions env ety sub_predicates
     | IsShapeOf shape_predicate ->
-      split_ty_by_shape ~expansions ~ty_datatype env ety shape_predicate
-    | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag
+      split_ty_by_shape ~expansions env ety shape_predicate
+    | IsTag tag -> split_ty_by_tag env ety tag
   in
   let split_union ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
@@ -211,26 +212,15 @@ and split_ty
     | Tunapplied_alias _ ->
       (env, TyPartition.mk_span ty)
     (* Types we cannot split *)
-    | Tprim
-        Aast.(
-          (Tint | Tnull | Tvoid | Tbool | Tfloat | Tstring | Tresource) as prim)
-      ->
-      partition_f DataType.(of_ty env @@ Primitive prim)
-    | Tfun _ -> partition_f DataType.(of_ty env Function)
-    | Tnonnull -> partition_f DataType.(of_ty env Nonnull)
-    | Ttuple _ -> partition_f DataType.(of_ty env Tuple)
-    | Tshape _ -> partition_f DataType.(of_ty env Shape)
-    | Tlabel _ -> partition_f DataType.(of_ty env Label)
-    | Tclass ((_, name), _, _) -> partition_f DataType.(of_ty env @@ Class name)
-    | Tneg (_, predicate) ->
-      let (env, dty) =
-        match predicate with
-        | IsTag tag -> DataType.of_tag env tag
-        | IsTupleOf _ -> DataType.(of_ty env Tuple)
-        | IsShapeOf _ -> DataType.(of_ty env Shape)
-      in
-      let dty = DataType.complement dty in
-      partition_f (env, dty)
+    | Tprim Aast.(Tint | Tnull | Tvoid | Tbool | Tfloat | Tstring | Tresource)
+    | Tfun _
+    | Tnonnull
+    | Ttuple _
+    | Tshape _
+    | Tlabel _
+    | Tclass (_, _, _)
+    | Tneg (_, _) ->
+      partition_f env
     | Tprim Aast.Tnoreturn -> (env, TyPartition.mk_bottom)
     (* Types we can split into a union of types *)
     | Tunion tyl -> split_union ~expansions env tyl

@@ -883,8 +883,6 @@ module AtomicDataTypes = struct
 
   let shape = DataType.shape_to_datatypes ~trail
 
-  let mixed = DataType.mixed ~reason:DataTypeReason.(make NoSubreason trail)
-
   let label = DataType.label_to_datatypes ~trail
 
   let of_ty env : atomic_ty -> env * DataType.t = function
@@ -908,7 +906,7 @@ module AtomicDataTypes = struct
     | NullTag -> of_ty env (Primitive Aast.Tnull)
     | ClassTag id -> of_ty env (Class id)
 
-  let complement dt = DataType.Set.diff mixed dt
-
-  let are_disjoint env dt1 dt2 = DataType.Set.are_disjoint env dt1 dt2
+  let relate env dt ~scrutinee =
+    let (env, scrutinee) = DataType.fromTy env scrutinee in
+    (env, DataType.Set.relate env scrutinee dt)
 end

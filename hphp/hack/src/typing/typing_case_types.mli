@@ -82,10 +82,6 @@ module AtomicDataTypes : sig
 
   val of_tag : env -> Typing_defs_core.type_tag -> env * t
 
-  (** Computes the complement for the set of values contained in [t] *)
-  val complement : t -> t
-
-  (** Returns true if the given data types are known to have no values in
-      common, otherwise returns false *)
-  val are_disjoint : env -> t -> t -> bool
+  (** Returns the relationship of the [scruntinee] to the atomic data type *)
+  val relate : env -> t -> scrutinee:locl_ty -> env * SetRelation.t
 end

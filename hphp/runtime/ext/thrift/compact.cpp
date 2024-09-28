@@ -1118,7 +1118,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      auto arr = initialize_array(KindOfDict, size);
+      DictInit arr(size);
       switch (keyType) {
         case TType::T_I08:
         case TType::T_I16:
@@ -1153,7 +1153,7 @@ struct CompactReader {
           }
       }
       readCollectionEnd();
-      return arr;
+      return arr.toVariant();
     }
 
     Variant readMapCollection(
@@ -1163,7 +1163,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      auto map(req::make<c_Map>(get_initial_array_size(size)));
+      auto map(req::make<c_Map>(size));
       if (spec.key().adapter == nullptr && spec.val().adapter == nullptr &&
           typeIs16to64Int(keyType) && typeIs16to64Int(valueType)) {
         hasTypeWrapper = hasTypeWrapper || spec.key().isTypeWrapped || spec.val().isTypeWrapped;
@@ -1190,14 +1190,17 @@ struct CompactReader {
       } else if (s_collection.equal(spec.format)) {
         return readMapCollection(spec, keyType, valueType, size, hasTypeWrapper);
       } else {
-        auto arr = initialize_array(KindOfDict, size, options & k_THRIFT_MARK_LEGACY_ARRAYS);
+        DictInit arr(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          arr.setLegacyArray();
+        }
         for (uint32_t i = 0; i < size; i++) {
           auto key = readField(spec.key(), keyType,hasTypeWrapper);
           auto value = readField(spec.val(), valueType, hasTypeWrapper);
           set_with_intish_key_cast(arr, key, value);
         }
         readCollectionEnd();
-        return arr;
+        return arr.toVariant();
       }
     }
 
@@ -1231,7 +1234,7 @@ struct CompactReader {
       const uint32_t size,
       bool& hasTypeWrapper
     ) {
-      auto arr = initialize_array(KindOfVec, size);
+      auto arr = initialize_array(size);
       if (spec.val().adapter == nullptr && valueType == T_BYTE) {
         for (uint32_t i = 0; i < size; i++) {
           arr.append(transport.template readBE<int8_t>());
@@ -1257,7 +1260,7 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(req::make<c_Vector>());
       }
-      auto vec = req::make<c_Vector>(get_initial_array_size(size));
+      auto vec = req::make<c_Vector>(size);
       if (spec.val().adapter == nullptr && typeIs16to64Int(valueType)) {
         readIntList(
           [&, i = 0LL](int64_t val) mutable {
@@ -1286,7 +1289,10 @@ struct CompactReader {
       } else if (s_collection.equal(spec.format)) {
         return readListCollection(spec, valueType, size, hasTypeWrapper);
       } else {
-        auto vai = initialize_array(KindOfVec, size, options & k_THRIFT_MARK_LEGACY_ARRAYS);
+        auto vai = initialize_array(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          vai.setLegacyArray(true);
+        }
         for (auto i = uint32_t{0}; i < size; ++i) {
           vai.append(readField(spec.val(), valueType, hasTypeWrapper));
         }
@@ -1301,14 +1307,14 @@ struct CompactReader {
       readListBegin(valueType, size);
 
       if (s_harray.equal(spec.format)) {
-        auto arr = initialize_array(KindOfKeyset, size);
+        KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
-          arr.append(readField(spec.val(), valueType, hasTypeWrapper));
+          arr.add(readField(spec.val(), valueType, hasTypeWrapper));
         }
         readCollectionEnd();
-        return arr;
+        return arr.toVariant();
       } else if (s_collection.equal(spec.format)) {
-        auto set_ret = req::make<c_Set>(get_initial_array_size(size));
+        auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(spec.val(), valueType, hasTypeWrapper);
           set_ret->add(value);
@@ -1316,13 +1322,16 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(set_ret));
       } else {
-        auto ainit = initialize_array(KindOfDict, size, options & k_THRIFT_MARK_LEGACY_ARRAYS);
+        DictInit ainit(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          ainit.setLegacyArray();
+        }
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(spec.val(), valueType, hasTypeWrapper);
           set_with_intish_key_cast(ainit, value, true);
         }
         readCollectionEnd();
-        return ainit;
+        return ainit.toVariant();
       }
     }
 

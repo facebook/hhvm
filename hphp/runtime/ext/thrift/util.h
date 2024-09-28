@@ -33,14 +33,9 @@ enum TError {
 }
 
 inline void set_with_intish_key_cast(
-    Array& arr,
+    DictInit& arr,
     const Variant& key,
     const Variant& value) {
-  if (!arr.isDict()){
-    thrift_error(
-        "Expected Dict to set intish key",
-        ERR_INVALID_DATA);
-  }
   if (key.isString()) {
     int64_t intish_key;
     if (key.getStringData()->isStrictlyInteger(intish_key)) {
@@ -84,30 +79,11 @@ inline bool is_value_type_default(int8_t thrift_typeID, const Variant& value) {
     }
 }
 
-inline uint32_t get_initial_array_size(const uint32_t size) {
+inline Array initialize_array(const uint32_t size) {
   // Reserve up to 16k entries for perf - but after that use "normal"
   // array expansion so that we ensure the data is actually there before
   // allocating massive arrays.
-  return std::min(16384u, size);
-}
-// Create a new array-like with the given type and with enough capacity to
-// store `size` elements.
-inline Array initialize_array(DataType type,const uint32_t sz, bool is_legacy_array = false) {
-  auto size = get_initial_array_size(sz);
-  auto const ad = [&]{
-    switch (dt_with_rc(type)) {
-      case KindOfVec:    return VanillaVec::MakeReserveVec(size);
-      case KindOfDict:   return VanillaDict::MakeReserveDict(size);
-      case KindOfKeyset: return VanillaKeyset::MakeReserveSet(size);
-      default:           always_assert(false);
-    }
-    not_reached();
-  }();
-
-  if (is_legacy_array) {
-    ad->setLegacyArrayInPlace(true); 
-  }
-  return Array::attach(ad);
+  return Array::attach(VanillaVec::MakeReserveVec(std::min(16384u, size)));
 }
 
 inline void check_container_size(const uint32_t size) {

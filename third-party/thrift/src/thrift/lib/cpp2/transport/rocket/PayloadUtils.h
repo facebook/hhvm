@@ -47,6 +47,14 @@ size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
   return reader.getCursorPosition();
 }
 
+template <typename T>
+size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
+  CompactProtocolReader reader;
+  reader.setInput(cursor);
+  output.read(&reader);
+  return reader.getCursorPosition();
+}
+
 namespace detail {
 template <class PayloadType, bool uncompressPayload>
 inline PayloadType unpackPayload(rocket::Payload&& payload) {

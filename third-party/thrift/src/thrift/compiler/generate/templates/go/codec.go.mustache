@@ -1,0 +1,39 @@
+{{!
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+    NOTE:
+    Unfortunately map literals cannot be used to store metadata, due to a bug
+    in the Go compiler: https://github.com/golang/go/issues/33437
+    The bug results in a "NewBulk too big" compilation error for some very large schemas.
+    The workaround is to create slice literals (one with keys, one with values),
+    create an empty map during runtime and populate that map from the two slices.
+
+}}{{> common/header}}
+
+import (
+    "reflect"
+
+    {{#program:thrift_imports}}
+    {{program:go_package_alias}} "{{program:go_import_path}}"
+    {{/program:thrift_imports}}
+    thrift "{{program:thrift_lib_import}}"
+)
+
+{{> common/unused_imports_protection}}
+// (needed to ensure safety because of naive import list construction)
+var _ = thrift.ZERO
+var _ = reflect.Ptr

@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type MyRoot interface {
     DoRoot(ctx context.Context) (error)
 }
@@ -367,8 +365,6 @@ func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.
 }
 
 
-
-
 type MyNode interface {
     // Inherited/extended service
     MyRoot
@@ -697,8 +693,6 @@ func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.S
 
     return result, nil
 }
-
-
 
 
 type MyLeaf interface {

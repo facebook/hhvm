@@ -28,8 +28,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type MyService interface {
     Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)

@@ -281,7 +281,6 @@ if err != nil {
     }()
     return decodeResult, decodeErr
 }
-
 type Automobile struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
     PreviousPlate *Plate `thrift:"previous_plate,2,optional" json:"previous_plate,omitempty" db:"previous_plate"`
@@ -858,7 +857,6 @@ func (x *Automobile) setDefaults() *Automobile {
         SetPartNamesNonCompat(make(map[int32]*CarPartName))
 }
 
-
 type MapKey struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
     Strval string `thrift:"strval,2" json:"strval" db:"strval"`
@@ -1042,7 +1040,6 @@ func (x *MapKey) setDefaults() *MapKey {
         SetNumNonCompat(0).
         SetStrvalNonCompat("")
 }
-
 
 type MapContainer struct {
     Mapval map[MapKey]string `thrift:"mapval,1" json:"mapval" db:"mapval"`
@@ -1229,7 +1226,6 @@ func (x *MapContainer) setDefaults() *MapContainer {
     return x.
         SetMapvalNonCompat(make(map[MapKey]string))
 }
-
 
 type Pair struct {
     Automobile *Automobile `thrift:"automobile,1" json:"automobile" db:"automobile"`
@@ -1454,7 +1450,6 @@ func (x *Pair) setDefaults() *Pair {
         SetAutomobileNonCompat(NewAutomobile()).
         SetCarNonCompat(NewCar())
 }
-
 
 type Collection struct {
     Automobiles []*Automobile `thrift:"automobiles,1" json:"automobiles" db:"automobiles"`

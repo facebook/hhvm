@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type TrivialStruct struct {
     IntValue int32 `thrift:"int_value,1" json:"int_value" db:"int_value"`
 }
@@ -151,7 +150,6 @@ func (x *TrivialStruct) setDefaults() *TrivialStruct {
     return x.
         SetIntValueNonCompat(0)
 }
-
 
 type StructWithNoCustomDefaultValues struct {
     UnqualifiedInteger int32 `thrift:"unqualified_integer,1" json:"unqualified_integer" db:"unqualified_integer"`
@@ -617,7 +615,6 @@ func (x *StructWithNoCustomDefaultValues) setDefaults() *StructWithNoCustomDefau
         SetUnqualifiedStructNonCompat(NewTrivialStruct()).
         SetRequiredStructNonCompat(NewTrivialStruct())
 }
-
 
 type StructWithCustomDefaultValues struct {
     UnqualifiedInteger int32 `thrift:"unqualified_integer,1" json:"unqualified_integer" db:"unqualified_integer"`

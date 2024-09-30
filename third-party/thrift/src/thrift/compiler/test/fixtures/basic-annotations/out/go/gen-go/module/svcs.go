@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type MyService interface {
     Ping(ctx context.Context) (error)
     GetRandomData(ctx context.Context) (string, error)
@@ -2440,8 +2438,6 @@ func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct
 }
 
 
-
-
 type MyServicePrioParent interface {
     Ping(ctx context.Context) (error)
     Pong(ctx context.Context) (error)
@@ -3028,8 +3024,6 @@ func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStr
 }
 
 
-
-
 type MyServicePrioChild interface {
     // Inherited/extended service
     MyServicePrioParent
@@ -3358,8 +3352,6 @@ func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStru
 
     return result, nil
 }
-
-
 
 
 type BadService interface {
@@ -3768,8 +3760,6 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
     result.Success = &retval
     return result, nil
 }
-
-
 
 
 type FooBarBazService interface {

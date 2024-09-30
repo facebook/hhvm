@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Foo struct {
     MyInt int64 `thrift:"MyInt,1" json:"MyInt" db:"MyInt"`
 }

@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Fiery struct {
     Message string `thrift:"message,1,required" json:"message" db:"message"`
 }
@@ -155,7 +154,6 @@ func (x *Fiery) setDefaults() *Fiery {
 func (x *Fiery) Error() string {
     return x.String()
 }
-
 type Serious struct {
     Sonnet *string `thrift:"sonnet,1,optional" json:"sonnet,omitempty" db:"sonnet"`
 }
@@ -305,7 +303,6 @@ func (x *Serious) setDefaults() *Serious {
 func (x *Serious) Error() string {
     return x.String()
 }
-
 type ComplexFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
@@ -493,7 +490,6 @@ func (x *ComplexFieldNames) setDefaults() *ComplexFieldNames {
 func (x *ComplexFieldNames) Error() string {
     return x.String()
 }
-
 type CustomFieldNames struct {
     ErrorMessage string `thrift:"error_message,1" json:"error_message" db:"error_message"`
     InternalErrorMessage string `thrift:"internal_error_message,2" json:"internal_error_message" db:"internal_error_message"`
@@ -681,7 +677,6 @@ func (x *CustomFieldNames) setDefaults() *CustomFieldNames {
 func (x *CustomFieldNames) Error() string {
     return x.String()
 }
-
 type ExceptionWithPrimitiveField struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
@@ -869,7 +864,6 @@ func (x *ExceptionWithPrimitiveField) setDefaults() *ExceptionWithPrimitiveField
 func (x *ExceptionWithPrimitiveField) Error() string {
     return x.String()
 }
-
 type ExceptionWithStructuredAnnotation struct {
     MessageField string `thrift:"message_field,1" json:"message_field" db:"message_field"`
     ErrorCode int32 `thrift:"error_code,2" json:"error_code" db:"error_code"`
@@ -1057,7 +1051,6 @@ func (x *ExceptionWithStructuredAnnotation) setDefaults() *ExceptionWithStructur
 func (x *ExceptionWithStructuredAnnotation) Error() string {
     return x.String()
 }
-
 type Banal struct {
 }
 // Compile time interface enforcer

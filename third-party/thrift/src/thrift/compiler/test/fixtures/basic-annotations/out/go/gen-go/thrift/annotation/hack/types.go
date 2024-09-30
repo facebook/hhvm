@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type FieldWrapper struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -151,7 +150,6 @@ func (x *FieldWrapper) setDefaults() *FieldWrapper {
     return x.
         SetNameNonCompat("")
 }
-
 
 type Wrapper struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -389,7 +387,6 @@ func (x *Wrapper) setDefaults() *Wrapper {
         SetExtraNamespaceNonCompat("thrift_adapted_types")
 }
 
-
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -522,7 +519,6 @@ func (x *Adapter) setDefaults() *Adapter {
         SetNameNonCompat("")
 }
 
-
 type SkipCodegen struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
 }
@@ -654,7 +650,6 @@ func (x *SkipCodegen) setDefaults() *SkipCodegen {
     return x.
         SetReasonNonCompat("")
 }
-
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -840,7 +835,6 @@ func (x *Name) setDefaults() *Name {
         SetReasonNonCompat("")
 }
 
-
 type UnionEnumAttributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
 }
@@ -1009,7 +1003,6 @@ func (x *UnionEnumAttributes) setDefaults() *UnionEnumAttributes {
         SetAttributesNonCompat(make([]string, 0))
 }
 
-
 type StructTrait struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -1141,7 +1134,6 @@ func (x *StructTrait) setDefaults() *StructTrait {
     return x.
         SetNameNonCompat("")
 }
-
 
 type Attributes struct {
     Attributes []string `thrift:"attributes,1" json:"attributes" db:"attributes"`
@@ -1311,7 +1303,6 @@ func (x *Attributes) setDefaults() *Attributes {
         SetAttributesNonCompat(make([]string, 0))
 }
 
-
 type StructAsTrait struct {
 }
 // Compile time interface enforcer
@@ -1391,7 +1382,6 @@ func (x *StructAsTrait) String() string {
 func (x *StructAsTrait) setDefaults() *StructAsTrait {
     return x
 }
-
 
 type ModuleInternal struct {
 }

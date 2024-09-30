@@ -68,7 +68,6 @@ func RpcPriorityFromString(s string) (RpcPriority, error) {
     return RpcPriority(0), fmt.Errorf("not a valid RpcPriority string")
 }
 
-
 type Experimental struct {
 }
 // Compile time interface enforcer
@@ -148,7 +147,6 @@ func (x *Experimental) String() string {
 func (x *Experimental) setDefaults() *Experimental {
     return x
 }
-
 
 type ReserveIds struct {
     Ids []int32 `thrift:"ids,1" json:"ids" db:"ids"`
@@ -423,7 +421,6 @@ func (x *ReserveIds) setDefaults() *ReserveIds {
         SetIdRangesNonCompat(make(map[int32]int32))
 }
 
-
 type RequiresBackwardCompatibility struct {
     FieldName bool `thrift:"field_name,1" json:"field_name" db:"field_name"`
 }
@@ -556,7 +553,6 @@ func (x *RequiresBackwardCompatibility) setDefaults() *RequiresBackwardCompatibi
         SetFieldNameNonCompat(false)
 }
 
-
 type TerseWrite struct {
 }
 // Compile time interface enforcer
@@ -636,7 +632,6 @@ func (x *TerseWrite) String() string {
 func (x *TerseWrite) setDefaults() *TerseWrite {
     return x
 }
-
 
 type Box struct {
 }
@@ -718,7 +713,6 @@ func (x *Box) setDefaults() *Box {
     return x
 }
 
-
 type Mixin struct {
 }
 // Compile time interface enforcer
@@ -798,7 +792,6 @@ func (x *Mixin) String() string {
 func (x *Mixin) setDefaults() *Mixin {
     return x
 }
-
 
 type SerializeInFieldIdOrder struct {
 }
@@ -880,7 +873,6 @@ func (x *SerializeInFieldIdOrder) setDefaults() *SerializeInFieldIdOrder {
     return x
 }
 
-
 type BitmaskEnum struct {
 }
 // Compile time interface enforcer
@@ -960,7 +952,6 @@ func (x *BitmaskEnum) String() string {
 func (x *BitmaskEnum) setDefaults() *BitmaskEnum {
     return x
 }
-
 
 type ExceptionMessage struct {
 }
@@ -1042,7 +1033,6 @@ func (x *ExceptionMessage) setDefaults() *ExceptionMessage {
     return x
 }
 
-
 type InternBox struct {
 }
 // Compile time interface enforcer
@@ -1123,7 +1113,6 @@ func (x *InternBox) setDefaults() *InternBox {
     return x
 }
 
-
 type Serial struct {
 }
 // Compile time interface enforcer
@@ -1203,7 +1192,6 @@ func (x *Serial) String() string {
 func (x *Serial) setDefaults() *Serial {
     return x
 }
-
 
 type Uri struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
@@ -1337,7 +1325,6 @@ func (x *Uri) setDefaults() *Uri {
         SetValueNonCompat("")
 }
 
-
 type Priority struct {
     Level RpcPriority `thrift:"level,1" json:"level" db:"level"`
 }
@@ -1470,7 +1457,6 @@ func (x *Priority) setDefaults() *Priority {
     return x.
         SetLevelNonCompat(0)
 }
-
 
 type DeprecatedUnvalidatedAnnotations struct {
     Items map[string]string `thrift:"items,1" json:"items" db:"items"`
@@ -1657,7 +1643,6 @@ func (x *DeprecatedUnvalidatedAnnotations) setDefaults() *DeprecatedUnvalidatedA
         SetItemsNonCompat(make(map[string]string))
 }
 
-
 type AllowReservedIdentifier struct {
 }
 // Compile time interface enforcer
@@ -1737,7 +1722,6 @@ func (x *AllowReservedIdentifier) String() string {
 func (x *AllowReservedIdentifier) setDefaults() *AllowReservedIdentifier {
     return x
 }
-
 
 type AllowReservedFilename struct {
 }

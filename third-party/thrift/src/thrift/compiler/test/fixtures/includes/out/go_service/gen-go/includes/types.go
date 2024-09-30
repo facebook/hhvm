@@ -74,7 +74,6 @@ if err != nil {
     }()
     return decodeResult, decodeErr
 }
-
 type Included struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyTransitiveField *transitive.Foo `thrift:"MyTransitiveField,2" json:"MyTransitiveField" db:"MyTransitiveField"`

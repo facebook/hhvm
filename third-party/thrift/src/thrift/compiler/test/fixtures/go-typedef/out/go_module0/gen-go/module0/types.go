@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Accessory struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
     Name string `thrift:"Name,2" json:"Name" db:"Name"`
@@ -203,7 +202,6 @@ func (x *Accessory) setDefaults() *Accessory {
         SetInventoryIdNonCompat(0).
         SetNameNonCompat("")
 }
-
 
 type PartName struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`

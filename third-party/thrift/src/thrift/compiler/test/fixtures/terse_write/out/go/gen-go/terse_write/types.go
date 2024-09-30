@@ -85,7 +85,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
 
-
 type MyStruct struct {
 }
 // Compile time interface enforcer
@@ -165,7 +164,6 @@ func (x *MyStruct) String() string {
 func (x *MyStruct) setDefaults() *MyStruct {
     return x
 }
-
 
 type MyUnion struct {
     BoolField *bool `thrift:"bool_field,1" json:"bool_field,omitempty" db:"bool_field"`
@@ -1320,7 +1318,6 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
-
 type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
 }
@@ -1452,7 +1449,6 @@ func (x *MyStructWithCustomDefault) setDefaults() *MyStructWithCustomDefault {
     return x.
         SetField1NonCompat(1)
 }
-
 
 type StructLevelTerseStruct struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -2487,7 +2483,6 @@ func (x *StructLevelTerseStruct) setDefaults() *StructLevelTerseStruct {
         SetStructFieldNonCompat(NewMyStruct()).
         SetUnionFieldNonCompat(NewMyUnion())
 }
-
 
 type FieldLevelTerseStruct struct {
     TerseBoolField bool `thrift:"terse_bool_field,1" json:"terse_bool_field" db:"terse_bool_field"`
@@ -4477,7 +4472,6 @@ func (x *FieldLevelTerseStruct) setDefaults() *FieldLevelTerseStruct {
         SetUnionFieldNonCompat(NewMyUnion())
 }
 
-
 type TerseStructWithCustomDefault struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
     ByteField int8 `thrift:"byte_field,2" json:"byte_field" db:"byte_field"`
@@ -5460,7 +5454,6 @@ func (x *TerseStructWithCustomDefault) setDefaults() *TerseStructWithCustomDefau
         SetStructFieldNonCompat(NewMyStructWithCustomDefault())
 }
 
-
 type AdaptedFields struct {
     Field1 MyInteger `thrift:"field1,1" json:"field1" db:"field1"`
     Field2 int32 `thrift:"field2,2" json:"field2" db:"field2"`
@@ -5699,7 +5692,6 @@ func (x *AdaptedFields) setDefaults() *AdaptedFields {
         SetField3NonCompat(NewMyInteger())
 }
 
-
 type WrappedFields struct {
     Field1 int32 `thrift:"field1,1" json:"field1" db:"field1"`
 }
@@ -5831,7 +5823,6 @@ func (x *WrappedFields) setDefaults() *WrappedFields {
     return x.
         SetField1NonCompat(7)
 }
-
 
 type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`

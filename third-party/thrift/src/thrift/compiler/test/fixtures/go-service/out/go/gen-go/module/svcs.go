@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type GetEntity interface {
     GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
     GetBool(ctx context.Context) (bool, error)

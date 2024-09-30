@@ -48,14 +48,8 @@ var _ = metadata.GoUnusedProtection__
 {{/program:import_metadata_package?}}
 {{/program:gen_metadata?}}
 
-{{#program:services}}{{!
-
-}}{{#service:docs?}}{{!
-}}{{service:docs}}{{!
-}}{{/service:docs?}}
-
+{{#program:services}}
 {{> svc/interface}}
-
 
 {{> svc/client}}
 

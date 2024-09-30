@@ -21,7 +21,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type CustomException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`
 }

@@ -21,7 +21,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type MyStruct struct {
     MyIncludedField *includes.Included `thrift:"MyIncludedField,1" json:"MyIncludedField" db:"MyIncludedField"`
     MyOtherIncludedField *includes.Included `thrift:"MyOtherIncludedField,2" json:"MyOtherIncludedField" db:"MyOtherIncludedField"`

@@ -344,7 +344,6 @@ func MyBitmaskEnum2FromString(s string) (MyBitmaskEnum2, error) {
     return MyBitmaskEnum2(0), fmt.Errorf("not a valid MyBitmaskEnum2 string")
 }
 
-
 type SomeStruct struct {
     Reasonable Metasyntactic `thrift:"reasonable,1" json:"reasonable" db:"reasonable"`
     Fine Metasyntactic `thrift:"fine,2" json:"fine" db:"fine"`
@@ -681,7 +680,6 @@ func (x *SomeStruct) setDefaults() *SomeStruct {
 },
           )
 }
-
 
 type MyStruct struct {
     Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`

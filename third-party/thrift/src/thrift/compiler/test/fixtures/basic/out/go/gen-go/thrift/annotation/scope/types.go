@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Transitive struct {
 }
 // Compile time interface enforcer
@@ -99,7 +98,6 @@ func (x *Transitive) String() string {
 func (x *Transitive) setDefaults() *Transitive {
     return x
 }
-
 
 type Program struct {
 }
@@ -181,7 +179,6 @@ func (x *Program) setDefaults() *Program {
     return x
 }
 
-
 type Struct struct {
 }
 // Compile time interface enforcer
@@ -261,7 +258,6 @@ func (x *Struct) String() string {
 func (x *Struct) setDefaults() *Struct {
     return x
 }
-
 
 type Union struct {
 }
@@ -343,7 +339,6 @@ func (x *Union) setDefaults() *Union {
     return x
 }
 
-
 type Exception struct {
 }
 // Compile time interface enforcer
@@ -423,7 +418,6 @@ func (x *Exception) String() string {
 func (x *Exception) setDefaults() *Exception {
     return x
 }
-
 
 type Field struct {
 }
@@ -505,7 +499,6 @@ func (x *Field) setDefaults() *Field {
     return x
 }
 
-
 type Typedef struct {
 }
 // Compile time interface enforcer
@@ -585,7 +578,6 @@ func (x *Typedef) String() string {
 func (x *Typedef) setDefaults() *Typedef {
     return x
 }
-
 
 type Service struct {
 }
@@ -667,7 +659,6 @@ func (x *Service) setDefaults() *Service {
     return x
 }
 
-
 type Interaction struct {
 }
 // Compile time interface enforcer
@@ -747,7 +738,6 @@ func (x *Interaction) String() string {
 func (x *Interaction) setDefaults() *Interaction {
     return x
 }
-
 
 type Function struct {
 }
@@ -829,7 +819,6 @@ func (x *Function) setDefaults() *Function {
     return x
 }
 
-
 type EnumValue struct {
 }
 // Compile time interface enforcer
@@ -909,7 +898,6 @@ func (x *EnumValue) String() string {
 func (x *EnumValue) setDefaults() *EnumValue {
     return x
 }
-
 
 type Const struct {
 }
@@ -991,7 +979,6 @@ func (x *Const) setDefaults() *Const {
     return x
 }
 
-
 type Enum struct {
 }
 // Compile time interface enforcer
@@ -1071,7 +1058,6 @@ func (x *Enum) String() string {
 func (x *Enum) setDefaults() *Enum {
     return x
 }
-
 
 type Structured struct {
 }
@@ -1153,7 +1139,6 @@ func (x *Structured) setDefaults() *Structured {
     return x
 }
 
-
 type Interface struct {
 }
 // Compile time interface enforcer
@@ -1234,7 +1219,6 @@ func (x *Interface) setDefaults() *Interface {
     return x
 }
 
-
 type RootDefinition struct {
 }
 // Compile time interface enforcer
@@ -1314,7 +1298,6 @@ func (x *RootDefinition) String() string {
 func (x *RootDefinition) setDefaults() *RootDefinition {
     return x
 }
-
 
 type Definition struct {
 }

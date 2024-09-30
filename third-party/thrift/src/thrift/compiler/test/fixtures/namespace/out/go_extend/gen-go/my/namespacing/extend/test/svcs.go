@@ -26,8 +26,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type ExtendTestService interface {
     // Inherited/extended service
     test0.HsTestService

@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type DoSomethingResult struct {
     SRes string `thrift:"s_res,1" json:"s_res" db:"s_res"`
     IRes int32 `thrift:"i_res,2" json:"i_res" db:"i_res"`

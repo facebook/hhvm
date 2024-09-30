@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type InteractLocally interface {
 }
 

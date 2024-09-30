@@ -26,8 +26,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type MyService interface {
     Foo(ctx context.Context) (error)
 }
@@ -367,8 +365,6 @@ func (p *procFuncMyServiceFoo) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
-
-
 
 
 type Factories interface {
@@ -712,8 +708,6 @@ func (p *procFuncFactoriesFoo) RunContext(ctx context.Context, reqStruct thrift.
 }
 
 
-
-
 type Perform interface {
     Foo(ctx context.Context) (error)
 }
@@ -1053,8 +1047,6 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.St
 
     return result, nil
 }
-
-
 
 
 type InteractWithShared interface {

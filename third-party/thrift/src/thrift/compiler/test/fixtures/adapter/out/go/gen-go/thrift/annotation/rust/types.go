@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -152,7 +151,6 @@ func (x *Name) setDefaults() *Name {
         SetNameNonCompat("")
 }
 
-
 type Copy struct {
 }
 // Compile time interface enforcer
@@ -232,7 +230,6 @@ func (x *Copy) String() string {
 func (x *Copy) setDefaults() *Copy {
     return x
 }
-
 
 type RequestContext struct {
 }
@@ -314,7 +311,6 @@ func (x *RequestContext) setDefaults() *RequestContext {
     return x
 }
 
-
 type Arc struct {
 }
 // Compile time interface enforcer
@@ -394,7 +390,6 @@ func (x *Arc) String() string {
 func (x *Arc) setDefaults() *Arc {
     return x
 }
-
 
 type Box struct {
 }
@@ -476,7 +471,6 @@ func (x *Box) setDefaults() *Box {
     return x
 }
 
-
 type Exhaustive struct {
 }
 // Compile time interface enforcer
@@ -556,7 +550,6 @@ func (x *Exhaustive) String() string {
 func (x *Exhaustive) setDefaults() *Exhaustive {
     return x
 }
-
 
 type Ord struct {
 }
@@ -638,7 +631,6 @@ func (x *Ord) setDefaults() *Ord {
     return x
 }
 
-
 type NewType_ struct {
 }
 // Compile time interface enforcer
@@ -718,7 +710,6 @@ func (x *NewType_) String() string {
 func (x *NewType_) setDefaults() *NewType_ {
     return x
 }
-
 
 type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -852,7 +843,6 @@ func (x *Type) setDefaults() *Type {
         SetNameNonCompat("")
 }
 
-
 type Serde struct {
     Enabled bool `thrift:"enabled,1" json:"enabled" db:"enabled"`
 }
@@ -984,7 +974,6 @@ func (x *Serde) setDefaults() *Serde {
     return x.
         SetEnabledNonCompat(false)
 }
-
 
 type Mod struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1118,7 +1107,6 @@ func (x *Mod) setDefaults() *Mod {
         SetNameNonCompat("")
 }
 
-
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -1250,7 +1238,6 @@ func (x *Adapter) setDefaults() *Adapter {
     return x.
         SetNameNonCompat("")
 }
-
 
 type Derive struct {
     Derives []string `thrift:"derives,1" json:"derives" db:"derives"`
@@ -1419,7 +1406,6 @@ func (x *Derive) setDefaults() *Derive {
     return x.
         SetDerivesNonCompat(make([]string, 0))
 }
-
 
 type ServiceExn struct {
     AnyhowToApplicationExn bool `thrift:"anyhow_to_application_exn,1" json:"anyhow_to_application_exn" db:"anyhow_to_application_exn"`

@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type InjectMetadataFields struct {
     Type string `thrift:"type,1" json:"type" db:"type"`
 }

@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type C interface {
     F(ctx context.Context) (error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)

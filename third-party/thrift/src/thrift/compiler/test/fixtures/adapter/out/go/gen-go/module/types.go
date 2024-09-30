@@ -1235,7 +1235,6 @@ func ThriftAdaptedEnumFromString(s string) (ThriftAdaptedEnum, error) {
     return ThriftAdaptedEnum(0), fmt.Errorf("not a valid ThriftAdaptedEnum string")
 }
 
-
 type MyAnnotation struct {
     Signature string `thrift:"signature,1" json:"signature" db:"signature"`
     Color Color `thrift:"color,2" json:"color" db:"color"`
@@ -1422,7 +1421,6 @@ func (x *MyAnnotation) setDefaults() *MyAnnotation {
               Color_RED,
           )
 }
-
 
 type Foo struct {
     IntField I32_5137 `thrift:"intField,1" json:"intField" db:"intField"`
@@ -2142,7 +2140,6 @@ func (x *Foo) setDefaults() *Foo {
         SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64())
 }
 
-
 type Baz struct {
     IntField *I32_5137 `thrift:"intField,1" json:"intField,omitempty" db:"intField"`
     SetField SetWithAdapter `thrift:"setField,4" json:"setField,omitempty" db:"setField"`
@@ -2572,7 +2569,6 @@ func (x *Baz) String() string {
 func (x *Baz) setDefaults() *Baz {
     return x
 }
-
 
 type Bar struct {
     StructField *Foo_6868 `thrift:"structField,1" json:"structField" db:"structField"`
@@ -3193,7 +3189,6 @@ func (x *Bar) setDefaults() *Bar {
         SetAdaptedStructFieldNonCompat(NewDirectlyAdapted())
 }
 
-
 type DirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
@@ -3326,7 +3321,6 @@ func (x *DirectlyAdapted) setDefaults() *DirectlyAdapted {
         SetFieldNonCompat(0)
 }
 
-
 type IndependentDirectlyAdapted struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
 }
@@ -3458,7 +3452,6 @@ func (x *IndependentDirectlyAdapted) setDefaults() *IndependentDirectlyAdapted {
     return x.
         SetFieldNonCompat(0)
 }
-
 
 type StructWithFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -3776,7 +3769,6 @@ func (x *StructWithFieldAdapter) setDefaults() *StructWithFieldAdapter {
         SetSharedFieldNonCompat(0)
 }
 
-
 type TerseAdaptedFields struct {
     IntField int32 `thrift:"int_field,1" json:"int_field" db:"int_field"`
     StringField string `thrift:"string_field,2" json:"string_field" db:"string_field"`
@@ -4049,7 +4041,6 @@ func (x *TerseAdaptedFields) setDefaults() *TerseAdaptedFields {
         SetSetFieldNonCompat(make([]int32, 0))
 }
 
-
 type B struct {
     A *AdaptedA `thrift:"a,1" json:"a" db:"a"`
 }
@@ -4202,7 +4193,6 @@ func (x *B) setDefaults() *B {
         SetANonCompat(NewAdaptedA())
 }
 
-
 type A struct {
 }
 // Compile time interface enforcer
@@ -4282,7 +4272,6 @@ func (x *A) String() string {
 func (x *A) setDefaults() *A {
     return x
 }
-
 
 type Config struct {
     Path string `thrift:"path,1" json:"path" db:"path"`
@@ -4415,7 +4404,6 @@ func (x *Config) setDefaults() *Config {
     return x.
         SetPathNonCompat("")
 }
-
 
 type MyStruct struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`
@@ -4608,7 +4596,6 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetFieldNonCompat(0).
         SetSetStringNonCompat(NewSetWithAdapter())
 }
-
 
 type AdaptTestStruct struct {
     Delay DurationMs `thrift:"delay,1" json:"delay" db:"delay"`
@@ -5228,7 +5215,6 @@ func (x *AdaptTestStruct) setDefaults() *AdaptTestStruct {
         SetDoubleWrappedIntegerNonCompat(NewAdaptedInteger()).
         SetBinaryDataNonCompat([]byte(""))
 }
-
 
 type AdaptTemplatedTestStruct struct {
     AdaptedBool AdaptedBool `thrift:"adaptedBool,1" json:"adaptedBool" db:"adaptedBool"`
@@ -6740,7 +6726,6 @@ func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
         SetDoubleTypedefBoolNonCompat(NewDoubleTypedefBool())
 }
 
-
 type AdaptTemplatedNestedTestStruct struct {
     AdaptedStruct *AdaptTemplatedTestStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
 }
@@ -6892,7 +6877,6 @@ func (x *AdaptTemplatedNestedTestStruct) setDefaults() *AdaptTemplatedNestedTest
     return x.
         SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
 }
-
 
 type AdaptTestUnion struct {
     Delay *DurationMs `thrift:"delay,1" json:"delay,omitempty" db:"delay"`
@@ -7122,7 +7106,6 @@ func (x *AdaptTestUnion) setDefaults() *AdaptTestUnion {
     return x
 }
 
-
 type AdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -7255,7 +7238,6 @@ func (x *AdaptedStruct) setDefaults() *AdaptedStruct {
         SetDataNonCompat(0)
 }
 
-
 type DirectlyAdaptedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -7387,7 +7369,6 @@ func (x *DirectlyAdaptedStruct) setDefaults() *DirectlyAdaptedStruct {
     return x.
         SetDataNonCompat(0)
 }
-
 
 type StructFieldAdaptedStruct struct {
     AdaptedStruct *AdaptedStruct `thrift:"adaptedStruct,1" json:"adaptedStruct" db:"adaptedStruct"`
@@ -7757,7 +7738,6 @@ func (x *StructFieldAdaptedStruct) setDefaults() *StructFieldAdaptedStruct {
         SetTypedefOfAdaptedNonCompat(NewTypedefOfDirect())
 }
 
-
 type CircularAdaptee struct {
     Field *CircularStruct `thrift:"field,1" json:"field" db:"field"`
 }
@@ -7910,7 +7890,6 @@ func (x *CircularAdaptee) setDefaults() *CircularAdaptee {
         SetFieldNonCompat(NewCircularStruct())
 }
 
-
 type CircularStruct struct {
     Field *AdaptedCircularAdaptee `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
@@ -8061,7 +8040,6 @@ func (x *CircularStruct) String() string {
 func (x *CircularStruct) setDefaults() *CircularStruct {
     return x
 }
-
 
 type ReorderedStruct struct {
     ReorderedDependentAdapted *DeclaredAfterStruct `thrift:"reordered_dependent_adapted,1" json:"reordered_dependent_adapted" db:"reordered_dependent_adapted"`
@@ -8215,7 +8193,6 @@ func (x *ReorderedStruct) setDefaults() *ReorderedStruct {
         SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
 }
 
-
 type DeclaredAfterStruct struct {
 }
 // Compile time interface enforcer
@@ -8295,7 +8272,6 @@ func (x *DeclaredAfterStruct) String() string {
 func (x *DeclaredAfterStruct) setDefaults() *DeclaredAfterStruct {
     return x
 }
-
 
 type RenamedStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
@@ -8429,7 +8405,6 @@ func (x *RenamedStruct) setDefaults() *RenamedStruct {
         SetDataNonCompat(0)
 }
 
-
 type SameNamespaceStruct struct {
     Data int64 `thrift:"data,1" json:"data" db:"data"`
 }
@@ -8562,7 +8537,6 @@ func (x *SameNamespaceStruct) setDefaults() *SameNamespaceStruct {
         SetDataNonCompat(0)
 }
 
-
 type HeapAllocated struct {
 }
 // Compile time interface enforcer
@@ -8642,7 +8616,6 @@ func (x *HeapAllocated) String() string {
 func (x *HeapAllocated) setDefaults() *HeapAllocated {
     return x
 }
-
 
 type MoveOnly struct {
     Ptr *HeapAllocated `thrift:"ptr,1" json:"ptr" db:"ptr"`
@@ -8796,7 +8769,6 @@ func (x *MoveOnly) setDefaults() *MoveOnly {
         SetPtrNonCompat(NewHeapAllocated())
 }
 
-
 type AlsoMoveOnly struct {
     Ptr int64 `thrift:"ptr,1" json:"ptr" db:"ptr"`
 }
@@ -8929,7 +8901,6 @@ func (x *AlsoMoveOnly) setDefaults() *AlsoMoveOnly {
         SetPtrNonCompat(0)
 }
 
-
 type ApplyAdapter struct {
 }
 // Compile time interface enforcer
@@ -9010,7 +8981,6 @@ func (x *ApplyAdapter) setDefaults() *ApplyAdapter {
     return x
 }
 
-
 type TransitiveAdapted struct {
 }
 // Compile time interface enforcer
@@ -9090,7 +9060,6 @@ func (x *TransitiveAdapted) String() string {
 func (x *TransitiveAdapted) setDefaults() *TransitiveAdapted {
     return x
 }
-
 
 type CountingStruct struct {
     RegularInt *int64 `thrift:"regularInt,1,optional" json:"regularInt,omitempty" db:"regularInt"`
@@ -9371,7 +9340,6 @@ func (x *CountingStruct) setDefaults() *CountingStruct {
     return x
 }
 
-
 type Person struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -9504,7 +9472,6 @@ func (x *Person) setDefaults() *Person {
         SetNameNonCompat("")
 }
 
-
 type Person2 struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -9636,7 +9603,6 @@ func (x *Person2) setDefaults() *Person2 {
     return x.
         SetNameNonCompat("")
 }
-
 
 type RenamedStructWithStructAdapterAndFieldAdapter struct {
     Field int32 `thrift:"field,1" json:"field" db:"field"`

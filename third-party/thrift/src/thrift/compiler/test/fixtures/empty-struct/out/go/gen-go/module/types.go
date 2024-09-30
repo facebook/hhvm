@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Empty struct {
 }
 // Compile time interface enforcer
@@ -99,7 +98,6 @@ func (x *Empty) String() string {
 func (x *Empty) setDefaults() *Empty {
     return x
 }
-
 
 type Nada struct {
 }

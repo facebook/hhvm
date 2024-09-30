@@ -88,7 +88,6 @@ func AnimalFromString(s string) (Animal, error) {
     return Animal(0), fmt.Errorf("not a valid Animal string")
 }
 
-
 type Color struct {
     Red float64 `thrift:"red,1" json:"red" db:"red"`
     Green float64 `thrift:"green,2" json:"green" db:"green"`
@@ -376,7 +375,6 @@ func (x *Color) setDefaults() *Color {
         SetBlueNonCompat(0.0).
         SetAlphaNonCompat(0.0)
 }
-
 
 type Vehicle struct {
     Color *Color `thrift:"color,1" json:"color" db:"color"`
@@ -794,7 +792,6 @@ func (x *Vehicle) setDefaults() *Vehicle {
         SetColorNonCompat(NewColor()).
         SetHasACNonCompat(false)
 }
-
 
 type Person struct {
     Id PersonID `thrift:"id,1" json:"id" db:"id"`

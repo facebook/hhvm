@@ -111,7 +111,6 @@ func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
     return EnumUnderlyingType(0), fmt.Errorf("not a valid EnumUnderlyingType string")
 }
 
-
 type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
     Template string `thrift:"template,2" json:"template" db:"template"`
@@ -296,7 +295,6 @@ func (x *Type) setDefaults() *Type {
         SetTemplateNonCompat("")
 }
 
-
 type Ref struct {
     Type RefType `thrift:"type,1" json:"type" db:"type"`
 }
@@ -430,7 +428,6 @@ func (x *Ref) setDefaults() *Ref {
         SetTypeNonCompat(0)
 }
 
-
 type Name struct {
     Value string `thrift:"value,1" json:"value" db:"value"`
 }
@@ -562,7 +559,6 @@ func (x *Name) setDefaults() *Name {
     return x.
         SetValueNonCompat("")
 }
-
 
 type Lazy struct {
     Ref bool `thrift:"ref,1" json:"ref" db:"ref"`
@@ -696,7 +692,6 @@ func (x *Lazy) setDefaults() *Lazy {
         SetRefNonCompat(false)
 }
 
-
 type DisableLazyChecksum struct {
 }
 // Compile time interface enforcer
@@ -776,7 +771,6 @@ func (x *DisableLazyChecksum) String() string {
 func (x *DisableLazyChecksum) setDefaults() *DisableLazyChecksum {
     return x
 }
-
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1118,7 +1112,6 @@ func (x *Adapter) setDefaults() *Adapter {
         SetMoveOnlyNonCompat(false)
 }
 
-
 type PackIsset struct {
     Atomic bool `thrift:"atomic,1" json:"atomic" db:"atomic"`
 }
@@ -1251,7 +1244,6 @@ func (x *PackIsset) setDefaults() *PackIsset {
         SetAtomicNonCompat(true)
 }
 
-
 type MinimizePadding struct {
 }
 // Compile time interface enforcer
@@ -1332,7 +1324,6 @@ func (x *MinimizePadding) setDefaults() *MinimizePadding {
     return x
 }
 
-
 type ScopedEnumAsUnionType struct {
 }
 // Compile time interface enforcer
@@ -1412,7 +1403,6 @@ func (x *ScopedEnumAsUnionType) String() string {
 func (x *ScopedEnumAsUnionType) setDefaults() *ScopedEnumAsUnionType {
     return x
 }
-
 
 type FieldInterceptor struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -1598,7 +1588,6 @@ func (x *FieldInterceptor) setDefaults() *FieldInterceptor {
         SetNoinlineNonCompat(false)
 }
 
-
 type UseOpEncode struct {
 }
 // Compile time interface enforcer
@@ -1678,7 +1667,6 @@ func (x *UseOpEncode) String() string {
 func (x *UseOpEncode) setDefaults() *UseOpEncode {
     return x
 }
-
 
 type EnumType struct {
     Type EnumUnderlyingType `thrift:"type,1" json:"type" db:"type"`
@@ -1813,7 +1801,6 @@ func (x *EnumType) setDefaults() *EnumType {
         SetTypeNonCompat(0)
 }
 
-
 type Frozen2Exclude struct {
 }
 // Compile time interface enforcer
@@ -1893,7 +1880,6 @@ func (x *Frozen2Exclude) String() string {
 func (x *Frozen2Exclude) setDefaults() *Frozen2Exclude {
     return x
 }
-
 
 type Frozen2RequiresCompleteContainerParams struct {
 }
@@ -1975,7 +1961,6 @@ func (x *Frozen2RequiresCompleteContainerParams) setDefaults() *Frozen2RequiresC
     return x
 }
 
-
 type ProcessInEbThreadUnsafe struct {
 }
 // Compile time interface enforcer
@@ -2055,7 +2040,6 @@ func (x *ProcessInEbThreadUnsafe) String() string {
 func (x *ProcessInEbThreadUnsafe) setDefaults() *ProcessInEbThreadUnsafe {
     return x
 }
-
 
 type RuntimeAnnotation struct {
 }
@@ -2137,7 +2121,6 @@ func (x *RuntimeAnnotation) setDefaults() *RuntimeAnnotation {
     return x
 }
 
-
 type UseCursorSerialization struct {
 }
 // Compile time interface enforcer
@@ -2217,7 +2200,6 @@ func (x *UseCursorSerialization) String() string {
 func (x *UseCursorSerialization) setDefaults() *UseCursorSerialization {
     return x
 }
-
 
 type GenerateDeprecatedHeaderClientMethods struct {
 }

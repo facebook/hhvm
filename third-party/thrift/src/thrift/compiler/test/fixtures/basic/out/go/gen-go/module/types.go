@@ -169,7 +169,6 @@ func HackEnumFromString(s string) (HackEnum, error) {
     return HackEnum(0), fmt.Errorf("not a valid HackEnum string")
 }
 
-
 type MyStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -775,7 +774,6 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetNoHackCodegenFieldNonCompat("")
 }
 
-
 type Containers struct {
     I32List []int32 `thrift:"I32List,1" json:"I32List" db:"I32List"`
     StringSet []string `thrift:"StringSet,2" json:"StringSet" db:"StringSet"`
@@ -1137,7 +1135,6 @@ func (x *Containers) setDefaults() *Containers {
         SetStringToI64MapNonCompat(make(map[string]int64))
 }
 
-
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -1217,7 +1214,6 @@ func (x *MyDataItem) String() string {
 func (x *MyDataItem) setDefaults() *MyDataItem {
     return x
 }
-
 
 type MyUnion struct {
     MyEnum *MyEnumAlias `thrift:"myEnum,1" json:"myEnum,omitempty" db:"myEnum"`
@@ -1623,7 +1619,6 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
-
 type MyException struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -1955,7 +1950,6 @@ func (x *MyException) setDefaults() *MyException {
 func (x *MyException) Error() string {
     return x.String()
 }
-
 type MyExceptionWithMessage struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -2287,7 +2281,6 @@ func (x *MyExceptionWithMessage) setDefaults() *MyExceptionWithMessage {
 func (x *MyExceptionWithMessage) Error() string {
     return x.String()
 }
-
 type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
 }
@@ -2419,7 +2412,6 @@ func (x *ReservedKeyword) setDefaults() *ReservedKeyword {
     return x.
         SetReservedFieldNonCompat(0)
 }
-
 
 type UnionToBeRenamed struct {
     ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field,omitempty" db:"reserved_field"`

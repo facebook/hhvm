@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Fields struct {
     InjectedField string `thrift:"injected_field,100" json:"injected_field" db:"injected_field"`
     InjectedStructuredAnnotationField *string `thrift:"injected_structured_annotation_field,101,optional" json:"injected_structured_annotation_field,omitempty" db:"injected_structured_annotation_field"`

@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -151,7 +150,6 @@ func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("")
 }
-
 
 type Tag struct {
     Tag string `thrift:"tag,1" json:"tag" db:"tag"`

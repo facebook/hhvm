@@ -21,7 +21,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Fields struct {
     InjectedField string `thrift:"injected_field,100" json:"injected_field" db:"injected_field"`
 }
@@ -154,7 +153,6 @@ func (x *Fields) setDefaults() *Fields {
         SetInjectedFieldNonCompat("")
 }
 
-
 type FieldsInjectedToEmptyStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
 }
@@ -286,7 +284,6 @@ func (x *FieldsInjectedToEmptyStruct) setDefaults() *FieldsInjectedToEmptyStruct
     return x.
         SetInjectedFieldNonCompat("")
 }
-
 
 type FieldsInjectedToStruct struct {
     InjectedField string `thrift:"injected_field,-1100" json:"injected_field" db:"injected_field"`
@@ -471,7 +468,6 @@ func (x *FieldsInjectedToStruct) setDefaults() *FieldsInjectedToStruct {
         SetInjectedFieldNonCompat("").
         SetStringFieldNonCompat("")
 }
-
 
 type FieldsInjectedWithIncludedStruct struct {
     InjectedUnstructuredAnnotationField *string `thrift:"injected_unstructured_annotation_field,-1102,optional" json:"injected_unstructured_annotation_field,omitempty" db:"injected_unstructured_annotation_field"`

@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Foo struct {
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`
     Field3 int32 `thrift:"field3,2" json:"field3" db:"field3"`
@@ -255,7 +254,6 @@ func (x *Foo) setDefaults() *Foo {
         SetField3NonCompat(0).
         SetField1NonCompat(0)
 }
-
 
 type Foo2 struct {
     Field2 int32 `thrift:"field2,1" json:"field2" db:"field2"`

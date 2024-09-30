@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type FooService interface {
     SimpleRPC(ctx context.Context) (error)
 }
@@ -365,8 +363,6 @@ func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
-
-
 
 
 type FB303Service interface {
@@ -834,8 +830,6 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
     result.Success = retval
     return result, nil
 }
-
-
 
 
 type MyService interface {
@@ -4099,8 +4093,6 @@ func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, req
 
     return result, nil
 }
-
-
 
 
 type DbMixedStackArguments interface {

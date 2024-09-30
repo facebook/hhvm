@@ -171,7 +171,6 @@ func MyEnumFromString(s string) (MyEnum, error) {
     return MyEnum(0), fmt.Errorf("not a valid MyEnum string")
 }
 
-
 type MyStructNestedAnnotation struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
 }
@@ -304,7 +303,6 @@ func (x *MyStructNestedAnnotation) setDefaults() *MyStructNestedAnnotation {
         SetNameNonCompat("")
 }
 
-
 type MyUnion struct {
 }
 // Compile time interface enforcer
@@ -397,7 +395,6 @@ func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
 
-
 type MyException struct {
 }
 // Compile time interface enforcer
@@ -481,7 +478,6 @@ func (x *MyException) setDefaults() *MyException {
 func (x *MyException) Error() string {
     return x.String()
 }
-
 type MyStruct struct {
     AbstractName string `thrift:"abstract,1" tag:"some_abstract"`
     MajorVer int64 `thrift:"major,2" json:"major" db:"major"`
@@ -1058,7 +1054,6 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetCppTypeAnnotationNonCompat(NewListString_6884()).
         SetMyUnionNonCompat(NewMyUnion())
 }
-
 
 type SecretStruct struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`

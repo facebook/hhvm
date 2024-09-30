@@ -91,7 +91,6 @@ result := mapResult
     }()
     return decodeResult, decodeErr
 }
-
 type ComplexUnion struct {
     IntValue *int64 `thrift:"intValue,1" json:"intValue,omitempty" db:"intValue"`
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
@@ -645,7 +644,6 @@ func (x *ComplexUnion) setDefaults() *ComplexUnion {
     return x
 }
 
-
 type ListUnion struct {
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue,omitempty" db:"intListValue"`
     StringListValue []string `thrift:"stringListValue,3" json:"stringListValue,omitempty" db:"stringListValue"`
@@ -926,7 +924,6 @@ func (x *ListUnion) setDefaults() *ListUnion {
     return x
 }
 
-
 type DataUnion struct {
     BinaryData []byte `thrift:"binaryData,1" json:"binaryData,omitempty" db:"binaryData"`
     StringData *string `thrift:"stringData,2" json:"stringData,omitempty" db:"stringData"`
@@ -1152,7 +1149,6 @@ func (x *DataUnion) String() string {
 func (x *DataUnion) setDefaults() *DataUnion {
     return x
 }
-
 
 type Val struct {
     StrVal string `thrift:"strVal,1" json:"strVal" db:"strVal"`
@@ -1398,7 +1394,6 @@ func (x *Val) setDefaults() *Val {
         SetTypedefValueNonCompat(NewContainerTypedef())
 }
 
-
 type ValUnion struct {
     V1 *Val `thrift:"v1,1" json:"v1,omitempty" db:"v1"`
     V2 *Val `thrift:"v2,2" json:"v2,omitempty" db:"v2"`
@@ -1639,7 +1634,6 @@ func (x *ValUnion) setDefaults() *ValUnion {
     return x
 }
 
-
 type VirtualComplexUnion struct {
     ThingOne *string `thrift:"thingOne,1" json:"thingOne,omitempty" db:"thingOne"`
     ThingTwo *string `thrift:"thingTwo,2" json:"thingTwo,omitempty" db:"thingTwo"`
@@ -1870,7 +1864,6 @@ func (x *VirtualComplexUnion) setDefaults() *VirtualComplexUnion {
     return x
 }
 
-
 type NonCopyableStruct struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
 }
@@ -2002,7 +1995,6 @@ func (x *NonCopyableStruct) setDefaults() *NonCopyableStruct {
     return x.
         SetNumNonCompat(0)
 }
-
 
 type NonCopyableUnion struct {
     S *NonCopyableStruct `thrift:"s,1" json:"s,omitempty" db:"s"`

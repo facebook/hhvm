@@ -314,7 +314,6 @@ func CompanyFromString(s string) (Company, error) {
     return Company(0), fmt.Errorf("not a valid Company string")
 }
 
-
 type Internship struct {
     Weeks int32 `thrift:"weeks,1,required" json:"weeks" db:"weeks"`
     Title string `thrift:"title,2" json:"title" db:"title"`
@@ -698,7 +697,6 @@ func (x *Internship) setDefaults() *Internship {
         SetTitleNonCompat("")
 }
 
-
 type Range struct {
     Min int32 `thrift:"min,1,required" json:"min" db:"min"`
     Max int32 `thrift:"max,2,required" json:"max" db:"max"`
@@ -883,7 +881,6 @@ func (x *Range) setDefaults() *Range {
         SetMaxNonCompat(0)
 }
 
-
 type Struct1 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B string `thrift:"b,2" json:"b" db:"b"`
@@ -1067,7 +1064,6 @@ func (x *Struct1) setDefaults() *Struct1 {
         SetANonCompat(1234567).
         SetBNonCompat("<uninitialized>")
 }
-
 
 type Struct2 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1413,7 +1409,6 @@ func (x *Struct2) setDefaults() *Struct2 {
         SetDNonCompat(make([]int32, 0))
 }
 
-
 type Struct3 struct {
     A string `thrift:"a,1" json:"a" db:"a"`
     B int32 `thrift:"b,2" json:"b" db:"b"`
@@ -1669,7 +1664,6 @@ func (x *Struct3) setDefaults() *Struct3 {
         SetBNonCompat(0).
         SetCNonCompat(NewStruct2())
 }
-
 
 type Struct4 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1936,7 +1930,6 @@ func (x *Struct4) setDefaults() *Struct4 {
         SetANonCompat(0)
 }
 
-
 type Union1 struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
     D *float64 `thrift:"d,2" json:"d,omitempty" db:"d"`
@@ -2166,7 +2159,6 @@ func (x *Union1) String() string {
 func (x *Union1) setDefaults() *Union1 {
     return x
 }
-
 
 type Union2 struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`

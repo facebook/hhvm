@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type Service interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
@@ -614,8 +612,6 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.S
     result.Success = &retval
     return result, nil
 }
-
-
 
 
 type AdapterService interface {

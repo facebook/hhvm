@@ -108,7 +108,6 @@ func BFromString(s string) (B, error) {
     return B(0), fmt.Errorf("not a valid B string")
 }
 
-
 type A struct {
     UselessField int32 `thrift:"useless_field,1" json:"useless_field" db:"useless_field"`
 }
@@ -240,7 +239,6 @@ func (x *A) setDefaults() *A {
     return x.
         SetUselessFieldNonCompat(0)
 }
-
 
 type U struct {
     I *int32 `thrift:"i,1" json:"i,omitempty" db:"i"`
@@ -471,7 +469,6 @@ func (x *U) String() string {
 func (x *U) setDefaults() *U {
     return x
 }
-
 
 type Bang struct {
     Message string `thrift:"message,1" json:"message" db:"message"`

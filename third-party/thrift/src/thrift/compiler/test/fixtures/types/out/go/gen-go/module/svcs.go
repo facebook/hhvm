@@ -26,8 +26,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type SomeService interface {
     BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)

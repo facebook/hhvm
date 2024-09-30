@@ -644,7 +644,6 @@ func MyForwardRefEnumFromString(s string) (MyForwardRefEnum, error) {
     return MyForwardRefEnum(0), fmt.Errorf("not a valid MyForwardRefEnum string")
 }
 
-
 type EmptyStruct struct {
 }
 // Compile time interface enforcer
@@ -724,7 +723,6 @@ func (x *EmptyStruct) String() string {
 func (x *EmptyStruct) setDefaults() *EmptyStruct {
     return x
 }
-
 
 type DecoratedStruct struct {
     Field string `thrift:"field,1" json:"field" db:"field"`
@@ -857,7 +855,6 @@ func (x *DecoratedStruct) setDefaults() *DecoratedStruct {
     return x.
         SetFieldNonCompat("")
 }
-
 
 type ContainerStruct struct {
     FieldB []int32 `thrift:"fieldB,2" json:"fieldB" db:"fieldB"`
@@ -1559,7 +1556,6 @@ func (x *ContainerStruct) setDefaults() *ContainerStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
-
 type CppTypeStruct struct {
     FieldA []int32 `thrift:"fieldA,1" json:"fieldA" db:"fieldA"`
 }
@@ -1728,7 +1724,6 @@ func (x *CppTypeStruct) setDefaults() *CppTypeStruct {
         SetFieldANonCompat(make([]int32, 0))
 }
 
-
 type VirtualStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
 }
@@ -1860,7 +1855,6 @@ func (x *VirtualStruct) setDefaults() *VirtualStruct {
     return x.
         SetMyIntFieldNonCompat(0)
 }
-
 
 type MyStructWithForwardRefEnum struct {
     A MyForwardRefEnum `thrift:"a,1" json:"a" db:"a"`
@@ -2052,7 +2046,6 @@ func (x *MyStructWithForwardRefEnum) setDefaults() *MyStructWithForwardRefEnum {
           )
 }
 
-
 type TrivialNumeric struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B bool `thrift:"b,2" json:"b" db:"b"`
@@ -2236,7 +2229,6 @@ func (x *TrivialNumeric) setDefaults() *TrivialNumeric {
         SetANonCompat(0).
         SetBNonCompat(false)
 }
-
 
 type TrivialNestedWithDefault struct {
     Z int32 `thrift:"z,1" json:"z" db:"z"`
@@ -2445,7 +2437,6 @@ func (x *TrivialNestedWithDefault) setDefaults() *TrivialNestedWithDefault {
     SetBNonCompat(true),
           )
 }
-
 
 type ComplexString struct {
     A string `thrift:"a,1" json:"a" db:"a"`
@@ -2684,7 +2675,6 @@ func (x *ComplexString) setDefaults() *ComplexString {
         SetBNonCompat(make(map[string]int32))
 }
 
-
 type ComplexNestedWithDefault struct {
     Z string `thrift:"z,1" json:"z" db:"z"`
     N *ComplexString `thrift:"n,2" json:"n" db:"n"`
@@ -2896,7 +2886,6 @@ func (x *ComplexNestedWithDefault) setDefaults() *ComplexNestedWithDefault {
     ),
           )
 }
-
 
 type MinPadding struct {
     Small int8 `thrift:"small,1,required" json:"small" db:"small"`
@@ -3240,7 +3229,6 @@ func (x *MinPadding) setDefaults() *MinPadding {
         SetTinyNonCompat(0)
 }
 
-
 type MinPaddingWithCustomType struct {
     Small int8 `thrift:"small,1" json:"small" db:"small"`
     Big int64 `thrift:"big,2" json:"big" db:"big"`
@@ -3583,7 +3571,6 @@ func (x *MinPaddingWithCustomType) setDefaults() *MinPaddingWithCustomType {
         SetTinyNonCompat(0)
 }
 
-
 type MyStruct struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`
     MyStringField string `thrift:"MyStringField,2" json:"MyStringField" db:"MyStringField"`
@@ -3892,7 +3879,6 @@ func (x *MyStruct) setDefaults() *MyStruct {
         SetDataNonCompat(NewMyDataItem())
 }
 
-
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -3972,7 +3958,6 @@ func (x *MyDataItem) String() string {
 func (x *MyDataItem) setDefaults() *MyDataItem {
     return x
 }
-
 
 type Renaming struct {
     Foo int64 `thrift:"foo,1" json:"foo" db:"foo"`
@@ -4105,7 +4090,6 @@ func (x *Renaming) setDefaults() *Renaming {
     return x.
         SetFooNonCompat(0)
 }
-
 
 type AnnotatedTypes struct {
     BinaryField TBinary_8623 `thrift:"binary_field,1" json:"binary_field" db:"binary_field"`
@@ -4306,7 +4290,6 @@ func (x *AnnotatedTypes) setDefaults() *AnnotatedTypes {
         SetBinaryFieldNonCompat(NewTBinary_8623()).
         SetListFieldNonCompat(NewSomeListOfTypeMap_2468())
 }
-
 
 type ForwardUsageRoot struct {
     ForwardUsageStruct *ForwardUsageStruct `thrift:"ForwardUsageStruct,1,optional" json:"ForwardUsageStruct,omitempty" db:"ForwardUsageStruct"`
@@ -4530,7 +4513,6 @@ func (x *ForwardUsageRoot) setDefaults() *ForwardUsageRoot {
     return x
 }
 
-
 type ForwardUsageStruct struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
@@ -4682,7 +4664,6 @@ func (x *ForwardUsageStruct) setDefaults() *ForwardUsageStruct {
     return x
 }
 
-
 type ForwardUsageByRef struct {
     Foo *ForwardUsageRoot `thrift:"foo,1,optional" json:"foo,omitempty" db:"foo"`
 }
@@ -4833,7 +4814,6 @@ func (x *ForwardUsageByRef) String() string {
 func (x *ForwardUsageByRef) setDefaults() *ForwardUsageByRef {
     return x
 }
-
 
 type IncompleteMap struct {
     Field map[int32]*IncompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5024,7 +5004,6 @@ func (x *IncompleteMap) setDefaults() *IncompleteMap {
     return x
 }
 
-
 type IncompleteMapDep struct {
 }
 // Compile time interface enforcer
@@ -5104,7 +5083,6 @@ func (x *IncompleteMapDep) String() string {
 func (x *IncompleteMapDep) setDefaults() *IncompleteMapDep {
     return x
 }
-
 
 type CompleteMap struct {
     Field map[int32]*CompleteMapDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5295,7 +5273,6 @@ func (x *CompleteMap) setDefaults() *CompleteMap {
     return x
 }
 
-
 type CompleteMapDep struct {
 }
 // Compile time interface enforcer
@@ -5375,7 +5352,6 @@ func (x *CompleteMapDep) String() string {
 func (x *CompleteMapDep) setDefaults() *CompleteMapDep {
     return x
 }
-
 
 type IncompleteList struct {
     Field []*IncompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5549,7 +5525,6 @@ func (x *IncompleteList) setDefaults() *IncompleteList {
     return x
 }
 
-
 type IncompleteListDep struct {
 }
 // Compile time interface enforcer
@@ -5629,7 +5604,6 @@ func (x *IncompleteListDep) String() string {
 func (x *IncompleteListDep) setDefaults() *IncompleteListDep {
     return x
 }
-
 
 type CompleteList struct {
     Field []*CompleteListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -5803,7 +5777,6 @@ func (x *CompleteList) setDefaults() *CompleteList {
     return x
 }
 
-
 type CompleteListDep struct {
 }
 // Compile time interface enforcer
@@ -5883,7 +5856,6 @@ func (x *CompleteListDep) String() string {
 func (x *CompleteListDep) setDefaults() *CompleteListDep {
     return x
 }
-
 
 type AdaptedList struct {
     Field []*AdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -6057,7 +6029,6 @@ func (x *AdaptedList) setDefaults() *AdaptedList {
     return x
 }
 
-
 type AdaptedListDep struct {
     Field *AdaptedList `thrift:"field,1" json:"field" db:"field"`
 }
@@ -6209,7 +6180,6 @@ func (x *AdaptedListDep) setDefaults() *AdaptedListDep {
     return x.
         SetFieldNonCompat(NewAdaptedList())
 }
-
 
 type DependentAdaptedList struct {
     Field []*DependentAdaptedListDep `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
@@ -6383,7 +6353,6 @@ func (x *DependentAdaptedList) setDefaults() *DependentAdaptedList {
     return x
 }
 
-
 type DependentAdaptedListDep struct {
     Field *int16 `thrift:"field,1,optional" json:"field,omitempty" db:"field"`
 }
@@ -6529,7 +6498,6 @@ func (x *DependentAdaptedListDep) String() string {
 func (x *DependentAdaptedListDep) setDefaults() *DependentAdaptedListDep {
     return x
 }
-
 
 type AllocatorAware struct {
     AaList ListI32_9187 `thrift:"aa_list,1" json:"aa_list" db:"aa_list"`
@@ -7002,7 +6970,6 @@ func (x *AllocatorAware) setDefaults() *AllocatorAware {
         SetAaSharedNonCompat(NewI32_9314())
 }
 
-
 type AllocatorAware2 struct {
     NotAContainer int32 `thrift:"not_a_container,1" json:"not_a_container" db:"not_a_container"`
     BoxField *int32 `thrift:"box_field,2,optional" json:"box_field,omitempty" db:"box_field"`
@@ -7200,7 +7167,6 @@ func (x *AllocatorAware2) setDefaults() *AllocatorAware2 {
     return x.
         SetNotAContainerNonCompat(0)
 }
-
 
 type TypedefStruct struct {
     I32Field int32 `thrift:"i32_field,1" json:"i32_field" db:"i32_field"`
@@ -7439,7 +7405,6 @@ func (x *TypedefStruct) setDefaults() *TypedefStruct {
         SetIntTypedefFieldNonCompat(NewIntTypedef()).
         SetUintTypedefFieldNonCompat(NewUintTypedef())
 }
-
 
 type StructWithDoubleUnderscores struct {
     _Field int32 `thrift:"__field,1" json:"__field" db:"__field"`

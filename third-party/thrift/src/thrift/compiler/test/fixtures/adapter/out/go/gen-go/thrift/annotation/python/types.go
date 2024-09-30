@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type Py3Hidden struct {
 }
 // Compile time interface enforcer
@@ -99,7 +98,6 @@ func (x *Py3Hidden) String() string {
 func (x *Py3Hidden) setDefaults() *Py3Hidden {
     return x
 }
-
 
 type PyDeprecatedHidden struct {
     Reason string `thrift:"reason,1" json:"reason" db:"reason"`
@@ -233,7 +231,6 @@ func (x *PyDeprecatedHidden) setDefaults() *PyDeprecatedHidden {
         SetReasonNonCompat("")
 }
 
-
 type Flags struct {
 }
 // Compile time interface enforcer
@@ -313,7 +310,6 @@ func (x *Flags) String() string {
 func (x *Flags) setDefaults() *Flags {
     return x
 }
-
 
 type Name struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -446,7 +442,6 @@ func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("")
 }
-
 
 type Adapter struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
@@ -631,7 +626,6 @@ func (x *Adapter) setDefaults() *Adapter {
         SetNameNonCompat("").
         SetTypeHintNonCompat("")
 }
-
 
 type UseCAPI struct {
     Serialize bool `thrift:"serialize,1" json:"serialize" db:"serialize"`

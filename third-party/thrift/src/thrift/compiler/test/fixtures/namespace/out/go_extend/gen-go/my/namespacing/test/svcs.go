@@ -24,8 +24,6 @@ var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 
-
-
 type HsTestService interface {
     Init(ctx context.Context, int1 int64) (int64, error)
 }

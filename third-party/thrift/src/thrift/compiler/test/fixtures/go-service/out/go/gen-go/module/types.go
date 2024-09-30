@@ -19,7 +19,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type GetEntityRequest struct {
     Id string `thrift:"id,1" json:"id" db:"id"`
 }
@@ -152,7 +151,6 @@ func (x *GetEntityRequest) setDefaults() *GetEntityRequest {
         SetIdNonCompat("")
 }
 
-
 type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
 }
@@ -284,7 +282,6 @@ func (x *GetEntityResponse) setDefaults() *GetEntityResponse {
     return x.
         SetEntityNonCompat("")
 }
-
 
 type NonComparableStruct struct {
     Foo string `thrift:"foo,1" json:"foo" db:"foo"`

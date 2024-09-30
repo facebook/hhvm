@@ -21,7 +21,6 @@ var _ = reflect.Ptr
 var _ = strings.Split
 var _ = thrift.ZERO
 
-
 type IncludesAlso struct {
     Also *includesAlso.Also `thrift:"also,1" json:"also" db:"also"`
 }

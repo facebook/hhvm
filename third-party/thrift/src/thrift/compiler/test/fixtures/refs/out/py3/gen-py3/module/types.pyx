@@ -180,12 +180,6 @@ cdef __EnumData __TypedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.
 
 
 
-cdef __UnionTypeEnumData __MyUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cMyUnion](),
-    __MyUnionType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -204,20 +198,18 @@ cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
+class __MyUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __MyUnionType, <PyTypeObject*> __MyUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __NonTriviallyDestructibleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cNonTriviallyDestructibleUnion](),
-    __NonTriviallyDestructibleUnionType,
+cdef __UnionTypeEnumData __MyUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cMyUnion](),
+    __MyUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __MyUnionType, <PyTypeObject*> __MyUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -238,11 +230,15 @@ cdef class __NonTriviallyDestructibleUnion_Union_TypeMeta(thrift.py3.types.EnumM
         return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
+class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __NonTriviallyDestructibleUnion_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __NonTriviallyDestructibleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cNonTriviallyDestructibleUnion](),
+    __NonTriviallyDestructibleUnionType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __NonTriviallyDestructibleUnionType, <PyTypeObject*> __NonTriviallyDestructibleUnion_Union_TypeMeta)

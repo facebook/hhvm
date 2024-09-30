@@ -69,12 +69,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 
-cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cComplexUnion](),
-    __ComplexUnionType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -93,20 +87,18 @@ cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
+class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __ListUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cListUnion](),
-    __ListUnionType,
+cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cComplexUnion](),
+    __ComplexUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -127,20 +119,18 @@ cdef class __ListUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __ListUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __ListUnionType(thrift.py3.types.CompiledEnum):
+class __ListUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __ListUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __ListUnionType, <PyTypeObject*> __ListUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __DataUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cDataUnion](),
-    __DataUnionType,
+cdef __UnionTypeEnumData __ListUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cListUnion](),
+    __ListUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __ListUnionType, <PyTypeObject*> __ListUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -161,20 +151,18 @@ cdef class __DataUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __DataUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __DataUnionType(thrift.py3.types.CompiledEnum):
+class __DataUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __DataUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __DataUnionType, <PyTypeObject*> __DataUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __ValUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cValUnion](),
-    __ValUnionType,
+cdef __UnionTypeEnumData __DataUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cDataUnion](),
+    __DataUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __DataUnionType, <PyTypeObject*> __DataUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -195,20 +183,18 @@ cdef class __ValUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __ValUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __ValUnionType(thrift.py3.types.CompiledEnum):
+class __ValUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __ValUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __ValUnionType, <PyTypeObject*> __ValUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __VirtualComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cVirtualComplexUnion](),
-    __VirtualComplexUnionType,
+cdef __UnionTypeEnumData __ValUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cValUnion](),
+    __ValUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __ValUnionType, <PyTypeObject*> __ValUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -229,20 +215,18 @@ cdef class __VirtualComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __VirtualComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
+class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __VirtualComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __VirtualComplexUnionType, <PyTypeObject*> __VirtualComplexUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __NonCopyableUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cNonCopyableUnion](),
-    __NonCopyableUnionType,
+cdef __UnionTypeEnumData __VirtualComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cVirtualComplexUnion](),
+    __VirtualComplexUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __VirtualComplexUnionType, <PyTypeObject*> __VirtualComplexUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -263,11 +247,15 @@ cdef class __NonCopyableUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __NonCopyableUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
+class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __NonCopyableUnion_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __NonCopyableUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cNonCopyableUnion](),
+    __NonCopyableUnionType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __NonCopyableUnionType, <PyTypeObject*> __NonCopyableUnion_Union_TypeMeta)

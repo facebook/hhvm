@@ -92,15 +92,11 @@ cdef class Empty(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cEmpty])
 
-cdef class __NadaType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class Nada(thrift.py3.types.Union):
     cdef shared_ptr[cNada] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __NadaType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(Nada self)
 

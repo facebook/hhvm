@@ -237,12 +237,6 @@ cdef __EnumData __Company_enum_data  = __EnumData._fbthrift_create(thrift.py3.ty
 
 
 
-cdef __UnionTypeEnumData __union1_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cunion1](),
-    __union1Type,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __union1_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -261,20 +255,18 @@ cdef class __union1_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __union1_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __union1Type(thrift.py3.types.CompiledEnum):
+class __union1Type(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __union1_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __union1Type, <PyTypeObject*> __union1_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __union2_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cunion2](),
-    __union2Type,
+cdef __UnionTypeEnumData __union1_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cunion1](),
+    __union1Type,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __union1Type, <PyTypeObject*> __union1_Union_TypeMeta)
 
 
 @__cython.internal
@@ -295,11 +287,15 @@ cdef class __union2_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __union2_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __union2Type(thrift.py3.types.CompiledEnum):
+class __union2Type(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __union2_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __union2_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cunion2](),
+    __union2Type,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __union2Type, <PyTypeObject*> __union2_Union_TypeMeta)

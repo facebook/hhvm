@@ -249,12 +249,6 @@ cdef __EnumFlagsData __Flags_enum_data  = __EnumFlagsData._fbthrift_create(thrif
 
 
 
-cdef __UnionTypeEnumData __BinaryUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cBinaryUnion](),
-    __BinaryUnionType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __BinaryUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -273,11 +267,15 @@ cdef class __BinaryUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __BinaryUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __BinaryUnionType(thrift.py3.types.CompiledEnum):
+class __BinaryUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __BinaryUnion_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __BinaryUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cBinaryUnion](),
+    __BinaryUnionType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __BinaryUnionType, <PyTypeObject*> __BinaryUnion_Union_TypeMeta)

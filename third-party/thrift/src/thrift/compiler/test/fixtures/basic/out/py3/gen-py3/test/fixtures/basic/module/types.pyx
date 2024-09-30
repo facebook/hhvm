@@ -178,12 +178,6 @@ cdef __EnumData __HackEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.t
 
 
 
-cdef __UnionTypeEnumData __MyUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cMyUnion](),
-    __MyUnionType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -202,20 +196,18 @@ cdef class __MyUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
+class __MyUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __MyUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __MyUnionType, <PyTypeObject*> __MyUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __UnionToBeRenamed_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cUnionToBeRenamed](),
-    __UnionToBeRenamedType,
+cdef __UnionTypeEnumData __MyUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cMyUnion](),
+    __MyUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __MyUnionType, <PyTypeObject*> __MyUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -236,11 +228,15 @@ cdef class __UnionToBeRenamed_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __UnionToBeRenamed_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
+class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __UnionToBeRenamed_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __UnionToBeRenamed_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cUnionToBeRenamed](),
+    __UnionToBeRenamedType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __UnionToBeRenamedType, <PyTypeObject*> __UnionToBeRenamed_Union_TypeMeta)

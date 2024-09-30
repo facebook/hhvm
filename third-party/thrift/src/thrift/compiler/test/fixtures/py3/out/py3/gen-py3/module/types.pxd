@@ -227,15 +227,11 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexStruct])
 
-cdef class __BinaryUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class BinaryUnion(thrift.py3.types.Union):
     cdef shared_ptr[cBinaryUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __BinaryUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(BinaryUnion self)
 

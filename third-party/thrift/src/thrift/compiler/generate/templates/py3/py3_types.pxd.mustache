@@ -66,12 +66,6 @@ cdef extern from "{{.}}":
 {{> types/struct_extern }}
 
 {{#program:filtered_structs}}
-{{#struct:union?}}
-cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
-    pass
-
-
-{{/struct:union?}}
 
 
 cdef class {{struct:name}}({{> types/python_struct_class}}):
@@ -98,7 +92,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{/type:iobufRef?}}{{/field:type}}
     {{/struct:py3_fields}}{{/struct:union?}}
     {{#struct:union?}}
-    cdef readonly __{{struct:name}}Type type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache({{struct:name}} self)
     {{/struct:union?}}

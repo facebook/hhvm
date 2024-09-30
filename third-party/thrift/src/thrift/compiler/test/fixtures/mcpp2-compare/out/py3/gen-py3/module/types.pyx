@@ -312,12 +312,6 @@ cdef __EnumData __MyEnumB_enum_data  = __EnumData._fbthrift_create(thrift.py3.ty
 
 
 
-cdef __UnionTypeEnumData __SimpleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cSimpleUnion](),
-    __SimpleUnionType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __SimpleUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -336,20 +330,18 @@ cdef class __SimpleUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __SimpleUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __SimpleUnionType(thrift.py3.types.CompiledEnum):
+class __SimpleUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __SimpleUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __SimpleUnionType, <PyTypeObject*> __SimpleUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cComplexUnion](),
-    __ComplexUnionType,
+cdef __UnionTypeEnumData __SimpleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cSimpleUnion](),
+    __SimpleUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __SimpleUnionType, <PyTypeObject*> __SimpleUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -370,20 +362,18 @@ cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
+class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __ComplexUnion_union_type_enum_data.get_by_name(name)
 
 
-__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
-
-
-cdef __UnionTypeEnumData __FloatUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cFloatUnion](),
-    __FloatUnionType,
+cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cComplexUnion](),
+    __ComplexUnionType,
 )
+
+
+__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
 
 
 @__cython.internal
@@ -404,11 +394,15 @@ cdef class __FloatUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __FloatUnion_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __FloatUnionType(thrift.py3.types.CompiledEnum):
+class __FloatUnionType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __FloatUnion_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __FloatUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cFloatUnion](),
+    __FloatUnionType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __FloatUnionType, <PyTypeObject*> __FloatUnion_Union_TypeMeta)

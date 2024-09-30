@@ -211,15 +211,11 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_ty
         cNonCopyableStruct& set_s "set_s" (const cNonCopyableStruct&)
 
 
-cdef class __ComplexUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class ComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[cComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __ComplexUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(ComplexUnion self)
 
@@ -237,15 +233,11 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexUnion])
 
-cdef class __ListUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class ListUnion(thrift.py3.types.Union):
     cdef shared_ptr[cListUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __ListUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(ListUnion self)
 
@@ -259,15 +251,11 @@ cdef class ListUnion(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cListUnion])
 
-cdef class __DataUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class DataUnion(thrift.py3.types.Union):
     cdef shared_ptr[cDataUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __DataUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(DataUnion self)
 
@@ -294,15 +282,11 @@ cdef class Val(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVal])
 
-cdef class __ValUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class ValUnion(thrift.py3.types.Union):
     cdef shared_ptr[cValUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __ValUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(ValUnion self)
 
@@ -316,15 +300,11 @@ cdef class ValUnion(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cValUnion])
 
-cdef class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class VirtualComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[cVirtualComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __VirtualComplexUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(VirtualComplexUnion self)
 
@@ -348,15 +328,11 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNonCopyableStruct])
 
-cdef class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class NonCopyableUnion(thrift.py3.types.Union):
     cdef shared_ptr[cNonCopyableUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __NonCopyableUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(NonCopyableUnion self)
 

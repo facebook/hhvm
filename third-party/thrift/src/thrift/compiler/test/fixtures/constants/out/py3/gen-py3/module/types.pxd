@@ -280,15 +280,11 @@ cdef class struct4(thrift.py3.types.Struct):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cstruct4])
 
-cdef class __union1Type(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class union1(thrift.py3.types.Union):
     cdef shared_ptr[cunion1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __union1Type type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(union1 self)
 
@@ -302,15 +298,11 @@ cdef class union1(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cunion1])
 
-cdef class __union2Type(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class union2(thrift.py3.types.Union):
     cdef shared_ptr[cunion2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __union2Type type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(union2 self)
 

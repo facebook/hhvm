@@ -65,12 +65,6 @@ import importlib
 
 
 
-cdef __UnionTypeEnumData __Nada_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cNada](),
-    __NadaType,
-)
-
-
 @__cython.internal
 @__cython.auto_pickle(False)
 cdef class __Nada_Union_TypeMeta(thrift.py3.types.EnumMeta):
@@ -89,11 +83,15 @@ cdef class __Nada_Union_TypeMeta(thrift.py3.types.EnumMeta):
         return __Nada_union_type_enum_data.get_by_name(name)
 
 
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __NadaType(thrift.py3.types.CompiledEnum):
+class __NadaType(thrift.py3.types.CompiledEnum):
     def get_by_name(self, str name):
         return __Nada_union_type_enum_data.get_by_name(name)
+
+
+cdef __UnionTypeEnumData __Nada_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
+    __createEnumDataForUnionType[cNada](),
+    __NadaType,
+)
 
 
 __SetMetaClass(<PyTypeObject*> __NadaType, <PyTypeObject*> __Nada_Union_TypeMeta)

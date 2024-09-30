@@ -358,15 +358,11 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custo
         shared_ptr[string] shared_string_ref_ref "shared_string_ref_ref" ()
 
 
-cdef class __MyUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class MyUnion(thrift.py3.types.Union):
     cdef shared_ptr[cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __MyUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
 
@@ -380,15 +376,11 @@ cdef class MyUnion(thrift.py3.types.Union):
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion])
 
-cdef class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
-    pass
-
-
 
 
 cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
     cdef shared_ptr[cNonTriviallyDestructibleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly __NonTriviallyDestructibleUnionType type
+    cdef readonly object type
     cdef readonly object value
     cdef _load_cache(NonTriviallyDestructibleUnion self)
 

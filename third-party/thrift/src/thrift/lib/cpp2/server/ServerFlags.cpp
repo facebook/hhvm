@@ -35,7 +35,7 @@ FOLLY_GFLAGS_DEFINE_bool(
 THRIFT_FLAG_DEFINE_bool(allow_set_thread_manager_resource_pools, false);
 THRIFT_FLAG_DEFINE_bool(enable_resource_pools_for_interaction, false);
 THRIFT_FLAG_DEFINE_bool(
-    enable_resource_pools_for_interaction_generated_processor_only, false);
+    enable_resource_pools_for_interaction_generated_processor_only, true);
 
 THRIFT_FLAG_DEFINE_bool(
     allow_resource_pools_set_thread_manager_from_executor, true);

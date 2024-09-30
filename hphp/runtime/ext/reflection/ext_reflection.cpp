@@ -1946,11 +1946,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
   }
 
   if (isArrayLikeType(cns->val.m_type)) {
-    auto const cls = cns->cls;
-    // go to the preclass to find the unresolved TypeStructure to get
-    // the original assigned type text
-    auto const preCls = cls->preClass();
-    auto typeCns = preCls->lookupConstant(cns->name);
+    auto typeCns = cns->preConst;
     assertx(typeCns->kind() == ConstModifiers::Kind::Type);
     assertx(!typeCns->isAbstractAndUninit());
     assertx(isArrayLikeType(typeCns->val().m_type));

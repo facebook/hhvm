@@ -155,13 +155,16 @@ func newDefaultPersistentHeaders() map[string]string {
 func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	res := &clientOptions{
 		protocol:          types.ProtocolIDCompact,
-		transport:         TransportIDHeader,
+		transport:         TransportIDUnknown,
 		persistentHeaders: newDefaultPersistentHeaders(),
 	}
 	for _, opt := range opts {
 		if err := opt(res); err != nil {
 			return nil, err
 		}
+	}
+	if res.transport == TransportIDUnknown {
+		panic(NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}
 	return res, nil
 }

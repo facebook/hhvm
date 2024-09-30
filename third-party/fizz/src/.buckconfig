@@ -4,6 +4,7 @@ prelude = prelude
 toolchains = shim
 shim = shim
 none = none
+folly = folly
 
 [cell_aliases]
 config = prelude
@@ -20,5 +21,7 @@ target_platform_detector_spec = target:root//...->prelude//platforms:default
 [external_cells]
 prelude = bundled
 
-[oss_depends_on]
-folly = True
+[oss]
+internal_cell = fbcode
+project_dirs = fizz
+prefix_mappings = fbcode//folly->folly//folly

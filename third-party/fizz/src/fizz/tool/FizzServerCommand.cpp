@@ -419,7 +419,7 @@ class FizzHTTPServer : public FizzExampleServer {
         folly::io::Appender appender(response.get(), 10);
         std::string responseBody =
             transport_ ? respondHandshakeSuccess() : respondFallbackSuccess();
-        format(
+        folly::format(
             "HTTP/1.0 200 OK\r\n"
             "Content-Type: text/plain\r\n"
             "Content-Length: {}\r\n\r\n"

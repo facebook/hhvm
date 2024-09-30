@@ -148,7 +148,7 @@ class Connection : public AsyncSocket::ConnectCallback,
     if (!proxyTarget_.empty()) {
       auto connectCommand = IOBuf::create(0);
       folly::io::Appender appender(connectCommand.get(), 10);
-      format(
+      folly::format(
           "CONNECT {} HTTP/1.1\r\n"
           "Host: {}\r\n\r\n",
           proxyTarget_,

@@ -301,6 +301,14 @@ MCROUTER_OPTION_INTEGER(
     no_short,
     "core-mutiplier logic is applied if the number of cores  >= core_multiplier_threshold")
 
+// ONLY ENABLED FOR SHADOW TESTING WHEN USING PROXY
+MCROUTER_OPTION_TOGGLE(
+    key_client_binding_enable,
+    false,
+    "key-client-binding-enable",
+    no_short,
+    "If true, cache is secured by binding client identities to keys")
+
 #ifdef ADDITIONAL_STANDALONE_OPTIONS_FILE
 #include ADDITIONAL_STANDALONE_OPTIONS_FILE
 #endif

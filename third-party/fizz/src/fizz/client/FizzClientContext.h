@@ -135,24 +135,6 @@ class FizzClientContext {
     return certManager_;
   }
 
-  /*
-   * Retrieves the default client cert used for the ctx. This is a legacy api,
-   * do not use.
-   */
-  [[deprecated(
-      "FizzClientContext will no longer allow access to the client certificate. The application is responsible for keeping track of the client certificate installed")]]
-  std::shared_ptr<SelfCert> getClientCertificate() const {
-    if (clientCert_) {
-      return clientCert_;
-    }
-    if (certManager_) {
-      auto result = certManager_->getCert(
-          folly::none, supportedSigSchemes_, supportedSigSchemes_, {});
-      return result ? result->cert : nullptr;
-    }
-    return nullptr;
-  }
-
   void setECHPolicy(std::shared_ptr<ECHPolicy> echPolicy) {
     echPolicy_ = std::move(echPolicy);
   }

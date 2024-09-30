@@ -104,6 +104,10 @@ pub trait Reason:
                     RI::FromWitnessDecl(WitnessDecl::VarParamFromDecl(pos.into()))
                 }
 
+                OR::FromWitnessDecl(&WD::TupleFromSplat(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::TupleFromSplat(pos.into()))
+                }
+
                 OR::FromWitnessDecl(&WD::VecOrDictKey(pos)) => {
                     RI::FromWitnessDecl(WitnessDecl::VecOrDictKey(pos.into()))
                 }
@@ -176,6 +180,7 @@ pub enum WitnessDecl<P> {
     Hint(P),
     ClassClass(P, TypeName),
     VarParamFromDecl(P),
+    TupleFromSplat(P),
     VecOrDictKey(P),
     RetFunKindFromDecl(P, FunKind),
 }

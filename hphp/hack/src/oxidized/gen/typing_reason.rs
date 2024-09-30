@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce76dd9c13d1e14f53e58e01918fa2c6>>
+// @generated SignedSource<<c6b91a87a00d2d2cbe95c809ceda6b2f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -498,6 +498,8 @@ pub enum WitnessDecl {
     ClassClass(pos_or_decl::PosOrDecl, String),
     #[rust_to_ocaml(name = "Var_param_from_decl")]
     VarParamFromDecl(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Tuple_from_splat")]
+    TupleFromSplat(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Vec_or_dict_key")]
     VecOrDictKey(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Ret_fun_kind_from_decl")]

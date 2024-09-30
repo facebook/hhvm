@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e77b69bc3ef9a54c531ecf7694a65b2d>>
+// @generated SignedSource<<539591eb5be5fa759c78f4e57e0645f6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1257,6 +1257,7 @@ impl<'a> Node<'a> for WitnessDecl<'a> {
             WitnessDecl::Hint(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::ClassClass(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::VarParamFromDecl(ref __binding_0) => __binding_0.accept(v),
+            WitnessDecl::TupleFromSplat(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::VecOrDictKey(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::RetFunKindFromDecl(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::InoutParam(ref __binding_0) => __binding_0.accept(v),

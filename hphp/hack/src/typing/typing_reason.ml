@@ -986,6 +986,7 @@ type witness_decl =
   | Hint of (Pos_or_decl.t[@hash.ignore])
   | Class_class of (Pos_or_decl.t[@hash.ignore]) * string
   | Var_param_from_decl of (Pos_or_decl.t[@hash.ignore])
+  | Tuple_from_splat of (Pos_or_decl.t[@hash.ignore])
   | Vec_or_dict_key of (Pos_or_decl.t[@hash.ignore])
   | Ret_fun_kind_from_decl of (Pos_or_decl.t[@hash.ignore]) * Ast_defs.fun_kind
   | Inout_param of (Pos_or_decl.t[@hash.ignore])
@@ -1016,6 +1017,7 @@ let witness_decl_to_raw_pos = function
   | Hint pos_or_decl
   | Class_class (pos_or_decl, _)
   | Var_param_from_decl pos_or_decl
+  | Tuple_from_splat pos_or_decl
   | Inout_param pos_or_decl
   | Tconst_no_cstr (pos_or_decl, _)
   | Varray_or_darray_key pos_or_decl
@@ -1045,6 +1047,7 @@ let map_pos_witness_decl pos_or_decl witness =
   | Hint p -> Hint (pos_or_decl p)
   | Class_class (p, s) -> Class_class (pos_or_decl p, s)
   | Var_param_from_decl p -> Var_param_from_decl (pos_or_decl p)
+  | Tuple_from_splat p -> Tuple_from_splat (pos_or_decl p)
   | Inout_param p -> Inout_param (pos_or_decl p)
   | Tconst_no_cstr id -> Tconst_no_cstr (positioned_id pos_or_decl id)
   | Varray_or_darray_key p -> Varray_or_darray_key (pos_or_decl p)
@@ -1074,6 +1077,7 @@ let constructor_string_of_witness_decl = function
   | Hint _ -> "Rhint"
   | Class_class _ -> "Rclass_class"
   | Var_param_from_decl _ -> "Rvar_param_from_decl"
+  | Tuple_from_splat _ -> "Rtuple_from_splat"
   | Inout_param _ -> "Rinout_param"
   | Tconst_no_cstr _ -> "Rtconst_no_cstr"
   | Varray_or_darray_key _ -> "Rvarray_or_darray_key"
@@ -1120,6 +1124,7 @@ let pp_witness_decl fmt witness =
     | Pessimised_prop p
     | Pessimised_this p
     | Var_param_from_decl p
+    | Tuple_from_splat p
     | Global_fun_param p
     | Global_fun_ret p
     | Enforceable p
@@ -1183,6 +1188,10 @@ let witness_decl_to_json = function
     Hh_json.(
       JSON_Object
         [("Var_param_from_decl", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Tuple_from_splat pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [("Tuple_from_splat", JSON_Array [Pos_or_decl.json pos_or_decl])])
   | Inout_param pos_or_decl ->
     Hh_json.(
       JSON_Object [("Inout_param", JSON_Array [Pos_or_decl.json pos_or_decl])])
@@ -1294,6 +1303,8 @@ let witness_decl_to_string prefix witness =
       ^ (strip_ns s |> Markdown_lite.md_codify) )
   | Var_param_from_decl pos_or_decl ->
     (pos_or_decl, prefix ^ " (variadic argument)")
+  | Tuple_from_splat pos_or_decl ->
+    (pos_or_decl, prefix ^ " (tuple from parameters)")
   | Inout_param pos_or_decl -> (pos_or_decl, prefix ^ " (`inout` parameter)")
   | Tconst_no_cstr (pos_or_decl, n) ->
     ( pos_or_decl,
@@ -2334,6 +2345,8 @@ module Constructors = struct
   let var_param p = from_witness_locl @@ Var_param p
 
   let var_param_from_decl p = from_witness_decl @@ Var_param_from_decl p
+
+  let tuple_from_splat p = from_witness_decl @@ Tuple_from_splat p
 
   let unpack_param (p1, p2, n) = from_witness_locl @@ Unpack_param (p1, p2, n)
 
@@ -3958,6 +3971,7 @@ module Derivation = struct
       | Support_dynamic_type pos -> (pos, "function or method declaration")
       | Pessimised_return pos -> (pos, "return hint")
       | Var_param_from_decl pos -> (pos, "variadic parameter declaration")
+      | Tuple_from_splat pos -> (pos, "tuple from parameters")
       | Cstr_on_generics (pos, _) -> (pos, "constraint on the generic parameter")
       | Implicit_upper_bound (pos, nm) ->
         ( pos,

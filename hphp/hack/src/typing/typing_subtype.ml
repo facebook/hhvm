@@ -1714,6 +1714,11 @@ end = struct
         Printf.sprintf "This function is marked <<__CrossPackage(%s)>>" s
       | None -> "This function is not cross package"
     in
+    let splat_super =
+      match List.last ft_super.ft_params with
+      | Some fp -> get_fp_splat fp
+      | None -> false
+    in
     (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
     let readonly_this_err =
       if
@@ -1837,7 +1842,7 @@ end = struct
       else
         Ok ()
     and arity_min_err =
-      if not (arity_min ft_sub <= arity_min ft_super) then
+      if (not splat_super) && not (arity_min ft_sub <= arity_min ft_super) then
         Error
           (Option.map
              subtype_env.Subtype_env.on_error
@@ -1884,7 +1889,7 @@ end = struct
                    apply_reasons ~on_error
                    @@ Secondary.Fun_variadicity_hh_vs_php56
                         { pos = p_sub; decl_pos = p_super }))
-      | (None, None) ->
+      | (None, None) when not splat_super ->
         let sub_max = List.length ft_sub.ft_params in
         let super_max = List.length ft_super.ft_params in
         if sub_max < super_max then
@@ -1935,6 +1940,63 @@ end = struct
       (* Otherwise, combine the errors and return invalid *)
       TL.invalid ~fail:(Typing_error.multiple_opt @@ List.filter_opt errs)
 
+  (* Construct a tuple type from the parameters in a function type.
+   * This is used for subtyping function types exactly one of which contains
+   * a splat parameter e.g. consider
+   *
+   * (function(t1',_,tm', ...T):r') <:
+   * (function(t1, _, tm, u1, _, un, optional v1, _, vk, w...):r <:
+   *
+   * (Here ...T is a splat parameter and w... is a variadic).
+   *
+   * We need to subtype t1<:t1', _, tm<:tm' and r'<:r as normal but
+   * splat parameter T is compared a tuple of the remaining parameters in the supertype
+   * i.e. T <: (u1, _, un, optional v1, _, optional vk, w...)
+   *)
+  and params_to_tuple fun_type_pos is_variadic fn_params =
+    (* We construct a position that spans all the parameters that we are gathering.
+     * If there are no parameters, just use the position from the function type *)
+    let acc_pos =
+      match fn_params with
+      | [] -> fun_type_pos
+      | { fp_pos; fp_type; _ } :: _ ->
+        Pos_or_decl.merge (get_pos fp_type) fp_pos
+    in
+    let rec aux fn_params acc_pos acc_required acc_optional acc_variadic =
+      match fn_params with
+      | [] ->
+        mk
+          ( Reason.tuple_from_splat acc_pos,
+            Ttuple
+              {
+                t_required = List.rev acc_required;
+                t_optional = List.rev acc_optional;
+                t_variadic = acc_variadic;
+              } )
+      | ({ fp_type; fp_pos; _ } as fn_param) :: fn_params ->
+        let acc_pos =
+          if List.is_empty fn_params then
+            Pos_or_decl.merge acc_pos fp_pos
+          else
+            acc_pos
+        in
+        let (acc_required, acc_optional, acc_variadic) =
+          if List.is_empty fn_params && is_variadic then
+            (acc_required, acc_optional, fp_type)
+          else if get_fp_is_optional fn_param then
+            (acc_required, fp_type :: acc_optional, acc_variadic)
+          else
+            (fp_type :: acc_required, acc_optional, acc_variadic)
+        in
+        aux fn_params acc_pos acc_required acc_optional acc_variadic
+    in
+    aux
+      fn_params
+      acc_pos
+      []
+      []
+      (MakeType.nothing (Reason.witness_from_decl fun_type_pos))
+
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
       ~for_override
@@ -1979,6 +2041,54 @@ end = struct
         (r_sub, idx_sub, fn_params_sub)
         (r_super, idx_super, ty_super)
         env
+    (* Two splat parameters are just compared directly *)
+    | ( [({ fp_type = ty_sub; _ } as fn_param_sub)],
+        [({ fp_type = ty_super; _ } as fn_param_super)] )
+      when get_fp_splat fn_param_sub && get_fp_splat fn_param_super ->
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty:None
+           ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+           ~rhs:
+             { super_like = false; super_supportdyn = false; ty_super = ty_sub }
+    (* If supertype is a splat parameter then package up remaining parameters in subtype as
+     * a tuple and compare that
+     *)
+    | (_, [({ fp_type = ty_super; _ } as fn_param_super)])
+      when get_fp_splat fn_param_super ->
+      let tuple_ty_sub =
+        params_to_tuple (Reason.to_pos r_sub) variadic_sub_ty fn_params_sub
+      in
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty:None
+           ~lhs:{ sub_supportdyn = None; ty_sub = ty_super }
+           ~rhs:
+             {
+               super_like = false;
+               super_supportdyn = false;
+               ty_super = tuple_ty_sub;
+             }
+    (* If subtype is a splat parameter then package up remaining parameters in supertype as
+     * a tuple and compare that
+     *)
+    | ([({ fp_type = ty_sub; _ } as fn_param_sub)], _)
+      when get_fp_splat fn_param_sub ->
+      let tuple_ty =
+        params_to_tuple
+          (Reason.to_pos r_super)
+          variadic_super_ty
+          fn_params_super
+      in
+      env
+      |> simplify
+           ~subtype_env
+           ~this_ty:None
+           ~lhs:{ sub_supportdyn = None; ty_sub = tuple_ty }
+           ~rhs:
+             { super_like = false; super_supportdyn = false; ty_super = ty_sub }
     | ([], _) -> valid env
     | (_, []) -> valid env
     | (fn_param_sub :: fn_params_sub, fn_param_super :: fn_params_super) ->

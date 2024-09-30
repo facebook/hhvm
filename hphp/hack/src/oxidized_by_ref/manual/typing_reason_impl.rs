@@ -81,6 +81,7 @@ impl<'a> WitnessDecl<'a> {
             | WitnessDecl::Hint(p)
             | WitnessDecl::ClassClass((p, _))
             | WitnessDecl::VarParamFromDecl(p)
+            | WitnessDecl::TupleFromSplat(p)
             | WitnessDecl::InoutParam(p)
             | WitnessDecl::TconstNoCstr((p, _))
             | WitnessDecl::VarrayOrDarrayKey(p)

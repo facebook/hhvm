@@ -2074,6 +2074,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                     )),
                                     ty_,
                                 ))
+                            } else if splat {
+                                self.alloc(Ty(
+                                    self.alloc(Reason::FromWitnessDecl(
+                                        self.alloc(WitnessDecl::TupleFromSplat(pos)),
+                                    )),
+                                    type_.1,
+                                ))
                             } else {
                                 type_
                             };
@@ -2147,6 +2154,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                                             self.alloc(WitnessDecl::WitnessFromDecl(pos)),
                                         )
                                     }),
+                                    type_.1,
+                                ))
+                            } else if splat {
+                                self.alloc(Ty(
+                                    self.alloc(Reason::FromWitnessDecl(
+                                        self.alloc(WitnessDecl::TupleFromSplat(pos)),
+                                    )),
                                     type_.1,
                                 ))
                             } else {

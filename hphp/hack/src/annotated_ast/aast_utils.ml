@@ -218,6 +218,8 @@ let is_param_variadic param =
   | Param_required -> false
   | Param_optional _ -> false
 
+let is_param_splat param = Option.is_some param.param_splat
+
 let is_param_optional param =
   match param.param_info with
   | Param_variadic -> false

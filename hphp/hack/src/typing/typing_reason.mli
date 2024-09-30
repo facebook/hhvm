@@ -304,6 +304,8 @@ val enforceable : Pos_or_decl.t -> 'phase t_
 
 val destructure : Pos.t -> t
 
+val tuple_from_splat : Pos_or_decl.t -> 'phase t_
+
 val key_value_collection_key : Pos.t -> t
 
 val global_class_prop : Pos_or_decl.t -> 'phase t_

@@ -45,7 +45,9 @@ let make_param_ty env param =
     if Aast_utils.is_param_variadic param then
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      mk (Reason.var_param_from_decl param_pos, get_node ty)
+      with_reason ty (Reason.var_param_from_decl param_pos)
+    else if Aast_utils.is_param_splat param then
+      with_reason ty (Reason.tuple_from_splat param_pos)
     else
       ty
   in

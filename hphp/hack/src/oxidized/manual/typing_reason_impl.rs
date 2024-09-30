@@ -97,7 +97,8 @@ impl WitnessDecl {
             | Self::PessimisedInout(pos_or_decl)
             | Self::PessimisedReturn(pos_or_decl)
             | Self::PessimisedProp(pos_or_decl)
-            | Self::PessimisedThis(pos_or_decl) => pos_or_decl,
+            | Self::PessimisedThis(pos_or_decl)
+            | Self::TupleFromSplat(pos_or_decl) => pos_or_decl,
         }
     }
 }

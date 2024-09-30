@@ -82,6 +82,11 @@ class ThriftHandler : virtual public hellogoodbye::thrift::HelloGoodbyeSvIf {
         LOG(INFO) << "Got optional header props " << it->second
                   << " from thrift header.";
       }
+      it = headers.find("client_identifier");
+      if (it != headers.end()) {
+        LOG(INFO) << "Got client_identifier " << it->second
+                  << " from thrift header.";
+      }
     } else {
       LOG(ERROR) << "Cannot get context.";
     }

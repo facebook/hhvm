@@ -37,6 +37,9 @@ class MessageCommon {
   static constexpr std::string_view kCryptoAuthTokenHeader =
       "crypto_auth_tokens";
 
+  static constexpr std::string_view kClientIdentifierHeader =
+      "client_identifier";
+
  protected:
   std::string traceContext_;
 };

@@ -11,6 +11,7 @@
 #include <cassert>
 #include <memory>
 
+#include "core_infra_security/thrift_authentication_module/detail/ClientIdentifierHelper.h"
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/RequestAclChecker.h"
 #include "mcrouter/config.h"
@@ -55,12 +56,14 @@ class ServerOnRequest {
       bool enablePassThroughMode,
       bool remoteThread,
       ExternalStatsHandler& statsHandler,
-      bool requestAclCheckerEnable)
+      bool requestAclCheckerEnable,
+      bool enableKeyClientBinding = false)
       : client_(client),
         eventBase_(eventBase),
         retainSourceIp_(retainSourceIp),
         enablePassThroughMode_(enablePassThroughMode),
-        remoteThread_(remoteThread) {
+        remoteThread_(remoteThread),
+        enableKeyClientBinding_(enableKeyClientBinding) {
     if constexpr (RouterInfo::useRequestAclChecker) {
       aclChecker_ = std::make_unique<RequestAclChecker>(
           statsHandler, requestAclCheckerEnable);
@@ -162,6 +165,20 @@ class ServerOnRequest {
     auto& reqRef = rctx->req;
     auto& ctxRef = rctx->ctx;
 
+    // Set hashed TLS client identities on request to propogate from proxy ->
+    // memcache server only IF enableKeyClientBinding_ is enabled.
+    if (FOLLY_UNLIKELY(enableKeyClientBinding_) &&
+        ctxRef.getThriftRequestContext()) {
+      auto mayBeHashedIdentities =
+          core_infra_security::thrift_authentication_module::detail::
+              getTlsClientIdentifier(*ctxRef.getThriftRequestContext());
+      // if has valid hashed identity string, set it on the request
+      if (mayBeHashedIdentities.hasValue() &&
+          std::holds_alternative<std::string>(mayBeHashedIdentities.value())) {
+        reqRef.setClientIdentifier(
+            std::get<std::string>(mayBeHashedIdentities.value()));
+      }
+    }
     // if we are reusing the request buffer, adjust the start offset and set
     // it to the request.
     if (reusableRequestBuffer) {
@@ -198,6 +215,7 @@ class ServerOnRequest {
   const bool enablePassThroughMode_{false};
   const bool remoteThread_{false};
   std::unique_ptr<RequestAclChecker> aclChecker_;
+  const bool enableKeyClientBinding_{false};
 };
 
 } // namespace mcrouter

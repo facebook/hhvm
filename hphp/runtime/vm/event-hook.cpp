@@ -336,7 +336,6 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
-  ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
                         RuntimeCoeffects::defaults(), ctx.dynamic);
 }
@@ -371,7 +370,6 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
-  ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
                         RuntimeCoeffects::defaults(), ctx.dynamic);
 }

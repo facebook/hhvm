@@ -1,0 +1,66 @@
+ERROR: File "type_splat_typing_bad.php", line 25, characters 3-28:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 12, characters 10-13:
+  Expected `()` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 25, characters 3-28:
+  But got `(float)`
+ERROR: File "type_splat_typing_bad.php", line 27, characters 3-22:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 14, characters 22-27:
+  Expected `(num)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 27, characters 3-22:
+  But got `()`
+ERROR: File "type_splat_typing_bad.php", line 29, characters 3-32:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 14, characters 22-27:
+  Expected `(num)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 29, characters 3-32:
+  But got `(float, float)`
+ERROR: File "type_splat_typing_bad.php", line 31, characters 3-27:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 16, characters 22-41:
+  Expected `(arraykey, bool)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 31, characters 3-27:
+  But got `(string)`
+ERROR: File "type_splat_typing_bad.php", line 33, characters 3-37:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 16, characters 22-41:
+  Expected `(arraykey, bool)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 33, characters 3-37:
+  But got `(string, bool, int)`
+ERROR: File "type_splat_typing_bad.php", line 35, characters 3-30:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 16, characters 35-38:
+  Expected `bool`
+  File "type_splat_typing_bad.php", line 35, characters 29-29:
+  But got `int`
+ERROR: File "type_splat_typing_bad.php", line 37, characters 3-45:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 18, characters 27-52:
+  Expected `(optional arraykey, optional bool)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 37, characters 3-45:
+  But got `(int, string, bool, int)`
+ERROR: File "type_splat_typing_bad.php", line 37, characters 3-45:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 18, characters 46-49:
+  Expected `bool`
+  File "type_splat_typing_bad.php", line 37, characters 32-34:
+  But got `string`
+ERROR: File "type_splat_typing_bad.php", line 39, characters 3-35:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 18, characters 46-49:
+  Expected `bool`
+  File "type_splat_typing_bad.php", line 39, characters 32-34:
+  But got `float`
+ERROR: File "type_splat_typing_bad.php", line 41, characters 3-30:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 20, characters 30-54:
+  Expected `(arraykey, num...)` (tuple from parameters)
+  File "type_splat_typing_bad.php", line 41, characters 3-30:
+  But got `()`
+ERROR: File "type_splat_typing_bad.php", line 43, characters 3-39:
+Invalid argument (Typing[4110])
+  File "type_splat_typing_bad.php", line 20, characters 50-54:
+  Expected `num` (variadic argument)
+  File "type_splat_typing_bad.php", line 43, characters 36-38:
+  But got `string`

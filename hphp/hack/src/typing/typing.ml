@@ -6251,6 +6251,19 @@ end = struct
             else
               ft.ft_params
           in
+          let el =
+            match List.last non_variadic_ft_params with
+            | Some fp when get_fp_splat fp ->
+              let n = List.length non_variadic_ft_params in
+              let non_splat_args = List.take el (n - 1) in
+              let splat_args = List.drop el (n - 1) in
+              non_splat_args
+              @ [
+                  Ast_defs.
+                    (Pnormal, ((), expr_pos, Tuple (List.map splat_args ~f:snd)));
+                ]
+            | _ -> el
+          in
           (* Simply checking argument expressions from left-to-right produces poor
            * results from inference, with too many programs rejected because unknown
            * types can not be determined or are not solved with enough precision.

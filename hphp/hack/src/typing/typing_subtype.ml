@@ -1264,11 +1264,7 @@ end = struct
         invalid_env env
       else
         let ( ||| ) = ( ||| ) ~fail in
-        simplify_subtype_of_dynamic env ||| fun env ->
-        if Typing_utils.is_tyvar env ty then
-          invalid_env env
-        else
-          finish env
+        simplify_subtype_of_dynamic env ||| finish
     in
     let stripped_dynamic =
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/sema/standard_mutator.h>
+#include <thrift/compiler/sema/sema.h>
 
 #include <algorithm>
 #include <functional>
@@ -25,11 +25,11 @@
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/ast_mutator.h>
+#include <thrift/compiler/sema/sema_context.h>
+#include <thrift/compiler/sema/standard_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-
+namespace apache::thrift::compiler {
 namespace {
 
 void match_type_with_const_value(
@@ -185,32 +185,32 @@ void match_type_with_const_value(
 
 void maybe_match_type_with_const_value(
     sema_context& ctx,
-    mutator_context& mCtx,
+    mutator_context& mctx,
     const t_type* type,
     t_const_value* value) {
   if (type == nullptr || value == nullptr) {
     return;
   }
 
-  match_type_with_const_value(ctx, mCtx.program(), type, value);
+  match_type_with_const_value(ctx, mctx.program(), type, value);
 }
 
 void match_const_type_with_value(
-    sema_context& ctx, mutator_context& mCtx, t_const& const_node) {
+    sema_context& ctx, mutator_context& mctx, t_const& const_node) {
   maybe_match_type_with_const_value(
-      ctx, mCtx, const_node.type(), const_node.value());
+      ctx, mctx, const_node.type(), const_node.value());
 }
 
 void match_field_type_with_default_value(
-    sema_context& ctx, mutator_context& mCtx, t_field& field_node) {
+    sema_context& ctx, mutator_context& mctx, t_field& field_node) {
   maybe_match_type_with_const_value(
-      ctx, mCtx, field_node.get_type(), field_node.get_default_value());
+      ctx, mctx, field_node.get_type(), field_node.get_default_value());
 }
 
 static void match_annotation_types_with_const_values(
-    sema_context& ctx, mutator_context& mCtx, t_named& node) {
+    sema_context& ctx, mutator_context& mctx, t_named& node) {
   for (t_const& tconst : node.structured_annotations()) {
-    maybe_match_type_with_const_value(ctx, mCtx, tconst.type(), tconst.value());
+    maybe_match_type_with_const_value(ctx, mctx, tconst.type(), tconst.value());
   }
 }
 
@@ -347,7 +347,7 @@ void normalize_return_type(
 }
 
 template <typename Node>
-void lower_type_annotations(sema_context&, mutator_context& mCtx, Node& node) {
+void lower_type_annotations(sema_context&, mutator_context& mctx, Node& node) {
   std::map<std::string, std::string> unstructured;
 
   if (const t_const* annot =
@@ -378,7 +378,7 @@ void lower_type_annotations(sema_context&, mutator_context& mCtx, Node& node) {
     }
   } else if (node_type->is_primitive_type()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
-    auto& program = mCtx.program();
+    auto& program = mctx.program();
     auto unnamed = std::make_unique<t_primitive_type>(
         *static_cast<const t_primitive_type*>(node_type));
     for (auto& pair : unstructured) {
@@ -388,7 +388,7 @@ void lower_type_annotations(sema_context&, mutator_context& mCtx, Node& node) {
     program.add_unnamed_type(std::move(unnamed));
   } else {
     // Wrap in an unnamed typedef :(
-    auto& program = mCtx.program();
+    auto& program = mctx.program();
     auto unnamed = t_typedef::make_unnamed(
         const_cast<t_program*>(node_type->get_program()),
         node_type->get_name(),
@@ -449,19 +449,18 @@ void deduplicate_thrift_includes(
   includes.erase(it, includes.end());
 }
 
-} // namespace
+std::vector<ast_mutator> standard_mutators() {
+  std::vector<ast_mutator> mutators;
 
-ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
-  ast_mutators mutators(use_legacy_type_ref_resolution);
-
-  auto& initial = mutators.add_stage();
+  ast_mutator initial;
   initial.add_field_visitor(&lower_type_annotations<t_field>);
   initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
   initial.add_function_visitor(&normalize_return_type);
   initial.add_named_visitor(&set_generated);
   initial.add_named_visitor(&lower_deprecated_annotations);
+  mutators.push_back(std::move(initial));
 
-  auto& main = mutators.add_stage();
+  ast_mutator main;
   main.add_struct_visitor(&mutate_terse_write_annotation_structured);
   main.add_exception_visitor(&mutate_terse_write_annotation_structured);
   main.add_struct_visitor(&mutate_inject_metadata_fields);
@@ -469,9 +468,12 @@ ast_mutators standard_mutators(bool use_legacy_type_ref_resolution) {
   main.add_field_visitor(&match_field_type_with_default_value);
   main.add_named_visitor(&match_annotation_types_with_const_values);
   main.add_program_visitor(&deduplicate_thrift_includes);
+  mutators.push_back(std::move(main));
 
   return mutators;
 }
+
+} // namespace
 
 ast_mutator schema_mutator() {
   ast_mutator mutator;
@@ -479,6 +481,39 @@ ast_mutator schema_mutator() {
   return mutator;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
+  bool success = true;
+  if (!use_legacy_type_ref_resolution_) {
+    success = type_ref_resolver()(diags, bundle);
+  }
+  for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
+    if (td.type()) {
+      continue;
+    }
+
+    if (use_legacy_type_ref_resolution_ && !td.resolve()) {
+      success = false;
+    }
+
+    diags.error(td, "Type `{}` not defined.", td.name());
+    assert(!td.resolve());
+    assert(!success);
+    success = false;
+  }
+  return success;
+}
+
+sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
+  for (auto& mutator : standard_mutators()) {
+    mutator.mutate(ctx, bundle);
+  }
+  // We have no more mutators, so all type references **must** resolve.
+  result ret;
+  ret.unresolved_types = !resolve_all_types(ctx, bundle);
+  if (!ret.unresolved_types) {
+    standard_validator()(ctx, *bundle.root_program());
+  }
+  return ret;
+}
+
+} // namespace apache::thrift::compiler

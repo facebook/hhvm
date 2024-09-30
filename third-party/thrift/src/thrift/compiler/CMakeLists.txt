@@ -115,7 +115,7 @@ add_library(
   sema/check_initializer.cc
   sema/explicit_include_validator.cc
   sema/scope_validator.cc
-  sema/standard_mutator.cc
+  sema/sema.cc
   sema/standard_validator.cc
 )
 target_link_libraries(

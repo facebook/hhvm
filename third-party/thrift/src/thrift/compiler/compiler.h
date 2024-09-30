@@ -27,6 +27,8 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+struct sema_params;
+class sema_context;
 class t_program_bundle;
 
 enum class compile_retcode {
@@ -68,7 +70,8 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     const std::string& filename,
     parsing_params params,
     bool return_nullptr_on_failure = false,
-    t_program_bundle* already_parsed = nullptr);
+    t_program_bundle* already_parsed = nullptr,
+    const sema_params* sparams = nullptr);
 
 /**
  * Runs the Thrift parser with the specified (command-line) arguments and

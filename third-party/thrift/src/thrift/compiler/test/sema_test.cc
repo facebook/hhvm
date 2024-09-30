@@ -15,55 +15,25 @@
  */
 
 #include <memory>
-#include <thrift/compiler/sema/standard_mutator.h>
+#include <thrift/compiler/sema/sema.h>
 
-#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 namespace apache::thrift::compiler {
 
-using ::testing::UnorderedElementsAre;
-
-TEST(AstMutatorTest, Output) {
-  ast_mutator mutator;
-  mutator.add_program_visitor(
-      [](sema_context& ctx, mutator_context& mctx, t_program& program) {
-        ctx.report(program, diagnostic_level::info, "test");
-        EXPECT_EQ(mctx.current(), &program);
-        EXPECT_EQ(mctx.parent(), nullptr);
-        EXPECT_EQ(mctx.root(), &program);
-        program.add_definition(
-            std::make_unique<t_service>(&program, "MagicService"));
-      });
-
-  t_program program("path/to/program.thrift");
-  source_manager source_mgr;
-  diagnostic_results results;
-  sema_context ctx(source_mgr, results, diagnostic_params::keep_all());
-  auto loc = source_mgr.add_virtual_file(program.path(), "").start;
-  program.set_src_range({loc, loc});
-  mutator_context mctx;
-  mutator(ctx, mctx, program);
-  EXPECT_THAT(
-      results.diagnostics(),
-      UnorderedElementsAre(
-          diagnostic(diagnostic_level::info, "test", program.path(), 1)));
-  ASSERT_EQ(program.services().size(), 1);
-  EXPECT_EQ(program.services().front()->name(), "MagicService");
-}
-
-class StandardMutatorTest : public ::testing::Test {
+class SemaTest : public ::testing::Test {
  protected:
   std::vector<diagnostic> mutate(
       diagnostic_params params = diagnostic_params::keep_all()) {
     source_manager source_mgr;
     diagnostic_results results;
     sema_context ctx(source_mgr, results, std::move(params));
-    standard_mutators(false)(ctx, program_bundle_);
+    sema(false).run(ctx, program_bundle_);
     return std::move(results).diagnostics();
   }
 
@@ -73,11 +43,7 @@ class StandardMutatorTest : public ::testing::Test {
       std::make_unique<t_program>("/path/to/file.thrift")};
 };
 
-TEST_F(StandardMutatorTest, Empty) {
-  mutate();
-}
-
-TEST_F(StandardMutatorTest, TerseWriteField) {
+TEST_F(SemaTest, terse_write_field) {
   t_program* program = root_program();
   auto terse_field =
       std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);
@@ -98,7 +64,7 @@ TEST_F(StandardMutatorTest, TerseWriteField) {
   EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::terse);
 }
 
-TEST_F(StandardMutatorTest, TerseWriteStruct) {
+TEST_F(SemaTest, terse_write_struct) {
   t_program* program = root_program();
   auto terse_field =
       std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);
@@ -134,7 +100,7 @@ TEST_F(StandardMutatorTest, TerseWriteStruct) {
   EXPECT_EQ(required_field_ptr->qualifier(), t_field_qualifier::required);
 }
 
-TEST_F(StandardMutatorTest, Transitive) {
+TEST_F(SemaTest, transitive) {
   t_program* program = root_program();
   auto terse_field =
       std::make_unique<t_field>(t_primitive_type::t_i64(), "terse_field", 1);

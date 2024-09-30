@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/sema/sema_context.h>
@@ -139,65 +137,6 @@ struct type_ref_resolver {
 
  private:
   bool unresolved_{false};
-};
-
-// A thin wrapper around a vector of mutators that
-// knows how to apply those mutators in order.
-struct ast_mutators {
- private:
-  struct mutation_result {
-    bool unresolvable_typeref = false;
-  };
-
-  std::vector<ast_mutator> stages_;
-  bool use_legacy_type_ref_resolution_;
-
- public:
-  explicit ast_mutators(bool use_legacy_type_ref_resolution)
-      : use_legacy_type_ref_resolution_(use_legacy_type_ref_resolution) {}
-
-  ast_mutator& add_stage() {
-    stages_.push_back({});
-    return stages_.back();
-  }
-
-  mutation_result operator()(sema_context& ctx, t_program_bundle& bundle) {
-    for (auto& stage : stages_) {
-      stage.mutate(ctx, bundle);
-    }
-    // We have no more mutators, so all type references **must** resolve.
-    mutation_result ret;
-    ret.unresolvable_typeref = !resolve_all_types(ctx, bundle);
-    return ret;
-  }
-
- private:
-  // Tries to resolve any unresolved type references, returning true if
-  // successful.
-  //
-  // Any errors are reported via diags.
-  bool resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
-    bool success = true;
-    if (!use_legacy_type_ref_resolution_) {
-      success = type_ref_resolver{}(diags, bundle);
-    }
-    for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
-      if (!td.type()) {
-        if (use_legacy_type_ref_resolution_) {
-          if (td.resolve()) {
-            continue;
-          }
-          success = false;
-        }
-
-        diags.error(td, "Type `{}` not defined.", td.name());
-        assert(!td.resolve());
-        assert(!success);
-        success = false;
-      }
-    }
-    return success;
-  }
 };
 
 } // namespace compiler

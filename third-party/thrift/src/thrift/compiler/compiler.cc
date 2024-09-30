@@ -43,9 +43,10 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/parse/parse_ast.h>
+#include <thrift/compiler/sema/ast_mutator.h>
 #include <thrift/compiler/sema/ast_validator.h>
+#include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/sema/sema_context.h>
-#include <thrift/compiler/sema/standard_mutator.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
 namespace apache {
@@ -733,18 +734,20 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
       ctx,
       input_filename,
       pparams,
-      true /* return_nullptr_on_failure */);
+      true /* return_nullptr_on_failure */,
+      nullptr,
+      &ctx.sema_parameters());
   if (program_bundle == nullptr) {
     return nullptr;
   }
 
   // Load standard library if available.
-  static const std::string kSchemaPath = "thrift/lib/thrift/schema.thrift";
+  static const std::string schema_path = "thrift/lib/thrift/schema.thrift";
   auto found_or_error =
-      source_mgr.find_include_file(kSchemaPath, "", pparams.incl_searchpath);
+      source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
   if (found_or_error.index() == 0) {
     // Found
-    if (!program_bundle->find_program(kSchemaPath)) {
+    if (!program_bundle->find_program(schema_path)) {
       sema_context stdlib_ctx(
           source_mgr,
           [&](diagnostic&& d) {
@@ -758,7 +761,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
       std::unique_ptr<t_program_bundle> inc = parse_and_mutate_program(
           source_mgr,
           stdlib_ctx,
-          kSchemaPath,
+          schema_path,
           pparams,
           true /* return_nullptr_on_failure */,
           program_bundle.get());
@@ -785,7 +788,6 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   program_bundle->root_program()->set_include_prefix(
       get_include_path(gparams.targets, input_filename));
 
-  standard_validator()(ctx, *program_bundle->root_program());
   return ctx.has_errors() ? nullptr : std::move(program_bundle);
 }
 
@@ -797,7 +799,8 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     const std::string& filename,
     parsing_params params,
     bool return_nullptr_on_failure,
-    t_program_bundle* already_parsed) {
+    t_program_bundle* already_parsed,
+    const sema_params* sparams) {
   bool use_legacy_type_ref_resolution = params.use_legacy_type_ref_resolution;
   auto programs =
       parse_ast(sm, diags, filename, std::move(params), already_parsed);
@@ -806,9 +809,11 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     return !return_nullptr_on_failure ? std::move(programs) : nullptr;
   }
   auto ctx = sema_context(diags);
-  auto result =
-      standard_mutators(use_legacy_type_ref_resolution)(ctx, *programs);
-  if (result.unresolvable_typeref && return_nullptr_on_failure) {
+  if (sparams) {
+    ctx.sema_parameters() = *sparams;
+  }
+  auto result = sema(use_legacy_type_ref_resolution).run(ctx, *programs);
+  if (result.unresolved_types && return_nullptr_on_failure) {
     // Stop processing if there is unresolvable typeref.
     programs = nullptr;
   }

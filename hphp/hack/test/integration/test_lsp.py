@@ -6034,14 +6034,21 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Hack IDE support has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
+                    "message": "A watchman fault stops Hack from working.\nThis is not a bug in Hack or VSCode.\nConsider consulting Watchman Users group for advice.\nMore details: http://dummy/HH_TEST_MODE",
+                },
+            )
+            .wait_for_notification(
+                method="window/showMessage",
+                params={
+                    "type": 1,
+                    "message": "A watchman fault stops Hack from working. See Output\u203aHack for details.",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "<ROOT>\n\nHack IDE support has failed. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
-                    "shortMessage": "Hack: failed",
+                    "message": "<ROOT>\n\nA watchman fault stops Hack from working. See Output\u203aHack for details.\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: watchman fault",
                     "type": 1,
                 },
                 result=NoResponse(),

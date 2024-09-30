@@ -165,14 +165,13 @@ let init_via_find
   if not local_config.ServerLocalConfig.ide_load_naming_table_on_disk then begin
     Lwt.return (Skip "ide_load_naming_table_on_disk=false")
   end else begin
-    let%lwt get_metadata_result =
+    let%lwt project_metadata =
       State_loader_lwt.get_project_metadata
         ~opts:(Provider_context.get_tcopt ctx |> TypecheckerOptions.saved_state)
-        ~progress_callback:(fun _ -> ())
         ~repo:root
         ~ignore_hh_version
     in
-    match get_metadata_result with
+    match project_metadata with
     | Error (load_error, _telemetry) ->
       Lwt.return (Failure (error_from_load_error load_error))
     | Ok (project_metadata, _telemetry) -> begin

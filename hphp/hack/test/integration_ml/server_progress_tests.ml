@@ -815,9 +815,6 @@ let test_no_load () : bool Lwt.t =
            server failure and reports it. *)
         assert_substring stdout ~substring:"WEXITED";
         assert_substring stdout ~substring:"Failed_to_load_should_abort";
-        assert_substring
-          stdout
-          ~substring:"LoadError.Find_hh_server_hash_failed";
         Lwt.return_unit)
   in
   Lwt.return_true

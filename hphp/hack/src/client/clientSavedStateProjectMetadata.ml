@@ -56,7 +56,6 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
   in
   let%lwt result =
     State_loader_lwt.get_project_metadata
-      ~progress_callback:(fun _ -> ())
       ~repo:root
       ~ignore_hh_version
       ~opts:config.ServerLocalConfig.saved_state
@@ -67,5 +66,5 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
       (GetProjectMetadataError
          (Saved_state_loader.LoadError.debug_details_of_error error))
   | Ok (project_metadata, _telemetry) ->
-    Printf.printf "%s\n%!" project_metadata;
+    Printf.printf "%s\n%!" (Option.value project_metadata ~default:"");
     Lwt.return Exit_status.No_error

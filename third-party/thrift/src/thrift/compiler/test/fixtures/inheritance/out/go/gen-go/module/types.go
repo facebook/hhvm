@@ -20,3 +20,518 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+// Service req/resp structs (below)
+type reqMyRootDoRoot struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyRootDoRoot)(nil)
+
+// Deprecated: MyRootDoRootArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootArgsDeprecated = reqMyRootDoRoot
+
+func newReqMyRootDoRoot() *reqMyRootDoRoot {
+    return (&reqMyRootDoRoot{}).setDefaults()
+}
+
+
+
+func (x *reqMyRootDoRoot) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqMyRootDoRoot) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyRootDoRoot({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqMyRootDoRoot) setDefaults() *reqMyRootDoRoot {
+    return x
+}
+
+type respMyRootDoRoot struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyRootDoRoot)(nil)
+var _ thrift.WritableResult = (*respMyRootDoRoot)(nil)
+
+// Deprecated: MyRootDoRootResultDeprecated is deprecated, since it is supposed to be internal.
+type MyRootDoRootResultDeprecated = respMyRootDoRoot
+
+func newRespMyRootDoRoot() *respMyRootDoRoot {
+    return (&respMyRootDoRoot{}).setDefaults()
+}
+
+
+
+func (x *respMyRootDoRoot) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyRootDoRoot) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respMyRootDoRoot) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyRootDoRoot({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respMyRootDoRoot) setDefaults() *respMyRootDoRoot {
+    return x
+}
+
+type reqMyNodeDoMid struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyNodeDoMid)(nil)
+
+// Deprecated: MyNodeDoMidArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyNodeDoMidArgsDeprecated = reqMyNodeDoMid
+
+func newReqMyNodeDoMid() *reqMyNodeDoMid {
+    return (&reqMyNodeDoMid{}).setDefaults()
+}
+
+
+
+func (x *reqMyNodeDoMid) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqMyNodeDoMid) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyNodeDoMid({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqMyNodeDoMid) setDefaults() *reqMyNodeDoMid {
+    return x
+}
+
+type respMyNodeDoMid struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyNodeDoMid)(nil)
+var _ thrift.WritableResult = (*respMyNodeDoMid)(nil)
+
+// Deprecated: MyNodeDoMidResultDeprecated is deprecated, since it is supposed to be internal.
+type MyNodeDoMidResultDeprecated = respMyNodeDoMid
+
+func newRespMyNodeDoMid() *respMyNodeDoMid {
+    return (&respMyNodeDoMid{}).setDefaults()
+}
+
+
+
+func (x *respMyNodeDoMid) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyNodeDoMid) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respMyNodeDoMid) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyNodeDoMid({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respMyNodeDoMid) setDefaults() *respMyNodeDoMid {
+    return x
+}
+
+type reqMyLeafDoLeaf struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqMyLeafDoLeaf)(nil)
+
+// Deprecated: MyLeafDoLeafArgsDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafArgsDeprecated = reqMyLeafDoLeaf
+
+func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
+    return (&reqMyLeafDoLeaf{}).setDefaults()
+}
+
+
+
+func (x *reqMyLeafDoLeaf) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqMyLeafDoLeaf) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqMyLeafDoLeaf({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqMyLeafDoLeaf) setDefaults() *reqMyLeafDoLeaf {
+    return x
+}
+
+type respMyLeafDoLeaf struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respMyLeafDoLeaf)(nil)
+var _ thrift.WritableResult = (*respMyLeafDoLeaf)(nil)
+
+// Deprecated: MyLeafDoLeafResultDeprecated is deprecated, since it is supposed to be internal.
+type MyLeafDoLeafResultDeprecated = respMyLeafDoLeaf
+
+func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
+    return (&respMyLeafDoLeaf{}).setDefaults()
+}
+
+
+
+func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respMyLeafDoLeaf) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respMyLeafDoLeaf) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respMyLeafDoLeaf({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
+    return x
+}
+
+

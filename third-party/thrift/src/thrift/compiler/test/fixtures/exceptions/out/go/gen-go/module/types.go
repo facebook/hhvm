@@ -1135,6 +1135,1268 @@ func (x *Banal) Error() string {
     return x.String()
 }
 
+// Service req/resp structs (below)
+type reqRaiserDoBland struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqRaiserDoBland)(nil)
+
+// Deprecated: RaiserDoBlandArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoBlandArgsDeprecated = reqRaiserDoBland
+
+func newReqRaiserDoBland() *reqRaiserDoBland {
+    return (&reqRaiserDoBland{}).setDefaults()
+}
+
+
+
+func (x *reqRaiserDoBland) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqRaiserDoBland"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqRaiserDoBland) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqRaiserDoBland) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserDoBland({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqRaiserDoBland) setDefaults() *reqRaiserDoBland {
+    return x
+}
+
+type respRaiserDoBland struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respRaiserDoBland)(nil)
+var _ thrift.WritableResult = (*respRaiserDoBland)(nil)
+
+// Deprecated: RaiserDoBlandResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoBlandResultDeprecated = respRaiserDoBland
+
+func newRespRaiserDoBland() *respRaiserDoBland {
+    return (&respRaiserDoBland{}).setDefaults()
+}
+
+
+
+func (x *respRaiserDoBland) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respRaiserDoBland) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respRaiserDoBland"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserDoBland) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respRaiserDoBland) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserDoBland({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respRaiserDoBland) setDefaults() *respRaiserDoBland {
+    return x
+}
+
+type reqRaiserDoRaise struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqRaiserDoRaise)(nil)
+
+// Deprecated: RaiserDoRaiseArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoRaiseArgsDeprecated = reqRaiserDoRaise
+
+func newReqRaiserDoRaise() *reqRaiserDoRaise {
+    return (&reqRaiserDoRaise{}).setDefaults()
+}
+
+
+
+func (x *reqRaiserDoRaise) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqRaiserDoRaise"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqRaiserDoRaise) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqRaiserDoRaise) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserDoRaise({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqRaiserDoRaise) setDefaults() *reqRaiserDoRaise {
+    return x
+}
+
+type respRaiserDoRaise struct {
+    B *Banal `thrift:"b,1,optional" json:"b,omitempty" db:"b"`
+    F *Fiery `thrift:"f,2,optional" json:"f,omitempty" db:"f"`
+    S *Serious `thrift:"s,3,optional" json:"s,omitempty" db:"s"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respRaiserDoRaise)(nil)
+var _ thrift.WritableResult = (*respRaiserDoRaise)(nil)
+
+// Deprecated: RaiserDoRaiseResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserDoRaiseResultDeprecated = respRaiserDoRaise
+
+func newRespRaiserDoRaise() *respRaiserDoRaise {
+    return (&respRaiserDoRaise{}).setDefaults()
+}
+
+func (x *respRaiserDoRaise) GetB() *Banal {
+    if !x.IsSetB() {
+        return nil
+    }
+    return x.B
+}
+
+func (x *respRaiserDoRaise) GetF() *Fiery {
+    if !x.IsSetF() {
+        return nil
+    }
+    return x.F
+}
+
+func (x *respRaiserDoRaise) GetS() *Serious {
+    if !x.IsSetS() {
+        return nil
+    }
+    return x.S
+}
+
+func (x *respRaiserDoRaise) SetBNonCompat(value *Banal) *respRaiserDoRaise {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetB(value *Banal) *respRaiserDoRaise {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetFNonCompat(value *Fiery) *respRaiserDoRaise {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetF(value *Fiery) *respRaiserDoRaise {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetSNonCompat(value *Serious) *respRaiserDoRaise {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserDoRaise) SetS(value *Serious) *respRaiserDoRaise {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserDoRaise) IsSetB() bool {
+    return x != nil && x.B != nil
+}
+
+func (x *respRaiserDoRaise) IsSetF() bool {
+    return x != nil && x.F != nil
+}
+
+func (x *respRaiserDoRaise) IsSetS() bool {
+    return x != nil && x.S != nil
+}
+
+func (x *respRaiserDoRaise) writeField1(p thrift.Encoder) error {  // B
+    if !x.IsSetB() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("b", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.B
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserDoRaise) writeField2(p thrift.Encoder) error {  // F
+    if !x.IsSetF() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("f", thrift.STRUCT, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.F
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
+    if !x.IsSetS() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("s", thrift.STRUCT, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.S
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
+    result := NewBanal()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.B = result
+    return nil
+}
+
+func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
+    result := NewFiery()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.F = result
+    return nil
+}
+
+func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
+    result := NewSerious()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.S = result
+    return nil
+}
+
+func (x *respRaiserDoRaise) toString1() string {  // B
+    return fmt.Sprintf("%v", x.B)
+}
+
+func (x *respRaiserDoRaise) toString2() string {  // F
+    return fmt.Sprintf("%v", x.F)
+}
+
+func (x *respRaiserDoRaise) toString3() string {  // S
+    return fmt.Sprintf("%v", x.S)
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetB() instead.
+func (x *respRaiserDoRaise) DefaultGetB() *Banal {
+    if !x.IsSetB() {
+        return NewBanal()
+    }
+    return x.B
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetF() instead.
+func (x *respRaiserDoRaise) DefaultGetF() *Fiery {
+    if !x.IsSetF() {
+        return NewFiery()
+    }
+    return x.F
+}
+
+// Deprecated: Use newRespRaiserDoRaise().GetS() instead.
+func (x *respRaiserDoRaise) DefaultGetS() *Serious {
+    if !x.IsSetS() {
+        return NewSerious()
+    }
+    return x.S
+}
+
+
+
+func (x *respRaiserDoRaise) Exception() thrift.WritableException {
+    if x.B != nil {
+        return x.B
+    }
+    if x.F != nil {
+        return x.F
+    }
+    if x.S != nil {
+        return x.S
+    }
+    return nil
+}
+
+func (x *respRaiserDoRaise) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respRaiserDoRaise"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserDoRaise) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // b
+            fieldReadErr = x.readField1(p)
+        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // f
+            fieldReadErr = x.readField2(p)
+        case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // s
+            fieldReadErr = x.readField3(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respRaiserDoRaise) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserDoRaise({")
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("F:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respRaiserDoRaise) setDefaults() *respRaiserDoRaise {
+    return x
+}
+
+type reqRaiserGet200 struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqRaiserGet200)(nil)
+
+// Deprecated: RaiserGet200ArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet200ArgsDeprecated = reqRaiserGet200
+
+func newReqRaiserGet200() *reqRaiserGet200 {
+    return (&reqRaiserGet200{}).setDefaults()
+}
+
+
+
+func (x *reqRaiserGet200) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqRaiserGet200"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqRaiserGet200) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqRaiserGet200) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserGet200({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqRaiserGet200) setDefaults() *reqRaiserGet200 {
+    return x
+}
+
+type respRaiserGet200 struct {
+    Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respRaiserGet200)(nil)
+var _ thrift.WritableResult = (*respRaiserGet200)(nil)
+
+// Deprecated: RaiserGet200ResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet200ResultDeprecated = respRaiserGet200
+
+func newRespRaiserGet200() *respRaiserGet200 {
+    return (&respRaiserGet200{}).setDefaults()
+}
+
+func (x *respRaiserGet200) GetSuccess() string {
+    if !x.IsSetSuccess() {
+        return ""
+    }
+    return *x.Success
+}
+
+func (x *respRaiserGet200) SetSuccessNonCompat(value string) *respRaiserGet200 {
+    x.Success = &value
+    return x
+}
+
+func (x *respRaiserGet200) SetSuccess(value *string) *respRaiserGet200 {
+    x.Success = value
+    return x
+}
+
+func (x *respRaiserGet200) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respRaiserGet200) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.Success
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet200) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respRaiserGet200) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.Success)
+    }
+    return fmt.Sprintf("%v", x.Success)
+}
+
+
+
+
+func (x *respRaiserGet200) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respRaiserGet200) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respRaiserGet200"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet200) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.STRING)):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respRaiserGet200) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserGet200({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respRaiserGet200) setDefaults() *respRaiserGet200 {
+    return x
+}
+
+type reqRaiserGet500 struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqRaiserGet500)(nil)
+
+// Deprecated: RaiserGet500ArgsDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet500ArgsDeprecated = reqRaiserGet500
+
+func newReqRaiserGet500() *reqRaiserGet500 {
+    return (&reqRaiserGet500{}).setDefaults()
+}
+
+
+
+func (x *reqRaiserGet500) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqRaiserGet500"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqRaiserGet500) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqRaiserGet500) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqRaiserGet500({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqRaiserGet500) setDefaults() *reqRaiserGet500 {
+    return x
+}
+
+type respRaiserGet500 struct {
+    Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    F *Fiery `thrift:"f,1,optional" json:"f,omitempty" db:"f"`
+    B *Banal `thrift:"b,2,optional" json:"b,omitempty" db:"b"`
+    S *Serious `thrift:"s,3,optional" json:"s,omitempty" db:"s"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respRaiserGet500)(nil)
+var _ thrift.WritableResult = (*respRaiserGet500)(nil)
+
+// Deprecated: RaiserGet500ResultDeprecated is deprecated, since it is supposed to be internal.
+type RaiserGet500ResultDeprecated = respRaiserGet500
+
+func newRespRaiserGet500() *respRaiserGet500 {
+    return (&respRaiserGet500{}).setDefaults()
+}
+
+func (x *respRaiserGet500) GetSuccess() string {
+    if !x.IsSetSuccess() {
+        return ""
+    }
+    return *x.Success
+}
+
+func (x *respRaiserGet500) GetF() *Fiery {
+    if !x.IsSetF() {
+        return nil
+    }
+    return x.F
+}
+
+func (x *respRaiserGet500) GetB() *Banal {
+    if !x.IsSetB() {
+        return nil
+    }
+    return x.B
+}
+
+func (x *respRaiserGet500) GetS() *Serious {
+    if !x.IsSetS() {
+        return nil
+    }
+    return x.S
+}
+
+func (x *respRaiserGet500) SetSuccessNonCompat(value string) *respRaiserGet500 {
+    x.Success = &value
+    return x
+}
+
+func (x *respRaiserGet500) SetSuccess(value *string) *respRaiserGet500 {
+    x.Success = value
+    return x
+}
+
+func (x *respRaiserGet500) SetFNonCompat(value *Fiery) *respRaiserGet500 {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserGet500) SetF(value *Fiery) *respRaiserGet500 {
+    x.F = value
+    return x
+}
+
+func (x *respRaiserGet500) SetBNonCompat(value *Banal) *respRaiserGet500 {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserGet500) SetB(value *Banal) *respRaiserGet500 {
+    x.B = value
+    return x
+}
+
+func (x *respRaiserGet500) SetSNonCompat(value *Serious) *respRaiserGet500 {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserGet500) SetS(value *Serious) *respRaiserGet500 {
+    x.S = value
+    return x
+}
+
+func (x *respRaiserGet500) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respRaiserGet500) IsSetF() bool {
+    return x != nil && x.F != nil
+}
+
+func (x *respRaiserGet500) IsSetB() bool {
+    return x != nil && x.B != nil
+}
+
+func (x *respRaiserGet500) IsSetS() bool {
+    return x != nil && x.S != nil
+}
+
+func (x *respRaiserGet500) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.Success
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) writeField1(p thrift.Encoder) error {  // F
+    if !x.IsSetF() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("f", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.F
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) writeField2(p thrift.Encoder) error {  // B
+    if !x.IsSetB() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("b", thrift.STRUCT, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.B
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
+    if !x.IsSetS() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("s", thrift.STRUCT, 3); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.S
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
+    result := NewFiery()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.F = result
+    return nil
+}
+
+func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
+    result := NewBanal()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.B = result
+    return nil
+}
+
+func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
+    result := NewSerious()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.S = result
+    return nil
+}
+
+func (x *respRaiserGet500) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.Success)
+    }
+    return fmt.Sprintf("%v", x.Success)
+}
+
+func (x *respRaiserGet500) toString1() string {  // F
+    return fmt.Sprintf("%v", x.F)
+}
+
+func (x *respRaiserGet500) toString2() string {  // B
+    return fmt.Sprintf("%v", x.B)
+}
+
+func (x *respRaiserGet500) toString3() string {  // S
+    return fmt.Sprintf("%v", x.S)
+}
+
+
+// Deprecated: Use newRespRaiserGet500().GetF() instead.
+func (x *respRaiserGet500) DefaultGetF() *Fiery {
+    if !x.IsSetF() {
+        return NewFiery()
+    }
+    return x.F
+}
+
+// Deprecated: Use newRespRaiserGet500().GetB() instead.
+func (x *respRaiserGet500) DefaultGetB() *Banal {
+    if !x.IsSetB() {
+        return NewBanal()
+    }
+    return x.B
+}
+
+// Deprecated: Use newRespRaiserGet500().GetS() instead.
+func (x *respRaiserGet500) DefaultGetS() *Serious {
+    if !x.IsSetS() {
+        return NewSerious()
+    }
+    return x.S
+}
+
+
+
+func (x *respRaiserGet500) Exception() thrift.WritableException {
+    if x.F != nil {
+        return x.F
+    }
+    if x.B != nil {
+        return x.B
+    }
+    if x.S != nil {
+        return x.S
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respRaiserGet500"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+    if err := x.writeField3(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respRaiserGet500) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.STRING)):  // success
+            fieldReadErr = x.readField0(p)
+        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // f
+            fieldReadErr = x.readField1(p)
+        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // b
+            fieldReadErr = x.readField2(p)
+        case (id == 3 && wireType == thrift.Type(thrift.STRUCT)):  // s
+            fieldReadErr = x.readField3(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respRaiserGet500) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respRaiserGet500({")
+    sb.WriteString(fmt.Sprintf("Success:%s ", x.toString0()))
+    sb.WriteString(fmt.Sprintf("F:%s ", x.toString1()))
+    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
+    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respRaiserGet500) setDefaults() *respRaiserGet500 {
+    return x
+}
+
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

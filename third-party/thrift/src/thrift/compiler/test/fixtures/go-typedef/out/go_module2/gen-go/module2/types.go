@@ -63,3 +63,4 @@ func EnumFromString(s string) (Enum, error) {
 }
 
 
+

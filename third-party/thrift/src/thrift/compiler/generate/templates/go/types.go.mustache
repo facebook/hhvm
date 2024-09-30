@@ -58,6 +58,17 @@ var _ = thrift.ZERO
 {{/program:structs}}
 {{/program:structs?}}
 
+{{! Req/resp srtucts }}
+{{#program:services?}}
+// Service req/resp structs (below)
+{{#program:services}}
+{{#service:req_resp_structs}}
+{{> types/struct}}
+
+{{/service:req_resp_structs}}
+{{/program:services}}
+{{/program:services?}}
+
 {{#program:structs?}}
 {{> common/registry}}
 {{/program:structs?}}

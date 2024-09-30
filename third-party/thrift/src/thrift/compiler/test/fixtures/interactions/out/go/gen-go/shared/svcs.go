@@ -76,7 +76,6 @@ func (c *InteractLocallyClient) Close() error {
 }
 
 
-
 type InteractLocallyProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string

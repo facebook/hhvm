@@ -20,3 +20,1617 @@ var _ = strings.Split
 var _ = thrift.ZERO
 
 
+// Service req/resp structs (below)
+type reqNestedContainersMapList struct {
+    Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqNestedContainersMapList)(nil)
+
+// Deprecated: NestedContainersMapListArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapListArgsDeprecated = reqNestedContainersMapList
+
+func newReqNestedContainersMapList() *reqNestedContainersMapList {
+    return (&reqNestedContainersMapList{}).setDefaults()
+}
+
+func (x *reqNestedContainersMapList) GetFoo() map[int32][]int32 {
+    if !x.IsSetFoo() {
+        return make(map[int32][]int32)
+    }
+    return x.Foo
+}
+
+func (x *reqNestedContainersMapList) SetFooNonCompat(value map[int32][]int32) *reqNestedContainersMapList {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersMapList) SetFoo(value map[int32][]int32) *reqNestedContainersMapList {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersMapList) IsSetFoo() bool {
+    return x != nil && x.Foo != nil
+}
+
+func (x *reqNestedContainersMapList) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Foo
+    if err := p.WriteMapBegin(thrift.I32, thrift.LIST, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersMapList) readField1(p thrift.Decoder) error {  // Foo
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32][]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value []int32
+    {
+        _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.Foo = result
+    return nil
+}
+
+func (x *reqNestedContainersMapList) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.Foo)
+}
+
+
+
+func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqNestedContainersMapList"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersMapList) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqNestedContainersMapList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersMapList({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqNestedContainersMapList) setDefaults() *reqNestedContainersMapList {
+    return x.
+        SetFooNonCompat(make(map[int32][]int32))
+}
+
+type respNestedContainersMapList struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respNestedContainersMapList)(nil)
+var _ thrift.WritableResult = (*respNestedContainersMapList)(nil)
+
+// Deprecated: NestedContainersMapListResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapListResultDeprecated = respNestedContainersMapList
+
+func newRespNestedContainersMapList() *respNestedContainersMapList {
+    return (&respNestedContainersMapList{}).setDefaults()
+}
+
+
+
+func (x *respNestedContainersMapList) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respNestedContainersMapList) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respNestedContainersMapList"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respNestedContainersMapList) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respNestedContainersMapList) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersMapList({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respNestedContainersMapList) setDefaults() *respNestedContainersMapList {
+    return x
+}
+
+type reqNestedContainersMapSet struct {
+    Foo map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqNestedContainersMapSet)(nil)
+
+// Deprecated: NestedContainersMapSetArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapSetArgsDeprecated = reqNestedContainersMapSet
+
+func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
+    return (&reqNestedContainersMapSet{}).setDefaults()
+}
+
+func (x *reqNestedContainersMapSet) GetFoo() map[int32][]int32 {
+    if !x.IsSetFoo() {
+        return make(map[int32][]int32)
+    }
+    return x.Foo
+}
+
+func (x *reqNestedContainersMapSet) SetFooNonCompat(value map[int32][]int32) *reqNestedContainersMapSet {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersMapSet) SetFoo(value map[int32][]int32) *reqNestedContainersMapSet {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersMapSet) IsSetFoo() bool {
+    return x != nil && x.Foo != nil
+}
+
+func (x *reqNestedContainersMapSet) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.MAP, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Foo
+    if err := p.WriteMapBegin(thrift.I32, thrift.SET, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersMapSet) readField1(p thrift.Decoder) error {  // Foo
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32][]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value []int32
+    {
+        _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+
+    x.Foo = result
+    return nil
+}
+
+func (x *reqNestedContainersMapSet) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.Foo)
+}
+
+
+
+func (x *reqNestedContainersMapSet) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqNestedContainersMapSet"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersMapSet) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqNestedContainersMapSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersMapSet({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqNestedContainersMapSet) setDefaults() *reqNestedContainersMapSet {
+    return x.
+        SetFooNonCompat(make(map[int32][]int32))
+}
+
+type respNestedContainersMapSet struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respNestedContainersMapSet)(nil)
+var _ thrift.WritableResult = (*respNestedContainersMapSet)(nil)
+
+// Deprecated: NestedContainersMapSetResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersMapSetResultDeprecated = respNestedContainersMapSet
+
+func newRespNestedContainersMapSet() *respNestedContainersMapSet {
+    return (&respNestedContainersMapSet{}).setDefaults()
+}
+
+
+
+func (x *respNestedContainersMapSet) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respNestedContainersMapSet) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respNestedContainersMapSet"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respNestedContainersMapSet) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respNestedContainersMapSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersMapSet({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respNestedContainersMapSet) setDefaults() *respNestedContainersMapSet {
+    return x
+}
+
+type reqNestedContainersListMap struct {
+    Foo []map[int32]int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqNestedContainersListMap)(nil)
+
+// Deprecated: NestedContainersListMapArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListMapArgsDeprecated = reqNestedContainersListMap
+
+func newReqNestedContainersListMap() *reqNestedContainersListMap {
+    return (&reqNestedContainersListMap{}).setDefaults()
+}
+
+func (x *reqNestedContainersListMap) GetFoo() []map[int32]int32 {
+    if !x.IsSetFoo() {
+        return make([]map[int32]int32, 0)
+    }
+    return x.Foo
+}
+
+func (x *reqNestedContainersListMap) SetFooNonCompat(value []map[int32]int32) *reqNestedContainersListMap {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersListMap) SetFoo(value []map[int32]int32) *reqNestedContainersListMap {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersListMap) IsSetFoo() bool {
+    return x != nil && x.Foo != nil
+}
+
+func (x *reqNestedContainersListMap) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Foo
+    if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersListMap) readField1(p thrift.Decoder) error {  // Foo
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]map[int32]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem map[int32]int32
+    {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.Foo = result
+    return nil
+}
+
+func (x *reqNestedContainersListMap) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.Foo)
+}
+
+
+
+func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqNestedContainersListMap"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersListMap) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqNestedContainersListMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersListMap({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqNestedContainersListMap) setDefaults() *reqNestedContainersListMap {
+    return x.
+        SetFooNonCompat(make([]map[int32]int32, 0))
+}
+
+type respNestedContainersListMap struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respNestedContainersListMap)(nil)
+var _ thrift.WritableResult = (*respNestedContainersListMap)(nil)
+
+// Deprecated: NestedContainersListMapResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListMapResultDeprecated = respNestedContainersListMap
+
+func newRespNestedContainersListMap() *respNestedContainersListMap {
+    return (&respNestedContainersListMap{}).setDefaults()
+}
+
+
+
+func (x *respNestedContainersListMap) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respNestedContainersListMap) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respNestedContainersListMap"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respNestedContainersListMap) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respNestedContainersListMap) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersListMap({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respNestedContainersListMap) setDefaults() *respNestedContainersListMap {
+    return x
+}
+
+type reqNestedContainersListSet struct {
+    Foo [][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqNestedContainersListSet)(nil)
+
+// Deprecated: NestedContainersListSetArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListSetArgsDeprecated = reqNestedContainersListSet
+
+func newReqNestedContainersListSet() *reqNestedContainersListSet {
+    return (&reqNestedContainersListSet{}).setDefaults()
+}
+
+func (x *reqNestedContainersListSet) GetFoo() [][]int32 {
+    if !x.IsSetFoo() {
+        return make([][]int32, 0)
+    }
+    return x.Foo
+}
+
+func (x *reqNestedContainersListSet) SetFooNonCompat(value [][]int32) *reqNestedContainersListSet {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersListSet) SetFoo(value [][]int32) *reqNestedContainersListSet {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersListSet) IsSetFoo() bool {
+    return x != nil && x.Foo != nil
+}
+
+func (x *reqNestedContainersListSet) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Foo
+    if err := p.WriteListBegin(thrift.SET, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersListSet) readField1(p thrift.Decoder) error {  // Foo
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([][]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem []int32
+    {
+        _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.Foo = result
+    return nil
+}
+
+func (x *reqNestedContainersListSet) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.Foo)
+}
+
+
+
+func (x *reqNestedContainersListSet) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqNestedContainersListSet"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersListSet) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqNestedContainersListSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersListSet({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqNestedContainersListSet) setDefaults() *reqNestedContainersListSet {
+    return x.
+        SetFooNonCompat(make([][]int32, 0))
+}
+
+type respNestedContainersListSet struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respNestedContainersListSet)(nil)
+var _ thrift.WritableResult = (*respNestedContainersListSet)(nil)
+
+// Deprecated: NestedContainersListSetResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersListSetResultDeprecated = respNestedContainersListSet
+
+func newRespNestedContainersListSet() *respNestedContainersListSet {
+    return (&respNestedContainersListSet{}).setDefaults()
+}
+
+
+
+func (x *respNestedContainersListSet) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respNestedContainersListSet) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respNestedContainersListSet"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respNestedContainersListSet) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respNestedContainersListSet) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersListSet({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respNestedContainersListSet) setDefaults() *respNestedContainersListSet {
+    return x
+}
+
+type reqNestedContainersTurtles struct {
+    Foo [][]map[int32]map[int32][]int32 `thrift:"foo,1" json:"foo" db:"foo"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqNestedContainersTurtles)(nil)
+
+// Deprecated: NestedContainersTurtlesArgsDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersTurtlesArgsDeprecated = reqNestedContainersTurtles
+
+func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
+    return (&reqNestedContainersTurtles{}).setDefaults()
+}
+
+func (x *reqNestedContainersTurtles) GetFoo() [][]map[int32]map[int32][]int32 {
+    if !x.IsSetFoo() {
+        return make([][]map[int32]map[int32][]int32, 0)
+    }
+    return x.Foo
+}
+
+func (x *reqNestedContainersTurtles) SetFooNonCompat(value [][]map[int32]map[int32][]int32) *reqNestedContainersTurtles {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersTurtles) SetFoo(value [][]map[int32]map[int32][]int32) *reqNestedContainersTurtles {
+    x.Foo = value
+    return x
+}
+
+func (x *reqNestedContainersTurtles) IsSetFoo() bool {
+    return x != nil && x.Foo != nil
+}
+
+func (x *reqNestedContainersTurtles) writeField1(p thrift.Encoder) error {  // Foo
+    if err := p.WriteFieldBegin("foo", thrift.LIST, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Foo
+    if err := p.WriteListBegin(thrift.LIST, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteMapBegin(thrift.I32, thrift.MAP, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteMapBegin(thrift.I32, thrift.SET, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
+    return thrift.PrependError("error writing set begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteI32(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteSetEnd(); err != nil {
+    return thrift.PrependError("error writing set end: ", err)
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersTurtles) readField1(p thrift.Decoder) error {  // Foo
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([][]map[int32]map[int32][]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem []map[int32]map[int32][]int32
+    {
+        _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]map[int32]map[int32][]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem map[int32]map[int32][]int32
+    {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32]map[int32][]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value map[int32][]int32
+    {
+        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int32][]int32, size)
+for i := 0; i < size; i++ {
+    var key int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value []int32
+    {
+        _ /* elemType */, size, err := p.ReadSetBegin()
+if err != nil {
+    return thrift.PrependError("error reading set begin: ", err)
+}
+
+setResult := make([]int32, 0, size)
+for i := 0; i < size; i++ {
+    var elem int32
+    {
+        result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    setResult = append(setResult, elem)
+}
+
+if err := p.ReadSetEnd(); err != nil {
+    return thrift.PrependError("error reading set end: ", err)
+}
+result := setResult
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.Foo = result
+    return nil
+}
+
+func (x *reqNestedContainersTurtles) toString1() string {  // Foo
+    return fmt.Sprintf("%v", x.Foo)
+}
+
+
+
+func (x *reqNestedContainersTurtles) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqNestedContainersTurtles"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqNestedContainersTurtles) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqNestedContainersTurtles) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqNestedContainersTurtles({")
+    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqNestedContainersTurtles) setDefaults() *reqNestedContainersTurtles {
+    return x.
+        SetFooNonCompat(make([][]map[int32]map[int32][]int32, 0))
+}
+
+type respNestedContainersTurtles struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respNestedContainersTurtles)(nil)
+var _ thrift.WritableResult = (*respNestedContainersTurtles)(nil)
+
+// Deprecated: NestedContainersTurtlesResultDeprecated is deprecated, since it is supposed to be internal.
+type NestedContainersTurtlesResultDeprecated = respNestedContainersTurtles
+
+func newRespNestedContainersTurtles() *respNestedContainersTurtles {
+    return (&respNestedContainersTurtles{}).setDefaults()
+}
+
+
+
+func (x *respNestedContainersTurtles) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respNestedContainersTurtles) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respNestedContainersTurtles"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respNestedContainersTurtles) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respNestedContainersTurtles) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respNestedContainersTurtles({")
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respNestedContainersTurtles) setDefaults() *respNestedContainersTurtles {
+    return x
+}
+
+

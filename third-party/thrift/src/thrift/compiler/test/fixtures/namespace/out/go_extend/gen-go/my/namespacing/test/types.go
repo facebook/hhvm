@@ -152,6 +152,297 @@ func (x *HsFoo) setDefaults() *HsFoo {
 }
 
 
+// Service req/resp structs (below)
+type reqHsTestServiceInit struct {
+    Int1 int64 `thrift:"int1,1" json:"int1" db:"int1"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqHsTestServiceInit)(nil)
+
+// Deprecated: HsTestServiceInitArgsDeprecated is deprecated, since it is supposed to be internal.
+type HsTestServiceInitArgsDeprecated = reqHsTestServiceInit
+
+func newReqHsTestServiceInit() *reqHsTestServiceInit {
+    return (&reqHsTestServiceInit{}).setDefaults()
+}
+
+func (x *reqHsTestServiceInit) GetInt1() int64 {
+    return x.Int1
+}
+
+func (x *reqHsTestServiceInit) SetInt1NonCompat(value int64) *reqHsTestServiceInit {
+    x.Int1 = value
+    return x
+}
+
+func (x *reqHsTestServiceInit) SetInt1(value int64) *reqHsTestServiceInit {
+    x.Int1 = value
+    return x
+}
+
+func (x *reqHsTestServiceInit) writeField1(p thrift.Encoder) error {  // Int1
+    if err := p.WriteFieldBegin("int1", thrift.I64, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Int1
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqHsTestServiceInit) readField1(p thrift.Decoder) error {  // Int1
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.Int1 = result
+    return nil
+}
+
+func (x *reqHsTestServiceInit) toString1() string {  // Int1
+    return fmt.Sprintf("%v", x.Int1)
+}
+
+
+
+func (x *reqHsTestServiceInit) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqHsTestServiceInit"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *reqHsTestServiceInit) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // int1
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *reqHsTestServiceInit) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("reqHsTestServiceInit({")
+    sb.WriteString(fmt.Sprintf("Int1:%s", x.toString1()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *reqHsTestServiceInit) setDefaults() *reqHsTestServiceInit {
+    return x.
+        SetInt1NonCompat(0)
+}
+
+type respHsTestServiceInit struct {
+    Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respHsTestServiceInit)(nil)
+var _ thrift.WritableResult = (*respHsTestServiceInit)(nil)
+
+// Deprecated: HsTestServiceInitResultDeprecated is deprecated, since it is supposed to be internal.
+type HsTestServiceInitResultDeprecated = respHsTestServiceInit
+
+func newRespHsTestServiceInit() *respHsTestServiceInit {
+    return (&respHsTestServiceInit{}).setDefaults()
+}
+
+func (x *respHsTestServiceInit) GetSuccess() int64 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *respHsTestServiceInit) SetSuccessNonCompat(value int64) *respHsTestServiceInit {
+    x.Success = &value
+    return x
+}
+
+func (x *respHsTestServiceInit) SetSuccess(value *int64) *respHsTestServiceInit {
+    x.Success = value
+    return x
+}
+
+func (x *respHsTestServiceInit) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respHsTestServiceInit) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI64(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respHsTestServiceInit) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+
+    x.Success = &result
+    return nil
+}
+
+func (x *respHsTestServiceInit) toString0() string {  // Success
+    if x.IsSetSuccess() {
+        return fmt.Sprintf("%v", *x.Success)
+    }
+    return fmt.Sprintf("%v", x.Success)
+}
+
+
+
+
+func (x *respHsTestServiceInit) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respHsTestServiceInit) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respHsTestServiceInit"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respHsTestServiceInit) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 0 && wireType == thrift.Type(thrift.I64)):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *respHsTestServiceInit) String() string {
+    if x == nil {
+        return "<nil>"
+    }
+
+    var sb strings.Builder
+
+    sb.WriteString("respHsTestServiceInit({")
+    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
+    sb.WriteString("})")
+
+    return sb.String()
+}
+func (x *respHsTestServiceInit) setDefaults() *respHsTestServiceInit {
+    return x
+}
+
+
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)

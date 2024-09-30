@@ -116,8 +116,3 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature_with_ctx}} {
 }
 {{/function:go_supported?}}
 {{/service:functions}}
-
-{{#service:req_resp_structs}}
-{{> types/struct}}
-
-{{/service:req_resp_structs}}

@@ -23,37 +23,26 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_includes_Included = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("includes.Included"),
-            )
     premadeThriftType_service_IncludesIncluded = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("service.IncludesIncluded").
-            SetUnderlyingType(premadeThriftType_includes_Included),
-            )
-    premadeThriftType_transitive_Foo = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("transitive.Foo"),
-            )
-    premadeThriftType_includes_TransitiveFoo = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("includes.TransitiveFoo").
-            SetUnderlyingType(premadeThriftType_transitive_Foo),
+            SetUnderlyingType(includes.GetMetadataThriftType("includes.Included")),
             )
     premadeThriftType_service_IncludesTransitiveFoo = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("service.IncludesTransitiveFoo").
-            SetUnderlyingType(premadeThriftType_includes_TransitiveFoo),
+            SetUnderlyingType(includes.GetMetadataThriftType("includes.TransitiveFoo")),
             )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )
-    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.MyStruct"),
-            )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "service.IncludesIncluded": premadeThriftType_service_IncludesIncluded,
+    "service.IncludesTransitiveFoo": premadeThriftType_service_IncludesTransitiveFoo,
+    "void": premadeThriftType_void,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
 }
@@ -79,12 +68,12 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetId(1).
     SetName("s").
     SetIsOptional(false).
-    SetType(premadeThriftType_module_MyStruct),
+    SetType(module.GetMetadataThriftType("module.MyStruct")),
             metadata.NewThriftField().
     SetId(2).
     SetName("i").
     SetIsOptional(false).
-    SetType(premadeThriftType_includes_Included),
+    SetType(includes.GetMetadataThriftType("includes.Included")),
         },
     ),
             metadata.NewThriftFunction().
@@ -97,16 +86,22 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetId(1).
     SetName("s").
     SetIsOptional(false).
-    SetType(premadeThriftType_module_MyStruct),
+    SetType(module.GetMetadataThriftType("module.MyStruct")),
             metadata.NewThriftField().
     SetId(2).
     SetName("i").
     SetIsOptional(false).
-    SetType(premadeThriftType_includes_Included),
+    SetType(includes.GetMetadataThriftType("includes.Included")),
         },
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

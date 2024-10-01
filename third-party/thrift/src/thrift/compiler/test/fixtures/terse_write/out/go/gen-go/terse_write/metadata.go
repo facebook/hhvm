@@ -106,6 +106,29 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "terse_write.MyEnum": premadeThriftType_terse_write_MyEnum,
+    "terse_write.MyStruct": premadeThriftType_terse_write_MyStruct,
+    "bool": premadeThriftType_bool,
+    "byte": premadeThriftType_byte,
+    "i16": premadeThriftType_i16,
+    "i32": premadeThriftType_i32,
+    "i64": premadeThriftType_i64,
+    "float": premadeThriftType_float,
+    "double": premadeThriftType_double,
+    "string": premadeThriftType_string,
+    "binary": premadeThriftType_binary,
+    "terse_write.MyUnion": premadeThriftType_terse_write_MyUnion,
+    "terse_write.MyStructWithCustomDefault": premadeThriftType_terse_write_MyStructWithCustomDefault,
+    "terse_write.StructLevelTerseStruct": premadeThriftType_terse_write_StructLevelTerseStruct,
+    "terse_write.FieldLevelTerseStruct": premadeThriftType_terse_write_FieldLevelTerseStruct,
+    "terse_write.TerseStructWithCustomDefault": premadeThriftType_terse_write_TerseStructWithCustomDefault,
+    "terse_write.MyInteger": premadeThriftType_terse_write_MyInteger,
+    "terse_write.AdaptedFields": premadeThriftType_terse_write_AdaptedFields,
+    "terse_write.WrappedFields": premadeThriftType_terse_write_WrappedFields,
+    "terse_write.TerseException": premadeThriftType_terse_write_TerseException,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("terse_write.MyStruct").
@@ -577,6 +600,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

@@ -24,11 +24,11 @@ var (
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
             )
-    premadeThriftType_hsmodule_HsFoo = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("hsmodule.HsFoo"),
-            )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "bool": premadeThriftType_bool,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
 }
@@ -55,11 +55,17 @@ var serviceMetadatas = []*metadata.ThriftService{
     SetId(1).
     SetName("struct1").
     SetIsOptional(false).
-    SetType(premadeThriftType_hsmodule_HsFoo),
+    SetType(test0.GetMetadataThriftType("hsmodule.HsFoo")),
         },
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

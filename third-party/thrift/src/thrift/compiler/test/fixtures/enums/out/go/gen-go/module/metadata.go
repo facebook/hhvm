@@ -64,6 +64,19 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "module.Metasyntactic": premadeThriftType_module_Metasyntactic,
+    "module.MyEnum1": premadeThriftType_module_MyEnum1,
+    "module.MyEnum2": premadeThriftType_module_MyEnum2,
+    "module.MyEnum3": premadeThriftType_module_MyEnum3,
+    "module.MyEnum4": premadeThriftType_module_MyEnum4,
+    "module.MyBitmaskEnum1": premadeThriftType_module_MyBitmaskEnum1,
+    "module.MyBitmaskEnum2": premadeThriftType_module_MyBitmaskEnum2,
+    "i32": premadeThriftType_i32,
+    "module.SomeStruct": premadeThriftType_module_SomeStruct,
+    "module.MyStruct": premadeThriftType_module_MyStruct,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.SomeStruct").
@@ -199,6 +212,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

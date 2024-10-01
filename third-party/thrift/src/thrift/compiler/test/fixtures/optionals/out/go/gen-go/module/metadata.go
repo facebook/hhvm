@@ -70,6 +70,19 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "module.Animal": premadeThriftType_module_Animal,
+    "double": premadeThriftType_double,
+    "module.Color": premadeThriftType_module_Color,
+    "string": premadeThriftType_string,
+    "bool": premadeThriftType_bool,
+    "module.Vehicle": premadeThriftType_module_Vehicle,
+    "i64": premadeThriftType_i64,
+    "module.PersonID": premadeThriftType_module_PersonID,
+    "i16": premadeThriftType_i16,
+    "module.Person": premadeThriftType_module_Person,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.Color").
@@ -205,6 +218,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

@@ -75,6 +75,20 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "string": premadeThriftType_string,
+    "module.GetEntityRequest": premadeThriftType_module_GetEntityRequest,
+    "module.GetEntityResponse": premadeThriftType_module_GetEntityResponse,
+    "module.NonComparableStruct": premadeThriftType_module_NonComparableStruct,
+    "i64": premadeThriftType_i64,
+    "bool": premadeThriftType_bool,
+    "byte": premadeThriftType_byte,
+    "i16": premadeThriftType_i16,
+    "i32": premadeThriftType_i32,
+    "double": premadeThriftType_double,
+    "binary": premadeThriftType_binary,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.GetEntityRequest").
@@ -354,6 +368,12 @@ var serviceMetadatas = []*metadata.ThriftService{
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

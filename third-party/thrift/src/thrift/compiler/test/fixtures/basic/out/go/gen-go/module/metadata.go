@@ -109,6 +109,28 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "module.MyEnum": premadeThriftType_module_MyEnum,
+    "module.HackEnum": premadeThriftType_module_HackEnum,
+    "i64": premadeThriftType_i64,
+    "string": premadeThriftType_string,
+    "module.MyDataItem": premadeThriftType_module_MyDataItem,
+    "module.MyDataItemAlias": premadeThriftType_module_MyDataItemAlias,
+    "bool": premadeThriftType_bool,
+    "float": premadeThriftType_float,
+    "module.MyStruct": premadeThriftType_module_MyStruct,
+    "i32": premadeThriftType_i32,
+    "module.Containers": premadeThriftType_module_Containers,
+    "module.MyEnumAlias": premadeThriftType_module_MyEnumAlias,
+    "module.MyUnion": premadeThriftType_module_MyUnion,
+    "module.ReservedKeyword": premadeThriftType_module_ReservedKeyword,
+    "module.UnionToBeRenamed": premadeThriftType_module_UnionToBeRenamed,
+    "module.MyException": premadeThriftType_module_MyException,
+    "module.MyExceptionWithMessage": premadeThriftType_module_MyExceptionWithMessage,
+    "void": premadeThriftType_void,
+    "binary": premadeThriftType_binary,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.MyStruct").
@@ -486,6 +508,12 @@ var serviceMetadatas = []*metadata.ThriftService{
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

@@ -48,27 +48,19 @@ var (
             SetName("module1.Drivers").
             SetUnderlyingType(premadeThriftType_list_string),
             )
-    premadeThriftType_module0_Accessory = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module0.Accessory"),
-            )
     premadeThriftType_module1_Accessory = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module1.Accessory").
-            SetUnderlyingType(premadeThriftType_module0_Accessory),
+            SetUnderlyingType(module0.GetMetadataThriftType("module0.Accessory")),
             )
     premadeThriftType_list_module1_Accessory = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_module1_Accessory),
             )
-    premadeThriftType_module0_PartName = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module0.PartName"),
-            )
     premadeThriftType_module1_PartName = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module1.PartName").
-            SetUnderlyingType(premadeThriftType_module0_PartName),
+            SetUnderlyingType(module0.GetMetadataThriftType("module0.PartName")),
             )
     premadeThriftType_map_i32_module1_PartName = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
@@ -121,16 +113,31 @@ var (
             SetName("module1.State").
             SetUnderlyingType(premadeThriftType_string),
             )
-    premadeThriftType_module2_Enum = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module2.Enum"),
-            )
     premadeThriftType_module1_Enum = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module1.Enum").
-            SetUnderlyingType(premadeThriftType_module2_Enum),
+            SetUnderlyingType(module2.GetMetadataThriftType("module2.Enum")),
             )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "string": premadeThriftType_string,
+    "module1.Plate": premadeThriftType_module1_Plate,
+    "i32": premadeThriftType_i32,
+    "module1.Year": premadeThriftType_module1_Year,
+    "module1.Drivers": premadeThriftType_module1_Drivers,
+    "module1.Accessory": premadeThriftType_module1_Accessory,
+    "module1.PartName": premadeThriftType_module1_PartName,
+    "module1.Automobile": premadeThriftType_module1_Automobile,
+    "i64": premadeThriftType_i64,
+    "module1.MapKey": premadeThriftType_module1_MapKey,
+    "module1.MapContainer": premadeThriftType_module1_MapContainer,
+    "module1.Car": premadeThriftType_module1_Car,
+    "module1.Pair": premadeThriftType_module1_Pair,
+    "module1.Collection": premadeThriftType_module1_Collection,
+    "module1.State": premadeThriftType_module1_State,
+    "module1.Enum": premadeThriftType_module1_Enum,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
@@ -292,6 +299,12 @@ var serviceMetadatas = []*metadata.ThriftService{
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

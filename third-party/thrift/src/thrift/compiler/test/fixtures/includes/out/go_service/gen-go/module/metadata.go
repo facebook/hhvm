@@ -21,23 +21,19 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_includes_Included = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("includes.Included"),
-            )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )
-    premadeThriftType_includes_IncludedInt64 = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("includes.IncludedInt64").
-            SetUnderlyingType(premadeThriftType_i64),
             )
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
             )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "i64": premadeThriftType_i64,
+    "module.MyStruct": premadeThriftType_module_MyStruct,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
@@ -49,17 +45,17 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("MyIncludedField").
     SetIsOptional(false).
-    SetType(premadeThriftType_includes_Included),
+    SetType(includes.GetMetadataThriftType("includes.Included")),
             metadata.NewThriftField().
     SetId(2).
     SetName("MyOtherIncludedField").
     SetIsOptional(false).
-    SetType(premadeThriftType_includes_Included),
+    SetType(includes.GetMetadataThriftType("includes.Included")),
             metadata.NewThriftField().
     SetId(3).
     SetName("MyIncludedInt").
     SetIsOptional(false).
-    SetType(premadeThriftType_includes_IncludedInt64),
+    SetType(includes.GetMetadataThriftType("includes.IncludedInt64")),
         },
     ),
 }
@@ -71,6 +67,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

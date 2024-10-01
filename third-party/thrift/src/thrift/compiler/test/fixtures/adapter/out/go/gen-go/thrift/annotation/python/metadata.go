@@ -51,6 +51,17 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "python.Py3Hidden": premadeThriftType_python_Py3Hidden,
+    "string": premadeThriftType_string,
+    "python.PyDeprecatedHidden": premadeThriftType_python_PyDeprecatedHidden,
+    "python.Flags": premadeThriftType_python_Flags,
+    "python.Name": premadeThriftType_python_Name,
+    "python.Adapter": premadeThriftType_python_Adapter,
+    "bool": premadeThriftType_bool,
+    "python.UseCAPI": premadeThriftType_python_UseCAPI,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("python.Py3Hidden").
@@ -120,6 +131,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

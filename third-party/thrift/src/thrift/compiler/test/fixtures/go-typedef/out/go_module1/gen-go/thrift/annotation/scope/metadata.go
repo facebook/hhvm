@@ -89,6 +89,26 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "scope.Transitive": premadeThriftType_scope_Transitive,
+    "scope.Program": premadeThriftType_scope_Program,
+    "scope.Struct": premadeThriftType_scope_Struct,
+    "scope.Union": premadeThriftType_scope_Union,
+    "scope.Exception": premadeThriftType_scope_Exception,
+    "scope.Field": premadeThriftType_scope_Field,
+    "scope.Typedef": premadeThriftType_scope_Typedef,
+    "scope.Service": premadeThriftType_scope_Service,
+    "scope.Interaction": premadeThriftType_scope_Interaction,
+    "scope.Function": premadeThriftType_scope_Function,
+    "scope.EnumValue": premadeThriftType_scope_EnumValue,
+    "scope.Const": premadeThriftType_scope_Const,
+    "scope.Enum": premadeThriftType_scope_Enum,
+    "scope.Structured": premadeThriftType_scope_Structured,
+    "scope.Interface": premadeThriftType_scope_Interface,
+    "scope.RootDefinition": premadeThriftType_scope_RootDefinition,
+    "scope.Definition": premadeThriftType_scope_Definition,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("scope.Transitive").
@@ -150,6 +170,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

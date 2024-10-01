@@ -24,10 +24,6 @@ var (
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
             )
-    premadeThriftType_transitive_Foo = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("transitive.Foo"),
-            )
     premadeThriftType_includes_Included = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("includes.Included"),
@@ -40,9 +36,16 @@ var (
     premadeThriftType_includes_TransitiveFoo = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("includes.TransitiveFoo").
-            SetUnderlyingType(premadeThriftType_transitive_Foo),
+            SetUnderlyingType(transitive.GetMetadataThriftType("transitive.Foo")),
             )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "i64": premadeThriftType_i64,
+    "includes.Included": premadeThriftType_includes_Included,
+    "includes.IncludedInt64": premadeThriftType_includes_IncludedInt64,
+    "includes.TransitiveFoo": premadeThriftType_includes_TransitiveFoo,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
@@ -59,7 +62,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(2).
     SetName("MyTransitiveField").
     SetIsOptional(false).
-    SetType(premadeThriftType_transitive_Foo),
+    SetType(transitive.GetMetadataThriftType("transitive.Foo")),
         },
     ),
 }
@@ -71,6 +74,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

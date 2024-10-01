@@ -21,15 +21,15 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_IncludesAlso_Also = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("IncludesAlso.Also"),
-            )
     premadeThriftType_matching_names_IncludesAlso = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("matching_names.IncludesAlso"),
             )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "matching_names.IncludesAlso": premadeThriftType_matching_names_IncludesAlso,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
@@ -41,7 +41,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(1).
     SetName("also").
     SetIsOptional(false).
-    SetType(premadeThriftType_IncludesAlso_Also),
+    SetType(includesAlso.GetMetadataThriftType("IncludesAlso.Also")),
         },
     ),
 }
@@ -53,6 +53,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

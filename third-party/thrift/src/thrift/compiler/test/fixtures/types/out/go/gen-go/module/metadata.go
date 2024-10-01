@@ -70,11 +70,6 @@ var (
             SetName("module.map_i32_string_1261").
             SetUnderlyingType(premadeThriftType_map_i32_string),
             )
-    premadeThriftType_included_SomeMap = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("included.SomeMap").
-            SetUnderlyingType(premadeThriftType_map_i32_string),
-            )
     premadeThriftType_module_ContainerStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ContainerStruct"),
@@ -159,17 +154,12 @@ var (
             )
     premadeThriftType_list_included_SomeMap = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
-            SetValueType(premadeThriftType_included_SomeMap),
-            )
-    premadeThriftType_included_SomeListOfTypeMap = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("included.SomeListOfTypeMap").
-            SetUnderlyingType(premadeThriftType_list_included_SomeMap),
+            SetValueType(included.GetMetadataThriftType("included.SomeMap")),
             )
     premadeThriftType_module_SomeListOfTypeMap_2468 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.SomeListOfTypeMap_2468").
-            SetUnderlyingType(premadeThriftType_included_SomeListOfTypeMap),
+            SetUnderlyingType(included.GetMetadataThriftType("included.SomeListOfTypeMap")),
             )
     premadeThriftType_module_AnnotatedTypes = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -328,6 +318,66 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "module.has_bitwise_ops": premadeThriftType_module_has_bitwise_ops,
+    "module.is_unscoped": premadeThriftType_module_is_unscoped,
+    "module.MyForwardRefEnum": premadeThriftType_module_MyForwardRefEnum,
+    "module.empty_struct": premadeThriftType_module_empty_struct,
+    "string": premadeThriftType_string,
+    "module.decorated_struct": premadeThriftType_module_decorated_struct,
+    "i32": premadeThriftType_i32,
+    "module.set_i32_7194": premadeThriftType_module_set_i32_7194,
+    "module.map_i32_string_1261": premadeThriftType_module_map_i32_string_1261,
+    "module.ContainerStruct": premadeThriftType_module_ContainerStruct,
+    "module.CppTypeStruct": premadeThriftType_module_CppTypeStruct,
+    "i64": premadeThriftType_i64,
+    "module.VirtualStruct": premadeThriftType_module_VirtualStruct,
+    "module.MyStructWithForwardRefEnum": premadeThriftType_module_MyStructWithForwardRefEnum,
+    "bool": premadeThriftType_bool,
+    "module.TrivialNumeric": premadeThriftType_module_TrivialNumeric,
+    "module.TrivialNestedWithDefault": premadeThriftType_module_TrivialNestedWithDefault,
+    "module.ComplexString": premadeThriftType_module_ComplexString,
+    "module.ComplexNestedWithDefault": premadeThriftType_module_ComplexNestedWithDefault,
+    "byte": premadeThriftType_byte,
+    "i16": premadeThriftType_i16,
+    "module.MinPadding": premadeThriftType_module_MinPadding,
+    "module.MinPaddingWithCustomType": premadeThriftType_module_MinPaddingWithCustomType,
+    "module.MyDataItem": premadeThriftType_module_MyDataItem,
+    "module.MyStruct": premadeThriftType_module_MyStruct,
+    "module.Renaming": premadeThriftType_module_Renaming,
+    "binary": premadeThriftType_binary,
+    "module.TBinary": premadeThriftType_module_TBinary,
+    "module.TBinary_8623": premadeThriftType_module_TBinary_8623,
+    "module.SomeListOfTypeMap_2468": premadeThriftType_module_SomeListOfTypeMap_2468,
+    "module.AnnotatedTypes": premadeThriftType_module_AnnotatedTypes,
+    "module.ForwardUsageStruct": premadeThriftType_module_ForwardUsageStruct,
+    "module.ForwardUsageByRef": premadeThriftType_module_ForwardUsageByRef,
+    "module.ForwardUsageRoot": premadeThriftType_module_ForwardUsageRoot,
+    "module.IncompleteMapDep": premadeThriftType_module_IncompleteMapDep,
+    "module.IncompleteMap": premadeThriftType_module_IncompleteMap,
+    "module.CompleteMapDep": premadeThriftType_module_CompleteMapDep,
+    "module.CompleteMap": premadeThriftType_module_CompleteMap,
+    "module.IncompleteListDep": premadeThriftType_module_IncompleteListDep,
+    "module.IncompleteList": premadeThriftType_module_IncompleteList,
+    "module.CompleteListDep": premadeThriftType_module_CompleteListDep,
+    "module.CompleteList": premadeThriftType_module_CompleteList,
+    "module.AdaptedListDep": premadeThriftType_module_AdaptedListDep,
+    "module.AdaptedList": premadeThriftType_module_AdaptedList,
+    "module.DependentAdaptedListDep": premadeThriftType_module_DependentAdaptedListDep,
+    "module.DependentAdaptedList": premadeThriftType_module_DependentAdaptedList,
+    "module.list_i32_9187": premadeThriftType_module_list_i32_9187,
+    "module.set_i32_7070": premadeThriftType_module_set_i32_7070,
+    "module.map_i32_i32_9565": premadeThriftType_module_map_i32_i32_9565,
+    "module.string_5252": premadeThriftType_module_string_5252,
+    "module.i32_9314": premadeThriftType_module_i32_9314,
+    "module.AllocatorAware": premadeThriftType_module_AllocatorAware,
+    "module.AllocatorAware2": premadeThriftType_module_AllocatorAware2,
+    "module.IntTypedef": premadeThriftType_module_IntTypedef,
+    "module.UintTypedef": premadeThriftType_module_UintTypedef,
+    "module.TypedefStruct": premadeThriftType_module_TypedefStruct,
+    "module.StructWithDoubleUnderscores": premadeThriftType_module_StructWithDoubleUnderscores,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.empty_struct").
@@ -383,7 +433,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetId(8).
     SetName("fieldH").
     SetIsOptional(false).
-    SetType(premadeThriftType_included_SomeMap),
+    SetType(included.GetMetadataThriftType("included.SomeMap")),
             metadata.NewThriftField().
     SetId(12).
     SetName("fieldA").
@@ -908,14 +958,14 @@ var serviceMetadatas = []*metadata.ThriftService{
             metadata.NewThriftFunction().
     SetName("bounce_map").
     SetIsOneway(false).
-    SetReturnType(premadeThriftType_included_SomeMap).
+    SetReturnType(included.GetMetadataThriftType("included.SomeMap")).
     SetArguments(
         []*metadata.ThriftField{
             metadata.NewThriftField().
     SetId(1).
     SetName("m").
     SetIsOptional(false).
-    SetType(premadeThriftType_included_SomeMap),
+    SetType(included.GetMetadataThriftType("included.SomeMap")),
         },
     ),
             metadata.NewThriftFunction().
@@ -933,6 +983,12 @@ var serviceMetadatas = []*metadata.ThriftService{
     ),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

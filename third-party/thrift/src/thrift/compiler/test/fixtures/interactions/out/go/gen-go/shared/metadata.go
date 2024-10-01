@@ -31,6 +31,12 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "string": premadeThriftType_string,
+    "i32": premadeThriftType_i32,
+    "shared.DoSomethingResult": premadeThriftType_shared_DoSomethingResult,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("shared.DoSomethingResult").
@@ -64,6 +70,12 @@ var serviceMetadatas = []*metadata.ThriftService{
         []*metadata.ThriftFunction{
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

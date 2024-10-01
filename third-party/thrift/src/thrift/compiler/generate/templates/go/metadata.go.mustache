@@ -53,6 +53,14 @@ var (
     {{/program:thrift_metadata_types}}
 )
 
+var premadeThriftTypesMap = map[string]*{{program:metadata_qualifier}}ThriftType{
+    {{#program:thrift_metadata_types}}
+    {{#type:named?}}
+    "{{type:full_name}}": {{type:metadata_name}},
+    {{/type:named?}}
+    {{/program:thrift_metadata_types}}
+}
+
 var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
     {{#program:structs}}
     {{^struct:exception?}}
@@ -79,6 +87,12 @@ var serviceMetadatas = []*{{program:metadata_qualifier}}ThriftService{
     {{#program:services}}
     {{> metadata/thrift_metadata_service}},
     {{/program:services}}
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *{{program:metadata_qualifier}}ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

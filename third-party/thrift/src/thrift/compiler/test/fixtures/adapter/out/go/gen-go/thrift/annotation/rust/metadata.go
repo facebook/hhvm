@@ -87,6 +87,25 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "string": premadeThriftType_string,
+    "rust.Name": premadeThriftType_rust_Name,
+    "rust.Copy": premadeThriftType_rust_Copy,
+    "rust.RequestContext": premadeThriftType_rust_RequestContext,
+    "rust.Arc": premadeThriftType_rust_Arc,
+    "rust.Box": premadeThriftType_rust_Box,
+    "rust.Exhaustive": premadeThriftType_rust_Exhaustive,
+    "rust.Ord": premadeThriftType_rust_Ord,
+    "rust.NewType": premadeThriftType_rust_NewType,
+    "rust.Type": premadeThriftType_rust_Type,
+    "bool": premadeThriftType_bool,
+    "rust.Serde": premadeThriftType_rust_Serde,
+    "rust.Mod": premadeThriftType_rust_Mod,
+    "rust.Adapter": premadeThriftType_rust_Adapter,
+    "rust.Derive": premadeThriftType_rust_Derive,
+    "rust.ServiceExn": premadeThriftType_rust_ServiceExn,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("rust.Name").
@@ -202,6 +221,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

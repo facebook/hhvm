@@ -31,11 +31,13 @@ var (
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
             )
-    premadeThriftType_shared_DoSomethingResult = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("shared.DoSomethingResult"),
-            )
 )
+
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "string": premadeThriftType_string,
+    "module.CustomException": premadeThriftType_module_CustomException,
+    "void": premadeThriftType_void,
+}
 
 var structMetadatas = []*metadata.ThriftStruct{
 }
@@ -95,9 +97,15 @@ var serviceMetadatas = []*metadata.ThriftService{
             metadata.NewThriftFunction().
     SetName("do_some_similar_things").
     SetIsOneway(false).
-    SetReturnType(premadeThriftType_shared_DoSomethingResult),
+    SetReturnType(shared.GetMetadataThriftType("shared.DoSomethingResult")),
         },
     ),
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

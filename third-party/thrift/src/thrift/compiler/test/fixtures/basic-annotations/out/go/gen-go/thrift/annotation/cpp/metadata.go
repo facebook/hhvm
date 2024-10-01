@@ -107,6 +107,31 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "cpp.RefType": premadeThriftType_cpp_RefType,
+    "cpp.EnumUnderlyingType": premadeThriftType_cpp_EnumUnderlyingType,
+    "string": premadeThriftType_string,
+    "cpp.Type": premadeThriftType_cpp_Type,
+    "cpp.Ref": premadeThriftType_cpp_Ref,
+    "cpp.Name": premadeThriftType_cpp_Name,
+    "bool": premadeThriftType_bool,
+    "cpp.Lazy": premadeThriftType_cpp_Lazy,
+    "cpp.DisableLazyChecksum": premadeThriftType_cpp_DisableLazyChecksum,
+    "cpp.Adapter": premadeThriftType_cpp_Adapter,
+    "cpp.PackIsset": premadeThriftType_cpp_PackIsset,
+    "cpp.MinimizePadding": premadeThriftType_cpp_MinimizePadding,
+    "cpp.ScopedEnumAsUnionType": premadeThriftType_cpp_ScopedEnumAsUnionType,
+    "cpp.FieldInterceptor": premadeThriftType_cpp_FieldInterceptor,
+    "cpp.UseOpEncode": premadeThriftType_cpp_UseOpEncode,
+    "cpp.EnumType": premadeThriftType_cpp_EnumType,
+    "cpp.Frozen2Exclude": premadeThriftType_cpp_Frozen2Exclude,
+    "cpp.Frozen2RequiresCompleteContainerParams": premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams,
+    "cpp.ProcessInEbThreadUnsafe": premadeThriftType_cpp_ProcessInEbThreadUnsafe,
+    "cpp.RuntimeAnnotation": premadeThriftType_cpp_RuntimeAnnotation,
+    "cpp.UseCursorSerialization": premadeThriftType_cpp_UseCursorSerialization,
+    "cpp.GenerateDeprecatedHeaderClientMethods": premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("cpp.Type").
@@ -293,6 +318,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

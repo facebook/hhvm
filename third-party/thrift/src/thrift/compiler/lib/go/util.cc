@@ -188,6 +188,14 @@ void codegen_data::add_to_thrift_metadata_types(
     add_to_thrift_metadata_types(val_type, visited_type_names);
   }
 
+  // Filter out external types (i.e. types defined in other programs).
+  // Primitive (base) types should be treated as internal and kept.
+  // For those types - 'program' will be null, so account for that.
+  if (type->get_program() != nullptr &&
+      !is_current_program(type->get_program())) {
+    return;
+  }
+
   thrift_metadata_types.push_back(type);
 }
 

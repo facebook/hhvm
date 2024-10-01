@@ -112,6 +112,29 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "thrift.RpcPriority": premadeThriftType_thrift_RpcPriority,
+    "thrift.Experimental": premadeThriftType_thrift_Experimental,
+    "i32": premadeThriftType_i32,
+    "thrift.ReserveIds": premadeThriftType_thrift_ReserveIds,
+    "bool": premadeThriftType_bool,
+    "thrift.RequiresBackwardCompatibility": premadeThriftType_thrift_RequiresBackwardCompatibility,
+    "thrift.TerseWrite": premadeThriftType_thrift_TerseWrite,
+    "thrift.Box": premadeThriftType_thrift_Box,
+    "thrift.Mixin": premadeThriftType_thrift_Mixin,
+    "thrift.SerializeInFieldIdOrder": premadeThriftType_thrift_SerializeInFieldIdOrder,
+    "thrift.BitmaskEnum": premadeThriftType_thrift_BitmaskEnum,
+    "thrift.ExceptionMessage": premadeThriftType_thrift_ExceptionMessage,
+    "thrift.InternBox": premadeThriftType_thrift_InternBox,
+    "thrift.Serial": premadeThriftType_thrift_Serial,
+    "string": premadeThriftType_string,
+    "thrift.Uri": premadeThriftType_thrift_Uri,
+    "thrift.Priority": premadeThriftType_thrift_Priority,
+    "thrift.DeprecatedUnvalidatedAnnotations": premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations,
+    "thrift.AllowReservedIdentifier": premadeThriftType_thrift_AllowReservedIdentifier,
+    "thrift.AllowReservedFilename": premadeThriftType_thrift_AllowReservedFilename,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("thrift.Experimental").
@@ -231,6 +254,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

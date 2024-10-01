@@ -86,6 +86,23 @@ var (
             )
 )
 
+var premadeThriftTypesMap = map[string]*metadata.ThriftType{
+    "i64": premadeThriftType_i64,
+    "string": premadeThriftType_string,
+    "i16": premadeThriftType_i16,
+    "module.containerTypedef": premadeThriftType_module_containerTypedef,
+    "module.ComplexUnion": premadeThriftType_module_ComplexUnion,
+    "module.ListUnion": premadeThriftType_module_ListUnion,
+    "binary": premadeThriftType_binary,
+    "module.DataUnion": premadeThriftType_module_DataUnion,
+    "i32": premadeThriftType_i32,
+    "module.Val": premadeThriftType_module_Val,
+    "module.ValUnion": premadeThriftType_module_ValUnion,
+    "module.VirtualComplexUnion": premadeThriftType_module_VirtualComplexUnion,
+    "module.NonCopyableStruct": premadeThriftType_module_NonCopyableStruct,
+    "module.NonCopyableUnion": premadeThriftType_module_NonCopyableUnion,
+}
+
 var structMetadatas = []*metadata.ThriftStruct{
     metadata.NewThriftStruct().
     SetName("module.ComplexUnion").
@@ -247,6 +264,12 @@ var enumMetadatas = []*metadata.ThriftEnum{
 }
 
 var serviceMetadatas = []*metadata.ThriftService{
+}
+
+// GetMetadataThriftType (INTERNAL USE ONLY).
+// Returns metadata ThriftType for a given full type name.
+func GetMetadataThriftType(fullName string) *metadata.ThriftType {
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.

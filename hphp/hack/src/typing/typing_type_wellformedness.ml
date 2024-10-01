@@ -586,7 +586,7 @@ let hint ?(ignore_package_errors = false) tenv h =
 let expr tenv ((), _p, e) =
   (* We don't recurse on expressions here because this is called by Typing.expr *)
   match e with
-  | Is (_, h)
+  | Is (_, h) -> hint tenv h ~ignore_package_errors:true
   | As { expr = _; hint = h; is_nullable = _; enforce_deep = _ }
   | Upcast (_, h)
   | Cast (h, _) ->

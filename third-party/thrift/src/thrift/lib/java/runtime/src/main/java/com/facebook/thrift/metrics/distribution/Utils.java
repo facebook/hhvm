@@ -19,6 +19,7 @@ package com.facebook.thrift.metrics.distribution;
 import com.facebook.thrift.metrics.common.Clock;
 import com.facebook.thrift.metrics.common.NanoClock;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,9 @@ public class Utils {
     if (executorService == null) {
       synchronized (Utils.class) {
         if (executorService == null) {
-          executorService = Executors.newSingleThreadScheduledExecutor();
+          executorService =
+              Executors.newSingleThreadScheduledExecutor(
+                  new ThreadFactoryBuilder().setDaemon(true).build());
         }
       }
     }

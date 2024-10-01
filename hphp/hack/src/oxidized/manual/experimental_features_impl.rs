@@ -43,8 +43,8 @@ impl FeatureName {
             ExpressionTreeNest => Preview,
             SealedMethods => Unstable,
             AwaitInSplice => OngoingRelease,
-            OpenTuples => Unstable,
-            TypeSplat => Unstable,
+            OpenTuples => Preview,
+            TypeSplat => Preview,
         }
     }
 

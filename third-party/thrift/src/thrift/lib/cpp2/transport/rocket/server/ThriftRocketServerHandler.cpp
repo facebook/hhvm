@@ -101,9 +101,7 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
           nullptr, /* x509PeerCert */
           worker_->getServer()->getClientIdentityHook(),
           worker_.get(),
-          apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
-              *worker_->getServer())
-              .size()),
+          worker_->getServer()->getServiceInterceptors().size()),
       setupFrameHandlers_(handlers),
       setupFrameInterceptors_(interceptors),
       version_(static_cast<int32_t>(std::min(
@@ -118,8 +116,7 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
   }
 #if FOLLY_HAS_COROUTINES
   const auto& serviceInterceptorsInfo =
-      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
-          *worker_->getServer());
+      worker_->getServer()->getServiceInterceptors();
   for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
@@ -133,8 +130,7 @@ ThriftRocketServerHandler::ThriftRocketServerHandler(
 ThriftRocketServerHandler::~ThriftRocketServerHandler() {
 #if FOLLY_HAS_COROUTINES
   const auto& serviceInterceptorsInfo =
-      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
-          *worker_->getServer());
+      worker_->getServer()->getServiceInterceptors();
   for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,

@@ -177,9 +177,7 @@ void HTTP2RoutingHandler::handleConnection(
         nullptr /* peerCert */,
         nullptr /* clientIdentityHook */,
         worker.get() /* worker */,
-        apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
-            *worker->getServer())
-            .size());
+        worker->getServer()->getServiceInterceptors().size());
     connContext.setTransportType(Cpp2ConnContext::TransportType::HTTP2);
     logSetupConnectionEventsOnce(logConnectionOnce, connContext);
   }

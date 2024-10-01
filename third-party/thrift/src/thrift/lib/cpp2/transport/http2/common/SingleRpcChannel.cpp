@@ -389,9 +389,7 @@ void SingleRpcChannel::onThriftRequest() noexcept {
       nullptr,
       nullptr,
       worker_.get(),
-      apache::thrift::detail::getServiceInterceptorsIfServerIsSetUp(
-          *worker_->getServer())
-          .size());
+      worker_->getServer()->getServiceInterceptors().size());
   processor_->onThriftRequest(
       std::move(metadata),
       std::move(contents_),

@@ -1106,7 +1106,9 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse() const {
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnRequest(
     detail::ServiceInterceptorOnRequestArguments arguments) {
-  DCHECK(shouldProcessServiceInterceptorsOnRequest());
+  if (!shouldProcessServiceInterceptorsOnRequest()) {
+    co_return;
+  }
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);
@@ -1150,7 +1152,9 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
 folly::coro::Task<void>
 HandlerCallbackBase::processServiceInterceptorsOnResponse(
     detail::ServiceInterceptorOnResponseResult resultOrActiveException) {
-  DCHECK(shouldProcessServiceInterceptorsOnResponse());
+  if (!shouldProcessServiceInterceptorsOnResponse()) {
+    co_return;
+  }
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);

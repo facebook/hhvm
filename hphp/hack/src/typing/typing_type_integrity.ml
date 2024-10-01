@@ -335,9 +335,8 @@ module Simple = struct
   and check_targ_well_kinded ~in_signature env tyarg (nkind : Simple.named_kind)
       =
     let kind = snd nkind in
-    let in_non_reified_targ =
-      (Simple.to_full_kind_without_bounds kind).reified |> Aast.is_erased
-    in
+    (* ignore package errors for targs *)
+    let ignore_package_errors = true in
     match get_node tyarg with
     | Twildcard ->
       let is_higher_kinded = Simple.get_arity kind > 0 in
@@ -346,20 +345,10 @@ module Simple = struct
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
         Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
-        check_well_kinded
-          ~in_signature
-          ~ignore_package_errors:in_non_reified_targ
-          env
-          tyarg
-          nkind
+        check_well_kinded ~in_signature ~ignore_package_errors env tyarg nkind
       )
     | _ ->
-      check_well_kinded
-        ~in_signature
-        ~ignore_package_errors:in_non_reified_targ
-        env
-        tyarg
-        nkind
+      check_well_kinded ~in_signature ~ignore_package_errors env tyarg nkind
 
   (** Traverse a type and for each encountered type argument of a type X,
   check that it complies with the corresponding type parameter of X (arity and kinds, but not constraints),

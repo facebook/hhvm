@@ -12,7 +12,7 @@ class Bar<reify T> {}
 function bar<reify T>(): void {}
 
 function test(): void {
-  // All error
+  // No errors
   bar<TFoo>();
   bar<Foo>();
   $_ = new Bar<TFoo>();

@@ -16,10 +16,7 @@ namespace facebook::common::mysql_client::mysql_protocol {
 class MysqlRowMetadata;
 
 size_t MysqlResult::numFields() const {
-  // T202181457
-  if (!res_) {
-    return 0;
-  }
+  DCHECK(res_);
   auto ret = mysql_num_fields(res_.get());
   VLOG(4) << fmt::format(
       "mysql_num_fields({}) returned {}", (void*)res_.get(), ret);
@@ -27,10 +24,7 @@ size_t MysqlResult::numFields() const {
 }
 
 MYSQL_FIELD* MysqlResult::fields() const {
-  // T202181457
-  if (!res_) {
-    return nullptr;
-  }
+  DCHECK(res_);
   auto ret = mysql_fetch_fields(res_.get());
   VLOG(4) << fmt::format(
       "mysql_fetch_fields({}) returned {}", (void*)res_.get(), (void*)ret);
@@ -38,10 +32,7 @@ MYSQL_FIELD* MysqlResult::fields() const {
 }
 
 size_t MysqlResult::numRows() const {
-  // T202181457
-  if (!res_) {
-    return 0;
-  }
+  DCHECK(res_);
   auto ret = mysql_num_rows(res_.get());
   VLOG(4) << fmt::format(
       "mysql_num_rows({}) returned {}", (void*)res_.get(), ret);
@@ -76,8 +67,7 @@ InternalResult::FetchRowRet MysqlRowFactory(
 } // namespace
 
 InternalResult::FetchRowRet SyncMysqlResult::fetchRow() {
-  // T202181457
-  CHECK(res_);
+  DCHECK(res_);
   auto mysqlRow = mysql_fetch_row(res_.get());
   VLOG(4) << fmt::format(
       "mysql_fetch_row({}) returned {}", (void*)res_.get(), (void*)mysqlRow);
@@ -87,13 +77,7 @@ InternalResult::FetchRowRet SyncMysqlResult::fetchRow() {
 
 InternalResult::FetchRowRet AsyncMysqlResult::fetchRow() {
   std::unique_ptr<InternalRow> row;
-
-  // T202181457
-  if (!res_) {
-    return std::make_pair(
-        MysqlConnection::toHandlerStatus(NET_ASYNC_ERROR), std::move(row));
-  }
-
+  DCHECK(res_);
   MYSQL_ROW mysqlRow;
   auto ret = mysql_fetch_row_nonblocking(res_.get(), &mysqlRow);
   VLOG(4) << fmt::format(

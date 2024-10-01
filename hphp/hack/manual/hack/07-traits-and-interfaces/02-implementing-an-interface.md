@@ -63,3 +63,25 @@ interface are those specified by its own declaration, and the members inherited 
 Interfaces are designed to support classes; an interface cannot be instantiated directly.
 
 An interface can have usage requirements placed on it; see [interface requirements](trait-and-interface-requirements.md) for more information.
+
+Methods declared in interfaces, and abstract methods in classes, should not use default values for parameters. Instead, they can declare a
+parameter to be `optional`. Any implementation of the interface or abstract method must supply default values for the optional parameters.
+```Hack
+interface ICounter {
+  public function inc(optional int $increment): void;
+  public function get(): int;
+}
+class Counter implements ICounter {
+  public function __construct(private int $value = 0) { }
+  public function inc(int $increment = 1): void {
+    $this->value += $increment;
+  }
+  public function get(): int {
+    return $this->value;
+  }
+}
+function doSomething(ICounter $c):void {
+  $c->inc(); // Use default as defined by implementation of ICounter
+  $c->inc(10); // Uses the supplied value
+}
+```

@@ -1105,6 +1105,9 @@ class ReflectionClass implements Reflector {
     } else {
       $classname = $name_or_obj;
     }
+    if (HH\is_class($classname)) {
+      $classname = HH\class_to_classname($classname);
+    }
     $name = $this->__init($classname);
     if (!$name) {
       throw new ReflectionException("Class $classname does not exist");

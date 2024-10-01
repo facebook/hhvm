@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 
+#include <folly/Memory.h>
 #include <folly/synchronization/DelayedInit.h>
 
 namespace apache::thrift::runtime {
@@ -26,6 +27,7 @@ namespace {
 struct RuntimeState {
   std::vector<std::shared_ptr<apache::thrift::TProcessorEventHandler>>
       legacyClientEventHandlers;
+  std::shared_ptr<ClientInterceptorList> clientInterceptors;
   std::vector<InitOptions::ThriftServerInitializer> serverInitializers;
 };
 folly::DelayedInit<RuntimeState> gRuntimeState;
@@ -35,8 +37,12 @@ void init(InitOptions options) {
   bool didInitialize = false;
   gRuntimeState.try_emplace_with([&] {
     didInitialize = true;
+    auto clientInterceptors = options.clientInterceptors.empty()
+        ? nullptr
+        : folly::copy_to_shared_ptr(std::move(options.clientInterceptors));
     return RuntimeState{
         std::move(options.legacyClientEventHandlers),
+        std::move(clientInterceptors),
         std::move(options.serverInitializers)};
   });
   if (!didInitialize) {
@@ -55,6 +61,13 @@ getGlobalLegacyClientEventHandlers() {
     return {};
   }
   return folly::range(gRuntimeState->legacyClientEventHandlers);
+}
+
+std::shared_ptr<ClientInterceptorList> getGlobalClientInterceptors() {
+  if (!wasInitialized()) {
+    return nullptr;
+  }
+  return gRuntimeState->clientInterceptors;
 }
 
 folly::Range<const InitOptions::ThriftServerInitializer*>

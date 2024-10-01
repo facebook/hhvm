@@ -23,14 +23,23 @@
 
 namespace apache::thrift {
 class TProcessorEventHandler;
+class ClientInterceptorBase;
 class ThriftServer;
 } // namespace apache::thrift
 
 namespace apache::thrift::runtime {
 
+using ClientInterceptorList =
+    std::vector<std::shared_ptr<apache::thrift::ClientInterceptorBase>>;
+
 struct InitOptions {
   std::vector<std::shared_ptr<apache::thrift::TProcessorEventHandler>>
       legacyClientEventHandlers;
+  /**
+   * Global set of client interceptors that will be applied to all AsyncClient
+   * objects (by default).
+   */
+  ClientInterceptorList clientInterceptors;
 
   using ThriftServerInitializer = folly::Function<void(ThriftServer&) const>;
   /**
@@ -46,6 +55,8 @@ bool wasInitialized() noexcept;
 
 folly::Range<std::shared_ptr<apache::thrift::TProcessorEventHandler>*>
 getGlobalLegacyClientEventHandlers();
+
+std::shared_ptr<ClientInterceptorList> getGlobalClientInterceptors();
 
 folly::Range<const InitOptions::ThriftServerInitializer*>
 getGlobalServerInitializers();

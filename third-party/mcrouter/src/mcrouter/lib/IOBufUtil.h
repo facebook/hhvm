@@ -38,6 +38,7 @@ folly::StringPiece coalesceAndGetRange(
     apache::thrift::field_ref<const folly::IOBuf&> buf);
 
 void copyInto(char* raw, const folly::IOBuf& buf);
+void copyInto(char* raw, folly::IOBuf&& buf);
 
 template <typename InputIterator>
 folly::IOBuf concatAll(InputIterator begin, InputIterator end) {

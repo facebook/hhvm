@@ -57,8 +57,8 @@ folly::StringPiece coalesceAndGetRange(
   return coalesceAndGetRange(*buf);
 }
 
-void copyInto(char* raw, const folly::IOBuf& buf) {
-  auto cur = &buf;
+void copyIntoInternal(char* raw, const folly::IOBuf* bufPtr) {
+  auto cur = bufPtr;
   auto next = cur->next();
   do {
     if (cur->data()) {
@@ -67,7 +67,15 @@ void copyInto(char* raw, const folly::IOBuf& buf) {
     }
     cur = next;
     next = next->next();
-  } while (cur != &buf);
+  } while (cur != bufPtr);
+}
+
+void copyInto(char* raw, const folly::IOBuf& buf) {
+  copyIntoInternal(raw, &buf);
+}
+
+void copyInto(char* raw, folly::IOBuf&& buf) {
+  copyIntoInternal(raw, &buf);
 }
 
 namespace {

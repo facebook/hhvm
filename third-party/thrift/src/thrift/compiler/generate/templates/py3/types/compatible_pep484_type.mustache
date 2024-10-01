@@ -35,14 +35,14 @@ thrift-py3 specific container types.
   }}{{^type:iobufWrapper?}}bytes{{/type:iobufWrapper?}}{{!
 }}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}{{> common/python_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{!
+  }}{{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/compatible_pep484_containers}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{!
-  }}{{> common/python_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{!
+  }}{{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{!
 }}{{/type:enum}}{{!
 }}{{/program:intercompatible?}}{{!
 }}{{^program:intercompatible?}}{{!

@@ -39,7 +39,7 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 {{#program:intercompatible?}}
-import {{> common/python_types_module_path}}
+import {{> common/thrift_types_module_path}}
 {{/program:intercompatible?}}
 
 
@@ -48,12 +48,12 @@ __property__ = property
 
 {{#program:enums}}
 class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-}}{{#program:intercompatible?}}, {{> common/python_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
+}}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> "{{> common/python_types_module_path}}.{{enum:name}}": ...   # type: ignore
+    def _to_python(self) -> "{{> common/thrift_types_module_path}}.{{enum:name}}": ...   # type: ignore
     def _to_py3(self) -> {{enum:name}}: ...
     def _to_py_deprecated(self) -> int: ...
 
@@ -65,7 +65,7 @@ _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}
 
 {{/struct:union?}}
 class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
-}}{{#program:intercompatible?}}, {{> common/python_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{/program:intercompatible?}}):
+}}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{struct:name}}{{/program:intercompatible?}}):
     class __fbthrift_IsSet:
     {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}
@@ -122,10 +122,10 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
 
     {{#program:python_capi_converter?}}
     @staticmethod
-    def from_python(obj: "{{> common/python_types_module_path}}.{{struct:name}}") -> _typing.Self: ...   # type: ignore
+    def from_python(obj: "{{> common/thrift_types_module_path}}.{{struct:name}}") -> _typing.Self: ...   # type: ignore
     {{/program:python_capi_converter?}}
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> "{{> common/python_types_module_path}}.{{struct:name}}": ...   # type: ignore
+    def _to_python(self) -> "{{> common/thrift_types_module_path}}.{{struct:name}}": ...   # type: ignore
     def _to_py3(self) -> {{struct:name}}: ...
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:name}}": ...   # type: ignore
 

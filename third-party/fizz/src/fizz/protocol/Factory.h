@@ -74,10 +74,10 @@ class Factory {
       CipherSuite cipher) const;
 
   virtual std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const = 0;
+      CipherSuite cipher) const;
 
   virtual std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const = 0;
+      CipherSuite cipher) const;
 
   virtual std::unique_ptr<KeyExchange> makeKeyExchange(
       NamedGroup group,

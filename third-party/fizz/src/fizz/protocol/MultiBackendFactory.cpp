@@ -84,13 +84,6 @@ std::unique_ptr<Aead> MultiBackendFactory::makeAead(CipherSuite cipher) const {
   }
 }
 
-// TODO: This belongs in Factory
-std::unique_ptr<KeyDerivation> MultiBackendFactory::makeKeyDeriver(
-    CipherSuite cipher) const {
-  auto hasher = makeHasherFactory(getHashFunction(cipher));
-  return std::make_unique<KeyDerivationImpl>(hasher);
-}
-
 const HasherFactoryWithMetadata* MultiBackendFactory::makeHasherFactory(
     HashFunction digest) const {
   switch (digest) {
@@ -103,13 +96,6 @@ const HasherFactoryWithMetadata* MultiBackendFactory::makeHasherFactory(
     default:
       throw std::runtime_error("makeHasher: not implemented");
   }
-}
-
-// TODO: This belongs in Factory
-std::unique_ptr<HandshakeContext> MultiBackendFactory::makeHandshakeContext(
-    CipherSuite cipher) const {
-  auto hasherFactory = makeHasherFactory(getHashFunction(cipher));
-  return std::make_unique<HandshakeContextImpl>(hasherFactory);
 }
 
 std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(

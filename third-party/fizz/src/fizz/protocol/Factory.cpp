@@ -53,6 +53,19 @@ std::unique_ptr<folly::IOBuf> Factory::makeRandomBytes(size_t count) const {
   return RandomBufGenerator(count).generateRandom();
 }
 
+std::unique_ptr<HandshakeContext> Factory::makeHandshakeContext(
+    CipherSuite cipher) const {
+  auto hasherFactory = makeHasherFactory(getHashFunction(cipher));
+  return std::make_unique<HandshakeContextImpl>(hasherFactory);
+}
+//
+
+std::unique_ptr<KeyDerivation> Factory::makeKeyDeriver(
+    CipherSuite cipher) const {
+  auto hasher = makeHasherFactory(getHashFunction(cipher));
+  return std::make_unique<KeyDerivationImpl>(hasher);
+}
+
 std::shared_ptr<Cert> Factory::makeIdentityOnlyCert(std::string ident) const {
   return std::make_shared<IdentityCert>(std::move(ident));
 }

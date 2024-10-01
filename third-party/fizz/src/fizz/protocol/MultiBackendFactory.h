@@ -30,14 +30,8 @@ class MultiBackendFactory : public Factory {
   [[nodiscard]] std::unique_ptr<Aead> makeAead(
       CipherSuite cipher) const override;
 
-  std::unique_ptr<KeyDerivation> makeKeyDeriver(
-      CipherSuite cipher) const override;
-
   const HasherFactoryWithMetadata* makeHasherFactory(
       HashFunction digest) const override;
-
-  std::unique_ptr<HandshakeContext> makeHandshakeContext(
-      CipherSuite cipher) const override;
 
   [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,

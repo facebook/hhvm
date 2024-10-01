@@ -121,3 +121,84 @@ THRIFT_STRESS_TEST(SinkAndStream) {
 THRIFT_STRESS_TEST(CoroTest_10) {
   co_await client->co_calculateSquares(10);
 }
+
+THRIFT_STRESS_TEST(Stream512_64Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 64;
+  req.processInfo()->numChunks() = 8;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream512_128Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 128;
+  req.processInfo()->numChunks() = 4;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream512_256Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 256;
+  req.processInfo()->numChunks() = 2;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5k_128Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 128;
+  req.processInfo()->numChunks() = 40;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5k_256Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 256;
+  req.processInfo()->numChunks() = 20;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5k_512Chunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 512;
+  req.processInfo()->numChunks() = 10;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5M_5kChunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 5 * 1'024;
+  req.processInfo()->numChunks() = 1000;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5M_10kChunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 10 * 1'024;
+  req.processInfo()->numChunks() = 500;
+  co_await client->co_streamTm(std::move(req));
+}
+
+THRIFT_STRESS_TEST(Stream5M_20kChunks) {
+  using namespace apache::thrift::stress;
+  StreamRequest req;
+  req.processInfo() = StreamProcessInfo();
+  req.processInfo()->chunkSize() = 20 * 1'024;
+  req.processInfo()->numChunks() = 250;
+  co_await client->co_streamTm(std::move(req));
+}

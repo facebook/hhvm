@@ -10,7 +10,6 @@ import (
     "context"
     "fmt"
     "reflect"
-    "strings"
 
     module0 "module0"
     module2 "module2"
@@ -24,7 +23,6 @@ var _ = module2.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 

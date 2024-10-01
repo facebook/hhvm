@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -562,35 +560,6 @@ if err != nil {
     return nil
 }
 
-func (x *Internship) toString1() string {  // Weeks
-    return fmt.Sprintf("%v", x.Weeks)
-}
-
-func (x *Internship) toString2() string {  // Title
-    return fmt.Sprintf("%v", x.Title)
-}
-
-func (x *Internship) toString3() string {  // Employer
-    if x.IsSetEmployer() {
-        return fmt.Sprintf("%v", *x.Employer)
-    }
-    return fmt.Sprintf("%v", x.Employer)
-}
-
-func (x *Internship) toString4() string {  // Compensation
-    if x.IsSetCompensation() {
-        return fmt.Sprintf("%v", *x.Compensation)
-    }
-    return fmt.Sprintf("%v", x.Compensation)
-}
-
-func (x *Internship) toString5() string {  // School
-    if x.IsSetSchool() {
-        return fmt.Sprintf("%v", *x.School)
-    }
-    return fmt.Sprintf("%v", x.School)
-}
-
 
 
 
@@ -675,22 +644,9 @@ func (x *Internship) Read(p thrift.Decoder) error {
 }
 
 func (x *Internship) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Internship({")
-    sb.WriteString(fmt.Sprintf("Weeks:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Title:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Employer:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Compensation:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("School:%s", x.toString5()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Internship) setDefaults() *Internship {
     return x.
         SetWeeksNonCompat(0).
@@ -788,14 +744,6 @@ if err != nil {
     return nil
 }
 
-func (x *Range) toString1() string {  // Min
-    return fmt.Sprintf("%v", x.Min)
-}
-
-func (x *Range) toString2() string {  // Max
-    return fmt.Sprintf("%v", x.Max)
-}
-
 
 
 func (x *Range) Write(p thrift.Encoder) error {
@@ -862,19 +810,9 @@ func (x *Range) Read(p thrift.Decoder) error {
 }
 
 func (x *Range) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Range({")
-    sb.WriteString(fmt.Sprintf("Min:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Max:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Range) setDefaults() *Range {
     return x.
         SetMinNonCompat(0).
@@ -972,14 +910,6 @@ if err != nil {
     return nil
 }
 
-func (x *Struct1) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
-}
-
-func (x *Struct1) toString2() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
 
 
 func (x *Struct1) Write(p thrift.Encoder) error {
@@ -1046,19 +976,9 @@ func (x *Struct1) Read(p thrift.Decoder) error {
 }
 
 func (x *Struct1) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Struct1({")
-    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Struct1) setDefaults() *Struct1 {
     return x.
         SetANonCompat(1234567).
@@ -1286,22 +1206,6 @@ result := listResult
     return nil
 }
 
-func (x *Struct2) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
-}
-
-func (x *Struct2) toString2() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *Struct2) toString3() string {  // C
-    return fmt.Sprintf("%v", x.C)
-}
-
-func (x *Struct2) toString4() string {  // D
-    return fmt.Sprintf("%v", x.D)
-}
-
 // Deprecated: Use NewStruct2().GetC() instead.
 func (x *Struct2) DefaultGetC() *Struct1 {
     if !x.IsSetC() {
@@ -1386,21 +1290,9 @@ func (x *Struct2) Read(p thrift.Decoder) error {
 }
 
 func (x *Struct2) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Struct2({")
-    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("C:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("D:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Struct2) setDefaults() *Struct2 {
     return x.
         SetANonCompat(0).
@@ -1553,18 +1445,6 @@ if err != nil {
     return nil
 }
 
-func (x *Struct3) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
-}
-
-func (x *Struct3) toString2() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *Struct3) toString3() string {  // C
-    return fmt.Sprintf("%v", x.C)
-}
-
 // Deprecated: Use NewStruct3().GetC() instead.
 func (x *Struct3) DefaultGetC() *Struct2 {
     if !x.IsSetC() {
@@ -1644,20 +1524,9 @@ func (x *Struct3) Read(p thrift.Decoder) error {
 }
 
 func (x *Struct3) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Struct3({")
-    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Struct3) setDefaults() *Struct3 {
     return x.
         SetANonCompat("").
@@ -1820,24 +1689,6 @@ if err != nil {
     return nil
 }
 
-func (x *Struct4) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
-}
-
-func (x *Struct4) toString2() string {  // B
-    if x.IsSetB() {
-        return fmt.Sprintf("%v", *x.B)
-    }
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *Struct4) toString3() string {  // C
-    if x.IsSetC() {
-        return fmt.Sprintf("%v", *x.C)
-    }
-    return fmt.Sprintf("%v", x.C)
-}
-
 
 
 
@@ -1911,20 +1762,9 @@ func (x *Struct4) Read(p thrift.Decoder) error {
 }
 
 func (x *Struct4) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Struct4({")
-    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Struct4) setDefaults() *Struct4 {
     return x.
         SetANonCompat(0)
@@ -2043,20 +1883,6 @@ if err != nil {
     return nil
 }
 
-func (x *Union1) toString1() string {  // I
-    if x.IsSetI() {
-        return fmt.Sprintf("%v", *x.I)
-    }
-    return fmt.Sprintf("%v", x.I)
-}
-
-func (x *Union1) toString2() string {  // D
-    if x.IsSetD() {
-        return fmt.Sprintf("%v", *x.D)
-    }
-    return fmt.Sprintf("%v", x.D)
-}
-
 
 
 func (x *Union1) countSetFields() int {
@@ -2143,19 +1969,9 @@ func (x *Union1) Read(p thrift.Decoder) error {
 }
 
 func (x *Union1) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Union1({")
-    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("D:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Union1) setDefaults() *Union1 {
     return x
 }
@@ -2379,28 +2195,6 @@ if err != nil {
     return nil
 }
 
-func (x *Union2) toString1() string {  // I
-    if x.IsSetI() {
-        return fmt.Sprintf("%v", *x.I)
-    }
-    return fmt.Sprintf("%v", x.I)
-}
-
-func (x *Union2) toString2() string {  // D
-    if x.IsSetD() {
-        return fmt.Sprintf("%v", *x.D)
-    }
-    return fmt.Sprintf("%v", x.D)
-}
-
-func (x *Union2) toString3() string {  // S
-    return fmt.Sprintf("%v", x.S)
-}
-
-func (x *Union2) toString4() string {  // U
-    return fmt.Sprintf("%v", x.U)
-}
-
 
 
 // Deprecated: Use NewUnion2().GetS() instead.
@@ -2519,21 +2313,9 @@ func (x *Union2) Read(p thrift.Decoder) error {
 }
 
 func (x *Union2) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Union2({")
-    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("D:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("S:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("U:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Union2) setDefaults() *Union2 {
     return x
 }

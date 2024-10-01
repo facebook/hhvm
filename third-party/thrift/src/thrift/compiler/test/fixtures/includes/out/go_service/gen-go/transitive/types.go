@@ -8,7 +8,6 @@ package transitive
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Foo struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.A = result
     return nil
-}
-
-func (x *Foo) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
 }
 
 
@@ -134,18 +128,9 @@ func (x *Foo) Read(p thrift.Decoder) error {
 }
 
 func (x *Foo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Foo({")
-    sb.WriteString(fmt.Sprintf("A:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Foo) setDefaults() *Foo {
     return x.
         SetANonCompat(2)

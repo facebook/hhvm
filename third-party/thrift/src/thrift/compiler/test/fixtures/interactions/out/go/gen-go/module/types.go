@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     shared "shared"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type CustomException struct {
@@ -69,10 +67,6 @@ if err != nil {
 
     x.Message = result
     return nil
-}
-
-func (x *CustomException) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.Message)
 }
 
 
@@ -136,18 +130,9 @@ func (x *CustomException) Read(p thrift.Decoder) error {
 }
 
 func (x *CustomException) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("CustomException({")
-    sb.WriteString(fmt.Sprintf("Message:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *CustomException) setDefaults() *CustomException {
     return x.
         SetMessageNonCompat("")
@@ -226,17 +211,9 @@ func (x *reqMyServiceFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceFoo) setDefaults() *reqMyServiceFoo {
     return x
 }
@@ -314,17 +291,9 @@ func (x *respMyServiceFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceFoo) setDefaults() *respMyServiceFoo {
     return x
 }
@@ -397,17 +366,9 @@ func (x *reqFactoriesFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFactoriesFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFactoriesFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFactoriesFoo) setDefaults() *reqFactoriesFoo {
     return x
 }
@@ -485,17 +446,9 @@ func (x *respFactoriesFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *respFactoriesFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFactoriesFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFactoriesFoo) setDefaults() *respFactoriesFoo {
     return x
 }
@@ -568,17 +521,9 @@ func (x *reqPerformFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *reqPerformFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqPerformFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqPerformFoo) setDefaults() *reqPerformFoo {
     return x
 }
@@ -656,17 +601,9 @@ func (x *respPerformFoo) Read(p thrift.Decoder) error {
 }
 
 func (x *respPerformFoo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respPerformFoo({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respPerformFoo) setDefaults() *respPerformFoo {
     return x
 }
@@ -739,17 +676,9 @@ func (x *reqInteractWithSharedDoSomeSimilarThings) Read(p thrift.Decoder) error 
 }
 
 func (x *reqInteractWithSharedDoSomeSimilarThings) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqInteractWithSharedDoSomeSimilarThings({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqInteractWithSharedDoSomeSimilarThings) setDefaults() *reqInteractWithSharedDoSomeSimilarThings {
     return x
 }
@@ -818,10 +747,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respInteractWithSharedDoSomeSimilarThings) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespInteractWithSharedDoSomeSimilarThings().GetSuccess() instead.
@@ -897,18 +822,9 @@ func (x *respInteractWithSharedDoSomeSimilarThings) Read(p thrift.Decoder) error
 }
 
 func (x *respInteractWithSharedDoSomeSimilarThings) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respInteractWithSharedDoSomeSimilarThings({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respInteractWithSharedDoSomeSimilarThings) setDefaults() *respInteractWithSharedDoSomeSimilarThings {
     return x
 }

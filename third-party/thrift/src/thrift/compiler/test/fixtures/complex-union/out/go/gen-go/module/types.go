@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -471,39 +469,6 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexUnion) toString1() string {  // IntValue
-    if x.IsSetIntValue() {
-        return fmt.Sprintf("%v", *x.IntValue)
-    }
-    return fmt.Sprintf("%v", x.IntValue)
-}
-
-func (x *ComplexUnion) toString2() string {  // IntListValue
-    return fmt.Sprintf("%v", x.IntListValue)
-}
-
-func (x *ComplexUnion) toString3() string {  // StringListValue
-    return fmt.Sprintf("%v", x.StringListValue)
-}
-
-func (x *ComplexUnion) toString5() string {  // StringValue
-    if x.IsSetStringValue() {
-        return fmt.Sprintf("%v", *x.StringValue)
-    }
-    return fmt.Sprintf("%v", x.StringValue)
-}
-
-func (x *ComplexUnion) toString9() string {  // TypedefValue
-    return fmt.Sprintf("%v", x.TypedefValue)
-}
-
-func (x *ComplexUnion) toString14() string {  // StringRef
-    if x.IsSetStringRef() {
-        return fmt.Sprintf("%v", *x.StringRef)
-    }
-    return fmt.Sprintf("%v", x.StringRef)
-}
-
 
 
 
@@ -623,23 +588,9 @@ func (x *ComplexUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *ComplexUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ComplexUnion({")
-    sb.WriteString(fmt.Sprintf("IntValue:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("IntListValue:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("StringListValue:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("StringValue:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("TypedefValue:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("StringRef:%s", x.toString14()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ComplexUnion) setDefaults() *ComplexUnion {
     return x
 }
@@ -815,14 +766,6 @@ result := listResult
     return nil
 }
 
-func (x *ListUnion) toString2() string {  // IntListValue
-    return fmt.Sprintf("%v", x.IntListValue)
-}
-
-func (x *ListUnion) toString3() string {  // StringListValue
-    return fmt.Sprintf("%v", x.StringListValue)
-}
-
 func (x *ListUnion) countSetFields() int {
     count := int(0)
     if (x.IsSetIntListValue()) {
@@ -907,19 +850,9 @@ func (x *ListUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *ListUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ListUnion({")
-    sb.WriteString(fmt.Sprintf("IntListValue:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("StringListValue:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ListUnion) setDefaults() *ListUnion {
     return x
 }
@@ -1037,17 +970,6 @@ if err != nil {
     return nil
 }
 
-func (x *DataUnion) toString1() string {  // BinaryData
-    return fmt.Sprintf("%v", x.BinaryData)
-}
-
-func (x *DataUnion) toString2() string {  // StringData
-    if x.IsSetStringData() {
-        return fmt.Sprintf("%v", *x.StringData)
-    }
-    return fmt.Sprintf("%v", x.StringData)
-}
-
 
 func (x *DataUnion) countSetFields() int {
     count := int(0)
@@ -1133,19 +1055,9 @@ func (x *DataUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *DataUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DataUnion({")
-    sb.WriteString(fmt.Sprintf("BinaryData:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("StringData:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DataUnion) setDefaults() *DataUnion {
     return x
 }
@@ -1290,18 +1202,6 @@ if err != nil {
     return nil
 }
 
-func (x *Val) toString1() string {  // StrVal
-    return fmt.Sprintf("%v", x.StrVal)
-}
-
-func (x *Val) toString2() string {  // IntVal
-    return fmt.Sprintf("%v", x.IntVal)
-}
-
-func (x *Val) toString9() string {  // TypedefValue
-    return fmt.Sprintf("%v", x.TypedefValue)
-}
-
 
 
 func (x *Val) Write(p thrift.Encoder) error {
@@ -1373,20 +1273,9 @@ func (x *Val) Read(p thrift.Decoder) error {
 }
 
 func (x *Val) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Val({")
-    sb.WriteString(fmt.Sprintf("StrVal:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("IntVal:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("TypedefValue:%s", x.toString9()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Val) setDefaults() *Val {
     return x.
         SetStrValNonCompat("").
@@ -1509,14 +1398,6 @@ if err != nil {
     return nil
 }
 
-func (x *ValUnion) toString1() string {  // V1
-    return fmt.Sprintf("%v", x.V1)
-}
-
-func (x *ValUnion) toString2() string {  // V2
-    return fmt.Sprintf("%v", x.V2)
-}
-
 // Deprecated: Use NewValUnion().GetV1() instead.
 func (x *ValUnion) DefaultGetV1() *Val {
     if !x.IsSetV1() {
@@ -1617,19 +1498,9 @@ func (x *ValUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *ValUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ValUnion({")
-    sb.WriteString(fmt.Sprintf("V1:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("V2:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ValUnion) setDefaults() *ValUnion {
     return x
 }
@@ -1747,20 +1618,6 @@ if err != nil {
     return nil
 }
 
-func (x *VirtualComplexUnion) toString1() string {  // ThingOne
-    if x.IsSetThingOne() {
-        return fmt.Sprintf("%v", *x.ThingOne)
-    }
-    return fmt.Sprintf("%v", x.ThingOne)
-}
-
-func (x *VirtualComplexUnion) toString2() string {  // ThingTwo
-    if x.IsSetThingTwo() {
-        return fmt.Sprintf("%v", *x.ThingTwo)
-    }
-    return fmt.Sprintf("%v", x.ThingTwo)
-}
-
 
 
 func (x *VirtualComplexUnion) countSetFields() int {
@@ -1847,19 +1704,9 @@ func (x *VirtualComplexUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *VirtualComplexUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("VirtualComplexUnion({")
-    sb.WriteString(fmt.Sprintf("ThingOne:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ThingTwo:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *VirtualComplexUnion) setDefaults() *VirtualComplexUnion {
     return x
 }
@@ -1912,10 +1759,6 @@ if err != nil {
 
     x.Num = result
     return nil
-}
-
-func (x *NonCopyableStruct) toString1() string {  // Num
-    return fmt.Sprintf("%v", x.Num)
 }
 
 
@@ -1979,18 +1822,9 @@ func (x *NonCopyableStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *NonCopyableStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("NonCopyableStruct({")
-    sb.WriteString(fmt.Sprintf("Num:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *NonCopyableStruct) setDefaults() *NonCopyableStruct {
     return x.
         SetNumNonCompat(0)
@@ -2056,10 +1890,6 @@ if err != nil {
 
     x.S = result
     return nil
-}
-
-func (x *NonCopyableUnion) toString1() string {  // S
-    return fmt.Sprintf("%v", x.S)
 }
 
 // Deprecated: Use NewNonCopyableUnion().GetS() instead.
@@ -2146,18 +1976,9 @@ func (x *NonCopyableUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *NonCopyableUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("NonCopyableUnion({")
-    sb.WriteString(fmt.Sprintf("S:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *NonCopyableUnion) setDefaults() *NonCopyableUnion {
     return x
 }

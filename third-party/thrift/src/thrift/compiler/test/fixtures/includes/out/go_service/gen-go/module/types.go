@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     includes "includes"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type MyStruct struct {
@@ -178,18 +176,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString1() string {  // MyIncludedField
-    return fmt.Sprintf("%v", x.MyIncludedField)
-}
-
-func (x *MyStruct) toString2() string {  // MyOtherIncludedField
-    return fmt.Sprintf("%v", x.MyOtherIncludedField)
-}
-
-func (x *MyStruct) toString3() string {  // MyIncludedInt
-    return fmt.Sprintf("%v", x.MyIncludedInt)
-}
-
 // Deprecated: Use NewMyStruct().GetMyIncludedField() instead.
 func (x *MyStruct) DefaultGetMyIncludedField() *includes.Included {
     if !x.IsSetMyIncludedField() {
@@ -277,20 +263,9 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("MyIncludedField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyOtherIncludedField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("MyIncludedInt:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetMyIncludedFieldNonCompat(

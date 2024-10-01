@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -156,10 +154,6 @@ result := mapResult
     return nil
 }
 
-func (x *reqNestedContainersMapList) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
 
 
 func (x *reqNestedContainersMapList) Write(p thrift.Encoder) error {
@@ -221,18 +215,9 @@ func (x *reqNestedContainersMapList) Read(p thrift.Decoder) error {
 }
 
 func (x *reqNestedContainersMapList) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqNestedContainersMapList({")
-    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqNestedContainersMapList) setDefaults() *reqNestedContainersMapList {
     return x.
         SetFooNonCompat(make(map[int32][]int32))
@@ -311,17 +296,9 @@ func (x *respNestedContainersMapList) Read(p thrift.Decoder) error {
 }
 
 func (x *respNestedContainersMapList) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respNestedContainersMapList({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respNestedContainersMapList) setDefaults() *respNestedContainersMapList {
     return x
 }
@@ -461,10 +438,6 @@ result := mapResult
     return nil
 }
 
-func (x *reqNestedContainersMapSet) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
 
 
 func (x *reqNestedContainersMapSet) Write(p thrift.Encoder) error {
@@ -526,18 +499,9 @@ func (x *reqNestedContainersMapSet) Read(p thrift.Decoder) error {
 }
 
 func (x *reqNestedContainersMapSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqNestedContainersMapSet({")
-    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqNestedContainersMapSet) setDefaults() *reqNestedContainersMapSet {
     return x.
         SetFooNonCompat(make(map[int32][]int32))
@@ -616,17 +580,9 @@ func (x *respNestedContainersMapSet) Read(p thrift.Decoder) error {
 }
 
 func (x *respNestedContainersMapSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respNestedContainersMapSet({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respNestedContainersMapSet) setDefaults() *respNestedContainersMapSet {
     return x
 }
@@ -766,10 +722,6 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersListMap) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
 
 
 func (x *reqNestedContainersListMap) Write(p thrift.Encoder) error {
@@ -831,18 +783,9 @@ func (x *reqNestedContainersListMap) Read(p thrift.Decoder) error {
 }
 
 func (x *reqNestedContainersListMap) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqNestedContainersListMap({")
-    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqNestedContainersListMap) setDefaults() *reqNestedContainersListMap {
     return x.
         SetFooNonCompat(make([]map[int32]int32, 0))
@@ -921,17 +864,9 @@ func (x *respNestedContainersListMap) Read(p thrift.Decoder) error {
 }
 
 func (x *respNestedContainersListMap) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respNestedContainersListMap({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respNestedContainersListMap) setDefaults() *respNestedContainersListMap {
     return x
 }
@@ -1054,10 +989,6 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersListSet) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
 
 
 func (x *reqNestedContainersListSet) Write(p thrift.Encoder) error {
@@ -1119,18 +1050,9 @@ func (x *reqNestedContainersListSet) Read(p thrift.Decoder) error {
 }
 
 func (x *reqNestedContainersListSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqNestedContainersListSet({")
-    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqNestedContainersListSet) setDefaults() *reqNestedContainersListSet {
     return x.
         SetFooNonCompat(make([][]int32, 0))
@@ -1209,17 +1131,9 @@ func (x *respNestedContainersListSet) Read(p thrift.Decoder) error {
 }
 
 func (x *respNestedContainersListSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respNestedContainersListSet({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respNestedContainersListSet) setDefaults() *respNestedContainersListSet {
     return x
 }
@@ -1463,10 +1377,6 @@ result := listResult
     return nil
 }
 
-func (x *reqNestedContainersTurtles) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
 
 
 func (x *reqNestedContainersTurtles) Write(p thrift.Encoder) error {
@@ -1528,18 +1438,9 @@ func (x *reqNestedContainersTurtles) Read(p thrift.Decoder) error {
 }
 
 func (x *reqNestedContainersTurtles) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqNestedContainersTurtles({")
-    sb.WriteString(fmt.Sprintf("Foo:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqNestedContainersTurtles) setDefaults() *reqNestedContainersTurtles {
     return x.
         SetFooNonCompat(make([][]map[int32]map[int32][]int32, 0))
@@ -1618,17 +1519,9 @@ func (x *respNestedContainersTurtles) Read(p thrift.Decoder) error {
 }
 
 func (x *respNestedContainersTurtles) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respNestedContainersTurtles({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respNestedContainersTurtles) setDefaults() *respNestedContainersTurtles {
     return x
 }

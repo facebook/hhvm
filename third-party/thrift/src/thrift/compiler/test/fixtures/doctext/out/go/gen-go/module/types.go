@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -158,10 +156,6 @@ if err != nil {
     return nil
 }
 
-func (x *A) toString1() string {  // UselessField
-    return fmt.Sprintf("%v", x.UselessField)
-}
-
 
 
 func (x *A) Write(p thrift.Encoder) error {
@@ -223,18 +217,9 @@ func (x *A) Read(p thrift.Decoder) error {
 }
 
 func (x *A) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("A({")
-    sb.WriteString(fmt.Sprintf("UselessField:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *A) setDefaults() *A {
     return x.
         SetUselessFieldNonCompat(0)
@@ -353,20 +338,6 @@ if err != nil {
     return nil
 }
 
-func (x *U) toString1() string {  // I
-    if x.IsSetI() {
-        return fmt.Sprintf("%v", *x.I)
-    }
-    return fmt.Sprintf("%v", x.I)
-}
-
-func (x *U) toString2() string {  // S
-    if x.IsSetS() {
-        return fmt.Sprintf("%v", *x.S)
-    }
-    return fmt.Sprintf("%v", x.S)
-}
-
 
 
 func (x *U) countSetFields() int {
@@ -453,19 +424,9 @@ func (x *U) Read(p thrift.Decoder) error {
 }
 
 func (x *U) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("U({")
-    sb.WriteString(fmt.Sprintf("I:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("S:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *U) setDefaults() *U {
     return x
 }
@@ -518,10 +479,6 @@ if err != nil {
 
     x.Message = result
     return nil
-}
-
-func (x *Bang) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.Message)
 }
 
 
@@ -585,18 +542,9 @@ func (x *Bang) Read(p thrift.Decoder) error {
 }
 
 func (x *Bang) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Bang({")
-    sb.WriteString(fmt.Sprintf("Message:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Bang) setDefaults() *Bang {
     return x.
         SetMessageNonCompat("")
@@ -675,17 +623,9 @@ func (x *reqCF) Read(p thrift.Decoder) error {
 }
 
 func (x *reqCF) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqCF({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqCF) setDefaults() *reqCF {
     return x
 }
@@ -763,17 +703,9 @@ func (x *respCF) Read(p thrift.Decoder) error {
 }
 
 func (x *respCF) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respCF({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respCF) setDefaults() *respCF {
     return x
 }
@@ -949,18 +881,6 @@ result := setResult
     return nil
 }
 
-func (x *reqCThing) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
-}
-
-func (x *reqCThing) toString2() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *reqCThing) toString3() string {  // C
-    return fmt.Sprintf("%v", x.C)
-}
-
 
 
 func (x *reqCThing) Write(p thrift.Encoder) error {
@@ -1032,20 +952,9 @@ func (x *reqCThing) Read(p thrift.Decoder) error {
 }
 
 func (x *reqCThing) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqCThing({")
-    sb.WriteString(fmt.Sprintf("A:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("C:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqCThing) setDefaults() *reqCThing {
     return x.
         SetANonCompat(0).
@@ -1171,17 +1080,6 @@ if err != nil {
     return nil
 }
 
-func (x *respCThing) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
-func (x *respCThing) toString1() string {  // Bang
-    return fmt.Sprintf("%v", x.Bang)
-}
-
 
 // Deprecated: Use newRespCThing().GetBang() instead.
 func (x *respCThing) DefaultGetBang() *Bang {
@@ -1264,19 +1162,9 @@ func (x *respCThing) Read(p thrift.Decoder) error {
 }
 
 func (x *respCThing) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respCThing({")
-    sb.WriteString(fmt.Sprintf("Success:%s ", x.toString0()))
-    sb.WriteString(fmt.Sprintf("Bang:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respCThing) setDefaults() *respCThing {
     return x
 }

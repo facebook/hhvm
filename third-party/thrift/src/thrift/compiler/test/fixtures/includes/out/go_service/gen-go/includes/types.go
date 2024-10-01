@@ -8,7 +8,6 @@ package includes
 import (
     "fmt"
     "reflect"
-    "strings"
 
     transitive "transitive"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = transitive.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -177,14 +175,6 @@ if err != nil {
     return nil
 }
 
-func (x *Included) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.MyIntField)
-}
-
-func (x *Included) toString2() string {  // MyTransitiveField
-    return fmt.Sprintf("%v", x.MyTransitiveField)
-}
-
 // Deprecated: Use NewIncluded().GetMyTransitiveField() instead.
 func (x *Included) DefaultGetMyTransitiveField() *transitive.Foo {
     if !x.IsSetMyTransitiveField() {
@@ -259,19 +249,9 @@ func (x *Included) Read(p thrift.Decoder) error {
 }
 
 func (x *Included) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Included({")
-    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyTransitiveField:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Included) setDefaults() *Included {
     return x.
         SetMyIntFieldNonCompat(0).

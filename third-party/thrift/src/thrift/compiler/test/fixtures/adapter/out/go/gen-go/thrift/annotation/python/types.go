@@ -8,7 +8,6 @@ package python
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Py3Hidden struct {
@@ -84,17 +82,9 @@ func (x *Py3Hidden) Read(p thrift.Decoder) error {
 }
 
 func (x *Py3Hidden) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Py3Hidden({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Py3Hidden) setDefaults() *Py3Hidden {
     return x
 }
@@ -147,10 +137,6 @@ if err != nil {
 
     x.Reason = result
     return nil
-}
-
-func (x *PyDeprecatedHidden) toString1() string {  // Reason
-    return fmt.Sprintf("%v", x.Reason)
 }
 
 
@@ -214,18 +200,9 @@ func (x *PyDeprecatedHidden) Read(p thrift.Decoder) error {
 }
 
 func (x *PyDeprecatedHidden) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("PyDeprecatedHidden({")
-    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *PyDeprecatedHidden) setDefaults() *PyDeprecatedHidden {
     return x.
         SetReasonNonCompat("")
@@ -296,17 +273,9 @@ func (x *Flags) Read(p thrift.Decoder) error {
 }
 
 func (x *Flags) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Flags({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Flags) setDefaults() *Flags {
     return x
 }
@@ -359,10 +328,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -426,18 +391,9 @@ func (x *Name) Read(p thrift.Decoder) error {
 }
 
 func (x *Name) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Name({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("")
@@ -534,14 +490,6 @@ if err != nil {
     return nil
 }
 
-func (x *Adapter) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
-func (x *Adapter) toString2() string {  // TypeHint
-    return fmt.Sprintf("%v", x.TypeHint)
-}
-
 
 
 func (x *Adapter) Write(p thrift.Encoder) error {
@@ -608,19 +556,9 @@ func (x *Adapter) Read(p thrift.Decoder) error {
 }
 
 func (x *Adapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Adapter({")
-    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("TypeHint:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Adapter) setDefaults() *Adapter {
     return x.
         SetNameNonCompat("").
@@ -675,10 +613,6 @@ if err != nil {
 
     x.Serialize = result
     return nil
-}
-
-func (x *UseCAPI) toString1() string {  // Serialize
-    return fmt.Sprintf("%v", x.Serialize)
 }
 
 
@@ -742,18 +676,9 @@ func (x *UseCAPI) Read(p thrift.Decoder) error {
 }
 
 func (x *UseCAPI) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("UseCAPI({")
-    sb.WriteString(fmt.Sprintf("Serialize:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *UseCAPI) setDefaults() *UseCAPI {
     return x.
         SetSerializeNonCompat(false)

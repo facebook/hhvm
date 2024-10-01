@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     foo "foo"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = foo.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Fields struct {
@@ -69,10 +67,6 @@ if err != nil {
 
     x.InjectedField = result
     return nil
-}
-
-func (x *Fields) toString100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 
@@ -136,18 +130,9 @@ func (x *Fields) Read(p thrift.Decoder) error {
 }
 
 func (x *Fields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Fields({")
-    sb.WriteString(fmt.Sprintf("InjectedField:%s", x.toString100()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Fields) setDefaults() *Fields {
     return x.
         SetInjectedFieldNonCompat("")
@@ -201,10 +186,6 @@ if err != nil {
 
     x.InjectedField = result
     return nil
-}
-
-func (x *FieldsInjectedToEmptyStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.InjectedField)
 }
 
 
@@ -268,18 +249,9 @@ func (x *FieldsInjectedToEmptyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *FieldsInjectedToEmptyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("FieldsInjectedToEmptyStruct({")
-    sb.WriteString(fmt.Sprintf("InjectedField:%s", x.toString_1100()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *FieldsInjectedToEmptyStruct) setDefaults() *FieldsInjectedToEmptyStruct {
     return x.
         SetInjectedFieldNonCompat("")
@@ -376,14 +348,6 @@ if err != nil {
     return nil
 }
 
-func (x *FieldsInjectedToStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.InjectedField)
-}
-
-func (x *FieldsInjectedToStruct) toString1() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
 
 
 func (x *FieldsInjectedToStruct) Write(p thrift.Encoder) error {
@@ -450,19 +414,9 @@ func (x *FieldsInjectedToStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *FieldsInjectedToStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("FieldsInjectedToStruct({")
-    sb.WriteString(fmt.Sprintf("InjectedField:%s ", x.toString_1100()))
-    sb.WriteString(fmt.Sprintf("StringField:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *FieldsInjectedToStruct) setDefaults() *FieldsInjectedToStruct {
     return x.
         SetInjectedFieldNonCompat("").
@@ -664,28 +618,6 @@ if err != nil {
     return nil
 }
 
-func (x *FieldsInjectedWithIncludedStruct) toString_1102() string {  // InjectedUnstructuredAnnotationField
-    if x.IsSetInjectedUnstructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.InjectedUnstructuredAnnotationField)
-    }
-    return fmt.Sprintf("%v", x.InjectedUnstructuredAnnotationField)
-}
-
-func (x *FieldsInjectedWithIncludedStruct) toString_1101() string {  // InjectedStructuredAnnotationField
-    if x.IsSetInjectedStructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.InjectedStructuredAnnotationField)
-    }
-    return fmt.Sprintf("%v", x.InjectedStructuredAnnotationField)
-}
-
-func (x *FieldsInjectedWithIncludedStruct) toString_1100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.InjectedField)
-}
-
-func (x *FieldsInjectedWithIncludedStruct) toString1() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
 
 
 
@@ -764,21 +696,9 @@ func (x *FieldsInjectedWithIncludedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *FieldsInjectedWithIncludedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("FieldsInjectedWithIncludedStruct({")
-    sb.WriteString(fmt.Sprintf("InjectedUnstructuredAnnotationField:%s ", x.toString_1102()))
-    sb.WriteString(fmt.Sprintf("InjectedStructuredAnnotationField:%s ", x.toString_1101()))
-    sb.WriteString(fmt.Sprintf("InjectedField:%s ", x.toString_1100()))
-    sb.WriteString(fmt.Sprintf("StringField:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *FieldsInjectedWithIncludedStruct) setDefaults() *FieldsInjectedWithIncludedStruct {
     return x.
         SetInjectedFieldNonCompat("").

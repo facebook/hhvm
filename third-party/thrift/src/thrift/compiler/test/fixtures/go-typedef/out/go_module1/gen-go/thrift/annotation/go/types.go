@@ -8,7 +8,6 @@ package go_
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Name struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -134,18 +128,9 @@ func (x *Name) Read(p thrift.Decoder) error {
 }
 
 func (x *Name) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Name({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("")
@@ -199,10 +184,6 @@ if err != nil {
 
     x.Tag = result
     return nil
-}
-
-func (x *Tag) toString1() string {  // Tag
-    return fmt.Sprintf("%v", x.Tag)
 }
 
 
@@ -266,18 +247,9 @@ func (x *Tag) Read(p thrift.Decoder) error {
 }
 
 func (x *Tag) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Tag({")
-    sb.WriteString(fmt.Sprintf("Tag:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Tag) setDefaults() *Tag {
     return x.
         SetTagNonCompat("")

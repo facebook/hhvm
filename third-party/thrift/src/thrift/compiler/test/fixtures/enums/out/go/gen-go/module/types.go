@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -557,22 +555,6 @@ result := setResult
     return nil
 }
 
-func (x *SomeStruct) toString1() string {  // Reasonable
-    return fmt.Sprintf("%v", x.Reasonable)
-}
-
-func (x *SomeStruct) toString2() string {  // Fine
-    return fmt.Sprintf("%v", x.Fine)
-}
-
-func (x *SomeStruct) toString3() string {  // Questionable
-    return fmt.Sprintf("%v", x.Questionable)
-}
-
-func (x *SomeStruct) toString4() string {  // Tags
-    return fmt.Sprintf("%v", x.Tags)
-}
-
 
 
 func (x *SomeStruct) Write(p thrift.Encoder) error {
@@ -649,21 +631,9 @@ func (x *SomeStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *SomeStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("SomeStruct({")
-    sb.WriteString(fmt.Sprintf("Reasonable:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Fine:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Questionable:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Tags:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *SomeStruct) setDefaults() *SomeStruct {
     return x.
         SetReasonableNonCompat(
@@ -858,22 +828,6 @@ result := MyEnum1(enumResult)
     return nil
 }
 
-func (x *MyStruct) toString1() string {  // Me2_3
-    return fmt.Sprintf("%v", x.Me2_3)
-}
-
-func (x *MyStruct) toString2() string {  // Me3N3
-    return fmt.Sprintf("%v", x.Me3N3)
-}
-
-func (x *MyStruct) toString4() string {  // Me1T1
-    return fmt.Sprintf("%v", x.Me1T1)
-}
-
-func (x *MyStruct) toString6() string {  // Me1T2
-    return fmt.Sprintf("%v", x.Me1T2)
-}
-
 
 
 func (x *MyStruct) Write(p thrift.Encoder) error {
@@ -950,21 +904,9 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("Me2_3:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Me3N3:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Me1T1:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("Me1T2:%s", x.toString6()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetMe2_3NonCompat(

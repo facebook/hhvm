@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Foo struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.MyInt = result
     return nil
-}
-
-func (x *Foo) toString1() string {  // MyInt
-    return fmt.Sprintf("%v", x.MyInt)
 }
 
 
@@ -134,18 +128,9 @@ func (x *Foo) Read(p thrift.Decoder) error {
 }
 
 func (x *Foo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Foo({")
-    sb.WriteString(fmt.Sprintf("MyInt:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Foo) setDefaults() *Foo {
     return x.
         SetMyIntNonCompat(0)
@@ -204,10 +189,6 @@ if err != nil {
 
     x.Int1 = result
     return nil
-}
-
-func (x *reqTestServiceInit) toString1() string {  // Int1
-    return fmt.Sprintf("%v", x.Int1)
 }
 
 
@@ -271,18 +252,9 @@ func (x *reqTestServiceInit) Read(p thrift.Decoder) error {
 }
 
 func (x *reqTestServiceInit) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqTestServiceInit({")
-    sb.WriteString(fmt.Sprintf("Int1:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqTestServiceInit) setDefaults() *reqTestServiceInit {
     return x.
         SetInt1NonCompat(0)
@@ -353,13 +325,6 @@ if err != nil {
     return nil
 }
 
-func (x *respTestServiceInit) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -426,18 +391,9 @@ func (x *respTestServiceInit) Read(p thrift.Decoder) error {
 }
 
 func (x *respTestServiceInit) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respTestServiceInit({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respTestServiceInit) setDefaults() *respTestServiceInit {
     return x
 }

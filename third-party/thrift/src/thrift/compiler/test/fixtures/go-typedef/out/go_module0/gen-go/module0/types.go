@@ -8,7 +8,6 @@ package module0
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Accessory struct {
@@ -110,14 +108,6 @@ if err != nil {
     return nil
 }
 
-func (x *Accessory) toString1() string {  // InventoryId
-    return fmt.Sprintf("%v", x.InventoryId)
-}
-
-func (x *Accessory) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
 
 
 func (x *Accessory) Write(p thrift.Encoder) error {
@@ -184,19 +174,9 @@ func (x *Accessory) Read(p thrift.Decoder) error {
 }
 
 func (x *Accessory) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Accessory({")
-    sb.WriteString(fmt.Sprintf("InventoryId:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Accessory) setDefaults() *Accessory {
     return x.
         SetInventoryIdNonCompat(0).
@@ -294,14 +274,6 @@ if err != nil {
     return nil
 }
 
-func (x *PartName) toString1() string {  // InventoryId
-    return fmt.Sprintf("%v", x.InventoryId)
-}
-
-func (x *PartName) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
 
 
 func (x *PartName) Write(p thrift.Encoder) error {
@@ -368,19 +340,9 @@ func (x *PartName) Read(p thrift.Decoder) error {
 }
 
 func (x *PartName) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("PartName({")
-    sb.WriteString(fmt.Sprintf("InventoryId:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *PartName) setDefaults() *PartName {
     return x.
         SetInventoryIdNonCompat(0).

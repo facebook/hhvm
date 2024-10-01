@@ -8,7 +8,6 @@ package module1
 import (
     "fmt"
     "reflect"
-    "strings"
 
     module0 "module0"
     module2 "module2"
@@ -20,7 +19,6 @@ var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -702,40 +700,6 @@ result := mapResult
     return nil
 }
 
-func (x *Automobile) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.Plate)
-}
-
-func (x *Automobile) toString2() string {  // PreviousPlate
-    if x.IsSetPreviousPlate() {
-        return fmt.Sprintf("%v", *x.PreviousPlate)
-    }
-    return fmt.Sprintf("%v", x.PreviousPlate)
-}
-
-func (x *Automobile) toString3() string {  // FirstPlate
-    if x.IsSetFirstPlate() {
-        return fmt.Sprintf("%v", *x.FirstPlate)
-    }
-    return fmt.Sprintf("%v", x.FirstPlate)
-}
-
-func (x *Automobile) toString4() string {  // Year
-    return fmt.Sprintf("%v", x.Year)
-}
-
-func (x *Automobile) toString5() string {  // Drivers
-    return fmt.Sprintf("%v", x.Drivers)
-}
-
-func (x *Automobile) toString6() string {  // Accessories
-    return fmt.Sprintf("%v", x.Accessories)
-}
-
-func (x *Automobile) toString7() string {  // PartNames
-    return fmt.Sprintf("%v", x.PartNames)
-}
-
 
 
 
@@ -829,24 +793,9 @@ func (x *Automobile) Read(p thrift.Decoder) error {
 }
 
 func (x *Automobile) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Automobile({")
-    sb.WriteString(fmt.Sprintf("Plate:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("PreviousPlate:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("FirstPlate:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Year:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("Drivers:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("Accessories:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("PartNames:%s", x.toString7()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Automobile) setDefaults() *Automobile {
     return x.
         SetPlateNonCompat(NewPlate()).
@@ -948,14 +897,6 @@ if err != nil {
     return nil
 }
 
-func (x *MapKey) toString1() string {  // Num
-    return fmt.Sprintf("%v", x.Num)
-}
-
-func (x *MapKey) toString2() string {  // Strval
-    return fmt.Sprintf("%v", x.Strval)
-}
-
 
 
 func (x *MapKey) Write(p thrift.Encoder) error {
@@ -1022,19 +963,9 @@ func (x *MapKey) Read(p thrift.Decoder) error {
 }
 
 func (x *MapKey) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MapKey({")
-    sb.WriteString(fmt.Sprintf("Num:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Strval:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MapKey) setDefaults() *MapKey {
     return x.
         SetNumNonCompat(0).
@@ -1145,10 +1076,6 @@ result := mapResult
     return nil
 }
 
-func (x *MapContainer) toString1() string {  // Mapval
-    return fmt.Sprintf("%v", x.Mapval)
-}
-
 
 
 func (x *MapContainer) Write(p thrift.Encoder) error {
@@ -1210,18 +1137,9 @@ func (x *MapContainer) Read(p thrift.Decoder) error {
 }
 
 func (x *MapContainer) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MapContainer({")
-    sb.WriteString(fmt.Sprintf("Mapval:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MapContainer) setDefaults() *MapContainer {
     return x.
         SetMapvalNonCompat(make(map[MapKey]string))
@@ -1342,14 +1260,6 @@ if err != nil {
     return nil
 }
 
-func (x *Pair) toString1() string {  // Automobile
-    return fmt.Sprintf("%v", x.Automobile)
-}
-
-func (x *Pair) toString2() string {  // Car
-    return fmt.Sprintf("%v", x.Car)
-}
-
 // Deprecated: Use NewPair().GetAutomobile() instead.
 func (x *Pair) DefaultGetAutomobile() *Automobile {
     if !x.IsSetAutomobile() {
@@ -1432,19 +1342,9 @@ func (x *Pair) Read(p thrift.Decoder) error {
 }
 
 func (x *Pair) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Pair({")
-    sb.WriteString(fmt.Sprintf("Automobile:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Car:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Pair) setDefaults() *Pair {
     return x.
         SetAutomobileNonCompat(NewAutomobile()).
@@ -1616,14 +1516,6 @@ result := listResult
     return nil
 }
 
-func (x *Collection) toString1() string {  // Automobiles
-    return fmt.Sprintf("%v", x.Automobiles)
-}
-
-func (x *Collection) toString2() string {  // Cars
-    return fmt.Sprintf("%v", x.Cars)
-}
-
 
 
 func (x *Collection) Write(p thrift.Encoder) error {
@@ -1690,19 +1582,9 @@ func (x *Collection) Read(p thrift.Decoder) error {
 }
 
 func (x *Collection) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Collection({")
-    sb.WriteString(fmt.Sprintf("Automobiles:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Cars:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Collection) setDefaults() *Collection {
     return x.
         SetAutomobilesNonCompat(make([]*Automobile, 0)).
@@ -1763,10 +1645,6 @@ if err != nil {
 
     x.Plate = result
     return nil
-}
-
-func (x *reqFinderByPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -1830,18 +1708,9 @@ func (x *reqFinderByPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFinderByPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFinderByPlate({")
-    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFinderByPlate) setDefaults() *reqFinderByPlate {
     return x.
         SetPlateNonCompat(NewPlate())
@@ -1911,10 +1780,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respFinderByPlate) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespFinderByPlate().GetSuccess() instead.
@@ -1990,18 +1855,9 @@ func (x *respFinderByPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *respFinderByPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFinderByPlate({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFinderByPlate) setDefaults() *respFinderByPlate {
     return x
 }
@@ -2058,10 +1914,6 @@ if err != nil {
 
     x.Plate = result
     return nil
-}
-
-func (x *reqFinderAliasByPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -2125,18 +1977,9 @@ func (x *reqFinderAliasByPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFinderAliasByPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFinderAliasByPlate({")
-    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFinderAliasByPlate) setDefaults() *reqFinderAliasByPlate {
     return x.
         SetPlateNonCompat(NewPlate())
@@ -2206,10 +2049,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respFinderAliasByPlate) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespFinderAliasByPlate().GetSuccess() instead.
@@ -2285,18 +2124,9 @@ func (x *respFinderAliasByPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *respFinderAliasByPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFinderAliasByPlate({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFinderAliasByPlate) setDefaults() *respFinderAliasByPlate {
     return x
 }
@@ -2353,10 +2183,6 @@ if err != nil {
 
     x.Plate = result
     return nil
-}
-
-func (x *reqFinderPreviousPlate) toString1() string {  // Plate
-    return fmt.Sprintf("%v", x.Plate)
 }
 
 
@@ -2420,18 +2246,9 @@ func (x *reqFinderPreviousPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFinderPreviousPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFinderPreviousPlate({")
-    sb.WriteString(fmt.Sprintf("Plate:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFinderPreviousPlate) setDefaults() *reqFinderPreviousPlate {
     return x.
         SetPlateNonCompat(NewPlate())
@@ -2503,13 +2320,6 @@ if err != nil {
     return nil
 }
 
-func (x *respFinderPreviousPlate) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -2576,18 +2386,9 @@ func (x *respFinderPreviousPlate) Read(p thrift.Decoder) error {
 }
 
 func (x *respFinderPreviousPlate) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFinderPreviousPlate({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFinderPreviousPlate) setDefaults() *respFinderPreviousPlate {
     return x
 }

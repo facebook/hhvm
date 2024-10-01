@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -89,17 +87,9 @@ func (x *reqMyRootDoRoot) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyRootDoRoot) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyRootDoRoot({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyRootDoRoot) setDefaults() *reqMyRootDoRoot {
     return x
 }
@@ -177,17 +167,9 @@ func (x *respMyRootDoRoot) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyRootDoRoot) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyRootDoRoot({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyRootDoRoot) setDefaults() *respMyRootDoRoot {
     return x
 }
@@ -260,17 +242,9 @@ func (x *reqMyNodeDoMid) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyNodeDoMid) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyNodeDoMid({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyNodeDoMid) setDefaults() *reqMyNodeDoMid {
     return x
 }
@@ -348,17 +322,9 @@ func (x *respMyNodeDoMid) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyNodeDoMid) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyNodeDoMid({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyNodeDoMid) setDefaults() *respMyNodeDoMid {
     return x
 }
@@ -431,17 +397,9 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyLeafDoLeaf) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyLeafDoLeaf({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyLeafDoLeaf) setDefaults() *reqMyLeafDoLeaf {
     return x
 }
@@ -519,17 +477,9 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyLeafDoLeaf) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyLeafDoLeaf({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyLeafDoLeaf) setDefaults() *respMyLeafDoLeaf {
     return x
 }

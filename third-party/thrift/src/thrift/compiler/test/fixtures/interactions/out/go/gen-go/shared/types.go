@@ -8,7 +8,6 @@ package shared
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type DoSomethingResult struct {
@@ -110,14 +108,6 @@ if err != nil {
     return nil
 }
 
-func (x *DoSomethingResult) toString1() string {  // SRes
-    return fmt.Sprintf("%v", x.SRes)
-}
-
-func (x *DoSomethingResult) toString2() string {  // IRes
-    return fmt.Sprintf("%v", x.IRes)
-}
-
 
 
 func (x *DoSomethingResult) Write(p thrift.Encoder) error {
@@ -184,19 +174,9 @@ func (x *DoSomethingResult) Read(p thrift.Decoder) error {
 }
 
 func (x *DoSomethingResult) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DoSomethingResult({")
-    sb.WriteString(fmt.Sprintf("SRes:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("IRes:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DoSomethingResult) setDefaults() *DoSomethingResult {
     return x.
         SetSResNonCompat("").

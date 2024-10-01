@@ -85,6 +85,7 @@ struct Xtruct4 {
   2: i32 int_thing = 42;
   3: list<i32> list_int32_thing = [5];
   4: Xtruct2 xtruct2;
+  5: optional i64 opt64;
 }
 
 struct Insanity {

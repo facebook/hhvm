@@ -8,7 +8,6 @@ package rust
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Name struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -134,18 +128,9 @@ func (x *Name) Read(p thrift.Decoder) error {
 }
 
 func (x *Name) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Name({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("")
@@ -216,17 +201,9 @@ func (x *Copy) Read(p thrift.Decoder) error {
 }
 
 func (x *Copy) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Copy({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Copy) setDefaults() *Copy {
     return x
 }
@@ -296,17 +273,9 @@ func (x *RequestContext) Read(p thrift.Decoder) error {
 }
 
 func (x *RequestContext) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RequestContext({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *RequestContext) setDefaults() *RequestContext {
     return x
 }
@@ -376,17 +345,9 @@ func (x *Arc) Read(p thrift.Decoder) error {
 }
 
 func (x *Arc) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Arc({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Arc) setDefaults() *Arc {
     return x
 }
@@ -456,17 +417,9 @@ func (x *Box) Read(p thrift.Decoder) error {
 }
 
 func (x *Box) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Box({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Box) setDefaults() *Box {
     return x
 }
@@ -536,17 +489,9 @@ func (x *Exhaustive) Read(p thrift.Decoder) error {
 }
 
 func (x *Exhaustive) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Exhaustive({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Exhaustive) setDefaults() *Exhaustive {
     return x
 }
@@ -616,17 +561,9 @@ func (x *Ord) Read(p thrift.Decoder) error {
 }
 
 func (x *Ord) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Ord({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Ord) setDefaults() *Ord {
     return x
 }
@@ -696,17 +633,9 @@ func (x *NewType_) Read(p thrift.Decoder) error {
 }
 
 func (x *NewType_) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("NewType_({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *NewType_) setDefaults() *NewType_ {
     return x
 }
@@ -759,10 +688,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Type) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -826,18 +751,9 @@ func (x *Type) Read(p thrift.Decoder) error {
 }
 
 func (x *Type) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Type({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Type) setDefaults() *Type {
     return x.
         SetNameNonCompat("")
@@ -891,10 +807,6 @@ if err != nil {
 
     x.Enabled = result
     return nil
-}
-
-func (x *Serde) toString1() string {  // Enabled
-    return fmt.Sprintf("%v", x.Enabled)
 }
 
 
@@ -958,18 +870,9 @@ func (x *Serde) Read(p thrift.Decoder) error {
 }
 
 func (x *Serde) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Serde({")
-    sb.WriteString(fmt.Sprintf("Enabled:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Serde) setDefaults() *Serde {
     return x.
         SetEnabledNonCompat(false)
@@ -1023,10 +926,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Mod) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -1090,18 +989,9 @@ func (x *Mod) Read(p thrift.Decoder) error {
 }
 
 func (x *Mod) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Mod({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Mod) setDefaults() *Mod {
     return x.
         SetNameNonCompat("")
@@ -1155,10 +1045,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Adapter) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -1222,18 +1108,9 @@ func (x *Adapter) Read(p thrift.Decoder) error {
 }
 
 func (x *Adapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Adapter({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Adapter) setDefaults() *Adapter {
     return x.
         SetNameNonCompat("")
@@ -1325,10 +1202,6 @@ result := listResult
     return nil
 }
 
-func (x *Derive) toString1() string {  // Derives
-    return fmt.Sprintf("%v", x.Derives)
-}
-
 
 
 func (x *Derive) Write(p thrift.Encoder) error {
@@ -1390,18 +1263,9 @@ func (x *Derive) Read(p thrift.Decoder) error {
 }
 
 func (x *Derive) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Derive({")
-    sb.WriteString(fmt.Sprintf("Derives:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Derive) setDefaults() *Derive {
     return x.
         SetDerivesNonCompat(make([]string, 0))
@@ -1455,10 +1319,6 @@ if err != nil {
 
     x.AnyhowToApplicationExn = result
     return nil
-}
-
-func (x *ServiceExn) toString1() string {  // AnyhowToApplicationExn
-    return fmt.Sprintf("%v", x.AnyhowToApplicationExn)
 }
 
 
@@ -1522,18 +1382,9 @@ func (x *ServiceExn) Read(p thrift.Decoder) error {
 }
 
 func (x *ServiceExn) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ServiceExn({")
-    sb.WriteString(fmt.Sprintf("AnyhowToApplicationExn:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ServiceExn) setDefaults() *ServiceExn {
     return x.
         SetAnyhowToApplicationExnNonCompat(false)

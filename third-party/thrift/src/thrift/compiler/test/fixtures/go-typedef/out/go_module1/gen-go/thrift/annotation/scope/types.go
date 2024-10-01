@@ -8,7 +8,6 @@ package scope
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Transitive struct {
@@ -84,17 +82,9 @@ func (x *Transitive) Read(p thrift.Decoder) error {
 }
 
 func (x *Transitive) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Transitive({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Transitive) setDefaults() *Transitive {
     return x
 }
@@ -164,17 +154,9 @@ func (x *Program) Read(p thrift.Decoder) error {
 }
 
 func (x *Program) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Program({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Program) setDefaults() *Program {
     return x
 }
@@ -244,17 +226,9 @@ func (x *Struct) Read(p thrift.Decoder) error {
 }
 
 func (x *Struct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Struct({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Struct) setDefaults() *Struct {
     return x
 }
@@ -324,17 +298,9 @@ func (x *Union) Read(p thrift.Decoder) error {
 }
 
 func (x *Union) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Union({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Union) setDefaults() *Union {
     return x
 }
@@ -404,17 +370,9 @@ func (x *Exception) Read(p thrift.Decoder) error {
 }
 
 func (x *Exception) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Exception({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Exception) setDefaults() *Exception {
     return x
 }
@@ -484,17 +442,9 @@ func (x *Field) Read(p thrift.Decoder) error {
 }
 
 func (x *Field) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Field({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Field) setDefaults() *Field {
     return x
 }
@@ -564,17 +514,9 @@ func (x *Typedef) Read(p thrift.Decoder) error {
 }
 
 func (x *Typedef) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Typedef({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Typedef) setDefaults() *Typedef {
     return x
 }
@@ -644,17 +586,9 @@ func (x *Service) Read(p thrift.Decoder) error {
 }
 
 func (x *Service) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Service({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Service) setDefaults() *Service {
     return x
 }
@@ -724,17 +658,9 @@ func (x *Interaction) Read(p thrift.Decoder) error {
 }
 
 func (x *Interaction) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Interaction({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Interaction) setDefaults() *Interaction {
     return x
 }
@@ -804,17 +730,9 @@ func (x *Function) Read(p thrift.Decoder) error {
 }
 
 func (x *Function) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Function({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Function) setDefaults() *Function {
     return x
 }
@@ -884,17 +802,9 @@ func (x *EnumValue) Read(p thrift.Decoder) error {
 }
 
 func (x *EnumValue) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("EnumValue({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *EnumValue) setDefaults() *EnumValue {
     return x
 }
@@ -964,17 +874,9 @@ func (x *Const) Read(p thrift.Decoder) error {
 }
 
 func (x *Const) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Const({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Const) setDefaults() *Const {
     return x
 }
@@ -1044,17 +946,9 @@ func (x *Enum) Read(p thrift.Decoder) error {
 }
 
 func (x *Enum) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Enum({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Enum) setDefaults() *Enum {
     return x
 }
@@ -1124,17 +1018,9 @@ func (x *Structured) Read(p thrift.Decoder) error {
 }
 
 func (x *Structured) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Structured({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Structured) setDefaults() *Structured {
     return x
 }
@@ -1204,17 +1090,9 @@ func (x *Interface) Read(p thrift.Decoder) error {
 }
 
 func (x *Interface) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Interface({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Interface) setDefaults() *Interface {
     return x
 }
@@ -1284,17 +1162,9 @@ func (x *RootDefinition) Read(p thrift.Decoder) error {
 }
 
 func (x *RootDefinition) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RootDefinition({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *RootDefinition) setDefaults() *RootDefinition {
     return x
 }
@@ -1364,17 +1234,9 @@ func (x *Definition) Read(p thrift.Decoder) error {
 }
 
 func (x *Definition) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Definition({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Definition) setDefaults() *Definition {
     return x
 }

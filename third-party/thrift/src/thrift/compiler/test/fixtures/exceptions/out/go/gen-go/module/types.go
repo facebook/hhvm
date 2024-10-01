@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Fiery struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Message = result
     return nil
-}
-
-func (x *Fiery) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.Message)
 }
 
 
@@ -134,18 +128,9 @@ func (x *Fiery) Read(p thrift.Decoder) error {
 }
 
 func (x *Fiery) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Fiery({")
-    sb.WriteString(fmt.Sprintf("Message:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Fiery) setDefaults() *Fiery {
     return x.
         SetMessageNonCompat("")
@@ -215,13 +200,6 @@ if err != nil {
     return nil
 }
 
-func (x *Serious) toString1() string {  // Sonnet
-    if x.IsSetSonnet() {
-        return fmt.Sprintf("%v", *x.Sonnet)
-    }
-    return fmt.Sprintf("%v", x.Sonnet)
-}
-
 
 
 
@@ -284,18 +262,9 @@ func (x *Serious) Read(p thrift.Decoder) error {
 }
 
 func (x *Serious) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Serious({")
-    sb.WriteString(fmt.Sprintf("Sonnet:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Serious) setDefaults() *Serious {
     return x
 }
@@ -394,14 +363,6 @@ if err != nil {
     return nil
 }
 
-func (x *ComplexFieldNames) toString1() string {  // ErrorMessage
-    return fmt.Sprintf("%v", x.ErrorMessage)
-}
-
-func (x *ComplexFieldNames) toString2() string {  // InternalErrorMessage
-    return fmt.Sprintf("%v", x.InternalErrorMessage)
-}
-
 
 
 func (x *ComplexFieldNames) Write(p thrift.Encoder) error {
@@ -468,19 +429,9 @@ func (x *ComplexFieldNames) Read(p thrift.Decoder) error {
 }
 
 func (x *ComplexFieldNames) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ComplexFieldNames({")
-    sb.WriteString(fmt.Sprintf("ErrorMessage:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("InternalErrorMessage:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ComplexFieldNames) setDefaults() *ComplexFieldNames {
     return x.
         SetErrorMessageNonCompat("").
@@ -581,14 +532,6 @@ if err != nil {
     return nil
 }
 
-func (x *CustomFieldNames) toString1() string {  // ErrorMessage
-    return fmt.Sprintf("%v", x.ErrorMessage)
-}
-
-func (x *CustomFieldNames) toString2() string {  // InternalErrorMessage
-    return fmt.Sprintf("%v", x.InternalErrorMessage)
-}
-
 
 
 func (x *CustomFieldNames) Write(p thrift.Encoder) error {
@@ -655,19 +598,9 @@ func (x *CustomFieldNames) Read(p thrift.Decoder) error {
 }
 
 func (x *CustomFieldNames) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("CustomFieldNames({")
-    sb.WriteString(fmt.Sprintf("ErrorMessage:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("InternalErrorMessage:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *CustomFieldNames) setDefaults() *CustomFieldNames {
     return x.
         SetErrorMessageNonCompat("").
@@ -768,14 +701,6 @@ if err != nil {
     return nil
 }
 
-func (x *ExceptionWithPrimitiveField) toString1() string {  // Message
-    return fmt.Sprintf("%v", x.Message)
-}
-
-func (x *ExceptionWithPrimitiveField) toString2() string {  // ErrorCode
-    return fmt.Sprintf("%v", x.ErrorCode)
-}
-
 
 
 func (x *ExceptionWithPrimitiveField) Write(p thrift.Encoder) error {
@@ -842,19 +767,9 @@ func (x *ExceptionWithPrimitiveField) Read(p thrift.Decoder) error {
 }
 
 func (x *ExceptionWithPrimitiveField) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ExceptionWithPrimitiveField({")
-    sb.WriteString(fmt.Sprintf("Message:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ErrorCode:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ExceptionWithPrimitiveField) setDefaults() *ExceptionWithPrimitiveField {
     return x.
         SetMessageNonCompat("").
@@ -955,14 +870,6 @@ if err != nil {
     return nil
 }
 
-func (x *ExceptionWithStructuredAnnotation) toString1() string {  // MessageField
-    return fmt.Sprintf("%v", x.MessageField)
-}
-
-func (x *ExceptionWithStructuredAnnotation) toString2() string {  // ErrorCode
-    return fmt.Sprintf("%v", x.ErrorCode)
-}
-
 
 
 func (x *ExceptionWithStructuredAnnotation) Write(p thrift.Encoder) error {
@@ -1029,19 +936,9 @@ func (x *ExceptionWithStructuredAnnotation) Read(p thrift.Decoder) error {
 }
 
 func (x *ExceptionWithStructuredAnnotation) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ExceptionWithStructuredAnnotation({")
-    sb.WriteString(fmt.Sprintf("MessageField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ErrorCode:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ExceptionWithStructuredAnnotation) setDefaults() *ExceptionWithStructuredAnnotation {
     return x.
         SetMessageFieldNonCompat("").
@@ -1116,17 +1013,9 @@ func (x *Banal) Read(p thrift.Decoder) error {
 }
 
 func (x *Banal) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Banal({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Banal) setDefaults() *Banal {
     return x
 }
@@ -1204,17 +1093,9 @@ func (x *reqRaiserDoBland) Read(p thrift.Decoder) error {
 }
 
 func (x *reqRaiserDoBland) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqRaiserDoBland({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqRaiserDoBland) setDefaults() *reqRaiserDoBland {
     return x
 }
@@ -1292,17 +1173,9 @@ func (x *respRaiserDoBland) Read(p thrift.Decoder) error {
 }
 
 func (x *respRaiserDoBland) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respRaiserDoBland({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respRaiserDoBland) setDefaults() *respRaiserDoBland {
     return x
 }
@@ -1375,17 +1248,9 @@ func (x *reqRaiserDoRaise) Read(p thrift.Decoder) error {
 }
 
 func (x *reqRaiserDoRaise) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqRaiserDoRaise({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqRaiserDoRaise) setDefaults() *reqRaiserDoRaise {
     return x
 }
@@ -1562,18 +1427,6 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserDoRaise) toString1() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *respRaiserDoRaise) toString2() string {  // F
-    return fmt.Sprintf("%v", x.F)
-}
-
-func (x *respRaiserDoRaise) toString3() string {  // S
-    return fmt.Sprintf("%v", x.S)
-}
-
 // Deprecated: Use newRespRaiserDoRaise().GetB() instead.
 func (x *respRaiserDoRaise) DefaultGetB() *Banal {
     if !x.IsSetB() {
@@ -1682,20 +1535,9 @@ func (x *respRaiserDoRaise) Read(p thrift.Decoder) error {
 }
 
 func (x *respRaiserDoRaise) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respRaiserDoRaise({")
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("F:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respRaiserDoRaise) setDefaults() *respRaiserDoRaise {
     return x
 }
@@ -1768,17 +1610,9 @@ func (x *reqRaiserGet200) Read(p thrift.Decoder) error {
 }
 
 func (x *reqRaiserGet200) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqRaiserGet200({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqRaiserGet200) setDefaults() *reqRaiserGet200 {
     return x
 }
@@ -1848,13 +1682,6 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet200) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -1921,18 +1748,9 @@ func (x *respRaiserGet200) Read(p thrift.Decoder) error {
 }
 
 func (x *respRaiserGet200) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respRaiserGet200({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respRaiserGet200) setDefaults() *respRaiserGet200 {
     return x
 }
@@ -2005,17 +1823,9 @@ func (x *reqRaiserGet500) Read(p thrift.Decoder) error {
 }
 
 func (x *reqRaiserGet500) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqRaiserGet500({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqRaiserGet500) setDefaults() *reqRaiserGet500 {
     return x
 }
@@ -2244,25 +2054,6 @@ if err != nil {
     return nil
 }
 
-func (x *respRaiserGet500) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
-func (x *respRaiserGet500) toString1() string {  // F
-    return fmt.Sprintf("%v", x.F)
-}
-
-func (x *respRaiserGet500) toString2() string {  // B
-    return fmt.Sprintf("%v", x.B)
-}
-
-func (x *respRaiserGet500) toString3() string {  // S
-    return fmt.Sprintf("%v", x.S)
-}
-
 
 // Deprecated: Use newRespRaiserGet500().GetF() instead.
 func (x *respRaiserGet500) DefaultGetF() *Fiery {
@@ -2377,21 +2168,9 @@ func (x *respRaiserGet500) Read(p thrift.Decoder) error {
 }
 
 func (x *respRaiserGet500) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respRaiserGet500({")
-    sb.WriteString(fmt.Sprintf("Success:%s ", x.toString0()))
-    sb.WriteString(fmt.Sprintf("F:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("B:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("S:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respRaiserGet500) setDefaults() *respRaiserGet500 {
     return x
 }

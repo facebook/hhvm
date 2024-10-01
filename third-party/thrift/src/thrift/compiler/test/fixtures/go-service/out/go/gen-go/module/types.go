@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type GetEntityRequest struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Id = result
     return nil
-}
-
-func (x *GetEntityRequest) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -134,18 +128,9 @@ func (x *GetEntityRequest) Read(p thrift.Decoder) error {
 }
 
 func (x *GetEntityRequest) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("GetEntityRequest({")
-    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *GetEntityRequest) setDefaults() *GetEntityRequest {
     return x.
         SetIdNonCompat("")
@@ -199,10 +184,6 @@ if err != nil {
 
     x.Entity = result
     return nil
-}
-
-func (x *GetEntityResponse) toString1() string {  // Entity
-    return fmt.Sprintf("%v", x.Entity)
 }
 
 
@@ -266,18 +247,9 @@ func (x *GetEntityResponse) Read(p thrift.Decoder) error {
 }
 
 func (x *GetEntityResponse) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("GetEntityResponse({")
-    sb.WriteString(fmt.Sprintf("Entity:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *GetEntityResponse) setDefaults() *GetEntityResponse {
     return x.
         SetEntityNonCompat("")
@@ -509,18 +481,6 @@ result := mapResult
     return nil
 }
 
-func (x *NonComparableStruct) toString1() string {  // Foo
-    return fmt.Sprintf("%v", x.Foo)
-}
-
-func (x *NonComparableStruct) toString2() string {  // Bar
-    return fmt.Sprintf("%v", x.Bar)
-}
-
-func (x *NonComparableStruct) toString3() string {  // Baz
-    return fmt.Sprintf("%v", x.Baz)
-}
-
 
 
 func (x *NonComparableStruct) Write(p thrift.Encoder) error {
@@ -592,20 +552,9 @@ func (x *NonComparableStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *NonComparableStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("NonComparableStruct({")
-    sb.WriteString(fmt.Sprintf("Foo:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Bar:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Baz:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *NonComparableStruct) setDefaults() *NonComparableStruct {
     return x.
         SetFooNonCompat("").
@@ -680,10 +629,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetEntity) toString1() string {  // R
-    return fmt.Sprintf("%v", x.R)
-}
-
 // Deprecated: Use newReqGetEntityGetEntity().GetR() instead.
 func (x *reqGetEntityGetEntity) DefaultGetR() *GetEntityRequest {
     if !x.IsSetR() {
@@ -753,18 +698,9 @@ func (x *reqGetEntityGetEntity) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetEntity) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetEntity({")
-    sb.WriteString(fmt.Sprintf("R:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetEntity) setDefaults() *reqGetEntityGetEntity {
     return x.
         SetRNonCompat(NewGetEntityRequest())
@@ -834,10 +770,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respGetEntityGetEntity) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespGetEntityGetEntity().GetSuccess() instead.
@@ -913,18 +845,9 @@ func (x *respGetEntityGetEntity) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetEntity) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetEntity({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetEntity) setDefaults() *respGetEntityGetEntity {
     return x
 }
@@ -997,17 +920,9 @@ func (x *reqGetEntityGetBool) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetBool) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetBool({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetBool) setDefaults() *reqGetEntityGetBool {
     return x
 }
@@ -1077,13 +992,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetBool) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -1150,18 +1058,9 @@ func (x *respGetEntityGetBool) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetBool) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetBool({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetBool) setDefaults() *respGetEntityGetBool {
     return x
 }
@@ -1234,17 +1133,9 @@ func (x *reqGetEntityGetByte) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetByte) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetByte({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetByte) setDefaults() *reqGetEntityGetByte {
     return x
 }
@@ -1315,13 +1206,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetByte) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -1388,18 +1272,9 @@ func (x *respGetEntityGetByte) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetByte) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetByte({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetByte) setDefaults() *respGetEntityGetByte {
     return x
 }
@@ -1472,17 +1347,9 @@ func (x *reqGetEntityGetI16) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetI16) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetI16({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetI16) setDefaults() *reqGetEntityGetI16 {
     return x
 }
@@ -1552,13 +1419,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI16) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -1625,18 +1485,9 @@ func (x *respGetEntityGetI16) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetI16) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetI16({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetI16) setDefaults() *respGetEntityGetI16 {
     return x
 }
@@ -1709,17 +1560,9 @@ func (x *reqGetEntityGetI32) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetI32) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetI32({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetI32) setDefaults() *reqGetEntityGetI32 {
     return x
 }
@@ -1789,13 +1632,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI32) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -1862,18 +1698,9 @@ func (x *respGetEntityGetI32) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetI32) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetI32({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetI32) setDefaults() *respGetEntityGetI32 {
     return x
 }
@@ -1946,17 +1773,9 @@ func (x *reqGetEntityGetI64) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetI64) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetI64({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetI64) setDefaults() *reqGetEntityGetI64 {
     return x
 }
@@ -2026,13 +1845,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetI64) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -2099,18 +1911,9 @@ func (x *respGetEntityGetI64) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetI64) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetI64({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetI64) setDefaults() *respGetEntityGetI64 {
     return x
 }
@@ -2183,17 +1986,9 @@ func (x *reqGetEntityGetDouble) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetDouble) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetDouble({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetDouble) setDefaults() *reqGetEntityGetDouble {
     return x
 }
@@ -2263,13 +2058,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetDouble) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -2336,18 +2124,9 @@ func (x *respGetEntityGetDouble) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetDouble) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetDouble({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetDouble) setDefaults() *respGetEntityGetDouble {
     return x
 }
@@ -2420,17 +2199,9 @@ func (x *reqGetEntityGetString) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetString) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetString({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetString) setDefaults() *reqGetEntityGetString {
     return x
 }
@@ -2500,13 +2271,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetString) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -2573,18 +2337,9 @@ func (x *respGetEntityGetString) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetString) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetString({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetString) setDefaults() *respGetEntityGetString {
     return x
 }
@@ -2657,17 +2412,9 @@ func (x *reqGetEntityGetBinary) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetBinary) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetBinary({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetBinary) setDefaults() *reqGetEntityGetBinary {
     return x
 }
@@ -2737,10 +2484,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetBinary) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
@@ -2806,18 +2549,9 @@ func (x *respGetEntityGetBinary) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetBinary) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetBinary({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetBinary) setDefaults() *respGetEntityGetBinary {
     return x
 }
@@ -2890,17 +2624,9 @@ func (x *reqGetEntityGetMap) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetMap) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetMap({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetMap) setDefaults() *reqGetEntityGetMap {
     return x
 }
@@ -3016,10 +2742,6 @@ result := mapResult
     return nil
 }
 
-func (x *respGetEntityGetMap) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respGetEntityGetMap) Exception() thrift.WritableException {
@@ -3085,18 +2807,9 @@ func (x *respGetEntityGetMap) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetMap) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetMap({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetMap) setDefaults() *respGetEntityGetMap {
     return x
 }
@@ -3169,17 +2882,9 @@ func (x *reqGetEntityGetSet) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetSet({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetSet) setDefaults() *reqGetEntityGetSet {
     return x
 }
@@ -3278,10 +2983,6 @@ result := setResult
     return nil
 }
 
-func (x *respGetEntityGetSet) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respGetEntityGetSet) Exception() thrift.WritableException {
@@ -3347,18 +3048,9 @@ func (x *respGetEntityGetSet) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetSet) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetSet({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetSet) setDefaults() *respGetEntityGetSet {
     return x
 }
@@ -3431,17 +3123,9 @@ func (x *reqGetEntityGetList) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetList) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetList({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetList) setDefaults() *reqGetEntityGetList {
     return x
 }
@@ -3540,10 +3224,6 @@ result := listResult
     return nil
 }
 
-func (x *respGetEntityGetList) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respGetEntityGetList) Exception() thrift.WritableException {
@@ -3609,18 +3289,9 @@ func (x *respGetEntityGetList) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetList) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetList({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetList) setDefaults() *respGetEntityGetList {
     return x
 }
@@ -3760,18 +3431,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetLegacyStuff) toString_2() string {  // NumNeg2
-    return fmt.Sprintf("%v", x.NumNeg2)
-}
-
-func (x *reqGetEntityGetLegacyStuff) toString_1() string {  // NumNeg1
-    return fmt.Sprintf("%v", x.NumNeg1)
-}
-
-func (x *reqGetEntityGetLegacyStuff) toString1() string {  // NumPos
-    return fmt.Sprintf("%v", x.NumPos)
-}
-
 
 
 func (x *reqGetEntityGetLegacyStuff) Write(p thrift.Encoder) error {
@@ -3843,20 +3502,9 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetLegacyStuff) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetLegacyStuff({")
-    sb.WriteString(fmt.Sprintf("NumNeg2:%s ", x.toString_2()))
-    sb.WriteString(fmt.Sprintf("NumNeg1:%s ", x.toString_1()))
-    sb.WriteString(fmt.Sprintf("NumPos:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetLegacyStuff) setDefaults() *reqGetEntityGetLegacyStuff {
     return x.
         SetNumNeg2NonCompat(0).
@@ -3929,13 +3577,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetLegacyStuff) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4002,18 +3643,9 @@ func (x *respGetEntityGetLegacyStuff) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetLegacyStuff) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetLegacyStuff({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetLegacyStuff) setDefaults() *respGetEntityGetLegacyStuff {
     return x
 }
@@ -4069,10 +3701,6 @@ if err != nil {
 
     x.Ctx = result
     return nil
-}
-
-func (x *reqGetEntityGetCtxCollision) toString1() string {  // Ctx
-    return fmt.Sprintf("%v", x.Ctx)
 }
 
 
@@ -4136,18 +3764,9 @@ func (x *reqGetEntityGetCtxCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetCtxCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetCtxCollision({")
-    sb.WriteString(fmt.Sprintf("Ctx:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetCtxCollision) setDefaults() *reqGetEntityGetCtxCollision {
     return x.
         SetCtxNonCompat(0)
@@ -4218,13 +3837,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetCtxCollision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4291,18 +3903,9 @@ func (x *respGetEntityGetCtxCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetCtxCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetCtxCollision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetCtxCollision) setDefaults() *respGetEntityGetCtxCollision {
     return x
 }
@@ -4401,14 +4004,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetCtx1Collision) toString1() string {  // Ctx
-    return fmt.Sprintf("%v", x.Ctx)
-}
-
-func (x *reqGetEntityGetCtx1Collision) toString2() string {  // Ctx1
-    return fmt.Sprintf("%v", x.Ctx1)
-}
-
 
 
 func (x *reqGetEntityGetCtx1Collision) Write(p thrift.Encoder) error {
@@ -4475,19 +4070,9 @@ func (x *reqGetEntityGetCtx1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetCtx1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetCtx1Collision({")
-    sb.WriteString(fmt.Sprintf("Ctx:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Ctx1:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetCtx1Collision) setDefaults() *reqGetEntityGetCtx1Collision {
     return x.
         SetCtxNonCompat(0).
@@ -4559,13 +4144,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetCtx1Collision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4632,18 +4210,9 @@ func (x *respGetEntityGetCtx1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetCtx1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetCtx1Collision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetCtx1Collision) setDefaults() *respGetEntityGetCtx1Collision {
     return x
 }
@@ -4699,10 +4268,6 @@ if err != nil {
 
     x.Context = result
     return nil
-}
-
-func (x *reqGetEntityGetContextCollision) toString1() string {  // Context
-    return fmt.Sprintf("%v", x.Context)
 }
 
 
@@ -4766,18 +4331,9 @@ func (x *reqGetEntityGetContextCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetContextCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetContextCollision({")
-    sb.WriteString(fmt.Sprintf("Context:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetContextCollision) setDefaults() *reqGetEntityGetContextCollision {
     return x.
         SetContextNonCompat(0)
@@ -4848,13 +4404,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetContextCollision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4921,18 +4470,9 @@ func (x *respGetEntityGetContextCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetContextCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetContextCollision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetContextCollision) setDefaults() *respGetEntityGetContextCollision {
     return x
 }
@@ -4988,10 +4528,6 @@ if err != nil {
 
     x.Out = result
     return nil
-}
-
-func (x *reqGetEntityGetOutCollision) toString1() string {  // Out
-    return fmt.Sprintf("%v", x.Out)
 }
 
 
@@ -5055,18 +4591,9 @@ func (x *reqGetEntityGetOutCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetOutCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetOutCollision({")
-    sb.WriteString(fmt.Sprintf("Out:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetOutCollision) setDefaults() *reqGetEntityGetOutCollision {
     return x.
         SetOutNonCompat(0)
@@ -5137,13 +4664,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetOutCollision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -5210,18 +4730,9 @@ func (x *respGetEntityGetOutCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetOutCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetOutCollision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetOutCollision) setDefaults() *respGetEntityGetOutCollision {
     return x
 }
@@ -5320,14 +4831,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetOut1Collision) toString1() string {  // Out
-    return fmt.Sprintf("%v", x.Out)
-}
-
-func (x *reqGetEntityGetOut1Collision) toString2() string {  // Out1
-    return fmt.Sprintf("%v", x.Out1)
-}
-
 
 
 func (x *reqGetEntityGetOut1Collision) Write(p thrift.Encoder) error {
@@ -5394,19 +4897,9 @@ func (x *reqGetEntityGetOut1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetOut1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetOut1Collision({")
-    sb.WriteString(fmt.Sprintf("Out:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Out1:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetOut1Collision) setDefaults() *reqGetEntityGetOut1Collision {
     return x.
         SetOutNonCompat(0).
@@ -5478,13 +4971,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetOut1Collision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -5551,18 +5037,9 @@ func (x *respGetEntityGetOut1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetOut1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetOut1Collision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetOut1Collision) setDefaults() *respGetEntityGetOut1Collision {
     return x
 }
@@ -5618,10 +5095,6 @@ if err != nil {
 
     x.In = result
     return nil
-}
-
-func (x *reqGetEntityGetInCollision) toString1() string {  // In
-    return fmt.Sprintf("%v", x.In)
 }
 
 
@@ -5685,18 +5158,9 @@ func (x *reqGetEntityGetInCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetInCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetInCollision({")
-    sb.WriteString(fmt.Sprintf("In:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetInCollision) setDefaults() *reqGetEntityGetInCollision {
     return x.
         SetInNonCompat(0)
@@ -5767,13 +5231,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetInCollision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -5840,18 +5297,9 @@ func (x *respGetEntityGetInCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetInCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetInCollision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetInCollision) setDefaults() *respGetEntityGetInCollision {
     return x
 }
@@ -5950,14 +5398,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetIn1Collision) toString1() string {  // In
-    return fmt.Sprintf("%v", x.In)
-}
-
-func (x *reqGetEntityGetIn1Collision) toString2() string {  // In1
-    return fmt.Sprintf("%v", x.In1)
-}
-
 
 
 func (x *reqGetEntityGetIn1Collision) Write(p thrift.Encoder) error {
@@ -6024,19 +5464,9 @@ func (x *reqGetEntityGetIn1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetIn1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetIn1Collision({")
-    sb.WriteString(fmt.Sprintf("In:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("In1:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetIn1Collision) setDefaults() *reqGetEntityGetIn1Collision {
     return x.
         SetInNonCompat(0).
@@ -6108,13 +5538,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetIn1Collision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -6181,18 +5604,9 @@ func (x *respGetEntityGetIn1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetIn1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetIn1Collision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetIn1Collision) setDefaults() *respGetEntityGetIn1Collision {
     return x
 }
@@ -6248,10 +5662,6 @@ if err != nil {
 
     x.Err = result
     return nil
-}
-
-func (x *reqGetEntityGetErrCollision) toString1() string {  // Err
-    return fmt.Sprintf("%v", x.Err)
 }
 
 
@@ -6315,18 +5725,9 @@ func (x *reqGetEntityGetErrCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetErrCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetErrCollision({")
-    sb.WriteString(fmt.Sprintf("Err:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetErrCollision) setDefaults() *reqGetEntityGetErrCollision {
     return x.
         SetErrNonCompat(0)
@@ -6397,13 +5798,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetErrCollision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -6470,18 +5864,9 @@ func (x *respGetEntityGetErrCollision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetErrCollision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetErrCollision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetErrCollision) setDefaults() *respGetEntityGetErrCollision {
     return x
 }
@@ -6580,14 +5965,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqGetEntityGetErr1Collision) toString1() string {  // Err
-    return fmt.Sprintf("%v", x.Err)
-}
-
-func (x *reqGetEntityGetErr1Collision) toString2() string {  // Err1
-    return fmt.Sprintf("%v", x.Err1)
-}
-
 
 
 func (x *reqGetEntityGetErr1Collision) Write(p thrift.Encoder) error {
@@ -6654,19 +6031,9 @@ func (x *reqGetEntityGetErr1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *reqGetEntityGetErr1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqGetEntityGetErr1Collision({")
-    sb.WriteString(fmt.Sprintf("Err:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Err1:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqGetEntityGetErr1Collision) setDefaults() *reqGetEntityGetErr1Collision {
     return x.
         SetErrNonCompat(0).
@@ -6738,13 +6105,6 @@ if err != nil {
     return nil
 }
 
-func (x *respGetEntityGetErr1Collision) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -6811,18 +6171,9 @@ func (x *respGetEntityGetErr1Collision) Read(p thrift.Decoder) error {
 }
 
 func (x *respGetEntityGetErr1Collision) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respGetEntityGetErr1Collision({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respGetEntityGetErr1Collision) setDefaults() *respGetEntityGetErr1Collision {
     return x
 }

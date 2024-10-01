@@ -8,7 +8,6 @@ package internals
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type InjectMetadataFields struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Type = result
     return nil
-}
-
-func (x *InjectMetadataFields) toString1() string {  // Type
-    return fmt.Sprintf("%v", x.Type)
 }
 
 
@@ -134,18 +128,9 @@ func (x *InjectMetadataFields) Read(p thrift.Decoder) error {
 }
 
 func (x *InjectMetadataFields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("InjectMetadataFields({")
-    sb.WriteString(fmt.Sprintf("Type:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *InjectMetadataFields) setDefaults() *InjectMetadataFields {
     return x.
         SetTypeNonCompat("")

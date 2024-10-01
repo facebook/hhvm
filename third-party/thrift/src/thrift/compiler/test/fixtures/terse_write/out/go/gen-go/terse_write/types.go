@@ -8,7 +8,6 @@ package terse_write
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -150,17 +148,9 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStruct({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStruct) setDefaults() *MyStruct {
     return x
 }
@@ -1009,89 +999,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyUnion) toString1() string {  // BoolField
-    if x.IsSetBoolField() {
-        return fmt.Sprintf("%v", *x.BoolField)
-    }
-    return fmt.Sprintf("%v", x.BoolField)
-}
-
-func (x *MyUnion) toString2() string {  // ByteField
-    if x.IsSetByteField() {
-        return fmt.Sprintf("%v", *x.ByteField)
-    }
-    return fmt.Sprintf("%v", x.ByteField)
-}
-
-func (x *MyUnion) toString3() string {  // ShortField
-    if x.IsSetShortField() {
-        return fmt.Sprintf("%v", *x.ShortField)
-    }
-    return fmt.Sprintf("%v", x.ShortField)
-}
-
-func (x *MyUnion) toString4() string {  // IntField
-    if x.IsSetIntField() {
-        return fmt.Sprintf("%v", *x.IntField)
-    }
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *MyUnion) toString5() string {  // LongField
-    if x.IsSetLongField() {
-        return fmt.Sprintf("%v", *x.LongField)
-    }
-    return fmt.Sprintf("%v", x.LongField)
-}
-
-func (x *MyUnion) toString6() string {  // FloatField
-    if x.IsSetFloatField() {
-        return fmt.Sprintf("%v", *x.FloatField)
-    }
-    return fmt.Sprintf("%v", x.FloatField)
-}
-
-func (x *MyUnion) toString7() string {  // DoubleField
-    if x.IsSetDoubleField() {
-        return fmt.Sprintf("%v", *x.DoubleField)
-    }
-    return fmt.Sprintf("%v", x.DoubleField)
-}
-
-func (x *MyUnion) toString8() string {  // StringField
-    if x.IsSetStringField() {
-        return fmt.Sprintf("%v", *x.StringField)
-    }
-    return fmt.Sprintf("%v", x.StringField)
-}
-
-func (x *MyUnion) toString9() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *MyUnion) toString10() string {  // EnumField
-    if x.IsSetEnumField() {
-        return fmt.Sprintf("%v", *x.EnumField)
-    }
-    return fmt.Sprintf("%v", x.EnumField)
-}
-
-func (x *MyUnion) toString11() string {  // ListField
-    return fmt.Sprintf("%v", x.ListField)
-}
-
-func (x *MyUnion) toString12() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *MyUnion) toString13() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *MyUnion) toString14() string {  // StructField
-    return fmt.Sprintf("%v", x.StructField)
-}
-
 
 
 
@@ -1289,31 +1196,9 @@ func (x *MyUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *MyUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyUnion({")
-    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
-    sb.WriteString(fmt.Sprintf("StructField:%s", x.toString14()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
@@ -1366,10 +1251,6 @@ if err != nil {
 
     x.Field1 = result
     return nil
-}
-
-func (x *MyStructWithCustomDefault) toString1() string {  // Field1
-    return fmt.Sprintf("%v", x.Field1)
 }
 
 
@@ -1433,18 +1314,9 @@ func (x *MyStructWithCustomDefault) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStructWithCustomDefault) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStructWithCustomDefault({")
-    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStructWithCustomDefault) setDefaults() *MyStructWithCustomDefault {
     return x.
         SetField1NonCompat(1)
@@ -2232,66 +2104,6 @@ if err != nil {
     return nil
 }
 
-func (x *StructLevelTerseStruct) toString1() string {  // BoolField
-    return fmt.Sprintf("%v", x.BoolField)
-}
-
-func (x *StructLevelTerseStruct) toString2() string {  // ByteField
-    return fmt.Sprintf("%v", x.ByteField)
-}
-
-func (x *StructLevelTerseStruct) toString3() string {  // ShortField
-    return fmt.Sprintf("%v", x.ShortField)
-}
-
-func (x *StructLevelTerseStruct) toString4() string {  // IntField
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *StructLevelTerseStruct) toString5() string {  // LongField
-    return fmt.Sprintf("%v", x.LongField)
-}
-
-func (x *StructLevelTerseStruct) toString6() string {  // FloatField
-    return fmt.Sprintf("%v", x.FloatField)
-}
-
-func (x *StructLevelTerseStruct) toString7() string {  // DoubleField
-    return fmt.Sprintf("%v", x.DoubleField)
-}
-
-func (x *StructLevelTerseStruct) toString8() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
-func (x *StructLevelTerseStruct) toString9() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *StructLevelTerseStruct) toString10() string {  // EnumField
-    return fmt.Sprintf("%v", x.EnumField)
-}
-
-func (x *StructLevelTerseStruct) toString11() string {  // ListField
-    return fmt.Sprintf("%v", x.ListField)
-}
-
-func (x *StructLevelTerseStruct) toString12() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *StructLevelTerseStruct) toString13() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *StructLevelTerseStruct) toString14() string {  // StructField
-    return fmt.Sprintf("%v", x.StructField)
-}
-
-func (x *StructLevelTerseStruct) toString15() string {  // UnionField
-    return fmt.Sprintf("%v", x.UnionField)
-}
-
 // Deprecated: Use NewStructLevelTerseStruct().GetStructField() instead.
 func (x *StructLevelTerseStruct) DefaultGetStructField() *MyStruct {
     if !x.IsSetStructField() {
@@ -2439,32 +2251,9 @@ func (x *StructLevelTerseStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *StructLevelTerseStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructLevelTerseStruct({")
-    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
-    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString14()))
-    sb.WriteString(fmt.Sprintf("UnionField:%s", x.toString15()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructLevelTerseStruct) setDefaults() *StructLevelTerseStruct {
     return x.
         SetBoolFieldNonCompat(false).
@@ -4039,126 +3828,6 @@ if err != nil {
     return nil
 }
 
-func (x *FieldLevelTerseStruct) toString1() string {  // TerseBoolField
-    return fmt.Sprintf("%v", x.TerseBoolField)
-}
-
-func (x *FieldLevelTerseStruct) toString2() string {  // TerseByteField
-    return fmt.Sprintf("%v", x.TerseByteField)
-}
-
-func (x *FieldLevelTerseStruct) toString3() string {  // TerseShortField
-    return fmt.Sprintf("%v", x.TerseShortField)
-}
-
-func (x *FieldLevelTerseStruct) toString4() string {  // TerseIntField
-    return fmt.Sprintf("%v", x.TerseIntField)
-}
-
-func (x *FieldLevelTerseStruct) toString5() string {  // TerseLongField
-    return fmt.Sprintf("%v", x.TerseLongField)
-}
-
-func (x *FieldLevelTerseStruct) toString6() string {  // TerseFloatField
-    return fmt.Sprintf("%v", x.TerseFloatField)
-}
-
-func (x *FieldLevelTerseStruct) toString7() string {  // TerseDoubleField
-    return fmt.Sprintf("%v", x.TerseDoubleField)
-}
-
-func (x *FieldLevelTerseStruct) toString8() string {  // TerseStringField
-    return fmt.Sprintf("%v", x.TerseStringField)
-}
-
-func (x *FieldLevelTerseStruct) toString9() string {  // TerseBinaryField
-    return fmt.Sprintf("%v", x.TerseBinaryField)
-}
-
-func (x *FieldLevelTerseStruct) toString10() string {  // TerseEnumField
-    return fmt.Sprintf("%v", x.TerseEnumField)
-}
-
-func (x *FieldLevelTerseStruct) toString11() string {  // TerseListField
-    return fmt.Sprintf("%v", x.TerseListField)
-}
-
-func (x *FieldLevelTerseStruct) toString12() string {  // TerseSetField
-    return fmt.Sprintf("%v", x.TerseSetField)
-}
-
-func (x *FieldLevelTerseStruct) toString13() string {  // TerseMapField
-    return fmt.Sprintf("%v", x.TerseMapField)
-}
-
-func (x *FieldLevelTerseStruct) toString14() string {  // TerseStructField
-    return fmt.Sprintf("%v", x.TerseStructField)
-}
-
-func (x *FieldLevelTerseStruct) toString15() string {  // BoolField
-    return fmt.Sprintf("%v", x.BoolField)
-}
-
-func (x *FieldLevelTerseStruct) toString16() string {  // ByteField
-    return fmt.Sprintf("%v", x.ByteField)
-}
-
-func (x *FieldLevelTerseStruct) toString17() string {  // ShortField
-    return fmt.Sprintf("%v", x.ShortField)
-}
-
-func (x *FieldLevelTerseStruct) toString18() string {  // IntField
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *FieldLevelTerseStruct) toString19() string {  // LongField
-    return fmt.Sprintf("%v", x.LongField)
-}
-
-func (x *FieldLevelTerseStruct) toString20() string {  // FloatField
-    return fmt.Sprintf("%v", x.FloatField)
-}
-
-func (x *FieldLevelTerseStruct) toString21() string {  // DoubleField
-    return fmt.Sprintf("%v", x.DoubleField)
-}
-
-func (x *FieldLevelTerseStruct) toString22() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
-func (x *FieldLevelTerseStruct) toString23() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *FieldLevelTerseStruct) toString24() string {  // EnumField
-    return fmt.Sprintf("%v", x.EnumField)
-}
-
-func (x *FieldLevelTerseStruct) toString25() string {  // ListField
-    return fmt.Sprintf("%v", x.ListField)
-}
-
-func (x *FieldLevelTerseStruct) toString26() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *FieldLevelTerseStruct) toString27() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *FieldLevelTerseStruct) toString28() string {  // StructField
-    return fmt.Sprintf("%v", x.StructField)
-}
-
-func (x *FieldLevelTerseStruct) toString29() string {  // TerseUnionField
-    return fmt.Sprintf("%v", x.TerseUnionField)
-}
-
-func (x *FieldLevelTerseStruct) toString30() string {  // UnionField
-    return fmt.Sprintf("%v", x.UnionField)
-}
-
 // Deprecated: Use NewFieldLevelTerseStruct().GetTerseStructField() instead.
 func (x *FieldLevelTerseStruct) DefaultGetTerseStructField() *MyStruct {
     if !x.IsSetTerseStructField() {
@@ -4397,47 +4066,9 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *FieldLevelTerseStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("FieldLevelTerseStruct({")
-    sb.WriteString(fmt.Sprintf("TerseBoolField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("TerseByteField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("TerseShortField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("TerseIntField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("TerseLongField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("TerseFloatField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("TerseDoubleField:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("TerseStringField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("TerseBinaryField:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("TerseEnumField:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("TerseListField:%s ", x.toString11()))
-    sb.WriteString(fmt.Sprintf("TerseSetField:%s ", x.toString12()))
-    sb.WriteString(fmt.Sprintf("TerseMapField:%s ", x.toString13()))
-    sb.WriteString(fmt.Sprintf("TerseStructField:%s ", x.toString14()))
-    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString15()))
-    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString16()))
-    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString17()))
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString18()))
-    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString19()))
-    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString20()))
-    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString21()))
-    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString22()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString23()))
-    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString24()))
-    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString25()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString26()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString27()))
-    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString28()))
-    sb.WriteString(fmt.Sprintf("TerseUnionField:%s ", x.toString29()))
-    sb.WriteString(fmt.Sprintf("UnionField:%s", x.toString30()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *FieldLevelTerseStruct) setDefaults() *FieldLevelTerseStruct {
     return x.
         SetTerseBoolFieldNonCompat(false).
@@ -5207,62 +4838,6 @@ if err != nil {
     return nil
 }
 
-func (x *TerseStructWithCustomDefault) toString1() string {  // BoolField
-    return fmt.Sprintf("%v", x.BoolField)
-}
-
-func (x *TerseStructWithCustomDefault) toString2() string {  // ByteField
-    return fmt.Sprintf("%v", x.ByteField)
-}
-
-func (x *TerseStructWithCustomDefault) toString3() string {  // ShortField
-    return fmt.Sprintf("%v", x.ShortField)
-}
-
-func (x *TerseStructWithCustomDefault) toString4() string {  // IntField
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *TerseStructWithCustomDefault) toString5() string {  // LongField
-    return fmt.Sprintf("%v", x.LongField)
-}
-
-func (x *TerseStructWithCustomDefault) toString6() string {  // FloatField
-    return fmt.Sprintf("%v", x.FloatField)
-}
-
-func (x *TerseStructWithCustomDefault) toString7() string {  // DoubleField
-    return fmt.Sprintf("%v", x.DoubleField)
-}
-
-func (x *TerseStructWithCustomDefault) toString8() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
-func (x *TerseStructWithCustomDefault) toString9() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *TerseStructWithCustomDefault) toString10() string {  // EnumField
-    return fmt.Sprintf("%v", x.EnumField)
-}
-
-func (x *TerseStructWithCustomDefault) toString11() string {  // ListField
-    return fmt.Sprintf("%v", x.ListField)
-}
-
-func (x *TerseStructWithCustomDefault) toString12() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *TerseStructWithCustomDefault) toString13() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *TerseStructWithCustomDefault) toString14() string {  // StructField
-    return fmt.Sprintf("%v", x.StructField)
-}
-
 // Deprecated: Use NewTerseStructWithCustomDefault().GetStructField() instead.
 func (x *TerseStructWithCustomDefault) DefaultGetStructField() *MyStructWithCustomDefault {
     if !x.IsSetStructField() {
@@ -5397,31 +4972,9 @@ func (x *TerseStructWithCustomDefault) Read(p thrift.Decoder) error {
 }
 
 func (x *TerseStructWithCustomDefault) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TerseStructWithCustomDefault({")
-    sb.WriteString(fmt.Sprintf("BoolField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("ByteField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("ShortField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("FloatField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("DoubleField:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("EnumField:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("ListField:%s ", x.toString11()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString12()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString13()))
-    sb.WriteString(fmt.Sprintf("StructField:%s", x.toString14()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TerseStructWithCustomDefault) setDefaults() *TerseStructWithCustomDefault {
     return x.
         SetBoolFieldNonCompat(true).
@@ -5588,18 +5141,6 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptedFields) toString1() string {  // Field1
-    return fmt.Sprintf("%v", x.Field1)
-}
-
-func (x *AdaptedFields) toString2() string {  // Field2
-    return fmt.Sprintf("%v", x.Field2)
-}
-
-func (x *AdaptedFields) toString3() string {  // Field3
-    return fmt.Sprintf("%v", x.Field3)
-}
-
 
 
 func (x *AdaptedFields) Write(p thrift.Encoder) error {
@@ -5671,20 +5212,9 @@ func (x *AdaptedFields) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptedFields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptedFields({")
-    sb.WriteString(fmt.Sprintf("Field1:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Field2:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Field3:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptedFields) setDefaults() *AdaptedFields {
     return x.
         SetField1NonCompat(NewMyInteger()).
@@ -5740,10 +5270,6 @@ if err != nil {
 
     x.Field1 = result
     return nil
-}
-
-func (x *WrappedFields) toString1() string {  // Field1
-    return fmt.Sprintf("%v", x.Field1)
 }
 
 
@@ -5807,18 +5333,9 @@ func (x *WrappedFields) Read(p thrift.Decoder) error {
 }
 
 func (x *WrappedFields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("WrappedFields({")
-    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *WrappedFields) setDefaults() *WrappedFields {
     return x.
         SetField1NonCompat(7)
@@ -5872,10 +5389,6 @@ if err != nil {
 
     x.Msg = result
     return nil
-}
-
-func (x *TerseException) toString1() string {  // Msg
-    return fmt.Sprintf("%v", x.Msg)
 }
 
 
@@ -5939,18 +5452,9 @@ func (x *TerseException) Read(p thrift.Decoder) error {
 }
 
 func (x *TerseException) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TerseException({")
-    sb.WriteString(fmt.Sprintf("Msg:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TerseException) setDefaults() *TerseException {
     return x.
         SetMsgNonCompat("")

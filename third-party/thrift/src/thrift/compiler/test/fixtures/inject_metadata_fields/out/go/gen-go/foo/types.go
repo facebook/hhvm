@@ -8,7 +8,6 @@ package foo
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Fields struct {
@@ -173,24 +171,6 @@ if err != nil {
     return nil
 }
 
-func (x *Fields) toString100() string {  // InjectedField
-    return fmt.Sprintf("%v", x.InjectedField)
-}
-
-func (x *Fields) toString101() string {  // InjectedStructuredAnnotationField
-    if x.IsSetInjectedStructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.InjectedStructuredAnnotationField)
-    }
-    return fmt.Sprintf("%v", x.InjectedStructuredAnnotationField)
-}
-
-func (x *Fields) toString102() string {  // InjectedUnstructuredAnnotationField
-    if x.IsSetInjectedUnstructuredAnnotationField() {
-        return fmt.Sprintf("%v", *x.InjectedUnstructuredAnnotationField)
-    }
-    return fmt.Sprintf("%v", x.InjectedUnstructuredAnnotationField)
-}
-
 
 
 
@@ -264,20 +244,9 @@ func (x *Fields) Read(p thrift.Decoder) error {
 }
 
 func (x *Fields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Fields({")
-    sb.WriteString(fmt.Sprintf("InjectedField:%s ", x.toString100()))
-    sb.WriteString(fmt.Sprintf("InjectedStructuredAnnotationField:%s ", x.toString101()))
-    sb.WriteString(fmt.Sprintf("InjectedUnstructuredAnnotationField:%s", x.toString102()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Fields) setDefaults() *Fields {
     return x.
         SetInjectedFieldNonCompat("")

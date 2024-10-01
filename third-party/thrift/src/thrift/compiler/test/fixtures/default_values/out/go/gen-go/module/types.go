@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type TrivialStruct struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.IntValue = result
     return nil
-}
-
-func (x *TrivialStruct) toString1() string {  // IntValue
-    return fmt.Sprintf("%v", x.IntValue)
 }
 
 
@@ -134,18 +128,9 @@ func (x *TrivialStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *TrivialStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TrivialStruct({")
-    sb.WriteString(fmt.Sprintf("IntValue:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TrivialStruct) setDefaults() *TrivialStruct {
     return x.
         SetIntValueNonCompat(0)
@@ -453,33 +438,6 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithNoCustomDefaultValues) toString1() string {  // UnqualifiedInteger
-    return fmt.Sprintf("%v", x.UnqualifiedInteger)
-}
-
-func (x *StructWithNoCustomDefaultValues) toString2() string {  // OptionalInteger
-    if x.IsSetOptionalInteger() {
-        return fmt.Sprintf("%v", *x.OptionalInteger)
-    }
-    return fmt.Sprintf("%v", x.OptionalInteger)
-}
-
-func (x *StructWithNoCustomDefaultValues) toString3() string {  // RequiredInteger
-    return fmt.Sprintf("%v", x.RequiredInteger)
-}
-
-func (x *StructWithNoCustomDefaultValues) toString4() string {  // UnqualifiedStruct
-    return fmt.Sprintf("%v", x.UnqualifiedStruct)
-}
-
-func (x *StructWithNoCustomDefaultValues) toString5() string {  // OptionalStruct
-    return fmt.Sprintf("%v", x.OptionalStruct)
-}
-
-func (x *StructWithNoCustomDefaultValues) toString6() string {  // RequiredStruct
-    return fmt.Sprintf("%v", x.RequiredStruct)
-}
-
 
 // Deprecated: Use NewStructWithNoCustomDefaultValues().GetUnqualifiedStruct() instead.
 func (x *StructWithNoCustomDefaultValues) DefaultGetUnqualifiedStruct() *TrivialStruct {
@@ -591,23 +549,9 @@ func (x *StructWithNoCustomDefaultValues) Read(p thrift.Decoder) error {
 }
 
 func (x *StructWithNoCustomDefaultValues) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructWithNoCustomDefaultValues({")
-    sb.WriteString(fmt.Sprintf("UnqualifiedInteger:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("OptionalInteger:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("RequiredInteger:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("UnqualifiedStruct:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("OptionalStruct:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("RequiredStruct:%s", x.toString6()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructWithNoCustomDefaultValues) setDefaults() *StructWithNoCustomDefaultValues {
     return x.
         SetUnqualifiedIntegerNonCompat(0).
@@ -918,33 +862,6 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithCustomDefaultValues) toString1() string {  // UnqualifiedInteger
-    return fmt.Sprintf("%v", x.UnqualifiedInteger)
-}
-
-func (x *StructWithCustomDefaultValues) toString2() string {  // OptionalInteger
-    if x.IsSetOptionalInteger() {
-        return fmt.Sprintf("%v", *x.OptionalInteger)
-    }
-    return fmt.Sprintf("%v", x.OptionalInteger)
-}
-
-func (x *StructWithCustomDefaultValues) toString3() string {  // RequiredInteger
-    return fmt.Sprintf("%v", x.RequiredInteger)
-}
-
-func (x *StructWithCustomDefaultValues) toString4() string {  // UnqualifiedStruct
-    return fmt.Sprintf("%v", x.UnqualifiedStruct)
-}
-
-func (x *StructWithCustomDefaultValues) toString5() string {  // OptionalStruct
-    return fmt.Sprintf("%v", x.OptionalStruct)
-}
-
-func (x *StructWithCustomDefaultValues) toString6() string {  // RequiredStruct
-    return fmt.Sprintf("%v", x.RequiredStruct)
-}
-
 
 // Deprecated: Use NewStructWithCustomDefaultValues().GetUnqualifiedStruct() instead.
 func (x *StructWithCustomDefaultValues) DefaultGetUnqualifiedStruct() *TrivialStruct {
@@ -1056,23 +973,9 @@ func (x *StructWithCustomDefaultValues) Read(p thrift.Decoder) error {
 }
 
 func (x *StructWithCustomDefaultValues) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructWithCustomDefaultValues({")
-    sb.WriteString(fmt.Sprintf("UnqualifiedInteger:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("OptionalInteger:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("RequiredInteger:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("UnqualifiedStruct:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("OptionalStruct:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("RequiredStruct:%s", x.toString6()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructWithCustomDefaultValues) setDefaults() *StructWithCustomDefaultValues {
     return x.
         SetUnqualifiedIntegerNonCompat(42).

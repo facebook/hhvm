@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -261,22 +259,6 @@ if err != nil {
     return nil
 }
 
-func (x *Color) toString1() string {  // Red
-    return fmt.Sprintf("%v", x.Red)
-}
-
-func (x *Color) toString2() string {  // Green
-    return fmt.Sprintf("%v", x.Green)
-}
-
-func (x *Color) toString3() string {  // Blue
-    return fmt.Sprintf("%v", x.Blue)
-}
-
-func (x *Color) toString4() string {  // Alpha
-    return fmt.Sprintf("%v", x.Alpha)
-}
-
 
 
 func (x *Color) Write(p thrift.Encoder) error {
@@ -353,21 +335,9 @@ func (x *Color) Read(p thrift.Decoder) error {
 }
 
 func (x *Color) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Color({")
-    sb.WriteString(fmt.Sprintf("Red:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Green:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Blue:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Alpha:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Color) setDefaults() *Color {
     return x.
         SetRedNonCompat(0.0).
@@ -646,38 +616,6 @@ if err != nil {
     return nil
 }
 
-func (x *Vehicle) toString1() string {  // Color
-    return fmt.Sprintf("%v", x.Color)
-}
-
-func (x *Vehicle) toString2() string {  // LicensePlate
-    if x.IsSetLicensePlate() {
-        return fmt.Sprintf("%v", *x.LicensePlate)
-    }
-    return fmt.Sprintf("%v", x.LicensePlate)
-}
-
-func (x *Vehicle) toString3() string {  // Description
-    if x.IsSetDescription() {
-        return fmt.Sprintf("%v", *x.Description)
-    }
-    return fmt.Sprintf("%v", x.Description)
-}
-
-func (x *Vehicle) toString4() string {  // Name
-    if x.IsSetName() {
-        return fmt.Sprintf("%v", *x.Name)
-    }
-    return fmt.Sprintf("%v", x.Name)
-}
-
-func (x *Vehicle) toString5() string {  // HasAC
-    if x.IsSetHasAC() {
-        return fmt.Sprintf("%v", *x.HasAC)
-    }
-    return fmt.Sprintf("%v", x.HasAC)
-}
-
 // Deprecated: Use NewVehicle().GetColor() instead.
 func (x *Vehicle) DefaultGetColor() *Color {
     if !x.IsSetColor() {
@@ -771,22 +709,9 @@ func (x *Vehicle) Read(p thrift.Decoder) error {
 }
 
 func (x *Vehicle) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Vehicle({")
-    sb.WriteString(fmt.Sprintf("Color:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("LicensePlate:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Description:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("HasAC:%s", x.toString5()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Vehicle) setDefaults() *Vehicle {
     return x.
         SetColorNonCompat(NewColor()).
@@ -1411,58 +1336,6 @@ result := listResult
     return nil
 }
 
-func (x *Person) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
-}
-
-func (x *Person) toString2() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
-func (x *Person) toString3() string {  // Age
-    if x.IsSetAge() {
-        return fmt.Sprintf("%v", *x.Age)
-    }
-    return fmt.Sprintf("%v", x.Age)
-}
-
-func (x *Person) toString4() string {  // Address
-    if x.IsSetAddress() {
-        return fmt.Sprintf("%v", *x.Address)
-    }
-    return fmt.Sprintf("%v", x.Address)
-}
-
-func (x *Person) toString5() string {  // FavoriteColor
-    return fmt.Sprintf("%v", x.FavoriteColor)
-}
-
-func (x *Person) toString6() string {  // Friends
-    return fmt.Sprintf("%v", x.Friends)
-}
-
-func (x *Person) toString7() string {  // BestFriend
-    if x.IsSetBestFriend() {
-        return fmt.Sprintf("%v", *x.BestFriend)
-    }
-    return fmt.Sprintf("%v", x.BestFriend)
-}
-
-func (x *Person) toString8() string {  // PetNames
-    return fmt.Sprintf("%v", x.PetNames)
-}
-
-func (x *Person) toString9() string {  // AfraidOfAnimal
-    if x.IsSetAfraidOfAnimal() {
-        return fmt.Sprintf("%v", *x.AfraidOfAnimal)
-    }
-    return fmt.Sprintf("%v", x.AfraidOfAnimal)
-}
-
-func (x *Person) toString10() string {  // Vehicles
-    return fmt.Sprintf("%v", x.Vehicles)
-}
-
 
 
 // Deprecated: Use NewPerson().GetFavoriteColor() instead.
@@ -1581,27 +1454,9 @@ func (x *Person) Read(p thrift.Decoder) error {
 }
 
 func (x *Person) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Person({")
-    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Age:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Address:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("FavoriteColor:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("Friends:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("BestFriend:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("PetNames:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("AfraidOfAnimal:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("Vehicles:%s", x.toString10()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Person) setDefaults() *Person {
     return x.
         SetIdNonCompat(NewPersonID()).

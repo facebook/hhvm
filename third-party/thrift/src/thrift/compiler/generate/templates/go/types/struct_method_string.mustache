@@ -20,21 +20,6 @@
 
 }}
 func (x *{{struct:go_name}}) String() string {
-    {{!
-        NOTE: Go may invoke String() method on a nil pointer,
-        so an explicit nil check is required for safety.
-    }}
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("{{struct:go_name}}({")
-    {{#struct:fields_sorted}}
-    sb.WriteString(fmt.Sprintf("{{field:go_name}}:%s{{^last?}} {{/last?}}", x.toString{{field:key_str}}()))
-    {{/struct:fields_sorted}}
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+{{!newline}}

@@ -8,7 +8,6 @@ package thrift
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -133,17 +131,9 @@ func (x *Experimental) Read(p thrift.Decoder) error {
 }
 
 func (x *Experimental) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Experimental({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Experimental) setDefaults() *Experimental {
     return x
 }
@@ -328,14 +318,6 @@ result := mapResult
     return nil
 }
 
-func (x *ReserveIds) toString1() string {  // Ids
-    return fmt.Sprintf("%v", x.Ids)
-}
-
-func (x *ReserveIds) toString2() string {  // IdRanges
-    return fmt.Sprintf("%v", x.IdRanges)
-}
-
 
 
 func (x *ReserveIds) Write(p thrift.Encoder) error {
@@ -402,19 +384,9 @@ func (x *ReserveIds) Read(p thrift.Decoder) error {
 }
 
 func (x *ReserveIds) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ReserveIds({")
-    sb.WriteString(fmt.Sprintf("Ids:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("IdRanges:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ReserveIds) setDefaults() *ReserveIds {
     return x.
         SetIdsNonCompat(make([]int32, 0)).
@@ -469,10 +441,6 @@ if err != nil {
 
     x.FieldName = result
     return nil
-}
-
-func (x *RequiresBackwardCompatibility) toString1() string {  // FieldName
-    return fmt.Sprintf("%v", x.FieldName)
 }
 
 
@@ -536,18 +504,9 @@ func (x *RequiresBackwardCompatibility) Read(p thrift.Decoder) error {
 }
 
 func (x *RequiresBackwardCompatibility) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RequiresBackwardCompatibility({")
-    sb.WriteString(fmt.Sprintf("FieldName:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *RequiresBackwardCompatibility) setDefaults() *RequiresBackwardCompatibility {
     return x.
         SetFieldNameNonCompat(false)
@@ -618,17 +577,9 @@ func (x *TerseWrite) Read(p thrift.Decoder) error {
 }
 
 func (x *TerseWrite) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TerseWrite({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TerseWrite) setDefaults() *TerseWrite {
     return x
 }
@@ -698,17 +649,9 @@ func (x *Box) Read(p thrift.Decoder) error {
 }
 
 func (x *Box) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Box({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Box) setDefaults() *Box {
     return x
 }
@@ -778,17 +721,9 @@ func (x *Mixin) Read(p thrift.Decoder) error {
 }
 
 func (x *Mixin) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Mixin({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Mixin) setDefaults() *Mixin {
     return x
 }
@@ -858,17 +793,9 @@ func (x *SerializeInFieldIdOrder) Read(p thrift.Decoder) error {
 }
 
 func (x *SerializeInFieldIdOrder) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("SerializeInFieldIdOrder({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *SerializeInFieldIdOrder) setDefaults() *SerializeInFieldIdOrder {
     return x
 }
@@ -938,17 +865,9 @@ func (x *BitmaskEnum) Read(p thrift.Decoder) error {
 }
 
 func (x *BitmaskEnum) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("BitmaskEnum({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *BitmaskEnum) setDefaults() *BitmaskEnum {
     return x
 }
@@ -1018,17 +937,9 @@ func (x *ExceptionMessage) Read(p thrift.Decoder) error {
 }
 
 func (x *ExceptionMessage) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ExceptionMessage({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ExceptionMessage) setDefaults() *ExceptionMessage {
     return x
 }
@@ -1098,17 +1009,9 @@ func (x *InternBox) Read(p thrift.Decoder) error {
 }
 
 func (x *InternBox) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("InternBox({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *InternBox) setDefaults() *InternBox {
     return x
 }
@@ -1178,17 +1081,9 @@ func (x *Serial) Read(p thrift.Decoder) error {
 }
 
 func (x *Serial) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Serial({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Serial) setDefaults() *Serial {
     return x
 }
@@ -1241,10 +1136,6 @@ if err != nil {
 
     x.Value = result
     return nil
-}
-
-func (x *Uri) toString1() string {  // Value
-    return fmt.Sprintf("%v", x.Value)
 }
 
 
@@ -1308,18 +1199,9 @@ func (x *Uri) Read(p thrift.Decoder) error {
 }
 
 func (x *Uri) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Uri({")
-    sb.WriteString(fmt.Sprintf("Value:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Uri) setDefaults() *Uri {
     return x.
         SetValueNonCompat("")
@@ -1374,10 +1256,6 @@ result := RpcPriority(enumResult)
 
     x.Level = result
     return nil
-}
-
-func (x *Priority) toString1() string {  // Level
-    return fmt.Sprintf("%v", x.Level)
 }
 
 
@@ -1441,18 +1319,9 @@ func (x *Priority) Read(p thrift.Decoder) error {
 }
 
 func (x *Priority) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Priority({")
-    sb.WriteString(fmt.Sprintf("Level:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Priority) setDefaults() *Priority {
     return x.
         SetLevelNonCompat(0)
@@ -1561,10 +1430,6 @@ result := mapResult
     return nil
 }
 
-func (x *DeprecatedUnvalidatedAnnotations) toString1() string {  // Items
-    return fmt.Sprintf("%v", x.Items)
-}
-
 
 
 func (x *DeprecatedUnvalidatedAnnotations) Write(p thrift.Encoder) error {
@@ -1626,18 +1491,9 @@ func (x *DeprecatedUnvalidatedAnnotations) Read(p thrift.Decoder) error {
 }
 
 func (x *DeprecatedUnvalidatedAnnotations) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DeprecatedUnvalidatedAnnotations({")
-    sb.WriteString(fmt.Sprintf("Items:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DeprecatedUnvalidatedAnnotations) setDefaults() *DeprecatedUnvalidatedAnnotations {
     return x.
         SetItemsNonCompat(make(map[string]string))
@@ -1708,17 +1564,9 @@ func (x *AllowReservedIdentifier) Read(p thrift.Decoder) error {
 }
 
 func (x *AllowReservedIdentifier) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AllowReservedIdentifier({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AllowReservedIdentifier) setDefaults() *AllowReservedIdentifier {
     return x
 }
@@ -1788,17 +1636,9 @@ func (x *AllowReservedFilename) Read(p thrift.Decoder) error {
 }
 
 func (x *AllowReservedFilename) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AllowReservedFilename({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AllowReservedFilename) setDefaults() *AllowReservedFilename {
     return x
 }

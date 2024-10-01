@@ -8,7 +8,6 @@ package test
 import (
     "fmt"
     "reflect"
-    "strings"
 
     test0 "my/namespacing/test"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = test0.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -86,10 +84,6 @@ if err != nil {
 
     x.Struct1 = result
     return nil
-}
-
-func (x *reqExtendTestServiceCheck) toString1() string {  // Struct1
-    return fmt.Sprintf("%v", x.Struct1)
 }
 
 // Deprecated: Use newReqExtendTestServiceCheck().GetStruct1() instead.
@@ -161,18 +155,9 @@ func (x *reqExtendTestServiceCheck) Read(p thrift.Decoder) error {
 }
 
 func (x *reqExtendTestServiceCheck) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqExtendTestServiceCheck({")
-    sb.WriteString(fmt.Sprintf("Struct1:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqExtendTestServiceCheck) setDefaults() *reqExtendTestServiceCheck {
     return x.
         SetStruct1NonCompat(test0.NewHsFoo())
@@ -243,13 +228,6 @@ if err != nil {
     return nil
 }
 
-func (x *respExtendTestServiceCheck) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -316,18 +294,9 @@ func (x *respExtendTestServiceCheck) Read(p thrift.Decoder) error {
 }
 
 func (x *respExtendTestServiceCheck) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respExtendTestServiceCheck({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respExtendTestServiceCheck) setDefaults() *respExtendTestServiceCheck {
     return x
 }

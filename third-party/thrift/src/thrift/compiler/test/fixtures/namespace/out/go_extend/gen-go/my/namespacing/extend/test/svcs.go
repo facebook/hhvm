@@ -10,7 +10,6 @@ import (
     "context"
     "fmt"
     "reflect"
-    "strings"
 
     test0 "my/namespacing/test"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -22,7 +21,6 @@ var _ = test0.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 var _ = metadata.GoUnusedProtection__
 

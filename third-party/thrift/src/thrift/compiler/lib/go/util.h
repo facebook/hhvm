@@ -95,7 +95,6 @@ class codegen_data {
       {"thrift", 0},
       {"context", 0},
       {"fmt", 0},
-      {"strings", 0},
       {"sync", 0},
       {"metadata", 0},
       {"maps", 0},

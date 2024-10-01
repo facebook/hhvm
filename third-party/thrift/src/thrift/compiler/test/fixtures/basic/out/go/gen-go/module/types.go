@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -596,42 +594,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.MyIntField)
-}
-
-func (x *MyStruct) toString2() string {  // MyStringField
-    return fmt.Sprintf("%v", x.MyStringField)
-}
-
-func (x *MyStruct) toString3() string {  // MyDataField
-    return fmt.Sprintf("%v", x.MyDataField)
-}
-
-func (x *MyStruct) toString4() string {  // MyEnum
-    return fmt.Sprintf("%v", x.MyEnum)
-}
-
-func (x *MyStruct) toString5() string {  // Oneway
-    return fmt.Sprintf("%v", x.Oneway)
-}
-
-func (x *MyStruct) toString6() string {  // Readonly
-    return fmt.Sprintf("%v", x.Readonly)
-}
-
-func (x *MyStruct) toString7() string {  // Idempotent
-    return fmt.Sprintf("%v", x.Idempotent)
-}
-
-func (x *MyStruct) toString8() string {  // FloatSet
-    return fmt.Sprintf("%v", x.FloatSet)
-}
-
-func (x *MyStruct) toString9() string {  // NoHackCodegenField
-    return fmt.Sprintf("%v", x.NoHackCodegenField)
-}
-
 // Deprecated: Use NewMyStruct().GetMyDataField() instead.
 func (x *MyStruct) DefaultGetMyDataField() *MyDataItemAlias {
     if !x.IsSetMyDataField() {
@@ -741,26 +703,9 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyStringField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("MyDataField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("Oneway:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("Readonly:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("Idempotent:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("FloatSet:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("NoHackCodegenField:%s", x.toString9()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetMyIntFieldNonCompat(0).
@@ -1031,18 +976,6 @@ result := mapResult
     return nil
 }
 
-func (x *Containers) toString1() string {  // I32List
-    return fmt.Sprintf("%v", x.I32List)
-}
-
-func (x *Containers) toString2() string {  // StringSet
-    return fmt.Sprintf("%v", x.StringSet)
-}
-
-func (x *Containers) toString3() string {  // StringToI64Map
-    return fmt.Sprintf("%v", x.StringToI64Map)
-}
-
 
 
 func (x *Containers) Write(p thrift.Encoder) error {
@@ -1114,20 +1047,9 @@ func (x *Containers) Read(p thrift.Decoder) error {
 }
 
 func (x *Containers) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Containers({")
-    sb.WriteString(fmt.Sprintf("I32List:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("StringSet:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("StringToI64Map:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Containers) setDefaults() *Containers {
     return x.
         SetI32ListNonCompat(make([]int32, 0)).
@@ -1200,17 +1122,9 @@ func (x *MyDataItem) Read(p thrift.Decoder) error {
 }
 
 func (x *MyDataItem) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyDataItem({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyDataItem) setDefaults() *MyDataItem {
     return x
 }
@@ -1464,25 +1378,6 @@ result := setResult
     return nil
 }
 
-func (x *MyUnion) toString1() string {  // MyEnum
-    if x.IsSetMyEnum() {
-        return fmt.Sprintf("%v", *x.MyEnum)
-    }
-    return fmt.Sprintf("%v", x.MyEnum)
-}
-
-func (x *MyUnion) toString2() string {  // MyStruct
-    return fmt.Sprintf("%v", x.MyStruct)
-}
-
-func (x *MyUnion) toString3() string {  // MyDataItem
-    return fmt.Sprintf("%v", x.MyDataItem)
-}
-
-func (x *MyUnion) toString4() string {  // FloatSet
-    return fmt.Sprintf("%v", x.FloatSet)
-}
-
 
 // Deprecated: Use NewMyUnion().GetMyStruct() instead.
 func (x *MyUnion) DefaultGetMyStruct() *MyStruct {
@@ -1600,21 +1495,9 @@ func (x *MyUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *MyUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyUnion({")
-    sb.WriteString(fmt.Sprintf("MyEnum:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyStruct:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("MyDataItem:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("FloatSet:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyUnion) setDefaults() *MyUnion {
     return x
 }
@@ -1816,22 +1699,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyException) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.MyIntField)
-}
-
-func (x *MyException) toString2() string {  // MyStringField
-    return fmt.Sprintf("%v", x.MyStringField)
-}
-
-func (x *MyException) toString3() string {  // MyStruct
-    return fmt.Sprintf("%v", x.MyStruct)
-}
-
-func (x *MyException) toString4() string {  // MyUnion
-    return fmt.Sprintf("%v", x.MyUnion)
-}
-
 // Deprecated: Use NewMyException().GetMyStruct() instead.
 func (x *MyException) DefaultGetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
@@ -1924,21 +1791,9 @@ func (x *MyException) Read(p thrift.Decoder) error {
 }
 
 func (x *MyException) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyException({")
-    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyStringField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("MyStruct:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("MyUnion:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyException) setDefaults() *MyException {
     return x.
         SetMyIntFieldNonCompat(0).
@@ -2147,22 +2002,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyExceptionWithMessage) toString1() string {  // MyIntField
-    return fmt.Sprintf("%v", x.MyIntField)
-}
-
-func (x *MyExceptionWithMessage) toString2() string {  // MyStringField
-    return fmt.Sprintf("%v", x.MyStringField)
-}
-
-func (x *MyExceptionWithMessage) toString3() string {  // MyStruct
-    return fmt.Sprintf("%v", x.MyStruct)
-}
-
-func (x *MyExceptionWithMessage) toString4() string {  // MyUnion
-    return fmt.Sprintf("%v", x.MyUnion)
-}
-
 // Deprecated: Use NewMyExceptionWithMessage().GetMyStruct() instead.
 func (x *MyExceptionWithMessage) DefaultGetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
@@ -2255,21 +2094,9 @@ func (x *MyExceptionWithMessage) Read(p thrift.Decoder) error {
 }
 
 func (x *MyExceptionWithMessage) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyExceptionWithMessage({")
-    sb.WriteString(fmt.Sprintf("MyIntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("MyStringField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("MyStruct:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("MyUnion:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyExceptionWithMessage) setDefaults() *MyExceptionWithMessage {
     return x.
         SetMyIntFieldNonCompat(0).
@@ -2329,10 +2156,6 @@ if err != nil {
 
     x.ReservedField = result
     return nil
-}
-
-func (x *ReservedKeyword) toString1() string {  // ReservedField
-    return fmt.Sprintf("%v", x.ReservedField)
 }
 
 
@@ -2396,18 +2219,9 @@ func (x *ReservedKeyword) Read(p thrift.Decoder) error {
 }
 
 func (x *ReservedKeyword) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ReservedKeyword({")
-    sb.WriteString(fmt.Sprintf("ReservedField:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ReservedKeyword) setDefaults() *ReservedKeyword {
     return x.
         SetReservedFieldNonCompat(0)
@@ -2472,13 +2286,6 @@ if err != nil {
 
     x.ReservedField = &result
     return nil
-}
-
-func (x *UnionToBeRenamed) toString1() string {  // ReservedField
-    if x.IsSetReservedField() {
-        return fmt.Sprintf("%v", *x.ReservedField)
-    }
-    return fmt.Sprintf("%v", x.ReservedField)
 }
 
 
@@ -2558,18 +2365,9 @@ func (x *UnionToBeRenamed) Read(p thrift.Decoder) error {
 }
 
 func (x *UnionToBeRenamed) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("UnionToBeRenamed({")
-    sb.WriteString(fmt.Sprintf("ReservedField:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *UnionToBeRenamed) setDefaults() *UnionToBeRenamed {
     return x
 }
@@ -2644,17 +2442,9 @@ func (x *reqFooServiceSimpleRPC) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFooServiceSimpleRPC) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFooServiceSimpleRPC({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFooServiceSimpleRPC) setDefaults() *reqFooServiceSimpleRPC {
     return x
 }
@@ -2732,17 +2522,9 @@ func (x *respFooServiceSimpleRPC) Read(p thrift.Decoder) error {
 }
 
 func (x *respFooServiceSimpleRPC) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFooServiceSimpleRPC({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFooServiceSimpleRPC) setDefaults() *respFooServiceSimpleRPC {
     return x
 }
@@ -2798,10 +2580,6 @@ if err != nil {
 
     x.IntParameter = result
     return nil
-}
-
-func (x *reqFB303ServiceSimpleRPC) toString1() string {  // IntParameter
-    return fmt.Sprintf("%v", x.IntParameter)
 }
 
 
@@ -2865,18 +2643,9 @@ func (x *reqFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
 }
 
 func (x *reqFB303ServiceSimpleRPC) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqFB303ServiceSimpleRPC({")
-    sb.WriteString(fmt.Sprintf("IntParameter:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqFB303ServiceSimpleRPC) setDefaults() *reqFB303ServiceSimpleRPC {
     return x.
         SetIntParameterNonCompat(0)
@@ -2946,10 +2715,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respFB303ServiceSimpleRPC) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespFB303ServiceSimpleRPC().GetSuccess() instead.
@@ -3025,18 +2790,9 @@ func (x *respFB303ServiceSimpleRPC) Read(p thrift.Decoder) error {
 }
 
 func (x *respFB303ServiceSimpleRPC) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respFB303ServiceSimpleRPC({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respFB303ServiceSimpleRPC) setDefaults() *respFB303ServiceSimpleRPC {
     return x
 }
@@ -3109,17 +2865,9 @@ func (x *reqMyServicePing) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServicePing) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServicePing({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServicePing) setDefaults() *reqMyServicePing {
     return x
 }
@@ -3197,17 +2945,9 @@ func (x *respMyServicePing) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServicePing) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServicePing({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServicePing) setDefaults() *respMyServicePing {
     return x
 }
@@ -3280,17 +3020,9 @@ func (x *reqMyServiceGetRandomData) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceGetRandomData) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceGetRandomData({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceGetRandomData) setDefaults() *reqMyServiceGetRandomData {
     return x
 }
@@ -3360,13 +3092,6 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceGetRandomData) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -3433,18 +3158,9 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceGetRandomData) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceGetRandomData({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceGetRandomData) setDefaults() *respMyServiceGetRandomData {
     return x
 }
@@ -3500,10 +3216,6 @@ if err != nil {
 
     x.Sink = result
     return nil
-}
-
-func (x *reqMyServiceSink) toString1() string {  // Sink
-    return fmt.Sprintf("%v", x.Sink)
 }
 
 
@@ -3567,18 +3279,9 @@ func (x *reqMyServiceSink) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceSink) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceSink({")
-    sb.WriteString(fmt.Sprintf("Sink:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceSink) setDefaults() *reqMyServiceSink {
     return x.
         SetSinkNonCompat(0)
@@ -3657,17 +3360,9 @@ func (x *respMyServiceSink) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceSink) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceSink({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceSink) setDefaults() *respMyServiceSink {
     return x
 }
@@ -3766,14 +3461,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServicePutDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
-}
-
-func (x *reqMyServicePutDataById) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
-}
-
 
 
 func (x *reqMyServicePutDataById) Write(p thrift.Encoder) error {
@@ -3840,19 +3527,9 @@ func (x *reqMyServicePutDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServicePutDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServicePutDataById({")
-    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServicePutDataById) setDefaults() *reqMyServicePutDataById {
     return x.
         SetIdNonCompat(0).
@@ -3932,17 +3609,9 @@ func (x *respMyServicePutDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServicePutDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServicePutDataById({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServicePutDataById) setDefaults() *respMyServicePutDataById {
     return x
 }
@@ -3998,10 +3667,6 @@ if err != nil {
 
     x.Id = result
     return nil
-}
-
-func (x *reqMyServiceHasDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -4065,18 +3730,9 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceHasDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceHasDataById({")
-    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceHasDataById) setDefaults() *reqMyServiceHasDataById {
     return x.
         SetIdNonCompat(0)
@@ -4147,13 +3803,6 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceHasDataById) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4220,18 +3869,9 @@ func (x *respMyServiceHasDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceHasDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceHasDataById({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceHasDataById) setDefaults() *respMyServiceHasDataById {
     return x
 }
@@ -4287,10 +3927,6 @@ if err != nil {
 
     x.Id = result
     return nil
-}
-
-func (x *reqMyServiceGetDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -4354,18 +3990,9 @@ func (x *reqMyServiceGetDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceGetDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceGetDataById({")
-    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceGetDataById) setDefaults() *reqMyServiceGetDataById {
     return x.
         SetIdNonCompat(0)
@@ -4436,13 +4063,6 @@ if err != nil {
     return nil
 }
 
-func (x *respMyServiceGetDataById) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -4509,18 +4129,9 @@ func (x *respMyServiceGetDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceGetDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceGetDataById({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceGetDataById) setDefaults() *respMyServiceGetDataById {
     return x
 }
@@ -4576,10 +4187,6 @@ if err != nil {
 
     x.Id = result
     return nil
-}
-
-func (x *reqMyServiceDeleteDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
 }
 
 
@@ -4643,18 +4250,9 @@ func (x *reqMyServiceDeleteDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceDeleteDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceDeleteDataById({")
-    sb.WriteString(fmt.Sprintf("Id:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceDeleteDataById) setDefaults() *reqMyServiceDeleteDataById {
     return x.
         SetIdNonCompat(0)
@@ -4733,17 +4331,9 @@ func (x *respMyServiceDeleteDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceDeleteDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceDeleteDataById({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceDeleteDataById) setDefaults() *respMyServiceDeleteDataById {
     return x
 }
@@ -4842,14 +4432,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceLobDataById) toString1() string {  // Id
-    return fmt.Sprintf("%v", x.Id)
-}
-
-func (x *reqMyServiceLobDataById) toString2() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
-}
-
 
 
 func (x *reqMyServiceLobDataById) Write(p thrift.Encoder) error {
@@ -4916,19 +4498,9 @@ func (x *reqMyServiceLobDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceLobDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceLobDataById({")
-    sb.WriteString(fmt.Sprintf("Id:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceLobDataById) setDefaults() *reqMyServiceLobDataById {
     return x.
         SetIdNonCompat(0).
@@ -5008,17 +4580,9 @@ func (x *respMyServiceLobDataById) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceLobDataById) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceLobDataById({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceLobDataById) setDefaults() *respMyServiceLobDataById {
     return x
 }
@@ -5091,17 +4655,9 @@ func (x *reqMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceInvalidReturnForHack) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceInvalidReturnForHack({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceInvalidReturnForHack) setDefaults() *reqMyServiceInvalidReturnForHack {
     return x
 }
@@ -5200,10 +4756,6 @@ result := setResult
     return nil
 }
 
-func (x *respMyServiceInvalidReturnForHack) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respMyServiceInvalidReturnForHack) Exception() thrift.WritableException {
@@ -5269,18 +4821,9 @@ func (x *respMyServiceInvalidReturnForHack) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceInvalidReturnForHack) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceInvalidReturnForHack({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceInvalidReturnForHack) setDefaults() *respMyServiceInvalidReturnForHack {
     return x
 }
@@ -5353,17 +4896,9 @@ func (x *reqMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceRpcSkippedCodegen) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceRpcSkippedCodegen({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceRpcSkippedCodegen) setDefaults() *reqMyServiceRpcSkippedCodegen {
     return x
 }
@@ -5441,17 +4976,9 @@ func (x *respMyServiceRpcSkippedCodegen) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceRpcSkippedCodegen) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceRpcSkippedCodegen({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceRpcSkippedCodegen) setDefaults() *respMyServiceRpcSkippedCodegen {
     return x
 }
@@ -5507,10 +5034,6 @@ if err != nil {
 
     x.Key = result
     return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey0) toString1() string {  // Key
-    return fmt.Sprintf("%v", x.Key)
 }
 
 
@@ -5574,18 +5097,9 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey0) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqDbMixedStackArgumentsGetDataByKey0({")
-    sb.WriteString(fmt.Sprintf("Key:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqDbMixedStackArgumentsGetDataByKey0) setDefaults() *reqDbMixedStackArgumentsGetDataByKey0 {
     return x.
         SetKeyNonCompat("")
@@ -5656,10 +5170,6 @@ if err != nil {
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey0) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
@@ -5725,18 +5235,9 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Decoder) error {
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey0) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respDbMixedStackArgumentsGetDataByKey0({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respDbMixedStackArgumentsGetDataByKey0) setDefaults() *respDbMixedStackArgumentsGetDataByKey0 {
     return x
 }
@@ -5792,10 +5293,6 @@ if err != nil {
 
     x.Key = result
     return nil
-}
-
-func (x *reqDbMixedStackArgumentsGetDataByKey1) toString1() string {  // Key
-    return fmt.Sprintf("%v", x.Key)
 }
 
 
@@ -5859,18 +5356,9 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
 }
 
 func (x *reqDbMixedStackArgumentsGetDataByKey1) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqDbMixedStackArgumentsGetDataByKey1({")
-    sb.WriteString(fmt.Sprintf("Key:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqDbMixedStackArgumentsGetDataByKey1) setDefaults() *reqDbMixedStackArgumentsGetDataByKey1 {
     return x.
         SetKeyNonCompat("")
@@ -5941,10 +5429,6 @@ if err != nil {
     return nil
 }
 
-func (x *respDbMixedStackArgumentsGetDataByKey1) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) Exception() thrift.WritableException {
@@ -6010,18 +5494,9 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Decoder) error {
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respDbMixedStackArgumentsGetDataByKey1({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respDbMixedStackArgumentsGetDataByKey1) setDefaults() *respDbMixedStackArgumentsGetDataByKey1 {
     return x
 }

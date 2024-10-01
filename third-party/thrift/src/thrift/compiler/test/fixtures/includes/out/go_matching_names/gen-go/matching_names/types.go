@@ -8,7 +8,6 @@ package matching_names
 import (
     "fmt"
     "reflect"
-    "strings"
 
     includesAlso "IncludesAlso"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,7 +17,6 @@ var _ = includesAlso.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type IncludesAlso struct {
@@ -81,10 +79,6 @@ if err != nil {
 
     x.Also = result
     return nil
-}
-
-func (x *IncludesAlso) toString1() string {  // Also
-    return fmt.Sprintf("%v", x.Also)
 }
 
 // Deprecated: Use NewIncludesAlso().GetAlso() instead.
@@ -156,18 +150,9 @@ func (x *IncludesAlso) Read(p thrift.Decoder) error {
 }
 
 func (x *IncludesAlso) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("IncludesAlso({")
-    sb.WriteString(fmt.Sprintf("Also:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *IncludesAlso) setDefaults() *IncludesAlso {
     return x.
         SetAlsoNonCompat(includesAlso.NewAlso())

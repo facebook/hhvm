@@ -8,7 +8,6 @@ package hack
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type FieldWrapper struct {
@@ -67,10 +65,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *FieldWrapper) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -134,18 +128,9 @@ func (x *FieldWrapper) Read(p thrift.Decoder) error {
 }
 
 func (x *FieldWrapper) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("FieldWrapper({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *FieldWrapper) setDefaults() *FieldWrapper {
     return x.
         SetNameNonCompat("")
@@ -283,18 +268,6 @@ if err != nil {
     return nil
 }
 
-func (x *Wrapper) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
-func (x *Wrapper) toString2() string {  // UnderlyingName
-    return fmt.Sprintf("%v", x.UnderlyingName)
-}
-
-func (x *Wrapper) toString3() string {  // ExtraNamespace
-    return fmt.Sprintf("%v", x.ExtraNamespace)
-}
-
 
 
 func (x *Wrapper) Write(p thrift.Encoder) error {
@@ -366,20 +339,9 @@ func (x *Wrapper) Read(p thrift.Decoder) error {
 }
 
 func (x *Wrapper) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Wrapper({")
-    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("UnderlyingName:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("ExtraNamespace:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Wrapper) setDefaults() *Wrapper {
     return x.
         SetNameNonCompat("").
@@ -435,10 +397,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Adapter) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -502,18 +460,9 @@ func (x *Adapter) Read(p thrift.Decoder) error {
 }
 
 func (x *Adapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Adapter({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Adapter) setDefaults() *Adapter {
     return x.
         SetNameNonCompat("")
@@ -567,10 +516,6 @@ if err != nil {
 
     x.Reason = result
     return nil
-}
-
-func (x *SkipCodegen) toString1() string {  // Reason
-    return fmt.Sprintf("%v", x.Reason)
 }
 
 
@@ -634,18 +579,9 @@ func (x *SkipCodegen) Read(p thrift.Decoder) error {
 }
 
 func (x *SkipCodegen) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("SkipCodegen({")
-    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *SkipCodegen) setDefaults() *SkipCodegen {
     return x.
         SetReasonNonCompat("")
@@ -742,14 +678,6 @@ if err != nil {
     return nil
 }
 
-func (x *Name) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
-}
-
-func (x *Name) toString2() string {  // Reason
-    return fmt.Sprintf("%v", x.Reason)
-}
-
 
 
 func (x *Name) Write(p thrift.Encoder) error {
@@ -816,19 +744,9 @@ func (x *Name) Read(p thrift.Decoder) error {
 }
 
 func (x *Name) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Name({")
-    sb.WriteString(fmt.Sprintf("Name:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Reason:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Name) setDefaults() *Name {
     return x.
         SetNameNonCompat("").
@@ -921,10 +839,6 @@ result := listResult
     return nil
 }
 
-func (x *UnionEnumAttributes) toString1() string {  // Attributes
-    return fmt.Sprintf("%v", x.Attributes)
-}
-
 
 
 func (x *UnionEnumAttributes) Write(p thrift.Encoder) error {
@@ -986,18 +900,9 @@ func (x *UnionEnumAttributes) Read(p thrift.Decoder) error {
 }
 
 func (x *UnionEnumAttributes) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("UnionEnumAttributes({")
-    sb.WriteString(fmt.Sprintf("Attributes:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *UnionEnumAttributes) setDefaults() *UnionEnumAttributes {
     return x.
         SetAttributesNonCompat(make([]string, 0))
@@ -1051,10 +956,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *StructTrait) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -1118,18 +1019,9 @@ func (x *StructTrait) Read(p thrift.Decoder) error {
 }
 
 func (x *StructTrait) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructTrait({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructTrait) setDefaults() *StructTrait {
     return x.
         SetNameNonCompat("")
@@ -1221,10 +1113,6 @@ result := listResult
     return nil
 }
 
-func (x *Attributes) toString1() string {  // Attributes
-    return fmt.Sprintf("%v", x.Attributes)
-}
-
 
 
 func (x *Attributes) Write(p thrift.Encoder) error {
@@ -1286,18 +1174,9 @@ func (x *Attributes) Read(p thrift.Decoder) error {
 }
 
 func (x *Attributes) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Attributes({")
-    sb.WriteString(fmt.Sprintf("Attributes:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Attributes) setDefaults() *Attributes {
     return x.
         SetAttributesNonCompat(make([]string, 0))
@@ -1368,17 +1247,9 @@ func (x *StructAsTrait) Read(p thrift.Decoder) error {
 }
 
 func (x *StructAsTrait) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructAsTrait({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructAsTrait) setDefaults() *StructAsTrait {
     return x
 }
@@ -1448,17 +1319,9 @@ func (x *ModuleInternal) Read(p thrift.Decoder) error {
 }
 
 func (x *ModuleInternal) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ModuleInternal({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ModuleInternal) setDefaults() *ModuleInternal {
     return x
 }

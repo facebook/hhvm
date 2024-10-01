@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -1327,14 +1325,6 @@ result := Color(enumResult)
     return nil
 }
 
-func (x *MyAnnotation) toString1() string {  // Signature
-    return fmt.Sprintf("%v", x.Signature)
-}
-
-func (x *MyAnnotation) toString2() string {  // Color
-    return fmt.Sprintf("%v", x.Color)
-}
-
 
 
 func (x *MyAnnotation) Write(p thrift.Encoder) error {
@@ -1401,19 +1391,9 @@ func (x *MyAnnotation) Read(p thrift.Decoder) error {
 }
 
 func (x *MyAnnotation) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyAnnotation({")
-    sb.WriteString(fmt.Sprintf("Signature:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Color:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyAnnotation) setDefaults() *MyAnnotation {
     return x.
         SetSignatureNonCompat("").
@@ -1947,53 +1927,6 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) toString1() string {  // IntField
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *Foo) toString2() string {  // OptionalIntField
-    if x.IsSetOptionalIntField() {
-        return fmt.Sprintf("%v", *x.OptionalIntField)
-    }
-    return fmt.Sprintf("%v", x.OptionalIntField)
-}
-
-func (x *Foo) toString3() string {  // IntFieldWithDefault
-    return fmt.Sprintf("%v", x.IntFieldWithDefault)
-}
-
-func (x *Foo) toString4() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *Foo) toString5() string {  // OptionalSetField
-    return fmt.Sprintf("%v", x.OptionalSetField)
-}
-
-func (x *Foo) toString6() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *Foo) toString7() string {  // OptionalMapField
-    return fmt.Sprintf("%v", x.OptionalMapField)
-}
-
-func (x *Foo) toString8() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *Foo) toString9() string {  // LongField
-    return fmt.Sprintf("%v", x.LongField)
-}
-
-func (x *Foo) toString10() string {  // AdaptedLongField
-    return fmt.Sprintf("%v", x.AdaptedLongField)
-}
-
-func (x *Foo) toString11() string {  // DoubleAdaptedField
-    return fmt.Sprintf("%v", x.DoubleAdaptedField)
-}
-
 
 
 
@@ -2106,28 +2039,9 @@ func (x *Foo) Read(p thrift.Decoder) error {
 }
 
 func (x *Foo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Foo({")
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("OptionalIntField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("IntFieldWithDefault:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("OptionalSetField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("OptionalMapField:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("LongField:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("AdaptedLongField:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("DoubleAdaptedField:%s", x.toString11()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Foo) setDefaults() *Foo {
     return x.
         SetIntFieldNonCompat(NewI32_5137()).
@@ -2414,32 +2328,6 @@ if err != nil {
     return nil
 }
 
-func (x *Baz) toString1() string {  // IntField
-    if x.IsSetIntField() {
-        return fmt.Sprintf("%v", *x.IntField)
-    }
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *Baz) toString4() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
-func (x *Baz) toString6() string {  // MapField
-    return fmt.Sprintf("%v", x.MapField)
-}
-
-func (x *Baz) toString8() string {  // BinaryField
-    return fmt.Sprintf("%v", x.BinaryField)
-}
-
-func (x *Baz) toString9() string {  // LongField
-    if x.IsSetLongField() {
-        return fmt.Sprintf("%v", *x.LongField)
-    }
-    return fmt.Sprintf("%v", x.LongField)
-}
-
 
 
 func (x *Baz) countSetFields() int {
@@ -2550,22 +2438,9 @@ func (x *Baz) Read(p thrift.Decoder) error {
 }
 
 func (x *Baz) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Baz({")
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("SetField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("MapField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("BinaryField:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("LongField:%s", x.toString9()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Baz) setDefaults() *Baz {
     return x
 }
@@ -3004,34 +2879,6 @@ if err != nil {
     return nil
 }
 
-func (x *Bar) toString1() string {  // StructField
-    return fmt.Sprintf("%v", x.StructField)
-}
-
-func (x *Bar) toString2() string {  // OptionalStructField
-    return fmt.Sprintf("%v", x.OptionalStructField)
-}
-
-func (x *Bar) toString3() string {  // StructListField
-    return fmt.Sprintf("%v", x.StructListField)
-}
-
-func (x *Bar) toString4() string {  // OptionalStructListField
-    return fmt.Sprintf("%v", x.OptionalStructListField)
-}
-
-func (x *Bar) toString5() string {  // UnionField
-    return fmt.Sprintf("%v", x.UnionField)
-}
-
-func (x *Bar) toString6() string {  // OptionalUnionField
-    return fmt.Sprintf("%v", x.OptionalUnionField)
-}
-
-func (x *Bar) toString7() string {  // AdaptedStructField
-    return fmt.Sprintf("%v", x.AdaptedStructField)
-}
-
 // Deprecated: Use NewBar().GetStructField() instead.
 func (x *Bar) DefaultGetStructField() *Foo_6868 {
     if !x.IsSetStructField() {
@@ -3163,24 +3010,9 @@ func (x *Bar) Read(p thrift.Decoder) error {
 }
 
 func (x *Bar) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Bar({")
-    sb.WriteString(fmt.Sprintf("StructField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("OptionalStructField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("StructListField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("OptionalStructListField:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("UnionField:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("OptionalUnionField:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("AdaptedStructField:%s", x.toString7()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Bar) setDefaults() *Bar {
     return x.
         SetStructFieldNonCompat(NewFoo_6868()).
@@ -3237,10 +3069,6 @@ if err != nil {
 
     x.Field = result
     return nil
-}
-
-func (x *DirectlyAdapted) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -3304,18 +3132,9 @@ func (x *DirectlyAdapted) Read(p thrift.Decoder) error {
 }
 
 func (x *DirectlyAdapted) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DirectlyAdapted({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DirectlyAdapted) setDefaults() *DirectlyAdapted {
     return x.
         SetFieldNonCompat(0)
@@ -3369,10 +3188,6 @@ if err != nil {
 
     x.Field = result
     return nil
-}
-
-func (x *IndependentDirectlyAdapted) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -3436,18 +3251,9 @@ func (x *IndependentDirectlyAdapted) Read(p thrift.Decoder) error {
 }
 
 func (x *IndependentDirectlyAdapted) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("IndependentDirectlyAdapted({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *IndependentDirectlyAdapted) setDefaults() *IndependentDirectlyAdapted {
     return x.
         SetFieldNonCompat(0)
@@ -3648,28 +3454,6 @@ if err != nil {
     return nil
 }
 
-func (x *StructWithFieldAdapter) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
-}
-
-func (x *StructWithFieldAdapter) toString2() string {  // SharedField
-    return fmt.Sprintf("%v", x.SharedField)
-}
-
-func (x *StructWithFieldAdapter) toString3() string {  // OptSharedField
-    if x.IsSetOptSharedField() {
-        return fmt.Sprintf("%v", *x.OptSharedField)
-    }
-    return fmt.Sprintf("%v", x.OptSharedField)
-}
-
-func (x *StructWithFieldAdapter) toString4() string {  // OptBoxedField
-    if x.IsSetOptBoxedField() {
-        return fmt.Sprintf("%v", *x.OptBoxedField)
-    }
-    return fmt.Sprintf("%v", x.OptBoxedField)
-}
-
 
 
 
@@ -3748,21 +3532,9 @@ func (x *StructWithFieldAdapter) Read(p thrift.Decoder) error {
 }
 
 func (x *StructWithFieldAdapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructWithFieldAdapter({")
-    sb.WriteString(fmt.Sprintf("Field:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("SharedField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("OptSharedField:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("OptBoxedField:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructWithFieldAdapter) setDefaults() *StructWithFieldAdapter {
     return x.
         SetFieldNonCompat(0).
@@ -3937,18 +3709,6 @@ result := setResult
     return nil
 }
 
-func (x *TerseAdaptedFields) toString1() string {  // IntField
-    return fmt.Sprintf("%v", x.IntField)
-}
-
-func (x *TerseAdaptedFields) toString2() string {  // StringField
-    return fmt.Sprintf("%v", x.StringField)
-}
-
-func (x *TerseAdaptedFields) toString3() string {  // SetField
-    return fmt.Sprintf("%v", x.SetField)
-}
-
 
 
 func (x *TerseAdaptedFields) Write(p thrift.Encoder) error {
@@ -4020,20 +3780,9 @@ func (x *TerseAdaptedFields) Read(p thrift.Decoder) error {
 }
 
 func (x *TerseAdaptedFields) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TerseAdaptedFields({")
-    sb.WriteString(fmt.Sprintf("IntField:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("StringField:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("SetField:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TerseAdaptedFields) setDefaults() *TerseAdaptedFields {
     return x.
         SetIntFieldNonCompat(0).
@@ -4101,10 +3850,6 @@ if err != nil {
 
     x.A = result
     return nil
-}
-
-func (x *B) toString1() string {  // A
-    return fmt.Sprintf("%v", x.A)
 }
 
 // Deprecated: Use NewB().GetA() instead.
@@ -4176,18 +3921,9 @@ func (x *B) Read(p thrift.Decoder) error {
 }
 
 func (x *B) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("B({")
-    sb.WriteString(fmt.Sprintf("A:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *B) setDefaults() *B {
     return x.
         SetANonCompat(NewAdaptedA())
@@ -4258,17 +3994,9 @@ func (x *A) Read(p thrift.Decoder) error {
 }
 
 func (x *A) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("A({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *A) setDefaults() *A {
     return x
 }
@@ -4321,10 +4049,6 @@ if err != nil {
 
     x.Path = result
     return nil
-}
-
-func (x *Config) toString1() string {  // Path
-    return fmt.Sprintf("%v", x.Path)
 }
 
 
@@ -4388,18 +4112,9 @@ func (x *Config) Read(p thrift.Decoder) error {
 }
 
 func (x *Config) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Config({")
-    sb.WriteString(fmt.Sprintf("Path:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Config) setDefaults() *Config {
     return x.
         SetPathNonCompat("")
@@ -4504,14 +4219,6 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
-}
-
-func (x *MyStruct) toString2() string {  // SetString
-    return fmt.Sprintf("%v", x.SetString)
-}
-
 
 
 func (x *MyStruct) Write(p thrift.Encoder) error {
@@ -4578,19 +4285,9 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *MyStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MyStruct({")
-    sb.WriteString(fmt.Sprintf("Field:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("SetString:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MyStruct) setDefaults() *MyStruct {
     return x.
         SetFieldNonCompat(0).
@@ -5035,46 +4732,6 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTestStruct) toString1() string {  // Delay
-    return fmt.Sprintf("%v", x.Delay)
-}
-
-func (x *AdaptTestStruct) toString2() string {  // Custom
-    return fmt.Sprintf("%v", x.Custom)
-}
-
-func (x *AdaptTestStruct) toString3() string {  // Timeout
-    return fmt.Sprintf("%v", x.Timeout)
-}
-
-func (x *AdaptTestStruct) toString4() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
-}
-
-func (x *AdaptTestStruct) toString5() string {  // Meta
-    return fmt.Sprintf("%v", x.Meta)
-}
-
-func (x *AdaptTestStruct) toString6() string {  // IndirectionString
-    return fmt.Sprintf("%v", x.IndirectionString)
-}
-
-func (x *AdaptTestStruct) toString7() string {  // StringData
-    return fmt.Sprintf("%v", x.StringData)
-}
-
-func (x *AdaptTestStruct) toString8() string {  // DoubleWrappedBool
-    return fmt.Sprintf("%v", x.DoubleWrappedBool)
-}
-
-func (x *AdaptTestStruct) toString9() string {  // DoubleWrappedInteger
-    return fmt.Sprintf("%v", x.DoubleWrappedInteger)
-}
-
-func (x *AdaptTestStruct) toString10() string {  // BinaryData
-    return fmt.Sprintf("%v", x.BinaryData)
-}
-
 
 
 func (x *AdaptTestStruct) Write(p thrift.Encoder) error {
@@ -5181,27 +4838,9 @@ func (x *AdaptTestStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptTestStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptTestStruct({")
-    sb.WriteString(fmt.Sprintf("Delay:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Custom:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Timeout:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("Data:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("Meta:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("IndirectionString:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("StringData:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("DoubleWrappedBool:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("DoubleWrappedInteger:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("BinaryData:%s", x.toString10()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptTestStruct) setDefaults() *AdaptTestStruct {
     return x.
         SetDelayNonCompat(NewDurationMs()).
@@ -6399,94 +6038,6 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTemplatedTestStruct) toString1() string {  // AdaptedBool
-    return fmt.Sprintf("%v", x.AdaptedBool)
-}
-
-func (x *AdaptTemplatedTestStruct) toString2() string {  // AdaptedByte
-    return fmt.Sprintf("%v", x.AdaptedByte)
-}
-
-func (x *AdaptTemplatedTestStruct) toString3() string {  // AdaptedShort
-    return fmt.Sprintf("%v", x.AdaptedShort)
-}
-
-func (x *AdaptTemplatedTestStruct) toString4() string {  // AdaptedInteger
-    return fmt.Sprintf("%v", x.AdaptedInteger)
-}
-
-func (x *AdaptTemplatedTestStruct) toString5() string {  // AdaptedLong
-    return fmt.Sprintf("%v", x.AdaptedLong)
-}
-
-func (x *AdaptTemplatedTestStruct) toString6() string {  // AdaptedDouble
-    return fmt.Sprintf("%v", x.AdaptedDouble)
-}
-
-func (x *AdaptTemplatedTestStruct) toString7() string {  // AdaptedString
-    return fmt.Sprintf("%v", x.AdaptedString)
-}
-
-func (x *AdaptTemplatedTestStruct) toString8() string {  // AdaptedList
-    return fmt.Sprintf("%v", x.AdaptedList)
-}
-
-func (x *AdaptTemplatedTestStruct) toString9() string {  // AdaptedSet
-    return fmt.Sprintf("%v", x.AdaptedSet)
-}
-
-func (x *AdaptTemplatedTestStruct) toString10() string {  // AdaptedMap
-    return fmt.Sprintf("%v", x.AdaptedMap)
-}
-
-func (x *AdaptTemplatedTestStruct) toString11() string {  // AdaptedBoolDefault
-    return fmt.Sprintf("%v", x.AdaptedBoolDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString12() string {  // AdaptedByteDefault
-    return fmt.Sprintf("%v", x.AdaptedByteDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString13() string {  // AdaptedShortDefault
-    return fmt.Sprintf("%v", x.AdaptedShortDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString14() string {  // AdaptedIntegerDefault
-    return fmt.Sprintf("%v", x.AdaptedIntegerDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString15() string {  // AdaptedLongDefault
-    return fmt.Sprintf("%v", x.AdaptedLongDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString16() string {  // AdaptedDoubleDefault
-    return fmt.Sprintf("%v", x.AdaptedDoubleDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString17() string {  // AdaptedStringDefault
-    return fmt.Sprintf("%v", x.AdaptedStringDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString18() string {  // AdaptedEnum
-    return fmt.Sprintf("%v", x.AdaptedEnum)
-}
-
-func (x *AdaptTemplatedTestStruct) toString19() string {  // AdaptedListDefault
-    return fmt.Sprintf("%v", x.AdaptedListDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString20() string {  // AdaptedSetDefault
-    return fmt.Sprintf("%v", x.AdaptedSetDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString21() string {  // AdaptedMapDefault
-    return fmt.Sprintf("%v", x.AdaptedMapDefault)
-}
-
-func (x *AdaptTemplatedTestStruct) toString22() string {  // DoubleTypedefBool
-    return fmt.Sprintf("%v", x.DoubleTypedefBool)
-}
-
 
 
 func (x *AdaptTemplatedTestStruct) Write(p thrift.Encoder) error {
@@ -6653,39 +6204,9 @@ func (x *AdaptTemplatedTestStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptTemplatedTestStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptTemplatedTestStruct({")
-    sb.WriteString(fmt.Sprintf("AdaptedBool:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("AdaptedByte:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("AdaptedShort:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("AdaptedInteger:%s ", x.toString4()))
-    sb.WriteString(fmt.Sprintf("AdaptedLong:%s ", x.toString5()))
-    sb.WriteString(fmt.Sprintf("AdaptedDouble:%s ", x.toString6()))
-    sb.WriteString(fmt.Sprintf("AdaptedString:%s ", x.toString7()))
-    sb.WriteString(fmt.Sprintf("AdaptedList:%s ", x.toString8()))
-    sb.WriteString(fmt.Sprintf("AdaptedSet:%s ", x.toString9()))
-    sb.WriteString(fmt.Sprintf("AdaptedMap:%s ", x.toString10()))
-    sb.WriteString(fmt.Sprintf("AdaptedBoolDefault:%s ", x.toString11()))
-    sb.WriteString(fmt.Sprintf("AdaptedByteDefault:%s ", x.toString12()))
-    sb.WriteString(fmt.Sprintf("AdaptedShortDefault:%s ", x.toString13()))
-    sb.WriteString(fmt.Sprintf("AdaptedIntegerDefault:%s ", x.toString14()))
-    sb.WriteString(fmt.Sprintf("AdaptedLongDefault:%s ", x.toString15()))
-    sb.WriteString(fmt.Sprintf("AdaptedDoubleDefault:%s ", x.toString16()))
-    sb.WriteString(fmt.Sprintf("AdaptedStringDefault:%s ", x.toString17()))
-    sb.WriteString(fmt.Sprintf("AdaptedEnum:%s ", x.toString18()))
-    sb.WriteString(fmt.Sprintf("AdaptedListDefault:%s ", x.toString19()))
-    sb.WriteString(fmt.Sprintf("AdaptedSetDefault:%s ", x.toString20()))
-    sb.WriteString(fmt.Sprintf("AdaptedMapDefault:%s ", x.toString21()))
-    sb.WriteString(fmt.Sprintf("DoubleTypedefBool:%s", x.toString22()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptTemplatedTestStruct) setDefaults() *AdaptTemplatedTestStruct {
     return x.
         SetAdaptedBoolNonCompat(NewAdaptedBool()).
@@ -6788,10 +6309,6 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTemplatedNestedTestStruct) toString1() string {  // AdaptedStruct
-    return fmt.Sprintf("%v", x.AdaptedStruct)
-}
-
 // Deprecated: Use NewAdaptTemplatedNestedTestStruct().GetAdaptedStruct() instead.
 func (x *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplatedTestStruct {
     if !x.IsSetAdaptedStruct() {
@@ -6861,18 +6378,9 @@ func (x *AdaptTemplatedNestedTestStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptTemplatedNestedTestStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptTemplatedNestedTestStruct({")
-    sb.WriteString(fmt.Sprintf("AdaptedStruct:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptTemplatedNestedTestStruct) setDefaults() *AdaptTemplatedNestedTestStruct {
     return x.
         SetAdaptedStructNonCompat(NewAdaptTemplatedTestStruct())
@@ -6993,17 +6501,6 @@ if err != nil {
     return nil
 }
 
-func (x *AdaptTestUnion) toString1() string {  // Delay
-    if x.IsSetDelay() {
-        return fmt.Sprintf("%v", *x.Delay)
-    }
-    return fmt.Sprintf("%v", x.Delay)
-}
-
-func (x *AdaptTestUnion) toString2() string {  // Custom
-    return fmt.Sprintf("%v", x.Custom)
-}
-
 
 func (x *AdaptTestUnion) countSetFields() int {
     count := int(0)
@@ -7089,19 +6586,9 @@ func (x *AdaptTestUnion) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptTestUnion) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptTestUnion({")
-    sb.WriteString(fmt.Sprintf("Delay:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Custom:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptTestUnion) setDefaults() *AdaptTestUnion {
     return x
 }
@@ -7154,10 +6641,6 @@ if err != nil {
 
     x.Data = result
     return nil
-}
-
-func (x *AdaptedStruct) toString1() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -7221,18 +6704,9 @@ func (x *AdaptedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *AdaptedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AdaptedStruct({")
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AdaptedStruct) setDefaults() *AdaptedStruct {
     return x.
         SetDataNonCompat(0)
@@ -7286,10 +6760,6 @@ if err != nil {
 
     x.Data = result
     return nil
-}
-
-func (x *DirectlyAdaptedStruct) toString1() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -7353,18 +6823,9 @@ func (x *DirectlyAdaptedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *DirectlyAdaptedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DirectlyAdaptedStruct({")
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DirectlyAdaptedStruct) setDefaults() *DirectlyAdaptedStruct {
     return x.
         SetDataNonCompat(0)
@@ -7591,22 +7052,6 @@ if err != nil {
     return nil
 }
 
-func (x *StructFieldAdaptedStruct) toString1() string {  // AdaptedStruct
-    return fmt.Sprintf("%v", x.AdaptedStruct)
-}
-
-func (x *StructFieldAdaptedStruct) toString2() string {  // AdaptedTypedef
-    return fmt.Sprintf("%v", x.AdaptedTypedef)
-}
-
-func (x *StructFieldAdaptedStruct) toString3() string {  // DirectlyAdapted
-    return fmt.Sprintf("%v", x.DirectlyAdapted)
-}
-
-func (x *StructFieldAdaptedStruct) toString4() string {  // TypedefOfAdapted
-    return fmt.Sprintf("%v", x.TypedefOfAdapted)
-}
-
 // Deprecated: Use NewStructFieldAdaptedStruct().GetAdaptedStruct() instead.
 func (x *StructFieldAdaptedStruct) DefaultGetAdaptedStruct() *AdaptedStruct {
     if !x.IsSetAdaptedStruct() {
@@ -7715,21 +7160,9 @@ func (x *StructFieldAdaptedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *StructFieldAdaptedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("StructFieldAdaptedStruct({")
-    sb.WriteString(fmt.Sprintf("AdaptedStruct:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("AdaptedTypedef:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("DirectlyAdapted:%s ", x.toString3()))
-    sb.WriteString(fmt.Sprintf("TypedefOfAdapted:%s", x.toString4()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *StructFieldAdaptedStruct) setDefaults() *StructFieldAdaptedStruct {
     return x.
         SetAdaptedStructNonCompat(NewAdaptedStruct()).
@@ -7798,10 +7231,6 @@ if err != nil {
 
     x.Field = result
     return nil
-}
-
-func (x *CircularAdaptee) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
 }
 
 // Deprecated: Use NewCircularAdaptee().GetField() instead.
@@ -7873,18 +7302,9 @@ func (x *CircularAdaptee) Read(p thrift.Decoder) error {
 }
 
 func (x *CircularAdaptee) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("CircularAdaptee({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *CircularAdaptee) setDefaults() *CircularAdaptee {
     return x.
         SetFieldNonCompat(NewCircularStruct())
@@ -7950,10 +7370,6 @@ if err != nil {
 
     x.Field = result
     return nil
-}
-
-func (x *CircularStruct) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
 }
 
 // Deprecated: Use NewCircularStruct().GetField() instead.
@@ -8025,18 +7441,9 @@ func (x *CircularStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *CircularStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("CircularStruct({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *CircularStruct) setDefaults() *CircularStruct {
     return x
 }
@@ -8101,10 +7508,6 @@ if err != nil {
 
     x.ReorderedDependentAdapted = result
     return nil
-}
-
-func (x *ReorderedStruct) toString1() string {  // ReorderedDependentAdapted
-    return fmt.Sprintf("%v", x.ReorderedDependentAdapted)
 }
 
 // Deprecated: Use NewReorderedStruct().GetReorderedDependentAdapted() instead.
@@ -8176,18 +7579,9 @@ func (x *ReorderedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *ReorderedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ReorderedStruct({")
-    sb.WriteString(fmt.Sprintf("ReorderedDependentAdapted:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ReorderedStruct) setDefaults() *ReorderedStruct {
     return x.
         SetReorderedDependentAdaptedNonCompat(NewDeclaredAfterStruct())
@@ -8258,17 +7652,9 @@ func (x *DeclaredAfterStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *DeclaredAfterStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("DeclaredAfterStruct({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *DeclaredAfterStruct) setDefaults() *DeclaredAfterStruct {
     return x
 }
@@ -8321,10 +7707,6 @@ if err != nil {
 
     x.Data = result
     return nil
-}
-
-func (x *RenamedStruct) toString1() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -8388,18 +7770,9 @@ func (x *RenamedStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *RenamedStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RenamedStruct({")
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *RenamedStruct) setDefaults() *RenamedStruct {
     return x.
         SetDataNonCompat(0)
@@ -8453,10 +7826,6 @@ if err != nil {
 
     x.Data = result
     return nil
-}
-
-func (x *SameNamespaceStruct) toString1() string {  // Data
-    return fmt.Sprintf("%v", x.Data)
 }
 
 
@@ -8520,18 +7889,9 @@ func (x *SameNamespaceStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *SameNamespaceStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("SameNamespaceStruct({")
-    sb.WriteString(fmt.Sprintf("Data:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *SameNamespaceStruct) setDefaults() *SameNamespaceStruct {
     return x.
         SetDataNonCompat(0)
@@ -8602,17 +7962,9 @@ func (x *HeapAllocated) Read(p thrift.Decoder) error {
 }
 
 func (x *HeapAllocated) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("HeapAllocated({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *HeapAllocated) setDefaults() *HeapAllocated {
     return x
 }
@@ -8677,10 +8029,6 @@ if err != nil {
 
     x.Ptr = result
     return nil
-}
-
-func (x *MoveOnly) toString1() string {  // Ptr
-    return fmt.Sprintf("%v", x.Ptr)
 }
 
 // Deprecated: Use NewMoveOnly().GetPtr() instead.
@@ -8752,18 +8100,9 @@ func (x *MoveOnly) Read(p thrift.Decoder) error {
 }
 
 func (x *MoveOnly) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("MoveOnly({")
-    sb.WriteString(fmt.Sprintf("Ptr:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *MoveOnly) setDefaults() *MoveOnly {
     return x.
         SetPtrNonCompat(NewHeapAllocated())
@@ -8817,10 +8156,6 @@ if err != nil {
 
     x.Ptr = result
     return nil
-}
-
-func (x *AlsoMoveOnly) toString1() string {  // Ptr
-    return fmt.Sprintf("%v", x.Ptr)
 }
 
 
@@ -8884,18 +8219,9 @@ func (x *AlsoMoveOnly) Read(p thrift.Decoder) error {
 }
 
 func (x *AlsoMoveOnly) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("AlsoMoveOnly({")
-    sb.WriteString(fmt.Sprintf("Ptr:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *AlsoMoveOnly) setDefaults() *AlsoMoveOnly {
     return x.
         SetPtrNonCompat(0)
@@ -8966,17 +8292,9 @@ func (x *ApplyAdapter) Read(p thrift.Decoder) error {
 }
 
 func (x *ApplyAdapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("ApplyAdapter({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *ApplyAdapter) setDefaults() *ApplyAdapter {
     return x
 }
@@ -9046,17 +8364,9 @@ func (x *TransitiveAdapted) Read(p thrift.Decoder) error {
 }
 
 func (x *TransitiveAdapted) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("TransitiveAdapted({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *TransitiveAdapted) setDefaults() *TransitiveAdapted {
     return x
 }
@@ -9227,27 +8537,6 @@ if err != nil {
     return nil
 }
 
-func (x *CountingStruct) toString1() string {  // RegularInt
-    if x.IsSetRegularInt() {
-        return fmt.Sprintf("%v", *x.RegularInt)
-    }
-    return fmt.Sprintf("%v", x.RegularInt)
-}
-
-func (x *CountingStruct) toString2() string {  // CountingInt
-    if x.IsSetCountingInt() {
-        return fmt.Sprintf("%v", *x.CountingInt)
-    }
-    return fmt.Sprintf("%v", x.CountingInt)
-}
-
-func (x *CountingStruct) toString3() string {  // RegularString
-    if x.IsSetRegularString() {
-        return fmt.Sprintf("%v", *x.RegularString)
-    }
-    return fmt.Sprintf("%v", x.RegularString)
-}
-
 
 
 
@@ -9322,20 +8611,9 @@ func (x *CountingStruct) Read(p thrift.Decoder) error {
 }
 
 func (x *CountingStruct) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("CountingStruct({")
-    sb.WriteString(fmt.Sprintf("RegularInt:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("CountingInt:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("RegularString:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *CountingStruct) setDefaults() *CountingStruct {
     return x
 }
@@ -9388,10 +8666,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Person) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -9455,18 +8729,9 @@ func (x *Person) Read(p thrift.Decoder) error {
 }
 
 func (x *Person) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Person({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Person) setDefaults() *Person {
     return x.
         SetNameNonCompat("")
@@ -9520,10 +8785,6 @@ if err != nil {
 
     x.Name = result
     return nil
-}
-
-func (x *Person2) toString1() string {  // Name
-    return fmt.Sprintf("%v", x.Name)
 }
 
 
@@ -9587,18 +8848,9 @@ func (x *Person2) Read(p thrift.Decoder) error {
 }
 
 func (x *Person2) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Person2({")
-    sb.WriteString(fmt.Sprintf("Name:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Person2) setDefaults() *Person2 {
     return x.
         SetNameNonCompat("")
@@ -9652,10 +8904,6 @@ if err != nil {
 
     x.Field = result
     return nil
-}
-
-func (x *RenamedStructWithStructAdapterAndFieldAdapter) toString1() string {  // Field
-    return fmt.Sprintf("%v", x.Field)
 }
 
 
@@ -9719,18 +8967,9 @@ func (x *RenamedStructWithStructAdapterAndFieldAdapter) Read(p thrift.Decoder) e
 }
 
 func (x *RenamedStructWithStructAdapterAndFieldAdapter) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("RenamedStructWithStructAdapterAndFieldAdapter({")
-    sb.WriteString(fmt.Sprintf("Field:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *RenamedStructWithStructAdapterAndFieldAdapter) setDefaults() *RenamedStructWithStructAdapterAndFieldAdapter {
     return x.
         SetFieldNonCompat(0)
@@ -9886,18 +9125,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqServiceFunc) toString1() string {  // Arg1
-    return fmt.Sprintf("%v", x.Arg1)
-}
-
-func (x *reqServiceFunc) toString2() string {  // Arg2
-    return fmt.Sprintf("%v", x.Arg2)
-}
-
-func (x *reqServiceFunc) toString3() string {  // Arg3
-    return fmt.Sprintf("%v", x.Arg3)
-}
-
 // Deprecated: Use newReqServiceFunc().GetArg3() instead.
 func (x *reqServiceFunc) DefaultGetArg3() *Foo {
     if !x.IsSetArg3() {
@@ -9977,20 +9204,9 @@ func (x *reqServiceFunc) Read(p thrift.Decoder) error {
 }
 
 func (x *reqServiceFunc) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqServiceFunc({")
-    sb.WriteString(fmt.Sprintf("Arg1:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Arg2:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Arg3:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqServiceFunc) setDefaults() *reqServiceFunc {
     return x.
         SetArg1NonCompat(NewStringWithAdapter_7208()).
@@ -10064,13 +9280,6 @@ if err != nil {
     return nil
 }
 
-func (x *respServiceFunc) toString0() string {  // Success
-    if x.IsSetSuccess() {
-        return fmt.Sprintf("%v", *x.Success)
-    }
-    return fmt.Sprintf("%v", x.Success)
-}
-
 
 
 
@@ -10137,18 +9346,9 @@ func (x *respServiceFunc) Read(p thrift.Decoder) error {
 }
 
 func (x *respServiceFunc) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respServiceFunc({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respServiceFunc) setDefaults() *respServiceFunc {
     return x
 }
@@ -10221,17 +9421,9 @@ func (x *reqAdapterServiceCount) Read(p thrift.Decoder) error {
 }
 
 func (x *reqAdapterServiceCount) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqAdapterServiceCount({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqAdapterServiceCount) setDefaults() *reqAdapterServiceCount {
     return x
 }
@@ -10300,10 +9492,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respAdapterServiceCount) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespAdapterServiceCount().GetSuccess() instead.
@@ -10379,18 +9567,9 @@ func (x *respAdapterServiceCount) Read(p thrift.Decoder) error {
 }
 
 func (x *respAdapterServiceCount) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respAdapterServiceCount({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respAdapterServiceCount) setDefaults() *respAdapterServiceCount {
     return x
 }
@@ -10458,10 +9637,6 @@ if err != nil {
 
     x.Arg = result
     return nil
-}
-
-func (x *reqAdapterServiceAdaptedTypes) toString1() string {  // Arg
-    return fmt.Sprintf("%v", x.Arg)
 }
 
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().GetArg() instead.
@@ -10533,18 +9708,9 @@ func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Decoder) error {
 }
 
 func (x *reqAdapterServiceAdaptedTypes) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqAdapterServiceAdaptedTypes({")
-    sb.WriteString(fmt.Sprintf("Arg:%s", x.toString1()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqAdapterServiceAdaptedTypes) setDefaults() *reqAdapterServiceAdaptedTypes {
     return x.
         SetArgNonCompat(NewHeapAllocated())
@@ -10614,10 +9780,6 @@ if err != nil {
 
     x.Success = result
     return nil
-}
-
-func (x *respAdapterServiceAdaptedTypes) toString0() string {  // Success
-    return fmt.Sprintf("%v", x.Success)
 }
 
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().GetSuccess() instead.
@@ -10693,18 +9855,9 @@ func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Decoder) error {
 }
 
 func (x *respAdapterServiceAdaptedTypes) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respAdapterServiceAdaptedTypes({")
-    sb.WriteString(fmt.Sprintf("Success:%s", x.toString0()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respAdapterServiceAdaptedTypes) setDefaults() *respAdapterServiceAdaptedTypes {
     return x
 }

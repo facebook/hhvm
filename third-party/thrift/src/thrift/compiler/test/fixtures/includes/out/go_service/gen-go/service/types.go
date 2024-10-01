@@ -8,7 +8,6 @@ package service
 import (
     "fmt"
     "reflect"
-    "strings"
 
     module "module"
     includes "includes"
@@ -20,7 +19,6 @@ var _ = includes.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 
@@ -197,14 +195,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceQuery) toString1() string {  // S
-    return fmt.Sprintf("%v", x.S)
-}
-
-func (x *reqMyServiceQuery) toString2() string {  // I
-    return fmt.Sprintf("%v", x.I)
-}
-
 // Deprecated: Use newReqMyServiceQuery().GetS() instead.
 func (x *reqMyServiceQuery) DefaultGetS() *module.MyStruct {
     if !x.IsSetS() {
@@ -287,19 +277,9 @@ func (x *reqMyServiceQuery) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceQuery) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceQuery({")
-    sb.WriteString(fmt.Sprintf("S:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("I:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceQuery) setDefaults() *reqMyServiceQuery {
     return x.
         SetSNonCompat(module.NewMyStruct()).
@@ -379,17 +359,9 @@ func (x *respMyServiceQuery) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceQuery) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceQuery({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceQuery) setDefaults() *respMyServiceQuery {
     return x
 }
@@ -512,14 +484,6 @@ if err != nil {
     return nil
 }
 
-func (x *reqMyServiceHasArgDocs) toString1() string {  // S
-    return fmt.Sprintf("%v", x.S)
-}
-
-func (x *reqMyServiceHasArgDocs) toString2() string {  // I
-    return fmt.Sprintf("%v", x.I)
-}
-
 // Deprecated: Use newReqMyServiceHasArgDocs().GetS() instead.
 func (x *reqMyServiceHasArgDocs) DefaultGetS() *module.MyStruct {
     if !x.IsSetS() {
@@ -602,19 +566,9 @@ func (x *reqMyServiceHasArgDocs) Read(p thrift.Decoder) error {
 }
 
 func (x *reqMyServiceHasArgDocs) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("reqMyServiceHasArgDocs({")
-    sb.WriteString(fmt.Sprintf("S:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("I:%s", x.toString2()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *reqMyServiceHasArgDocs) setDefaults() *reqMyServiceHasArgDocs {
     return x.
         SetSNonCompat(module.NewMyStruct()).
@@ -694,17 +648,9 @@ func (x *respMyServiceHasArgDocs) Read(p thrift.Decoder) error {
 }
 
 func (x *respMyServiceHasArgDocs) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("respMyServiceHasArgDocs({")
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *respMyServiceHasArgDocs) setDefaults() *respMyServiceHasArgDocs {
     return x
 }

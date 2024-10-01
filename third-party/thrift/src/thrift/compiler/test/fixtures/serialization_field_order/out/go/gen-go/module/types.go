@@ -8,7 +8,6 @@ package module
 import (
     "fmt"
     "reflect"
-    "strings"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -16,7 +15,6 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = strings.Split
 var _ = thrift.ZERO
 
 type Foo struct {
@@ -151,18 +149,6 @@ if err != nil {
     return nil
 }
 
-func (x *Foo) toString1() string {  // Field2
-    return fmt.Sprintf("%v", x.Field2)
-}
-
-func (x *Foo) toString2() string {  // Field3
-    return fmt.Sprintf("%v", x.Field3)
-}
-
-func (x *Foo) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.Field1)
-}
-
 
 
 func (x *Foo) Write(p thrift.Encoder) error {
@@ -234,20 +220,9 @@ func (x *Foo) Read(p thrift.Decoder) error {
 }
 
 func (x *Foo) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Foo({")
-    sb.WriteString(fmt.Sprintf("Field2:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Field3:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Foo) setDefaults() *Foo {
     return x.
         SetField2NonCompat(0).
@@ -387,18 +362,6 @@ if err != nil {
     return nil
 }
 
-func (x *Foo2) toString1() string {  // Field2
-    return fmt.Sprintf("%v", x.Field2)
-}
-
-func (x *Foo2) toString2() string {  // Field3
-    return fmt.Sprintf("%v", x.Field3)
-}
-
-func (x *Foo2) toString3() string {  // Field1
-    return fmt.Sprintf("%v", x.Field1)
-}
-
 
 
 func (x *Foo2) Write(p thrift.Encoder) error {
@@ -470,20 +433,9 @@ func (x *Foo2) Read(p thrift.Decoder) error {
 }
 
 func (x *Foo2) String() string {
-    if x == nil {
-        return "<nil>"
-    }
-
-    var sb strings.Builder
-
-    sb.WriteString("Foo2({")
-    sb.WriteString(fmt.Sprintf("Field2:%s ", x.toString1()))
-    sb.WriteString(fmt.Sprintf("Field3:%s ", x.toString2()))
-    sb.WriteString(fmt.Sprintf("Field1:%s", x.toString3()))
-    sb.WriteString("})")
-
-    return sb.String()
+    return thrift.StructToString(reflect.ValueOf(x))
 }
+
 func (x *Foo2) setDefaults() *Foo2 {
     return x.
         SetField2NonCompat(0).

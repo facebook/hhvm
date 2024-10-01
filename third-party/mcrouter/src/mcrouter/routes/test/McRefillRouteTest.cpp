@@ -26,10 +26,24 @@
 
 namespace facebook::memcache::mcrouter {
 
-class McRefillRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {};
+class McRefillRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
+ public:
+  McRefillRouteTest() {
+    primaryTestHandle = std::make_shared<TestHandle>(
+        GetRouteTestData(carbon::Result::NOTFOUND, "a"));
+    refillTestHandle = std::make_shared<TestHandle>(
+        GetRouteTestData(carbon::Result::FOUND, "a"));
+    primary = primaryTestHandle->rh;
+    refill = refillTestHandle->rh;
+  }
+
+  std::shared_ptr<MemcacheRouteHandleIf> primary;
+  std::shared_ptr<TestHandle> primaryTestHandle;
+  std::shared_ptr<TestHandle> refillTestHandle;
+  std::shared_ptr<MemcacheRouteHandleIf> refill;
+};
 
 TEST_F(McRefillRouteTest, create) {
-  // Full TaoShardFilterRoute. Used to see if the route handle configures fine.
   constexpr folly::StringPiece kMcRefillRouteConfig = R"(
   {
     "type": "McRefillRoute",
@@ -41,6 +55,27 @@ TEST_F(McRefillRouteTest, create) {
   auto rh = getRoute(kMcRefillRouteConfig);
   EXPECT_TRUE(rh != nullptr);
   EXPECT_EQ("McRefillRoute", rh->routeName());
+}
+
+TEST_F(McRefillRouteTest, testRefill) {
+  mockFiberContext();
+  McRefillRoute<MemcacheRouterInfo> rh(primary, refill);
+  auto getReq = McGetRequest("key");
+  std::string clientId = "iamaclient";
+  getReq.setClientIdentifier(clientId);
+  TestFiberManager<MemcacheRouterInfo> fm;
+  fm.runAll({[&]() { rh.route(getReq); }});
+  EXPECT_EQ(primaryTestHandle->sawOperations.size(), 2);
+  EXPECT_EQ(primaryTestHandle->sawOperations[0], McGetRequest::name);
+  EXPECT_EQ(primaryTestHandle->sawClientIdentifiers[0], clientId);
+  EXPECT_EQ(primaryTestHandle->sawOperations[1], McSetRequest::name);
+  EXPECT_EQ(primaryTestHandle->sawClientIdentifiers[1], clientId);
+
+  EXPECT_EQ(refillTestHandle->sawOperations.size(), 2);
+  EXPECT_EQ(refillTestHandle->sawOperations[0], McGetRequest::name);
+  EXPECT_EQ(refillTestHandle->sawClientIdentifiers[0], clientId);
+  EXPECT_EQ(refillTestHandle->sawOperations[1], McMetagetRequest::name);
+  EXPECT_EQ(refillTestHandle->sawClientIdentifiers[1], clientId);
 }
 
 } // namespace facebook::memcache::mcrouter

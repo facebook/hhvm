@@ -73,6 +73,7 @@ class McRefillRoute {
       auto refillReply = refill_->route(genGetRequest(req));
       if (isHitResult(*refillReply.result_ref())) {
         McMetagetRequest metaGet(req.key_ref()->fullKey());
+        metaGet.setClientIdentifier(req.getClientIdentifier().value_or(""));
         auto metaReply = refill_->route(metaGet);
         if (isHitResult(*metaReply.result_ref())) {
           folly::fibers::addTask(
@@ -95,6 +96,7 @@ class McRefillRoute {
       auto refillReply = refill_->route(genGetRequest(req));
       if (isHitResult(*refillReply.result_ref())) {
         McMetagetRequest metaGet(req.key_ref()->fullKey());
+        metaGet.setClientIdentifier(req.getClientIdentifier().value_or(""));
         auto metaReply = refill_->route(metaGet);
         if (isHitResult(*metaReply.result_ref())) {
           folly::fibers::addTask(
@@ -127,6 +129,10 @@ class McRefillRoute {
   McGetRequest genGetRequest(const Request& req, carbon::GetLikeT<Request> = 0)
       const {
     McGetRequest getReq(req.key_ref()->fullKey());
+    getReq.setClientIdentifier(req.getClientIdentifier().value_or(""));
+    if constexpr (facebook::memcache::HasFlagsTrait<Request>::value) {
+      getReq.flags_ref() = *req.flags_ref();
+    }
     return getReq;
   }
 
@@ -140,6 +146,7 @@ class McRefillRoute {
     sreq.flags_ref() = *refillReply.flags_ref();
     sreq.exptime_ref() = *metaReply.exptime_ref();
     sreq.leaseToken_ref() = *primaryReply.leaseToken_ref();
+    sreq.setClientIdentifier(primaryReq.getClientIdentifier().value_or(""));
     return sreq;
   }
 
@@ -154,6 +161,7 @@ class McRefillRoute {
     sreq.value_ref() = *refillReply.value_ref();
     sreq.flags_ref() = *refillReply.flags_ref();
     sreq.exptime_ref() = *metaReply.exptime_ref();
+    sreq.setClientIdentifier(primaryReq.getClientIdentifier().value_or(""));
     return sreq;
   }
 };

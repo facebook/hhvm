@@ -16,43 +16,13 @@
 
 package com.facebook.swift.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import com.facebook.thrift.metrics.distribution.Utils;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 
 public class TestThriftClientStats {
 
   private ThriftClientStats thriftClientStats = new ThriftClientStats();
-
-  @Mock ScheduledExecutorService executorService;
-
-  @Captor ArgumentCaptor<Runnable> runnableCaptor;
-
-  @Before
-  public void setup() {
-    initMocks(this);
-    Utils.setExecutorService(executorService);
-  }
-
-  // Ensure at least one interval sample is done on histogram so that data is collected
-  private void performIntervalSampleOnDistributions() {
-    verify(executorService, atLeastOnce())
-        .scheduleAtFixedRate(runnableCaptor.capture(), anyLong(), anyLong(), any(TimeUnit.class));
-    runnableCaptor.getAllValues().forEach(Runnable::run);
-  }
 
   @Test
   public void testCall() throws Exception {
@@ -70,8 +40,6 @@ public class TestThriftClientStats {
     thriftClientStats.publishWrite("foo", 30L);
     thriftClientStats.publishWrite("foo", 40L);
     thriftClientStats.publishWrite("foo", 50L);
-
-    performIntervalSampleOnDistributions();
 
     Map<String, Long> actual = thriftClientStats.getCounters();
     Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum"));
@@ -99,8 +67,6 @@ public class TestThriftClientStats {
     thriftClientStats.publishRead("foo", 40L);
     thriftClientStats.publishRead("foo", 70L);
 
-    performIntervalSampleOnDistributions();
-
     Map<String, Long> actual = thriftClientStats.getCounters();
     Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum"));
     Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum.60"));
@@ -126,8 +92,6 @@ public class TestThriftClientStats {
     thriftClientStats.complete("foo", 30L);
     thriftClientStats.complete("foo", 40L);
     thriftClientStats.complete("foo", 60L);
-
-    performIntervalSampleOnDistributions();
 
     Map<String, Long> actual = thriftClientStats.getCounters();
     Assert.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg"));

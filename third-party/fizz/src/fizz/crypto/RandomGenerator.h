@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+// TODO: Deprecate this.
 #pragma once
 
 #include <folly/io/IOBuf.h>

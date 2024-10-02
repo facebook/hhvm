@@ -289,6 +289,8 @@ class MockFactory : public ::fizz::DefaultFactory {
       makeRandomBytes,
       std::unique_ptr<folly::IOBuf>(size_t count));
 
+  MOCK_METHOD(void, makeRandomBytes, (unsigned char*, size_t), (const));
+
   void setDefaults() {
     ON_CALL(*this, makePlaintextReadRecordLayer())
         .WillByDefault(InvokeWithoutArgs([]() {

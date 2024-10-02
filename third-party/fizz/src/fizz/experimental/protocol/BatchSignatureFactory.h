@@ -89,6 +89,10 @@ class BatchSignatureFactory : public Factory {
     return original_->makeRandomBytes(count);
   }
 
+  void makeRandomBytes(unsigned char* out, size_t count) const override {
+    return original_->makeRandomBytes(out, count);
+  }
+
   /**
    * Make BatchSigPeerCert instead of PeerCert.
    *

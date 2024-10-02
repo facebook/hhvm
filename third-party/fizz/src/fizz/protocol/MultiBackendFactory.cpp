@@ -98,6 +98,11 @@ const HasherFactoryWithMetadata* MultiBackendFactory::makeHasherFactory(
   }
 }
 
+void MultiBackendFactory::makeRandomBytes(unsigned char* out, size_t count)
+    const {
+  randombytes_buf(out, count);
+}
+
 std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(
     CertificateEntry certEntry,
     bool /*leaf*/) const {

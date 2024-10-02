@@ -36,5 +36,7 @@ class MultiBackendFactory : public Factory {
   [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const override;
+
+  void makeRandomBytes(unsigned char* out, size_t count) const override;
 };
 } // namespace fizz

@@ -19,7 +19,6 @@
 #include <variant>
 #include <folly/Overload.h>
 #include <folly/SpinLock.h>
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/LegacyPayloadSerializerStrategy.h>
@@ -155,17 +154,14 @@ class PayloadSerializer {
     }
   }
 
- private:
   /**
    * Resets the singleton instance of the PayloadSerializer to empty. This
    * should only be called in tests.
    */
   static void reset();
 
+ private:
   static PayloadSerializerHolder& getPayloadSerializerHolder();
-
-  FRIEND_TEST(PayloadSerializerTest, TestPackWithLegacyStrategy);
-  FRIEND_TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy);
 };
 
 } // namespace apache::thrift::rocket

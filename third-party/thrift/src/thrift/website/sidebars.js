@@ -397,6 +397,18 @@ module.exports = {
             items: [],
           },
           'fb/server/stream-graceful-shutdown',
+          {
+            type: 'category',
+            label: 'thrift-python Servers',
+            link: {
+              type: 'doc',
+              id: 'fb/server/thrift-python/index',
+            },
+            items: [
+              'fb/server/thrift-python/create',
+              'fb/server/thrift-python/requests',
+            ],
+          },
         ],
       },
       {

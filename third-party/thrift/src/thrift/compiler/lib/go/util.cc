@@ -153,6 +153,14 @@ void codegen_data::add_to_thrift_metadata_types(
     return;
   }
 
+  // Filter out external types (i.e. types defined in other programs).
+  // Primitive (base) types should be treated as internal and kept.
+  // For those types - 'program' will be null, so account for that.
+  if (type->get_program() != nullptr &&
+      !is_current_program(type->get_program())) {
+    return;
+  }
+
   // Skip over a chain of "non-defined" typedefs.
   if (type->is_typedef()) {
     auto typedef_ = dynamic_cast<const t_typedef*>(type);
@@ -186,14 +194,6 @@ void codegen_data::add_to_thrift_metadata_types(
     auto val_type = map_type->val_type().get_type();
     add_to_thrift_metadata_types(key_type, visited_type_names);
     add_to_thrift_metadata_types(val_type, visited_type_names);
-  }
-
-  // Filter out external types (i.e. types defined in other programs).
-  // Primitive (base) types should be treated as internal and kept.
-  // For those types - 'program' will be null, so account for that.
-  if (type->get_program() != nullptr &&
-      !is_current_program(type->get_program())) {
-    return;
   }
 
   thrift_metadata_types.push_back(type);

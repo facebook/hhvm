@@ -21,9 +21,6 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
@@ -31,7 +28,6 @@ var (
 )
 
 var premadeThriftTypesMap = map[string]*metadata.ThriftType{
-    "i64": premadeThriftType_i64,
     "module.MyStruct": premadeThriftType_module_MyStruct,
 }
 

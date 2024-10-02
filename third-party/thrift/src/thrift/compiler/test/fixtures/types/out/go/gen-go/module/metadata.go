@@ -152,10 +152,6 @@ var (
             SetName("module.TBinary_8623").
             SetUnderlyingType(premadeThriftType_module_TBinary),
             )
-    premadeThriftType_list_included_SomeMap = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(included.GetMetadataThriftType("included.SomeMap")),
-            )
     premadeThriftType_module_SomeListOfTypeMap_2468 = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.SomeListOfTypeMap_2468").

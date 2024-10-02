@@ -8,15 +8,9 @@
 
 #pragma once
 
-#include <fizz/backend/openssl/crypto/ECCurve.h>
-#include <fizz/backend/openssl/crypto/aead/OpenSSLEVPCipher.h>
-#include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
-#include <fizz/crypto/exchange/X25519.h>
 #include <fizz/protocol/Factory.h>
 
 namespace fizz {
-class PeerCert;
-
 /**
  * A fizz::Factory implementation composed of primitives from
  * multiple backends.

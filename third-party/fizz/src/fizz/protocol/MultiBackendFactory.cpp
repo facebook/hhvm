@@ -16,6 +16,7 @@
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
+#include <fizz/crypto/exchange/X25519.h>
 
 #include <sodium.h>
 

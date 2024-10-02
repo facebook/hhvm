@@ -30,6 +30,10 @@ var (
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
             )
+    premadeThriftType_cpp_Name = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("cpp.Name"),
+            )
     premadeThriftType_cpp_Type = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("cpp.Type"),
@@ -37,10 +41,6 @@ var (
     premadeThriftType_cpp_Ref = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("cpp.Ref"),
-            )
-    premadeThriftType_cpp_Name = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Name"),
             )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
@@ -111,9 +111,9 @@ var premadeThriftTypesMap = map[string]*metadata.ThriftType{
     "cpp.RefType": premadeThriftType_cpp_RefType,
     "cpp.EnumUnderlyingType": premadeThriftType_cpp_EnumUnderlyingType,
     "string": premadeThriftType_string,
+    "cpp.Name": premadeThriftType_cpp_Name,
     "cpp.Type": premadeThriftType_cpp_Type,
     "cpp.Ref": premadeThriftType_cpp_Ref,
-    "cpp.Name": premadeThriftType_cpp_Name,
     "bool": premadeThriftType_bool,
     "cpp.Lazy": premadeThriftType_cpp_Lazy,
     "cpp.DisableLazyChecksum": premadeThriftType_cpp_DisableLazyChecksum,
@@ -133,6 +133,18 @@ var premadeThriftTypesMap = map[string]*metadata.ThriftType{
 }
 
 var structMetadatas = []*metadata.ThriftStruct{
+    metadata.NewThriftStruct().
+    SetName("cpp.Name").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("value").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ),
     metadata.NewThriftStruct().
     SetName("cpp.Type").
     SetIsUnion(false).
@@ -160,18 +172,6 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetName("type").
     SetIsOptional(false).
     SetType(premadeThriftType_cpp_RefType),
-        },
-    ),
-    metadata.NewThriftStruct().
-    SetName("cpp.Name").
-    SetIsUnion(false).
-    SetFields(
-        []*metadata.ThriftField{
-            metadata.NewThriftField().
-    SetId(1).
-    SetName("value").
-    SetIsOptional(false).
-    SetType(premadeThriftType_string),
         },
     ),
     metadata.NewThriftStruct().

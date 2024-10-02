@@ -16,9 +16,9 @@ namespace cpp {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<RefType>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<EnumUnderlyingType>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Type>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Ref>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Lazy>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DisableLazyChecksum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);

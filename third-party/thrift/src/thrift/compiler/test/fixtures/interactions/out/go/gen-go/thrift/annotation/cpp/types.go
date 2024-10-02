@@ -109,6 +109,125 @@ func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
     return EnumUnderlyingType(0), fmt.Errorf("not a valid EnumUnderlyingType string")
 }
 
+type Name struct {
+    Value string `thrift:"value,1" json:"value" db:"value"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*Name)(nil)
+
+func NewName() *Name {
+    return (&Name{}).setDefaults()
+}
+
+func (x *Name) GetValue() string {
+    return x.Value
+}
+
+func (x *Name) SetValueNonCompat(value string) *Name {
+    x.Value = value
+    return x
+}
+
+func (x *Name) SetValue(value string) *Name {
+    x.Value = value
+    return x
+}
+
+func (x *Name) writeField1(p thrift.Encoder) error {  // Value
+    if err := p.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.Value
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) readField1(p thrift.Decoder) error {  // Value
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.Value = result
+    return nil
+}
+
+
+
+func (x *Name) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("Name"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Name) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // value
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Name) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *Name) setDefaults() *Name {
+    return x.
+        SetValueNonCompat("")
+}
+
 type Type struct {
     Name string `thrift:"name,1" json:"name" db:"name"`
     Template string `thrift:"template,2" json:"template" db:"template"`
@@ -393,125 +512,6 @@ func (x *Ref) String() string {
 func (x *Ref) setDefaults() *Ref {
     return x.
         SetTypeNonCompat(0)
-}
-
-type Name struct {
-    Value string `thrift:"value,1" json:"value" db:"value"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = (*Name)(nil)
-
-func NewName() *Name {
-    return (&Name{}).setDefaults()
-}
-
-func (x *Name) GetValue() string {
-    return x.Value
-}
-
-func (x *Name) SetValueNonCompat(value string) *Name {
-    x.Value = value
-    return x
-}
-
-func (x *Name) SetValue(value string) *Name {
-    x.Value = value
-    return x
-}
-
-func (x *Name) writeField1(p thrift.Encoder) error {  // Value
-    if err := p.WriteFieldBegin("value", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.Value
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Name) readField1(p thrift.Decoder) error {  // Value
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.Value = result
-    return nil
-}
-
-
-
-func (x *Name) Write(p thrift.Encoder) error {
-    if err := p.WriteStructBegin("Name"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Name) Read(p thrift.Decoder) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, wireType, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if wireType == thrift.STOP {
-            break;
-        }
-
-        var fieldReadErr error
-        switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // value
-            fieldReadErr = x.readField1(p)
-        default:
-            fieldReadErr = p.Skip(wireType)
-        }
-
-        if fieldReadErr != nil {
-            return fieldReadErr
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-
-func (x *Name) String() string {
-    return thrift.StructToString(reflect.ValueOf(x))
-}
-
-func (x *Name) setDefaults() *Name {
-    return x.
-        SetValueNonCompat("")
 }
 
 type Lazy struct {
@@ -2071,9 +2071,9 @@ func (x *GenerateDeprecatedHeaderClientMethods) setDefaults() *GenerateDeprecate
 func RegisterTypes(registry interface {
   RegisterType(name string, initializer func() any)
 }) {
+    registry.RegisterType("facebook.com/thrift/annotation/cpp/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Type", func() any { return NewType() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Ref", func() any { return NewRef() })
-    registry.RegisterType("facebook.com/thrift/annotation/cpp/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Lazy", func() any { return NewLazy() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/DisableLazyChecksum", func() any { return NewDisableLazyChecksum() })
     registry.RegisterType("facebook.com/thrift/annotation/cpp/Adapter", func() any { return NewAdapter() })

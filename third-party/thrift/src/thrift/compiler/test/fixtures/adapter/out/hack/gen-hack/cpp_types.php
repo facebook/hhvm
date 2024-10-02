@@ -108,6 +108,124 @@ class EnumUnderlyingType_TEnumStaticMetadata implements \IThriftEnumStaticMetada
 }
 
 /**
+ * Changes the name of the definition in generated C++ code.
+ * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
+ * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
+ *
+ * Original thrift struct:-
+ * Name
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/Name'))>>
+class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'value',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'value' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'value' => ?string,
+  );
+
+  const type TShape = shape(
+    'value' => string,
+  );
+  const int STRUCTURAL_ID = 4244314491070478042;
+  /**
+   * Original thrift field:-
+   * 1: string value
+   */
+  public string $value;
+
+  public function __construct(?string $value = null)[] {
+    $this->value = $value ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'value'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Name';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.Name",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "value",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['value'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'value' => $this->value,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'value') !== null) {
+      $this->value = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['value']);
+    }
+  }
+
+}
+
+/**
  * Changes the native type of a Thrift object (the C++ type used in codegen) to the value of the `name` field.
  * Container types may instead provide the `template` field, in which case template parameters will be filled in by thrift.
  * (e.g. `template = "folly::sorted_vector_set"` is equivalent to `type = "folly::sorted_vector_set<T>"` on `set<T>`)
@@ -232,6 +350,16 @@ class Type implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
         ),
       ],
       'fields' => dict[
+        'template' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\cpp\Name' => \facebook\thrift\annotation\cpp\Name::fromShape(
+              shape(
+                "value" => "template_",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -390,124 +518,6 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
     if (idx($parsed, 'type') !== null) {
       $this->type = \facebook\thrift\annotation\cpp\RefType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\annotation\cpp\RefType>($parsed['type']));
-    }
-  }
-
-}
-
-/**
- * Changes the name of the definition in generated C++ code.
- * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
- * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
- *
- * Original thrift struct:-
- * Name
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/Name'))>>
-class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'value',
-      'type' => \TType::STRING,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'value' => 1,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'value' => ?string,
-  );
-
-  const type TShape = shape(
-    'value' => string,
-  );
-  const int STRUCTURAL_ID = 4244314491070478042;
-  /**
-   * Original thrift field:-
-   * 1: string value
-   */
-  public string $value;
-
-  public function __construct(?string $value = null)[] {
-    $this->value = $value ?? '';
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'value'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'Name';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "cpp.Name",
-        "fields" => vec[
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "value",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[
-        '\facebook\thrift\annotation\Definition' => \facebook\thrift\annotation\Definition::fromShape(
-          shape(
-          )
-        ),
-      ],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      $shape['value'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'value' => $this->value,
-    );
-  }
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'value') !== null) {
-      $this->value = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['value']);
     }
   }
 

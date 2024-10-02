@@ -29,6 +29,16 @@ namespace py thrift.annotation.cpp
 // start
 
 /**
+ * Changes the name of the definition in generated C++ code.
+ * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
+ * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
+ */
+@scope.Definition
+struct Name {
+  1: string value;
+}
+
+/**
  * Changes the native type of a Thrift object (the C++ type used in codegen) to the value of the `name` field.
  * Container types may instead provide the `template` field, in which case template parameters will be filled in by thrift.
  * (e.g. `template = "folly::sorted_vector_set"` is equivalent to `type = "folly::sorted_vector_set<T>"` on `set<T>`)
@@ -48,7 +58,9 @@ namespace py thrift.annotation.cpp
 @scope.Field
 struct Type {
   1: string name;
-  2: string template (cpp.name = "template_");
+
+  @Name{value = "template_"}
+  2: string template;
 }
 
 /**
@@ -66,16 +78,6 @@ enum RefType {
   Unique = 0, /// `std::unique_ptr<T>`
   Shared = 1, /// `std::shared_ptr<const T> `
   SharedMutable = 2, /// `std::shared_ptr<T>`
-}
-
-/**
- * Changes the name of the definition in generated C++ code.
- * In most cases a much better solution is to rename the problematic Thrift field itself. Only use the `@cpp.Name` annotation if such renaming is problematic,
- * e.g. when the field name appears in code as a string, particularly when using JSON serialization, and it is hard to change all usage sites.
- */
-@scope.Definition
-struct Name {
-  1: string value;
 }
 
 /**

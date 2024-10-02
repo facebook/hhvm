@@ -28,14 +28,18 @@ from types import MappingProxyType
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.serializer import deserialize, serialize
 from thrift.python.types cimport BadEnum as _fbthrift_python_BadEnum
+from thrift.python.types import (
+    Enum as _fbthrift_python_Enum,
+    EnumMeta as _fbthrift_python_EnumMeta,
+    Flag as _fbthrift_python_Flag,
+)
 
-# ensures that BadEnum can be reliably imported from thrift.py3.types
+# ensures that common classes can be reliably imported from thrift.py3.types
 BadEnum = _fbthrift_python_BadEnum
+EnumMeta = _fbthrift_python_EnumMeta
 
-__all__ = ['Struct', 'BadEnum', 'NOTSET', 'Union', 'Enum', 'Flag']
+__all__ = ['Struct', 'BadEnum', 'Union', 'Enum', 'Flag', 'EnumMeta']
 
-
-cdef __NotSet NOTSET = __NotSet.__new__(__NotSet)
 
 # This isn't exposed to the module dict
 Object = cython.fused_type(Struct, GeneratedError)
@@ -506,241 +510,16 @@ cdef class Map(Container):
         except KeyError:
             return default
 
-
-@cython.auto_pickle(False)
-cdef class EnumData:
-    @staticmethod
-    cdef EnumData _fbthrift_create(cEnumData* ptr, py_type):
-        cdef EnumData inst = EnumData.__new__(EnumData)
-        inst._py_type = py_type
-        inst._cpp_obj = unique_ptr[cEnumData](ptr)
-        return inst
-
-    cdef get_by_name(self, str name):
-        cdef bytes name_bytes = name.encode("utf-8") # to keep the buffer alive
-        cdef string_view name_sv = string_view(name_bytes)
-        cdef pair[PyObjectPtr, cOptionalInt] r = self._cpp_obj.get().tryGetByName(name_sv)
-        cdef PyObject* inst = r.first
-        cdef optional[int] value = r.second
-        if inst != NULL:
-            return <object>inst
-        if not value.has_value():
-            raise AttributeError(f"'{self._py_type.__name__}' has no attribute '{name}'")
-        return <object>self._add_to_cache(name, value.value())
-
-    cdef get_by_value(self, int value):
-        if value < -(1<<31) or value >= (1 << 31):
-            self._value_error(value)
-        cdef pair[PyObjectPtr, string_view] r = self._cpp_obj.get().tryGetByValue(value)
-        cdef PyObject* inst = r.first
-        cdef string_view name = r.second
-        if inst != NULL:
-            return <object>inst
-        if name.data() == NULL:
-            self._value_error(value)
-        return <object>self._add_to_cache(sv_to_str(name), value)
-
-    cdef PyObject* _add_to_cache(self, str name, int value) except *:
-        new_inst = self._py_type.__new__(self._py_type, name, value, NOTSET)
-        return self._cpp_obj.get().tryAddToCache(
-            value,
-            <PyObject*>new_inst
-        )
-
-    def get_all_names(self):
-        cdef cEnumData* cpp_obj_ptr = self._cpp_obj.get()
-        cdef cRange[const string_view*] names = cpp_obj_ptr.getNames()
-        cdef string_view name
-        for name in names:
-            yield sv_to_str(cpp_obj_ptr.getPyName(string_view(name.data())))
-
-    cdef int size(self):
-        return self._cpp_obj.get().size()
-
-    cdef void _value_error(self, int value) except *:
-        raise ValueError(f"{value} is not a valid {self._py_type.__name__}")
-
-
-@cython.auto_pickle(False)
-cdef class EnumFlagsData(EnumData):
-
-    @staticmethod
-    cdef EnumFlagsData _fbthrift_create(cEnumFlagsData* ptr, py_type):
-        cdef EnumFlagsData inst = EnumFlagsData.__new__(EnumFlagsData)
-        inst._py_type = py_type
-        inst._cpp_obj = unique_ptr[cEnumData](ptr)
-        return inst
-
-    cdef get_by_value(self, int value):
-        cdef cEnumFlagsData* cpp_obj_ptr = down_cast_ptr[
-            cEnumFlagsData, cEnumData](self._cpp_obj.get())
-        if value < 0:
-            value = cpp_obj_ptr.convertNegativeValue(value)
-        cdef pair[PyObjectPtr, string_view] r = cpp_obj_ptr.tryGetByValue(value)
-        cdef PyObject* inst = r.first
-        cdef string_view name = r.second
-        if inst != NULL:
-            return <object>inst
-        if name.data() == NULL:
-            self._value_error(value)
-        if not name.empty():
-            # it's not a derived value
-            return <object>self._add_to_cache(sv_to_str(name), value)
-        # it's a derived value
-        new_inst = self._py_type.__new__(
-            self._py_type,
-            cpp_obj_ptr.getNameForDerivedValue(value).decode("utf-8"),
-            value,
-            NOTSET,
-        )
-        return <object>cpp_obj_ptr.tryAddToFlagValuesCache(value, <PyObject*>new_inst)
-
-    cdef get_invert(self, uint32_t value):
-        cdef cEnumFlagsData* cpp_obj_ptr = down_cast_ptr[
-            cEnumFlagsData, cEnumData](self._cpp_obj.get())
-        return self.get_by_value(cpp_obj_ptr.getInvertValue(value))
-
-@cython.auto_pickle(False)
-cdef class UnionTypeEnumData(EnumData):
-
-    @staticmethod
-    cdef UnionTypeEnumData _fbthrift_create(cEnumData* ptr, py_type):
-        cdef UnionTypeEnumData inst = UnionTypeEnumData.__new__(UnionTypeEnumData)
-        inst._py_type = py_type
-        inst._cpp_obj = unique_ptr[cEnumData](ptr)
-        inst.__empty = py_type.__new__(py_type, "EMPTY", 0, NOTSET)
-        return inst
-
-    def get_all_names(self):
-        yield "EMPTY"
-        yield from EnumData.get_all_names(self)
-
-    cdef get_by_name(self, str name):
-        if name == "EMPTY":
-            return self.__empty
-        return EnumData.get_by_name(self, name)
-
-    cdef get_by_value(self, int value):
-        if value == 0:
-            return self.__empty
-        return EnumData.get_by_value(self, value)
-
-    cdef int size(self):
-        return EnumData.size(self) + 1  # for EMPTY
-
-
-@cython.auto_pickle(False)
-cdef class EnumMeta(type):
-    def _fbthrift_get_by_value(cls, int value):
-        return NotImplemented
-
-    def _fbthrift_get_all_names(cls):
-        return NotImplemented
-
-    def __call__(cls, value):
-        if isinstance(value, cls):
-            return value
-        if not isinstance(value, int):
-            raise ValueError(f"{repr(value)} is not a valid {cls.__name__}")
-        return cls._fbthrift_get_by_value(value)
-
-    def __getitem__(cls, name):
-        if type(name) is not str:
-            if not isinstance(name, str):
-                raise KeyError(name)
-            name = str(name) # cast to str for Cython
-        try:
-            return getattr(cls, name)
-        except AttributeError:
-            raise KeyError(name)
-
-    def __iter__(cls):
-        for name in cls._fbthrift_get_all_names():
-            yield getattr(cls, name)
-
-    def __contains__(cls, item):
-        if not isinstance(item, cls):
-            return False
-        return item in cls.__iter__()
-
-    def __len__(cls):
-        return NotImplemented
-
-    def __setattr__(cls, name, _):
-        raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
-
-    def __delattr__(cls, name):
-        raise AttributeError(f"{cls.__name__}: cannot delete Enum member.")
-
-    @property
-    def __members__(cls):
-        return MappingProxyType({inst.name: inst for inst in cls.__iter__()})
-
-    def __dir__(cls):
-        return ['__class__', '__doc__', '__members__', '__module__'] + [name for name in cls._fbthrift_get_all_names()]
-
-
-@cython.auto_pickle(False)
-cdef class CompiledEnum:
-    """
-    Base class for all thrift Enum
-    """
-    def __cinit__(self, name, value, __NotSet guard = None):
-        if guard is not NOTSET:
-            raise TypeError('__new__ is disabled in the interest of type-safety')
-        self.name = name
-        self.value = value
-        self._fbthrift_hash = hash(name)
-        self.__str = f"{type(self).__name__}.{name}"
-        self.__repr = f"<{self.__str}: {value}>"
-
-    def __getattribute__(self, str name not None):
-        if name.startswith("__") or name in (
-            "name", "value", "get_by_name", "_to_python", "_to_py3", "_to_py_deprecated",
-        ):
-            return super().__getattribute__(name)
-        return self.get_by_name(name)
-
-    def __repr__(self):
-        return self.__repr
-
-    def __str__(self):
-        return self.__str
-
+# to reduce issues with logic that relies on 
+# the assumption that CompiledEnum implies thrift-py3
+# leave an intermediate base class for now
+class CompiledEnum(_fbthrift_python_Enum):
+    # as a next step, remove these methods and make the
+    # generated enums inherit from int directly
     def __int__(self):
         return self.value
-
     def __index__(self):
         return self.value
-
-    def __hash__(self):
-        return self._fbthrift_hash
-
-    def __reduce__(self):
-        return type(self), (self.value,)
-
-    def __eq__(self, other):
-        if isinstance(other, CompiledEnum):
-            return self is other
-        # in thrift-python this warning will disappear
-        warnings.warn(
-            f"type-unsafe-comparison between instances of { type(self) } and {type(other)}",
-            RuntimeWarning,
-            stacklevel=1
-        )
-        return self.value == other
-        # historically, we returned False if other is not type(self)
-        # but this was inconsistent with thrift-py and thrift-python
-        # and caused unexpected behavior 
-
-    @staticmethod
-    def __get_metadata__():
-        raise NotImplementedError()
-
-    @staticmethod
-    def __get_thrift_name__():
-        raise NotImplementedError()
-
 
 
 Enum = CompiledEnum
@@ -748,41 +527,11 @@ Enum = CompiledEnum
 # See https://github.com/cython/cython/issues/2474
 # Will move when the bug is fixed
 
-
-@cython.auto_pickle(False)
-cdef class Flag(CompiledEnum):
-    """
-    Base class for all thrift Flag
-    """
-    def __contains__(self, other):
-        if type(other) is not type(self):
-            return NotImplemented
-        return other.value & self.value == other.value
-
-    def __bool__(self):
-        return bool(self.value)
-
-    def __or__(self, other):
-        cls = type(self)
-        if type(other) is not cls:
-            return NotImplemented
-        return cls(self.value | other.value)
-
-    def __and__(self, other):
-        cls = type(self)
-        if type(other) is not cls:
-            return NotImplemented
-        return cls(self.value & other.value)
-
-    def __xor__(self, other):
-        cls = type(self)
-        if type(other) is not cls:
-            return NotImplemented
-        return cls(self.value ^ other.value)
-
-    def __invert__(self):
-        return NotImplemented
-
+# to reduce issues with logic that relies on 
+# the assumption that py3.types.Flag implies thrift-py3,
+# leave an intermediate base class for now
+class Flag(CompiledEnum, _fbthrift_python_Flag):
+    pass
 
 cdef class StructFieldsSetter:
     cdef void set_field(self, const char* name, object val) except *:
@@ -801,7 +550,7 @@ try:
     def _is_python_struct(obj):
         return isinstance(obj, thrift.python.types.StructOrUnion)
     def _is_python_enum(obj):
-        return isinstance(obj, thrift.python.types.Enum)
+        return "thrift_types" in obj.__class__.__module__ 
 except ImportError:
     def _is_python_struct(obj):
         return False

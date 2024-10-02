@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -38,8 +37,8 @@ class Included(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        MyIntField: _typing.Union[int, '__NotSet', None]=NOTSET,
-        MyTransitiveField: _typing.Union[_transitive_types.Foo, '__NotSet', None]=NOTSET
+        MyIntField: _typing.Union[int, None]=None,
+        MyTransitiveField: _typing.Union[_transitive_types.Foo, None]=None
     ) -> Included: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['Included'], bytes]]: ...

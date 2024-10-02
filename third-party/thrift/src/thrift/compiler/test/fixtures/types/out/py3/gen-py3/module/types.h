@@ -18,39 +18,6 @@ namespace thrift {
 namespace py3 {
 
 
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::apache::thrift::fixtures::types::has_bitwise_ops>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::apache::thrift::fixtures::types::is_unscoped>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::apache::thrift::fixtures::types::MyForwardRefEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
 
 template<>
 inline void reset_field<::apache::thrift::fixtures::types::empty_struct>(

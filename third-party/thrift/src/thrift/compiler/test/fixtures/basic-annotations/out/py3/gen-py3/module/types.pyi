@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -42,7 +41,7 @@ class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        name: _typing.Union[str, '__NotSet', None]=NOTSET
+        name: _typing.Union[str, None]=None
     ) -> MyStructNestedAnnotation: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStructNestedAnnotation'], bytes]]: ...
@@ -76,8 +75,8 @@ class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        id: _typing.Union[int, '__NotSet', None]=NOTSET,
-        password: _typing.Union[str, '__NotSet', None]=NOTSET
+        id: _typing.Union[int, None]=None,
+        password: _typing.Union[str, None]=None
     ) -> SecretStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SecretStruct'], bytes]]: ...

@@ -50,7 +50,7 @@ class UnionTests(unittest.TestCase):
         if not issubclass(Integers, Union) and sys.version_info.minor > 10:
             return
         contents = dir(Integers.Type)
-        self.assertEqual(len(contents), 4 + len(Integers.Type))
+        self.assertEqual(len(contents), 4 + len(Integers.Type), contents)
         self.assertIn("__module__", contents)
         self.assertIn("__class__", contents)
         self.assertIn("__doc__", contents)

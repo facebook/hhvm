@@ -19,7 +19,7 @@ import pickle
 import unittest
 from typing import cast, Type, TypeVar
 
-from testing.types import BadMembers, Color, ColorGroups, Complex, File, Kind, Perm
+from testing.types import BadMembers, Color, ColorGroups, File, Kind, Perm
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
     is_auto_migrated,
@@ -173,7 +173,7 @@ class EnumTests(unittest.TestCase):
         self.assertIs(green, Color.green)
 
     def test_adding_member(self) -> None:
-        with self.assertRaises((AttributeError, TypeError)):
+        with self.assertRaises(AttributeError):
             # pyre-fixme[16]: `Type` has no attribute `black`.
             Color.black = 3
 
@@ -206,6 +206,10 @@ class EnumTests(unittest.TestCase):
     def test_enum_value(self) -> None:
         self.assertEqual(Color.red.value, 0)
 
+    def test_no_error_hasattr(self) -> None:
+        self.assertFalse(hasattr(Color.red, "type"))
+        self.assertFalse(hasattr(Color.red, "yellow"))
+
     def test_enum(self) -> None:
         lst = list(Color)
         self.assertEqual(len(lst), len(Color))
@@ -237,27 +241,16 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(f"{e=}", f"e=<Color.{color}: {i}>")
 
     @brokenInAutoMigrate()
-    def test_insinstance_Enum(self) -> None:
+    def test_isinstance_Enum(self) -> None:
         self.assertIsInstance(Color.red, Enum)
         self.assertTrue(issubclass(Color, Enum))
 
 
 class EnumMetaTests(unittest.TestCase):
-    @brokenInAutoMigrate()
-    def test_get_all_names_equivalent(self) -> None:
-        # pyre-ignore[16]
-        self.assertEqual(list(Color._fbthrift_get_all_names()), [e.name for e in Color])
-
     def test_iter_forward_compatible(self) -> None:
         # test that replacement for _fbthrift_get_all_names()
         # works as expected and is forward-compatible in thrift-python
         self.assertEqual([e.name for e in Color], ["red", "blue", "green"])
-
-    @brokenInAutoMigrate()
-    def test_get_by_value_equivalent(self) -> None:
-        for i in range(len(Color)):
-            # pyre-ignore[16]
-            self.assertEqual(Color._fbthrift_get_by_value(i), Color(i))
 
     def test_enum_call_forward_compatible(self) -> None:
         self.assertEqual(Color(0), Color.red)
@@ -288,12 +281,10 @@ class EnumMetaTests(unittest.TestCase):
         self.assertNotIn(-1, Color)
         self.assertNotIn(3, Color)
 
-    @brokenInAutoMigrate()
     def test_enum_metaclass_contains_int(self) -> None:
-        # in thrift-python, this works because enums are int-like
-        self.assertNotIn(0, Color)
-        self.assertNotIn(1, Color)
-        self.assertNotIn(2, Color)
+        self.assertIn(0, Color)
+        self.assertIn(1, Color)
+        self.assertIn(2, Color)
 
     def test_enum_metaclass_dir(self) -> None:
         attrs = set(dir(Color))
@@ -313,8 +304,9 @@ class FlagTests(unittest.TestCase):
             # flags are not ints
             # pyre-fixme[6]: Expected `Optional[Perm]` for 2nd param but got `int`.
             File(name="/etc/motd", permissions=4)
-        x = File(name="/bin/sh", permissions=Perm.read | Perm.execute)
+        x = File(name="/bin/sh", permissions=(Perm.read | Perm.execute))
         self.assertIsInstance(x.permissions, Perm)
+        self.assertEqual(x.permissions, 5)
         self.assertEqual(x.permissions, Perm.read | Perm.execute)
         self.assertNotIsInstance(2, Perm, "Flags are not ints")
         self.assertEqual(int(x.permissions), 5)
@@ -350,7 +342,7 @@ class FlagTests(unittest.TestCase):
         self.assertIs(x, Perm.read | Perm.write)
 
     @brokenInAutoMigrate()
-    def test_insinstance_Flag(self) -> None:
+    def test_isinstance_Flag(self) -> None:
         self.assertIsInstance(Perm.read, Flag)
         self.assertTrue(issubclass(Perm, Flag))
         self.assertIsInstance(Perm.read, Enum)
@@ -363,3 +355,6 @@ class FlagTests(unittest.TestCase):
     def test_combo_repr(self) -> None:
         x = Perm(7)
         self.assertEqual("<Perm.read|write|execute: 7>", repr(x))
+
+    def test_Perm_len(self) -> None:
+        self.assertEqual(len(Perm), 3)

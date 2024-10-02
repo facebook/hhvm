@@ -20,6 +20,7 @@ from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 cimport thrift.python.exceptions
+from thrift.python.types import EnumMeta as __EnumMeta
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
 from thrift.python.types cimport(
     BadEnum as __BadEnum,
@@ -38,15 +39,9 @@ from thrift.py3.types cimport (
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
     translate_cpp_enum_to_python,
-    SetMetaClass as __SetMetaClass,
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
-    NOTSET as __NOTSET,
-    EnumData as __EnumData,
-    EnumFlagsData as __EnumFlagsData,
-    UnionTypeEnumData as __UnionTypeEnumData,
-    createEnumDataForUnionType as __createEnumDataForUnionType,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -61,204 +56,19 @@ import weakref as __weakref
 import builtins as _builtins
 import importlib
 
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+    __ComplexUnionType,
+    __ListUnionType,
+    __DataUnionType,
+    __ValUnionType,
+    __VirtualComplexUnionType,
+    __NonCopyableUnionType,
+)
+
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i64,
     List__string,
 )
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __ComplexUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __ComplexUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __ComplexUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __ComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-class __ComplexUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __ComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cComplexUnion](),
-    __ComplexUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __ListUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __ListUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __ListUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __ListUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __ListUnion_union_type_enum_data.get_by_name(name)
-
-
-class __ListUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __ListUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __ListUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cListUnion](),
-    __ListUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __ListUnionType, <PyTypeObject*> __ListUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __DataUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __DataUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __DataUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __DataUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __DataUnion_union_type_enum_data.get_by_name(name)
-
-
-class __DataUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __DataUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __DataUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cDataUnion](),
-    __DataUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __DataUnionType, <PyTypeObject*> __DataUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __ValUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __ValUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __ValUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __ValUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __ValUnion_union_type_enum_data.get_by_name(name)
-
-
-class __ValUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __ValUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __ValUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cValUnion](),
-    __ValUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __ValUnionType, <PyTypeObject*> __ValUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __VirtualComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __VirtualComplexUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __VirtualComplexUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __VirtualComplexUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __VirtualComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __VirtualComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __VirtualComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cVirtualComplexUnion](),
-    __VirtualComplexUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __VirtualComplexUnionType, <PyTypeObject*> __VirtualComplexUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __NonCopyableUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __NonCopyableUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __NonCopyableUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __NonCopyableUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __NonCopyableUnion_union_type_enum_data.get_by_name(name)
-
-
-class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __NonCopyableUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __NonCopyableUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cNonCopyableUnion](),
-    __NonCopyableUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __NonCopyableUnionType, <PyTypeObject*> __NonCopyableUnion_Union_TypeMeta)
 
 
 cdef object get_types_reflection():

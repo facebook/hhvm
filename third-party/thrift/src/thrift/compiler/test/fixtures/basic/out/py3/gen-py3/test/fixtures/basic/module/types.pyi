@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -81,15 +80,15 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        MyIntField: _typing.Union[int, '__NotSet', None]=NOTSET,
-        MyStringField: _typing.Union[str, '__NotSet', None]=NOTSET,
-        MyDataField: _typing.Union[MyDataItem, '__NotSet', None]=NOTSET,
-        myEnum: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
-        oneway: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        readonly: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        idempotent: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        floatSet: _typing.Union[_typing.AbstractSet[float], '__NotSet', None]=NOTSET,
-        no_hack_codegen_field: _typing.Union[str, '__NotSet', None]=NOTSET
+        MyIntField: _typing.Union[int, None]=None,
+        MyStringField: _typing.Union[str, None]=None,
+        MyDataField: _typing.Union[MyDataItem, None]=None,
+        myEnum: _typing.Union[MyEnum, None]=None,
+        oneway: _typing.Union[bool, None]=None,
+        readonly: _typing.Union[bool, None]=None,
+        idempotent: _typing.Union[bool, None]=None,
+        floatSet: _typing.Union[_typing.AbstractSet[float], None]=None,
+        no_hack_codegen_field: _typing.Union[str, None]=None
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...
@@ -127,9 +126,9 @@ class Containers(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        I32List: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        StringSet: _typing.Union[_typing.AbstractSet[str], '__NotSet', None]=NOTSET,
-        StringToI64Map: _typing.Union[_typing.Mapping[str, int], '__NotSet', None]=NOTSET
+        I32List: _typing.Union[_typing.Sequence[int], None]=None,
+        StringSet: _typing.Union[_typing.AbstractSet[str], None]=None,
+        StringToI64Map: _typing.Union[_typing.Mapping[str, int], None]=None
     ) -> Containers: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['Containers'], bytes]]: ...
@@ -308,7 +307,7 @@ class ReservedKeyword(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        reserved_field: _typing.Union[int, '__NotSet', None]=NOTSET
+        reserved_field: _typing.Union[int, None]=None
     ) -> ReservedKeyword: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['ReservedKeyword'], bytes]]: ...

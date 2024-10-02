@@ -18,50 +18,6 @@ namespace thrift {
 namespace py3 {
 
 
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::test::fixtures::enumstrict::EmptyEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::test::fixtures::enumstrict::MyEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::test::fixtures::enumstrict::MyBigEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
 
 template<>
 inline void reset_field<::test::fixtures::enumstrict::MyStruct>(

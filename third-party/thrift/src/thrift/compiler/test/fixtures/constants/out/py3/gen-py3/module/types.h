@@ -18,59 +18,6 @@ namespace thrift {
 namespace py3 {
 
 
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::EmptyEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::City>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::Company>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::union1::Type>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::union2::Type>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
 
 template<>
 inline void reset_field<::cpp2::Internship>(

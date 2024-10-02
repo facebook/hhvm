@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -33,7 +32,7 @@ class InitialResponse(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        content: _typing.Union[str, '__NotSet', None]=NOTSET
+        content: _typing.Union[str, None]=None
     ) -> InitialResponse: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['InitialResponse'], bytes]]: ...
@@ -63,7 +62,7 @@ class FinalResponse(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        content: _typing.Union[str, '__NotSet', None]=NOTSET
+        content: _typing.Union[str, None]=None
     ) -> FinalResponse: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['FinalResponse'], bytes]]: ...
@@ -93,7 +92,7 @@ class SinkPayload(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        content: _typing.Union[str, '__NotSet', None]=NOTSET
+        content: _typing.Union[str, None]=None
     ) -> SinkPayload: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SinkPayload'], bytes]]: ...
@@ -123,7 +122,7 @@ class CompatibleWithKeywordSink(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        sink: _typing.Union[str, '__NotSet', None]=NOTSET
+        sink: _typing.Union[str, None]=None
     ) -> CompatibleWithKeywordSink: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['CompatibleWithKeywordSink'], bytes]]: ...

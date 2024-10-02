@@ -37,9 +37,16 @@ except ModuleNotFoundError:
     pass
 
 try:
-    from thrift.py3.types import BadEnum, Enum, Flag, Struct, Union  # noqa: 401
+    from thrift.python.types import Enum, Flag  # noqa: 401
 
-    __all__.extend(["Struct", "BadEnum", "Union", "Enum", "Flag"])
+    __all__.extend(["Enum", "Flag"])
+except ModuleNotFoundError:
+    pass
+
+try:
+    from thrift.py3.types import BadEnum, Struct, Union  # noqa: 401
+
+    __all__.extend(["Struct", "BadEnum", "Union"])
 except ModuleNotFoundError:
     pass
 

@@ -15,7 +15,8 @@
 from types import MappingProxyType
 
 from libcpp.memory cimport shared_ptr
-from thrift.py3.types cimport CompiledEnum, Struct
+from thrift.py3.types cimport Struct
+from thrift.py3.types import CompiledEnum
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.server cimport ServiceInterface
 from thrift.py3.client cimport Client
@@ -60,6 +61,9 @@ from apache.thrift.metadata.types import (
     ThriftStreamType,
     ThriftConstStruct,
     ThriftConstValue,
+)
+from apache.thrift.metadata.thrift_types import (
+    ThriftMetadata as ThriftMetadataPython,
 )
 from apache.thrift.metadata.converter cimport ThriftMetadata_from_cpp
 
@@ -449,6 +453,17 @@ cdef class ThriftServiceProxy:
         for function in self.thriftType.functions:
             yield ThriftFunctionProxy(function, self.thriftMeta)
 
+def use_python_metadata(cls):
+    if issubclass(
+        cls,
+        (PyStructOrUnion, PyGeneratedError, PyClient, PyAsyncClient, PySyncClient, PyServiceInterface)
+    ):
+        return True
+    if issubclass(cls, PyEnum):
+        return "thrift_types" in cls.__module__ 
+
+    return False
+
 
 def gen_metadata(obj_or_cls):
     if hasattr(obj_or_cls, "getThriftModuleMetadata"):
@@ -456,17 +471,25 @@ def gen_metadata(obj_or_cls):
 
     cls = obj_or_cls if isinstance(obj_or_cls, type) else type(obj_or_cls)
 
-    if issubclass(cls, (PyStructOrUnion, PyEnum, PyGeneratedError, PyClient, PyAsyncClient, PySyncClient, PyServiceInterface)):
+    if use_python_metadata(cls):
         return python_gen_metadata(cls)
 
     if not issubclass(cls, (Struct, GeneratedError, ServiceInterface, Client, CompiledEnum)):
         raise TypeError(f'{cls!r} is not a thrift-py3 type.')
 
     # get the box
-    cdef MetadataBox box = cls.__get_metadata__()
-    # unbox the box
-    cdef shared_ptr[cThriftMetadata] box_obj = box._cpp_obj
-    meta = ThriftMetadata_from_cpp(box_obj)
+    maybe_box = cls.__get_metadata__()
+    cdef MetadataBox box
+    cdef shared_ptr[cThriftMetadata] box_obj
+    # enums use thrift-python metadata, so convert
+    if isinstance(maybe_box, ThriftMetadataPython):
+        meta = maybe_box._to_py3()
+    # for normal thrift-py3, unbox the box
+    else:
+        box = <MetadataBox>maybe_box
+        box_obj = box._cpp_obj
+        meta = ThriftMetadata_from_cpp(box_obj)
+
     cdef str name = cls.__get_thrift_name__()
 
     if issubclass(cls, Struct):

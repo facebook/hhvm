@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -37,8 +36,8 @@ class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        s_res: _typing.Union[str, '__NotSet', None]=NOTSET,
-        i_res: _typing.Union[int, '__NotSet', None]=NOTSET
+        s_res: _typing.Union[str, None]=None,
+        i_res: _typing.Union[int, None]=None
     ) -> DoSomethingResult: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['DoSomethingResult'], bytes]]: ...

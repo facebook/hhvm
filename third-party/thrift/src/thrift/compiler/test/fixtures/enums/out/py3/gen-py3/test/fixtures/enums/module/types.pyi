@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -116,10 +115,10 @@ class SomeStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        reasonable: _typing.Union[Metasyntactic, '__NotSet', None]=NOTSET,
-        fine: _typing.Union[Metasyntactic, '__NotSet', None]=NOTSET,
-        questionable: _typing.Union[Metasyntactic, '__NotSet', None]=NOTSET,
-        tags: _typing.Union[_typing.AbstractSet[int], '__NotSet', None]=NOTSET
+        reasonable: _typing.Union[Metasyntactic, None]=None,
+        fine: _typing.Union[Metasyntactic, None]=None,
+        questionable: _typing.Union[Metasyntactic, None]=None,
+        tags: _typing.Union[_typing.AbstractSet[int], None]=None
     ) -> SomeStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SomeStruct'], bytes]]: ...
@@ -161,10 +160,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        me2_3: _typing.Union[MyEnum2, '__NotSet', None]=NOTSET,
-        me3_n3: _typing.Union[MyEnum3, '__NotSet', None]=NOTSET,
-        me1_t1: _typing.Union[MyEnum1, '__NotSet', None]=NOTSET,
-        me1_t2: _typing.Union[MyEnum1, '__NotSet', None]=NOTSET
+        me2_3: _typing.Union[MyEnum2, None]=None,
+        me3_n3: _typing.Union[MyEnum3, None]=None,
+        me1_t1: _typing.Union[MyEnum1, None]=None,
+        me1_t2: _typing.Union[MyEnum1, None]=None
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...

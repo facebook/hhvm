@@ -94,55 +94,6 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
 ctypedef PyObject* PyObjectPtr
 ctypedef optional[int] cOptionalInt
 
-cdef extern from "thrift/lib/py3/enums.h" namespace "::thrift::py3" nogil:
-    cdef cppclass cEnumData "::thrift::py3::EnumData":
-        pair[PyObjectPtr, cOptionalInt] tryGetByName(string_view name) except +
-        pair[PyObjectPtr, string_view] tryGetByValue(int value) except +
-        PyObject* tryAddToCache(int value, PyObject* obj) except +
-        size_t size()
-        string_view getPyName(string_view name)
-        cRange[const string_view*] getNames()
-    cdef cppclass cEnumFlagsData "::thrift::py3::EnumFlagsData"(cEnumData):
-        PyObject* tryAddToFlagValuesCache(int value, PyObject* obj) except +
-        string getNameForDerivedValue(int value) except +
-        int getInvertValue(int value) except +
-        int convertNegativeValue(int value) except +
-    cEnumData* createEnumData[T]() except +
-    cEnumFlagsData* createEnumFlagsData[T]() except +
-    cEnumData* createEnumDataForUnionType[T]() except +
-
-
-cdef class EnumData:
-    cdef unique_ptr[cEnumData] _cpp_obj
-    cdef object _py_type
-    cdef get_by_name(self, str name)
-    cdef get_by_value(self, int value)
-    cdef PyObject* _add_to_cache(self, str name, int value) except *
-    cdef int size(self)
-    cdef void _value_error(self, int value) except *
-    @staticmethod
-    cdef EnumData _fbthrift_create(cEnumData* ptr, py_type)
-
-cdef class EnumFlagsData(EnumData):
-    cdef get_invert(self, uint32_t value)
-    @staticmethod
-    cdef EnumFlagsData _fbthrift_create(cEnumFlagsData* ptr, py_type)
-
-cdef class UnionTypeEnumData(EnumData):
-    cdef object __empty
-    @staticmethod
-    cdef UnionTypeEnumData _fbthrift_create(cEnumData* ptr, py_type)
-
-cdef class EnumMeta(type):
-    pass
-
-
-cdef class __NotSet:
-    pass
-
-cdef __NotSet NOTSET
-
-
 cdef class Struct:
     cdef object _fbthrift_hash
     cdef object __weakref__
@@ -176,18 +127,6 @@ cdef class Set(Container):
 cdef class Map(Container):
     pass
 
-
-cdef class CompiledEnum:
-    cdef object __weakref__
-    cdef readonly int value
-    cdef readonly str name
-    cdef object _fbthrift_hash
-    cdef object __str
-    cdef object __repr
-
-
-cdef class Flag(CompiledEnum):
-    pass
 
 cdef class StructFieldsSetter:
     cdef void set_field(StructFieldsSetter self, const char* name, object value) except *

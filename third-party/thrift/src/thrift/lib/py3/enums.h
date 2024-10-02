@@ -176,16 +176,5 @@ EnumFlagsData* createEnumFlagsData() {
       s);
 }
 
-template <typename T>
-EnumData* createEnumDataForUnionType() {
-  using type = typename T::Type;
-  using Traits = apache::thrift::TEnumTraits<type>;
-  return new EnumData(
-      enumFindNameWrapper<type>,
-      enumFindValueWrapper<type>,
-      Traits::names,
-      PyEnumTraits<type>::namesmap());
-}
-
 } // namespace py3
 } // namespace thrift

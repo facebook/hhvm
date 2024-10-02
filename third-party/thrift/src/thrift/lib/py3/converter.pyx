@@ -20,7 +20,8 @@ from thrift.py3.reflection import inspect
 from libcpp cimport bool
 from thrift.py3.reflection cimport FieldSpec, MapSpec, Qualifier, StructType
 from thrift.python.types cimport BadEnum
-from thrift.py3.types cimport CompiledEnum, Container, Struct
+from thrift.py3.types cimport Container, Struct
+from thrift.py3.types import CompiledEnum
 from thrift.python.types cimport Struct as PythonStruct, Union as PythonUnion
 
 def to_py3_struct(cls, obj):

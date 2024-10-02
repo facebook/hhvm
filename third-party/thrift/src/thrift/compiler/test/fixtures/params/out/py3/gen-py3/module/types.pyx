@@ -20,6 +20,7 @@ from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 cimport thrift.python.exceptions
+from thrift.python.types import EnumMeta as __EnumMeta
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
 from thrift.python.types cimport(
     BadEnum as __BadEnum,
@@ -38,15 +39,9 @@ from thrift.py3.types cimport (
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
     translate_cpp_enum_to_python,
-    SetMetaClass as __SetMetaClass,
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
-    NOTSET as __NOTSET,
-    EnumData as __EnumData,
-    EnumFlagsData as __EnumFlagsData,
-    UnionTypeEnumData as __UnionTypeEnumData,
-    createEnumDataForUnionType as __createEnumDataForUnionType,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -61,6 +56,7 @@ import weakref as __weakref
 import builtins as _builtins
 import importlib
 
+
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
     List__Map__i32_i32,
@@ -68,8 +64,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__i32_Map__i32_Set__i32,
     List__List__Map__i32_Map__i32_Set__i32,
 )
-
-
 
 
 cdef object get_types_reflection():

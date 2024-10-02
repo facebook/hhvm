@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -86,8 +85,8 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        myEnum: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
-        myBigEnum: _typing.Union[MyBigEnum, '__NotSet', None]=NOTSET
+        myEnum: _typing.Union[MyEnum, None]=None,
+        myBigEnum: _typing.Union[MyBigEnum, None]=None
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...

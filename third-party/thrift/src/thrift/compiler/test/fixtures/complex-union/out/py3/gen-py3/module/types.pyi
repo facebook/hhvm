@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -186,9 +185,9 @@ class Val(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        strVal: _typing.Union[str, '__NotSet', None]=NOTSET,
-        intVal: _typing.Union[int, '__NotSet', None]=NOTSET,
-        typedefValue: _typing.Union[_typing.Mapping[int, str], '__NotSet', None]=NOTSET
+        strVal: _typing.Union[str, None]=None,
+        intVal: _typing.Union[int, None]=None,
+        typedefValue: _typing.Union[_typing.Mapping[int, str], None]=None
     ) -> Val: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['Val'], bytes]]: ...
@@ -302,7 +301,7 @@ class NonCopyableStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        num: _typing.Union[int, '__NotSet', None]=NOTSET
+        num: _typing.Union[int, None]=None
     ) -> NonCopyableStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['NonCopyableStruct'], bytes]]: ...

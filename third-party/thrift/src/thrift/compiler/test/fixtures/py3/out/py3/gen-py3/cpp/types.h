@@ -18,28 +18,6 @@ namespace thrift {
 namespace py3 {
 
 
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::facebook::thrift::annotation::cpp::RefType>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::facebook::thrift::annotation::cpp::EnumUnderlyingType>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
 
 template<>
 inline void reset_field<::facebook::thrift::annotation::cpp::Name>(

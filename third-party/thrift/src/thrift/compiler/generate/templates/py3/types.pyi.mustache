@@ -24,7 +24,6 @@ This template should always mirror types.pyx but for mypy typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -90,7 +89,7 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
     {{#struct:plain?}}
     def __call__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
-        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}, '__NotSet', None]=NOTSET{{/struct:py3_fields}}
+        {{field:py_name}}: _typing.Union[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}, None]=None{{/struct:py3_fields}}
     ) -> {{struct:name}}: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['{{struct:name}}'], bytes]]: ...

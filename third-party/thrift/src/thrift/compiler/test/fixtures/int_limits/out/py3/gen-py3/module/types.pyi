@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -61,14 +60,14 @@ class Limits(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        max_i64_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        min_i64_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        max_i32_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        min_i32_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        max_i16_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        min_i16_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        max_byte_field: _typing.Union[int, '__NotSet', None]=NOTSET,
-        min_byte_field: _typing.Union[int, '__NotSet', None]=NOTSET
+        max_i64_field: _typing.Union[int, None]=None,
+        min_i64_field: _typing.Union[int, None]=None,
+        max_i32_field: _typing.Union[int, None]=None,
+        min_i32_field: _typing.Union[int, None]=None,
+        max_i16_field: _typing.Union[int, None]=None,
+        min_i16_field: _typing.Union[int, None]=None,
+        max_byte_field: _typing.Union[int, None]=None,
+        min_byte_field: _typing.Union[int, None]=None
     ) -> Limits: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['Limits'], bytes]]: ...

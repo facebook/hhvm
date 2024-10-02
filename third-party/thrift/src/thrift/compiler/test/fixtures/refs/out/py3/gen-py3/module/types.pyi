@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -148,15 +147,15 @@ class MyField(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        opt_value: _typing.Union[int, '__NotSet', None]=NOTSET,
-        value: _typing.Union[int, '__NotSet', None]=NOTSET,
-        req_value: _typing.Union[int, '__NotSet', None]=NOTSET,
-        opt_enum_value: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
-        enum_value: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
-        req_enum_value: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
-        opt_str_value: _typing.Union[str, '__NotSet', None]=NOTSET,
-        str_value: _typing.Union[str, '__NotSet', None]=NOTSET,
-        req_str_value: _typing.Union[str, '__NotSet', None]=NOTSET
+        opt_value: _typing.Union[int, None]=None,
+        value: _typing.Union[int, None]=None,
+        req_value: _typing.Union[int, None]=None,
+        opt_enum_value: _typing.Union[MyEnum, None]=None,
+        enum_value: _typing.Union[MyEnum, None]=None,
+        req_enum_value: _typing.Union[MyEnum, None]=None,
+        opt_str_value: _typing.Union[str, None]=None,
+        str_value: _typing.Union[str, None]=None,
+        req_str_value: _typing.Union[str, None]=None
     ) -> MyField: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyField'], bytes]]: ...
@@ -191,9 +190,9 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        opt_ref: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        ref: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        req_ref: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        opt_ref: _typing.Union[MyField, None]=None,
+        ref: _typing.Union[MyField, None]=None,
+        req_ref: _typing.Union[MyField, None]=None
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...
@@ -229,9 +228,9 @@ class StructWithUnion(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        u: _typing.Union[MyUnion, '__NotSet', None]=NOTSET,
-        aDouble: _typing.Union[float, '__NotSet', None]=NOTSET,
-        f: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        u: _typing.Union[MyUnion, None]=None,
+        aDouble: _typing.Union[float, None]=None,
+        f: _typing.Union[MyField, None]=None
     ) -> StructWithUnion: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithUnion'], bytes]]: ...
@@ -261,7 +260,7 @@ class RecursiveStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        mes: _typing.Union[_typing.Sequence[RecursiveStruct], '__NotSet', None]=NOTSET
+        mes: _typing.Union[_typing.Sequence[RecursiveStruct], None]=None
     ) -> RecursiveStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['RecursiveStruct'], bytes]]: ...
@@ -305,12 +304,12 @@ class StructWithContainers(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        list_ref: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        set_ref: _typing.Union[_typing.AbstractSet[int], '__NotSet', None]=NOTSET,
-        map_ref: _typing.Union[_typing.Mapping[int, int], '__NotSet', None]=NOTSET,
-        list_ref_unique: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        set_ref_shared: _typing.Union[_typing.AbstractSet[int], '__NotSet', None]=NOTSET,
-        list_ref_shared_const: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET
+        list_ref: _typing.Union[_typing.Sequence[int], None]=None,
+        set_ref: _typing.Union[_typing.AbstractSet[int], None]=None,
+        map_ref: _typing.Union[_typing.Mapping[int, int], None]=None,
+        list_ref_unique: _typing.Union[_typing.Sequence[int], None]=None,
+        set_ref_shared: _typing.Union[_typing.AbstractSet[int], None]=None,
+        list_ref_shared_const: _typing.Union[_typing.Sequence[int], None]=None
     ) -> StructWithContainers: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithContainers'], bytes]]: ...
@@ -345,9 +344,9 @@ class StructWithSharedConst(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        opt_shared_const: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        shared_const: _typing.Union[MyField, '__NotSet', None]=NOTSET,
-        req_shared_const: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        opt_shared_const: _typing.Union[MyField, None]=None,
+        shared_const: _typing.Union[MyField, None]=None,
+        req_shared_const: _typing.Union[MyField, None]=None
     ) -> StructWithSharedConst: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithSharedConst'], bytes]]: ...
@@ -407,9 +406,9 @@ class StructWithRef(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        def_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        opt_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        req_field: _typing.Union[Empty, '__NotSet', None]=NOTSET
+        def_field: _typing.Union[Empty, None]=None,
+        opt_field: _typing.Union[Empty, None]=None,
+        req_field: _typing.Union[Empty, None]=None
     ) -> StructWithRef: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithRef'], bytes]]: ...
@@ -447,9 +446,9 @@ class StructWithBox(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        a: _typing.Union[str, '__NotSet', None]=NOTSET,
-        b: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        c: _typing.Union[StructWithRef, '__NotSet', None]=NOTSET
+        a: _typing.Union[str, None]=None,
+        b: _typing.Union[_typing.Sequence[int], None]=None,
+        c: _typing.Union[StructWithRef, None]=None
     ) -> StructWithBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithBox'], bytes]]: ...
@@ -483,8 +482,8 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> StructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithInternBox'], bytes]]: ...
@@ -516,8 +515,8 @@ class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> StructWithTerseInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithTerseInternBox'], bytes]]: ...
@@ -551,8 +550,8 @@ class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> AdaptedStructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithInternBox'], bytes]]: ...
@@ -584,8 +583,8 @@ class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable)
 
     def __call__(
         self, *,
-        field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> AdaptedStructWithTerseInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithTerseInternBox'], bytes]]: ...
@@ -620,9 +619,9 @@ class StructWithRefTypeUnique(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        def_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        opt_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        req_field: _typing.Union[Empty, '__NotSet', None]=NOTSET
+        def_field: _typing.Union[Empty, None]=None,
+        opt_field: _typing.Union[Empty, None]=None,
+        req_field: _typing.Union[Empty, None]=None
     ) -> StructWithRefTypeUnique: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithRefTypeUnique'], bytes]]: ...
@@ -657,9 +656,9 @@ class StructWithRefTypeShared(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        def_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        opt_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        req_field: _typing.Union[Empty, '__NotSet', None]=NOTSET
+        def_field: _typing.Union[Empty, None]=None,
+        opt_field: _typing.Union[Empty, None]=None,
+        req_field: _typing.Union[Empty, None]=None
     ) -> StructWithRefTypeShared: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithRefTypeShared'], bytes]]: ...
@@ -694,9 +693,9 @@ class StructWithRefTypeSharedConst(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        def_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        opt_field: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        req_field: _typing.Union[Empty, '__NotSet', None]=NOTSET
+        def_field: _typing.Union[Empty, None]=None,
+        opt_field: _typing.Union[Empty, None]=None,
+        req_field: _typing.Union[Empty, None]=None
     ) -> StructWithRefTypeSharedConst: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithRefTypeSharedConst'], bytes]]: ...
@@ -725,7 +724,7 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct, _typing.
 
     def __call__(
         self, *,
-        def_field: _typing.Union[Empty, '__NotSet', None]=NOTSET
+        def_field: _typing.Union[Empty, None]=None
     ) -> StructWithRefAndAnnotCppNoexceptMoveCtor: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithRefAndAnnotCppNoexceptMoveCtor'], bytes]]: ...
@@ -766,11 +765,11 @@ class StructWithString(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        def_unique_string_ref: _typing.Union[str, '__NotSet', None]=NOTSET,
-        def_shared_string_ref: _typing.Union[str, '__NotSet', None]=NOTSET,
-        def_shared_string_const_ref: _typing.Union[str, '__NotSet', None]=NOTSET,
-        unique_string_ref: _typing.Union[str, '__NotSet', None]=NOTSET,
-        shared_string_ref: _typing.Union[str, '__NotSet', None]=NOTSET
+        def_unique_string_ref: _typing.Union[str, None]=None,
+        def_shared_string_ref: _typing.Union[str, None]=None,
+        def_shared_string_const_ref: _typing.Union[str, None]=None,
+        unique_string_ref: _typing.Union[str, None]=None,
+        shared_string_ref: _typing.Union[str, None]=None
     ) -> StructWithString: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithString'], bytes]]: ...

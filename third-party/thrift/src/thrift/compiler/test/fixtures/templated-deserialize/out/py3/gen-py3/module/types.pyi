@@ -8,7 +8,6 @@
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
-from thrift.py3.types import __NotSet, NOTSET
 import typing as _typing
 from typing_extensions import Final
 
@@ -46,8 +45,8 @@ class SmallStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        small_A: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        small_B: _typing.Union[int, '__NotSet', None]=NOTSET
+        small_A: _typing.Union[bool, None]=None,
+        small_B: _typing.Union[int, None]=None
     ) -> SmallStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SmallStruct'], bytes]]: ...
@@ -156,28 +155,28 @@ class containerStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     def __call__(
         self, *,
-        fieldA: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        fieldB: _typing.Union[_typing.Mapping[str, bool], '__NotSet', None]=NOTSET,
-        fieldC: _typing.Union[_typing.AbstractSet[int], '__NotSet', None]=NOTSET,
-        fieldD: _typing.Union[str, '__NotSet', None]=NOTSET,
-        fieldE: _typing.Union[str, '__NotSet', None]=NOTSET,
-        fieldF: _typing.Union[_typing.Sequence[_typing.Sequence[_typing.Sequence[int]]], '__NotSet', None]=NOTSET,
-        fieldG: _typing.Union[_typing.Mapping[str, _typing.Mapping[str, _typing.Mapping[str, int]]], '__NotSet', None]=NOTSET,
-        fieldH: _typing.Union[_typing.Sequence[_typing.AbstractSet[int]], '__NotSet', None]=NOTSET,
-        fieldI: _typing.Union[bool, '__NotSet', None]=NOTSET,
-        fieldJ: _typing.Union[_typing.Mapping[str, _typing.Sequence[int]], '__NotSet', None]=NOTSET,
-        fieldK: _typing.Union[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]], '__NotSet', None]=NOTSET,
-        fieldL: _typing.Union[_typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[bool]]], '__NotSet', None]=NOTSET,
-        fieldM: _typing.Union[_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], '__NotSet', None]=NOTSET,
-        fieldN: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        fieldO: _typing.Union[_typing.Sequence[float], '__NotSet', None]=NOTSET,
-        fieldP: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
-        fieldQ: _typing.Union[MyEnumA, '__NotSet', None]=NOTSET,
-        fieldR: _typing.Union[_typing.Mapping[str, bool], '__NotSet', None]=NOTSET,
-        fieldS: _typing.Union[SmallStruct, '__NotSet', None]=NOTSET,
-        fieldT: _typing.Union[SmallStruct, '__NotSet', None]=NOTSET,
-        fieldU: _typing.Union[SmallStruct, '__NotSet', None]=NOTSET,
-        fieldX: _typing.Union[SmallStruct, '__NotSet', None]=NOTSET
+        fieldA: _typing.Union[bool, None]=None,
+        fieldB: _typing.Union[_typing.Mapping[str, bool], None]=None,
+        fieldC: _typing.Union[_typing.AbstractSet[int], None]=None,
+        fieldD: _typing.Union[str, None]=None,
+        fieldE: _typing.Union[str, None]=None,
+        fieldF: _typing.Union[_typing.Sequence[_typing.Sequence[_typing.Sequence[int]]], None]=None,
+        fieldG: _typing.Union[_typing.Mapping[str, _typing.Mapping[str, _typing.Mapping[str, int]]], None]=None,
+        fieldH: _typing.Union[_typing.Sequence[_typing.AbstractSet[int]], None]=None,
+        fieldI: _typing.Union[bool, None]=None,
+        fieldJ: _typing.Union[_typing.Mapping[str, _typing.Sequence[int]], None]=None,
+        fieldK: _typing.Union[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]], None]=None,
+        fieldL: _typing.Union[_typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[bool]]], None]=None,
+        fieldM: _typing.Union[_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], None]=None,
+        fieldN: _typing.Union[_typing.Sequence[int], None]=None,
+        fieldO: _typing.Union[_typing.Sequence[float], None]=None,
+        fieldP: _typing.Union[_typing.Sequence[int], None]=None,
+        fieldQ: _typing.Union[MyEnumA, None]=None,
+        fieldR: _typing.Union[_typing.Mapping[str, bool], None]=None,
+        fieldS: _typing.Union[SmallStruct, None]=None,
+        fieldT: _typing.Union[SmallStruct, None]=None,
+        fieldU: _typing.Union[SmallStruct, None]=None,
+        fieldX: _typing.Union[SmallStruct, None]=None
     ) -> containerStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['containerStruct'], bytes]]: ...

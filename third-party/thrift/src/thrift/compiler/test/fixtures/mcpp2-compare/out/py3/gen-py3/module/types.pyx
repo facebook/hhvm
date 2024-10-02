@@ -20,6 +20,7 @@ from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 cimport thrift.python.exceptions
+from thrift.python.types import EnumMeta as __EnumMeta
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
 from thrift.python.types cimport(
     BadEnum as __BadEnum,
@@ -38,15 +39,9 @@ from thrift.py3.types cimport (
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
     translate_cpp_enum_to_python,
-    SetMetaClass as __SetMetaClass,
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
-    NOTSET as __NOTSET,
-    EnumData as __EnumData,
-    EnumFlagsData as __EnumFlagsData,
-    UnionTypeEnumData as __UnionTypeEnumData,
-    createEnumDataForUnionType as __createEnumDataForUnionType,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -62,6 +57,16 @@ import builtins as _builtins
 import importlib
 cimport includes.types as _includes_types
 import includes.types as _includes_types
+
+from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+    MyEnumA,
+    AnnotatedEnum,
+    AnnotatedEnum2,
+    MyEnumB,
+    __SimpleUnionType,
+    __ComplexUnionType,
+    __FloatUnionType,
+)
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__Empty_MyStruct,
@@ -88,324 +93,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__i16_string,
     List__MyStruct,
 )
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __MyEnumAMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __MyEnumA_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __MyEnumA_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __MyEnumA_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __MyEnumA_enum_data.get_by_name(name)
-
-
-class MyEnumA(thrift.py3.types.CompiledEnum):
-    __slots__ = ()
-    def get_by_name(self, str name):
-        return __MyEnumA_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cMyEnumA].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyEnumA"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.MyEnumA(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> MyEnumA, <PyTypeObject*> __MyEnumAMeta)
-
-cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __AnnotatedEnumMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __AnnotatedEnum_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __AnnotatedEnum_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __AnnotatedEnum_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __AnnotatedEnum_enum_data.get_by_name(name)
-
-
-class AnnotatedEnum(thrift.py3.types.CompiledEnum):
-    __slots__ = ()
-    def get_by_name(self, str name):
-        return __AnnotatedEnum_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cAnnotatedEnum].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.AnnotatedEnum"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.AnnotatedEnum(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> AnnotatedEnum, <PyTypeObject*> __AnnotatedEnumMeta)
-
-cdef __EnumData __AnnotatedEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum](), AnnotatedEnum)
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __AnnotatedEnum2Meta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __AnnotatedEnum2_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __AnnotatedEnum2_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __AnnotatedEnum2_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __AnnotatedEnum2_enum_data.get_by_name(name)
-
-
-class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
-    __slots__ = ()
-    def get_by_name(self, str name):
-        return __AnnotatedEnum2_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cAnnotatedEnum2].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.AnnotatedEnum2"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.AnnotatedEnum2(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> AnnotatedEnum2, <PyTypeObject*> __AnnotatedEnum2Meta)
-
-cdef __EnumData __AnnotatedEnum2_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cAnnotatedEnum2](), AnnotatedEnum2)
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __MyEnumBMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __MyEnumB_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __MyEnumB_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __MyEnumB_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __MyEnumB_enum_data.get_by_name(name)
-
-
-class MyEnumB(thrift.py3.types.CompiledEnum):
-    __slots__ = ()
-    def get_by_name(self, str name):
-        return __MyEnumB_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cMyEnumB].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyEnumB"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.MyEnumB(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> MyEnumB, <PyTypeObject*> __MyEnumBMeta)
-
-cdef __EnumData __MyEnumB_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumB](), MyEnumB)
-
-
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __SimpleUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __SimpleUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __SimpleUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __SimpleUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __SimpleUnion_union_type_enum_data.get_by_name(name)
-
-
-class __SimpleUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __SimpleUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __SimpleUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cSimpleUnion](),
-    __SimpleUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __SimpleUnionType, <PyTypeObject*> __SimpleUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __ComplexUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __ComplexUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __ComplexUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __ComplexUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __ComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-class __ComplexUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __ComplexUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __ComplexUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cComplexUnion](),
-    __ComplexUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __ComplexUnionType, <PyTypeObject*> __ComplexUnion_Union_TypeMeta)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __FloatUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __FloatUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __FloatUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __FloatUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __FloatUnion_union_type_enum_data.get_by_name(name)
-
-
-class __FloatUnionType(thrift.py3.types.CompiledEnum):
-    def get_by_name(self, str name):
-        return __FloatUnion_union_type_enum_data.get_by_name(name)
-
-
-cdef __UnionTypeEnumData __FloatUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cFloatUnion](),
-    __FloatUnionType,
-)
-
-
-__SetMetaClass(<PyTypeObject*> __FloatUnionType, <PyTypeObject*> __FloatUnion_Union_TypeMeta)
 
 
 cdef object get_types_reflection():

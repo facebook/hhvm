@@ -18,48 +18,6 @@ namespace thrift {
 namespace py3 {
 
 
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::MyEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::TypedEnum>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::MyUnion::Type>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-template<>
-inline const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::cpp2::NonTriviallyDestructibleUnion::Type>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
 
 template<>
 inline void reset_field<::cpp2::MyField>(

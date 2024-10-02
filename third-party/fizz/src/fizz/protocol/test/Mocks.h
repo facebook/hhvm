@@ -272,7 +272,6 @@ class MockFactory : public ::fizz::DefaultFactory {
       (HashFunction),
       (const));
   MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
-  MOCK_METHOD(Random, makeRandom, (), (const));
   MOCK_METHOD(uint32_t, makeTicketAgeAdd, (), (const));
 
   MOCK_METHOD(
@@ -349,17 +348,16 @@ class MockFactory : public ::fizz::DefaultFactory {
       ret->setDefaults();
       return ret;
     }));
-    ON_CALL(*this, makeRandom()).WillByDefault(InvokeWithoutArgs([]() {
-      Random random;
-      random.fill(0x44);
-      return random;
-    }));
     ON_CALL(*this, makeRandomBytes(_)).WillByDefault(Invoke([](size_t count) {
       auto random = folly::IOBuf::create(count);
       memset(random->writableData(), 0x44, count);
       random->append(count);
       return random;
     }));
+    ON_CALL(*this, makeRandomBytes(_, _))
+        .WillByDefault(Invoke([](unsigned char* out, size_t count) {
+          memset(out, 0x44, count);
+        }));
     ON_CALL(*this, makeTicketAgeAdd()).WillByDefault(InvokeWithoutArgs([]() {
       return 0x44444444;
     }));

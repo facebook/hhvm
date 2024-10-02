@@ -1581,9 +1581,13 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                     AlertDescription::illegal_parameter);
               }
 
+              Random random;
+              state.context()->getFactory()->makeRandomBytes(
+                  random.data(), random.size());
+
               auto serverHello = getServerHello(
                   version,
-                  state.context()->getFactory()->makeRandom(),
+                  random,
                   cipher,
                   resState.has_value(),
                   group,

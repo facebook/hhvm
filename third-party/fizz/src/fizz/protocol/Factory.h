@@ -93,13 +93,6 @@ class Factory {
    *
    * TODO: Deprecate this.
    */
-  virtual Random makeRandom() const;
-
-  /**
-   * Should not be overridden *unless* for testing.
-   *
-   * TODO: Deprecate this.
-   */
   virtual uint32_t makeTicketAgeAdd() const;
 
   /**

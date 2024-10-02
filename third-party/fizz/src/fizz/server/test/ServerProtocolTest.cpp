@@ -618,11 +618,9 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -887,11 +885,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -1194,11 +1190,9 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -1503,11 +1497,9 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -1794,11 +1786,9 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -2066,11 +2056,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(*mockKeyScheduler_, deriveHandshakeSecret());
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -2308,11 +2296,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         EXPECT_EQ(msg.type, ContentType::handshake);
@@ -2592,11 +2578,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -2859,11 +2843,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -3107,11 +3089,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -3380,11 +3360,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -3685,11 +3663,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(
       *mockKeyScheduler_, deriveHandshakeSecret(RangeMatches("sharedsecret")));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -3965,11 +3941,9 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
   EXPECT_CALL(*mockKeyScheduler_, deriveHandshakeSecret());
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;

@@ -793,6 +793,17 @@ static ClientHello constructEncryptedClientHello(
   return chloOuter;
 }
 
+static std::unique_ptr<folly::IOBuf> randomIOBuf(
+    const Factory& factory,
+    size_t count) {
+  auto buf = folly::IOBuf::create(count);
+  if (count > 0) {
+    factory.makeRandomBytes(buf->writableData(), count);
+    buf->append(count);
+  }
+  return buf;
+}
+
 Actions
 EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     const State& /*state*/,
@@ -808,7 +819,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   folly::Optional<CachedPsk> psk =
       validatePsk(*context, std::move(connect.cachedPsk));
 
-  Random random = context->getFactory()->makeRandom();
+  Random random;
+  context->getFactory()->makeRandomBytes(random.data(), random.size());
 
   // If we have a saved PSK, use the group to choose which groups to
   // send by default
@@ -833,8 +845,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   Buf legacySessionId;
   if (context->getCompatibilityMode()) {
-    legacySessionId =
-        folly::IOBuf::copyBuffer(context->getFactory()->makeRandom());
+    constexpr size_t kRandomSize = Random().size();
+    legacySessionId = randomIOBuf(*context->getFactory(), kRandomSize);
   } else {
     legacySessionId = folly::IOBuf::create(0);
   }
@@ -935,7 +947,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   if (echParams.has_value()) {
     // Swap out randoms first.
     echRandom = std::move(random);
-    random = context->getFactory()->makeRandom();
+    context->getFactory()->makeRandomBytes(random.data(), random.size());
 
     // Generate GREASE PSK (if needed)
     greasePsk = ech::generateGreasePSK(chlo, context->getFactory());

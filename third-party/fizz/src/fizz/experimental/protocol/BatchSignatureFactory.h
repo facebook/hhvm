@@ -77,10 +77,6 @@ class BatchSignatureFactory : public Factory {
     return original_->makeAead(cipher);
   }
 
-  Random makeRandom() const override {
-    return original_->makeRandom();
-  }
-
   uint32_t makeTicketAgeAdd() const override {
     return original_->makeTicketAgeAdd();
   }

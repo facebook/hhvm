@@ -355,11 +355,6 @@ TEST_F(ClientProtocolTest, TestConnectFlow) {
             }));
         return ret;
       }));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -425,11 +420,6 @@ TEST_F(ClientProtocolTest, TestConnectPskFlow) {
             }));
         return ret;
       }));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -526,11 +516,6 @@ TEST_F(ClientProtocolTest, TestConnectPskEarlyFlow) {
             }));
         return ret;
       }));
-  EXPECT_CALL(*factory_, makeRandom()).WillOnce(Invoke([]() {
-    Random random;
-    random.fill(0x44);
-    return random;
-  }));
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -1066,7 +1051,7 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for the
   // client hello outer.
-  EXPECT_CALL(*factory_, makeRandom()).Times(2);
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);
@@ -1133,7 +1118,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for the
   // client hello outer.
-  EXPECT_CALL(*factory_, makeRandom()).Times(2);
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);
@@ -1201,7 +1186,7 @@ TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
 
   // Two randoms should be generated, 1 for the client hello inner and 1 for the
   // client hello outer.
-  EXPECT_CALL(*factory_, makeRandom()).Times(2);
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
   auto actions = detail::processEvent(state_, param);

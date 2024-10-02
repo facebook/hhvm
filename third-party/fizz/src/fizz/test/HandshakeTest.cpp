@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/test/HandshakeTest.h>
 
 using namespace fizz::openssl;

@@ -12,6 +12,7 @@
 #include <fizz/server/AeadTokenCipher.h>
 #include <fizz/server/CookieTypes.h>
 
+#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/test/TestUtil.h>
 

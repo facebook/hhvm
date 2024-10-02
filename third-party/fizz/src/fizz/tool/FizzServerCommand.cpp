@@ -20,6 +20,7 @@
 #endif
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/backend/openssl/certificate/OpenSSLSelfCertImpl.h>
+#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/protocol/test/CertUtil.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/SlidingBloomReplayCache.h>

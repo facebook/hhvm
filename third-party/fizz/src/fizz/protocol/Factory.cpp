@@ -35,18 +35,11 @@ std::unique_ptr<KeyScheduler> Factory::makeKeyScheduler(
   return std::make_unique<KeyScheduler>(std::move(keyDer));
 }
 
-// TODO: This should not belong as part of the base Factory; a concrete
-// factory should provide the random primitive.
-std::unique_ptr<folly::IOBuf> Factory::makeRandomBytes(size_t count) const {
-  return RandomBufGenerator(count).generateRandom();
-}
-
 std::unique_ptr<HandshakeContext> Factory::makeHandshakeContext(
     CipherSuite cipher) const {
   auto hasherFactory = makeHasherFactory(getHashFunction(cipher));
   return std::make_unique<HandshakeContextImpl>(hasherFactory);
 }
-//
 
 std::unique_ptr<KeyDerivation> Factory::makeKeyDeriver(
     CipherSuite cipher) const {

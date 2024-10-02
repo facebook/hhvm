@@ -17,6 +17,8 @@
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
 
+#include <sodium.h>
+
 namespace fizz {
 
 std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(

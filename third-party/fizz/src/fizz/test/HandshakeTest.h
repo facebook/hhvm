@@ -16,6 +16,7 @@
 #include <fizz/client/test/Mocks.h>
 #include <fizz/compression/ZlibCertificateCompressor.h>
 #include <fizz/compression/ZlibCertificateDecompressor.h>
+#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/Utils.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/extensions/tokenbinding/TokenBindingClientExtension.h>

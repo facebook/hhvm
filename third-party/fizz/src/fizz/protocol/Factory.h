@@ -14,7 +14,6 @@
 #include <fizz/crypto/Crypto.h>
 #include <fizz/crypto/Hasher.h>
 #include <fizz/crypto/KeyDerivation.h>
-#include <fizz/crypto/RandomGenerator.h>
 #include <fizz/crypto/aead/Aead.h>
 #include <fizz/crypto/exchange/KeyExchange.h>
 #include <fizz/protocol/Certificate.h>
@@ -87,13 +86,6 @@ class Factory {
       HashFunction digest) const = 0;
 
   virtual std::unique_ptr<Aead> makeAead(CipherSuite cipher) const = 0;
-
-  /**
-   * Should not be overridden *unless* for testing.
-   *
-   * TODO: Deprecate this.
-   */
-  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const;
 
   virtual void makeRandomBytes(unsigned char* out, size_t count) const = 0;
 

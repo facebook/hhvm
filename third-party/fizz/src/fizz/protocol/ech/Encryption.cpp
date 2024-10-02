@@ -395,6 +395,17 @@ void setAcceptConfirmation(
 }
 
 namespace {
+
+static std::unique_ptr<folly::IOBuf> randomIOBuf(
+    const Factory& factory,
+    size_t count) {
+  auto buf = folly::IOBuf::create(count);
+  if (count > 0) {
+    factory.makeRandomBytes(buf->writableData(), count);
+    buf->append(count);
+  }
+  return buf;
+}
 // GREASE PSKs are essentially the same size as the source PSK with the actual
 // contents of all fields replaced with random data. For the HRR case, the PSK
 // identity is preserved.
@@ -410,7 +421,7 @@ ClientPresharedKey generateGreasePskCommon(
       greaseIdentity.psk_identity = identity.psk_identity->clone();
     } else {
       size_t identitySize = identity.psk_identity->computeChainDataLength();
-      greaseIdentity.psk_identity = factory->makeRandomBytes(identitySize);
+      greaseIdentity.psk_identity = randomIOBuf(*factory, identitySize);
     }
 
     factory->makeRandomBytes(
@@ -421,7 +432,7 @@ ClientPresharedKey generateGreasePskCommon(
     const auto& binder = source.binders.at(i);
     PskBinder greaseBinder;
     size_t binderSize = binder.binder->computeChainDataLength();
-    greaseBinder.binder = factory->makeRandomBytes(binderSize);
+    greaseBinder.binder = randomIOBuf(*factory, binderSize);
     grease.binders.push_back(std::move(greaseBinder));
   }
   return grease;

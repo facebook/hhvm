@@ -31,7 +31,6 @@
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
@@ -61,7 +60,8 @@ RocketStreamClientCallback::RocketStreamClientCallback(
     : streamId_(streamId),
       connection_(connection),
       tokens_(initialRequestN),
-      streamMetricCallback_(streamMetricCallback) {}
+      streamMetricCallback_(streamMetricCallback),
+      payloadSerializer_(PayloadSerializer::getInstance()) {}
 
 bool RocketStreamClientCallback::onFirstResponse(
     FirstResponsePayload&& firstResponse,
@@ -94,7 +94,8 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   connection_.sendPayload(
       streamId_,
-      pack(std::move(firstResponse), connection_.getRawSocket()),
+      payloadSerializer_.pack(
+          std::move(firstResponse), connection_.getRawSocket()),
       Flags().next(true));
 
   if (tokens) {
@@ -114,7 +115,7 @@ void RocketStreamClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                pack(
+                payloadSerializer_.pack(
                     std::move(encodedError.encoded),
                     connection_.getRawSocket()),
                 Flags().next(true).complete(true));
@@ -143,7 +144,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
   streamMetricCallback_.onStreamNext(rpcMethodName_);
   connection_.sendPayload(
       streamId_,
-      pack(std::move(payload), connection_.getRawSocket()),
+      payloadSerializer_.pack(std::move(payload), connection_.getRawSocket()),
       Flags().next(true));
 
   return true;
@@ -182,7 +183,8 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
         }
         connection_.sendPayload(
             streamId_,
-            pack(std::move(err.encoded), connection_.getRawSocket()),
+            payloadSerializer_.pack(
+                std::move(err.encoded), connection_.getRawSocket()),
             Flags().next(true).complete(true));
       },
       [this, &ew](...) {
@@ -199,7 +201,8 @@ bool RocketStreamClientCallback::onStreamHeaders(HeadersPayload&& payload) {
       static_cast<uint32_t>(streamId_);
   serverMeta.streamHeadersPush_ref()->headersPayloadContent_ref() =
       std::move(payload.payload);
-  connection_.sendMetadataPush(packCompact(std::move(serverMeta)));
+  connection_.sendMetadataPush(
+      payloadSerializer_.packCompact(std::move(serverMeta)));
   return true;
 }
 
@@ -260,7 +263,8 @@ void RocketStreamClientCallback::timeoutExpired() noexcept {
   streamRpcError.what_utf8_ref() =
       "Stream expire timeout(no credit from client)";
   onStreamError(folly::make_exception_wrapper<rocket::RocketException>(
-      rocket::ErrorCode::CANCELED, packCompact(streamRpcError)));
+      rocket::ErrorCode::CANCELED,
+      payloadSerializer_.packCompact(streamRpcError)));
 }
 
 void RocketStreamClientCallback::setProtoId(protocol::PROTOCOL_TYPES protoId) {

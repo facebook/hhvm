@@ -30,10 +30,8 @@ class LegacyPayloadSerializerStrategy final
   LegacyPayloadSerializerStrategy() : PayloadSerializerStrategy(*this) {}
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpackAsCompressed(
-      rocket::Payload&& payload, bool useBinary) {
-    return ::apache::thrift::rocket::unpackAsCompressed<T>(
-        std::move(payload), useBinary);
+  FOLLY_ERASE folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
+    return ::apache::thrift::rocket::unpackAsCompressed<T>(std::move(payload));
   }
 
   template <class T>

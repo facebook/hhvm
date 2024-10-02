@@ -45,9 +45,9 @@
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #if __has_include(<thrift/lib/thrift/gen-cpp2/any_rep_types.h>)
@@ -128,7 +128,8 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 
   ResponseRpcError responseError;
   try {
-    rocket::unpackCompact(responseError, ex.moveErrorData().get());
+    rocket::PayloadSerializer::getInstance().unpackCompact(
+        responseError, ex.moveErrorData().get());
   } catch (...) {
     return folly::Try<FirstResponsePayload>(
         folly::make_exception_wrapper<TApplicationException>(fmt::format(
@@ -598,7 +599,9 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       stats.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
 
-      response = rocket::unpack<FirstResponsePayload>(std::move(*payload));
+      response =
+          rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
+              std::move(*payload));
       if (response.hasException()) {
         cb_.release()->onResponseError(std::move(response.exception()));
         return;
@@ -844,7 +847,7 @@ void RocketClientChannel::sendRequestStream(
       buf->computeChainDataLength(),
       *header);
 
-  auto payload = rocket::packWithFds(
+  auto payload = rocket::PayloadSerializer::getInstance().packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -885,7 +888,7 @@ void RocketClientChannel::sendRequestSink(
       buf->computeChainDataLength(),
       *header);
 
-  auto payload = rocket::packWithFds(
+  auto payload = rocket::PayloadSerializer::getInstance().packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -960,7 +963,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
     RequestRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
-  auto requestPayload = rocket::packWithFds(
+  auto requestPayload = rocket::PayloadSerializer::getInstance().packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -985,7 +988,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
   const auto requestSerializedSize = buf->computeChainDataLength();
-  auto requestPayload = rocket::packWithFds(
+  auto requestPayload = rocket::PayloadSerializer::getInstance().packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),

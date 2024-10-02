@@ -42,7 +42,6 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
@@ -310,7 +309,8 @@ void RocketServerConnection::closeIfNeeded() {
           .ensure()
           .drainCompleteCode_ref()
           .from_optional(drainCompleteCode_);
-      sendMetadataPush(packCompact(std::move(serverMeta)));
+      sendMetadataPush(
+          PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
       // Send CONNECTION_ERROR error in case client doesn't support
       // DrainCompletePush
       sendError(StreamId{0}, RocketException(ErrorCode::CONNECTION_ERROR));
@@ -354,7 +354,8 @@ void RocketServerConnection::closeIfNeeded() {
                 callback->getStreamId(),
                 RocketException(
                     ErrorCode::CANCELED,
-                    packCompact(getStreamConnectionClosingError())));
+                    PayloadSerializer::getInstance().packCompact(
+                        getStreamConnectionClosingError())));
           }
           callback->onStreamCancel();
         },
@@ -530,7 +531,8 @@ void RocketServerConnection::handleUntrackedFrame(
       MetadataPushFrame metadataFrame(std::move(frame));
       ClientPushMetadata clientMeta;
       try {
-        unpackCompact(clientMeta, metadataFrame.metadata());
+        PayloadSerializer::getInstance().unpackCompact(
+            clientMeta, metadataFrame.metadata());
       } catch (...) {
         close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID, "Failed to deserialize metadata push frame"));
@@ -675,7 +677,8 @@ void RocketServerConnection::handleSinkFrame(
       bool notViolateContract = true;
       if (next) {
         auto streamPayload =
-            rocket::unpack<StreamPayload>(std::move(*fullPayload));
+            PayloadSerializer::getInstance().unpack<StreamPayload>(
+                std::move(*fullPayload));
         if (streamPayload.hasException()) {
           notViolateContract =
               clientCallback.onSinkError(std::move(streamPayload.exception()));

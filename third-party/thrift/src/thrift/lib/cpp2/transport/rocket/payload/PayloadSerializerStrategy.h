@@ -29,22 +29,22 @@ template <typename Child>
 class PayloadSerializerStrategy {
  public:
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpackAsCompressed(Payload&& payload) {
+  FOLLY_ALWAYS_INLINE folly::Try<T> unpackAsCompressed(Payload&& payload) {
     return child_.unpackAsCompressed(std::move(payload));
   }
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpack(Payload&& payload) {
+  FOLLY_ALWAYS_INLINE folly::Try<T> unpack(Payload&& payload) {
     return child_.unpack(std::move(payload));
   }
 
   template <typename T>
-  FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
+  FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
     return child_.packCompact(std::forward<T>(data));
   }
 
   template <typename Metadata>
-  FOLLY_ERASE rocket::Payload packWithFds(
+  FOLLY_ALWAYS_INLINE rocket::Payload packWithFds(
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
@@ -54,13 +54,14 @@ class PayloadSerializerStrategy {
   }
 
   template <class PayloadType>
-  FOLLY_ERASE Payload
+  FOLLY_ALWAYS_INLINE Payload
   pack(PayloadType&& payload, folly::AsyncTransport* transport) {
     return child_.pack(std::forward<PayloadType>(payload), transport);
   }
 
   template <typename T>
-  FOLLY_ERASE size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
+  FOLLY_ALWAYS_INLINE size_t
+  unpackCompact(T& output, const folly::IOBuf* buffer) {
     return child_.unpackCompact(output, buffer);
   }
 

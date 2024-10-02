@@ -51,16 +51,14 @@ class PayloadSerializer {
     void initialize(Strategy&& strategy) {
       auto* serializer =
           new PayloadSerializer(std::forward<Strategy>(strategy));
-      auto* other = serializer_.exchange(serializer);
-      if (other) {
-        delete other;
-      }
+      delete serializer_.exchange(serializer, std::memory_order_acq_rel);
     }
 
     void reset();
 
    private:
-    std::atomic<PayloadSerializer*> serializer_{nullptr};
+    alignas(folly::hardware_destructive_interference_size)
+        std::atomic<PayloadSerializer*> serializer_{nullptr};
   };
 
  public:
@@ -86,64 +84,75 @@ class PayloadSerializer {
   static PayloadSerializer& getInstance();
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpackAsCompressed(Payload&& payload) {
-    return folly::variant_match(
-        strategy_, [payload = std::move(payload)](auto& strategy) mutable {
-          return strategy.template unpackAsCompressed<T>(std::move(payload));
-        });
+  folly::Try<T> unpackAsCompressed(Payload&& payload) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_)
+          .unpackAsCompressed<T>(std::move(payload));
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_)
+          .unpackAsCompressed<T>(std::move(payload));
+    }
   }
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpack(rocket::Payload&& payload) {
-    return folly::variant_match(
-        strategy_, [payload = std::move(payload)](auto& strategy) mutable {
-          return strategy.template unpack<T>(std::move(payload));
-        });
+  folly::Try<T> unpack(rocket::Payload&& payload) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_).unpack<T>(
+          std::move(payload));
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_).unpack<T>(
+          std::move(payload));
+    }
   }
 
   template <typename T>
-  FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
-    return folly::variant_match(
-        strategy_, [data = std::forward<T>(data)](auto& strategy) mutable {
-          return strategy.packCompact(std::forward<T>(data));
-        });
+  std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_).packCompact(
+          std::forward<T>(data));
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_).packCompact(
+          std::forward<T>(data));
+    }
   }
 
   template <typename T>
-  FOLLY_ERASE size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
-    return folly::variant_match(
-        strategy_, [&output, buffer](auto& strategy) mutable {
-          return strategy.unpackCompact(output, buffer);
-        });
+  size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_)
+          .unpackCompact(output, buffer);
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_).unpackCompact(
+          output, buffer);
+    }
   }
 
   template <typename Metadata>
-  FOLLY_ERASE rocket::Payload packWithFds(
+  rocket::Payload packWithFds(
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
       folly::AsyncTransport* transport) {
-    return folly::variant_match(
-        strategy_,
-        [metadata,
-         payload = std::move(payload),
-         fds = std::move(fds),
-         transport](auto& strategy) mutable {
-          return strategy.template packWithFds<Metadata>(
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_)
+          .packWithFds<Metadata>(
               metadata, std::move(payload), std::move(fds), transport);
-        });
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_)
+          .packWithFds<Metadata>(
+              metadata, std::move(payload), std::move(fds), transport);
+    }
   }
-
   template <class PayloadType>
-  FOLLY_ERASE Payload
-  pack(PayloadType&& payload, folly::AsyncTransport* transport) {
-    return folly::variant_match(
-        strategy_,
-        [payload = std::forward<PayloadType>(payload),
-         transport](auto& strategy) mutable {
-          return strategy.template pack<PayloadType>(
-              std::forward<PayloadType>(payload), transport);
-        });
+  rocket::Payload pack(
+      PayloadType&& payload, folly::AsyncTransport* transport) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_)
+          .pack<PayloadType>(std::forward<PayloadType>(payload), transport);
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_)
+          .pack<PayloadType>(std::forward<PayloadType>(payload), transport);
+    }
   }
 
  private:

@@ -32,8 +32,8 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
@@ -104,7 +104,9 @@ RocketException makeRocketException(const ResponseRpcError& responseRpcError) {
     }
   }();
 
-  return RocketException(rocketCategory, packCompact(responseRpcError));
+  return RocketException(
+      rocketCategory,
+      PayloadSerializer::getInstance().packCompact(responseRpcError));
 }
 
 template <typename Serializer>
@@ -481,7 +483,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
     context_.sendError(std::move(ex), std::move(cb));
     return;
   }
-  auto payload = packWithFds(
+  auto payload = PayloadSerializer::getInstance().packWithFds(
       &metadata,
       std::move(data),
       std::move(getRequestContext()->getHeader()->fds),

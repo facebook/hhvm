@@ -41,12 +41,12 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
@@ -179,7 +179,8 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     }
     ServerPushMetadata serverMeta;
     try {
-      unpackCompact(serverMeta, std::move(mdPushFrame.metadata()));
+      PayloadSerializer::getInstance().unpackCompact(
+          serverMeta, std::move(mdPushFrame.metadata()));
     } catch (...) {
       close(transport::TTransportException(
           transport::TTransportException::CORRUPTED_DATA,
@@ -230,7 +231,9 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
               ResponseRpcErrorCategory::LOADSHEDDING;
 
           close(RocketException(
-              ErrorCode::REJECTED, packCompact(responseRpcError)));
+              ErrorCode::REJECTED,
+              rocket::PayloadSerializer::getInstance().packCompact(
+                  responseRpcError)));
         }
         return;
       }
@@ -383,7 +386,9 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
     serverCallback.onInitialError(makeContractViolation(kErrorMsg));
     return {StreamChannelStatus::ContractViolation, kErrorMsg};
   }
-  auto firstResponse = unpack<FirstResponsePayload>(std::move(fullPayload));
+  auto firstResponse =
+      rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
+          std::move(fullPayload));
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     return StreamChannelStatus::Complete;
@@ -437,7 +442,9 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     bool next,
     bool complete) {
   if (next) {
-    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload));
+    auto streamPayload =
+        rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
+            std::move(fullPayload));
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
     }
@@ -504,7 +511,9 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
     return {StreamChannelStatus::ContractViolation, std::move(msg)};
   };
   if (next) {
-    auto streamPayload = unpack<StreamPayload>(std::move(fullPayload));
+    auto streamPayload =
+        rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
+            std::move(fullPayload));
     if (streamPayload.hasException()) {
       return serverCallback.onFinalResponseError(
           std::move(streamPayload.exception()));
@@ -1066,7 +1075,10 @@ bool RocketClient::sendPayload(
     StreamId streamId, StreamPayload&& payload, Flags flags) {
   return sendFrame(
       PayloadFrame(
-          streamId, pack(std::move(payload), getTransportWrapper()), flags),
+          streamId,
+          rocket::PayloadSerializer::getInstance().pack(
+              std::move(payload), getTransportWrapper()),
+          flags),
       [this,
        dg = DestructorGuard(this),
        g = makeRequestCountGuard(RequestType::INTERNAL)](
@@ -1114,7 +1126,9 @@ bool RocketClient::sendHeadersPush(
   clientMeta.streamHeadersPush_ref()->headersPayloadContent_ref() =
       std::move(payload.payload);
   return sendFrame(
-      MetadataPushFrame::makeFromMetadata(packCompact(std::move(clientMeta))),
+      MetadataPushFrame::makeFromMetadata(
+          rocket::PayloadSerializer::getInstance().packCompact(
+              std::move(clientMeta))),
       std::move(onError));
 }
 
@@ -1500,7 +1514,9 @@ void RocketClient::terminateInteraction(int64_t id) {
   ClientPushMetadata clientMeta;
   clientMeta.interactionTerminate_ref().ensure().interactionId_ref() = id;
   std::ignore = sendFrame(
-      MetadataPushFrame::makeFromMetadata(packCompact(std::move(clientMeta))),
+      MetadataPushFrame::makeFromMetadata(
+          rocket::PayloadSerializer::getInstance().packCompact(
+              std::move(clientMeta))),
       std::move(onError));
 }
 
@@ -1541,7 +1557,9 @@ void RocketClient::sendTransportMetadataPush() {
     ClientPushMetadata clientMeta;
     clientMeta.transportMetadataPush_ref() = std::move(*transportMetadataPush);
     std::ignore = sendFrame(
-        MetadataPushFrame::makeFromMetadata(packCompact(std::move(clientMeta))),
+        MetadataPushFrame::makeFromMetadata(
+            rocket::PayloadSerializer::getInstance().packCompact(
+                std::move(clientMeta))),
         std::move(onError));
   }
 }

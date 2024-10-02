@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
 
 namespace apache::thrift::rocket {
@@ -36,7 +37,7 @@ class DefaultPayloadSerializerStrategy final
       if (auto compression = t.metadata.compression()) {
         t.payload = uncompressBuffer(std::move(t.payload), *compression);
       }
-      return std::move(t);
+      return t;
     });
   }
 

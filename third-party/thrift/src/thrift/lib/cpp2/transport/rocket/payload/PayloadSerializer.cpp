@@ -19,48 +19,35 @@
 namespace apache::thrift::rocket {
 
 PayloadSerializer::PayloadSerializerHolder::~PayloadSerializerHolder() {
-  PayloadSerializer* serializer = serializer_;
-  if (serializer) {
-    delete serializer;
-  }
+  delete serializer_.load(std::memory_order_acquire);
 }
 
 PayloadSerializer& PayloadSerializer::PayloadSerializerHolder::get() {
   auto* serializer = serializer_.load(std::memory_order_relaxed);
-
-  // Fast path when the serializer is already initialized
-  if (FOLLY_LIKELY(serializer != nullptr)) {
-    return *serializer;
-  } else {
-    // Slow path when the serializer is not initialized yet that
-    // uses a compare-and-swap to initialize it. Avoids the need for a lock.
+  if (FOLLY_UNLIKELY(serializer == nullptr)) {
     auto* newSerializer =
         new PayloadSerializer(LegacyPayloadSerializerStrategy());
-    for (;;) {
-      // Load the current serializer
-      auto* expected = serializer_.load(std::memory_order_relaxed);
 
-      // Check if the serializer is already initialized
-      if (expected == nullptr) {
-        // Try to initialize the serializer
-        if (serializer_.compare_exchange_strong(
-                expected, newSerializer, std::memory_order_release)) {
-          return *newSerializer;
-        }
-      } else {
-        // The serializer is already initialized, return it and clean up.
-        delete newSerializer;
-        return *expected;
-      }
+    // Try to initialize the serializer
+    if (serializer_.compare_exchange_strong(
+            serializer,
+            newSerializer,
+            std::memory_order_release,
+            std::memory_order_acquire)) {
+      serializer = newSerializer;
+    } else {
+      // The serializer is already initialized, clean up.
+      delete newSerializer;
     }
+
+    FOLLY_SAFE_CHECK(serializer != nullptr, "null serializer");
   }
+
+  return *serializer;
 }
 
 void PayloadSerializer::PayloadSerializerHolder::reset() {
-  auto* serializer = serializer_.exchange(nullptr);
-  if (serializer) {
-    delete serializer;
-  }
+  delete serializer_.exchange(nullptr, std::memory_order_acquire);
 }
 
 PayloadSerializer::PayloadSerializerHolder&

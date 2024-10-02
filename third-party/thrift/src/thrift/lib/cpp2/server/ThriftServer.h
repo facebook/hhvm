@@ -91,9 +91,9 @@
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <wangle/acceptor/ServerSocketConfig.h>
 #include <wangle/acceptor/SharedSSLContextManager.h>
@@ -2906,7 +2906,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
           rootRequestContextId_(stub.getRootRequestContextId()),
           reqId_(RequestsRegistry::getRequestId(rootRequestContextId_)),
           reqDebugLog_(collectRequestDebugLog(stub)) {
-      auto requestPayload = rocket::unpack<RequestPayload>(stub.clonePayload());
+      auto requestPayload =
+          rocket::PayloadSerializer::getInstance().unpack<RequestPayload>(
+              stub.clonePayload());
       payload_ = std::move(*requestPayload->payload);
       auto& metadata = requestPayload->metadata;
       if (metadata.otherMetadata()) {

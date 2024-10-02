@@ -177,13 +177,20 @@ module Alarm_timeout = struct
 
   let read_process ~timeout ~on_timeout ~reader cmd args =
     let (ic, oc) = open_process cmd args in
+    let terminate_common () =
+      close_in ic;
+      Out_channel.close oc;
+      ()
+    in
+    let on_timeout x =
+      terminate_common ();
+      on_timeout x
+    in
     with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
         try reader timeout ic oc with
         | exn ->
-          let e = Exception.wrap exn in
-          close_in ic;
-          Out_channel.close oc;
-          Exception.reraise e)
+          terminate_common ();
+          Exception.reraise (Exception.wrap exn))
 
   let open_connection ?timeout:_ sockaddr =
     (* timeout isn't used in this Alarm_timeout implementation, but is used in Select_timeout *)
@@ -516,20 +523,22 @@ module Select_timeout = struct
 
   let read_process ~timeout ~on_timeout ~reader cmd args =
     let (tic, oc) = open_process cmd args in
-    let on_timeout timings =
+    let terminate_common () =
       Option.iter ~f:Sys_utils.terminate_process tic.pid;
       tic.pid <- None;
+      close_in tic;
+      Out_channel.close oc;
+      ()
+    in
+    let on_timeout timings =
+      terminate_common ();
       on_timeout timings
     in
     with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
         try reader timeout tic oc with
         | exn ->
-          let e = Exception.wrap exn in
-          Option.iter ~f:Sys_utils.terminate_process tic.pid;
-          tic.pid <- None;
-          close_in tic;
-          Out_channel.close oc;
-          Exception.reraise e)
+          terminate_common ();
+          Exception.reraise (Exception.wrap exn))
 
   (** Socket *)
 

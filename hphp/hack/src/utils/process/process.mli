@@ -54,14 +54,13 @@ val register_entry_point : string -> ('param -> unit) -> 'param Entry.t
 val run_entry :
   ?input:string -> environment -> 'a Entry.t -> 'a -> Process_types.t
 
-(** Read data from stdout and stderr until EOF is reached. Waits for
-    process to terminate returns the stderr and stdout
-    and stderr.
+(** Read data from stdout and stderr until EOF is reached.
+  Wait for process to terminate then return the stdout and stderr.
 
-    Idempotent.
+  Idempotent.
 
-    If process exits with something other than (Unix.WEXITED 0), will return a
-    Error. *)
+  If the process exits with something other than (Unix.WEXITED 0), will return a
+  Error. *)
 val read_and_wait_pid : timeout:int -> Process_types.t -> process_result
 
 val failure_msg : failure -> string

@@ -56,6 +56,9 @@ module Primitive = struct
     | Num
   [@@deriving enum, eq, ord]
 
+  (* suppress warning about to_enum not used *)
+  let _ = to_enum
+
   let all = List.init max ~f:(fun i -> of_enum i |> Option.value_exn)
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
@@ -66,7 +69,10 @@ module Container = struct
     | Vec
     | Dict
     | Keyset
-  [@@deriving enum, ord, eq]
+  [@@deriving enum]
+
+  (* suppress warning about to_enum not used *)
+  let _ = to_enum
 
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
@@ -166,6 +172,9 @@ end = struct
     | Function
   [@@deriving enum, eq]
 
+  (* suppress warning about to_enum not used *)
+  let _ = to_enum
+
   let pick env =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
@@ -196,6 +205,9 @@ end = struct
     | Interface
     | AbstractClass
   [@@deriving enum, eq, ord]
+
+  (* suppress warning about classish_to_enum not used *)
+  let _ = classish_to_enum
 
   let pick_classish () =
     Random.int_incl min_classish max_classish

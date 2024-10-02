@@ -316,6 +316,8 @@ void AsyncFizzBase::deliverError(
     bool closeTransport) {
   DelayedDestruction::DestructorGuard dg(this);
 
+  bool readCallbackDelivered = false;
+
   if (readCallback_) {
     auto readCallback = readCallback_;
     readCallback_ = nullptr;
@@ -324,7 +326,8 @@ void AsyncFizzBase::deliverError(
     } else {
       readCallback->readErr(ex);
     }
-  } else {
+    readCallbackDelivered = true;
+  } else if (!pendingReadEx_) {
     pendingReadEx_ = ex;
   }
 
@@ -343,6 +346,12 @@ void AsyncFizzBase::deliverError(
 
   if (closeTransport) {
     transport_->close();
+  }
+
+  if (readCallbackDelivered) {
+    // The transport close or other callbacks may have generated another read
+    // exception. If we already delivered a more relevant exception, clear it.
+    pendingReadEx_ = folly::none;
   }
 }
 

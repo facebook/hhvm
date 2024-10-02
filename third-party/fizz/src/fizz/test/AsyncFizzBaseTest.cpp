@@ -39,6 +39,10 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
     ON_CALL(*this, good()).WillByDefault(Return(true));
     ON_CALL(*this, isReplaySafe()).WillByDefault(Return(true));
     ON_CALL(*this, connecting()).WillByDefault(Return(false));
+    ON_CALL(*this, transportError(_))
+        .WillByDefault(Invoke([this](const AsyncSocketException& ex) {
+          this->deliverError(ex);
+        }));
   }
 
   void TearDown() override {
@@ -406,6 +410,23 @@ TYPED_TEST(AsyncFizzBaseTest, TestReadEOFDelayedCallback) {
   EXPECT_CALL(this->readCallback_, readEOF_());
   this->setReadCB(&this->readCallback_);
   EXPECT_EQ(this->getReadCallback(), nullptr);
+}
+
+TYPED_TEST(AsyncFizzBaseTest, TestReadEOFSetCallbackAgain) {
+  this->expectTransportReadCallback();
+  this->setReadCB(&this->readCallback_);
+
+  EXPECT_CALL(this->readCallback_, readEOF_());
+  EXPECT_CALL(*this->socket_, close())
+      .WillOnce(Invoke([this]() {
+        ON_CALL(*this, good()).WillByDefault(Return(false));
+        this->transportReadCallback_->readEOF();
+      }))
+      .WillRepeatedly([] {});
+  this->endOfTLS(IOBuf::create(0));
+
+  EXPECT_CALL(this->readCallback_, readErr_(_));
+  this->setReadCB(&this->readCallback_);
 }
 
 TYPED_TEST(AsyncFizzBaseTest, TestMovableBuffer) {

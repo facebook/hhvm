@@ -37,7 +37,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
-                include "thrift/annotation/cpp.thrift"
+                struct Annotation {}
 
                 struct A {
                     1: string foo;
@@ -66,7 +66,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     string added_after_codemod;
                 }
                 struct G {
-                    @cpp.Ref{type = cpp.RefType.Unique}
+                    @Annotation
                     string foo;
                 }
                 struct H {
@@ -85,7 +85,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             read_file("foo.thrift"),
             textwrap.dedent(
                 """\
-                include "thrift/annotation/cpp.thrift"
+                struct Annotation {}
 
                 struct A {
                     1: string foo;
@@ -121,7 +121,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     -2: string added_after_codemod;
                 }
                 struct G {
-                    @cpp.Ref{type = cpp.RefType.Unique}
+                    @Annotation
                     // @lint-ignore thrift-compiler-warning Negative field id is deprecated, don't add new ones.
                     -1: string foo;
                 }

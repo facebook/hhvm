@@ -22,7 +22,7 @@
 #include <folly/String.h>
 #include <folly/testing/TestUtil.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/compiler.h>
+#include <thrift/compiler/parse/parse_ast.h>
 
 std::shared_ptr<t_program> dedent_and_parse_to_program(
     source_manager& sm, std::string source) {
@@ -31,6 +31,6 @@ std::shared_ptr<t_program> dedent_and_parse_to_program(
   std::ofstream(path) << folly::stripLeftMargin(source);
   diagnostics_engine diags = diagnostics_engine::ignore_all(sm);
   auto bundle = folly::to_shared_ptr(
-      apache::thrift::compiler::parse_and_mutate_program(sm, diags, path, {}));
+      apache::thrift::compiler::parse_ast(sm, diags, path, {}));
   return {bundle->root_program(), [bundle, temp_file](auto) {}};
 }

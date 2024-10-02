@@ -93,6 +93,7 @@ class node_metadata_cache {
 struct sema_params {
   bool forbid_unstructured_annotations_on_field_types = false;
   bool forbid_implicit_field_ids = false;
+  bool skip_lowering_type_annotations = false;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

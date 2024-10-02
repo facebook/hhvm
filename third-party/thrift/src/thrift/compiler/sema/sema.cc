@@ -347,18 +347,21 @@ void normalize_return_type(
 }
 
 template <typename Node>
-void lower_type_annotations(sema_context&, mutator_context& mctx, Node& node) {
+void lower_type_annotations(
+    sema_context& ctx, mutator_context& mctx, Node& node) {
   std::map<std::string, std::string> unstructured;
 
-  if (const t_const* annot =
-          node.find_structured_annotation_or_null(kCppTypeUri)) {
-    if (auto type =
-            annot->get_value_from_structured_annotation_or_null("name")) {
-      unstructured.insert({"cpp.type", type->get_string()});
-    } else if (
-        auto tmplate =
-            annot->get_value_from_structured_annotation_or_null("template")) {
-      unstructured.insert({"cpp.template", tmplate->get_string()});
+  if (!ctx.sema_parameters().skip_lowering_type_annotations) {
+    if (const t_const* annot =
+            node.find_structured_annotation_or_null(kCppTypeUri)) {
+      if (auto type =
+              annot->get_value_from_structured_annotation_or_null("name")) {
+        unstructured.insert({"cpp.type", type->get_string()});
+      } else if (
+          auto tmplate =
+              annot->get_value_from_structured_annotation_or_null("template")) {
+        unstructured.insert({"cpp.template", tmplate->get_string()});
+      }
     }
   }
 
@@ -484,7 +487,7 @@ ast_mutator schema_mutator() {
 bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
   bool success = true;
   if (!use_legacy_type_ref_resolution_) {
-    success = type_ref_resolver()(diags, bundle);
+    success = type_ref_resolver().run(diags, bundle);
   }
   for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
     if (td.type()) {

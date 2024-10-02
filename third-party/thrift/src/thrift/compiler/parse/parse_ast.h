@@ -28,6 +28,8 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+struct sema_params;
+
 struct parsing_params {
   parsing_params() noexcept {} // Disable aggregate initialization.
 
@@ -89,6 +91,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
     diagnostics_engine& diags,
     const std::string& path,
     const parsing_params& params,
+    const sema_params* sparams = nullptr,
     t_program_bundle* already_parsed = nullptr);
 
 } // namespace compiler

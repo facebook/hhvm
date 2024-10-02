@@ -57,7 +57,7 @@ struct type_ref_resolver {
     resolve_in_place(ref);
     return ref;
   }
-  bool operator()(sema_context& ctx, t_program_bundle& bundle) {
+  bool run(sema_context& ctx, t_program_bundle& bundle) {
     ast_mutator mutator;
 
     auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {

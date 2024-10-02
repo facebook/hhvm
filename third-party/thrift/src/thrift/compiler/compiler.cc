@@ -544,7 +544,7 @@ bool validate_program(t_generator& generator, diagnostics_engine& diags) {
       diags.params());
   ast_validator validator;
   generator.fill_validator_visitors(validator);
-  validator(validator_ctx, *(generator.get_program()));
+  validator(validator_ctx, *generator.get_program());
   return success;
 }
 
@@ -729,15 +729,9 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
     const parsing_params& pparams,
     const gen_params& gparams) {
   // Parse it!
-  std::unique_ptr<t_program_bundle> program_bundle = parse_and_mutate_program(
-      source_mgr,
-      ctx,
-      input_filename,
-      pparams,
-      true /* return_nullptr_on_failure */,
-      nullptr,
-      &ctx.sema_parameters());
-  if (program_bundle == nullptr) {
+  std::unique_ptr<t_program_bundle> program_bundle = parse_ast(
+      source_mgr, ctx, input_filename, pparams, &ctx.sema_parameters());
+  if (!program_bundle || ctx.has_errors()) {
     return nullptr;
   }
 
@@ -758,21 +752,20 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
                 d);
           },
           diagnostic_params::only_errors());
-      std::unique_ptr<t_program_bundle> inc = parse_and_mutate_program(
+      std::unique_ptr<t_program_bundle> inc = parse_ast(
           source_mgr,
           stdlib_ctx,
           schema_path,
           pparams,
-          true /* return_nullptr_on_failure */,
+          nullptr,
           program_bundle.get());
-      if (inc) {
+      if (inc && !stdlib_ctx.has_errors()) {
         program_bundle->add_implicit_includes(std::move(inc));
       }
     }
   } else {
-    // Not found
     ctx.warning(
-        source_location{},
+        source_location(),
         "Could not load Thrift standard libraries: {}",
         std::get<1>(found_or_error));
   }
@@ -793,33 +786,6 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
 } // namespace
 
-std::unique_ptr<t_program_bundle> parse_and_mutate_program(
-    source_manager& sm,
-    diagnostics_engine& diags,
-    const std::string& filename,
-    parsing_params params,
-    bool return_nullptr_on_failure,
-    t_program_bundle* already_parsed,
-    const sema_params* sparams) {
-  bool use_legacy_type_ref_resolution = params.use_legacy_type_ref_resolution;
-  auto programs =
-      parse_ast(sm, diags, filename, std::move(params), already_parsed);
-  if (!programs || diags.has_errors()) {
-    // Mutations should be only performed on a valid AST.
-    return !return_nullptr_on_failure ? std::move(programs) : nullptr;
-  }
-  auto ctx = sema_context(diags);
-  if (sparams) {
-    ctx.sema_parameters() = *sparams;
-  }
-  auto result = sema(use_legacy_type_ref_resolution).run(ctx, *programs);
-  if (result.unresolved_types && return_nullptr_on_failure) {
-    // Stop processing if there is unresolvable typeref.
-    programs = nullptr;
-  }
-  return programs;
-}
-
 std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
 parse_and_mutate_program(
     source_manager& sm,
@@ -828,8 +794,7 @@ parse_and_mutate_program(
     diagnostic_params dparams) {
   diagnostic_results results;
   sema_context ctx(sm, results, std::move(dparams));
-  return {
-      parse_and_mutate_program(sm, ctx, filename, std::move(params)), results};
+  return {parse_ast(sm, ctx, filename, std::move(params)), results};
 }
 
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
@@ -839,12 +804,11 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     diagnostic_params dparams) {
   diagnostic_results results;
   sema_context ctx(sm, results, std::move(dparams));
-  auto program =
-      parse_and_mutate_program(sm, ctx, filename, std::move(pparams));
+  auto programs = parse_ast(sm, ctx, filename, std::move(pparams));
   for (const auto& diag : results.diagnostics()) {
     fmt::print(stderr, "{}\n", diag);
   }
-  return program;
+  return programs;
 }
 
 std::unique_ptr<t_program_bundle> parse_and_get_program(
@@ -862,12 +826,12 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
     return {};
   }
 
-  sema_context ctx(
+  diagnostics_engine diags(
       sm,
       [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
       diagnostic_params::only_errors());
-  ctx.sema_parameters() = std::move(sparams);
-  return parse_ast(sm, ctx, filename, std::move(pparams));
+  sparams.skip_lowering_type_annotations = true;
+  return parse_ast(sm, diags, filename, std::move(pparams), &sparams);
 }
 
 compile_result compile(

@@ -85,12 +85,12 @@ TEST(ParserTest, struct_doc) {
     /// struct doc
     struct S {
       /// field doc
-      1: i32 field;
+      1: i32 field1;
       /**
        * multiline doc
        */
-      2: i32 field;
-      3: i32 field2; // ignored
+      2: i32 field2;
+      3: i32 field3; // ignored
     }
   )");
   auto diag = std::optional<diagnostic>();
@@ -144,9 +144,9 @@ TEST(ParserTest, struct_annotation) {
 
     struct S {
       @rust.Type{name = "Foo"}
-      1: i32 field;
-      2: i32 field;
-      3: i32 field2;
+      1: i32 field1;
+      2: i32 field2;
+      3: i32 field3;
     }
   )");
   auto diag = std::optional<diagnostic>();

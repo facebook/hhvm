@@ -763,16 +763,9 @@ let parse_options () =
   in
 
   (match !mode with
-  | Get_some_file_deps { depth; _ } ->
-    if Option.is_none !naming_table then
-      raise (Arg.Bad "--get-some-file-deps requires --naming-table");
-    if Option.is_none !root then
-      raise (Arg.Bad "--get-some-file-deps requires --root");
-    mode :=
-      Get_some_file_deps
-        { depth; full_hierarchy = !get_some_file_deps_full_hierarchy }
+  | Get_some_file_deps _ when Option.is_none !root ->
+    raise (Arg.Bad "--get-some-file-deps requires --root")
   | _ -> ());
-
   if Option.is_some !naming_table && Option.is_none !root then
     failwith "--naming-table needs --root";
 
@@ -820,6 +813,15 @@ let parse_options () =
       (* Path.make canonicalizes it, i.e. resolves symlinks *)
       Path.make root
   in
+  (match !mode with
+  | Get_some_file_deps { depth; _ } ->
+    if Option.is_none !naming_table then
+      raise (Arg.Bad "--get-some-file-deps requires --naming-table");
+    mode :=
+      Get_some_file_deps
+        { depth; full_hierarchy = !get_some_file_deps_full_hierarchy }
+  | _ -> ());
+
   let ( >?? ) x y = Option.value x ~default:y in
   let po =
     ParserOptions.

@@ -5714,7 +5714,9 @@ TEST_F(ServerProtocolTest, TestFullHandshakeFinished) {
   expectAeadCreation(&raead, nullptr);
   expectEncryptedReadRecordLayerCreation(
       &rrl, &raead, folly::StringPiece("cat"));
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
       .WillOnce(Invoke([=](ResumptionState& resState) {
         EXPECT_EQ(resState.version, TestProtocolVersion);
@@ -5783,7 +5785,9 @@ TEST_F(ServerProtocolTest, TestFinishedTicketEarly) {
   acceptEarlyData();
   setUpExpectingFinished();
 
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockWrite_, _write(_, _))
       .WillOnce(Invoke([&](TLSMessage& msg, Aead::AeadOptions) {
         TLSContent content;
@@ -5894,7 +5898,9 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicket) {
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("derivedrsec"); }));
 
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
       .WillOnce(Invoke([=](ResumptionState& resState) {
         EXPECT_EQ(resState.version, TestProtocolVersion);
@@ -5961,7 +5967,9 @@ TEST_F(ServerProtocolTest, TestWriteNewSessionTicketWithAppToken) {
 
   std::string appToken("appToken");
 
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
       .WillOnce(Invoke([=](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);
@@ -5987,7 +5995,9 @@ TEST_F(
   context_->setSendNewSessionTicket(true);
 
   // ExpectingFinished -> AcceptingData
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
       .WillOnce(Invoke([=](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);
@@ -6009,7 +6019,9 @@ TEST_F(
 
   // AcceptingData: WriteNewSessionTicket
   std::string appToken("appToken");
-  EXPECT_CALL(*factory_, makeTicketAgeAdd()).WillOnce(Return(0x44444444));
+  EXPECT_CALL(*factory_, makeRandomBytes(_, 4))
+      .WillOnce(Invoke(
+          [](unsigned char* out, size_t count) { memset(out, 0x44, count); }));
   EXPECT_CALL(*mockTicketCipher_, _encrypt(_))
       .WillOnce(Invoke([=](ResumptionState& resState) {
         EXPECT_EQ(resState.serverCert, cert_);

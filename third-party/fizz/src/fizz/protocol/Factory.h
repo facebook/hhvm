@@ -93,13 +93,6 @@ class Factory {
    *
    * TODO: Deprecate this.
    */
-  virtual uint32_t makeTicketAgeAdd() const;
-
-  /**
-   * Should not be overridden *unless* for testing.
-   *
-   * TODO: Deprecate this.
-   */
   virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const;
 
   virtual void makeRandomBytes(unsigned char* out, size_t count) const = 0;

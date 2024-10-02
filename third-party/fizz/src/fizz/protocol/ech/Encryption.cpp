@@ -412,7 +412,10 @@ ClientPresharedKey generateGreasePskCommon(
       size_t identitySize = identity.psk_identity->computeChainDataLength();
       greaseIdentity.psk_identity = factory->makeRandomBytes(identitySize);
     }
-    greaseIdentity.obfuscated_ticket_age = factory->makeTicketAgeAdd();
+
+    factory->makeRandomBytes(
+        reinterpret_cast<unsigned char*>(&greaseIdentity.obfuscated_ticket_age),
+        sizeof(greaseIdentity.obfuscated_ticket_age));
     grease.identities.push_back(std::move(greaseIdentity));
 
     const auto& binder = source.binders.at(i);

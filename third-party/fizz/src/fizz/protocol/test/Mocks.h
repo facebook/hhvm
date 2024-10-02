@@ -272,7 +272,6 @@ class MockFactory : public ::fizz::DefaultFactory {
       (HashFunction),
       (const));
   MOCK_METHOD(std::unique_ptr<Aead>, makeAead, (CipherSuite cipher), (const));
-  MOCK_METHOD(uint32_t, makeTicketAgeAdd, (), (const));
 
   MOCK_METHOD(
       std::unique_ptr<PeerCert>,
@@ -358,9 +357,6 @@ class MockFactory : public ::fizz::DefaultFactory {
         .WillByDefault(Invoke([](unsigned char* out, size_t count) {
           memset(out, 0x44, count);
         }));
-    ON_CALL(*this, makeTicketAgeAdd()).WillByDefault(InvokeWithoutArgs([]() {
-      return 0x44444444;
-    }));
     ON_CALL(*this, _makePeerCert(_, _)).WillByDefault(InvokeWithoutArgs([]() {
       return std::make_unique<NiceMock<MockPeerCert>>();
     }));

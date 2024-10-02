@@ -37,12 +37,6 @@ std::unique_ptr<KeyScheduler> Factory::makeKeyScheduler(
 
 // TODO: This should not belong as part of the base Factory; a concrete
 // factory should provide the random primitive.
-uint32_t Factory::makeTicketAgeAdd() const {
-  return RandomNumGenerator<uint32_t>().generateRandom();
-}
-
-// TODO: This should not belong as part of the base Factory; a concrete
-// factory should provide the random primitive.
 std::unique_ptr<folly::IOBuf> Factory::makeRandomBytes(size_t count) const {
   return RandomBufGenerator(count).generateRandom();
 }

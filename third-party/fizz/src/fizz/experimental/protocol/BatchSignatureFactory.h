@@ -77,10 +77,6 @@ class BatchSignatureFactory : public Factory {
     return original_->makeAead(cipher);
   }
 
-  uint32_t makeTicketAgeAdd() const override {
-    return original_->makeTicketAgeAdd();
-  }
-
   std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const override {
     return original_->makeRandomBytes(count);
   }

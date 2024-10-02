@@ -2099,7 +2099,10 @@ static SemiFuture<Optional<WriteToSocket>> generateTicket(
   resumptionSecret = state.keyScheduler()->getResumptionSecret(
       folly::range(resumptionMasterSecret), ticketNonce->coalesce());
 
-  auto ticketAgeAdd = state.context()->getFactory()->makeTicketAgeAdd();
+  uint32_t ticketAgeAdd{};
+  state.context()->getFactory()->makeRandomBytes(
+      reinterpret_cast<unsigned char*>(&ticketAgeAdd), sizeof(ticketAgeAdd));
+
   ResumptionState resState;
   resState.version = *state.version();
   resState.cipher = *state.cipher();

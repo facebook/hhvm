@@ -43,9 +43,22 @@ final class InputStreamByteBuf extends ByteBuf {
 
   private void read(int length) {
     try {
-      inputStream.read(buffer, 0, length);
+      int read = inputStream.read(buffer, 0, length);
+      ensureLength(read, length);
     } catch (IOException e) {
       throw Exceptions.propagate(e);
+    }
+  }
+
+  private void ensureLength(int read, int expected) {
+    if (read < expected) {
+      throw Exceptions.propagate(
+          new IndexOutOfBoundsException(
+              "Attempted to read beyond the end of InputStream, read: "
+                  + read
+                  + " bytes, expected:"
+                  + expected
+                  + " bytes"));
     }
   }
 

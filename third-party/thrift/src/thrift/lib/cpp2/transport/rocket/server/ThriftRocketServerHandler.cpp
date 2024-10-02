@@ -452,6 +452,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload, F&& makeRequest, RpcKind expectedKind) {
   std::chrono::steady_clock::time_point readEnd{
       std::chrono::steady_clock::now()};
+  auto wiredPayloadSize = payload.metadataAndDataSize();
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
@@ -720,6 +721,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   if (frameworkMetadataPtr) {
     cpp2ReqCtx->setFrameworkMetadata(std::move(*frameworkMetadataPtr));
   }
+
+  cpp2ReqCtx->setWiredRequestBytes(wiredPayloadSize);
 
   auto serializedCompressedRequest = SerializedCompressedRequest(
       std::move(data),

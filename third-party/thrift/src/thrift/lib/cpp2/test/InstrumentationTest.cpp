@@ -1259,7 +1259,10 @@ TEST_P(TimestampsTest, Basic) {
   auto now = std::chrono::steady_clock::now();
   handler()->setCallback([&](TestInterface* ti) {
     validateTimestamps(
-        forceTimestamps, now, ti->getConnectionContext()->getTimestamps());
+        forceTimestamps, now, ti->getRequestContext()->getTimestamps());
+    if (rocket) {
+      EXPECT_GT(ti->getRequestContext()->getWiredRequestBytes(), 0);
+    }
     now = std::chrono::steady_clock::now();
   });
   client->sync_runCallback();

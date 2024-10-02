@@ -132,6 +132,8 @@ inline constexpr auto kPythonAdapterUri =
     "facebook.com/thrift/annotation/python/Adapter";
 inline constexpr auto kPythonPy3HiddenUri =
     "facebook.com/thrift/annotation/python/Py3Hidden";
+inline constexpr auto kPythonPyDeprecatedHiddenUri =
+    "facebook.com/thrift/annotation/python/PyDeprecatedHidden";
 inline constexpr auto kPythonFlagsUri =
     "facebook.com/thrift/annotation/python/Flags";
 inline constexpr auto kPythonNameUri =

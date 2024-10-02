@@ -257,6 +257,11 @@ union Blake3Result {
   2: EdenError error;
 }
 
+union DigestHashResult {
+  1: BinaryHash digestHash;
+  2: EdenError error;
+}
+
 /**
  * Effectively a `struct timespec`
  */
@@ -1871,6 +1876,25 @@ service EdenService extends fb303_core.BaseService {
    * these for more details.
    */
   list<Blake3Result> getBlake3(
+    1: PathString mountPoint,
+    2: list<PathString> paths,
+    3: SyncBehavior sync,
+  ) throws (1: EdenError ex);
+
+  /**
+   * For each path, returns an EdenError instead of the DIGEST_HASH if any of the
+   * following occur:
+   * - directory is materialized (directory or child is/was modified since the
+   *   last checkout operation).
+   * - path identifies a non-existent file.
+   * - path identifies something that is not an ordinary file or directory (e.g.,
+   *   symlink or socket).
+   *
+   * Note: may return stale data if synchronizeWorkingCopy isn't called, and if
+   * the SyncBehavior specify a 0 timeout. see the documentation for both of
+   * these for more details.
+   */
+  list<DigestHashResult> getDigestHash(
     1: PathString mountPoint,
     2: list<PathString> paths,
     3: SyncBehavior sync,

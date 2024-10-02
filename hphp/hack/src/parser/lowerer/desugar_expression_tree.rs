@@ -116,7 +116,35 @@ pub fn desugar(
                 &et_literal_pos,
             )]),
         };
-        let mut typing_fun_ = wrap_fun_(false, typing_fun_body, vec![], et_literal_pos.clone());
+        let param_type = aast::Hint(
+            et_literal_pos.clone(),
+            Box::new(Hint_::Hshape(aast::NastShapeInfo {
+                allows_unknown_fields: true,
+                field_map: vec![],
+            })),
+        );
+        let freevar_param = aast::FunParam {
+            annotation: (),
+            type_hint: aast::TypeHint((), Some(param_type)),
+            pos: et_literal_pos.clone(),
+            name: "$0fv_shape".to_string(),
+            info: aast::FunParamInfo::ParamOptional(Some(Expr(
+                (),
+                et_literal_pos.clone(),
+                Expr_::mk_shape(vec![]),
+            ))),
+            readonly: None,
+            callconv: ParamKind::Pnormal,
+            user_attributes: aast::UserAttributes(vec![]),
+            visibility: None,
+            splat: None,
+        };
+        let mut typing_fun_ = wrap_fun_(
+            false,
+            typing_fun_body,
+            vec![freevar_param],
+            et_literal_pos.clone(),
+        );
         typing_fun_.ctxs = Some(aast::Contexts(
             et_literal_pos.clone(),
             vec![ast::Hint(

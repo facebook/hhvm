@@ -89,8 +89,24 @@
                                                                     f_readonly_this = None; 
                                                                     f_annotation = (); 
                                                                     f_readonly_ret = None; 
-                                                                    f_ret = ((), None); 
-                                                                    f_params = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = ();
+                                                                    param_type_hint =
+                                                                    (
+                                                                    (),
+                                                                    (Some (
+                                                                    [4:19-38],
+                                                                    (
+                                                                    Happly (([4:19-38], "\\HH\\supportdyn"), [([4:19-38], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
+                                                                    param_pos = [4:19-38]; 
+                                                                    param_name = "$0fv_shape"; 
+                                                                    param_info = (Param_optional (Some ((), [4:19-38], (Shape [])))); 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
                                                                     f_ctxs = (Some ([4:19-38], [([4:19-38], (Happly (([4:19-38], "\\HH\\Contexts\\defaults"), [])))])); 
                                                                     f_unsafe_ctxs = None;
                                                                     f_body =

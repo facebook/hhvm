@@ -966,15 +966,21 @@ class t_hack_generator : public t_concat_generator {
       const std::optional<std::string>& underlying_name,
       const std::optional<std::string>& underlying_ns,
       bool decl = false) {
-    if (decl) {
+    if (underlying_name.has_value()) {
+      if (decl) {
+        return *underlying_name;
+      }
+
+      if (underlying_ns.has_value()) {
+        return "\\" + *underlying_ns + "\\" + *underlying_name;
+      } else if (has_hack_namespace || has_nested_ns) {
+        return "\\" + *underlying_name;
+      }
+
       return *underlying_name;
     }
-    if (underlying_ns) {
-      return "\\" + *underlying_ns + "\\" + *underlying_name;
-    } else if (has_hack_namespace || has_nested_ns) {
-      return "\\" + *underlying_name;
-    }
-    return *underlying_name;
+
+    throw std::runtime_error("`underlying_name` doesn't have a value!");
   }
 
   const char* UNION_EMPTY = "_EMPTY_";
@@ -1671,7 +1677,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
   } else {
     typehint = type_to_typehint(ttypedef->get_type());
   }
-  if (wrapper) {
+  if (wrapper && name.has_value()) {
     f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
              << " = " << *wrapper << "<" << hack_wrapped_type_name(name, ns)
              << ">;\n";
@@ -3723,7 +3729,7 @@ bool t_hack_generator::
         wrapper_method = *wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
       }
 
-      if (is_async_val) {
+      if (is_async_val && name.has_value()) {
         out << indent() << " {\n";
         indent_up();
         out << indent() << "$" << *name << " = " << inner_str << ";\n";
@@ -5152,7 +5158,7 @@ void t_hack_generator::_generate_php_struct_definition(
   auto [wrapper, underlying_name, ns] = find_hack_wrapper(tstruct, false);
   std::string struct_hack_name_with_ns;
   std::string struct_hack_decl;
-  if (wrapper) {
+  if (wrapper && underlying_name.has_value()) {
     struct_hack_name_with_ns = hack_wrapped_type_name(underlying_name, ns);
     struct_hack_decl = *underlying_name;
   } else {
@@ -6783,9 +6789,9 @@ void t_hack_generator::generate_service_interface(
     // Finally, the function declaration.
     std::string return_typehint;
 
-    if (function->stream()) {
+    if (function->stream() != nullptr) {
       return_typehint = get_stream_function_return_typehint(function);
-    } else if (const t_sink* sink = function->sink()) {
+    } else if (function->sink() != nullptr) {
       return_typehint = get_sink_function_return_typehint(function);
     } else {
       return_typehint = type_to_typehint(function->return_type().get_type());

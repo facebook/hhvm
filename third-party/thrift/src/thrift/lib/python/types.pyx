@@ -1468,6 +1468,14 @@ cdef class Union(StructOrUnion):
     def get_type(self):
         return self.type
 
+    @property
+    def fbthrift_current_field(self):
+        return self.type
+
+    @property
+    def fbthrift_current_value(self):
+        return self.value
+
     @classmethod
     def fromValue(cls, value):
         """
@@ -1754,7 +1762,7 @@ class UnionMeta(type):
 
     def __dir__(cls):
         return tuple((<UnionInfo>cls._fbthrift_struct_info).name_to_index.keys()) + (
-            "type", "value")
+            "type", "value", 'fbthrift_current_field', 'fbthrift_current_value')
 
     def _fbthrift_fill_spec(cls):
         (<UnionInfo>cls._fbthrift_struct_info)._fill_union_info()

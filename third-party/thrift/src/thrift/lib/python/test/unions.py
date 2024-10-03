@@ -48,18 +48,29 @@ class UnionTestImmutable(unittest.TestCase):
         string = "123"
         union = Integers.fromValue(tiny)
         self.assertEqual(union.type, Integers.Type.tiny)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.tiny)
+        self.assertEqual(union.fbthrift_current_value, tiny)
         union = Integers.fromValue(small)
-        self.assertEqual(union.type, Integers.Type.small)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.small)
+        self.assertEqual(union.fbthrift_current_value, small)
         union = Integers.fromValue(medium)
-        self.assertEqual(union.type, Integers.Type.medium)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.medium)
+        self.assertEqual(union.fbthrift_current_value, medium)
         union = Integers.fromValue(large)
-        self.assertEqual(union.type, Integers.Type.large)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.large)
+        self.assertEqual(union.fbthrift_current_value, large)
         union = Integers.fromValue(string)
-        self.assertEqual(union.type, Integers.Type.unbounded)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.unbounded)
+        self.assertEqual(union.fbthrift_current_value, string)
         union = Integers.fromValue(
             Digits(data=[Integers(tiny=1), Integers(unbounded="123")])
         )
         self.assertEqual(union.type, Integers.Type.digits)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.digits)
+        self.assertEqual(
+            union.fbthrift_current_value,
+            Digits(data=[Integers(tiny=1), Integers(unbounded="123")]),
+        )
 
 
 @parameterized_class(
@@ -167,7 +178,7 @@ class UnionTests(unittest.TestCase):
             "tiny",
             "unbounded",
         ] + (
-            ["type", "value"]
+            ["type", "value", "fbthrift_current_field", "fbthrift_current_value"]
             if not self.is_mutable_run
             else ["fbthrift_current_field", "fbthrift_current_value"]
         )

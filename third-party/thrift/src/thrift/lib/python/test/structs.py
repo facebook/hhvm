@@ -273,7 +273,6 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNone(
             z.an_int.value
             if not self.is_mutable_run
-            # pyre-ignore[16]: no attribute `fbthrift_current_value`
             else z.an_int.fbthrift_current_value
         )
         self.assertEqual(y.val, x.val)

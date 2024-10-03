@@ -37,6 +37,7 @@ class _fbthrift_ExtendTestService_check_args(metaclass=_fbthrift_python_types.St
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

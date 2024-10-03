@@ -159,6 +159,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(metaclass=_fbthrift_pyt
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -169,6 +170,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(metaclass=_fbthrift_pyt
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -204,6 +206,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_args(metaclass=_fbthrift_pyt
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -234,6 +237,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream(metaclass=_fbt
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -249,6 +253,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_args(metaclass=_fbthrift_py
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -264,6 +269,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -294,6 +300,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_args(metaclass=_fbthrift_p
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -309,6 +316,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -319,6 +327,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -349,6 +358,7 @@ class _fbthrift_PubSubStreamingService_boththrows_args(metaclass=_fbthrift_pytho
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -364,6 +374,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result(metaclass=_fbthrift_pyt
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -389,6 +400,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream(metaclass=_fbthr
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -404,6 +416,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(metacl
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -444,6 +457,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -459,6 +473,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(metac
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -484,6 +499,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(met
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -514,6 +530,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(metaclas
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -539,6 +556,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(metacl
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -564,6 +582,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -579,6 +598,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(metaclass=_fbthrift
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -589,6 +609,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(metaclass=_fbthrift
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 

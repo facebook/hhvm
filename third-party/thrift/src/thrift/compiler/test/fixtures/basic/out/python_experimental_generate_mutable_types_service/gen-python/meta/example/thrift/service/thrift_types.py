@@ -24,6 +24,7 @@ class EchoRequest(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -76,6 +77,7 @@ class EchoResponse(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -128,6 +130,7 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -207,6 +210,7 @@ class _fbthrift_EchoService_echo_args(metaclass=_fbthrift_python_types.StructMet
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -232,6 +236,7 @@ class _fbthrift_EchoService_echo_result(metaclass=_fbthrift_python_types.StructM
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

@@ -24,6 +24,7 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -34,6 +35,7 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -44,6 +46,7 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -54,6 +57,7 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -64,6 +68,7 @@ class TemplateLists(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -110,6 +115,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -120,6 +126,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -130,6 +137,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -140,6 +148,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -150,6 +159,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             6,  # id
@@ -160,6 +170,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             7,  # id
@@ -170,6 +181,7 @@ class TemplateSets(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -216,6 +228,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -226,6 +239,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -236,6 +250,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -246,6 +261,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -256,6 +272,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             6,  # id
@@ -266,6 +283,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             7,  # id
@@ -276,6 +294,7 @@ class TemplateMaps(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -322,6 +341,7 @@ class TWrapped(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -332,6 +352,7 @@ class TWrapped(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            9, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -378,6 +399,7 @@ class IndirectionA(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -424,6 +446,7 @@ class IndirectionB(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -470,6 +493,7 @@ class IndirectionC(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
     )
 

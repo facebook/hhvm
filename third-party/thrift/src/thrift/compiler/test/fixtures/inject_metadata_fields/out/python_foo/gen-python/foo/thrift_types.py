@@ -24,6 +24,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             101,  # id
@@ -34,6 +35,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             102,  # id
@@ -44,6 +46,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 

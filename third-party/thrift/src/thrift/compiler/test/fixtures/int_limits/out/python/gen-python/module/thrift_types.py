@@ -24,6 +24,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             9223372036854775807,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -34,6 +35,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             -9223372036854775808,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -44,6 +46,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             2147483647,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -54,6 +57,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             -2147483648,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -64,6 +68,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             32767,  # default value
             None,  # adapter info
             True, # field type is primitive
+            3, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             6,  # id
@@ -74,6 +79,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             -32768,  # default value
             None,  # adapter info
             True, # field type is primitive
+            3, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             7,  # id
@@ -84,6 +90,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             127,  # default value
             None,  # adapter info
             True, # field type is primitive
+            2, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             8,  # id
@@ -94,6 +101,7 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
             -128,  # default value
             None,  # adapter info
             True, # field type is primitive
+            2, # IDL type (see BaseTypeEnum)
         ),
     )
 

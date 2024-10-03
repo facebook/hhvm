@@ -26,6 +26,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -105,6 +106,7 @@ class _fbthrift_MyService_interact_args(metaclass=_fbthrift_python_types.StructM
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -197,6 +199,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -318,6 +321,7 @@ class _fbthrift_Factories_interact_args(metaclass=_fbthrift_python_types.StructM
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -410,6 +414,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -548,6 +553,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -696,6 +702,7 @@ class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

@@ -30,10 +30,8 @@ class {{> types/function_args_type}}(metaclass={{> types/struct_metaclass}}):
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive{{!
-}}{{#program:generate_mutable_types}}
-            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
-}}{{/program:generate_mutable_types}}
+            {{> fields/is_primitive }}, # field type is primitive
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:args}}
     )
@@ -65,10 +63,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(metaclass={{> types/st
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive{{!
-}}{{#program:generate_mutable_types}}
-            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
-}}{{/program:generate_mutable_types}}
+            {{> fields/is_primitive }}, # field type is primitive
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:exceptions}}
     )
@@ -99,10 +95,8 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(metaclass={{> t
             {{#field:type}}{{^type:base?}}lambda: {{/type:base?}}{{ >types/typeinfo }}{{/field:type}},  # typeinfo
             None,  # default value
             {{> fields/adapter_info }},  # adapter info
-            {{> fields/is_primitive }}, # field type is primitive{{!
-}}{{#program:generate_mutable_types}}
-            {{field:idl_type}}, # IDL type (see BaseTypeEnum){{!
-}}{{/program:generate_mutable_types}}
+            {{> fields/is_primitive }}, # field type is primitive
+            {{field:idl_type}}, # IDL type (see BaseTypeEnum)
         ),
         {{/function:stream_exceptions}}
     )

@@ -26,6 +26,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -78,6 +79,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -130,6 +132,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -140,6 +143,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -192,6 +196,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             -1101,  # id
@@ -202,6 +207,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             -1100,  # id
@@ -212,6 +218,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             1,  # id
@@ -222,6 +229,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 

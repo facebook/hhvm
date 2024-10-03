@@ -26,6 +26,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -36,6 +37,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             lambda: Result.SO_SO,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -131,6 +133,7 @@ class _fbthrift_PrimitivesService_init_args(metaclass=_fbthrift_python_types.Str
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -141,6 +144,7 @@ class _fbthrift_PrimitivesService_init_args(metaclass=_fbthrift_python_types.Str
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -186,6 +190,7 @@ class _fbthrift_PrimitivesService_method_that_throws_result(metaclass=_fbthrift_
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -201,6 +206,7 @@ class _fbthrift_PrimitivesService_return_void_method_args(metaclass=_fbthrift_py
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
     )
 

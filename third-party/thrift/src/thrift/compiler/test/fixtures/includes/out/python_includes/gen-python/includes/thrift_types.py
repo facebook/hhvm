@@ -26,6 +26,7 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
             0,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -36,6 +37,7 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
             lambda: transitive.thrift_types.Foo(a=2),  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

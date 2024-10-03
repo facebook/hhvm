@@ -24,6 +24,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: Metasyntactic.FOO,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -34,6 +35,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: Metasyntactic.BAR,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -44,6 +46,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.BadEnum(Metasyntactic, -1),  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -54,6 +57,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, ()),  # default value
             None,  # adapter info
             False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -100,6 +104,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.BadEnum(MyEnum2, 3),  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -110,6 +115,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: _fbthrift_python_types.BadEnum(MyEnum3, -3),  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             4,  # id
@@ -120,6 +126,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             6,  # id
@@ -130,6 +137,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             lambda: MyEnum1.ME1_1,  # default value
             None,  # adapter info
             False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
         ),
     )
 

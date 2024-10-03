@@ -24,6 +24,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -34,6 +35,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -44,6 +46,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             5,  # id
@@ -54,6 +57,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             9,  # id
@@ -64,6 +68,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             14,  # id
@@ -74,6 +79,7 @@ class ComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -126,6 +132,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             3,  # id
@@ -136,6 +143,7 @@ class ListUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -188,6 +196,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            9, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -198,6 +207,7 @@ class DataUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -250,6 +260,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -260,6 +271,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             9,  # id
@@ -270,6 +282,7 @@ class Val(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -322,6 +335,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -332,6 +346,7 @@ class ValUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -384,6 +399,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -394,6 +410,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -446,6 +463,7 @@ class NonCopyableStruct(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -498,6 +516,7 @@ class NonCopyableUnion(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

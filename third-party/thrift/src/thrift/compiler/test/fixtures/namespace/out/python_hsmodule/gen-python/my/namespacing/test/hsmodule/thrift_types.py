@@ -24,6 +24,7 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -87,6 +88,7 @@ class _fbthrift_HsTestService_init_args(metaclass=_fbthrift_python_types.StructM
             None,  # default value
             None,  # adapter info
             True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
         ),
     )
 

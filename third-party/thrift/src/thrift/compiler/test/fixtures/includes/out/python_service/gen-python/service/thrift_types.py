@@ -44,6 +44,7 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -54,6 +55,7 @@ class _fbthrift_MyService_query_args(metaclass=_fbthrift_python_types.StructMeta
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 
@@ -74,6 +76,7 @@ class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.Str
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
         _fbthrift_python_types.FieldInfo(
             2,  # id
@@ -84,6 +87,7 @@ class _fbthrift_MyService_has_arg_docs_args(metaclass=_fbthrift_python_types.Str
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
         ),
     )
 

@@ -63,6 +63,12 @@ class RpcOptions {
     CRIT, // Critical infra traffic that should *never* be dropped
   };
 
+  enum class Checksum : uint8_t {
+    NONE = 0,
+    CRC32 = 1,
+    XXH3_64 = 2,
+  };
+
   typedef apache::thrift::concurrency::PRIORITY PRIORITY;
 
   /**
@@ -165,6 +171,9 @@ class RpcOptions {
   RpcOptions& setConnectionKey(std::string key);
   std::string_view getConnectionKey() const;
 
+  RpcOptions& setChecksum(Checksum checksum);
+  Checksum getChecksum() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -205,6 +214,8 @@ class RpcOptions {
   std::optional<uint32_t> requestDeadlineMs_;
 
   folly::SocketFds::ToSend fdsToSend_;
+
+  Checksum checksum_{Checksum::NONE};
 };
 
 } // namespace thrift

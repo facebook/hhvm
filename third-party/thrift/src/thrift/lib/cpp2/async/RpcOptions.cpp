@@ -287,5 +287,14 @@ std::string_view RpcOptions::getConnectionKey() const {
   return connectionKey_;
 }
 
+RpcOptions& RpcOptions::setChecksum(RpcOptions::Checksum checksum) {
+  checksum_ = checksum;
+  return *this;
+}
+
+RpcOptions::Checksum RpcOptions::getChecksum() const {
+  return checksum_;
+}
+
 } // namespace thrift
 } // namespace apache

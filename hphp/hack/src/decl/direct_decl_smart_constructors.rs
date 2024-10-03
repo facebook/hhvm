@@ -3138,7 +3138,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Readonly
             | TokenKind::Internal
             | TokenKind::Global
-            | TokenKind::Optional => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
+            | TokenKind::Optional
+            | TokenKind::Nameof => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
             TokenKind::Attribute
             | TokenKind::Await
             | TokenKind::Binary
@@ -3176,7 +3177,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::List
             | TokenKind::Match
             | TokenKind::Module
-            | TokenKind::Nameof
             | TokenKind::New
             | TokenKind::Parent
             | TokenKind::Print

@@ -5,9 +5,9 @@ include_paths=["./*"]
 
 [packages.pkg2]
 include_paths=[
-    "cross_package_access_internal1.php--foo.php",
-    "illegal_cross_package_basic.php--foo.php",
-    "illegal_cross_package_call_to_tests.php--__tests__.php"
+    "cross_package_access_internal1_foo.php",
+    "illegal_cross_package_basic_foo.php",
+
 ]
 includes = ["pkg1"]
 
@@ -15,3 +15,10 @@ includes = ["pkg1"]
 includes = ["pkg2"]
 
 [packages.pkg4]
+
+[packages.pkg5]
+include_paths=["./pkg5/*"]
+
+[packages.pkg6]
+include_paths=["./pkg6/*"]
+includes = ["pkg1"]

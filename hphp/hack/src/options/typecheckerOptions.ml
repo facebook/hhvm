@@ -322,5 +322,8 @@ let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let package_v2 t = t.GlobalOptions.tco_package_v2
 
+let package_v2_support_multifile_tests t =
+  t.GlobalOptions.tco_package_v2_support_multifile_tests
+
 let package_v2_bypass_package_check_for_class_const t =
   t.GlobalOptions.tco_package_v2_bypass_package_check_for_class_const

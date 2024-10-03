@@ -2493,6 +2493,7 @@ let decl_and_run_mode
     | Some _ ->
       let (errors, info) =
         PackageConfig.load_and_parse
+          ~strict:false
           ~pkgs_config_abs_path:packages_config_path
           ()
       in

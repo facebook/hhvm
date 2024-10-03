@@ -41,7 +41,7 @@ mod ffi {
 }
 
 pub fn package_info(filename: &CxxString) -> ffi::PackageInfo {
-    let s = package::PackageInfo::from_text("", &filename.to_string());
+    let s = package::PackageInfo::from_text_strict("", &filename.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {

@@ -1,9 +1,9 @@
-error: Naming[2049] Unbound name: pkg5 (a package) [1]
+error: Naming[2049] Unbound name: pkgNotDefined5 (a package) [1]
 
 crosspackage_attr_nonexistent_pkg.php--a.php:4:20
 2 | // package pkg1
 3 | class A {
-[1] 4 |   <<__CrossPackage("pkg5")>> // pkg5 doesn't exist
+[1] 4 |   <<__CrossPackage("pkgNotDefined5")>> // pkgNotDefined doesn't exist
 5 |   public function test() : void {
 6 |   }
 

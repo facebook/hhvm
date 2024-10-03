@@ -6,8 +6,14 @@
  *
  *)
 
-(** Load and parse PACKAGES.toml if it exists at the root. *)
+(** Load and parse PACKAGES.toml if it exists at the root.
+  * If `strict` is true, then an error is raised if an include_path
+  * does not exist in the filesystem.
+  *)
 val load_and_parse :
-  ?pkgs_config_abs_path:string option -> unit -> Errors.t * PackageInfo.t
+  ?strict:bool ->
+  ?pkgs_config_abs_path:string option ->
+  unit ->
+  Errors.t * PackageInfo.t
 
 val repo_config_path : Relative_path.t

@@ -103,7 +103,7 @@ impl HhConfig {
         } else {
             String::new()
         };
-        let package_info: PackageInfo = PackageInfo::from_text(
+        let package_info: PackageInfo = PackageInfo::from_text_strict(
             root.as_ref().to_str().unwrap_or_default(),
             package_config_pathbuf.to_str().unwrap_or_default(),
         )
@@ -158,7 +158,7 @@ impl HhConfig {
         let custom_error_config = CustomErrorConfig::from_path(custom_error_config_path)?;
         let package_config_pathbuf = Self::create_packages_path(hhconfig_path.as_path());
         let package_config_path = package_config_pathbuf.as_path();
-        let package_info: PackageInfo = PackageInfo::from_text(
+        let package_info: PackageInfo = PackageInfo::from_text_strict(
             root.as_ref().to_str().unwrap_or_default(),
             package_config_path.to_str().unwrap_or_default(),
         )
@@ -446,6 +446,7 @@ impl HhConfig {
             warnings_default_all: hhconfig.get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
+            tco_package_v2_support_multifile_tests: hhconfig.get_bool_or("package_v2_support_multifile_tests", default.tco_package_v2_support_multifile_tests)?,
             tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or("package_v2_bypass_package_check_for_class_const", default.tco_package_v2_bypass_package_check_for_class_const)?,
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(

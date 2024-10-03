@@ -1,0 +1,25 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg6 from package pkg1 [1]
+-> This is from nested_package_path.php--pkg6/bar.php, which belongs to package pkg6 [2]
+-> But nested_package_path.php--foo.php is in package pkg1, and package pkg1 does not include package pkg6 [3]
+
+nested_package_path.php--foo.php:4:3
+2 |
+3 | function foo(): void {
+[1] 4 |   bar(); // this should be an error as pkg1 does not include pkg6
+5 | }
+
+nested_package_path.php--pkg6/bar.php:3:10
+1 | <?hh
+2 |
+[2] 3 | function bar(): void {}
+4 |
+5 | function zot(): void {
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3] 3 | [packages.pkg1]
+4 | include_paths=["./*"]
+5 |
+
+1 error found

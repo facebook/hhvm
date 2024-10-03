@@ -1,5 +1,5 @@
 error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from illegal_cross_package_basic.php--foo.php, which belongs to package pkg2 [2]
+-> This is from illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php, which belongs to package pkg2 [2]
 -> But illegal_cross_package_basic.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 illegal_cross_package_basic.php--bar.php:3:13
@@ -7,7 +7,7 @@ illegal_cross_package_basic.php--bar.php:3:13
 2 | // package pkg1
 [1] 3 | type TBar = TFoo;
 
-illegal_cross_package_basic.php--foo.php:3:6
+illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php:3:6
 1 | <?hh
 2 | // package pkg2
 [2] 3 | type TFoo = int;

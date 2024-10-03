@@ -695,7 +695,10 @@ let get_package_for_module env md =
 
 let get_package_for_file env file =
   let info = get_tcopt env |> TypecheckerOptions.package_info in
-  PackageInfo.get_package_for_file info file
+  let support_multifile_tests =
+    get_tcopt env |> TypecheckerOptions.package_v2_support_multifile_tests
+  in
+  PackageInfo.get_package_for_file ~support_multifile_tests info file
 
 let get_package_by_name env pkg_name =
   let info = get_tcopt env |> TypecheckerOptions.package_info in

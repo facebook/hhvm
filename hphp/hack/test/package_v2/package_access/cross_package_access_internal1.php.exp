@@ -6,13 +6,13 @@ cross_package_access_internal1.php--bar.php:3:13
 2 | // package pkg1
 [1] 3 | type TBar = TFoo;
 
-cross_package_access_internal1.php--foo.php:4:15
+cross_package_access_internal1.php--cross_package_access_internal1_foo.php:4:15
 2 | // package pkg2
 3 | module foo;
 [2] 4 | internal type TFoo = int;
 
 error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from cross_package_access_internal1.php--foo.php, which belongs to package pkg2 [2]
+-> This is from cross_package_access_internal1.php--cross_package_access_internal1_foo.php, which belongs to package pkg2 [2]
 -> But cross_package_access_internal1.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
 
 cross_package_access_internal1.php--bar.php:3:13
@@ -20,7 +20,7 @@ cross_package_access_internal1.php--bar.php:3:13
 2 | // package pkg1
 [1] 3 | type TBar = TFoo;
 
-cross_package_access_internal1.php--foo.php:4:15
+cross_package_access_internal1.php--cross_package_access_internal1_foo.php:4:15
 2 | // package pkg2
 3 | module foo;
 [2] 4 | internal type TFoo = int;

@@ -2,7 +2,7 @@
 <?hh
 // package pkg1
 class A {
-  <<__CrossPackage("pkg5")>> // pkg5 doesn't exist
+  <<__CrossPackage("pkgNotDefined5")>> // pkgNotDefined doesn't exist
   public function test() : void {
   }
 }

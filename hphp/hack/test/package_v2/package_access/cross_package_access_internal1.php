@@ -2,7 +2,7 @@
 <?hh
 new module foo {}
 
-//// foo.php
+//// cross_package_access_internal1_foo.php
 <?hh
 // package pkg2
 module foo;

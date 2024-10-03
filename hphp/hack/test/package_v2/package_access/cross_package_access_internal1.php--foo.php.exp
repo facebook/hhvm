@@ -1,9 +1,0 @@
-error: Naming[2049] Unbound name: foo (a module) [1]
-
-cross_package_access_internal1.php--foo.php:3:8
-1 | <?hh
-2 | // package pkg2
-[1] 3 | module foo;
-4 | internal type TFoo = int;
-
-1 error found

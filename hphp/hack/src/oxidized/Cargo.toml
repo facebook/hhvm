@@ -36,7 +36,7 @@ rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
 strum = { version = "0.26.2", features = ["derive"] }
-thiserror = "1.0.49"
+thiserror = "1.0.64"
 toml = "0.8.4"
 
 [dev-dependencies]

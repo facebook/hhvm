@@ -29,7 +29,7 @@ python = { version = "0.0.1+unstable", path = "../python" }
 ref-cast = "1.0.18"
 rust = { version = "0.0.1+unstable", path = "../rust" }
 scope = { version = "0.0.1+unstable", path = "../scope" }
-thiserror = "1.0.49"
+thiserror = "1.0.64"
 thrift = { version = "0.0.1+unstable", path = "../thrift" }
 
 [build-dependencies]

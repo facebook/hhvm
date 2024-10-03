@@ -33,7 +33,7 @@ parser_core_types = { version = "0.0.0", path = "../../parser/cargo/core_types" 
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 sha1 = "0.10.5"
-thiserror = "1.0.49"
+thiserror = "1.0.64"
 ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]

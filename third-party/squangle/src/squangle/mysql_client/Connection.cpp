@@ -7,6 +7,7 @@
  */
 
 #include "squangle/mysql_client/Connection.h"
+#include "common/db/sql_builder/logging/OdsCounterHelper.h"
 #include "squangle/mysql_client/ChangeUserOperation.h"
 #include "squangle/mysql_client/ResetOperation.h"
 #include "squangle/mysql_client/SemiFutureAdapter.h"
@@ -333,6 +334,8 @@ DbQueryResult Connection::internalQueryWithGenerator(
     QueryGenerator&& query_generator,
     QueryCallback&& cb,
     QueryOptions&& options) {
+  facebook::common::mysql_client::sql_builder::OdsCounterHelper::
+      bumpOdsOverallCounter();
   return Connection::query(
       query_generator.query(), std::move(cb), std::move(options));
 }
@@ -476,6 +479,8 @@ DbMultiQueryResult Connection::internalMultiQueryWithGenerators(
     std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
     MultiQueryCallback&& cb,
     QueryOptions&& options) {
+  facebook::common::mysql_client::sql_builder::OdsCounterHelper::
+      bumpOdsOverallCounter();
   return Connection::multiQuery(
       generateQueries(std::move(query_generators)),
       std::move(cb),

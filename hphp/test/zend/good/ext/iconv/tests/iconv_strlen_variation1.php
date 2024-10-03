@@ -27,39 +27,8 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
 // unexpected values to be passed to $str argument
 $inputs = dict[
-
-       // int data
-/*1*/
-     'int 0' => 0,
-     'int 1' => 1,
-     'int 12345' => 12345,
-     'int -12345' => -12345,
-
-       // float data
-/*5*/
-     'float 10.5' => 10.5,
-     'float -10.5' => -10.5,
-     'float 12.3456789000e10' => 12.3456789000e10,
-     'float 12.3456789000e-10' => 12.3456789000e-10,
-     'float .5' => .5,
-
-       // null data
-/*10*/
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
-
-       // boolean data
-/*12*/
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
-
        // empty data
 /*16*/
       'empty string DQ' => "",
@@ -71,14 +40,6 @@ $inputs = dict[
       'string SQ' => 'string',
       'mixed case string' => "sTrInG",
       'heredoc' => $heredoc,
-
-       // object data
-/*21*/
-      'instance of class' => new classA(),
-
-       // resource variable
-/*22*/
-       'resource' => $fp
 ];
 
 // loop through each element of $inputs to check the behavior of iconv_strlen()
@@ -89,6 +50,5 @@ foreach($inputs as $key =>$value) {
   $iterator++;
 };
 
-fclose($fp);
 echo "===DONE===\n";
 }

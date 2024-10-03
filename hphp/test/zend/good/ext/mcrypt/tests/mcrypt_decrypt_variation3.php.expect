@@ -1,0 +1,8 @@
+*** Testing mcrypt_decrypt() : usage variation ***
+
+--empty string DQ--
+string(16) "d27689f6fd9700f4"
+
+--empty string SQ--
+string(16) "d27689f6fd9700f4"
+===DONE===

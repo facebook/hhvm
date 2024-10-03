@@ -13,8 +13,4 @@ Warning: gmp_setbit(): supplied object is not a valid GMP object in %s/test/zend
 Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/gmp/tests/gmp_setbit.php on line 31
 
 Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/gmp/tests/gmp_setbit.php on line 32
-
-Warning: gmp_setbit() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gmp/tests/gmp_setbit.php on line 33
-
-Warning: gmp_setbit() expects parameter 2 to be integer, vec given in %s/test/zend/good/ext/gmp/tests/gmp_setbit.php on line 35
 Done

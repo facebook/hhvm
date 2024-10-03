@@ -1,0 +1,42 @@
+*** Testing array_slice() : usage variations ***
+
+-- Iteration 1 --
+dict(3) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+  [99]=>
+  int(3)
+}
+
+-- Iteration 2 --
+dict(3) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+
+-- Iteration 3 --
+dict(3) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+  [99]=>
+  int(3)
+}
+
+-- Iteration 4 --
+dict(3) {
+  ["one"]=>
+  int(1)
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+Done

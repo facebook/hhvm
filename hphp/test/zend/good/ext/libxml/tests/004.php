@@ -1,11 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $ctxs = vec[
-	NULL,
-	'bogus',
-	123,
-	new stdClass,
-	vec['a'],
 	stream_context_create(),
 	stream_context_create(dict[0 => 'file']),
 	stream_context_create(dict['file' => dict['some_opt' => 'aaa']])

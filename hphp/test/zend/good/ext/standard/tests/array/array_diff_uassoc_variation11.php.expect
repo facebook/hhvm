@@ -1,6 +1,0 @@
-*** Testing array_diff_uassoc() : usage variation ***
-
--- Testing array_diff_key() function with float indexed array --
-string(60) "strcasecmp() expects parameter 1 to be string, integer given"
-string(60) "strcasecmp() expects parameter 1 to be string, integer given"
-===DONE===

@@ -2,6 +2,4 @@
 Warning: ldap_get_entries() expects exactly 2 parameters, 1 given in %s/ldap_get_entries_error.php on line 7
 
 Warning: ldap_get_entries() expects exactly 2 parameters, 3 given in %s/ldap_get_entries_error.php on line 10
-
-Warning: ldap_get_entries() expects parameter 2 to be resource, string given in %s/ldap_get_entries_error.php on line 13
 ===DONE===

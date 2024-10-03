@@ -1,0 +1,8 @@
+*** Testing mcrypt_ecb() : usage variation ***
+
+--empty string DQ--
+string(16) "6ece228c41457539"
+
+--empty string SQ--
+string(16) "6ece228c41457539"
+===DONE===

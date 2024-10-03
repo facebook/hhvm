@@ -1,0 +1,62 @@
+*** Testing array_reverse() : usage variations ***
+-- Iteration 1 --
+dict(6) {
+  [4]=>
+  string(4) "pink"
+  [3]=>
+  string(6) "orange"
+  [2]=>
+  string(3) "red"
+  [1]=>
+  string(4) "blue"
+  [0]=>
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
+}
+-- Iteration 2 --
+dict(6) {
+  [0]=>
+  string(4) "pink"
+  [1]=>
+  string(6) "orange"
+  [2]=>
+  string(3) "red"
+  [3]=>
+  string(4) "blue"
+  [4]=>
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
+}
+-- Iteration 3 --
+dict(6) {
+  [4]=>
+  string(4) "pink"
+  [3]=>
+  string(6) "orange"
+  [2]=>
+  string(3) "red"
+  [1]=>
+  string(4) "blue"
+  [0]=>
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
+}
+-- Iteration 4 --
+dict(6) {
+  [0]=>
+  string(4) "pink"
+  [1]=>
+  string(6) "orange"
+  [2]=>
+  string(3) "red"
+  [3]=>
+  string(4) "blue"
+  [4]=>
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
+}
+Done

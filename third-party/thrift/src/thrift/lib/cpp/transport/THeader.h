@@ -348,6 +348,12 @@ class THeader final {
 
   folly::Optional<uint32_t> getCrc32c() const { return c_.crc32c_; }
 
+  void setChecksum(std::optional<Checksum> checksum) {
+    c_.checksum_ = checksum;
+  }
+
+  std::optional<Checksum> getChecksum() const { return c_.checksum_; }
+
   void setServerLoad(folly::Optional<int64_t> load) { c_.serverLoad_ = load; }
 
   folly::Optional<int64_t> getServerLoad() const { return c_.serverLoad_; }
@@ -516,6 +522,7 @@ class THeader final {
 
     // CRC32C of message payload for checksum.
     folly::Optional<uint32_t> crc32c_;
+    std::optional<Checksum> checksum_;
     folly::Optional<int64_t> serverLoad_;
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;

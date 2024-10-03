@@ -33,7 +33,7 @@ var tfv = []func() io.ReadWriteCloser{
 
 func BenchmarkBinaryBool_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBool(b, p, trans)
 	}
@@ -41,7 +41,7 @@ func BenchmarkBinaryBool_0(b *testing.B) {
 
 func BenchmarkBinaryByte_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteByte(b, p, trans)
 	}
@@ -49,7 +49,7 @@ func BenchmarkBinaryByte_0(b *testing.B) {
 
 func BenchmarkBinaryI16_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI16(b, p, trans)
 	}
@@ -57,35 +57,35 @@ func BenchmarkBinaryI16_0(b *testing.B) {
 
 func BenchmarkBinaryI32_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI32(b, p, trans)
 	}
 }
 func BenchmarkBinaryI64_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI64(b, p, trans)
 	}
 }
 func BenchmarkBinaryDouble_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteDouble(b, p, trans)
 	}
 }
 func BenchmarkBinaryString_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteString(b, p, trans)
 	}
 }
 func BenchmarkBinaryBinary_0(b *testing.B) {
 	trans := tfv[0]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBinary(b, p, trans)
 	}
@@ -93,7 +93,7 @@ func BenchmarkBinaryBinary_0(b *testing.B) {
 
 func BenchmarkBinaryBool_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBool(b, p, trans)
 	}
@@ -101,7 +101,7 @@ func BenchmarkBinaryBool_1(b *testing.B) {
 
 func BenchmarkBinaryByte_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteByte(b, p, trans)
 	}
@@ -109,7 +109,7 @@ func BenchmarkBinaryByte_1(b *testing.B) {
 
 func BenchmarkBinaryI16_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI16(b, p, trans)
 	}
@@ -117,35 +117,35 @@ func BenchmarkBinaryI16_1(b *testing.B) {
 
 func BenchmarkBinaryI32_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI32(b, p, trans)
 	}
 }
 func BenchmarkBinaryI64_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI64(b, p, trans)
 	}
 }
 func BenchmarkBinaryDouble_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteDouble(b, p, trans)
 	}
 }
 func BenchmarkBinaryString_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteString(b, p, trans)
 	}
 }
 func BenchmarkBinaryBinary_1(b *testing.B) {
 	trans := tfv[1]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBinary(b, p, trans)
 	}
@@ -153,7 +153,7 @@ func BenchmarkBinaryBinary_1(b *testing.B) {
 
 func BenchmarkBinaryBool_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBool(b, p, trans)
 	}
@@ -161,7 +161,7 @@ func BenchmarkBinaryBool_2(b *testing.B) {
 
 func BenchmarkBinaryByte_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteByte(b, p, trans)
 	}
@@ -169,7 +169,7 @@ func BenchmarkBinaryByte_2(b *testing.B) {
 
 func BenchmarkBinaryI16_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI16(b, p, trans)
 	}
@@ -177,35 +177,35 @@ func BenchmarkBinaryI16_2(b *testing.B) {
 
 func BenchmarkBinaryI32_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI32(b, p, trans)
 	}
 }
 func BenchmarkBinaryI64_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteI64(b, p, trans)
 	}
 }
 func BenchmarkBinaryDouble_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteDouble(b, p, trans)
 	}
 }
 func BenchmarkBinaryString_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteString(b, p, trans)
 	}
 }
 func BenchmarkBinaryBinary_2(b *testing.B) {
 	trans := tfv[2]()
-	p := NewBinaryProtocolTransport(trans)
+	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
 		ReadWriteBinary(b, p, trans)
 	}

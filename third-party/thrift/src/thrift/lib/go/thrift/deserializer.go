@@ -29,7 +29,7 @@ type Deserializer struct {
 
 func NewDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewBinaryProtocolTransport(transport)
+	protocol := NewBinaryFormat(transport)
 	return &Deserializer{transport, protocol}
 }
 

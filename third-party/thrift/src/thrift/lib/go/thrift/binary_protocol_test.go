@@ -27,11 +27,11 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-func TestReadWriteBinaryProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewBinaryProtocolTransport(transport) })
+func TestReadWriteBinaryFormat(t *testing.T) {
+	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewBinaryFormat(transport) })
 }
 
-func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {
+func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := NewMyTestStruct()
 	m.Bin = nil
 	s := NewSerializer()
@@ -42,7 +42,7 @@ func TestWriteBinaryEmptyBinaryProtocol(t *testing.T) {
 	}
 }
 
-func TestSkipUnknownTypeBinaryProtocol(t *testing.T) {
+func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	// skip over a map with invalid key/value type and ~550M entries
@@ -63,7 +63,7 @@ func TestSkipUnknownTypeBinaryProtocol(t *testing.T) {
 	}
 }
 
-func TestInitialAllocationMapBinaryProtocol(t *testing.T) {
+func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	// attempts to allocate a map with 1.8B elements for a 20 byte message
@@ -76,7 +76,7 @@ func TestInitialAllocationMapBinaryProtocol(t *testing.T) {
 	}
 }
 
-func TestInitialAllocationListBinaryProtocol(t *testing.T) {
+func TestInitialAllocationListBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	// attempts to allocate a list with 1.8B elements for a 20 byte message
@@ -89,7 +89,7 @@ func TestInitialAllocationListBinaryProtocol(t *testing.T) {
 	}
 }
 
-func TestInitialAllocationSetBinaryProtocol(t *testing.T) {
+func TestInitialAllocationSetBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	d := NewDeserializer()
 	// attempts to allocate a set with 1.8B elements for a 20 byte message

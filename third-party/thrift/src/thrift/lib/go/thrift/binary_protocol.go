@@ -29,22 +29,22 @@ import (
 const BinaryVersionMask uint32 = 0xffff0000
 const BinaryVersion1 uint32 = 0x80010000
 
-type binaryProtocol struct {
+type binaryFormat struct {
 	binaryEncoder
 	binaryDecoder
 	io.Closer
 }
 
-var _ types.Format = (*binaryProtocol)(nil)
+var _ types.Format = (*binaryFormat)(nil)
 
-// NewBinaryProtocolTransport creates a new protocol handler using a buffer
-func NewBinaryProtocolTransport(t io.ReadWriteCloser) types.Format {
-	return NewBinaryProtocol(t, false, true)
+// NewBinaryFormat creates a new Format handler using a buffer
+func NewBinaryFormat(t io.ReadWriteCloser) types.Format {
+	return NewBinaryFormatOptions(t, false, true)
 }
 
-// NewBinaryProtocol creates a new protocol handler using a buffer
-func NewBinaryProtocol(t io.ReadWriteCloser, strictRead, strictWrite bool) types.Format {
-	p := &binaryProtocol{}
+// NewBinaryFormatOptions creates a new Format handler using a buffer
+func NewBinaryFormatOptions(t io.ReadWriteCloser, strictRead, strictWrite bool) types.Format {
+	p := &binaryFormat{}
 	p.binaryDecoder = binaryDecoder{reader: t, strictRead: strictRead}
 	p.binaryEncoder = binaryEncoder{writer: t, strictWrite: strictWrite}
 	p.Closer = t

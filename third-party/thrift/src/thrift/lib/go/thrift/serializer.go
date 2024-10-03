@@ -29,7 +29,7 @@ type Serializer struct {
 // NewSerializer create a new serializer using the binary protocol
 func NewSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewBinaryProtocolTransport(transport)
+	protocol := NewBinaryFormat(transport)
 	return &Serializer{transport, protocol}
 }
 

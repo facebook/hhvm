@@ -10,7 +10,6 @@
 #include <functional>
 #include <folly/Range.h>
 
-#include <thrift/lib/py3/enums.h>
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_data.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/service_metadata.h"

@@ -10,7 +10,6 @@
 #include <functional>
 #include <folly/Range.h>
 
-#include <thrift/lib/py3/enums.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_data.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h"

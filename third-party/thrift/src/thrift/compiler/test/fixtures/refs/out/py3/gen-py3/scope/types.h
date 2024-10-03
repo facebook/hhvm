@@ -10,7 +10,6 @@
 #include <functional>
 #include <folly/Range.h>
 
-#include <thrift/lib/py3/enums.h>
 #include "thrift/compiler/test/fixtures/refs/gen-cpp2/scope_data.h"
 #include "thrift/compiler/test/fixtures/refs/gen-cpp2/scope_types.h"
 #include "thrift/compiler/test/fixtures/refs/gen-cpp2/scope_metadata.h"

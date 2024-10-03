@@ -10,7 +10,6 @@
 #include <functional>
 #include <folly/Range.h>
 
-#include <thrift/lib/py3/enums.h>
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_data.h"
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h"
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h"

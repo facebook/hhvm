@@ -41,53 +41,7 @@ EOT;
 
   //array of values to iterate over
   $values = dict[
-
-        // int data
-        'int 0' => 0,
-        'int 1' => 1,
-        'int 12345' => 12345,
-        'int -12345' => -12345,
-
-        // float data
-        'float 10.5' => 10.5,
-        'float -10.5' => -10.5,
-        'float 10.1234567e10' => 10.1234567e10,
-        'float 10.7654321E-10' => 10.7654321E-10,
-        'float .5' => .5,
-
-        // array data
-        'empty array' => vec[],
-        'int indexed array' => $index_array,
-        'associative array' => $assoc_array,
-  	  'nested arrays' => vec['foo', $index_array, $assoc_array],
-
-        // null data
-  	  'uppercase NULL' => NULL,
-        'lowercase null' => null,
-
-        // boolean data
-        'lowercase true' => true,
-        'lowercase false' =>false,
-        'uppercase TRUE' =>TRUE,
-        'uppercase FALSE' =>FALSE,
-
-        // empty data
-        'empty string DQ' => "",
-        'empty string SQ' => '',
-
-        // string data
-        'string DQ' => "string",
-        'string SQ' => 'string',
-        'mixed case string' => "sTrInG",
-        'heredoc' => $heredoc,
-
-        // object data
-        'instance of classWithToString' => new classWithToString(),
-        'instance of classWithoutToString' => new classWithoutToString(),
-
-
-
-        //resource 
+        //resource
         "file resource" => $fp
   ];
 

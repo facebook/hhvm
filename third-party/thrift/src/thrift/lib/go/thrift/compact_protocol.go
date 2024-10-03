@@ -75,16 +75,16 @@ func init() {
 	}
 }
 
-type compactProtocol struct {
+type compactFormat struct {
 	compactEncoder
 	compactDecoder
 }
 
-var _ types.Format = (*compactProtocol)(nil)
+var _ types.Format = (*compactFormat)(nil)
 
-// NewCompactProtocol creates a CompactProtocol
-func NewCompactProtocol(trans io.ReadWriteCloser) types.Format {
-	p := &compactProtocol{}
+// NewCompactFormat creates a CompactFormat
+func NewCompactFormat(trans io.ReadWriteCloser) types.Format {
+	p := &compactFormat{}
 	p.compactDecoder.version = COMPACT_VERSION_BE
 	p.compactDecoder.reader = trans
 	p.compactEncoder.version = COMPACT_VERSION_BE
@@ -100,7 +100,7 @@ func newCompactDecoder(reader io.Reader) types.Decoder {
 	return &compactDecoder{reader: reader, version: COMPACT_VERSION_BE}
 }
 
-func (p *compactProtocol) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
+func (p *compactFormat) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	// The version can be updated in compactEncoder's ReadMessageBegin, so we need to update it in p.compactEncoder before writing a new message.
 	p.compactEncoder.version = p.compactDecoder.version
 	return p.compactEncoder.WriteMessageBegin(name, typeID, seqid)
@@ -145,8 +145,8 @@ type compactEncoder struct {
 // Public Writing methods.
 //
 
-// Write a message header to the wire. Compact Protocol messages contain the
-// protocol version so we can migrate forwards in the future if need be.
+// Write a message header to the wire. Compact Format messages contain the
+// format version so we can migrate forwards in the future if need be.
 func (p *compactEncoder) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	err := p.writeByteDirect(COMPACT_PROTOCOL_ID)
 	if err != nil {
@@ -362,13 +362,13 @@ func (p *compactEncoder) WriteBinary(bin []byte) error {
 // Read a message header.
 func (p *compactDecoder) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
 
-	protocolID, err := p.ReadByte()
+	formatID, err := p.ReadByte()
 	if err != nil {
 		return
 	}
 
-	if protocolID != COMPACT_PROTOCOL_ID {
-		e := fmt.Errorf("Expected protocol id %02x but got %02x", COMPACT_PROTOCOL_ID, protocolID)
+	if formatID != COMPACT_PROTOCOL_ID {
+		e := fmt.Errorf("Expected format id %02x but got %02x", COMPACT_PROTOCOL_ID, formatID)
 		return "", typeID, seqID, types.NewProtocolExceptionWithType(types.BAD_VERSION, e)
 	}
 

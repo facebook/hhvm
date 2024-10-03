@@ -25,33 +25,33 @@ import (
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactProtocol(transport) })
+	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactFormat(transport) })
 	// CompactProtocol is capable of reading and writing in different goroutines.
-	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactProtocol(transport) })
+	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactFormat(transport) })
 	transports := []io.ReadWriteCloser{
 		NewMemoryBuffer(),
 		newFramedTransport(NewMemoryBuffer()),
 	}
 	for _, trans := range transports {
-		p := NewCompactProtocol(trans)
+		p := NewCompactFormat(trans)
 		ReadWriteBool(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteByte(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteI16(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteI32(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteI64(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteDouble(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteFloat(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteString(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteBinary(t, p, trans)
-		p = NewCompactProtocol(trans)
+		p = NewCompactFormat(trans)
 		ReadWriteStruct(t, p, trans)
 		trans.Close()
 	}
@@ -101,7 +101,7 @@ func TestInitialAllocationMapCompactProtocolLimitedR(t *testing.T) {
 
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
-	p := NewCompactProtocol(NewMemoryBufferWithData(data))
+	p := NewCompactFormat(NewMemoryBufferWithData(data))
 
 	err := m.Read(p)
 	if err == nil {

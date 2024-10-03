@@ -36,7 +36,7 @@ func NewSerializer() *Serializer {
 // NewCompactSerializer creates a new serializer using the compact protocol
 func NewCompactSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewCompactProtocol(transport)
+	protocol := NewCompactFormat(transport)
 	return &Serializer{transport, protocol}
 }
 

@@ -114,7 +114,7 @@ func TestHeaderFramedCompact(t *testing.T) {
 	tmb := newMockSocket()
 	testHeaderToProto(
 		t, FramedCompact, tmb,
-		NewCompactProtocol(newFramedTransport(tmb)),
+		NewCompactFormat(newFramedTransport(tmb)),
 		newHeaderTransport(tmb, types.ProtocolIDCompact),
 	)
 }

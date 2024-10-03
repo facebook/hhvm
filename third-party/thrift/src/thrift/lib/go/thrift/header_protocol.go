@@ -65,7 +65,7 @@ func (p *headerProtocol) resetProtocol() error {
 		// These defaults match cpp implementation
 		p.Format = NewBinaryFormatOptions(p.trans, false, true)
 	case types.ProtocolIDCompact:
-		p.Format = NewCompactProtocol(p.trans)
+		p.Format = NewCompactFormat(p.trans)
 	default:
 		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
 	}

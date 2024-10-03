@@ -55,7 +55,7 @@ func NewJSONDeserializer() *Deserializer {
 
 func NewSimpleJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewSimpleJSONProtocol(transport)
+	protocol := NewSimpleJSONFormat(transport)
 	return &Deserializer{transport, protocol}
 }
 

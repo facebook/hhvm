@@ -63,7 +63,7 @@ func (p _ParseContext) String() string {
 // This protocol produces/consumes a simple output format
 // suitable for parsing by scripting languages.  It should not be
 // confused with the full-featured JSONProtocol.
-type simpleJSONProtocol struct {
+type simpleJSONFormat struct {
 	buffer io.ReadWriteCloser
 
 	parseContextStack []int
@@ -73,15 +73,15 @@ type simpleJSONProtocol struct {
 	reader *bufio.Reader
 }
 
-var _ types.Format = (*simpleJSONProtocol)(nil)
+var _ types.Format = (*simpleJSONFormat)(nil)
 
-// NewSimpleJSONProtocol creates a new simpleJSONProtocol
-func NewSimpleJSONProtocol(buffer io.ReadWriteCloser) types.Format {
-	return newSimpleJSONProtocol(buffer)
+// NewSimpleJSONFormat creates a new simpleJSONFormat
+func NewSimpleJSONFormat(buffer io.ReadWriteCloser) types.Format {
+	return newSimpleJSONFormat(buffer)
 }
 
-func newSimpleJSONProtocol(buffer io.ReadWriteCloser) *simpleJSONProtocol {
-	v := &simpleJSONProtocol{buffer: buffer,
+func newSimpleJSONFormat(buffer io.ReadWriteCloser) *simpleJSONFormat {
+	v := &simpleJSONFormat{buffer: buffer,
 		writer: bufio.NewWriter(buffer),
 		reader: bufio.NewReader(buffer),
 	}
@@ -106,7 +106,7 @@ func mismatch(expected, actual string) error {
 	return fmt.Errorf("Expected '%s' but found '%s' while parsing JSON.", expected, actual)
 }
 
-func (p *simpleJSONProtocol) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
+func (p *simpleJSONFormat) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
 	if e := p.OutputListBegin(); e != nil {
 		return e
@@ -123,36 +123,36 @@ func (p *simpleJSONProtocol) WriteMessageBegin(name string, typeID types.Message
 	return nil
 }
 
-func (p *simpleJSONProtocol) WriteMessageEnd() error {
+func (p *simpleJSONFormat) WriteMessageEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *simpleJSONProtocol) WriteStructBegin(name string) error {
+func (p *simpleJSONFormat) WriteStructBegin(name string) error {
 	if e := p.OutputObjectBegin(); e != nil {
 		return e
 	}
 	return nil
 }
 
-func (p *simpleJSONProtocol) WriteStructEnd() error {
+func (p *simpleJSONFormat) WriteStructEnd() error {
 	return p.OutputObjectEnd()
 }
 
-func (p *simpleJSONProtocol) WriteFieldBegin(name string, typeID types.Type, id int16) error {
+func (p *simpleJSONFormat) WriteFieldBegin(name string, typeID types.Type, id int16) error {
 	if e := p.WriteString(name); e != nil {
 		return e
 	}
 	return nil
 }
 
-func (p *simpleJSONProtocol) WriteFieldEnd() error {
+func (p *simpleJSONFormat) WriteFieldEnd() error {
 	//return p.OutputListEnd()
 	return nil
 }
 
-func (p *simpleJSONProtocol) WriteFieldStop() error { return nil }
+func (p *simpleJSONFormat) WriteFieldStop() error { return nil }
 
-func (p *simpleJSONProtocol) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
+func (p *simpleJSONFormat) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
@@ -165,59 +165,59 @@ func (p *simpleJSONProtocol) WriteMapBegin(keyType types.Type, valueType types.T
 	return p.WriteI32(int32(size))
 }
 
-func (p *simpleJSONProtocol) WriteMapEnd() error {
+func (p *simpleJSONFormat) WriteMapEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *simpleJSONProtocol) WriteListBegin(elemType types.Type, size int) error {
+func (p *simpleJSONFormat) WriteListBegin(elemType types.Type, size int) error {
 	return p.OutputElemListBegin(elemType, size)
 }
 
-func (p *simpleJSONProtocol) WriteListEnd() error {
+func (p *simpleJSONFormat) WriteListEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *simpleJSONProtocol) WriteSetBegin(elemType types.Type, size int) error {
+func (p *simpleJSONFormat) WriteSetBegin(elemType types.Type, size int) error {
 	return p.OutputElemListBegin(elemType, size)
 }
 
-func (p *simpleJSONProtocol) WriteSetEnd() error {
+func (p *simpleJSONFormat) WriteSetEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *simpleJSONProtocol) WriteBool(b bool) error {
+func (p *simpleJSONFormat) WriteBool(b bool) error {
 	return p.OutputBool(b)
 }
 
-func (p *simpleJSONProtocol) WriteByte(b byte) error {
+func (p *simpleJSONFormat) WriteByte(b byte) error {
 	return p.WriteI32(int32(b))
 }
 
-func (p *simpleJSONProtocol) WriteI16(v int16) error {
+func (p *simpleJSONFormat) WriteI16(v int16) error {
 	return p.WriteI32(int32(v))
 }
 
-func (p *simpleJSONProtocol) WriteI32(v int32) error {
+func (p *simpleJSONFormat) WriteI32(v int32) error {
 	return p.OutputI64(int64(v))
 }
 
-func (p *simpleJSONProtocol) WriteI64(v int64) error {
+func (p *simpleJSONFormat) WriteI64(v int64) error {
 	return p.OutputI64(int64(v))
 }
 
-func (p *simpleJSONProtocol) WriteDouble(v float64) error {
+func (p *simpleJSONFormat) WriteDouble(v float64) error {
 	return p.OutputF64(v)
 }
 
-func (p *simpleJSONProtocol) WriteFloat(v float32) error {
+func (p *simpleJSONFormat) WriteFloat(v float32) error {
 	return p.OutputF32(v)
 }
 
-func (p *simpleJSONProtocol) WriteString(v string) error {
+func (p *simpleJSONFormat) WriteString(v string) error {
 	return p.OutputString(v)
 }
 
-func (p *simpleJSONProtocol) WriteBinary(v []byte) error {
+func (p *simpleJSONFormat) WriteBinary(v []byte) error {
 	// JSON library only takes in a string,
 	// not an arbitrary byte array, to ensure bytes are transmitted
 	// efficiently we must convert this into a valid JSON string
@@ -245,7 +245,7 @@ func (p *simpleJSONProtocol) WriteBinary(v []byte) error {
 }
 
 // Reading methods.
-func (p *simpleJSONProtocol) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
+func (p *simpleJSONFormat) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
 	p.resetContextStack() // THRIFT-3735
 	if isNull, err := p.ParseListBegin(); isNull || err != nil {
 		return name, typeID, seqID, err
@@ -264,20 +264,20 @@ func (p *simpleJSONProtocol) ReadMessageBegin() (name string, typeID types.Messa
 	return name, typeID, seqID, nil
 }
 
-func (p *simpleJSONProtocol) ReadMessageEnd() error {
+func (p *simpleJSONFormat) ReadMessageEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONProtocol) ReadStructBegin() (name string, err error) {
+func (p *simpleJSONFormat) ReadStructBegin() (name string, err error) {
 	_, err = p.ParseObjectStart()
 	return "", err
 }
 
-func (p *simpleJSONProtocol) ReadStructEnd() error {
+func (p *simpleJSONFormat) ReadStructEnd() error {
 	return p.ParseObjectEnd()
 }
 
-func (p *simpleJSONProtocol) ReadFieldBegin() (string, types.Type, int16, error) {
+func (p *simpleJSONFormat) ReadFieldBegin() (string, types.Type, int16, error) {
 	if err := p.ParsePreValue(); err != nil {
 		return "", types.STOP, 0, err
 	}
@@ -318,12 +318,12 @@ func (p *simpleJSONProtocol) ReadFieldBegin() (string, types.Type, int16, error)
 	return "", types.STOP, 0, types.NewProtocolException(io.EOF)
 }
 
-func (p *simpleJSONProtocol) ReadFieldEnd() error {
+func (p *simpleJSONFormat) ReadFieldEnd() error {
 	return nil
 	//return p.ParseListEnd()
 }
 
-func (p *simpleJSONProtocol) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
 	if isNull, e := p.ParseListBegin(); isNull || e != nil {
 		return types.VOID, types.VOID, 0, e
 	}
@@ -348,27 +348,27 @@ func (p *simpleJSONProtocol) ReadMapBegin() (keyType types.Type, valueType types
 	return keyType, valueType, size, err
 }
 
-func (p *simpleJSONProtocol) ReadMapEnd() error {
+func (p *simpleJSONFormat) ReadMapEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONProtocol) ReadListBegin() (elemType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ReadListBegin() (elemType types.Type, size int, e error) {
 	return p.ParseElemListBegin()
 }
 
-func (p *simpleJSONProtocol) ReadListEnd() error {
+func (p *simpleJSONFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONProtocol) ReadSetBegin() (elemType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ReadSetBegin() (elemType types.Type, size int, e error) {
 	return p.ParseElemListBegin()
 }
 
-func (p *simpleJSONProtocol) ReadSetEnd() error {
+func (p *simpleJSONFormat) ReadSetEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONProtocol) ReadBool() (bool, error) {
+func (p *simpleJSONFormat) ReadBool() (bool, error) {
 	var value bool
 
 	if err := p.ParsePreValue(); err != nil {
@@ -423,37 +423,37 @@ func (p *simpleJSONProtocol) ReadBool() (bool, error) {
 	return value, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ReadByte() (byte, error) {
+func (p *simpleJSONFormat) ReadByte() (byte, error) {
 	v, err := p.ReadI64()
 	return byte(v), err
 }
 
-func (p *simpleJSONProtocol) ReadI16() (int16, error) {
+func (p *simpleJSONFormat) ReadI16() (int16, error) {
 	v, err := p.ReadI64()
 	return int16(v), err
 }
 
-func (p *simpleJSONProtocol) ReadI32() (int32, error) {
+func (p *simpleJSONFormat) ReadI32() (int32, error) {
 	v, err := p.ReadI64()
 	return int32(v), err
 }
 
-func (p *simpleJSONProtocol) ReadI64() (int64, error) {
+func (p *simpleJSONFormat) ReadI64() (int64, error) {
 	v, _, err := p.ParseI64()
 	return v, err
 }
 
-func (p *simpleJSONProtocol) ReadDouble() (float64, error) {
+func (p *simpleJSONFormat) ReadDouble() (float64, error) {
 	v, _, err := p.ParseF64()
 	return v, err
 }
 
-func (p *simpleJSONProtocol) ReadFloat() (float32, error) {
+func (p *simpleJSONFormat) ReadFloat() (float32, error) {
 	v, _, err := p.ParseF32()
 	return v, err
 }
 
-func (p *simpleJSONProtocol) ReadString() (string, error) {
+func (p *simpleJSONFormat) ReadString() (string, error) {
 	var v string
 	if err := p.ParsePreValue(); err != nil {
 		return v, err
@@ -483,7 +483,7 @@ func (p *simpleJSONProtocol) ReadString() (string, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ReadBinary() ([]byte, error) {
+func (p *simpleJSONFormat) ReadBinary() ([]byte, error) {
 	var v []byte
 	if err := p.ParsePreValue(); err != nil {
 		return nil, err
@@ -514,19 +514,19 @@ func (p *simpleJSONProtocol) ReadBinary() ([]byte, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) Flush() (err error) {
+func (p *simpleJSONFormat) Flush() (err error) {
 	return types.NewProtocolException(p.writer.Flush())
 }
 
-func (p *simpleJSONProtocol) Skip(fieldType types.Type) (err error) {
+func (p *simpleJSONFormat) Skip(fieldType types.Type) (err error) {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 
-func (p *simpleJSONProtocol) Close() error {
+func (p *simpleJSONFormat) Close() error {
 	return p.buffer.Close()
 }
 
-func (p *simpleJSONProtocol) OutputPreValue() error {
+func (p *simpleJSONFormat) OutputPreValue() error {
 	cxt := _ParseContext(p.dumpContext[len(p.dumpContext)-1])
 	switch cxt {
 	case _CONTEXT_IN_LIST, _CONTEXT_IN_OBJECT_NEXT_KEY:
@@ -543,7 +543,7 @@ func (p *simpleJSONProtocol) OutputPreValue() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputPostValue() error {
+func (p *simpleJSONFormat) OutputPostValue() error {
 	cxt := _ParseContext(p.dumpContext[len(p.dumpContext)-1])
 	switch cxt {
 	case _CONTEXT_IN_LIST_FIRST:
@@ -566,7 +566,7 @@ func (p *simpleJSONProtocol) OutputPostValue() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputBool(value bool) error {
+func (p *simpleJSONFormat) OutputBool(value bool) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -587,7 +587,7 @@ func (p *simpleJSONProtocol) OutputBool(value bool) error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputNull() error {
+func (p *simpleJSONFormat) OutputNull() error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -597,7 +597,7 @@ func (p *simpleJSONProtocol) OutputNull() error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputF64(value float64) error {
+func (p *simpleJSONFormat) OutputF64(value float64) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -622,7 +622,7 @@ func (p *simpleJSONProtocol) OutputF64(value float64) error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputF32(value float32) error {
+func (p *simpleJSONFormat) OutputF32(value float32) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -647,7 +647,7 @@ func (p *simpleJSONProtocol) OutputF32(value float32) error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputI64(value int64) error {
+func (p *simpleJSONFormat) OutputI64(value int64) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -663,7 +663,7 @@ func (p *simpleJSONProtocol) OutputI64(value int64) error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputString(s string) error {
+func (p *simpleJSONFormat) OutputString(s string) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -673,12 +673,12 @@ func (p *simpleJSONProtocol) OutputString(s string) error {
 	return p.OutputPostValue()
 }
 
-func (p *simpleJSONProtocol) OutputStringData(s string) error {
+func (p *simpleJSONFormat) OutputStringData(s string) error {
 	_, e := p.write([]byte(s))
 	return types.NewProtocolException(e)
 }
 
-func (p *simpleJSONProtocol) OutputObjectBegin() error {
+func (p *simpleJSONFormat) OutputObjectBegin() error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -689,7 +689,7 @@ func (p *simpleJSONProtocol) OutputObjectBegin() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputObjectEnd() error {
+func (p *simpleJSONFormat) OutputObjectEnd() error {
 	if _, e := p.write(types.JSON_RBRACE); e != nil {
 		return types.NewProtocolException(e)
 	}
@@ -700,7 +700,7 @@ func (p *simpleJSONProtocol) OutputObjectEnd() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputListBegin() error {
+func (p *simpleJSONFormat) OutputListBegin() error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
@@ -711,7 +711,7 @@ func (p *simpleJSONProtocol) OutputListBegin() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputListEnd() error {
+func (p *simpleJSONFormat) OutputListEnd() error {
 	if _, e := p.write(types.JSON_RBRACKET); e != nil {
 		return types.NewProtocolException(e)
 	}
@@ -722,7 +722,7 @@ func (p *simpleJSONProtocol) OutputListEnd() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) OutputElemListBegin(elemType types.Type, size int) error {
+func (p *simpleJSONFormat) OutputElemListBegin(elemType types.Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
@@ -735,7 +735,7 @@ func (p *simpleJSONProtocol) OutputElemListBegin(elemType types.Type, size int) 
 	return nil
 }
 
-func (p *simpleJSONProtocol) ParsePreValue() error {
+func (p *simpleJSONFormat) ParsePreValue() error {
 	if e := p.readNonSignificantWhitespace(); e != nil {
 		return types.NewProtocolException(e)
 	}
@@ -795,7 +795,7 @@ func (p *simpleJSONProtocol) ParsePreValue() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) ParsePostValue() error {
+func (p *simpleJSONFormat) ParsePostValue() error {
 	if e := p.readNonSignificantWhitespace(); e != nil {
 		return types.NewProtocolException(e)
 	}
@@ -817,7 +817,7 @@ func (p *simpleJSONProtocol) ParsePostValue() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) readNonSignificantWhitespace() error {
+func (p *simpleJSONFormat) readNonSignificantWhitespace() error {
 	for {
 		b, _ := p.reader.Peek(1)
 		if len(b) < 1 {
@@ -835,7 +835,7 @@ func (p *simpleJSONProtocol) readNonSignificantWhitespace() error {
 	return nil
 }
 
-func (p *simpleJSONProtocol) ParseStringBody() (string, error) {
+func (p *simpleJSONFormat) ParseStringBody() (string, error) {
 	line, err := p.reader.ReadString(types.JSON_QUOTE)
 	if err != nil {
 		return "", types.NewProtocolException(err)
@@ -868,7 +868,7 @@ func (p *simpleJSONProtocol) ParseStringBody() (string, error) {
 	return v, nil
 }
 
-func (p *simpleJSONProtocol) ParseQuotedStringBody() (string, error) {
+func (p *simpleJSONFormat) ParseQuotedStringBody() (string, error) {
 	line, err := p.reader.ReadString(types.JSON_QUOTE)
 	if err != nil {
 		return "", types.NewProtocolException(err)
@@ -892,7 +892,7 @@ func (p *simpleJSONProtocol) ParseQuotedStringBody() (string, error) {
 	return v, nil
 }
 
-func (p *simpleJSONProtocol) ParseBase64EncodedBody() ([]byte, error) {
+func (p *simpleJSONFormat) ParseBase64EncodedBody() ([]byte, error) {
 	line, err := p.reader.ReadBytes(types.JSON_QUOTE)
 	if err != nil {
 		return line, types.NewProtocolException(err)
@@ -910,7 +910,7 @@ func (p *simpleJSONProtocol) ParseBase64EncodedBody() ([]byte, error) {
 	return output[0:n], types.NewProtocolException(err)
 }
 
-func (p *simpleJSONProtocol) ParseI64() (int64, bool, error) {
+func (p *simpleJSONFormat) ParseI64() (int64, bool, error) {
 	if err := p.ParsePreValue(); err != nil {
 		return 0, false, err
 	}
@@ -932,7 +932,7 @@ func (p *simpleJSONProtocol) ParseI64() (int64, bool, error) {
 	return value, isnull, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ParseF64() (float64, bool, error) {
+func (p *simpleJSONFormat) ParseF64() (float64, bool, error) {
 	if err := p.ParsePreValue(); err != nil {
 		return 0, false, err
 	}
@@ -954,7 +954,7 @@ func (p *simpleJSONProtocol) ParseF64() (float64, bool, error) {
 	return value, isnull, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ParseF32() (float32, bool, error) {
+func (p *simpleJSONFormat) ParseF32() (float32, bool, error) {
 	if err := p.ParsePreValue(); err != nil {
 		return 0, false, err
 	}
@@ -976,7 +976,7 @@ func (p *simpleJSONProtocol) ParseF32() (float32, bool, error) {
 	return value, isnull, p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ParseObjectStart() (bool, error) {
+func (p *simpleJSONFormat) ParseObjectStart() (bool, error) {
 	if err := p.ParsePreValue(); err != nil {
 		return false, err
 	}
@@ -996,7 +996,7 @@ func (p *simpleJSONProtocol) ParseObjectStart() (bool, error) {
 	return false, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 }
 
-func (p *simpleJSONProtocol) ParseObjectEnd() error {
+func (p *simpleJSONFormat) ParseObjectEnd() error {
 	if isNull, err := p.readIfNull(); isNull || err != nil {
 		return err
 	}
@@ -1022,7 +1022,7 @@ func (p *simpleJSONProtocol) ParseObjectEnd() error {
 	return p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) ParseListBegin() (isNull bool, err error) {
+func (p *simpleJSONFormat) ParseListBegin() (isNull bool, err error) {
 	if e := p.ParsePreValue(); e != nil {
 		return false, e
 	}
@@ -1043,7 +1043,7 @@ func (p *simpleJSONProtocol) ParseListBegin() (isNull bool, err error) {
 	return isNull, types.NewProtocolExceptionWithType(types.INVALID_DATA, err)
 }
 
-func (p *simpleJSONProtocol) ParseElemListBegin() (elemType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ParseElemListBegin() (elemType types.Type, size int, e error) {
 	if isNull, e := p.ParseListBegin(); isNull || e != nil {
 		return types.VOID, 0, e
 	}
@@ -1057,7 +1057,7 @@ func (p *simpleJSONProtocol) ParseElemListBegin() (elemType types.Type, size int
 	return elemType, size, err2
 }
 
-func (p *simpleJSONProtocol) ParseListEnd() error {
+func (p *simpleJSONFormat) ParseListEnd() error {
 	if isNull, err := p.readIfNull(); isNull || err != nil {
 		return err
 	}
@@ -1086,7 +1086,7 @@ func (p *simpleJSONProtocol) ParseListEnd() error {
 	return p.ParsePostValue()
 }
 
-func (p *simpleJSONProtocol) readSingleValue() (interface{}, types.Type, error) {
+func (p *simpleJSONFormat) readSingleValue() (interface{}, types.Type, error) {
 	e := p.readNonSignificantWhitespace()
 	if e != nil {
 		return nil, types.VOID, types.NewProtocolException(e)
@@ -1162,7 +1162,7 @@ func (p *simpleJSONProtocol) readSingleValue() (interface{}, types.Type, error) 
 
 }
 
-func (p *simpleJSONProtocol) readIfNull() (bool, error) {
+func (p *simpleJSONFormat) readIfNull() (bool, error) {
 	cont := true
 	for cont {
 		b, _ := p.reader.Peek(1)
@@ -1187,14 +1187,14 @@ func (p *simpleJSONProtocol) readIfNull() (bool, error) {
 	return false, nil
 }
 
-func (p *simpleJSONProtocol) readQuoteIfNext() {
+func (p *simpleJSONFormat) readQuoteIfNext() {
 	b, _ := p.reader.Peek(1)
 	if len(b) > 0 && b[0] == types.JSON_QUOTE {
 		p.reader.ReadByte()
 	}
 }
 
-func (p *simpleJSONProtocol) readNumeric() (types.Numeric, error) {
+func (p *simpleJSONFormat) readNumeric() (types.Numeric, error) {
 	isNull, err := p.readIfNull()
 	if isNull || err != nil {
 		return types.NUMERIC_NULL, err
@@ -1321,7 +1321,7 @@ func (p *simpleJSONProtocol) readNumeric() (types.Numeric, error) {
 }
 
 // Safely peeks into the buffer, reading only what is necessary
-func (p *simpleJSONProtocol) safePeekContains(b []byte) bool {
+func (p *simpleJSONFormat) safePeekContains(b []byte) bool {
 	for i := 0; i < len(b); i++ {
 		a, _ := p.reader.Peek(i + 1)
 		if len(a) < (i+1) || a[i] != b[i] {
@@ -1332,12 +1332,12 @@ func (p *simpleJSONProtocol) safePeekContains(b []byte) bool {
 }
 
 // Reset the context stack to its initial state.
-func (p *simpleJSONProtocol) resetContextStack() {
+func (p *simpleJSONFormat) resetContextStack() {
 	p.parseContextStack = []int{int(_CONTEXT_IN_TOPLEVEL)}
 	p.dumpContext = []int{int(_CONTEXT_IN_TOPLEVEL)}
 }
 
-func (p *simpleJSONProtocol) write(b []byte) (int, error) {
+func (p *simpleJSONFormat) write(b []byte) (int, error) {
 	n, err := p.writer.Write(b)
 	if err != nil {
 		p.writer.Reset(p.buffer) // THRIFT-3735

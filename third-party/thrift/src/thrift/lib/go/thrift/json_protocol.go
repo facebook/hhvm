@@ -48,14 +48,14 @@ const (
 //
 //	{"1":{"tf":1},"2":{"map":["str","tf",2,{"key1": 1,"key2":0}]}}'
 type jsonProtocol struct {
-	*simpleJSONProtocol
+	*simpleJSONFormat
 }
 
 var _ types.Format = (*jsonProtocol)(nil)
 
 // Constructor
 func NewJSONProtocol(buffer io.ReadWriteCloser) types.Format {
-	v := &jsonProtocol{simpleJSONProtocol: newSimpleJSONProtocol(buffer)}
+	v := &jsonProtocol{simpleJSONFormat: newSimpleJSONFormat(buffer)}
 	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
 	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
 	return v

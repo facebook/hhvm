@@ -54,7 +54,7 @@ func NewJSONSerializer() *Serializer {
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON protocol
 func NewSimpleJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewSimpleJSONProtocol(transport)
+	protocol := NewSimpleJSONFormat(transport)
 	return &Serializer{transport, protocol}
 }
 

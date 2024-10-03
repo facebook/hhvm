@@ -77,7 +77,7 @@ struct ServerWorker
 
 protected:
 
-  void doJobImpl(JobPtr job, bool abort) {
+  virtual void doJobImpl(JobPtr job, bool abort) {
     TransportTraits traits(job, this->m_context, this->m_id);
     Server *server = traits.getServer();
     Transport *transport = traits.getTransport();

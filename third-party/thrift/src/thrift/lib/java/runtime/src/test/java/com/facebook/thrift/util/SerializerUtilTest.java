@@ -17,6 +17,8 @@
 package com.facebook.thrift.util;
 
 import com.facebook.thrift.test.EveryLayout;
+import com.facebook.thrift.test.universalname.TestRequest;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -90,6 +92,24 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromInputStream(EveryLayout.asReader(), in, SerializationProtocol.TBinary);
     Assert.assertEquals(this.everyLayout, everyLayout);
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void testBadDataWithoutStopTagThrowsIndexOutOfBoundsException() {
+    ByteBuffer in =
+        SerializerUtil.toByteBuffer(
+            new TestRequest.Builder().setAString("abcd").build(), SerializationProtocol.TCompact);
+
+    // Remove Trailing byte tha would normally indicate STOP
+    byte[] slice = new byte[in.capacity() - 1];
+    in.get(slice, 0, in.capacity() - 1);
+
+    // Use ByteArrayInputStream to simulate use of input stream
+    TestRequest everyLayout =
+        SerializerUtil.fromInputStream(
+            TestRequest.asReader(),
+            new ByteArrayInputStream(slice),
+            SerializationProtocol.TCompact);
   }
 
   @Test

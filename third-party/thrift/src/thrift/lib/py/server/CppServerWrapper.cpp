@@ -307,6 +307,12 @@ class PythonAsyncProcessor : public AsyncProcessor {
         true /* fromExecuteRequest  */);
   }
 
+  void processInteraction(apache::thrift::ServerRequest&&) override {
+    LOG(FATAL)
+        << "This AsyncProcessor doesn't support Thrift interactions. "
+        << "Please implement processInteraction to support interactions.";
+  }
+
   /**
    * Get the priority of the request
    * Check the headers directly in C++ since noone seems to override that logic

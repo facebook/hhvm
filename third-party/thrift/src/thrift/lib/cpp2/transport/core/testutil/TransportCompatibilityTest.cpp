@@ -1310,6 +1310,12 @@ void TransportCompatibilityTest::TestCustomAsyncProcessor() {
           tm);
     }
 
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
+    }
+
    private:
     std::unique_ptr<apache::thrift::AsyncProcessor> underlyingProcessor_;
   };

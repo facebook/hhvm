@@ -65,6 +65,12 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
 
   const char* getServiceName() override final;
 
+  void processInteraction(ServerRequest&&) override {
+    LOG(FATAL)
+        << "This AsyncProcessor doesn't support Thrift interactions. "
+        << "Please implement processInteraction to support interactions.";
+  }
+
  protected:
   using ProcessSerializedCompressedRequestReturnT = std::
       tuple<ResponseChannelRequest::UniquePtr, SerializedCompressedRequest>;

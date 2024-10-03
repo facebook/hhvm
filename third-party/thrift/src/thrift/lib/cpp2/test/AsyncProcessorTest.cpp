@@ -512,6 +512,12 @@ TEST_P(
           processor_->executeRequest(std::move(request), methodMetadata);
         }
 
+        void processInteraction(apache::thrift::ServerRequest&&) override {
+          LOG(FATAL)
+              << "This AsyncProcessor doesn't support Thrift interactions. "
+              << "Please implement processInteraction to support interactions.";
+        }
+
         explicit Processor(std::unique_ptr<AsyncProcessor> processor)
             : processor_(std::move(processor)) {}
 

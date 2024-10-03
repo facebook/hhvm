@@ -61,6 +61,12 @@ class MockAsyncProcessor : public AsyncProcessor {
     }
   }
 
+  void processInteraction(apache::thrift::ServerRequest&&) override {
+    LOG(FATAL)
+        << "This AsyncProcessor doesn't support Thrift interactions. "
+        << "Please implement processInteraction to support interactions.";
+  }
+
   void setFunc(Func func) { executeRequestFunc_ = std::move(func); }
 
  private:
@@ -591,6 +597,12 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExceptionSafe) {
             folly::make_exception_wrapper<TApplicationException>("bad news"),
             "1");
       });
+    }
+
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
     }
 
    private:

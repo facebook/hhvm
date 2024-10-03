@@ -30,6 +30,11 @@ std::unique_ptr<AsyncProcessor> EmptyAsyncProcessorFactory::getProcessor() {
         concurrency::ThreadManager*) override {
       LOG(FATAL) << "This method should never be called on EmptyAsyncProcessor";
     }
+    void processInteraction(ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
+    }
   };
 
   return std::make_unique<EmptyAsyncProcessor>();

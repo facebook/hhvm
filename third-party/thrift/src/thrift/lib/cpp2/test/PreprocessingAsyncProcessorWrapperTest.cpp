@@ -43,6 +43,12 @@ class MockAsyncProcessor : public AsyncProcessor {
       void(
           ServerRequest&& request,
           const AsyncProcessorFactory::MethodMetadata& methodMetadata));
+
+  void processInteraction(apache::thrift::ServerRequest&&) override {
+    LOG(FATAL)
+        << "This AsyncProcessor doesn't support Thrift interactions. "
+        << "Please implement processInteraction to support interactions.";
+  }
 };
 
 class TestChannelRequest : public ResponseChannelRequest {

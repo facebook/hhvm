@@ -404,6 +404,12 @@ class WildcardThrowsInternalError : public TProcessorFactory {
         inner_->destroyAllInteractions(ctx, eb);
       }
 
+      void processInteraction(ServerRequest&&) override {
+        LOG(FATAL)
+            << "This AsyncProcessor doesn't support Thrift interactions. "
+            << "Please implement processInteraction to support interactions.";
+      }
+
       explicit Processor(
           std::unique_ptr<AsyncProcessor>&& inner,
           const MessageVariant& message)

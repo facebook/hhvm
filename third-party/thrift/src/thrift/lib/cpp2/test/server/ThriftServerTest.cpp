@@ -4331,6 +4331,12 @@ class HeaderOrRocketCompression
           tm);
     }
 
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
+    }
+
     std::unique_ptr<AsyncProcessor> underlyingProcessor_;
     CompressionAlgorithm compression_;
   };
@@ -4363,6 +4369,12 @@ class HeaderOrRocketCompression
           ctx,
           eb,
           tm);
+    }
+
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
     }
 
     std::unique_ptr<AsyncProcessor> underlyingProcessor_;

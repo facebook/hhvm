@@ -3139,10 +3139,116 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             | TokenKind::Internal
             | TokenKind::Global
             | TokenKind::Optional => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
-            _ if kind.fixed_width().is_some() => {
-                Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
+            TokenKind::Attribute
+            | TokenKind::Await
+            | TokenKind::Binary
+            | TokenKind::Break
+            | TokenKind::Case
+            | TokenKind::Catch
+            | TokenKind::Category
+            | TokenKind::Children
+            | TokenKind::Clone
+            | TokenKind::Concurrent
+            | TokenKind::Continue
+            | TokenKind::Default
+            | TokenKind::Do
+            | TokenKind::Echo
+            | TokenKind::Else
+            | TokenKind::Empty
+            | TokenKind::EndOfFile
+            | TokenKind::Endif
+            | TokenKind::Eval
+            | TokenKind::Exports
+            | TokenKind::Fallthrough
+            | TokenKind::File
+            | TokenKind::Finally
+            | TokenKind::For
+            | TokenKind::Foreach
+            | TokenKind::If
+            | TokenKind::Imports
+            | TokenKind::Include
+            | TokenKind::Include_once
+            | TokenKind::Instanceof
+            | TokenKind::Insteadof
+            | TokenKind::Integer
+            | TokenKind::Is
+            | TokenKind::Isset
+            | TokenKind::List
+            | TokenKind::Match
+            | TokenKind::Module
+            | TokenKind::Nameof
+            | TokenKind::New
+            | TokenKind::Parent
+            | TokenKind::Print
+            | TokenKind::Real
+            | TokenKind::Require
+            | TokenKind::Require_once
+            | TokenKind::Return
+            | TokenKind::Switch
+            | TokenKind::Throw
+            | TokenKind::Try
+            | TokenKind::Unset
+            | TokenKind::Upcast
+            | TokenKind::Use
+            | TokenKind::Using
+            | TokenKind::Var
+            | TokenKind::With
+            | TokenKind::Where
+            | TokenKind::While
+            | TokenKind::LeftBrace
+            | TokenKind::MinusGreaterThan
+            | TokenKind::Dollar
+            | TokenKind::LessThanEqualGreaterThan
+            | TokenKind::ExclamationEqual
+            | TokenKind::ExclamationEqualEqual
+            | TokenKind::Carat
+            | TokenKind::QuestionAs
+            | TokenKind::QuestionColon
+            | TokenKind::QuestionQuestionEqual
+            | TokenKind::Colon
+            | TokenKind::StarStarEqual
+            | TokenKind::StarEqual
+            | TokenKind::SlashEqual
+            | TokenKind::PercentEqual
+            | TokenKind::PlusEqual
+            | TokenKind::MinusEqual
+            | TokenKind::DotEqual
+            | TokenKind::LessThanLessThanEqual
+            | TokenKind::GreaterThanGreaterThanEqual
+            | TokenKind::AmpersandEqual
+            | TokenKind::CaratEqual
+            | TokenKind::BarEqual
+            | TokenKind::Comma
+            | TokenKind::ColonColon
+            | TokenKind::EqualGreaterThan
+            | TokenKind::EqualEqualGreaterThan
+            | TokenKind::QuestionMinusGreaterThan
+            | TokenKind::DollarDollar
+            | TokenKind::BarGreaterThan
+            | TokenKind::SlashGreaterThan
+            | TokenKind::LessThanSlash
+            | TokenKind::LessThanQuestion
+            | TokenKind::Backtick
+            | TokenKind::Hash
+            | TokenKind::Package
+            | TokenKind::Let
+            | TokenKind::ErrorToken
+            | TokenKind::DoubleQuotedStringLiteralHead
+            | TokenKind::StringLiteralBody
+            | TokenKind::DoubleQuotedStringLiteralTail
+            | TokenKind::HeredocStringLiteralHead
+            | TokenKind::HeredocStringLiteralTail
+            | TokenKind::XHPCategoryName
+            | TokenKind::XHPStringLiteral
+            | TokenKind::XHPBody
+            | TokenKind::XHPComment
+            | TokenKind::Hashbang => {
+                if kind.fixed_width().is_some() {
+                    Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
+                } else {
+                    Node::Ignored(SK::Token(kind))
+                }
             }
-            _ => Node::Ignored(SK::Token(kind)),
         };
         self.previous_token_kind = kind;
         result

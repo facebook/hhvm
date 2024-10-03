@@ -47,21 +47,21 @@ const (
 // will be encoded as:
 //
 //	{"1":{"tf":1},"2":{"map":["str","tf",2,{"key1": 1,"key2":0}]}}'
-type jsonProtocol struct {
+type jsonFormat struct {
 	*simpleJSONFormat
 }
 
-var _ types.Format = (*jsonProtocol)(nil)
+var _ types.Format = (*jsonFormat)(nil)
 
-// Constructor
-func NewJSONProtocol(buffer io.ReadWriteCloser) types.Format {
-	v := &jsonProtocol{simpleJSONFormat: newSimpleJSONFormat(buffer)}
+// NewJSONFormat creates a new JSON Format.
+func NewJSONFormat(buffer io.ReadWriteCloser) types.Format {
+	v := &jsonFormat{simpleJSONFormat: newSimpleJSONFormat(buffer)}
 	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
 	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
 	return v
 }
 
-func (p *jsonProtocol) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
+func (p *jsonFormat) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
 	if e := p.OutputListBegin(); e != nil {
 		return e
@@ -81,22 +81,22 @@ func (p *jsonProtocol) WriteMessageBegin(name string, typeID types.MessageType, 
 	return nil
 }
 
-func (p *jsonProtocol) WriteMessageEnd() error {
+func (p *jsonFormat) WriteMessageEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *jsonProtocol) WriteStructBegin(name string) error {
+func (p *jsonFormat) WriteStructBegin(name string) error {
 	if e := p.OutputObjectBegin(); e != nil {
 		return e
 	}
 	return nil
 }
 
-func (p *jsonProtocol) WriteStructEnd() error {
+func (p *jsonFormat) WriteStructEnd() error {
 	return p.OutputObjectEnd()
 }
 
-func (p *jsonProtocol) WriteFieldBegin(name string, typeID types.Type, id int16) error {
+func (p *jsonFormat) WriteFieldBegin(name string, typeID types.Type, id int16) error {
 	if e := p.WriteI16(id); e != nil {
 		return e
 	}
@@ -113,13 +113,13 @@ func (p *jsonProtocol) WriteFieldBegin(name string, typeID types.Type, id int16)
 	return nil
 }
 
-func (p *jsonProtocol) WriteFieldEnd() error {
+func (p *jsonFormat) WriteFieldEnd() error {
 	return p.OutputObjectEnd()
 }
 
-func (p *jsonProtocol) WriteFieldStop() error { return nil }
+func (p *jsonFormat) WriteFieldStop() error { return nil }
 
-func (p *jsonProtocol) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
+func (p *jsonFormat) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
@@ -143,65 +143,65 @@ func (p *jsonProtocol) WriteMapBegin(keyType types.Type, valueType types.Type, s
 	return p.OutputObjectBegin()
 }
 
-func (p *jsonProtocol) WriteMapEnd() error {
+func (p *jsonFormat) WriteMapEnd() error {
 	if e := p.OutputObjectEnd(); e != nil {
 		return e
 	}
 	return p.OutputListEnd()
 }
 
-func (p *jsonProtocol) WriteListBegin(elemType types.Type, size int) error {
+func (p *jsonFormat) WriteListBegin(elemType types.Type, size int) error {
 	return p.OutputElemListBegin(elemType, size)
 }
 
-func (p *jsonProtocol) WriteListEnd() error {
+func (p *jsonFormat) WriteListEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *jsonProtocol) WriteSetBegin(elemType types.Type, size int) error {
+func (p *jsonFormat) WriteSetBegin(elemType types.Type, size int) error {
 	return p.OutputElemListBegin(elemType, size)
 }
 
-func (p *jsonProtocol) WriteSetEnd() error {
+func (p *jsonFormat) WriteSetEnd() error {
 	return p.OutputListEnd()
 }
 
-func (p *jsonProtocol) WriteBool(b bool) error {
+func (p *jsonFormat) WriteBool(b bool) error {
 	if b {
 		return p.WriteI32(1)
 	}
 	return p.WriteI32(0)
 }
 
-func (p *jsonProtocol) WriteByte(b byte) error {
+func (p *jsonFormat) WriteByte(b byte) error {
 	return p.WriteI32(int32(b))
 }
 
-func (p *jsonProtocol) WriteI16(v int16) error {
+func (p *jsonFormat) WriteI16(v int16) error {
 	return p.WriteI32(int32(v))
 }
 
-func (p *jsonProtocol) WriteI32(v int32) error {
+func (p *jsonFormat) WriteI32(v int32) error {
 	return p.OutputI64(int64(v))
 }
 
-func (p *jsonProtocol) WriteI64(v int64) error {
+func (p *jsonFormat) WriteI64(v int64) error {
 	return p.OutputI64(int64(v))
 }
 
-func (p *jsonProtocol) WriteDouble(v float64) error {
+func (p *jsonFormat) WriteDouble(v float64) error {
 	return p.OutputF64(v)
 }
 
-func (p *jsonProtocol) WriteFloat(v float32) error {
+func (p *jsonFormat) WriteFloat(v float32) error {
 	return p.OutputF32(v)
 }
 
-func (p *jsonProtocol) WriteString(v string) error {
+func (p *jsonFormat) WriteString(v string) error {
 	return p.OutputString(v)
 }
 
-func (p *jsonProtocol) WriteBinary(v []byte) error {
+func (p *jsonFormat) WriteBinary(v []byte) error {
 	// JSON library only takes in a string,
 	// not an arbitrary byte array, to ensure bytes are transmitted
 	// efficiently we must convert this into a valid JSON string
@@ -229,7 +229,7 @@ func (p *jsonProtocol) WriteBinary(v []byte) error {
 }
 
 // Reading methods.
-func (p *jsonProtocol) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
+func (p *jsonFormat) ReadMessageBegin() (name string, typeID types.MessageType, seqID int32, err error) {
 	p.resetContextStack() // THRIFT-3735
 	if isNull, err := p.ParseListBegin(); isNull || err != nil {
 		return name, typeID, seqID, err
@@ -257,21 +257,21 @@ func (p *jsonProtocol) ReadMessageBegin() (name string, typeID types.MessageType
 	return name, typeID, seqID, nil
 }
 
-func (p *jsonProtocol) ReadMessageEnd() error {
+func (p *jsonFormat) ReadMessageEnd() error {
 	err := p.ParseListEnd()
 	return err
 }
 
-func (p *jsonProtocol) ReadStructBegin() (name string, err error) {
+func (p *jsonFormat) ReadStructBegin() (name string, err error) {
 	_, err = p.ParseObjectStart()
 	return "", err
 }
 
-func (p *jsonProtocol) ReadStructEnd() error {
+func (p *jsonFormat) ReadStructEnd() error {
 	return p.ParseObjectEnd()
 }
 
-func (p *jsonProtocol) ReadFieldBegin() (string, types.Type, int16, error) {
+func (p *jsonFormat) ReadFieldBegin() (string, types.Type, int16, error) {
 	b, _ := p.reader.Peek(1)
 	if len(b) < 1 || b[0] == types.JSON_RBRACE[0] || b[0] == types.JSON_RBRACKET[0] {
 		return "", types.STOP, -1, nil
@@ -291,11 +291,11 @@ func (p *jsonProtocol) ReadFieldBegin() (string, types.Type, int16, error) {
 	return "", fType, fieldID, err
 }
 
-func (p *jsonProtocol) ReadFieldEnd() error {
+func (p *jsonFormat) ReadFieldEnd() error {
 	return p.ParseObjectEnd()
 }
 
-func (p *jsonProtocol) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
+func (p *jsonFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
 	if isNull, e := p.ParseListBegin(); isNull || e != nil {
 		return types.VOID, types.VOID, 0, e
 	}
@@ -331,7 +331,7 @@ func (p *jsonProtocol) ReadMapBegin() (keyType types.Type, valueType types.Type,
 	return keyType, valueType, size, e
 }
 
-func (p *jsonProtocol) ReadMapEnd() error {
+func (p *jsonFormat) ReadMapEnd() error {
 	e := p.ParseObjectEnd()
 	if e != nil {
 		return e
@@ -339,58 +339,58 @@ func (p *jsonProtocol) ReadMapEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *jsonProtocol) ReadListBegin() (elemType types.Type, size int, e error) {
+func (p *jsonFormat) ReadListBegin() (elemType types.Type, size int, e error) {
 	return p.ParseElemListBegin()
 }
 
-func (p *jsonProtocol) ReadListEnd() error {
+func (p *jsonFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *jsonProtocol) ReadSetBegin() (elemType types.Type, size int, e error) {
+func (p *jsonFormat) ReadSetBegin() (elemType types.Type, size int, e error) {
 	return p.ParseElemListBegin()
 }
 
-func (p *jsonProtocol) ReadSetEnd() error {
+func (p *jsonFormat) ReadSetEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *jsonProtocol) ReadBool() (bool, error) {
+func (p *jsonFormat) ReadBool() (bool, error) {
 	value, err := p.ReadI32()
 	return (value != 0), err
 }
 
-func (p *jsonProtocol) ReadByte() (byte, error) {
+func (p *jsonFormat) ReadByte() (byte, error) {
 	v, err := p.ReadI64()
 	return byte(v), err
 }
 
-func (p *jsonProtocol) ReadI16() (int16, error) {
+func (p *jsonFormat) ReadI16() (int16, error) {
 	v, err := p.ReadI64()
 	return int16(v), err
 }
 
-func (p *jsonProtocol) ReadI32() (int32, error) {
+func (p *jsonFormat) ReadI32() (int32, error) {
 	v, err := p.ReadI64()
 	return int32(v), err
 }
 
-func (p *jsonProtocol) ReadI64() (int64, error) {
+func (p *jsonFormat) ReadI64() (int64, error) {
 	v, _, err := p.ParseI64()
 	return v, err
 }
 
-func (p *jsonProtocol) ReadDouble() (float64, error) {
+func (p *jsonFormat) ReadDouble() (float64, error) {
 	v, _, err := p.ParseF64()
 	return v, err
 }
 
-func (p *jsonProtocol) ReadFloat() (float32, error) {
+func (p *jsonFormat) ReadFloat() (float32, error) {
 	v, _, err := p.ParseF32()
 	return v, err
 }
 
-func (p *jsonProtocol) ReadString() (string, error) {
+func (p *jsonFormat) ReadString() (string, error) {
 	var v string
 	if err := p.ParsePreValue(); err != nil {
 		return v, err
@@ -420,7 +420,7 @@ func (p *jsonProtocol) ReadString() (string, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *jsonProtocol) ReadBinary() ([]byte, error) {
+func (p *jsonFormat) ReadBinary() ([]byte, error) {
 	var v []byte
 	if err := p.ParsePreValue(); err != nil {
 		return nil, err
@@ -451,7 +451,7 @@ func (p *jsonProtocol) ReadBinary() ([]byte, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *jsonProtocol) Flush() (err error) {
+func (p *jsonFormat) Flush() (err error) {
 	err = p.writer.Flush()
 	if err == nil {
 		return flush(p.buffer)
@@ -459,15 +459,15 @@ func (p *jsonProtocol) Flush() (err error) {
 	return types.NewProtocolException(err)
 }
 
-func (p *jsonProtocol) Skip(fieldType types.Type) (err error) {
+func (p *jsonFormat) Skip(fieldType types.Type) (err error) {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 
-func (p *jsonProtocol) Close() error {
+func (p *jsonFormat) Close() error {
 	return p.buffer.Close()
 }
 
-func (p *jsonProtocol) OutputElemListBegin(elemType types.Type, size int) error {
+func (p *jsonFormat) OutputElemListBegin(elemType types.Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
@@ -484,7 +484,7 @@ func (p *jsonProtocol) OutputElemListBegin(elemType types.Type, size int) error 
 	return nil
 }
 
-func (p *jsonProtocol) ParseElemListBegin() (elemType types.Type, size int, e error) {
+func (p *jsonFormat) ParseElemListBegin() (elemType types.Type, size int, e error) {
 	if isNull, e := p.ParseListBegin(); isNull || e != nil {
 		return types.VOID, 0, e
 	}
@@ -501,7 +501,7 @@ func (p *jsonProtocol) ParseElemListBegin() (elemType types.Type, size int, e er
 	return elemType, size, err2
 }
 
-func (p *jsonProtocol) readElemListBegin() (elemType types.Type, size int, e error) {
+func (p *jsonFormat) readElemListBegin() (elemType types.Type, size int, e error) {
 	if isNull, e := p.ParseListBegin(); isNull || e != nil {
 		return types.VOID, 0, e
 	}
@@ -518,7 +518,7 @@ func (p *jsonProtocol) readElemListBegin() (elemType types.Type, size int, e err
 	return elemType, size, err2
 }
 
-func (p *jsonProtocol) writeElemListBegin(elemType types.Type, size int) error {
+func (p *jsonFormat) writeElemListBegin(elemType types.Type, size int) error {
 	if e := p.OutputListBegin(); e != nil {
 		return e
 	}
@@ -535,7 +535,7 @@ func (p *jsonProtocol) writeElemListBegin(elemType types.Type, size int) error {
 	return nil
 }
 
-func (p *jsonProtocol) TypeIdToString(fieldType types.Type) (string, error) {
+func (p *jsonFormat) TypeIdToString(fieldType types.Type) (string, error) {
 	switch byte(fieldType) {
 	case types.BOOL:
 		return "tf", nil
@@ -567,7 +567,7 @@ func (p *jsonProtocol) TypeIdToString(fieldType types.Type) (string, error) {
 	return "", types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 }
 
-func (p *jsonProtocol) StringToTypeId(fieldType string) (types.Type, error) {
+func (p *jsonFormat) StringToTypeId(fieldType string) (types.Type, error) {
 	switch fieldType {
 	case "tf":
 		return types.Type(types.BOOL), nil

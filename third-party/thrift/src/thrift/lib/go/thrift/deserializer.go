@@ -49,7 +49,7 @@ func deserializeCompact(data []byte, msg types.Struct) error {
 // NewJSONDeserializer creates a new deserializer using the JSON protocol
 func NewJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewJSONProtocol(transport)
+	protocol := NewJSONFormat(transport)
 	return &Deserializer{transport, protocol}
 }
 

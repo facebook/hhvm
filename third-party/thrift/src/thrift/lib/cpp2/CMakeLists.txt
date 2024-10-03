@@ -314,6 +314,8 @@ add_library(
   transport/rocket/framing/Parser.cpp
   transport/rocket/framing/Serializer.cpp
   transport/rocket/framing/Util.cpp
+  transport/rocket/payload/DefaultPayloadSerializerStrategy.cpp
+  transport/rocket/payload/PayloadSerializer.cpp
   transport/rocket/server/RocketRoutingHandler.cpp
   transport/rocket/server/RocketServerConnection.cpp
   transport/rocket/server/RocketServerConnectionPlugins.cpp

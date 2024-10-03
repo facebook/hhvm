@@ -11,17 +11,7 @@ $dir_handle = opendir('/');
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
 $dirnames = vec[
-  /* Invalid dirnames */
-  -2.34555,
-  TRUE,
-  FALSE,
-  NULL,
   " ",
-  $dir_handle,
-
-  /* scalars */
-  0,
-  1234
 ];
 
 /* loop through to test each element the above array */

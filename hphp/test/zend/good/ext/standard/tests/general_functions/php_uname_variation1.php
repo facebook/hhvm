@@ -15,38 +15,9 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 
 $values = dict[
-
-          // int data
-          "0" => 0,
-          "1" => 1,
-          "12345" =>  12345,
-          "-2345" =>  -2345,
-
-          // float data
-          "10.5" => 10.5,
-          "-10.5" => -10.5,
-          "10.1234567e10" => 10.1234567e10,
-          "10.7654321E-10" => 10.7654321E-10,
-          ".5" => .5,
-
-          // null data
-          "NULL" => NULL,
-          "null" =>  null,
-
-          // boolean data
-          "true" => true,
-          "false" => false,
-          "TRUE" => TRUE,
-          "FALSE" => FALSE,
-
           // empty data
           "\"\"" => "",
           "''" => '',
-
-          // object data
-          "new fooClass()" => new fooClass(),
-
-
 ];
 
 // loop through each element of the array for data

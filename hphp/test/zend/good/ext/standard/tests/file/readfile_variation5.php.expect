@@ -1,0 +1,14 @@
+*** Testing readfile() : usage variation ***
+
+--lowercase true--
+testing readfile
+
+--lowercase false--
+testing readfile
+
+--uppercase TRUE--
+testing readfile
+
+--uppercase FALSE--
+testing readfile
+===DONE===

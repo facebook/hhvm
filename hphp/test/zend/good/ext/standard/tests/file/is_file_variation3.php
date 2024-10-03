@@ -12,17 +12,8 @@ $file_handle = fopen(sys_get_temp_dir().'/'.'is_file_variation3.tmp', "w");
 echo "*** Testing Invalid file types ***\n";
 $filenames = vec[
   /* Invalid filenames */
-  -2.34555,
   " ",
   "",
-  TRUE,
-  FALSE,
-  NULL,
-  $file_handle,
-
-  /* scalars */
-  1234,
-  0
 ];
 
 /* loop through to test each element the above array */

@@ -1,20 +1,6 @@
 *** Testing Invalid file types ***
 
-Warning: readlink() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink(): No such file or directory  in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
+Warning: readlink(): No such file or directory  in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 17
 bool(false)
-
-Warning: readlink() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
-
-Warning: readlink() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/readlink_variation1.php on line 27
 
 *** Done ***

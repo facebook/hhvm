@@ -1,0 +1,14 @@
+*** Testing mkdir() : usage variation ***
+
+--lowercase true--
+Directory created
+
+--lowercase false--
+Directory created
+
+--uppercase TRUE--
+Directory created
+
+--uppercase FALSE--
+Directory created
+===DONE===

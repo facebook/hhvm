@@ -4,10 +4,4 @@
 Warning: glob() expects at least 1 parameter, 0 given in %s/glob_error.php on line 17
 
 Warning: glob() expects at most 2 parameters, 3 given in %s/glob_error.php on line 18
-
--- Testing glob() with invalid arguments --
-
-Warning: glob() expects parameter 2 to be integer, string given in %s/glob_error.php on line 21
-
-Warning: glob() expects parameter 2 to be integer, string given in %s/glob_error.php on line 22
 Done

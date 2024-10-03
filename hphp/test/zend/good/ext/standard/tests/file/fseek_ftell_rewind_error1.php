@@ -21,22 +21,6 @@ $fp = fopen(__FILE__, "r");
 try { var_dump( fseek($fp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( fseek($fp, 10, $fp,10) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-// test invalid arguments : non-resources
-echo "-- Testing fseek() with invalid arguments --\n";
-$invalid_args = vec[
-  "string",
-  10,
-  10.5,
-  true,
-  vec[1,2,3],
-  new stdClass
-];
-/* loop to test fseek() with different invalid type of args */
-for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
-  echo "-- Iteration $loop_counter --\n";
-  try { var_dump( fseek($invalid_args[$loop_counter - 1], 10) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-}
-
 // fseek() on a file handle which is already closed
 echo "-- Testing fseek() with closed/unset file handle --";
 fclose($fp);

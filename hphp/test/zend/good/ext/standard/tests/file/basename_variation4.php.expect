@@ -1,0 +1,8 @@
+*** Testing basename() : usage variation ***
+
+--empty string DQ--
+string(4) "path"
+
+--empty string SQ--
+string(4) "path"
+===DONE===

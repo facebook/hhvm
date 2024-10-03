@@ -1,0 +1,14 @@
+*** Testing file_get_contents() : usage variation ***
+
+--lowercase true--
+string(13) "contents read"
+
+--lowercase false--
+string(13) "contents read"
+
+--uppercase TRUE--
+string(13) "contents read"
+
+--uppercase FALSE--
+string(13) "contents read"
+===DONE===

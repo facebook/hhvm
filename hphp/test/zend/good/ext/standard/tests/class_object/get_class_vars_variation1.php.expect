@@ -1,0 +1,8 @@
+*** Testing get_class_vars() : usage variation ***
+
+--empty string DQ--
+bool(false)
+
+--empty string SQ--
+bool(false)
+===DONE===

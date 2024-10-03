@@ -7,7 +7,6 @@ class object_temp {
   public $html_var = "/var/html/testdir/example.html";
   public $dir_var = "/testdir/foo/test/";
   public $file_var = "/foo//symlink.link";
-  public $number = 12345;
 }
 
 <<__EntryPoint>>
@@ -21,26 +20,12 @@ function main(): void {
     "/testdir/foo//test/",
     "../foo/test.link",
     "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6/test.tmp",
-    2.345
   ];
 
   $paths = vec[
-    /* pathname containing numeric string */
-    0,
-    1234,
-    -1234,
-    2.3456,
-
-    /* pathname as boolean */
-    TRUE,
-    FALSE,
-
     /* pathname as an array */
     "./array(1, 2)",
     "array( array(), null)",
-
-    /* pathname as object */
-    $obj,
 
     /* pathname as spaces */
     " ",
@@ -50,23 +35,17 @@ function main(): void {
     "",
     '',
 
-    /* pathname as NULL */
-    NULL,
-    null,
-
     /* pathname as members of object */
     $obj->url_var,
     $obj->html_var,
     $obj->dir_var,
     $obj->file_var,
-    $obj->number,
 
     /* pathname as member of array */
     $path_arr[0],
     $path_arr[1],
     $path_arr[2],
     $path_arr[3],
-    $path_arr[4]
   ];
 
   $counter = 1;

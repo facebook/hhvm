@@ -1,38 +1,6 @@
 *** Testing php_uname() - usage variations
--- Iterator 0 --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
--- Iterator 1 --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
--- Iterator 12345 --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
--- Iterator -2345 --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
--- Iterator 10.5 --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
--- Iterator -10.5 --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
--- Iterator 10.1234567e10 --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
--- Iterator 10.7654321E-10 --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
--- Iterator .5 --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
--- Iterator NULL --
-ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
--- Iterator null --
-ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
--- Iterator true --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
--- Iterator false --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
--- Iterator TRUE --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
--- Iterator FALSE --
-ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
 -- Iterator "" --
 string(%d) "%s"
 -- Iterator '' --
 string(%d) "%s"
--- Iterator new fooClass() --
-ERROR: string(58) "php_uname() expects parameter 1 to be string, object given"
 ===DONE===

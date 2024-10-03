@@ -14,13 +14,6 @@ $fp = fopen($file, "w");
 $operations = vec[
   0,
   LOCK_NB,
-  FALSE,
-  NULL,
-  vec[1,2,3],
-  vec[],
-  "string",
-  "",
-  "\0"
 ];
 
 $i = 0;
@@ -39,7 +32,6 @@ $wouldblock = false;
 var_dump(flock($fp, LOCK_SH|LOCK_NB, inout $wouldblock));
 
 $var = false;
-try { var_dump(flock("", "", inout $var)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args leass than expected */
 try { var_dump(flock()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

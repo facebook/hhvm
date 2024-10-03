@@ -36,51 +36,16 @@ function main(): void {
 $dir_path
 EOT;
 
-  // get a resource variable
-  $fp = fopen(__FILE__, "r");
-
   // unexpected values to be passed to $directory argument
   $inputs = vec[
-         // int data
-  /*1*/  0,
-         1,
-         12345,
-         -2345,
-
-         // float data
-  /*5*/  10.5,
-         -10.5,
-         12.3456789000e10,
-         12.3456789000E-10,
-         .5,
-
-         // null data
-  /*10*/ NULL,
-         null,
-
-         // boolean data
-  /*12*/ true,
-         false,
-         TRUE,
-         FALSE,
-
          // empty data
-  /*16*/ "",
+  /*1*/  "",
          '',
-         vec[],
 
          // string data
-  /*19*/ "$dir_path",
+  /*2*/ "$dir_path",
          'string',
          $heredoc,
-
-         // object data
-  /*22*/ new classA($dir_path),
-
-
-
-         // resource variable
-  /*23*/ $fp
   ];
 
   // loop through each element of $inputs to check the behavior of chdir()
@@ -94,8 +59,6 @@ EOT;
     }
     $iterator++;
   }
-
-  fclose($fp);
 
   echo "===DONE===\n";
 

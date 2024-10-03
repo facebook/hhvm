@@ -1,0 +1,4 @@
+*** Testing is_dir() with Invalid arguments: expected bool(false) ***
+bool(false)
+
+*** Done ***

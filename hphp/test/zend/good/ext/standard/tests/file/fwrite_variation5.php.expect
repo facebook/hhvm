@@ -1,0 +1,6 @@
+*** Testing fwrite() : usage variation ***
+
+--empty string DQ--
+
+--empty string SQ--
+===DONE===

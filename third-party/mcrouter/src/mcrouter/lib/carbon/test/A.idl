@@ -29,4 +29,10 @@ reply TestAReply {
 
 service {
   enable_shutdown: true;
+
+  routing_groups: {
+    no_group: [
+        TestARequest,
+    ]
+  };
 };

@@ -60,6 +60,12 @@ service {
     DuplicateRoute @ "mcrouter/lib/carbon/example/DuplicateRoute.h",
     CarbonLookasideRoute @ "mcrouter/lib/carbon/example/CarbonLookasideRoute.h"
   ];
+  routing_groups: {
+    no_group: [
+        HelloRequest,
+        GoodbyeRequest,
+    ]
+  };
   gen_client_tool: true;
   compression_by_type: true;
 };

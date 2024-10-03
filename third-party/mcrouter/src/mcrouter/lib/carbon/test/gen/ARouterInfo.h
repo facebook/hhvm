@@ -24,6 +24,7 @@
 
 #include "mcrouter/lib/carbon/test/gen/ARouteHandleIf.h"
 #include "mcrouter/lib/carbon/test/gen/ARouterStats.h"
+#include "mcrouter/lib/carbon/test/gen/ARoutingGroups.h"
 
 // Forward declarations
 namespace folly {

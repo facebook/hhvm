@@ -24,6 +24,7 @@
 
 #include "mcrouter/lib/carbon/test/gen/BRouteHandleIf.h"
 #include "mcrouter/lib/carbon/test/gen/BRouterStats.h"
+#include "mcrouter/lib/carbon/test/gen/BRoutingGroups.h"
 
 // Forward declarations
 namespace folly {

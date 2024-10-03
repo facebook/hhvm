@@ -202,4 +202,11 @@ struct StructWithOptionalEnumInt8 {
 
 service {
   enable_shutdown: true;
+
+  routing_groups: {
+    no_group: [
+        TestRequest,
+        TestRequestStringKey,
+    ]
+  };
 };

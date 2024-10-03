@@ -40,9 +40,7 @@ constexpr auto kUpdateKey = folly::makeFixedString("update_like");
  * Request is get-like.
  */
 template <typename Request = void>
-struct GetLike {
-  static const bool value = false;
-};
+struct GetLike;
 
 template <typename Request = void>
 using GetLikeT = typename GetLike<Request>::Type;
@@ -57,9 +55,7 @@ using GetLikeT = typename GetLike<Request>::Type;
  * Request is update-like.
  */
 template <typename Request = void>
-struct UpdateLike {
-  static const bool value = false;
-};
+struct UpdateLike;
 
 template <typename Request = void>
 using UpdateLikeT = typename UpdateLike<Request>::Type;
@@ -74,9 +70,7 @@ using UpdateLikeT = typename UpdateLike<Request>::Type;
  * Request is delete-like.
  */
 template <typename Request = void>
-struct DeleteLike {
-  static const bool value = false;
-};
+struct DeleteLike;
 
 template <typename Request = void>
 using DeleteLikeT = typename DeleteLike<Request>::Type;
@@ -92,9 +86,7 @@ using DeleteLikeT = typename DeleteLike<Request>::Type;
  * Request is arithmetic-like.
  */
 template <typename Request = void>
-struct ArithmeticLike {
-  static const bool value = false;
-};
+struct ArithmeticLike;
 
 template <typename Request = void>
 using ArithmeticLikeT = typename ArithmeticLike<Request>::Type;

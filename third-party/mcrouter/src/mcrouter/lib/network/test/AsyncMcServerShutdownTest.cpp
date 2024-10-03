@@ -10,6 +10,7 @@
 #include <folly/fibers/FiberManagerMap.h>
 #include <folly/io/async/EventBaseManager.h>
 
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRoutingGroups.h"
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeServer.h"
 #include "mcrouter/lib/network/AsyncMcClient.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"

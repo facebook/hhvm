@@ -527,6 +527,16 @@ service {
     arithmetic: [
       McIncrRequest,
       McDecrRequest
+    ],
+    no_group: [
+      McExecRequest,
+      McFlushAllRequest,
+      McFlushReRequest,
+      McQuitRequest,
+      McShutdownRequest,
+      McStatsRequest,
+      McTouchRequest,
+      McVersionRequest,
     ]
   };
   gen_client_tool: true;

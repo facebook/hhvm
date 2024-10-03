@@ -20,6 +20,7 @@
 #include <mcrouter/lib/RouteHandleTraverser.h>
 
 #include "mcrouter/lib/carbon/test/gen/AMessages.h"
+#include "mcrouter/lib/carbon/test/gen/BRoutingGroups.h"
 
 namespace carbon {
 namespace test {

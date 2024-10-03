@@ -28,4 +28,10 @@ reply TestBReply {
 
 service {
   enable_shutdown: true;
+
+  routing_groups: {
+    no_group: [
+        TestBRequest,
+    ]
+  };
 };

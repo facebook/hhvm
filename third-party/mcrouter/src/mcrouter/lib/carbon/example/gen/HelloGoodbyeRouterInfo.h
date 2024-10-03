@@ -24,6 +24,7 @@
 
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouteHandleIf.h"
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterStats.h"
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRoutingGroups.h"
 
 // Forward declarations
 namespace folly {

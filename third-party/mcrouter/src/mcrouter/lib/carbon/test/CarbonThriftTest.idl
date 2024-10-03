@@ -111,4 +111,12 @@ service {
   enable_shutdown: true;
   gen_client_tool: false;
   thrift_tm_thread: true;
+
+  routing_groups: {
+    no_group: [
+        ThriftTestRequest,
+        DummyThriftRequest,
+        CustomRequest,
+    ]
+  };
 };

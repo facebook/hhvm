@@ -22,9 +22,64 @@ namespace carbon {
 
 // ArithmeticLike
 template <>
+struct ArithmeticLike<facebook::memcache::McAddRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McAppendRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McCasRequest> {
+  static const bool value = false;
+};
+
+template <>
 struct ArithmeticLike<facebook::memcache::McDecrRequest> {
   static const bool value = true;
   typedef void* Type;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McDeleteRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McExecRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McFlushAllRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McFlushReRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McGatRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McGatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McGetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McGetsRequest> {
+  static const bool value = false;
 };
 
 template <>
@@ -33,14 +88,224 @@ struct ArithmeticLike<facebook::memcache::McIncrRequest> {
   typedef void* Type;
 };
 
+template <>
+struct ArithmeticLike<facebook::memcache::McLeaseGetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McLeaseSetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McMetagetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McPrependRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McQuitRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McReplaceRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McSetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McShutdownRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McStatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McTouchRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct ArithmeticLike<facebook::memcache::McVersionRequest> {
+  static const bool value = false;
+};
+
 // DeleteLike
+template <>
+struct DeleteLike<facebook::memcache::McAddRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McAppendRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McCasRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McDecrRequest> {
+  static const bool value = false;
+};
+
 template <>
 struct DeleteLike<facebook::memcache::McDeleteRequest> {
   static const bool value = true;
   typedef void* Type;
 };
 
+template <>
+struct DeleteLike<facebook::memcache::McExecRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McFlushAllRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McFlushReRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McGatRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McGatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McGetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McGetsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McIncrRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McLeaseGetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McLeaseSetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McMetagetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McPrependRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McQuitRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McReplaceRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McSetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McShutdownRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McStatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McTouchRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct DeleteLike<facebook::memcache::McVersionRequest> {
+  static const bool value = false;
+};
+
 // GetLike
+template <>
+struct GetLike<facebook::memcache::McAddRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McAppendRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McCasRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McDecrRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McDeleteRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McExecRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McFlushAllRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McFlushReRequest> {
+  static const bool value = false;
+};
+
 template <>
 struct GetLike<facebook::memcache::McGatRequest> {
   static const bool value = true;
@@ -66,15 +331,65 @@ struct GetLike<facebook::memcache::McGetsRequest> {
 };
 
 template <>
+struct GetLike<facebook::memcache::McIncrRequest> {
+  static const bool value = false;
+};
+
+template <>
 struct GetLike<facebook::memcache::McLeaseGetRequest> {
   static const bool value = true;
   typedef void* Type;
 };
 
 template <>
+struct GetLike<facebook::memcache::McLeaseSetRequest> {
+  static const bool value = false;
+};
+
+template <>
 struct GetLike<facebook::memcache::McMetagetRequest> {
   static const bool value = true;
   typedef void* Type;
+};
+
+template <>
+struct GetLike<facebook::memcache::McPrependRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McQuitRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McReplaceRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McSetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McShutdownRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McStatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McTouchRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct GetLike<facebook::memcache::McVersionRequest> {
+  static const bool value = false;
 };
 
 // UpdateLike
@@ -97,15 +412,80 @@ struct UpdateLike<facebook::memcache::McCasRequest> {
 };
 
 template <>
+struct UpdateLike<facebook::memcache::McDecrRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McDeleteRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McExecRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McFlushAllRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McFlushReRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McGatRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McGatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McGetRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McGetsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McIncrRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McLeaseGetRequest> {
+  static const bool value = false;
+};
+
+template <>
 struct UpdateLike<facebook::memcache::McLeaseSetRequest> {
   static const bool value = true;
   typedef void* Type;
 };
 
 template <>
+struct UpdateLike<facebook::memcache::McMetagetRequest> {
+  static const bool value = false;
+};
+
+template <>
 struct UpdateLike<facebook::memcache::McPrependRequest> {
   static const bool value = true;
   typedef void* Type;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McQuitRequest> {
+  static const bool value = false;
 };
 
 template <>
@@ -118,5 +498,25 @@ template <>
 struct UpdateLike<facebook::memcache::McSetRequest> {
   static const bool value = true;
   typedef void* Type;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McShutdownRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McStatsRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McTouchRequest> {
+  static const bool value = false;
+};
+
+template <>
+struct UpdateLike<facebook::memcache::McVersionRequest> {
+  static const bool value = false;
 };
 } // namespace carbon

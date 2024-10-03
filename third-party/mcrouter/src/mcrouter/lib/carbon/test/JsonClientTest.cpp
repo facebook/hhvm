@@ -13,6 +13,7 @@
 #include "mcrouter/lib/carbon/CmdLineClient.h"
 #include "mcrouter/lib/carbon/JsonClient.h"
 #include "mcrouter/lib/carbon/test/gen/CarbonTest.h"
+#include "mcrouter/lib/carbon/test/gen/CarbonTestRoutingGroups.h"
 #include "mcrouter/lib/mc/msg.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"

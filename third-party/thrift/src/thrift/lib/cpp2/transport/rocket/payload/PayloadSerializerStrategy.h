@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/Try.h>
+#include <folly/io/Cursor.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 
@@ -63,6 +64,12 @@ class PayloadSerializerStrategy {
   FOLLY_ALWAYS_INLINE size_t
   unpackCompact(T& output, const folly::IOBuf* buffer) {
     return child_.unpackCompact(output, buffer);
+  }
+
+  template <typename T>
+  FOLLY_ALWAYS_INLINE size_t
+  unpackCompact(T& output, folly::io::Cursor& cursor) {
+    return child_.unpackCompact(output, cursor);
   }
 
   virtual ~PayloadSerializerStrategy() = default;

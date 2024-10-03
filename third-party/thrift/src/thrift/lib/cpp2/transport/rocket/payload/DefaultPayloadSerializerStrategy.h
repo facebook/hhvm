@@ -74,6 +74,14 @@ class DefaultPayloadSerializerStrategy final
     return reader.getCursorPosition();
   }
 
+  template <typename T>
+  size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
+    CompactProtocolReader reader;
+    reader.setInput(cursor);
+    output.read(&reader);
+    return reader.getCursorPosition();
+  }
+
   template <class PayloadType>
   rocket::Payload pack(
       PayloadType&& payload, folly::AsyncTransport* transport) {

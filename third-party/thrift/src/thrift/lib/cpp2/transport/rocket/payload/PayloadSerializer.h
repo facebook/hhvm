@@ -126,6 +126,17 @@ class PayloadSerializer {
     }
   }
 
+  template <typename T>
+  size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
+    if (std::holds_alternative<DefaultPayloadSerializerStrategy>(strategy_)) {
+      return std::get<DefaultPayloadSerializerStrategy>(strategy_)
+          .unpackCompact(output, cursor);
+    } else {
+      return std::get<LegacyPayloadSerializerStrategy>(strategy_).unpackCompact(
+          output, cursor);
+    }
+  }
+
   template <typename Metadata>
   rocket::Payload packWithFds(
       Metadata* metadata,

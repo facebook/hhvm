@@ -49,6 +49,11 @@ class LegacyPayloadSerializerStrategy final
     return ::apache::thrift::rocket::unpackCompact<T>(output, buffer);
   }
 
+  template <typename T>
+  size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
+    return ::apache::thrift::rocket::unpackCompact<T>(output, cursor);
+  }
+
   template <class PayloadType>
   FOLLY_ERASE rocket::Payload pack(
       PayloadType&& payload, folly::AsyncTransport* transport) {

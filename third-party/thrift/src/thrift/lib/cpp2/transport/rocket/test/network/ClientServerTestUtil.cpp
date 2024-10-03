@@ -47,10 +47,10 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/core/TryUtil.h>
-#include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/test/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
@@ -116,7 +116,8 @@ rocket::SetupFrame RocketTestClient::makeTestSetupFrame(
   *meta.opaque() = std::move(md);
   meta.maxVersion() = kClientVersion;
 
-  auto serializedMeta = packCompact(std::move(meta));
+  auto serializedMeta =
+      PayloadSerializer::getInstance().packCompact(std::move(meta));
 
   // Serialize RocketClient's major/minor version (which is separate from the
   // rsocket protocol major/minor version) into setup metadata.
@@ -379,14 +380,16 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
     }
     // Validate RequestSetupMetadata
     RequestSetupMetadata meta;
-    size_t unpackedSize = unpackCompact(meta, cursor);
+    size_t unpackedSize =
+        PayloadSerializer::getInstance().unpackCompact(meta, cursor);
     EXPECT_EQ(unpackedSize, frame.payload().metadataSize());
     EXPECT_EQ(expectedSetupMetadata_, meta.opaque_ref().value_or({}));
     version_ = std::min(kServerVersion, meta.maxVersion_ref().value_or(0));
     ServerPushMetadata serverMeta;
     serverMeta.set_setupResponse();
     serverMeta.setupResponse_ref()->version_ref() = version_;
-    connection.sendMetadataPush(packCompact(std::move(serverMeta)));
+    connection.sendMetadataPush(
+        PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
   }
 
   void handleRequestResponseFrame(

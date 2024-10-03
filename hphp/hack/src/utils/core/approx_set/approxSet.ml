@@ -6,45 +6,7 @@
  *
  *)
 
-module type DomainType = sig
-  type t
-
-  type ctx
-
-  val relation : t -> ctx:ctx -> t -> SetRelation.t
-end
-
-module type S = sig
-  module Domain : DomainType
-
-  type t
-
-  val empty : t
-
-  val singleton : Domain.t -> t
-
-  val union : t -> t -> t
-
-  val inter : t -> t -> t
-
-  val diff : t -> t -> t
-
-  val of_list : Domain.t list -> t
-
-  type disjoint =
-    | Sat
-    | Unsat of {
-        left: Domain.t;
-        relation: SetRelation.t;
-        right: Domain.t;
-      }
-
-  val disjoint : Domain.ctx -> t -> t -> disjoint
-
-  val are_disjoint : Domain.ctx -> t -> t -> bool
-
-  val relate : Domain.ctx -> t -> t -> SetRelation.t
-end
+include ApproxSet_intf
 
 module Make (Domain : DomainType) : S with module Domain := Domain = struct
   type disjoint =

@@ -96,7 +96,7 @@ func newSetupResponseVersion8() *rpcmetadata.SetupResponse {
 	res := rpcmetadata.NewSetupResponse()
 	version := int32(8)
 	res.SetVersion(&version)
-	ztsdSupported := true
-	res.SetZstdSupported(&ztsdSupported)
+	zstdSupported := true
+	res.SetZstdSupported(&zstdSupported)
 	return res
 }

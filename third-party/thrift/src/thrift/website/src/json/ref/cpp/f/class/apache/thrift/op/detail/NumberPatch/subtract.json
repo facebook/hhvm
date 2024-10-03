@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::subtract",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "subtract",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberPatch::subtract",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "263",
+        "line": "129",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "263",
-        "bodyend": "265"
+        "bodystart": "129",
+        "bodyend": "131"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid subtract(U&amp;&amp; val)",

@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::copy_from",
       "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other)",
       "name_html": "copy_from",
+      "qualifiedname_html": "apache::thrift::terse_intern_boxed_field_ref::copy_from",
       "param": [
         {
           "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1438",
+        "line": "1458",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1438",
-        "bodyend": "1440"
+        "bodystart": "1458",
+        "bodyend": "1460"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",

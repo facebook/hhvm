@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AssignPatch::createFromObject",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ab8c8b911261fd9d7a9eac81b2a0ff739",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a8e50f8db99752f5891e51d5e783baaa3",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::createFromObject",
+      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; class &gt;::createFromObject",
       "argsstring_html": "(protocol::Object v)",
       "name_html": "createFromObject",
+      "qualifiedname_html": "apache::thrift::op::detail::AssignPatch::createFromObject",
       "param": [
         {
           "type_html": "protocol::Object",
@@ -22,19 +23,19 @@
         }
       ],
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "147",
+        "file": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "line": "146",
         "column": "8",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "147",
-        "bodyend": "156"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "bodystart": "146",
+        "bodyend": "155"
       },
       "definition": {
         "simple_html": "void createFromObject(protocol::Object v)",
         "simple_raw": "void createFromObject(protocol::Object v)",
         "detailed_html": "private inline void createFromObject(protocol::Object v)",
         "detailed_raw": "private inline void createFromObject(protocol::Object v)",
-        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::createFromObject",
+        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; class &gt;::createFromObject",
         "original_argsstring_html": "(protocol::Object v)"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/createFromObject",

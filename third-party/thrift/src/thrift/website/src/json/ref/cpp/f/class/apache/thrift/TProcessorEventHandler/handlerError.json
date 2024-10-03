@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::handlerError",
       "argsstring_html": "(void *, const char *)",
       "name_html": "handlerError",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::handlerError",
       "param": [
         {
           "type_html": "void *"

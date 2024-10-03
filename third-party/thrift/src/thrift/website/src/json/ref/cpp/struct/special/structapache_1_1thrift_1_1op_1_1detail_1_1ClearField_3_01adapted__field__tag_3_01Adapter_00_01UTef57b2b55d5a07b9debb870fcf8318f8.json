@@ -43,6 +43,7 @@
       "definition_html": "using apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::Tag =  adapted_field_tag&lt;Adapter, UTag, Struct, FieldId&gt;",
       "argsstring_html": "",
       "name_html": "Tag",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
         "line": "396",
@@ -72,6 +73,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; T &gt;",
@@ -118,6 +120,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; T &gt;",
@@ -164,6 +167,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; T &gt;",
@@ -210,6 +214,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; T &gt; &amp;",
@@ -256,6 +261,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "std::unique_ptr&lt; T &gt; &amp;",
@@ -338,6 +344,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(optional_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &gt;",
@@ -388,6 +395,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(optional_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &gt;",
@@ -438,6 +446,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(union_field_ref&lt; T &gt; field, Union &amp;u) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/union_field_ref\">union_field_ref</a>&lt; T &gt;",
@@ -489,6 +498,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(terse_intern_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; T &gt;",
@@ -536,6 +546,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(required_field_ref&lt; T &gt; field, Struct &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; T &gt;",
@@ -584,6 +595,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(terse_field_ref&lt; T &gt; field, Struct &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; T &gt;",
@@ -632,6 +644,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(field_ref&lt; T &gt; field, Struct &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; T &gt;",
@@ -680,6 +693,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(std::shared_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "std::shared_ptr&lt; T &gt; &amp;",
@@ -728,6 +742,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "argsstring_html": "(std::unique_ptr&lt; T &gt; &amp;field, Struct &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearField&lt; adapted_field_tag&lt; Adapter, UTag, Struct, FieldId &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "std::unique_ptr&lt; T &gt; &amp;",

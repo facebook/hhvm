@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::detail::ListIdenticalTo&lt; VTag, Tag, T &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ListIdenticalTo::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "438",
+        "line": "454",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "438",
-        "bodyend": "443"
+        "bodystart": "454",
+        "bodyend": "459"
       },
       "definition": {
         "simple_html": "bool operator()(const T&amp; lhs, const T&amp; rhs) const",

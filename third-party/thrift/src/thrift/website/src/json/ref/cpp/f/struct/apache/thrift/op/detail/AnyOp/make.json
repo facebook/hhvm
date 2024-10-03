@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyOp::make",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -38,7 +39,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -47,7 +48,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -55,9 +56,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -81,7 +83,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -90,7 +92,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -98,9 +100,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -124,7 +127,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -133,7 +136,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -141,9 +144,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -167,7 +171,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -176,7 +180,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -184,9 +188,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -210,7 +215,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -219,7 +224,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -227,9 +232,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -253,7 +259,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -262,7 +268,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -270,9 +276,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -296,7 +303,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -305,7 +312,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -313,9 +320,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -339,7 +347,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -348,7 +356,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -356,9 +364,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -382,7 +391,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -391,7 +400,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -399,9 +408,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -425,7 +435,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -434,7 +444,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -442,9 +452,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -468,7 +479,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -477,7 +488,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -485,9 +496,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -511,7 +523,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -520,7 +532,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -528,9 +540,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -554,7 +567,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -563,7 +576,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -571,9 +584,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -597,7 +611,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -606,7 +620,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -614,9 +628,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -640,7 +655,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -649,7 +664,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -657,9 +672,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -683,7 +699,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -692,7 +708,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -700,9 +716,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -726,7 +743,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -735,7 +752,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::make"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -743,9 +760,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void *",
-      "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+      "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
       "argsstring_html": "(void *ptr, bool consume)",
       "name_html": "make",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
       "param": [
         {
           "type_html": "void *",
@@ -769,7 +787,7 @@
         "simple_raw": "static void* make(void* ptr, bool consume)",
         "detailed_html": "inline static void* make(void* ptr, bool consume)",
         "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-        "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+        "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
         "original_argsstring_html": "(void *ptr, bool consume)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",

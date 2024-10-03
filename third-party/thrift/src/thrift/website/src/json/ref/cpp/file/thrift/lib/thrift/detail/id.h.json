@@ -57,6 +57,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "PathSegmentId",
+      "qualifiedname_html": "apache::thrift::protocol::PathSegmentId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "24",
@@ -73,6 +74,7 @@
       "strong": "yes",
       "type_html": "std::int16_t",
       "name_html": "FieldId",
+      "qualifiedname_html": "apache::thrift::type::FieldId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "27",
@@ -89,6 +91,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "ValueId",
+      "qualifiedname_html": "apache::thrift::type::ValueId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "28",
@@ -105,6 +108,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "ProtocolId",
+      "qualifiedname_html": "apache::thrift::type::ProtocolId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "29",
@@ -121,6 +125,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "TypeId",
+      "qualifiedname_html": "apache::thrift::type::TypeId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "30",
@@ -137,6 +142,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "DefinitionId",
+      "qualifiedname_html": "apache::thrift::type::DefinitionId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "31",
@@ -153,6 +159,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "PackageId",
+      "qualifiedname_html": "apache::thrift::type::PackageId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "32",
@@ -169,6 +176,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "ProgramId",
+      "qualifiedname_html": "apache::thrift::type::ProgramId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "33",
@@ -185,6 +193,7 @@
       "strong": "yes",
       "type_html": "std::int64_t",
       "name_html": "SourceId",
+      "qualifiedname_html": "apache::thrift::type::SourceId",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "34",

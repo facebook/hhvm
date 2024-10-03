@@ -23,6 +23,7 @@
       "definition_html": "static decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::getEnsure",
       "argsstring_html": "(U &amp;&amp;data)",
       "name_html": "getEnsure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::getEnsure",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -31,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "410",
+        "line": "414",
         "column": "19",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "410",
-        "bodyend": "412"
+        "bodystart": "414",
+        "bodyend": "416"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U&gt;\nstatic decltype(auto) getEnsure(U&amp;&amp; data)",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeTo",
+      "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeTo",
       "param": [
         {
           "type_html": "std::ostream *",

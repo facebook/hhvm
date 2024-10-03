@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::detail::ensure_isset_unsafe_fn::operator()",
       "argsstring_html": "(optional_field_ref&lt; T &gt; ref) const noexcept",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::detail::ensure_isset_unsafe_fn::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &gt;",
@@ -29,11 +30,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1633",
+        "line": "1653",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1633",
-        "bodyend": "1635"
+        "bodystart": "1653",
+        "bodyend": "1655"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid operator()(optional_field_ref&lt;T&gt; ref) const",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicPatchBase::fromObject",
       "argsstring_html": "(detail::Badge, Object obj)",
       "name_html": "fromObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::fromObject",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "88",
+        "line": "109",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "88",
-        "bodyend": "88"
+        "bodystart": "109",
+        "bodyend": "109"
       },
       "definition": {
         "simple_html": "void fromObject(detail::Badge, Object obj)",
@@ -57,6 +58,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::fromObject",
       "argsstring_html": "(detail::Badge badge, Object obj)",
       "name_html": "fromObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicUnknownPatch::fromObject",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -69,11 +71,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "136",
+        "line": "157",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "136",
-        "bodyend": "139"
+        "bodystart": "157",
+        "bodyend": "160"
       },
       "definition": {
         "simple_html": "void fromObject(detail::Badge badge, Object obj)",

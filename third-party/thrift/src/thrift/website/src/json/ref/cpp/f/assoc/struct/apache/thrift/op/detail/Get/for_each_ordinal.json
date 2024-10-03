@@ -20,10 +20,11 @@
           "type_html": "typename F"
         }
       ],
-      "type_html": "constexpr void",
-      "definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::for_each_ordinal",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_ordinal",
+      "qualifiedname_html": "apache::thrift::op::for_each_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -32,18 +33,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "50",
+        "line": "51",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "50",
-        "bodyend": "53"
+        "bodystart": "51",
+        "bodyend": "54"
       },
       "definition": {
-        "simple_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-        "simple_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-        "detailed_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-        "detailed_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-        "original_definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+        "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+        "simple_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+        "detailed_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+        "detailed_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+        "original_definition_html": "void apache::thrift::op::for_each_ordinal",
         "original_argsstring_html": "(F &amp;&amp;f)"
       },
       "description": {

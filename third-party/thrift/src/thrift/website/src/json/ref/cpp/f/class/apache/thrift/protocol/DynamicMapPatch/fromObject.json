@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicMapPatch::fromObject",
       "argsstring_html": "(detail::Badge, Object obj)",
       "name_html": "fromObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::fromObject",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "319",
+        "line": "340",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "249",
-        "bodyend": "282"
+        "bodystart": "250",
+        "bodyend": "283"
       },
       "definition": {
         "simple_html": "void fromObject(detail::Badge, Object obj)",

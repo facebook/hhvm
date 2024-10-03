@@ -20,6 +20,7 @@
       "definition_html": "bool apache::thrift::op::detail::UnionEquality&lt; Equality &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::UnionEquality::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "738",
+        "line": "754",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "738",
-        "bodyend": "753"
+        "bodystart": "754",
+        "bodyend": "769"
       },
       "definition": {
         "simple_html": "template &lt;class T&gt;\nbool operator()(const T&amp; lhs, const T&amp; rhs) const",

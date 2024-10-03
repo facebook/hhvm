@@ -20,6 +20,7 @@
       "definition_html": "static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
       "argsstring_html": "(const T &amp;val, type::structured_c)",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::IsEmpty::empty",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -67,6 +68,7 @@
       "definition_html": "static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
       "argsstring_html": "(const T &amp;val, type::container_c)",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::IsEmpty::empty",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -114,6 +116,7 @@
       "definition_html": "static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
       "argsstring_html": "(const T &amp;val, type::string_c)",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::IsEmpty::empty",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -145,7 +148,7 @@
       "compoundname_html": "apache::thrift::op::detail::IsEmpty&lt; type::field&lt; Tag, Context &gt; &gt;::empty"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_1a8eb30ee4e6df3554aff6eb2cb169fd6c",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1IsEmpty_1a0db8f94adee3af6019b691be053a7344",
       "prot": "private",
       "static": "yes",
       "constexpr": "yes",
@@ -158,10 +161,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr static bool",
-      "definition_html": "constexpr static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
+      "type_html": "bool",
+      "definition_html": "static constexpr bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
       "argsstring_html": "(const T &amp;val, type::all_c)",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::IsEmpty::empty",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -180,11 +184,11 @@
         "bodyend": "123"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nstatic constexpr static bool empty(const T&amp; val, type::all_c)",
-        "simple_raw": "template <typename T>\nstatic constexpr static bool empty(const T& val, type::all_c)",
-        "detailed_html": "template &lt;typename T&gt;\nprivate inline static constexpr static bool empty(const T&amp; val, type::all_c)",
-        "detailed_raw": "template <typename T>\nprivate inline static constexpr static bool empty(const T& val, type::all_c)",
-        "original_definition_html": "constexpr static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
+        "simple_html": "template &lt;typename T&gt;\nstatic bool empty(const T&amp; val, type::all_c)",
+        "simple_raw": "template <typename T>\nstatic bool empty(const T& val, type::all_c)",
+        "detailed_html": "template &lt;typename T&gt;\nprivate inline static bool empty(const T&amp; val, type::all_c)",
+        "detailed_raw": "template <typename T>\nprivate inline static bool empty(const T& val, type::all_c)",
+        "original_definition_html": "static constexpr bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
         "original_argsstring_html": "(const T &amp;val, type::all_c)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/IsEmpty/empty",
@@ -209,6 +213,7 @@
       "definition_html": "static bool apache::thrift::op::detail::IsEmpty&lt; Tag &gt;::empty",
       "argsstring_html": "(const std::unique_ptr&lt; folly::IOBuf &gt; &amp;val, ATag tag)",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::IsEmpty::empty",
       "param": [
         {
           "type_html": "const std::unique_ptr&lt; folly::IOBuf &gt; &amp;",

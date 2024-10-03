@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::optional_boxed_field_ref::release",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1optional__boxed__field__ref_1a399d32256a486778f58d70db8646b3fe",
+      "refid": "classapache_1_1thrift_1_1optional__boxed__field__ref_1acb31f92839733ddf9d22b05122791d96",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -13,23 +13,24 @@
       "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE std::unique_ptr&lt; element_type &gt;",
-      "definition_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::release",
+      "definition_html": "FOLLY_ERASE std::unique_ptr&lt; element_type &gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::release",
       "argsstring_html": "() noexcept",
       "name_html": "release",
+      "qualifiedname_html": "apache::thrift::optional_boxed_field_ref::release",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1019",
+        "line": "1031",
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1019",
-        "bodyend": "1021"
+        "bodystart": "1031",
+        "bodyend": "1033"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; release()",
         "simple_raw": "FOLLY_ERASE std::unique_ptr<element_type> release()",
         "detailed_html": "private inline FOLLY_ERASE std::unique_ptr&lt;element_type&gt; release() noexcept",
         "detailed_raw": "private inline FOLLY_ERASE std::unique_ptr<element_type> release() noexcept",
-        "original_definition_html": "FOLLY_ERASE std::unique_ptr&lt;element_type&gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::release",
+        "original_definition_html": "FOLLY_ERASE std::unique_ptr&lt; element_type &gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::release",
         "original_argsstring_html": "() noexcept"
       },
       "filepath": "fns/class/apache/thrift/optional_boxed_field_ref/release",

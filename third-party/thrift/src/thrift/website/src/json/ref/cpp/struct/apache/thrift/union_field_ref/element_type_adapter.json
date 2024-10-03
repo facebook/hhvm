@@ -12,12 +12,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::element_type_adapter::element_type =  folly::remove_cvref_t&lt;T&gt;",
       "argsstring_html": "",
       "name_html": "element_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::element_type_adapter::element_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1986",
+        "line": "2042",
         "column": "5",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1986",
+        "bodystart": "2042",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1union__field__ref_1_1element__type__adapter"
@@ -25,11 +26,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1985",
+    "line": "2041",
     "column": "3",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1985",
-    "bodyend": "1987"
+    "bodystart": "2041",
+    "bodyend": "2043"
   },
   "namespacednames_html": [
     "apache",

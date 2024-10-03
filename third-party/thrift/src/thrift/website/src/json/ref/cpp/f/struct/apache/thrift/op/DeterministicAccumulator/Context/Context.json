@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
       "argsstring_html": "()=default",
       "name_html": "Context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "132",
@@ -46,6 +47,7 @@
       "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
       "argsstring_html": "(bool has_unordered_ctx)",
       "name_html": "Context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
       "param": [
         {
           "type_html": "bool",

@@ -17,6 +17,7 @@
       "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
       "argsstring_html": "()=default",
       "name_html": "Context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "132",
@@ -45,6 +46,7 @@
       "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
       "argsstring_html": "(bool has_unordered_ctx)",
       "name_html": "Context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
       "param": [
         {
           "type_html": "bool",
@@ -98,6 +100,7 @@
       "definition_html": "std::vector&lt;Hasher&gt; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::hashers",
       "argsstring_html": "",
       "name_html": "hashers",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::hashers",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "136",
@@ -116,6 +119,7 @@
       "definition_html": "size_t apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::ordered_count",
       "argsstring_html": "",
       "name_html": "ordered_count",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::ordered_count",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
@@ -123,7 +127,7 @@
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "142",
-        "bodyend": "-1"
+        "bodyend": "142"
       }
     },
     {
@@ -135,6 +139,7 @@
       "definition_html": "bool apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::has_unordered_context",
       "argsstring_html": "",
       "name_html": "has_unordered_context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::has_unordered_context",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
@@ -142,7 +147,7 @@
         "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "bodystart": "143",
-        "bodyend": "-1"
+        "bodyend": "143"
       }
     }
   ],
@@ -172,6 +177,7 @@
               "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
               "argsstring_html": "()=default",
               "name_html": "Context",
+              "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "line": "132",
@@ -203,6 +209,7 @@
               "definition_html": "apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::Context::Context",
               "argsstring_html": "(bool has_unordered_ctx)",
               "name_html": "Context",
+              "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::Context::Context",
               "param": [
                 {
                   "type_html": "bool",

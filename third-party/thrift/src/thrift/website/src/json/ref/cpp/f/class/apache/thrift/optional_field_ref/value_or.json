@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::optional_field_ref::value_or",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1optional__field__ref_1a0401b64e920fa30f6dd19507acbe059d",
+      "refid": "classapache_1_1thrift_1_1optional__field__ref_1a5c2cbaaf4ce39df179767a35b6927785",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -18,9 +18,10 @@
         }
       ],
       "type_html": "FOLLY_ERASE std::remove_const_t&lt; <code>value_type</code> &gt;",
-      "definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::optional_field_ref&lt; T &gt;::value_or",
+      "definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::optional_field_ref&lt; T &gt;::value_or",
       "argsstring_html": "(U &amp;&amp;default_value) const",
       "name_html": "value_or",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::value_or",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -29,18 +30,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "634",
+        "line": "646",
         "column": "35",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "634",
-        "bodyend": "639"
+        "bodystart": "646",
+        "bodyend": "651"
       },
       "definition": {
         "simple_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\nFOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(U&amp;&amp; default_value) const",
         "simple_raw": "template <typename U = std::remove_const_t<value_type>>\nFOLLY_ERASE std::remove_const_t<value_type> value_or(U&& default_value) const",
         "detailed_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\ninline FOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(\n    U&amp;&amp; default_value) const",
         "detailed_raw": "template <typename U = std::remove_const_t<value_type>>\ninline FOLLY_ERASE std::remove_const_t<value_type> value_or(\n    U&& default_value) const",
-        "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::optional_field_ref&lt; T &gt;::value_or",
+        "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::optional_field_ref&lt; T &gt;::value_or",
         "original_argsstring_html": "(U &amp;&amp;default_value) const"
       },
       "filepath": "fns/class/apache/thrift/optional_field_ref/value_or",

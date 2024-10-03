@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(field_ref&lt; Src &gt; src_ref, field_ref&lt; Dst &amp; &gt; dst_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; Src &gt;",
@@ -74,6 +75,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(required_field_ref&lt; Src &gt; src_ref, required_field_ref&lt; Dst &amp; &gt; dst_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; Src &gt;",
@@ -125,6 +127,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(optional_field_ref&lt; Src &gt; src_ref, optional_field_ref&lt; Dst &amp; &gt; dst_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; Src &gt;",
@@ -176,6 +179,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(optional_boxed_field_ref&lt; Src &gt; src_ref, optional_boxed_field_ref&lt; Dst &amp; &gt; dst_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; Src &gt;",
@@ -227,6 +231,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(terse_field_ref&lt; Src &gt; src_ref, terse_field_ref&lt; Dst &amp; &gt; dst_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; Src &gt;",
@@ -275,6 +280,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(const std::optional&lt; T &gt; &amp;src_opt, std::optional&lt; T &gt; &amp;dst_opt) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "const std::optional&lt; T &gt; &amp;",
@@ -323,6 +329,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(const std::unique_ptr&lt; T &gt; &amp;src_ptr, std::unique_ptr&lt; T &gt; &amp;dst_ptr) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "const std::unique_ptr&lt; T &gt; &amp;",
@@ -371,6 +378,7 @@
       "definition_html": "void apache::thrift::op::detail::Copy::operator()",
       "argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;src_ptr, std::shared_ptr&lt; T &gt; &amp;dst_ptr) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Copy::operator()",
       "param": [
         {
           "type_html": "const std::shared_ptr&lt; T &gt; &amp;",

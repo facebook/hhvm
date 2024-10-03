@@ -23,6 +23,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
       "argsstring_html": "(T &amp;&amp;val)",
       "name_html": "ret",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
       "param": [
         {
           "type_html": "<code>T</code> &amp;&amp;",
@@ -70,6 +71,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
       "argsstring_html": "(RTag, T &amp;&amp;val)",
       "name_html": "ret",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
       "param": [
         {
           "type_html": "RTag"
@@ -120,6 +122,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
       "argsstring_html": "(T &amp;&amp;val)",
       "name_html": "ret",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ret",
       "param": [
         {
           "type_html": "<code>T</code> &amp;&amp;",
@@ -167,6 +170,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
       "argsstring_html": "(RTag, T &amp;&amp;val)",
       "name_html": "ret",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ret",
       "param": [
         {
           "type_html": "RTag"

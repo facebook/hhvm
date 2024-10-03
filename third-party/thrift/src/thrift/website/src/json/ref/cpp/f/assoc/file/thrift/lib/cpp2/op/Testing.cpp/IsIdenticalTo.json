@@ -24,6 +24,7 @@
       "definition_html": "auto apache::thrift::test::IsIdenticalTo",
       "argsstring_html": "(T expected)",
       "name_html": "IsIdenticalTo",
+      "qualifiedname_html": "apache::thrift::test::IsIdenticalTo",
       "param": [
         {
           "type_html": "T",

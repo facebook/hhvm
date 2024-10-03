@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeListBegin",
       "argsstring_html": "(const TType elemType, const uint32_t size)",
       "name_html": "writeListBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeListBegin",
       "param": [
         {
           "type_html": "const TType",

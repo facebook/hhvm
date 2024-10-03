@@ -45,10 +45,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Create\">detail::Create</a>&lt; Tag &gt;",
-      "definition_html": "constexpr detail::Create&lt;Tag&gt; apache::thrift::op::create",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Create\">detail::Create</a>&lt; Tag &gt;",
+      "definition_html": "detail::Create&lt;Tag&gt; apache::thrift::op::create",
       "argsstring_html": "",
       "name_html": "create",
+      "qualifiedname_html": "apache::thrift::op::create",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Create.h",
@@ -56,10 +57,10 @@
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Create.h",
         "bodystart": "38",
-        "bodyend": "-1"
+        "bodyend": "38"
       },
       "description": {
-        "detailed_html": "<p>Returns the default for the given type.</p>\n<p>Some adapted types might not have default constructor. This allows default constructing those adapted types.</p>\n<p>For example:<ul>\n<li><p><code>create&lt;type::i32_t&gt;()</code> -&gt; 0</p>\n</li><li><p>create&lt;adapted&lt;Adapter, type::i32_t&gt;&gt;() -&gt; Adapted&lt;int32_t&gt;{}</p>\n</li><li><p>create&lt;field_t&lt;FieldId, adapted&lt;FieldAdapter, type::i32_t&gt;&gt;&gt;(Struct) -&gt; AdaptedWithContext&lt;int32_t&gt;{}; </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Returns the default for the given type.</p>\n<p>Some adapted types might not have default constructor. This allows default constructing those adapted types.</p>\n<p>For example:<ul>\n<li><p><code>create&lt;type::i32_t&gt;()</code> -&gt; 0</p>\n</li><li><p><code>create&lt;adapted&lt;Adapter, type::i32_t&gt;&gt;()</code> -&gt; Adapted&lt;int32_t&gt;{}</p>\n</li><li><p><code>create&lt;field_t&lt;FieldId, adapted&lt;FieldAdapter, type::i32_t&gt;&gt;&gt;(Struct)</code> -&gt; AdaptedWithContext&lt;int32_t&gt;{}; </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -78,10 +79,11 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Ensure\">detail::Ensure</a>&lt; Id, Tag &gt;",
-      "definition_html": "constexpr detail::Ensure&lt;Id, Tag&gt; apache::thrift::op::ensure",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Ensure\">detail::Ensure</a>&lt; Id, Tag &gt;",
+      "definition_html": "detail::Ensure&lt;Id, Tag&gt; apache::thrift::op::ensure",
       "argsstring_html": "",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::ensure",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Create.h",
@@ -89,10 +91,10 @@
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Create.h",
         "bodystart": "45",
-        "bodyend": "-1"
+        "bodyend": "45"
       },
       "description": {
-        "detailed_html": "<p>Ensures the given field. If the field doesn't exist, emplaces the field. For example:<ul>\n<li><p>ensure&lt;field_tag&gt;(foo) // calls foo.field_ref().<code>ensure()</code> </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Ensures the given field. If the field doesn't exist, emplaces the field. For example:<ul>\n<li><p><code>ensure&lt;field_tag&gt;(foo)</code> // calls foo.field_ref().<code>ensure()</code> </p>\n</li></ul>\n</p>"
       }
     }
   ],

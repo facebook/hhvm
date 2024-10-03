@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AssignPatch::empty",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a35505ce0b57d5fd6dd506eaa7112498c",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1a2180b728fc10dffd1c75feeb331ee5d4",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -12,23 +12,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+      "definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; class &gt;::empty",
       "argsstring_html": "() const",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::AssignPatch::empty",
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "136",
+        "file": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "line": "135",
         "column": "8",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "136",
-        "bodyend": "136"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "bodystart": "135",
+        "bodyend": "135"
       },
       "definition": {
         "simple_html": "bool empty() const",
         "simple_raw": "bool empty() const",
         "detailed_html": "inline bool empty() const",
         "detailed_raw": "inline bool empty() const",
-        "original_definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::empty",
+        "original_definition_html": "bool apache::thrift::op::detail::AssignPatch&lt; class &gt;::empty",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/empty",

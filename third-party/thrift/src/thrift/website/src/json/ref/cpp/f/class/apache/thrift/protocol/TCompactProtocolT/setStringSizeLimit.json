@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setStringSizeLimit",
       "argsstring_html": "(int32_t string_limit)",
       "name_html": "setStringSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setStringSizeLimit",
       "param": [
         {
           "type_html": "int32_t",

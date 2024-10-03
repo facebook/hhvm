@@ -20,13 +20,14 @@
       "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
       "argsstring_html": "()",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchIfSet",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "262",
+        "line": "266",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "262",
-        "bodyend": "276"
+        "bodystart": "266",
+        "bodyend": "280"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchIfSet()",
@@ -64,6 +65,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchIfSet",
       "argsstring_html": "(const FieldPatch &amp;p)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchIfSet",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
@@ -72,11 +74,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "515",
+        "line": "537",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "515",
-        "bodyend": "517"
+        "bodystart": "537",
+        "bodyend": "539"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; p)",

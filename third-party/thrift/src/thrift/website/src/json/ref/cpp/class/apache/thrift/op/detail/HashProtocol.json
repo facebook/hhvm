@@ -27,6 +27,7 @@
       "definition_html": "apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::HashProtocol",
       "argsstring_html": "(Accumulator &amp;accumulator)",
       "name_html": "HashProtocol",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::HashProtocol",
       "param": [
         {
           "type_html": "Accumulator &amp;",
@@ -64,6 +65,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeStructBegin",
       "argsstring_html": "(const char *)",
       "name_html": "writeStructBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeStructBegin",
       "param": [
         {
           "type_html": "const char *"
@@ -100,6 +102,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeStructEnd",
       "argsstring_html": "()",
       "name_html": "writeStructEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeStructEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "123",
@@ -131,6 +134,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldBegin",
       "argsstring_html": "(const char *, protocol::TType, int16_t id)",
       "name_html": "writeFieldBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldBegin",
       "param": [
         {
           "type_html": "const char *"
@@ -174,6 +178,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldEnd",
       "argsstring_html": "()",
       "name_html": "writeFieldEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "127",
@@ -205,6 +210,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldStop",
       "argsstring_html": "()",
       "name_html": "writeFieldStop",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldStop",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "128",
@@ -236,6 +242,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapBegin",
       "argsstring_html": "(protocol::TType, protocol::TType, uint32_t size)",
       "name_html": "writeMapBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapBegin",
       "param": [
         {
           "type_html": "protocol::TType"
@@ -279,6 +286,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapValueBegin",
       "argsstring_html": "(bool)",
       "name_html": "writeMapValueBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapValueBegin",
       "param": [
         {
           "type_html": "bool"
@@ -315,6 +323,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapValueEnd",
       "argsstring_html": "(bool)",
       "name_html": "writeMapValueEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapValueEnd",
       "param": [
         {
           "type_html": "bool"
@@ -351,6 +360,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapEnd",
       "argsstring_html": "()",
       "name_html": "writeMapEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "134",
@@ -382,6 +392,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeListBegin",
       "argsstring_html": "(protocol::TType, uint32_t size)",
       "name_html": "writeListBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeListBegin",
       "param": [
         {
           "type_html": "protocol::TType"
@@ -422,6 +433,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeListEnd",
       "argsstring_html": "()",
       "name_html": "writeListEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeListEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "138",
@@ -453,6 +465,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeSetBegin",
       "argsstring_html": "(protocol::TType, uint32_t size)",
       "name_html": "writeSetBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeSetBegin",
       "param": [
         {
           "type_html": "protocol::TType"
@@ -493,6 +506,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeSetEnd",
       "argsstring_html": "()",
       "name_html": "writeSetEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeSetEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "142",
@@ -524,6 +538,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBool",
       "argsstring_html": "(bool val)",
       "name_html": "writeBool",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBool",
       "param": [
         {
           "type_html": "bool",
@@ -561,6 +576,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeByte",
       "argsstring_html": "(int8_t val)",
       "name_html": "writeByte",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeByte",
       "param": [
         {
           "type_html": "int8_t",
@@ -598,6 +614,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI16",
       "argsstring_html": "(int16_t val)",
       "name_html": "writeI16",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI16",
       "param": [
         {
           "type_html": "int16_t",
@@ -635,6 +652,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI32",
       "argsstring_html": "(int32_t val)",
       "name_html": "writeI32",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI32",
       "param": [
         {
           "type_html": "int32_t",
@@ -672,6 +690,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI64",
       "argsstring_html": "(int64_t val)",
       "name_html": "writeI64",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI64",
       "param": [
         {
           "type_html": "int64_t",
@@ -709,6 +728,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeDouble",
       "argsstring_html": "(double val)",
       "name_html": "writeDouble",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeDouble",
       "param": [
         {
           "type_html": "double",
@@ -746,6 +766,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFloat",
       "argsstring_html": "(float val)",
       "name_html": "writeFloat",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFloat",
       "param": [
         {
           "type_html": "float",
@@ -783,6 +804,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeString",
       "argsstring_html": "(folly::StringPiece val)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeString",
       "param": [
         {
           "type_html": "folly::StringPiece",
@@ -820,6 +842,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
       "argsstring_html": "(folly::StringPiece val)",
       "name_html": "writeBinary",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
       "param": [
         {
           "type_html": "folly::StringPiece",
@@ -857,6 +880,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
       "argsstring_html": "(folly::ByteRange val)",
       "name_html": "writeBinary",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
       "param": [
         {
           "type_html": "folly::ByteRange",
@@ -894,6 +918,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
       "argsstring_html": "(const std::unique_ptr&lt; folly::IOBuf &gt; &amp;val)",
       "name_html": "writeBinary",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
       "param": [
         {
           "type_html": "const std::unique_ptr&lt; folly::IOBuf &gt; &amp;",
@@ -931,6 +956,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
       "argsstring_html": "(const folly::IOBuf &amp;val)",
       "name_html": "writeBinary",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -965,10 +991,11 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr bool",
+      "type_html": "bool",
       "definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
       "argsstring_html": "()",
       "name_html": "kSortKeys",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::kSortKeys",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "120",
@@ -978,10 +1005,10 @@
         "bodyend": "120"
       },
       "definition": {
-        "simple_html": "static constexpr bool kSortKeys()",
-        "simple_raw": "static constexpr bool kSortKeys()",
-        "detailed_html": "inline static constexpr bool kSortKeys()",
-        "detailed_raw": "inline static constexpr bool kSortKeys()",
+        "simple_html": "static bool kSortKeys()",
+        "simple_raw": "static bool kSortKeys()",
+        "detailed_html": "inline static bool kSortKeys()",
+        "detailed_raw": "inline static bool kSortKeys()",
         "original_definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
         "original_argsstring_html": "()"
       },
@@ -1016,6 +1043,7 @@
       "definition_html": "Accumulator&amp; apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::acc_",
       "argsstring_html": "",
       "name_html": "acc_",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::acc_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "161",
@@ -1055,6 +1083,7 @@
               "definition_html": "apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::HashProtocol",
               "argsstring_html": "(Accumulator &amp;accumulator)",
               "name_html": "HashProtocol",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::HashProtocol",
               "param": [
                 {
                   "type_html": "Accumulator &amp;",
@@ -1115,6 +1144,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeStructBegin",
               "argsstring_html": "(const char *)",
               "name_html": "writeStructBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeStructBegin",
               "param": [
                 {
                   "type_html": "const char *"
@@ -1173,6 +1203,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeStructEnd",
               "argsstring_html": "()",
               "name_html": "writeStructEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeStructEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "123",
@@ -1226,6 +1257,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldBegin",
               "argsstring_html": "(const char *, protocol::TType, int16_t id)",
               "name_html": "writeFieldBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldBegin",
               "param": [
                 {
                   "type_html": "const char *"
@@ -1291,6 +1323,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldEnd",
               "argsstring_html": "()",
               "name_html": "writeFieldEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "127",
@@ -1344,6 +1377,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldStop",
               "argsstring_html": "()",
               "name_html": "writeFieldStop",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldStop",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "128",
@@ -1397,6 +1431,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapBegin",
               "argsstring_html": "(protocol::TType, protocol::TType, uint32_t size)",
               "name_html": "writeMapBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapBegin",
               "param": [
                 {
                   "type_html": "protocol::TType"
@@ -1462,6 +1497,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapValueBegin",
               "argsstring_html": "(bool)",
               "name_html": "writeMapValueBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapValueBegin",
               "param": [
                 {
                   "type_html": "bool"
@@ -1520,6 +1556,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapValueEnd",
               "argsstring_html": "(bool)",
               "name_html": "writeMapValueEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapValueEnd",
               "param": [
                 {
                   "type_html": "bool"
@@ -1578,6 +1615,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapEnd",
               "argsstring_html": "()",
               "name_html": "writeMapEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "134",
@@ -1631,6 +1669,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeListBegin",
               "argsstring_html": "(protocol::TType, uint32_t size)",
               "name_html": "writeListBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeListBegin",
               "param": [
                 {
                   "type_html": "protocol::TType"
@@ -1693,6 +1732,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeListEnd",
               "argsstring_html": "()",
               "name_html": "writeListEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeListEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "138",
@@ -1746,6 +1786,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeSetBegin",
               "argsstring_html": "(protocol::TType, uint32_t size)",
               "name_html": "writeSetBegin",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeSetBegin",
               "param": [
                 {
                   "type_html": "protocol::TType"
@@ -1808,6 +1849,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeSetEnd",
               "argsstring_html": "()",
               "name_html": "writeSetEnd",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeSetEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "142",
@@ -1861,6 +1903,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBool",
               "argsstring_html": "(bool val)",
               "name_html": "writeBool",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBool",
               "param": [
                 {
                   "type_html": "bool",
@@ -1920,6 +1963,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeByte",
               "argsstring_html": "(int8_t val)",
               "name_html": "writeByte",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeByte",
               "param": [
                 {
                   "type_html": "int8_t",
@@ -1979,6 +2023,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI16",
               "argsstring_html": "(int16_t val)",
               "name_html": "writeI16",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI16",
               "param": [
                 {
                   "type_html": "int16_t",
@@ -2038,6 +2083,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI32",
               "argsstring_html": "(int32_t val)",
               "name_html": "writeI32",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI32",
               "param": [
                 {
                   "type_html": "int32_t",
@@ -2097,6 +2143,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI64",
               "argsstring_html": "(int64_t val)",
               "name_html": "writeI64",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI64",
               "param": [
                 {
                   "type_html": "int64_t",
@@ -2156,6 +2203,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeDouble",
               "argsstring_html": "(double val)",
               "name_html": "writeDouble",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeDouble",
               "param": [
                 {
                   "type_html": "double",
@@ -2215,6 +2263,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFloat",
               "argsstring_html": "(float val)",
               "name_html": "writeFloat",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFloat",
               "param": [
                 {
                   "type_html": "float",
@@ -2274,6 +2323,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeString",
               "argsstring_html": "(folly::StringPiece val)",
               "name_html": "writeString",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeString",
               "param": [
                 {
                   "type_html": "folly::StringPiece",
@@ -2333,6 +2383,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
               "argsstring_html": "(folly::StringPiece val)",
               "name_html": "writeBinary",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
               "param": [
                 {
                   "type_html": "folly::StringPiece",
@@ -2372,6 +2423,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
               "argsstring_html": "(folly::ByteRange val)",
               "name_html": "writeBinary",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
               "param": [
                 {
                   "type_html": "folly::ByteRange",
@@ -2411,6 +2463,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
               "argsstring_html": "(const std::unique_ptr&lt; folly::IOBuf &gt; &amp;val)",
               "name_html": "writeBinary",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
               "param": [
                 {
                   "type_html": "const std::unique_ptr&lt; folly::IOBuf &gt; &amp;",
@@ -2450,6 +2503,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeBinary",
               "argsstring_html": "(const folly::IOBuf &amp;val)",
               "name_html": "writeBinary",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeBinary",
               "param": [
                 {
                   "type_html": "const folly::IOBuf &amp;",
@@ -2506,10 +2560,11 @@
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
-              "type_html": "constexpr bool",
+              "type_html": "bool",
               "definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
               "argsstring_html": "()",
               "name_html": "kSortKeys",
+              "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::kSortKeys",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
                 "line": "120",
@@ -2519,10 +2574,10 @@
                 "bodyend": "120"
               },
               "definition": {
-                "simple_html": "static constexpr bool kSortKeys()",
-                "simple_raw": "static constexpr bool kSortKeys()",
-                "detailed_html": "inline static constexpr bool kSortKeys()",
-                "detailed_raw": "inline static constexpr bool kSortKeys()",
+                "simple_html": "static bool kSortKeys()",
+                "simple_raw": "static bool kSortKeys()",
+                "detailed_html": "inline static bool kSortKeys()",
+                "detailed_raw": "inline static bool kSortKeys()",
                 "original_definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
                 "original_argsstring_html": "()"
               },

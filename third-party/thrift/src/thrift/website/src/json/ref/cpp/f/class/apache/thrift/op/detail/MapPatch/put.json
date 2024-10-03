@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::put",
       "argsstring_html": "(C &amp;&amp;entries)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::put",
       "param": [
         {
           "type_html": "C &amp;&amp;",

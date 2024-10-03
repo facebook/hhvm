@@ -44,6 +44,7 @@
       "definition_html": "using apache::thrift::op::detail::StringOp&lt; Tag &gt;::T =  type::native_type&lt;Tag&gt;",
       "argsstring_html": "",
       "name_html": "T",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "159",
@@ -61,6 +62,7 @@
       "definition_html": "using apache::thrift::op::detail::StringOp&lt; Tag &gt;::Base =  BaseOp&lt;Tag&gt;",
       "argsstring_html": "",
       "name_html": "Base",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValueOp.h",
         "line": "160",
@@ -101,6 +103,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
               "argsstring_html": "(void *ptr, const Dyn &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
               "param": [
                 {
                   "type_html": "void *",
@@ -144,6 +147,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(std::string &amp;self, std::string val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -187,6 +191,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(folly::IOBuf &amp;self, const folly::IOBuf &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -230,6 +235,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(folly::IOBuf &amp;self, const std::string &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -273,6 +279,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -316,6 +323,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -359,6 +367,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -407,6 +416,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(const IOBufPtr &amp;self, T &amp;&amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -450,6 +460,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
               "argsstring_html": "(void *s, const Dyn &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
               "param": [
                 {
                   "type_html": "void *",
@@ -502,7 +513,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::concat",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1ace24bfea7aac956b752762f2b04431da",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1af69bac7f9a4e0ec0f473f8974cddc0a3",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -518,9 +529,10 @@
                 }
               ],
               "type_html": "std::unique_ptr&lt; folly::IOBuf &gt;",
-              "definition_html": "static std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
+              "definition_html": "static std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
               "argsstring_html": "(T1 &amp;&amp;first, T2 &amp;&amp;second)",
               "name_html": "concat",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::concat",
               "param": [
                 {
                   "type_html": "T1 &amp;&amp;",
@@ -544,7 +556,7 @@
                 "simple_raw": "template <typename T1, typename T2>\nstatic std::unique_ptr<folly::IOBuf> concat(T1&& first, T2&& second)",
                 "detailed_html": "template &lt;typename T1, typename T2&gt;\ninline static std::unique_ptr&lt;folly::IOBuf&gt; concat(T1&amp;&amp; first, T2&amp;&amp; second)",
                 "detailed_raw": "template <typename T1, typename T2>\ninline static std::unique_ptr<folly::IOBuf> concat(T1&& first, T2&& second)",
-                "original_definition_html": "static std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
+                "original_definition_html": "static std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
                 "original_argsstring_html": "(T1 &amp;&amp;first, T2 &amp;&amp;second)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/StringOp/concat",
@@ -584,6 +596,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(std::string &amp;self, const std::string &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -627,6 +640,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -670,6 +684,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -718,6 +733,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -761,6 +777,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -809,6 +826,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "<code>IOBufPtr</code> &amp;",
@@ -852,6 +870,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "<code>IOBufPtr</code> &amp;",
@@ -895,6 +914,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
               "argsstring_html": "(void *s, const Dyn &amp;val)",
               "name_html": "append",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
               "param": [
                 {
                   "type_html": "void *",
@@ -958,6 +978,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(std::string &amp;self, std::string val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -1001,6 +1022,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -1044,6 +1066,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -1092,6 +1115,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -1135,6 +1159,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "folly::IOBuf &amp;",
@@ -1183,6 +1208,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1226,6 +1252,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1269,6 +1296,7 @@
               "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
               "argsstring_html": "(void *s, const Dyn &amp;val)",
               "name_html": "prepend",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
               "param": [
                 {
                   "type_html": "void *",
@@ -1332,6 +1360,7 @@
               "definition_html": "static folly::partial_ordering apache::thrift::op::detail::BaseOp&lt; Tag &gt;::compare",
               "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
               "name_html": "compare",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::compare",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1375,6 +1404,7 @@
               "definition_html": "static folly::partial_ordering apache::thrift::op::detail::StringOp&lt; Tag &gt;::compare",
               "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
               "name_html": "compare",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::compare",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1438,6 +1468,7 @@
               "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
               "argsstring_html": "(void *s, const Dyn &amp;val)",
               "name_html": "add",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
               "param": [
                 {
                   "type_html": "void *",
@@ -1490,7 +1521,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::ref",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a51f90237dfd720c01f1c875b612a1575",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1498,9 +1529,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
               "param": [
                 {
                   "type_html": "void *",
@@ -1520,7 +1552,7 @@
                 "simple_raw": "static T& ref(void* ptr)",
                 "detailed_html": "inline static T&amp; ref(void* ptr)",
                 "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -1529,7 +1561,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a824275fe00ce416814fcb4aabc68b264",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1537,9 +1569,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1559,7 +1592,7 @@
                 "simple_raw": "static const T& ref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; ref(const void* ptr)",
                 "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -1568,7 +1601,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a51f90237dfd720c01f1c875b612a1575",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1576,9 +1609,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::ref",
               "param": [
                 {
                   "type_html": "void *",
@@ -1598,7 +1632,7 @@
                 "simple_raw": "static T& ref(void* ptr)",
                 "detailed_html": "inline static T&amp; ref(void* ptr)",
                 "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/StringOp/ref",
@@ -1607,7 +1641,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1a824275fe00ce416814fcb4aabc68b264",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1615,9 +1649,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::StringOp::ref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1637,7 +1672,7 @@
                 "simple_raw": "static const T& ref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; ref(const void* ptr)",
                 "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/StringOp/ref",
@@ -1666,7 +1701,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::cref",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1674,9 +1709,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "cref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1696,7 +1732,7 @@
                 "simple_raw": "static const T& cref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; cref(const void* ptr)",
                 "detailed_raw": "inline static const T& cref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -1744,6 +1780,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;&amp;",
@@ -1791,6 +1828,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(RTag, T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
               "param": [
                 {
                   "type_html": "RTag"
@@ -1853,6 +1891,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::delete_",
               "argsstring_html": "(void *ptr)",
               "name_html": "delete_",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::delete_",
               "param": [
                 {
                   "type_html": "void *",
@@ -1901,7 +1940,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::make",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1909,9 +1948,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "void *",
-              "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+              "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
               "argsstring_html": "(void *ptr, bool consume)",
               "name_html": "make",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
               "param": [
                 {
                   "type_html": "void *",
@@ -1935,7 +1975,7 @@
                 "simple_raw": "static void* make(void* ptr, bool consume)",
                 "detailed_html": "inline static void* make(void* ptr, bool consume)",
                 "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-                "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+                "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
                 "original_argsstring_html": "(void *ptr, bool consume)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -1975,6 +2015,7 @@
               "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::empty",
               "argsstring_html": "(const void *ptr)",
               "name_html": "empty",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::empty",
               "param": [
                 {
                   "type_html": "const void *",
@@ -2034,6 +2075,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::clear",
               "argsstring_html": "(void *ptr)",
               "name_html": "clear",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::clear",
               "param": [
                 {
                   "type_html": "void *",
@@ -2093,6 +2135,7 @@
               "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
               "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
               "name_html": "identical",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
               "param": [
                 {
                   "type_html": "const void *",
@@ -2145,7 +2188,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::partialCmp",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a003e01decf8f373784ebf4694238816b",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a819462f6ca807354a220bd8ebf42922a",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -2158,9 +2201,10 @@
                 }
               ],
               "type_html": "<code>if_comparable</code>&lt; UTag &gt;",
-              "definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+              "definition_html": "static if_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
               "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
               "name_html": "partialCmp",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::partialCmp",
               "param": [
                 {
                   "type_html": "const <code>T</code> &amp;",
@@ -2184,7 +2228,7 @@
                 "simple_raw": "template <typename UTag>\nstatic if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
                 "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
                 "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-                "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+                "original_definition_html": "static if_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
                 "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -2193,7 +2237,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::binary_t &gt;::partialCmp"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ada8a74dab2d536f4749df3b65509d4a9",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -2206,9 +2250,10 @@
                 }
               ],
               "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-              "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+              "definition_html": "static if_not_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
               "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
               "name_html": "partialCmp",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::partialCmp",
               "param": [
                 {
                   "type_html": "const <code>T</code> &amp;",
@@ -2232,7 +2277,7 @@
                 "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
                 "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
                 "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-                "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+                "original_definition_html": "static if_not_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
                 "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",

@@ -12,25 +12,27 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_move_assignable< value_type >::value",
       "type_html": "FOLLY_ERASE void",
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::reset",
-      "argsstring_html": "() noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)",
+      "argsstring_html": "()",
       "name_html": "reset",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "620",
+        "line": "632",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "620",
-        "bodyend": "624"
+        "bodystart": "632",
+        "bodyend": "636"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void reset()",
         "simple_raw": "FOLLY_ERASE void reset()",
-        "detailed_html": "inline FOLLY_ERASE void reset() noexcept(\n    (std::is_nothrow_move_assignable&lt;value_type&gt;::value))",
-        "detailed_raw": "inline FOLLY_ERASE void reset() noexcept(\n    (std::is_nothrow_move_assignable<value_type>::value))",
+        "detailed_html": "inline FOLLY_ERASE void reset()",
+        "detailed_raw": "inline FOLLY_ERASE void reset()",
         "original_definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::reset",
-        "original_argsstring_html": "() noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)"
+        "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/optional_field_ref/reset",
       "href": "/ref/cpp/fns/class/apache/thrift/optional_field_ref/reset",

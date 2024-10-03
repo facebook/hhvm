@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::handlerErrorWrapped",
       "argsstring_html": "(void *ctx, const char *fn_name, const folly::exception_wrapper &amp;)",
       "name_html": "handlerErrorWrapped",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::handlerErrorWrapped",
       "param": [
         {
           "type_html": "void *",

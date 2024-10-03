@@ -46,10 +46,11 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/IsEmpty\">detail::IsEmpty</a>&lt; Tag &gt;",
-      "definition_html": "constexpr detail::IsEmpty&lt;Tag&gt; apache::thrift::op::isEmpty",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/IsEmpty\">detail::IsEmpty</a>&lt; Tag &gt;",
+      "definition_html": "detail::IsEmpty&lt;Tag&gt; apache::thrift::op::isEmpty",
       "argsstring_html": "",
       "name_html": "isEmpty",
+      "qualifiedname_html": "apache::thrift::op::isEmpty",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Clear.h",
@@ -57,10 +58,10 @@
         "column": "34",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Clear.h",
         "bodystart": "42",
-        "bodyend": "-1"
+        "bodyend": "42"
       },
       "description": {
-        "detailed_html": "<p>Returns true iff the given value is 'empty', and not serialized in a 'terse' context.</p>\n<p>Some types cannot represent an 'empty' value. For example, a non-terse, non-optional field always serializes to a non-empty buffer, thus any struct with such a field, can never be 'empty'. In such cases, it is possible to deserialize from an empty buffer, but it is impossible to serialize to an empty buffer.</p>\n<p>For example:<ul>\n<li><p>isEmpty&lt;i32_t&gt;(0) -&gt; true</p>\n</li><li><p>isEmpty&lt;i64_t&gt;(1) -&gt; false</p>\n</li><li><p>isEmpty&lt;set&lt;i32_t&gt;&gt;({}) -&gt; true</p>\n</li><li><p>isEmpty&lt;set&lt;i32_t&gt;&gt;({0}) -&gt; false </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Returns true iff the given value is 'empty', and not serialized in a 'terse' context.</p>\n<p>Some types cannot represent an 'empty' value. For example, a non-terse, non-optional field always serializes to a non-empty buffer, thus any struct with such a field, can never be 'empty'. In such cases, it is possible to deserialize from an empty buffer, but it is impossible to serialize to an empty buffer.</p>\n<p>For example:<ul>\n<li><p><code>isEmpty&lt;i32_t&gt;(0)</code> -&gt; true</p>\n</li><li><p><code>isEmpty&lt;i64_t&gt;(1)</code> -&gt; false</p>\n</li><li><p>isEmpty&lt;set&lt;i32_t&gt;&gt;({}) -&gt; true</p>\n</li><li><p>isEmpty&lt;set&lt;i32_t&gt;&gt;({0}) -&gt; false </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -74,10 +75,11 @@
           "type_html": "typename TagOrT"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetDefault\">detail::GetDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
-      "definition_html": "constexpr detail::GetDefault&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getDefault",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetDefault\">detail::GetDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
+      "definition_html": "detail::GetDefault&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getDefault",
       "argsstring_html": "",
       "name_html": "getDefault",
+      "qualifiedname_html": "apache::thrift::op::getDefault",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Clear.h",
@@ -85,10 +87,10 @@
         "column": "37",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Clear.h",
         "bodystart": "53",
-        "bodyend": "-1"
+        "bodyend": "53"
       },
       "description": {
-        "detailed_html": "<p>Returns the default for the given type.</p>\n<p>Includes all 'custom' defaults set on fields within structured types.</p>\n<p>For example:<ul>\n<li><p>getDefault&lt;type::set&lt;type::i32_t&gt;&gt;() -&gt; {}</p>\n</li><li><p><code>getDefault&lt;type::string_t&gt;()</code> -&gt; \"\"</p>\n</li><li><p><code>getDefault&lt;int32_t&gt;()</code> -&gt; 0 </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Returns the default for the given type.</p>\n<p>Includes all 'custom' defaults set on fields within structured types.</p>\n<p>For example:<ul>\n<li><p><code>getDefault&lt;type::set&lt;type::i32_t&gt;&gt;()</code> -&gt; {}</p>\n</li><li><p><code>getDefault&lt;type::string_t&gt;()</code> -&gt; \"\"</p>\n</li><li><p><code>getDefault&lt;int32_t&gt;()</code> -&gt; 0 </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -102,10 +104,11 @@
           "type_html": "typename TagOrT"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetIntrinsicDefault\">detail::GetIntrinsicDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
-      "definition_html": "constexpr detail::GetIntrinsicDefault&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getIntrinsicDefault",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetIntrinsicDefault\">detail::GetIntrinsicDefault</a>&lt; type::infer_tag&lt; TagOrT &gt; &gt;",
+      "definition_html": "detail::GetIntrinsicDefault&lt;type::infer_tag&lt;TagOrT&gt; &gt; apache::thrift::op::getIntrinsicDefault",
       "argsstring_html": "",
       "name_html": "getIntrinsicDefault",
+      "qualifiedname_html": "apache::thrift::op::getIntrinsicDefault",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Clear.h",
@@ -113,10 +116,10 @@
         "column": "5",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Clear.h",
         "bodystart": "65",
-        "bodyend": "-1"
+        "bodyend": "65"
       },
       "description": {
-        "detailed_html": "<p>Returns the 'intrinsic' default for the given type.</p>\n<p>Ignores all 'custom' defaults set on fields within structured types.</p>\n<p>For example:<ul>\n<li><p>getIntrinsicDefault&lt;type::set&lt;type::i32_t&gt;&gt;() -&gt; {}</p>\n</li><li><p><code>getIntrinsicDefault&lt;type::string_t&gt;()</code> -&gt; \"\"</p>\n</li><li><p><code>getIntrinsicDefault&lt;int32_t&gt;()</code> -&gt; 0 </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Returns the 'intrinsic' default for the given type.</p>\n<p>Ignores all 'custom' defaults set on fields within structured types.</p>\n<p>For example:<ul>\n<li><p><code>getIntrinsicDefault&lt;type::set&lt;type::i32_t&gt;&gt;()</code> -&gt; {}</p>\n</li><li><p><code>getIntrinsicDefault&lt;type::string_t&gt;()</code> -&gt; \"\"</p>\n</li><li><p><code>getIntrinsicDefault&lt;int32_t&gt;()</code> -&gt; 0 </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -135,10 +138,11 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Clear\">detail::Clear</a>&lt; TagOrId, PTag &gt;",
-      "definition_html": "constexpr detail::Clear&lt;TagOrId, PTag&gt; apache::thrift::op::clear",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Clear\">detail::Clear</a>&lt; TagOrId, PTag &gt;",
+      "definition_html": "detail::Clear&lt;TagOrId, PTag&gt; apache::thrift::op::clear",
       "argsstring_html": "",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::clear",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Clear.h",
@@ -146,10 +150,10 @@
         "column": "32",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Clear.h",
         "bodystart": "74",
-        "bodyend": "-1"
+        "bodyend": "74"
       },
       "description": {
-        "detailed_html": "<p>Clears the given value, leaving it equal to its intrinsic default.</p>\n<p>For example:<ul>\n<li><p>clear&lt;&gt;(myInt) // sets myInt = 0.</p>\n</li><li><p>clear&lt;set&lt;i32_t&gt;&gt;(myIntSet) // calls <code>myIntSet.clear()</code></p>\n</li><li><p>clear&lt;ident::foo&gt;(myStruct) // calls myStruct.foo().reset() </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Clears the given value, leaving it equal to its intrinsic default.</p>\n<p>For example:<ul>\n<li><p><code>clear&lt;&gt;(myInt)</code> // sets myInt = 0.</p>\n</li><li><p><code>clear&lt;set&lt;i32_t&gt;&gt;(myIntSet)</code> // calls myIntSet.clear()</p>\n</li><li><p><code>clear&lt;ident::foo&gt;(myStruct)</code> // calls myStruct.foo().reset() </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -163,10 +167,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/ClearField\">detail::ClearField</a>&lt; Tag &gt;",
-      "definition_html": "constexpr detail::ClearField&lt;Tag&gt; apache::thrift::op::clear_field",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/ClearField\">detail::ClearField</a>&lt; Tag &gt;",
+      "definition_html": "detail::ClearField&lt;Tag&gt; apache::thrift::op::clear_field",
       "argsstring_html": "",
       "name_html": "clear_field",
+      "qualifiedname_html": "apache::thrift::op::clear_field",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Clear.h",
@@ -174,7 +179,7 @@
         "column": "37",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Clear.h",
         "bodystart": "86",
-        "bodyend": "-1"
+        "bodyend": "86"
       },
       "description": {
         "detailed_html": "<p>Clears the given field, setting the field to initial state.</p>\n<p>For example:<ul>\n<li><p>clear_field&lt;field_tag&gt;(foo.field(), foo) // clears foo.field().<code>value()</code> to the intrinsic default value.</p>\n</li><li><p>clear_field&lt;field_tag&gt;(foo.optional_field(), foo) // calls foo.optional_field().reset(). </p>\n</li></ul>\n</p>"

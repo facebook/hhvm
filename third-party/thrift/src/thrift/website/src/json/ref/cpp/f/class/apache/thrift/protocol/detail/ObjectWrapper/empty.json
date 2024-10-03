@@ -11,17 +11,19 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "bool",
       "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::empty",
       "argsstring_html": "() const",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::empty",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "93",
+        "line": "89",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "93",
-        "bodyend": "93"
+        "bodystart": "89",
+        "bodyend": "89"
       },
       "definition": {
         "simple_html": "bool empty() const",

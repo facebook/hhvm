@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::add",
       "argsstring_html": "(C &amp;&amp;keys)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::SetPatch::add",
       "param": [
         {
           "type_html": "C &amp;&amp;",

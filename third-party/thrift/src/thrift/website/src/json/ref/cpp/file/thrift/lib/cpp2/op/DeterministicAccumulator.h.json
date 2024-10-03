@@ -90,6 +90,7 @@
       "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeDeterministicAccumulator",
       "argsstring_html": "()",
       "name_html": "makeDeterministicAccumulator",
+      "qualifiedname_html": "apache::thrift::op::makeDeterministicAccumulator",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "162",
@@ -126,6 +127,7 @@
       "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeOrderedHashGuard",
       "argsstring_html": "(Accumulator &amp;accumulator)",
       "name_html": "makeOrderedHashGuard",
+      "qualifiedname_html": "apache::thrift::op::makeOrderedHashGuard",
       "param": [
         {
           "type_html": "Accumulator &amp;",
@@ -168,6 +170,7 @@
       "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeUnorderedHashGuard",
       "argsstring_html": "(Accumulator &amp;accumulator)",
       "name_html": "makeUnorderedHashGuard",
+      "qualifiedname_html": "apache::thrift::op::makeUnorderedHashGuard",
       "param": [
         {
           "type_html": "Accumulator &amp;",
@@ -220,6 +223,7 @@
               "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeDeterministicAccumulator",
               "argsstring_html": "()",
               "name_html": "makeDeterministicAccumulator",
+              "qualifiedname_html": "apache::thrift::op::makeDeterministicAccumulator",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
                 "line": "162",
@@ -271,6 +275,7 @@
               "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeOrderedHashGuard",
               "argsstring_html": "(Accumulator &amp;accumulator)",
               "name_html": "makeOrderedHashGuard",
+              "qualifiedname_html": "apache::thrift::op::makeOrderedHashGuard",
               "param": [
                 {
                   "type_html": "Accumulator &amp;",
@@ -328,6 +333,7 @@
               "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeUnorderedHashGuard",
               "argsstring_html": "(Accumulator &amp;accumulator)",
               "name_html": "makeUnorderedHashGuard",
+              "qualifiedname_html": "apache::thrift::op::makeUnorderedHashGuard",
               "param": [
                 {
                   "type_html": "Accumulator &amp;",

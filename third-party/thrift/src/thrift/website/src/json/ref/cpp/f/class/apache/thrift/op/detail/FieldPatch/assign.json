@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::FieldPatch::assign",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a9ba40bdd8c56c52083956a9ba8f98cfd",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1aa70a2da90c249c50cdb1cdde6e515482",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "type::if_not_id&lt; U &gt;",
-      "definition_html": "type::if_not_id&lt;U&gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
+      "definition_html": "type::if_not_id&lt; U &gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
       "argsstring_html": "(field_ref&lt; U &gt; val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::assign",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; U &gt;",
@@ -39,7 +40,7 @@
         "simple_raw": "template <typename U>\ntype::if_not_id<U> assign(field_ref<U> val)",
         "detailed_html": "template &lt;typename U&gt;\ninline type::if_not_id&lt;U&gt; assign(field_ref&lt;U&gt; val)",
         "detailed_raw": "template <typename U>\ninline type::if_not_id<U> assign(field_ref<U> val)",
-        "original_definition_html": "type::if_not_id&lt;U&gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
+        "original_definition_html": "type::if_not_id&lt; U &gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
         "original_argsstring_html": "(field_ref&lt; U &gt; val)"
       },
       "description": {
@@ -51,7 +52,7 @@
       "compoundname_html": "apache::thrift::op::detail::FieldPatch::assign"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a1c75264cbdbc2420286de7aedf084134",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a638be9d22837cf983e62b872a73c60f2",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -64,9 +65,10 @@
         }
       ],
       "type_html": "type::if_not_id&lt; U &gt;",
-      "definition_html": "type::if_not_id&lt;U&gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
+      "definition_html": "type::if_not_id&lt; U &gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
       "argsstring_html": "(terse_field_ref&lt; U &gt; val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::assign",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; U &gt;",
@@ -86,7 +88,7 @@
         "simple_raw": "template <typename U>\ntype::if_not_id<U> assign(terse_field_ref<U> val)",
         "detailed_html": "template &lt;typename U&gt;\ninline type::if_not_id&lt;U&gt; assign(terse_field_ref&lt;U&gt; val)",
         "detailed_raw": "template <typename U>\ninline type::if_not_id<U> assign(terse_field_ref<U> val)",
-        "original_definition_html": "type::if_not_id&lt;U&gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
+        "original_definition_html": "type::if_not_id&lt; U &gt; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::assign",
         "original_argsstring_html": "(terse_field_ref&lt; U &gt; val)"
       },
       "description": {

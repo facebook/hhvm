@@ -21,6 +21,7 @@
       "definition_html": "bool apache::thrift::op::detail::MapPatch&lt; Patch &gt;::isKeyModified",
       "argsstring_html": "(K &amp;&amp;key)",
       "name_html": "isKeyModified",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::isKeyModified",
       "param": [
         {
           "type_html": "K &amp;&amp;",

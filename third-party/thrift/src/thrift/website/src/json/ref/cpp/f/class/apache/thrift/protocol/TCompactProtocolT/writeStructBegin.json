@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeStructBegin",
       "argsstring_html": "(const char *name)",
       "name_html": "writeStructBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeStructBegin",
       "param": [
         {
           "type_html": "const char *",

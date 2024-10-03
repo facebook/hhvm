@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
       "argsstring_html": "(const Object &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -26,12 +27,12 @@
         }
       ],
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "577",
+        "file": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "line": "172",
         "column": "8",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "577",
-        "bodyend": "581"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "bodystart": "172",
+        "bodyend": "176"
       },
       "definition": {
         "simple_html": "bool operator()(const Object&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",
@@ -58,6 +59,7 @@
       "definition_html": "bool apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
       "argsstring_html": "(const Value &amp;obj, op::detail::AssignPatch&lt; PatchStruct &gt; &amp;patch)",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "const <code>Value</code> &amp;",
@@ -69,12 +71,12 @@
         }
       ],
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "582",
+        "file": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "line": "177",
         "column": "8",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "582",
-        "bodyend": "589"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "bodystart": "177",
+        "bodyend": "184"
       },
       "definition": {
         "simple_html": "bool operator()(const Value&amp; obj, op::detail::AssignPatch&lt;PatchStruct&gt;&amp; patch)",

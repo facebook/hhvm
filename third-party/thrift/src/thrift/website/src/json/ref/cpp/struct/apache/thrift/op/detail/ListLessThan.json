@@ -36,6 +36,7 @@
       "definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E, LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;l, const T &amp;r) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ListLessThan::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -110,6 +111,7 @@
               "definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E, LessThanImpl &gt;::operator()",
               "argsstring_html": "(const T &amp;l, const T &amp;r) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ListLessThan::operator()",
               "param": [
                 {
                   "type_html": "const T &amp;",

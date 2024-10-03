@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensurePatchable",
       "argsstring_html": "()",
       "name_html": "ensurePatchable",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
         "line": "462",

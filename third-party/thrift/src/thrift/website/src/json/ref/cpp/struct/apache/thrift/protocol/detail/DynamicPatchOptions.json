@@ -11,11 +11,11 @@
   },
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "line": "65",
+    "line": "86",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "bodystart": "65",
-    "bodyend": "69"
+    "bodystart": "86",
+    "bodyend": "90"
   },
   "namespacednames_html": [
     "apache",
@@ -37,13 +37,14 @@
       "definition_html": "bool apache::thrift::protocol::detail::DynamicPatchOptions::doNotConvertStringToBinary",
       "argsstring_html": "",
       "name_html": "doNotConvertStringToBinary",
+      "qualifiedname_html": "apache::thrift::protocol::detail::DynamicPatchOptions::doNotConvertStringToBinary",
       "initializer_html": "= false",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "68",
+        "line": "89",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "68",
+        "bodystart": "89",
         "bodyend": "-1"
       }
     }

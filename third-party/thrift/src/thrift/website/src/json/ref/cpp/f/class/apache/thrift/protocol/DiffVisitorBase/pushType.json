@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushType",
       "argsstring_html": "(type::Type)",
       "name_html": "pushType",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushType",
       "param": [
         {
           "type_html": "type::Type",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "635",
+        "line": "656",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "987",
-        "bodyend": "992"
+        "bodystart": "988",
+        "bodyend": "993"
       },
       "definition": {
         "simple_html": "void pushType(type::Type)",

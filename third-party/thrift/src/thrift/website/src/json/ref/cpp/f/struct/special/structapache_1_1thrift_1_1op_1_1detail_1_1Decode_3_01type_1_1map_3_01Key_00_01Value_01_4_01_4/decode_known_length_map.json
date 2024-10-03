@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4_1aae681188fb14bed3e39143ba180b6eef",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4_1a68b5f2be4a3e8b6f35aabb3b1cb6bfca",
       "prot": "private",
       "static": "yes",
       "const": "no",
@@ -20,9 +20,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt;",
-      "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
+      "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
       "argsstring_html": "(Protocol &amp;prot, Map &amp;map, std::uint32_t map_size)",
       "name_html": "decode_known_length_map",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -50,7 +51,7 @@
         "simple_raw": "template <typename Map, typename Protocol>\nstatic std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>\ndecode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size)",
         "detailed_html": "template &lt;typename Map, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
         "detailed_raw": "template <typename Map, typename Protocol>\nprivate inline static std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>\ndecode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size)",
-        "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
+        "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
         "original_argsstring_html": "(Protocol &amp;prot, Map &amp;map, std::uint32_t map_size)"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4/decode_known_length_map",
@@ -59,7 +60,7 @@
       "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4_1a34e2edaf804f2337bea7278570c03df9",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4_1a3c154879b9b5d212b0df047922352211",
       "prot": "private",
       "static": "yes",
       "const": "no",
@@ -75,9 +76,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt;",
-      "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
+      "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
       "argsstring_html": "(Protocol &amp;prot, Map &amp;map, std::uint32_t map_size)",
       "name_html": "decode_known_length_map",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -105,7 +107,7 @@
         "simple_raw": "template <typename Map, typename Protocol>\nstatic std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>\ndecode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size)",
         "detailed_html": "template &lt;typename Map, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt;&gt;\ndecode_known_length_map(Protocol&amp; prot, Map&amp; map, std::uint32_t map_size)",
         "detailed_raw": "template <typename Map, typename Protocol>\nprivate inline static std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Map>>\ndecode_known_length_map(Protocol& prot, Map& map, std::uint32_t map_size)",
-        "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Map&gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
+        "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Map &gt; &gt; apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::decode_known_length_map",
         "original_argsstring_html": "(Protocol &amp;prot, Map &amp;map, std::uint32_t map_size)"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4/decode_known_length_map",

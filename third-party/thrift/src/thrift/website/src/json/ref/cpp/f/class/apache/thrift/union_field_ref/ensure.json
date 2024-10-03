@@ -15,13 +15,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::union_field_ref::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2079",
+        "line": "2135",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2079",
-        "bodyend": "2084"
+        "bodystart": "2135",
+        "bodyend": "2140"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",

@@ -24,6 +24,7 @@
       "definition_html": "std::size_t std::hash&lt; apache::thrift::protocol::detail::Value &gt;::operator()",
       "argsstring_html": "(const apache::thrift::protocol::detail::Value &amp;s) const noexcept",
       "name_html": "operator()",
+      "qualifiedname_html": "std::hash&lt; apache::thrift::protocol::detail::Value &gt;::operator()",
       "param": [
         {
           "type_html": "const <code>apache::thrift::protocol::detail::Value</code> &amp;",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "183",
+        "line": "179",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "183",
-        "bodyend": "186"
+        "bodystart": "179",
+        "bodyend": "182"
       },
       "definition": {
         "simple_html": "std::size_t operator()(const apache::thrift::protocol::detail::Value&amp; s) const",
@@ -52,11 +53,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-    "line": "182",
+    "line": "178",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-    "bodystart": "182",
-    "bodyend": "187"
+    "bodystart": "178",
+    "bodyend": "183"
   },
   "namespacednames_html": [
     "std",
@@ -92,6 +93,7 @@
               "definition_html": "std::size_t std::hash&lt; apache::thrift::protocol::detail::Value &gt;::operator()",
               "argsstring_html": "(const apache::thrift::protocol::detail::Value &amp;s) const noexcept",
               "name_html": "operator()",
+              "qualifiedname_html": "std::hash&lt; apache::thrift::protocol::detail::Value &gt;::operator()",
               "param": [
                 {
                   "type_html": "const <code>apache::thrift::protocol::detail::Value</code> &amp;",
@@ -100,11 +102,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-                "line": "183",
+                "line": "179",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-                "bodystart": "183",
-                "bodyend": "186"
+                "bodystart": "179",
+                "bodyend": "182"
               },
               "definition": {
                 "simple_html": "std::size_t operator()(const apache::thrift::protocol::detail::Value&amp; s) const",

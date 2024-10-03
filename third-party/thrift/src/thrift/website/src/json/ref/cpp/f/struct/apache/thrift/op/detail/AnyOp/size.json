@@ -15,6 +15,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::AnyOp&lt; Tag, typename &gt;::size",
       "argsstring_html": "(const void *)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyOp::size",
       "param": [
         {
           "type_html": "const void *"
@@ -53,6 +54,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
       "argsstring_html": "(const void *s)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
       "param": [
         {
           "type_html": "const void *",
@@ -92,6 +94,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
       "argsstring_html": "(const void *s)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
       "param": [
         {
           "type_html": "const void *",
@@ -131,6 +134,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
       "argsstring_html": "(const void *s)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
       "param": [
         {
           "type_html": "const void *",
@@ -170,6 +174,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
       "argsstring_html": "(const void *s)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
       "param": [
         {
           "type_html": "const void *",
@@ -209,6 +214,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
       "argsstring_html": "(const void *s)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
       "param": [
         {
           "type_html": "const void *",
@@ -248,6 +254,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::size",
       "argsstring_html": "(const void *)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::size",
       "param": [
         {
           "type_html": "const void *"

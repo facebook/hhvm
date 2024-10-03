@@ -18,9 +18,9 @@
     "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
     "line": "36",
     "column": "1",
-    "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-    "bodystart": "36",
-    "bodyend": "36"
+    "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
+    "bodystart": "319",
+    "bodyend": "-1"
   },
   "namespacednames_html": [
     "apache",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::union_field_ref::operator=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a6c8bf4c4a63997fd9f641bd483d20e3f",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1aba58beba206ad9efec9b760f4622a295",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,20 +12,22 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_constructible< value_type, U >::value &&std::is_nothrow_assignable< value_type, U >::value",
       "tparams": [
         {
           "type_html": "typename U",
           "defval_html": "<code>value_type</code>"
         },
         {
-          "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;::<code>value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;::<code>value</code>, int &gt;",
+          "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;<code>::value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;<code>::value</code>, int &gt;",
           "defval_html": "0"
         }
       ],
       "type_html": "FOLLY_ERASE <code>union_field_ref</code> &amp;",
-      "definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-      "argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)",
+      "definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+      "argsstring_html": "(U &amp;&amp;other)",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator=",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -34,19 +36,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2025",
+        "line": "2081",
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2025",
-        "bodyend": "2035"
+        "bodystart": "2081",
+        "bodyend": "2091"
       },
       "definition": {
         "simple_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\nFOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
         "simple_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\nFOLLY_ERASE union_field_ref& operator=(U&& other)",
-        "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other) noexcept(\n    (std::is_nothrow_constructible&lt;value_type, U&gt;::value &amp;&amp;\n     std::is_nothrow_assignable&lt;value_type, U&gt;::value))",
-        "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other) noexcept(\n    (std::is_nothrow_constructible<value_type, U>::value &&\n     std::is_nothrow_assignable<value_type, U>::value))",
-        "original_definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-        "original_argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)"
+        "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
+        "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other)",
+        "original_definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+        "original_argsstring_html": "(U &amp;&amp;other)"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/operator.assign",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.assign",

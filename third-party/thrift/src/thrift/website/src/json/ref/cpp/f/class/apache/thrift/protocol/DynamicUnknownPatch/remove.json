@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::remove",
       "argsstring_html": "(detail::Badge badge, Value v)",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicUnknownPatch::remove",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "133",
+        "line": "154",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1257",
-        "bodyend": "1266"
+        "bodystart": "1258",
+        "bodyend": "1267"
       },
       "definition": {
         "simple_html": "void remove(detail::Badge badge, Value v)",

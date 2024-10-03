@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeMapValueEnd",
       "argsstring_html": "(bool)",
       "name_html": "writeMapValueEnd",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeMapValueEnd",
       "param": [
         {
           "type_html": "bool"

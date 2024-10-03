@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::remove",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1af55545832276910a561b8d1468df5444",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a42d993d239da5b99e206a086b164fe23",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt; T, Id &gt; &gt;",
-      "definition_html": "std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt;T, Id&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
+      "definition_html": "std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt; T, Id &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
       "argsstring_html": "()",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::remove",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "158",
@@ -33,7 +34,7 @@
         "simple_raw": "template <typename Id>\nstd::enable_if_t<!type::is_optional_or_union_field_v<T, Id>> remove()",
         "detailed_html": "template &lt;typename Id&gt;\nprivate inline std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt;T, Id&gt;&gt;\nremove()",
         "detailed_raw": "template <typename Id>\nprivate inline std::enable_if_t<!type::is_optional_or_union_field_v<T, Id>>\nremove()",
-        "original_definition_html": "std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt;T, Id&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
+        "original_definition_html": "std::enable_if_t&lt;!type::is_optional_or_union_field_v&lt; T, Id &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/remove",
@@ -42,7 +43,7 @@
       "compoundname_html": "apache::thrift::op::detail::BaseEnsurePatch::remove"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a13a3a85f167b5ae95488b30701a0f8a3",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a59512c428677075a24e894c614ea3526",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -55,9 +56,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &amp;&amp;!is_thrift_union_v&lt; T &gt; &gt;",
-      "definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt;T, Id&gt; &amp;&amp; !is_thrift_union_v&lt;T&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
+      "definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &amp;&amp;!is_thrift_union_v&lt; T &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
       "argsstring_html": "()",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::remove",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "200",
@@ -71,7 +73,7 @@
         "simple_raw": "template <typename Id>\nstd::enable_if_t<\n    type::is_optional_or_union_field_v<T, Id> && !is_thrift_union_v<T>>\nremove()",
         "detailed_html": "template &lt;typename Id&gt;\ninline std::enable_if_t&lt;\n    type::is_optional_or_union_field_v&lt;T, Id&gt; &amp;&amp; !is_thrift_union_v&lt;T&gt;&gt;\nremove()",
         "detailed_raw": "template <typename Id>\ninline std::enable_if_t<\n    type::is_optional_or_union_field_v<T, Id> && !is_thrift_union_v<T>>\nremove()",
-        "original_definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt;T, Id&gt; &amp;&amp; !is_thrift_union_v&lt;T&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
+        "original_definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &amp;&amp;!is_thrift_union_v&lt; T &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::remove",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/remove",

@@ -20,13 +20,14 @@
       "definition_html": "bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::modifies",
       "argsstring_html": "() const",
       "name_html": "modifies",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::modifies",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "206",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "bodystart": "206",
-        "bodyend": "211"
+        "bodyend": "213"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nbool modifies() const",
@@ -45,7 +46,7 @@
       "compoundname_html": "apache::thrift::op::detail::UnionPatch::modifies"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a843dc091e4701085c8d5e6353b9e657d",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ae68ba7ea8c86b4eeadf342e1c66687ab",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -63,23 +64,24 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; sizeof...(Ids) !=0, bool &gt;",
-      "definition_html": "std::enable_if_t&lt;sizeof...(Ids) != 0, bool&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::modifies",
+      "definition_html": "std::enable_if_t&lt; sizeof...(Ids) !=0, bool &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::modifies",
       "argsstring_html": "() const",
       "name_html": "modifies",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::modifies",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "214",
+        "line": "216",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "214",
-        "bodyend": "223"
+        "bodystart": "216",
+        "bodyend": "227"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename... Ids&gt;\nstd::enable_if_t&lt;sizeof...(Ids) != 0, bool&gt; modifies() const",
         "simple_raw": "template <typename Id, typename... Ids>\nstd::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const",
         "detailed_html": "template &lt;typename Id, typename... Ids&gt;\ninline std::enable_if_t&lt;sizeof...(Ids) != 0, bool&gt; modifies() const",
         "detailed_raw": "template <typename Id, typename... Ids>\ninline std::enable_if_t<sizeof...(Ids) != 0, bool> modifies() const",
-        "original_definition_html": "std::enable_if_t&lt;sizeof...(Ids) != 0, bool&gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::modifies",
+        "original_definition_html": "std::enable_if_t&lt; sizeof...(Ids) !=0, bool &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::modifies",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseEnsurePatch/modifies",

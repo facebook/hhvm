@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchIfSet",
       "argsstring_html": "(const P &amp;patches)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::patchIfSet",
       "param": [
         {
           "type_html": "const P &amp;",

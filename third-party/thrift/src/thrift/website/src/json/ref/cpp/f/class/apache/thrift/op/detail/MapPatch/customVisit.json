@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::customVisit",
       "argsstring_html": "(Visitor &amp;&amp;v) const",
       "name_html": "customVisit",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::customVisit",
       "param": [
         {
           "type_html": "Visitor &amp;&amp;",

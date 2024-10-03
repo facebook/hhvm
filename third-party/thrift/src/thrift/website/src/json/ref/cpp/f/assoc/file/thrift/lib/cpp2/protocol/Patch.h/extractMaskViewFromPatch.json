@@ -15,6 +15,7 @@
       "definition_html": "ExtractedMasksFromPatch apache::thrift::protocol::extractMaskViewFromPatch",
       "argsstring_html": "(const protocol::Object &amp;patch)",
       "name_html": "extractMaskViewFromPatch",
+      "qualifiedname_html": "apache::thrift::protocol::extractMaskViewFromPatch",
       "param": [
         {
           "type_html": "const protocol::Object &amp;",
@@ -55,6 +56,7 @@
       "definition_html": "ExtractedMasksFromPatch apache::thrift::protocol::extractMaskViewFromPatch",
       "argsstring_html": "(Object &amp;&amp;patch)=delete",
       "name_html": "extractMaskViewFromPatch",
+      "qualifiedname_html": "apache::thrift::protocol::extractMaskViewFromPatch",
       "param": [
         {
           "type_html": "Object &amp;&amp;",

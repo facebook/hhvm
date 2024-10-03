@@ -21,6 +21,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(T &amp;self, V &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -64,6 +65,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "void *",

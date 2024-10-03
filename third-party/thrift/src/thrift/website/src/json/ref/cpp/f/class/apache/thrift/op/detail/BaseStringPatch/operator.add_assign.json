@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::operator+=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch_1ac522c020de6f6cdb33d7122ad6bf7f71",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch_1a28ba7de73350f0926fd263bfda9a7591",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "Derived &amp;",
-      "definition_html": "Derived&amp; apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::operator+=",
+      "definition_html": "Derived &amp; apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::operator+=",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "operator+=",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseStringPatch::operator+=",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "366",
+        "line": "232",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "366",
-        "bodyend": "369"
+        "bodystart": "232",
+        "bodyend": "235"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nDerived&amp; operator+=(U&amp;&amp; val)",
         "simple_raw": "template <typename U>\nDerived& operator+=(U&& val)",
         "detailed_html": "template &lt;typename U&gt;\ninline Derived&amp; operator+=(U&amp;&amp; val)",
         "detailed_raw": "template <typename U>\ninline Derived& operator+=(U&& val)",
-        "original_definition_html": "Derived&amp; apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::operator+=",
+        "original_definition_html": "Derived &amp; apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::operator+=",
         "original_argsstring_html": "(U &amp;&amp;val)"
       },
       "description": {

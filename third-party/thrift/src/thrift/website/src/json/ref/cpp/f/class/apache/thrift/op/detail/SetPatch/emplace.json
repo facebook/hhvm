@@ -22,6 +22,7 @@
       "definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::emplace",
       "argsstring_html": "(Args &amp;&amp;... args)",
       "name_html": "emplace",
+      "qualifiedname_html": "apache::thrift::op::detail::SetPatch::emplace",
       "param": [
         {
           "type_html": "Args &amp;&amp;...",

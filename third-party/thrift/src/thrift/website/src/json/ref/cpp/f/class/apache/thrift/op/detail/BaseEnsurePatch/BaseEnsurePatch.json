@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::BaseEnsurePatch",
       "argsstring_html": "(const BaseEnsurePatch &amp;)=default",
       "name_html": "BaseEnsurePatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::BaseEnsurePatch",
       "param": [
         {
           "type_html": "const <code>BaseEnsurePatch</code> &amp;"
@@ -52,6 +53,7 @@
       "definition_html": "apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::BaseEnsurePatch",
       "argsstring_html": "(BaseEnsurePatch &amp;&amp;) noexcept=default",
       "name_html": "BaseEnsurePatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::BaseEnsurePatch",
       "param": [
         {
           "type_html": "<code>BaseEnsurePatch</code> &amp;&amp;"

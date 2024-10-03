@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::as_const_intern_box",
   "functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1aa842279ccd70ad1f02185aee1f66fb50",
+      "refid": "namespaceapache_1_1thrift_1aab293c29cbc8e900a85665af107c76a2",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; const T &amp; &gt;",
-      "definition_html": "terse_intern_boxed_field_ref&lt;const T&amp;&gt; apache::thrift::as_const_intern_box",
+      "definition_html": "terse_intern_boxed_field_ref&lt; const T &amp; &gt; apache::thrift::as_const_intern_box",
       "argsstring_html": "(terse_intern_boxed_field_ref&lt; T &amp; &gt; val)",
       "name_html": "as_const_intern_box",
+      "qualifiedname_html": "apache::thrift::as_const_intern_box",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; T &amp; &gt;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1509",
+        "line": "1529",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1509",
-        "bodyend": "1512"
+        "bodystart": "1529",
+        "bodyend": "1532"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nterse_intern_boxed_field_ref&lt;const T&amp;&gt; as_const_intern_box(\n    terse_intern_boxed_field_ref&lt;T&amp;&gt; val)",
         "simple_raw": "template <typename T>\nterse_intern_boxed_field_ref<const T&> as_const_intern_box(\n    terse_intern_boxed_field_ref<T&> val)",
         "detailed_html": "template &lt;typename T&gt;\nterse_intern_boxed_field_ref&lt;const T&amp;&gt; as_const_intern_box(\n    terse_intern_boxed_field_ref&lt;T&amp;&gt; val)",
         "detailed_raw": "template <typename T>\nterse_intern_boxed_field_ref<const T&> as_const_intern_box(\n    terse_intern_boxed_field_ref<T&> val)",
-        "original_definition_html": "terse_intern_boxed_field_ref&lt;const T&amp;&gt; apache::thrift::as_const_intern_box",
+        "original_definition_html": "terse_intern_boxed_field_ref&lt; const T &amp; &gt; apache::thrift::as_const_intern_box",
         "original_argsstring_html": "(terse_intern_boxed_field_ref&lt; T &amp; &gt; val)"
       },
       "compoundname_html": "apache::thrift::as_const_intern_box",

@@ -15,6 +15,7 @@
       "definition_html": "TType apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getTType",
       "argsstring_html": "(int8_t type)",
       "name_html": "getTType",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getTType",
       "param": [
         {
           "type_html": "int8_t",

@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
       "argsstring_html": "(const BaseClearPatch &amp;)=default",
       "name_html": "BaseClearPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::BaseClearPatch",
       "param": [
         {
           "type_html": "const <code>BaseClearPatch</code> &amp;"
@@ -52,6 +53,7 @@
       "definition_html": "apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::BaseClearPatch",
       "argsstring_html": "(BaseClearPatch &amp;&amp;) noexcept=default",
       "name_html": "BaseClearPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::BaseClearPatch",
       "param": [
         {
           "type_html": "<code>BaseClearPatch</code> &amp;&amp;"

@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::prepend",
       "argsstring_html": "(C &amp;&amp;lhs)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::ListPatch::prepend",
       "param": [
         {
           "type_html": "C &amp;&amp;",

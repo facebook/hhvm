@@ -26,6 +26,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
       "argsstring_html": "(T &amp;&amp;, const U &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
       "param": [
         {
           "type_html": "T &amp;&amp;"
@@ -107,6 +108,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
               "argsstring_html": "(T &amp;&amp;, const U &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
               "param": [
                 {
                   "type_html": "T &amp;&amp;"

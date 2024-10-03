@@ -15,6 +15,7 @@
       "definition_html": "size_t apache::thrift::op::StdHasher::getResult",
       "argsstring_html": "() const",
       "name_html": "getResult",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/StdHasher.h",
         "line": "32",

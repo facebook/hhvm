@@ -18,10 +18,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
       "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diff",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diff",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diff",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -34,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "590",
+        "line": "611",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "575",
-        "bodyend": "577"
+        "bodystart": "576",
+        "bodyend": "578"
       },
       "definition": {
         "simple_html": "DynamicPatch diff(const Object&amp; src, const Object&amp; dst)",
@@ -59,10 +61,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
       "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diff",
       "argsstring_html": "(detail::Badge, const Value &amp;src, const Value &amp;dst)",
       "name_html": "diff",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diff",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -78,11 +82,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "591",
+        "line": "612",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "579",
-        "bodyend": "623"
+        "bodystart": "580",
+        "bodyend": "624"
       },
       "definition": {
         "simple_html": "DynamicPatch diff(detail::Badge, const Value&amp; src, const Value&amp; dst)",
@@ -107,9 +111,10 @@
       "definition_html": "virtual apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
       "argsstring_html": "()=default",
       "name_html": "~DiffVisitorBase",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "594",
+        "line": "615",
         "column": "11"
       },
       "definition": {
@@ -135,6 +140,7 @@
       "definition_html": "op::BoolPatch apache::thrift::protocol::DiffVisitorBase::diffBool",
       "argsstring_html": "(bool, bool dst)",
       "name_html": "diffBool",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffBool",
       "param": [
         {
           "type_html": "bool",
@@ -147,11 +153,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "597",
+        "line": "618",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "643",
-        "bodyend": "645"
+        "bodystart": "644",
+        "bodyend": "646"
       },
       "definition": {
         "simple_html": "virtual op::BoolPatch diffBool(bool, bool dst)",
@@ -172,10 +178,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::BytePatch",
       "definition_html": "op::BytePatch apache::thrift::protocol::DiffVisitorBase::diffByte",
       "argsstring_html": "(std::int8_t src, std::int8_t dst)",
       "name_html": "diffByte",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffByte",
       "param": [
         {
           "type_html": "std::int8_t",
@@ -188,11 +196,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "598",
+        "line": "619",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "647",
-        "bodyend": "649"
+        "bodystart": "648",
+        "bodyend": "650"
       },
       "definition": {
         "simple_html": "virtual op::BytePatch diffByte(std::int8_t src, std::int8_t dst)",
@@ -213,10 +221,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::I16Patch",
       "definition_html": "op::I16Patch apache::thrift::protocol::DiffVisitorBase::diffI16",
       "argsstring_html": "(std::int16_t src, std::int16_t dst)",
       "name_html": "diffI16",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI16",
       "param": [
         {
           "type_html": "std::int16_t",
@@ -229,11 +239,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "600",
+        "line": "621",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "651",
-        "bodyend": "653"
+        "bodystart": "652",
+        "bodyend": "654"
       },
       "definition": {
         "simple_html": "virtual op::I16Patch diffI16(std::int16_t src, std::int16_t dst)",
@@ -254,10 +264,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::I32Patch",
       "definition_html": "op::I32Patch apache::thrift::protocol::DiffVisitorBase::diffI32",
       "argsstring_html": "(std::int32_t src, std::int32_t dst)",
       "name_html": "diffI32",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI32",
       "param": [
         {
           "type_html": "std::int32_t",
@@ -270,11 +282,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "602",
+        "line": "623",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "655",
-        "bodyend": "657"
+        "bodystart": "656",
+        "bodyend": "658"
       },
       "definition": {
         "simple_html": "virtual op::I32Patch diffI32(std::int32_t src, std::int32_t dst)",
@@ -295,10 +307,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::I64Patch",
       "definition_html": "op::I64Patch apache::thrift::protocol::DiffVisitorBase::diffI64",
       "argsstring_html": "(std::int64_t src, std::int64_t dst)",
       "name_html": "diffI64",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI64",
       "param": [
         {
           "type_html": "std::int64_t",
@@ -311,11 +325,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "604",
+        "line": "625",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "659",
-        "bodyend": "661"
+        "bodystart": "660",
+        "bodyend": "662"
       },
       "definition": {
         "simple_html": "virtual op::I64Patch diffI64(std::int64_t src, std::int64_t dst)",
@@ -336,10 +350,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::FloatPatch",
       "definition_html": "op::FloatPatch apache::thrift::protocol::DiffVisitorBase::diffFloat",
       "argsstring_html": "(float src, float dst)",
       "name_html": "diffFloat",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffFloat",
       "param": [
         {
           "type_html": "float",
@@ -352,11 +368,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "606",
+        "line": "627",
         "column": "27",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "663",
-        "bodyend": "665"
+        "bodystart": "664",
+        "bodyend": "666"
       },
       "definition": {
         "simple_html": "virtual op::FloatPatch diffFloat(float src, float dst)",
@@ -377,10 +393,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::DoublePatch",
       "definition_html": "op::DoublePatch apache::thrift::protocol::DiffVisitorBase::diffDouble",
       "argsstring_html": "(double src, double dst)",
       "name_html": "diffDouble",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffDouble",
       "param": [
         {
           "type_html": "double",
@@ -393,11 +411,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "607",
+        "line": "628",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "666",
-        "bodyend": "668"
+        "bodystart": "667",
+        "bodyend": "669"
       },
       "definition": {
         "simple_html": "virtual op::DoublePatch diffDouble(double src, double dst)",
@@ -418,10 +436,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::BinaryPatch",
       "definition_html": "op::BinaryPatch apache::thrift::protocol::DiffVisitorBase::diffBinary",
       "argsstring_html": "(const folly::IOBuf &amp;src, const folly::IOBuf &amp;dst)",
       "name_html": "diffBinary",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffBinary",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -434,11 +454,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "608",
+        "line": "629",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "670",
-        "bodyend": "698"
+        "bodystart": "671",
+        "bodyend": "699"
       },
       "definition": {
         "simple_html": "virtual op::BinaryPatch diffBinary(\n    const folly::IOBuf&amp; src, const folly::IOBuf&amp; dst)",
@@ -459,10 +479,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicListPatch\">DynamicListPatch</a>",
       "definition_html": "DynamicListPatch apache::thrift::protocol::DiffVisitorBase::diffList",
       "argsstring_html": "(const detail::ValueList &amp;src, const detail::ValueList &amp;dst)",
       "name_html": "diffList",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffList",
       "param": [
         {
           "type_html": "const <code>detail::ValueList</code> &amp;",
@@ -475,11 +497,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "610",
+        "line": "631",
         "column": "29",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "700",
-        "bodyend": "720"
+        "bodystart": "701",
+        "bodyend": "721"
       },
       "definition": {
         "simple_html": "virtual DynamicListPatch diffList(\n    const detail::ValueList&amp; src, const detail::ValueList&amp; dst)",
@@ -500,10 +522,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicSetPatch\">DynamicSetPatch</a>",
       "definition_html": "DynamicSetPatch apache::thrift::protocol::DiffVisitorBase::diffSet",
       "argsstring_html": "(const detail::ValueSet &amp;src, const detail::ValueSet &amp;dst)",
       "name_html": "diffSet",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffSet",
       "param": [
         {
           "type_html": "const <code>detail::ValueSet</code> &amp;",
@@ -516,11 +540,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "612",
+        "line": "633",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "722",
-        "bodyend": "755"
+        "bodystart": "723",
+        "bodyend": "756"
       },
       "definition": {
         "simple_html": "virtual DynamicSetPatch diffSet(\n    const detail::ValueSet&amp; src, const detail::ValueSet&amp; dst)",
@@ -541,10 +565,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch\">DynamicMapPatch</a>",
       "definition_html": "DynamicMapPatch apache::thrift::protocol::DiffVisitorBase::diffMap",
       "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst)",
       "name_html": "diffMap",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffMap",
       "param": [
         {
           "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -557,11 +583,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "614",
+        "line": "635",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "757",
-        "bodyend": "798"
+        "bodystart": "758",
+        "bodyend": "799"
       },
       "definition": {
         "simple_html": "virtual DynamicMapPatch diffMap(\n    const detail::ValueMap&amp; src, const detail::ValueMap&amp; dst)",
@@ -582,10 +608,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
       "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diffStructured",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffStructured",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffStructured",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -598,11 +626,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "616",
+        "line": "637",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "829",
-        "bodyend": "870"
+        "bodystart": "830",
+        "bodyend": "871"
       },
       "definition": {
         "simple_html": "virtual DynamicPatch diffStructured(const Object&amp; src, const Object&amp; dst)",
@@ -623,10 +651,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicUnionPatch\">DynamicUnionPatch</a>",
       "definition_html": "DynamicUnionPatch apache::thrift::protocol::DiffVisitorBase::diffUnion",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffUnion",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffUnion",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -639,11 +669,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "620",
+        "line": "641",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "872",
-        "bodyend": "899"
+        "bodystart": "873",
+        "bodyend": "900"
       },
       "definition": {
         "simple_html": "DynamicUnionPatch diffUnion(const Object&amp; src, const Object&amp; dst)",
@@ -664,10 +694,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<code>op::AnyPatch</code>",
       "definition_html": "op::AnyPatch apache::thrift::protocol::DiffVisitorBase::diffAny",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffAny",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffAny",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -680,11 +712,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "622",
+        "line": "643",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "901",
-        "bodyend": "938"
+        "bodystart": "902",
+        "bodyend": "939"
       },
       "definition": {
         "simple_html": "op::AnyPatch diffAny(const Object&amp; src, const Object&amp; dst)",
@@ -709,6 +741,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffField",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst, FieldId id, DynamicStructPatch &amp;patch)",
       "name_html": "diffField",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffField",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -729,11 +762,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "623",
+        "line": "644",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "940",
-        "bodyend": "978"
+        "bodystart": "941",
+        "bodyend": "979"
       },
       "definition": {
         "simple_html": "void diffField(\n    const Object&amp; src, const Object&amp; dst, FieldId id, DynamicStructPatch&amp; patch)",
@@ -758,6 +791,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffElement",
       "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst, const Value &amp;key, DynamicMapPatch &amp;patch)",
       "name_html": "diffElement",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffElement",
       "param": [
         {
           "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -778,11 +812,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "628",
+        "line": "649",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "800",
-        "bodyend": "827"
+        "bodystart": "801",
+        "bodyend": "828"
       },
       "definition": {
         "simple_html": "void diffElement(\n    const detail::ValueMap&amp; src,\n    const detail::ValueMap&amp; dst,\n    const Value&amp; key,\n    DynamicMapPatch&amp; patch)",
@@ -807,6 +841,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushField",
       "argsstring_html": "(FieldId)",
       "name_html": "pushField",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushField",
       "param": [
         {
           "type_html": "FieldId",
@@ -815,11 +850,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "634",
+        "line": "655",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "980",
-        "bodyend": "985"
+        "bodystart": "981",
+        "bodyend": "986"
       },
       "definition": {
         "simple_html": "void pushField(FieldId)",
@@ -844,6 +879,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushType",
       "argsstring_html": "(type::Type)",
       "name_html": "pushType",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushType",
       "param": [
         {
           "type_html": "type::Type",
@@ -852,11 +888,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "635",
+        "line": "656",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "987",
-        "bodyend": "992"
+        "bodystart": "988",
+        "bodyend": "993"
       },
       "definition": {
         "simple_html": "void pushType(type::Type)",
@@ -881,6 +917,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushKey",
       "argsstring_html": "(const Value &amp;)",
       "name_html": "pushKey",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushKey",
       "param": [
         {
           "type_html": "const Value &amp;",
@@ -889,11 +926,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "636",
+        "line": "657",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1011",
-        "bodyend": "1024"
+        "bodystart": "1012",
+        "bodyend": "1025"
       },
       "definition": {
         "simple_html": "void pushKey(const Value&amp;)",
@@ -918,13 +955,14 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pop",
       "argsstring_html": "()",
       "name_html": "pop",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pop",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "637",
+        "line": "658",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1026",
-        "bodyend": "1029"
+        "bodystart": "1027",
+        "bodyend": "1030"
       },
       "definition": {
         "simple_html": "void pop()",
@@ -938,7 +976,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/protocol/DiffVisitorBase/pop"
     },
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ac181e1aed31844dc91720422091c7241",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ab100d71277a2e27cfd6afa2597cfd9c1",
       "prot": "protected",
       "static": "no",
       "const": "yes",
@@ -946,23 +984,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const Mask &amp;",
-      "definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+      "definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
       "argsstring_html": "() const",
       "name_html": "getCurrentPath",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "639",
+        "line": "660",
         "column": "14",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "639",
-        "bodyend": "639"
+        "bodystart": "660",
+        "bodyend": "660"
       },
       "definition": {
         "simple_html": "const Mask&amp; getCurrentPath() const",
         "simple_raw": "const Mask& getCurrentPath() const",
         "detailed_html": "protected inline const Mask&amp; getCurrentPath() const",
         "detailed_raw": "protected inline const Mask& getCurrentPath() const",
-        "original_definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+        "original_definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/getCurrentPath",
@@ -971,11 +1010,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "line": "588",
+    "line": "609",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "bodystart": "588",
-    "bodyend": "646"
+    "bodystart": "609",
+    "bodyend": "667"
   },
   "namespacednames_html": [
     "apache",
@@ -995,13 +1034,14 @@
       "definition_html": "Mask apache::thrift::protocol::DiffVisitorBase::path_",
       "argsstring_html": "",
       "name_html": "path_",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::path_",
       "initializer_html": "= allMask()",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "642",
+        "line": "663",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "642",
+        "bodystart": "663",
         "bodyend": "-1"
       }
     },
@@ -1014,14 +1054,15 @@
       "definition_html": "std::stack&lt;Mask*&gt; apache::thrift::protocol::DiffVisitorBase::maskInPath_",
       "argsstring_html": "",
       "name_html": "maskInPath_",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::maskInPath_",
       "initializer_html": "{{&amp;path_}}",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "645",
+        "line": "666",
         "column": "14",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "645",
-        "bodyend": "-1"
+        "bodystart": "666",
+        "bodyend": "666"
       }
     }
   ],
@@ -1051,9 +1092,10 @@
               "definition_html": "virtual apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
               "argsstring_html": "()=default",
               "name_html": "~DiffVisitorBase",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "594",
+                "line": "615",
                 "column": "11"
               },
               "definition": {
@@ -1097,10 +1139,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
               "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diff",
               "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
               "name_html": "diff",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diff",
               "param": [
                 {
                   "type_html": "const Object &amp;",
@@ -1113,11 +1157,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "590",
+                "line": "611",
                 "column": "17",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "575",
-                "bodyend": "577"
+                "bodystart": "576",
+                "bodyend": "578"
               },
               "definition": {
                 "simple_html": "DynamicPatch diff(const Object&amp; src, const Object&amp; dst)",
@@ -1140,10 +1184,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
               "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diff",
               "argsstring_html": "(detail::Badge, const Value &amp;src, const Value &amp;dst)",
               "name_html": "diff",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diff",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1159,11 +1205,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "591",
+                "line": "612",
                 "column": "17",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "579",
-                "bodyend": "623"
+                "bodystart": "580",
+                "bodyend": "624"
               },
               "definition": {
                 "simple_html": "DynamicPatch diff(detail::Badge, const Value&amp; src, const Value&amp; dst)",
@@ -1210,6 +1256,7 @@
               "definition_html": "op::BoolPatch apache::thrift::protocol::DiffVisitorBase::diffBool",
               "argsstring_html": "(bool, bool dst)",
               "name_html": "diffBool",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffBool",
               "param": [
                 {
                   "type_html": "bool",
@@ -1222,11 +1269,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "597",
+                "line": "618",
                 "column": "25",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "643",
-                "bodyend": "645"
+                "bodystart": "644",
+                "bodyend": "646"
               },
               "definition": {
                 "simple_html": "virtual op::BoolPatch diffBool(bool, bool dst)",
@@ -1269,10 +1316,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::BytePatch",
               "definition_html": "op::BytePatch apache::thrift::protocol::DiffVisitorBase::diffByte",
               "argsstring_html": "(std::int8_t src, std::int8_t dst)",
               "name_html": "diffByte",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffByte",
               "param": [
                 {
                   "type_html": "std::int8_t",
@@ -1285,11 +1334,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "598",
+                "line": "619",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "647",
-                "bodyend": "649"
+                "bodystart": "648",
+                "bodyend": "650"
               },
               "definition": {
                 "simple_html": "virtual op::BytePatch diffByte(std::int8_t src, std::int8_t dst)",
@@ -1332,10 +1381,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::I16Patch",
               "definition_html": "op::I16Patch apache::thrift::protocol::DiffVisitorBase::diffI16",
               "argsstring_html": "(std::int16_t src, std::int16_t dst)",
               "name_html": "diffI16",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI16",
               "param": [
                 {
                   "type_html": "std::int16_t",
@@ -1348,11 +1399,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "600",
+                "line": "621",
                 "column": "25",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "651",
-                "bodyend": "653"
+                "bodystart": "652",
+                "bodyend": "654"
               },
               "definition": {
                 "simple_html": "virtual op::I16Patch diffI16(std::int16_t src, std::int16_t dst)",
@@ -1395,10 +1446,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::I32Patch",
               "definition_html": "op::I32Patch apache::thrift::protocol::DiffVisitorBase::diffI32",
               "argsstring_html": "(std::int32_t src, std::int32_t dst)",
               "name_html": "diffI32",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI32",
               "param": [
                 {
                   "type_html": "std::int32_t",
@@ -1411,11 +1464,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "602",
+                "line": "623",
                 "column": "25",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "655",
-                "bodyend": "657"
+                "bodystart": "656",
+                "bodyend": "658"
               },
               "definition": {
                 "simple_html": "virtual op::I32Patch diffI32(std::int32_t src, std::int32_t dst)",
@@ -1458,10 +1511,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::I64Patch",
               "definition_html": "op::I64Patch apache::thrift::protocol::DiffVisitorBase::diffI64",
               "argsstring_html": "(std::int64_t src, std::int64_t dst)",
               "name_html": "diffI64",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI64",
               "param": [
                 {
                   "type_html": "std::int64_t",
@@ -1474,11 +1529,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "604",
+                "line": "625",
                 "column": "25",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "659",
-                "bodyend": "661"
+                "bodystart": "660",
+                "bodyend": "662"
               },
               "definition": {
                 "simple_html": "virtual op::I64Patch diffI64(std::int64_t src, std::int64_t dst)",
@@ -1521,10 +1576,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::FloatPatch",
               "definition_html": "op::FloatPatch apache::thrift::protocol::DiffVisitorBase::diffFloat",
               "argsstring_html": "(float src, float dst)",
               "name_html": "diffFloat",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffFloat",
               "param": [
                 {
                   "type_html": "float",
@@ -1537,11 +1594,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "606",
+                "line": "627",
                 "column": "27",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "663",
-                "bodyend": "665"
+                "bodystart": "664",
+                "bodyend": "666"
               },
               "definition": {
                 "simple_html": "virtual op::FloatPatch diffFloat(float src, float dst)",
@@ -1584,10 +1641,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::DoublePatch",
               "definition_html": "op::DoublePatch apache::thrift::protocol::DiffVisitorBase::diffDouble",
               "argsstring_html": "(double src, double dst)",
               "name_html": "diffDouble",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffDouble",
               "param": [
                 {
                   "type_html": "double",
@@ -1600,11 +1659,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "607",
+                "line": "628",
                 "column": "28",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "666",
-                "bodyend": "668"
+                "bodystart": "667",
+                "bodyend": "669"
               },
               "definition": {
                 "simple_html": "virtual op::DoublePatch diffDouble(double src, double dst)",
@@ -1647,10 +1706,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "op::BinaryPatch",
               "definition_html": "op::BinaryPatch apache::thrift::protocol::DiffVisitorBase::diffBinary",
               "argsstring_html": "(const folly::IOBuf &amp;src, const folly::IOBuf &amp;dst)",
               "name_html": "diffBinary",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffBinary",
               "param": [
                 {
                   "type_html": "const folly::IOBuf &amp;",
@@ -1663,11 +1724,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "608",
+                "line": "629",
                 "column": "28",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "670",
-                "bodyend": "698"
+                "bodystart": "671",
+                "bodyend": "699"
               },
               "definition": {
                 "simple_html": "virtual op::BinaryPatch diffBinary(\n    const folly::IOBuf&amp; src, const folly::IOBuf&amp; dst)",
@@ -1710,10 +1771,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicListPatch\">DynamicListPatch</a>",
               "definition_html": "DynamicListPatch apache::thrift::protocol::DiffVisitorBase::diffList",
               "argsstring_html": "(const detail::ValueList &amp;src, const detail::ValueList &amp;dst)",
               "name_html": "diffList",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffList",
               "param": [
                 {
                   "type_html": "const <code>detail::ValueList</code> &amp;",
@@ -1726,11 +1789,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "610",
+                "line": "631",
                 "column": "29",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "700",
-                "bodyend": "720"
+                "bodystart": "701",
+                "bodyend": "721"
               },
               "definition": {
                 "simple_html": "virtual DynamicListPatch diffList(\n    const detail::ValueList&amp; src, const detail::ValueList&amp; dst)",
@@ -1773,10 +1836,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicSetPatch\">DynamicSetPatch</a>",
               "definition_html": "DynamicSetPatch apache::thrift::protocol::DiffVisitorBase::diffSet",
               "argsstring_html": "(const detail::ValueSet &amp;src, const detail::ValueSet &amp;dst)",
               "name_html": "diffSet",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffSet",
               "param": [
                 {
                   "type_html": "const <code>detail::ValueSet</code> &amp;",
@@ -1789,11 +1854,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "612",
+                "line": "633",
                 "column": "28",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "722",
-                "bodyend": "755"
+                "bodystart": "723",
+                "bodyend": "756"
               },
               "definition": {
                 "simple_html": "virtual DynamicSetPatch diffSet(\n    const detail::ValueSet&amp; src, const detail::ValueSet&amp; dst)",
@@ -1836,10 +1901,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch\">DynamicMapPatch</a>",
               "definition_html": "DynamicMapPatch apache::thrift::protocol::DiffVisitorBase::diffMap",
               "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst)",
               "name_html": "diffMap",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffMap",
               "param": [
                 {
                   "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -1852,11 +1919,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "614",
+                "line": "635",
                 "column": "28",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "757",
-                "bodyend": "798"
+                "bodystart": "758",
+                "bodyend": "799"
               },
               "definition": {
                 "simple_html": "virtual DynamicMapPatch diffMap(\n    const detail::ValueMap&amp; src, const detail::ValueMap&amp; dst)",
@@ -1899,10 +1966,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
               "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diffStructured",
               "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
               "name_html": "diffStructured",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffStructured",
               "param": [
                 {
                   "type_html": "const Object &amp;",
@@ -1915,11 +1984,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "616",
+                "line": "637",
                 "column": "25",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "829",
-                "bodyend": "870"
+                "bodystart": "830",
+                "bodyend": "871"
               },
               "definition": {
                 "simple_html": "virtual DynamicPatch diffStructured(const Object&amp; src, const Object&amp; dst)",
@@ -1962,10 +2031,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicUnionPatch\">DynamicUnionPatch</a>",
               "definition_html": "DynamicUnionPatch apache::thrift::protocol::DiffVisitorBase::diffUnion",
               "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
               "name_html": "diffUnion",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffUnion",
               "param": [
                 {
                   "type_html": "const Object &amp;",
@@ -1978,11 +2049,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "620",
+                "line": "641",
                 "column": "22",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "872",
-                "bodyend": "899"
+                "bodystart": "873",
+                "bodyend": "900"
               },
               "definition": {
                 "simple_html": "DynamicUnionPatch diffUnion(const Object&amp; src, const Object&amp; dst)",
@@ -2025,10 +2096,12 @@
               "explicit": "no",
               "inline": "no",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "<code>op::AnyPatch</code>",
               "definition_html": "op::AnyPatch apache::thrift::protocol::DiffVisitorBase::diffAny",
               "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
               "name_html": "diffAny",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffAny",
               "param": [
                 {
                   "type_html": "const Object &amp;",
@@ -2041,11 +2114,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "622",
+                "line": "643",
                 "column": "17",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "901",
-                "bodyend": "938"
+                "bodystart": "902",
+                "bodyend": "939"
               },
               "definition": {
                 "simple_html": "op::AnyPatch diffAny(const Object&amp; src, const Object&amp; dst)",
@@ -2092,6 +2165,7 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffField",
               "argsstring_html": "(const Object &amp;src, const Object &amp;dst, FieldId id, DynamicStructPatch &amp;patch)",
               "name_html": "diffField",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffField",
               "param": [
                 {
                   "type_html": "const Object &amp;",
@@ -2112,11 +2186,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "623",
+                "line": "644",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "940",
-                "bodyend": "978"
+                "bodystart": "941",
+                "bodyend": "979"
               },
               "definition": {
                 "simple_html": "void diffField(\n    const Object&amp; src, const Object&amp; dst, FieldId id, DynamicStructPatch&amp; patch)",
@@ -2163,6 +2237,7 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffElement",
               "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst, const Value &amp;key, DynamicMapPatch &amp;patch)",
               "name_html": "diffElement",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffElement",
               "param": [
                 {
                   "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -2183,11 +2258,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "628",
+                "line": "649",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "800",
-                "bodyend": "827"
+                "bodystart": "801",
+                "bodyend": "828"
               },
               "definition": {
                 "simple_html": "void diffElement(\n    const detail::ValueMap&amp; src,\n    const detail::ValueMap&amp; dst,\n    const Value&amp; key,\n    DynamicMapPatch&amp; patch)",
@@ -2234,6 +2309,7 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushField",
               "argsstring_html": "(FieldId)",
               "name_html": "pushField",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushField",
               "param": [
                 {
                   "type_html": "FieldId",
@@ -2242,11 +2318,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "634",
+                "line": "655",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "980",
-                "bodyend": "985"
+                "bodystart": "981",
+                "bodyend": "986"
               },
               "definition": {
                 "simple_html": "void pushField(FieldId)",
@@ -2293,6 +2369,7 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushType",
               "argsstring_html": "(type::Type)",
               "name_html": "pushType",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushType",
               "param": [
                 {
                   "type_html": "type::Type",
@@ -2301,11 +2378,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "635",
+                "line": "656",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "987",
-                "bodyend": "992"
+                "bodystart": "988",
+                "bodyend": "993"
               },
               "definition": {
                 "simple_html": "void pushType(type::Type)",
@@ -2352,6 +2429,7 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushKey",
               "argsstring_html": "(const Value &amp;)",
               "name_html": "pushKey",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushKey",
               "param": [
                 {
                   "type_html": "const Value &amp;",
@@ -2360,11 +2438,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "636",
+                "line": "657",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "1011",
-                "bodyend": "1024"
+                "bodystart": "1012",
+                "bodyend": "1025"
               },
               "definition": {
                 "simple_html": "void pushKey(const Value&amp;)",
@@ -2411,13 +2489,14 @@
               "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pop",
               "argsstring_html": "()",
               "name_html": "pop",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pop",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "637",
+                "line": "658",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "1026",
-                "bodyend": "1029"
+                "bodystart": "1027",
+                "bodyend": "1030"
               },
               "definition": {
                 "simple_html": "void pop()",
@@ -2453,7 +2532,7 @@
           "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ac181e1aed31844dc91720422091c7241",
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ab100d71277a2e27cfd6afa2597cfd9c1",
               "prot": "protected",
               "static": "no",
               "const": "yes",
@@ -2461,23 +2540,24 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const Mask &amp;",
-              "definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+              "definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
               "argsstring_html": "() const",
               "name_html": "getCurrentPath",
+              "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "639",
+                "line": "660",
                 "column": "14",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "639",
-                "bodyend": "639"
+                "bodystart": "660",
+                "bodyend": "660"
               },
               "definition": {
                 "simple_html": "const Mask&amp; getCurrentPath() const",
                 "simple_raw": "const Mask& getCurrentPath() const",
                 "detailed_html": "protected inline const Mask&amp; getCurrentPath() const",
                 "detailed_raw": "protected inline const Mask& getCurrentPath() const",
-                "original_definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+                "original_definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/getCurrentPath",

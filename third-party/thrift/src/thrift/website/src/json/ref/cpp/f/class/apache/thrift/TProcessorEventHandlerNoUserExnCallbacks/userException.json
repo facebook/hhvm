@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::userException",
       "argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;)",
       "name_html": "userException",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::userException",
       "reimplementedby": [
         {
           "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a2a9c1e5c29f2713fd475e87f402abcb6",
@@ -72,6 +73,7 @@
       "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
       "argsstring_html": "(void *, const char *, const std::string &amp;, const std::string &amp;) final",
       "name_html": "userException",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userException",
       "reimplements": {
         "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1aa0a970d8a14ac6744a5f6de74f20bd09",
         "text_html": "userException"

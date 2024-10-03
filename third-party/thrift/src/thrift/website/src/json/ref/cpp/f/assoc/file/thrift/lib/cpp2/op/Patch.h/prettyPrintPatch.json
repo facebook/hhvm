@@ -20,6 +20,7 @@
       "definition_html": "std::string apache::thrift::op::prettyPrintPatch",
       "argsstring_html": "(const T &amp;obj, DebugProtocolWriter::Options options=DebugProtocolWriter::Options::simple())",
       "name_html": "prettyPrintPatch",
+      "qualifiedname_html": "apache::thrift::op::prettyPrintPatch",
       "param": [
         {
           "type_html": "const T &amp;",

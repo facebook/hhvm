@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::customVisit",
       "argsstring_html": "(Visitor &amp;&amp;v) const",
       "name_html": "customVisit",
+      "qualifiedname_html": "apache::thrift::op::detail::BoolPatch::customVisit",
       "param": [
         {
           "type_html": "Visitor &amp;&amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "206",
+        "line": "72",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "206",
-        "bodyend": "216"
+        "bodystart": "72",
+        "bodyend": "82"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",

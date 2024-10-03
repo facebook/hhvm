@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::patchIfSet",
       "argsstring_html": "(const FieldPatch &amp;patch)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::patchIfSet",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",

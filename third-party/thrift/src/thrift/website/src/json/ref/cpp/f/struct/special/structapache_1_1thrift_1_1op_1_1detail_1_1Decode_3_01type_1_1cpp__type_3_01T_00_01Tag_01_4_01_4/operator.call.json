@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, U &amp;m) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::cpp_type&lt; T, Tag &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
       "argsstring_html": "(const AdaptedType &amp;, const AdaptedType &amp;)",
       "name_html": "equal",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
       "param": [
         {
           "type_html": "const <code>AdaptedType</code> &amp;",
@@ -27,7 +28,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "112",
+        "line": "120",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "77",

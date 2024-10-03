@@ -15,6 +15,7 @@
       "definition_html": "protocol::Object apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toObject",
       "argsstring_html": "() const",
       "name_html": "toObject",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::toObject",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "131",

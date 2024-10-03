@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::exitContext",
       "argsstring_html": "(Hasher result)",
       "name_html": "exitContext",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::exitContext",
       "param": [
         {
           "type_html": "Hasher",

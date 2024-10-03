@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensureStruct",
       "argsstring_html": "(FieldId, Value)",
       "name_html": "ensureStruct",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensureStruct",
       "param": [
         {
           "type_html": "FieldId",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "411",
+        "line": "432",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "435",
-        "bodyend": "458"
+        "bodystart": "436",
+        "bodyend": "459"
       },
       "definition": {
         "simple_html": "void ensureStruct(FieldId, Value)",

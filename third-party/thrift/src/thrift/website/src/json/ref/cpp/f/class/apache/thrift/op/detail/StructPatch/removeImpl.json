@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::removeImpl",
       "argsstring_html": "()",
       "name_html": "removeImpl",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::removeImpl",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "152",

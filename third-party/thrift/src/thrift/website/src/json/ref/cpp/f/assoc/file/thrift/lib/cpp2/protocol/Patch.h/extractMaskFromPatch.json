@@ -15,6 +15,7 @@
       "definition_html": "ExtractedMasksFromPatch apache::thrift::protocol::extractMaskFromPatch",
       "argsstring_html": "(const protocol::Object &amp;patch)",
       "name_html": "extractMaskFromPatch",
+      "qualifiedname_html": "apache::thrift::protocol::extractMaskFromPatch",
       "param": [
         {
           "type_html": "const protocol::Object &amp;",

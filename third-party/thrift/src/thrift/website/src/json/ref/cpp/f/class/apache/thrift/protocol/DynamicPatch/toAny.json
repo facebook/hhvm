@@ -15,6 +15,7 @@
       "definition_html": "type::AnyStruct apache::thrift::protocol::DynamicPatch::toAny",
       "argsstring_html": "(detail::Badge, type::Type type) const",
       "name_html": "toAny",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::toAny",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "459",
+        "line": "480",
         "column": "19",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1407",
-        "bodyend": "1413"
+        "bodystart": "1408",
+        "bodyend": "1414"
       },
       "definition": {
         "simple_html": "type::AnyStruct toAny(detail::Badge, type::Type type) const",

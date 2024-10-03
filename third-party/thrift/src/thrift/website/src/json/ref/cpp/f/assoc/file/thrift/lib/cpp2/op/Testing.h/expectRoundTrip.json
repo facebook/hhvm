@@ -27,6 +27,7 @@
       "definition_html": "void apache::thrift::test::expectRoundTrip",
       "argsstring_html": "(const S &amp;seralizer, const T &amp;expected)",
       "name_html": "expectRoundTrip",
+      "qualifiedname_html": "apache::thrift::test::expectRoundTrip",
       "param": [
         {
           "type_html": "const S &amp;",

@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::~BasePatch",
       "argsstring_html": "()=default",
       "name_html": "~BasePatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::~BasePatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "141",

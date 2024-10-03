@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE apache::thrift::field_ref&lt; T &gt;::field_ref",
       "argsstring_html": "(reference_type value, typename BitRef::Isset &amp;is_set, const uint8_t bit_index=0) noexcept",
       "name_html": "field_ref",
+      "qualifiedname_html": "apache::thrift::field_ref::field_ref",
       "param": [
         {
           "type_html": "<code>reference_type</code>",
           "declname_html": "value"
         },
         {
-          "type_html": "typename <code>BitRef::Isset</code> &amp;",
+          "type_html": "typename BitRef::Isset &amp;",
           "declname_html": "is_set"
         },
         {
@@ -33,11 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "274",
+        "line": "277",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "274",
-        "bodyend": "278"
+        "bodystart": "277",
+        "bodyend": "281"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE field_ref(\n    reference_type value,\n    typename BitRef::Isset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -69,13 +70,14 @@
       "definition_html": "FOLLY_ERASE apache::thrift::field_ref&lt; T &gt;::field_ref",
       "argsstring_html": "(reference_type value, typename BitRef::AtomicIsset &amp;is_set, const uint8_t bit_index=0) noexcept",
       "name_html": "field_ref",
+      "qualifiedname_html": "apache::thrift::field_ref::field_ref",
       "param": [
         {
           "type_html": "<code>reference_type</code>",
           "declname_html": "value"
         },
         {
-          "type_html": "typename <code>BitRef::AtomicIsset</code> &amp;",
+          "type_html": "typename BitRef::AtomicIsset &amp;",
           "declname_html": "is_set"
         },
         {
@@ -86,11 +88,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "281",
+        "line": "284",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "281",
-        "bodyend": "285"
+        "bodystart": "284",
+        "bodyend": "288"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE field_ref(\n    reference_type value,\n    typename BitRef::AtomicIsset&amp; is_set,\n    const uint8_t bit_index = 0)",
@@ -131,6 +133,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::field_ref&lt; T &gt;::field_ref",
       "argsstring_html": "(const field_ref&lt; U &gt; &amp;other) noexcept",
       "name_html": "field_ref",
+      "qualifiedname_html": "apache::thrift::field_ref::field_ref",
       "param": [
         {
           "type_html": "const <code>field_ref</code>&lt; U &gt; &amp;",
@@ -139,11 +142,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "290",
+        "line": "293",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "290",
-        "bodyend": "291"
+        "bodystart": "293",
+        "bodyend": "294"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = apache::thrift::detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE field_ref(const field_ref&lt;U&gt;&amp; other)",

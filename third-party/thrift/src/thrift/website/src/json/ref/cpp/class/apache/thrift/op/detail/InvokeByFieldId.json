@@ -22,7 +22,7 @@
   ],
   "types": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ac43b5df1b160c196139db26979f7901f",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1afe09546c478c3cea574ad80efa540455",
       "prot": "private",
       "tparams": [
         {
@@ -32,15 +32,16 @@
         }
       ],
       "type_html": "<code>get_field_id</code>&lt;T, field_ordinal&lt;std::min(Ordinal, N)&gt;&gt;",
-      "definition_html": "using apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::OrdToFieldId =  get_field_id&lt;T, field_ordinal&lt;std::min(Ordinal, N)&gt; &gt;",
+      "definition_html": "using apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::OrdToFieldId =  get_field_id&lt;T, field_ordinal&lt;std::min(Ordinal, N)&gt;&gt;",
       "argsstring_html": "",
       "name_html": "OrdToFieldId",
+      "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::OrdToFieldId",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "281",
+        "line": "287",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "281",
+        "bodystart": "287",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId"
@@ -48,7 +49,7 @@
   ],
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1acb71b0ae6a63b474999a61abc78e3397",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1adf6a7be3a38dd726f4dbfbc5df79f1f3",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -65,10 +66,11 @@
           "defval_html": "false"
         }
       ],
-      "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-      "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+      "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
       "argsstring_html": "(FieldId id, F &amp;&amp;f) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
       "param": [
         {
           "type_html": "<code>FieldId</code>",
@@ -81,25 +83,25 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "287",
+        "line": "293",
         "column": "42",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "287",
-        "bodyend": "311"
+        "bodystart": "293",
+        "bodyend": "317"
       },
       "definition": {
-        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId id, F&amp;&amp; f) const",
-        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId id, F&& f) const",
-        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp; f) const",
-        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&& f) const",
-        "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId id, F&amp;&amp; f) const",
+        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId id, F&& f) const",
+        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp; f) const",
+        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&& f) const",
+        "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
         "original_argsstring_html": "(FieldId id, F &amp;&amp;f) const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ae3c02bb40779762227e753c53f9988fc",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ad0c4a0e24c214395ab973a2c0cfda087",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -116,10 +118,11 @@
           "defval_html": "false"
         }
       ],
-      "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-      "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+      "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
       "argsstring_html": "(FieldId, F &amp;&amp;f) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
       "param": [
         {
           "type_html": "<code>FieldId</code>"
@@ -131,25 +134,25 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "316",
+        "line": "322",
         "column": "42",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "316",
-        "bodyend": "320"
+        "bodystart": "322",
+        "bodyend": "326"
       },
       "definition": {
-        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId, F&amp;&amp; f) const",
-        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId, F&& f) const",
-        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId, F&amp;&amp; f) const",
-        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId, F&& f) const",
-        "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId, F&amp;&amp; f) const",
+        "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId, F&& f) const",
+        "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId, F&amp;&amp; f) const",
+        "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId, F&& f) const",
+        "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
         "original_argsstring_html": "(FieldId, F &amp;&amp;f) const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a28c6ea63c42d299e98a10f47d85a541a",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1afb1809192607b52931043596f4c028f1",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -164,10 +167,11 @@
           "defname_html": "F"
         }
       ],
-      "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-      "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+      "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+      "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
       "argsstring_html": "(FieldId id, F &amp;&amp;... f) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
       "param": [
         {
           "type_html": "<code>FieldId</code>",
@@ -180,18 +184,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "323",
+        "line": "329",
         "column": "42",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "323",
-        "bodyend": "326"
+        "bodystart": "329",
+        "bodyend": "332"
       },
       "definition": {
-        "simple_html": "template &lt;typename... F&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp;... f) const",
-        "simple_raw": "template <typename... F>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&&... f) const",
-        "detailed_html": "template &lt;typename... F&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp;... f) const",
-        "detailed_raw": "template <typename... F>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&&... f) const",
-        "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+        "simple_html": "template &lt;typename... F&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp;... f) const",
+        "simple_raw": "template <typename... F>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&&... f) const",
+        "detailed_html": "template &lt;typename... F&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp;... f) const",
+        "detailed_raw": "template <typename... F>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&&... f) const",
+        "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
         "original_argsstring_html": "(FieldId id, F &amp;&amp;... f) const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
@@ -200,11 +204,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "276",
+    "line": "282",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "276",
-    "bodyend": "327"
+    "bodystart": "282",
+    "bodyend": "333"
   },
   "namespacednames_html": [
     "apache",
@@ -221,17 +225,18 @@
       "static": "yes",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr auto",
-      "definition_html": "constexpr auto apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::N",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::N",
       "argsstring_html": "",
       "name_html": "N",
+      "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::N",
       "initializer_html": "= <code>size_v</code>&lt;T&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "277",
+        "line": "283",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "277",
+        "bodystart": "283",
         "bodyend": "-1"
       }
     }
@@ -251,7 +256,7 @@
           "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1acb71b0ae6a63b474999a61abc78e3397",
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1adf6a7be3a38dd726f4dbfbc5df79f1f3",
               "prot": "public",
               "static": "no",
               "constexpr": "yes",
@@ -268,10 +273,11 @@
                   "defval_html": "false"
                 }
               ],
-              "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-              "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+              "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
               "argsstring_html": "(FieldId id, F &amp;&amp;f) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
               "param": [
                 {
                   "type_html": "<code>FieldId</code>",
@@ -284,18 +290,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "287",
+                "line": "293",
                 "column": "42",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "287",
-                "bodyend": "311"
+                "bodystart": "293",
+                "bodyend": "317"
               },
               "definition": {
-                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId id, F&amp;&amp; f) const",
-                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId id, F&& f) const",
-                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp; f) const",
-                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&& f) const",
-                "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId id, F&amp;&amp; f) const",
+                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId id, F&& f) const",
+                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos != N, bool&gt; = false&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp; f) const",
+                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&& f) const",
+                "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
                 "original_argsstring_html": "(FieldId id, F &amp;&amp;f) const"
               },
               "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
@@ -304,7 +310,7 @@
               "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()"
             },
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ae3c02bb40779762227e753c53f9988fc",
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1ad0c4a0e24c214395ab973a2c0cfda087",
               "prot": "public",
               "static": "no",
               "constexpr": "yes",
@@ -321,10 +327,11 @@
                   "defval_html": "false"
                 }
               ],
-              "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-              "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+              "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
               "argsstring_html": "(FieldId, F &amp;&amp;f) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
               "param": [
                 {
                   "type_html": "<code>FieldId</code>"
@@ -336,18 +343,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "316",
+                "line": "322",
                 "column": "42",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "316",
-                "bodyend": "320"
+                "bodystart": "322",
+                "bodyend": "326"
               },
               "definition": {
-                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId, F&amp;&amp; f) const",
-                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE operator()(FieldId, F&& f) const",
-                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId, F&amp;&amp; f) const",
-                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId, F&& f) const",
-                "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "simple_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId, F&amp;&amp; f) const",
+                "simple_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(FieldId, F&& f) const",
+                "detailed_html": "template &lt;\n    typename F,\n    std::enable_if_t&lt;sizeof(F) != 0 &amp;&amp; pos == N, bool&gt; = false&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId, F&amp;&amp; f) const",
+                "detailed_raw": "template <\n    typename F,\n    std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId, F&& f) const",
+                "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
                 "original_argsstring_html": "(FieldId, F &amp;&amp;f) const"
               },
               "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",
@@ -356,7 +363,7 @@
               "compoundname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()"
             },
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1a28c6ea63c42d299e98a10f47d85a541a",
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1InvokeByFieldId_1afb1809192607b52931043596f4c028f1",
               "prot": "public",
               "static": "no",
               "constexpr": "yes",
@@ -371,10 +378,11 @@
                   "defname_html": "F"
                 }
               ],
-              "type_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE",
-              "definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+              "type_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto)",
+              "definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
               "argsstring_html": "(FieldId id, F &amp;&amp;... f) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::InvokeByFieldId::operator()",
               "param": [
                 {
                   "type_html": "<code>FieldId</code>",
@@ -387,18 +395,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "323",
+                "line": "329",
                 "column": "42",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "323",
-                "bodyend": "326"
+                "bodystart": "329",
+                "bodyend": "332"
               },
               "definition": {
-                "simple_html": "template &lt;typename... F&gt;\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp;... f) const",
-                "simple_raw": "template <typename... F>\nconstexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&&... f) const",
-                "detailed_html": "template &lt;typename... F&gt;\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&amp;&amp;... f) const",
-                "detailed_raw": "template <typename... F>\ninline constexpr decltype(auto) FOLLY_ALWAYS_INLINE\noperator()(FieldId id, F&&... f) const",
-                "original_definition_html": "constexpr decltype(auto) FOLLY_ALWAYS_INLINE apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
+                "simple_html": "template &lt;typename... F&gt;\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp;... f) const",
+                "simple_raw": "template <typename... F>\nFOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&&... f) const",
+                "detailed_html": "template &lt;typename... F&gt;\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&amp;&amp;... f) const",
+                "detailed_raw": "template <typename... F>\ninline FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(\n    FieldId id, F&&... f) const",
+                "original_definition_html": "FOLLY_ALWAYS_INLINE constexpr decltype(auto) apache::thrift::op::detail::InvokeByFieldId&lt; T, pos &gt;::operator()",
                 "original_argsstring_html": "(FieldId id, F &amp;&amp;... f) const"
               },
               "filepath": "fns/class/apache/thrift/op/detail/InvokeByFieldId/operator.call",

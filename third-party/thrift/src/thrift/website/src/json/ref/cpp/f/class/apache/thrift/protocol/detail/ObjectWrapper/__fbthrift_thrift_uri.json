@@ -15,6 +15,7 @@
       "definition_html": "template const char * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::__fbthrift_thrift_uri",
       "argsstring_html": "()",
       "name_html": "__fbthrift_thrift_uri",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::__fbthrift_thrift_uri",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
         "line": "46",

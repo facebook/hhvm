@@ -42,10 +42,11 @@
       "static": "yes",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr TType",
-      "definition_html": "constexpr TType apache::thrift::op::detail::TypeTagToTType&lt; type::cpp_type&lt; T, Tag &gt; &gt;::value",
+      "type_html": "TType",
+      "definition_html": "TType apache::thrift::op::detail::TypeTagToTType&lt; type::cpp_type&lt; T, Tag &gt; &gt;::value",
       "argsstring_html": "",
       "name_html": "value",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeTagToTType&lt; type::cpp_type&lt; T, Tag &gt; &gt;::value",
       "initializer_html": "= <code>TypeTagToTType</code>&lt;Tag&gt;::value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",

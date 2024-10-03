@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicSetPatch::insert",
       "argsstring_html": "(detail::Badge, Value v)",
       "name_html": "insert",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::insert",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "222",
+        "line": "243",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "222",
-        "bodyend": "231"
+        "bodystart": "243",
+        "bodyend": "252"
       },
       "definition": {
         "simple_html": "void insert(detail::Badge, Value v)",

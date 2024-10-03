@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
       "argsstring_html": "(const Base &amp;base)",
       "name_html": "ValueWrapper",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::ValueWrapper",
       "param": [
         {
           "type_html": "const Base &amp;",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "121",
+        "line": "117",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "121",
-        "bodyend": "121"
+        "bodystart": "117",
+        "bodyend": "117"
       },
       "definition": {
         "simple_html": "ValueWrapper(const Base&amp; base)",
@@ -55,6 +56,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::ValueWrapper",
       "argsstring_html": "(Base &amp;&amp;base)",
       "name_html": "ValueWrapper",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::ValueWrapper",
       "param": [
         {
           "type_html": "Base &amp;&amp;",
@@ -63,11 +65,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "122",
+        "line": "118",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "122",
-        "bodyend": "122"
+        "bodystart": "118",
+        "bodyend": "118"
       },
       "definition": {
         "simple_html": "ValueWrapper(Base&amp;&amp; base)",

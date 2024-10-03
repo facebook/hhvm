@@ -20,6 +20,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::ensureIf",
       "argsstring_html": "(bool cond, T &amp;self, const Dyn &amp;val, Ptr &amp;result)",
       "name_html": "ensureIf",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::ensureIf",
       "param": [
         {
           "type_html": "bool",

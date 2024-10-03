@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::append",
       "argsstring_html": "(C &amp;&amp;rhs)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListPatch::append",
       "param": [
         {
           "type_html": "C &amp;&amp;",

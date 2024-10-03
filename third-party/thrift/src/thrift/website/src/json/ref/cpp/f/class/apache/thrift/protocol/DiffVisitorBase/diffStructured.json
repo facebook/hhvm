@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a>",
       "definition_html": "DynamicPatch apache::thrift::protocol::DiffVisitorBase::diffStructured",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffStructured",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffStructured",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "616",
+        "line": "637",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "829",
-        "bodyend": "870"
+        "bodystart": "830",
+        "bodyend": "871"
       },
       "definition": {
         "simple_html": "virtual DynamicPatch diffStructured(const Object&amp; src, const Object&amp; dst)",

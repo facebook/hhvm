@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::I64Patch",
       "definition_html": "op::I64Patch apache::thrift::protocol::DiffVisitorBase::diffI64",
       "argsstring_html": "(std::int64_t src, std::int64_t dst)",
       "name_html": "diffI64",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI64",
       "param": [
         {
           "type_html": "std::int64_t",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "604",
+        "line": "625",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "659",
-        "bodyend": "661"
+        "bodystart": "660",
+        "bodyend": "662"
       },
       "definition": {
         "simple_html": "virtual op::I64Patch diffI64(std::int64_t src, std::int64_t dst)",

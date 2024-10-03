@@ -20,13 +20,14 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "227",
+        "line": "231",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "227",
-        "bodyend": "233"
+        "bodystart": "231",
+        "bodyend": "237"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid ensure()",
@@ -45,7 +46,7 @@
       "compoundname_html": "apache::thrift::op::detail::StructPatch::ensure"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1a984c887af81688005bcd4d7a2792cc88",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ae5ab6835bc3aa67087c9af7d0725fb2b",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -62,9 +63,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &gt;",
-      "definition_html": "std::enable_if_t&lt;type::is_optional_or_union_field_v&lt;T, Id&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+      "definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
       "argsstring_html": "(U &amp;&amp;defaultVal)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensure",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -73,18 +75,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "236",
+        "line": "240",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "236",
-        "bodyend": "252"
+        "bodystart": "240",
+        "bodyend": "256"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\nstd::enable_if_t&lt;type::is_optional_or_union_field_v&lt;T, Id&gt;&gt; ensure(\n    U&amp;&amp; defaultVal)",
         "simple_raw": "template <typename Id, typename U = FieldType<Id>>\nstd::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(\n    U&& defaultVal)",
         "detailed_html": "template &lt;typename Id, typename U = FieldType&lt;Id&gt;&gt;\ninline std::enable_if_t&lt;type::is_optional_or_union_field_v&lt;T, Id&gt;&gt; ensure(\n    U&amp;&amp; defaultVal)",
         "detailed_raw": "template <typename Id, typename U = FieldType<Id>>\ninline std::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(\n    U&& defaultVal)",
-        "original_definition_html": "std::enable_if_t&lt;type::is_optional_or_union_field_v&lt;T, Id&gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
+        "original_definition_html": "std::enable_if_t&lt; type::is_optional_or_union_field_v&lt; T, Id &gt; &gt; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensure",
         "original_argsstring_html": "(U &amp;&amp;defaultVal)"
       },
       "description": {

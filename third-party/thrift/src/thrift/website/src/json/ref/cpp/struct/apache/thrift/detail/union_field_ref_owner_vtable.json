@@ -17,12 +17,13 @@
       "definition_html": "using apache::thrift::detail::union_field_ref_owner_vtable::reset_t =  void(void*)",
       "argsstring_html": "",
       "name_html": "reset_t",
+      "qualifiedname_html": "apache::thrift::detail::union_field_ref_owner_vtable::reset_t",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1947",
+        "line": "2003",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1947",
+        "bodystart": "2003",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1detail_1_1union__field__ref__owner__vtable"
@@ -30,11 +31,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1946",
+    "line": "2002",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1946",
-    "bodyend": "1950"
+    "bodystart": "2002",
+    "bodyend": "2006"
   },
   "namespacednames_html": [
     "apache",
@@ -54,12 +55,13 @@
       "definition_html": "reset_t* apache::thrift::detail::union_field_ref_owner_vtable::reset",
       "argsstring_html": "",
       "name_html": "reset",
+      "qualifiedname_html": "apache::thrift::detail::union_field_ref_owner_vtable::reset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1949",
+        "line": "2005",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1949",
+        "bodystart": "2005",
         "bodyend": "-1"
       }
     }

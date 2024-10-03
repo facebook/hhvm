@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::getIntegral",
   "functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1protocol_1ae6a447ebd277f3695a297a2e17477d09",
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1afe9003fa503631505a3a934533e03574",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "no",
       "virtual": "non-virtual",
       "type_html": "std::optional&lt; std::int64_t &gt;",
-      "definition_html": "static std::optional&lt;std::int64_t&gt; apache::thrift::protocol::getIntegral",
+      "definition_html": "static std::optional&lt; std::int64_t &gt; apache::thrift::protocol::getIntegral",
       "argsstring_html": "(const Value &amp;v)",
       "name_html": "getIntegral",
+      "qualifiedname_html": "apache::thrift::protocol::getIntegral",
       "param": [
         {
           "type_html": "const Value &amp;",
@@ -23,18 +24,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "line": "994",
+        "line": "995",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "994",
-        "bodyend": "1009"
+        "bodystart": "995",
+        "bodyend": "1010"
       },
       "definition": {
         "simple_html": "static std::optional&lt;std::int64_t&gt; getIntegral(const Value&amp; v)",
         "simple_raw": "static std::optional<std::int64_t> getIntegral(const Value& v)",
         "detailed_html": "static std::optional&lt;std::int64_t&gt; getIntegral(const Value&amp; v)",
         "detailed_raw": "static std::optional<std::int64_t> getIntegral(const Value& v)",
-        "original_definition_html": "static std::optional&lt;std::int64_t&gt; apache::thrift::protocol::getIntegral",
+        "original_definition_html": "static std::optional&lt; std::int64_t &gt; apache::thrift::protocol::getIntegral",
         "original_argsstring_html": "(const Value &amp;v)"
       },
       "compoundname_html": "apache::thrift::protocol::getIntegral",

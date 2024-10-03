@@ -22,6 +22,7 @@
       "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::emplace_back",
       "argsstring_html": "(Args &amp;&amp;... args)",
       "name_html": "emplace_back",
+      "qualifiedname_html": "apache::thrift::op::detail::ListPatch::emplace_back",
       "param": [
         {
           "type_html": "Args &amp;&amp;...",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::StringOp::concat",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1ace24bfea7aac956b752762f2b04431da",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StringOp_1af69bac7f9a4e0ec0f473f8974cddc0a3",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -20,9 +20,10 @@
         }
       ],
       "type_html": "std::unique_ptr&lt; folly::IOBuf &gt;",
-      "definition_html": "static std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
+      "definition_html": "static std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
       "argsstring_html": "(T1 &amp;&amp;first, T2 &amp;&amp;second)",
       "name_html": "concat",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::concat",
       "param": [
         {
           "type_html": "T1 &amp;&amp;",
@@ -46,7 +47,7 @@
         "simple_raw": "template <typename T1, typename T2>\nstatic std::unique_ptr<folly::IOBuf> concat(T1&& first, T2&& second)",
         "detailed_html": "template &lt;typename T1, typename T2&gt;\ninline static std::unique_ptr&lt;folly::IOBuf&gt; concat(T1&amp;&amp; first, T2&amp;&amp; second)",
         "detailed_raw": "template <typename T1, typename T2>\ninline static std::unique_ptr<folly::IOBuf> concat(T1&& first, T2&& second)",
-        "original_definition_html": "static std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
+        "original_definition_html": "static std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::op::detail::StringOp&lt; Tag &gt;::concat",
         "original_argsstring_html": "(T1 &amp;&amp;first, T2 &amp;&amp;second)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/StringOp/concat",

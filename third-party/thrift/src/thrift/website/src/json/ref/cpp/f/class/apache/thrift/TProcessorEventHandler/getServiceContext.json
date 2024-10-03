@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::TProcessorEventHandler::getServiceContext",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1ae6609e871a278fe56a2195e8a6182967",
+      "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1ab2ed24b14cc631168d583374e496b880",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "virtual",
       "type_html": "void *",
-      "definition_html": "virtual void* apache::thrift::TProcessorEventHandler::getServiceContext",
+      "definition_html": "virtual void * apache::thrift::TProcessorEventHandler::getServiceContext",
       "argsstring_html": "(const char *, const char *fn_name, TConnectionContext *connectionContext)",
       "name_html": "getServiceContext",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::getServiceContext",
       "param": [
         {
           "type_html": "const char *"
@@ -41,7 +42,7 @@
         "simple_raw": "virtual void* getServiceContext(\n    const char*, const char* fn_name, TConnectionContext* connectionContext)",
         "detailed_html": "inline virtual void* getServiceContext(\n    const char*, const char* fn_name, TConnectionContext* connectionContext)",
         "detailed_raw": "inline virtual void* getServiceContext(\n    const char*, const char* fn_name, TConnectionContext* connectionContext)",
-        "original_definition_html": "virtual void* apache::thrift::TProcessorEventHandler::getServiceContext",
+        "original_definition_html": "virtual void * apache::thrift::TProcessorEventHandler::getServiceContext",
         "original_argsstring_html": "(const char *, const char *fn_name, TConnectionContext *connectionContext)"
       },
       "description": {

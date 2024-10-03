@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::remove",
       "argsstring_html": "(C &amp;&amp;keys)",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::SetPatch::remove",
       "param": [
         {
           "type_html": "C &amp;&amp;",

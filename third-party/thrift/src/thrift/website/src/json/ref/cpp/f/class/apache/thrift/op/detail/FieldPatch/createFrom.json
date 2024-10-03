@@ -20,6 +20,7 @@
       "definition_html": "static FieldPatch apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::createFrom",
       "argsstring_html": "(T &amp;&amp;val)",
       "name_html": "createFrom",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::createFrom",
       "param": [
         {
           "type_html": "T &amp;&amp;",

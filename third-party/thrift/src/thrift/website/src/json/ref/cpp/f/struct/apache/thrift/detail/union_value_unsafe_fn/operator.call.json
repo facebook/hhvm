@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::detail::union_value_unsafe_fn::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1detail_1_1union__value__unsafe__fn_1ad90e4da2540d6cade896c586faae2ba4",
+      "refid": "structapache_1_1thrift_1_1detail_1_1union__value__unsafe__fn_1acef360c86ea26b84f1cd5596b0ce2b42",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "auto &amp;&amp;",
-      "definition_html": "auto&amp;&amp; apache::thrift::detail::union_value_unsafe_fn::operator()",
+      "definition_html": "auto &amp;&amp; apache::thrift::detail::union_value_unsafe_fn::operator()",
       "argsstring_html": "(union_field_ref&lt; T &gt; ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::detail::union_value_unsafe_fn::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/union_field_ref\">union_field_ref</a>&lt; T &gt;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2243",
+        "line": "2299",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2243",
-        "bodyend": "2246"
+        "bodystart": "2299",
+        "bodyend": "2302"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nauto&amp;&amp; operator()(union_field_ref&lt;T&gt; ref) const",
         "simple_raw": "template <typename T>\nauto&& operator()(union_field_ref<T> ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto&amp;&amp; operator()(union_field_ref&lt;T&gt; ref) const",
         "detailed_raw": "template <typename T>\ninline auto&& operator()(union_field_ref<T> ref) const",
-        "original_definition_html": "auto&amp;&amp; apache::thrift::detail::union_value_unsafe_fn::operator()",
+        "original_definition_html": "auto &amp;&amp; apache::thrift::detail::union_value_unsafe_fn::operator()",
         "original_argsstring_html": "(union_field_ref&lt; T &gt; ref) const"
       },
       "filepath": "fns/struct/apache/thrift/detail/union_value_unsafe_fn/operator.call",

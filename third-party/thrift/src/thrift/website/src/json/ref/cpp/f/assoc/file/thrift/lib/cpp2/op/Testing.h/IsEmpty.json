@@ -20,6 +20,7 @@
       "definition_html": "auto apache::thrift::test::IsEmpty",
       "argsstring_html": "()",
       "name_html": "IsEmpty",
+      "qualifiedname_html": "apache::thrift::test::IsEmpty",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "88",

@@ -20,6 +20,7 @@
       "definition_html": "bool apache::thrift::op::detail::UnionLessThan&lt; LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::UnionLessThan::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "716",
+        "line": "732",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "716",
-        "bodyend": "732"
+        "bodystart": "732",
+        "bodyend": "748"
       },
       "definition": {
         "simple_html": "template &lt;class T&gt;\nbool operator()(const T&amp; lhs, const T&amp; rhs) const",

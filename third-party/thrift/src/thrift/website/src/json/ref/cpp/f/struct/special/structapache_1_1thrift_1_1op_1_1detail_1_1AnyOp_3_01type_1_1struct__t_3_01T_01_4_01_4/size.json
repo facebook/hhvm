@@ -15,6 +15,7 @@
       "definition_html": "static size_t apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::size",
       "argsstring_html": "(const void *)",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::size",
       "param": [
         {
           "type_html": "const void *"

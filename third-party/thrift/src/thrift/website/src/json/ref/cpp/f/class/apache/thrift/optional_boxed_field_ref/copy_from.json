@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_boxed_field_ref&lt; T &gt;::copy_from",
       "argsstring_html": "(const optional_boxed_field_ref&lt; U &gt; &amp;other)",
       "name_html": "copy_from",
+      "qualifiedname_html": "apache::thrift::optional_boxed_field_ref::copy_from",
       "param": [
         {
           "type_html": "const <code>optional_boxed_field_ref</code>&lt; U &gt; &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "901",
+        "line": "913",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "901",
-        "bodyend": "903"
+        "bodystart": "913",
+        "bodyend": "915"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const optional_boxed_field_ref&lt;U&gt;&amp; other)",

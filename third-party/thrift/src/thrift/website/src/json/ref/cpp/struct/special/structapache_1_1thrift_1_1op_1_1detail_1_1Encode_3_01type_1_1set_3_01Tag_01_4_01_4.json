@@ -77,6 +77,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;set) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::SetEncode::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

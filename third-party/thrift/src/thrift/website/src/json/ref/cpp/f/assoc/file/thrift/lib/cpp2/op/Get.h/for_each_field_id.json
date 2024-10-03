@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::for_each_field_id",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_field_id",
+      "qualifiedname_html": "apache::thrift::op::for_each_field_id",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -31,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "83",
+        "line": "84",
         "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "83",
-        "bodyend": "85"
+        "bodystart": "84",
+        "bodyend": "86"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_field_id(F&amp;&amp; f)",

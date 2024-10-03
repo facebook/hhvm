@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::assign",
       "argsstring_html": "(detail::Badge, Object v)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::assign",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "362",
+        "line": "383",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "362",
-        "bodyend": "365"
+        "bodystart": "383",
+        "bodyend": "386"
       },
       "definition": {
         "simple_html": "void assign(detail::Badge, Object v)",

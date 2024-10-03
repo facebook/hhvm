@@ -15,9 +15,10 @@
       "definition_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch",
       "argsstring_html": "()",
       "name_html": "~DynamicPatch",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::~DynamicPatch",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "452",
+        "line": "473",
         "column": "3"
       },
       "definition": {

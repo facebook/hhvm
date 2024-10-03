@@ -36,6 +36,7 @@
       "definition_html": "Mask apache::thrift::protocol::ExtractedMasksFromPatch::read",
       "argsstring_html": "",
       "name_html": "read",
+      "qualifiedname_html": "apache::thrift::protocol::ExtractedMasksFromPatch::read",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
         "line": "89",
@@ -54,6 +55,7 @@
       "definition_html": "Mask apache::thrift::protocol::ExtractedMasksFromPatch::write",
       "argsstring_html": "",
       "name_html": "write",
+      "qualifiedname_html": "apache::thrift::protocol::ExtractedMasksFromPatch::write",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
         "line": "90",

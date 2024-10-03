@@ -15,6 +15,7 @@
       "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
       "argsstring_html": "(const DynamicPatch &amp;)",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::operator=",
       "param": [
         {
           "type_html": "const <code>DynamicPatch</code> &amp;",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "448",
+        "line": "469",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1399",
-        "bodyend": "1402"
+        "bodystart": "1400",
+        "bodyend": "1403"
       },
       "definition": {
         "simple_html": "DynamicPatch&amp; operator=(const DynamicPatch&amp;)",
@@ -55,6 +56,7 @@
       "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicPatch::operator=",
       "argsstring_html": "(DynamicPatch &amp;&amp;) noexcept",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::operator=",
       "param": [
         {
           "type_html": "<code>DynamicPatch</code> &amp;&amp;",
@@ -63,7 +65,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "451",
+        "line": "472",
         "column": "16"
       },
       "definition": {

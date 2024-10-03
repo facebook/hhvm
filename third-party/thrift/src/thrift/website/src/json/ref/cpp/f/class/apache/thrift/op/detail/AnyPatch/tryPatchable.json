@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::tryPatchable",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1aa7a5e65659cbd51645cc0042058ad347",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1aa5c02921c7ec2e2bc4317546956706fd",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -17,23 +17,24 @@
         }
       ],
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::tryPatchable",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::tryPatchable",
       "argsstring_html": "()",
       "name_html": "tryPatchable",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::tryPatchable",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "261",
+        "line": "286",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "261",
-        "bodyend": "265"
+        "bodystart": "286",
+        "bodyend": "290"
       },
       "definition": {
         "simple_html": "template &lt;typename VPatch&gt;\nvoid tryPatchable()",
         "simple_raw": "template <typename VPatch>\nvoid tryPatchable()",
         "detailed_html": "template &lt;typename VPatch&gt; private inline void tryPatchable()",
         "detailed_raw": "template <typename VPatch> private inline void tryPatchable()",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::tryPatchable",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::tryPatchable",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/tryPatchable",
@@ -42,7 +43,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyPatch::tryPatchable"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ae0123e9d18ec581a7f8f42f9ee9f5cc0",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a6203a8c728ee0175107199d56b79f3de",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -50,9 +51,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::tryPatchable",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::tryPatchable",
       "argsstring_html": "(const type::Type &amp;type)",
       "name_html": "tryPatchable",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::tryPatchable",
       "param": [
         {
           "type_html": "const type::Type &amp;",
@@ -61,18 +63,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "266",
+        "line": "291",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "266",
-        "bodyend": "275"
+        "bodystart": "291",
+        "bodyend": "300"
       },
       "definition": {
         "simple_html": "void tryPatchable(const type::Type&amp; type)",
         "simple_raw": "void tryPatchable(const type::Type& type)",
         "detailed_html": "private inline void tryPatchable(const type::Type&amp; type)",
         "detailed_raw": "private inline void tryPatchable(const type::Type& type)",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::tryPatchable",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::tryPatchable",
         "original_argsstring_html": "(const type::Type &amp;type)"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/tryPatchable",

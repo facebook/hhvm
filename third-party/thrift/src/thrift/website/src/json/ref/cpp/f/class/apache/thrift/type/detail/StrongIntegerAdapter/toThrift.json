@@ -15,6 +15,7 @@
       "definition_html": "static T apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::toThrift",
       "argsstring_html": "(StrongInteger t)",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::toThrift",
       "param": [
         {
           "type_html": "StrongInteger",

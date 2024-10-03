@@ -15,9 +15,10 @@
       "definition_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "argsstring_html": "()=default",
       "name_html": "IntWrapper",
+      "qualifiedname_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "69",
+        "line": "70",
         "column": "3"
       },
       "definition": {
@@ -46,6 +47,7 @@
       "definition_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "argsstring_html": "(const IntWrapper &amp;other) noexcept",
       "name_html": "IntWrapper",
+      "qualifiedname_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/detail/IntWrapper\">IntWrapper</a> &amp;",
@@ -54,11 +56,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "71",
+        "line": "72",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "71",
-        "bodyend": "72"
+        "bodystart": "72",
+        "bodyend": "73"
       },
       "definition": {
         "simple_html": "IntWrapper(const IntWrapper&amp; other)",
@@ -86,6 +88,7 @@
       "definition_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "argsstring_html": "(IntWrapper &amp;&amp;other) noexcept",
       "name_html": "IntWrapper",
+      "qualifiedname_html": "apache::thrift::detail::IntWrapper&lt; std::atomic&lt; U &gt; &gt;::IntWrapper",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/detail/IntWrapper\">IntWrapper</a> &amp;&amp;",
@@ -94,11 +97,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "73",
+        "line": "74",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "73",
-        "bodyend": "74"
+        "bodystart": "74",
+        "bodyend": "75"
       },
       "definition": {
         "simple_html": "IntWrapper(IntWrapper&amp;&amp; other)",

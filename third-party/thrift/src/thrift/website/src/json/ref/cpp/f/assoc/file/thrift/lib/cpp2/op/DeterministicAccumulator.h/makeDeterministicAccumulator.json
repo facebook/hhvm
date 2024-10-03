@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeDeterministicAccumulator",
       "argsstring_html": "()",
       "name_html": "makeDeterministicAccumulator",
+      "qualifiedname_html": "apache::thrift::op::makeDeterministicAccumulator",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "162",

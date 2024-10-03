@@ -15,6 +15,7 @@
       "definition_html": "virtual bool apache::thrift::TProcessorEventHandler::wantNonPerRequestCallbacks",
       "argsstring_html": "() const",
       "name_html": "wantNonPerRequestCallbacks",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::wantNonPerRequestCallbacks",
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "line": "144",

@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::StdHasher::operator&lt;",
       "argsstring_html": "(const StdHasher &amp;other) const",
       "name_html": "operator&lt;",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::operator&lt;",
       "param": [
         {
           "type_html": "const <code>StdHasher</code> &amp;",

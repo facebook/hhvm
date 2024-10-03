@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::applyPatch",
       "argsstring_html": "(T &amp;val, const P &amp;patch) const",
       "name_html": "applyPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::applyPatch",
       "param": [
         {
           "type_html": "T &amp;",

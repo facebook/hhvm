@@ -20,6 +20,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readBinary",
       "argsstring_html": "(String_ &amp;str)",
       "name_html": "readBinary",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readBinary",
       "param": [
         {
           "type_html": "String_ &amp;",

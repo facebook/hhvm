@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::ensureAny",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ad97cb80e6c8826c94b61d73e7ed87d41",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ab298c01a800633a05bd759652bd9d7b2",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensureAny",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensureAny",
       "argsstring_html": "(type::AnyStruct ensureAny)",
       "name_html": "ensureAny",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::ensureAny",
       "param": [
         {
           "type_html": "type::AnyStruct",
@@ -23,18 +24,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "179",
+        "line": "188",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "179",
-        "bodyend": "192"
+        "bodystart": "188",
+        "bodyend": "201"
       },
       "definition": {
         "simple_html": "void ensureAny(type::AnyStruct ensureAny)",
         "simple_raw": "void ensureAny(type::AnyStruct ensureAny)",
         "detailed_html": "inline void ensureAny(type::AnyStruct ensureAny)",
         "detailed_raw": "inline void ensureAny(type::AnyStruct ensureAny)",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensureAny",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensureAny",
         "original_argsstring_html": "(type::AnyStruct ensureAny)"
       },
       "description": {

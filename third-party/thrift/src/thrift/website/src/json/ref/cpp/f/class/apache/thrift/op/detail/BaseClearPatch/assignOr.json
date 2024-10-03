@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::BaseClearPatch::assignOr",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseAssignPatch_1a9b5f99a7c02d528ea74589ffc8e039c3",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseAssignPatch_1a4912851a3714a897d6e21c77c400a160",
       "prot": "protected",
       "static": "no",
       "const": "no",
@@ -13,9 +13,10 @@
       "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_NODISCARD <code>value_type</code> &amp;",
-      "definition_html": "FOLLY_NODISCARD value_type&amp; apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::assignOr",
+      "definition_html": "FOLLY_NODISCARD value_type &amp; apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::assignOr",
       "argsstring_html": "(value_type &amp;value) noexcept",
       "name_html": "assignOr",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::assignOr",
       "param": [
         {
           "type_html": "<code>value_type</code> &amp;",
@@ -35,7 +36,7 @@
         "simple_raw": "FOLLY_NODISCARD value_type& assignOr(value_type& value)",
         "detailed_html": "protected inline FOLLY_NODISCARD value_type&amp; assignOr(\n    value_type&amp; value) noexcept",
         "detailed_raw": "protected inline FOLLY_NODISCARD value_type& assignOr(\n    value_type& value) noexcept",
-        "original_definition_html": "FOLLY_NODISCARD value_type&amp; apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::assignOr",
+        "original_definition_html": "FOLLY_NODISCARD value_type &amp; apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::assignOr",
         "original_argsstring_html": "(value_type &amp;value) noexcept"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BaseAssignPatch/assignOr",

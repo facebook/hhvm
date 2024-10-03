@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE bool apache::thrift::field_ref&lt; T &gt;::is_set",
       "argsstring_html": "() const noexcept",
       "name_html": "is_set",
+      "qualifiedname_html": "apache::thrift::field_ref::is_set",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "329",
+        "line": "339",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "329",
-        "bodyend": "329"
+        "bodystart": "339",
+        "bodyend": "341"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool is_set() const",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::endOrdered",
       "argsstring_html": "()",
       "name_html": "endOrdered",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::endOrdered",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "126",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::Xxh64Hasher::finalize",
       "argsstring_html": "()",
       "name_html": "finalize",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::finalize",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "62",

@@ -11,17 +11,19 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "size_t",
       "definition_html": "size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::size",
       "argsstring_html": "() const",
       "name_html": "size",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::size",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "92",
+        "line": "88",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "92",
-        "bodyend": "92"
+        "bodystart": "88",
+        "bodyend": "88"
       },
       "definition": {
         "simple_html": "size_t size() const",

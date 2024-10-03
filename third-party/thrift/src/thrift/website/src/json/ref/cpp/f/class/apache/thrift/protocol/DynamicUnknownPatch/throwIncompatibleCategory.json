@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory",
       "argsstring_html": "(std::string_view method) const",
       "name_html": "throwIncompatibleCategory",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicUnknownPatch::throwIncompatibleCategory",
       "param": [
         {
           "type_html": "std::string_view",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "168",
+        "line": "189",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1250",
-        "bodyend": "1256"
+        "bodystart": "1251",
+        "bodyend": "1257"
       },
       "definition": {
         "simple_html": "void throwIncompatibleCategory(std::string_view method) const",

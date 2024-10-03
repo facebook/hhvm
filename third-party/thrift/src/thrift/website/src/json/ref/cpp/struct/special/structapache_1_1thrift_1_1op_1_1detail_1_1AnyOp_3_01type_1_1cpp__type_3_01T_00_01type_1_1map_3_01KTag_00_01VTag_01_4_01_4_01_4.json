@@ -54,6 +54,7 @@
       "definition_html": "using apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::T =  type::native_type&lt;Tag&gt;",
       "argsstring_html": "",
       "name_html": "T",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "178",
@@ -71,6 +72,7 @@
       "definition_html": "using apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::K =  type::native_type&lt;KTag&gt;",
       "argsstring_html": "",
       "name_html": "K",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::K",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "179",
@@ -88,6 +90,7 @@
       "definition_html": "using apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::V =  type::native_type&lt;VTag&gt;",
       "argsstring_html": "",
       "name_html": "V",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::V",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "180",
@@ -105,6 +108,7 @@
       "definition_html": "using apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::Base =  ContainerOp&lt;Tag&gt;",
       "argsstring_html": "",
       "name_html": "Base",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::Base",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "181",
@@ -122,6 +126,7 @@
       "definition_html": "using apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::I =  typename T::iterator",
       "argsstring_html": "",
       "name_html": "I",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::I",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerOp.h",
         "line": "38",
@@ -172,6 +177,7 @@
               "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
               "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
               "name_html": "put",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -219,6 +225,7 @@
               "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
               "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
               "name_html": "put",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
               "param": [
                 {
                   "type_html": "void *",
@@ -281,7 +288,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ensure",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a499c99a8c48b39f2a33c607e2b8790ba",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a5f51ad5ad41a95d1f9d7e064da4106f6",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -299,9 +306,10 @@
                 }
               ],
               "type_html": "<code>V</code> &amp;",
-              "definition_html": "static V&amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+              "definition_html": "static V &amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
               "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ensure",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -329,7 +337,7 @@
                 "simple_raw": "template <typename J = K, typename U = V>\nstatic V& ensure(T& self, J&& key, U&& val)",
                 "detailed_html": "template &lt;typename J = K, typename U = V&gt;\ninline static V&amp; ensure(T&amp; self, J&amp;&amp; key, U&amp;&amp; val)",
                 "detailed_raw": "template <typename J = K, typename U = V>\ninline static V& ensure(T& self, J&& key, U&& val)",
-                "original_definition_html": "static V&amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+                "original_definition_html": "static V &amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
                 "original_argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ensure",
@@ -349,6 +357,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
               "argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ensure",
               "param": [
                 {
                   "type_html": "void *",
@@ -419,6 +428,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::get",
               "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k)",
               "name_html": "get",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::get",
               "param": [
                 {
                   "type_html": "void *",
@@ -493,6 +503,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
               "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
               "name_html": "next",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
               "param": [
                 {
                   "type_html": "ITag",
@@ -540,6 +551,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
               "argsstring_html": "(T &amp;self, IterType type, typename T::iterator &amp;itr)",
               "name_html": "next",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -587,6 +599,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
               "argsstring_html": "(void *s, IterType type, std::any &amp;i)",
               "name_html": "next",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
               "param": [
                 {
                   "type_html": "void *",
@@ -643,7 +656,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a666ad554bc4fc33af3f334e3964a8f70",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a797c8731f5367068db0fa3912e9bd9b8",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -651,9 +664,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>I</code> &amp;",
-              "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+              "definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
               "argsstring_html": "(T &amp;self, std::any &amp;i)",
               "name_html": "iter",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::iter",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -677,7 +691,7 @@
                 "simple_raw": "static I& iter(T& self, std::any& i)",
                 "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
                 "detailed_raw": "inline static I& iter(T& self, std::any& i)",
-                "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+                "original_definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
                 "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/iter",
@@ -686,7 +700,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::iter"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a666ad554bc4fc33af3f334e3964a8f70",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a797c8731f5367068db0fa3912e9bd9b8",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -694,9 +708,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>I</code> &amp;",
-              "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+              "definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
               "argsstring_html": "(T &amp;self, std::any &amp;i)",
               "name_html": "iter",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::iter",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -720,7 +735,7 @@
                 "simple_raw": "static I& iter(T& self, std::any& i)",
                 "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
                 "detailed_raw": "inline static I& iter(T& self, std::any& i)",
-                "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+                "original_definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
                 "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/MapOp/iter",
@@ -749,7 +764,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a51f90237dfd720c01f1c875b612a1575",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -757,9 +772,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
               "param": [
                 {
                   "type_html": "void *",
@@ -779,7 +795,7 @@
                 "simple_raw": "static T& ref(void* ptr)",
                 "detailed_html": "inline static T&amp; ref(void* ptr)",
                 "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -788,7 +804,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a824275fe00ce416814fcb4aabc68b264",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -796,9 +812,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -818,7 +835,7 @@
                 "simple_raw": "static const T& ref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; ref(const void* ptr)",
                 "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -827,7 +844,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a51f90237dfd720c01f1c875b612a1575",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -835,9 +852,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ref",
               "param": [
                 {
                   "type_html": "void *",
@@ -857,7 +875,7 @@
                 "simple_raw": "static T& ref(void* ptr)",
                 "detailed_html": "inline static T&amp; ref(void* ptr)",
                 "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
@@ -866,7 +884,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a824275fe00ce416814fcb4aabc68b264",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -874,9 +892,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -896,7 +915,7 @@
                 "simple_raw": "static const T& ref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; ref(const void* ptr)",
                 "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/ref",
@@ -905,7 +924,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a51f90237dfd720c01f1c875b612a1575",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -913,9 +932,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<code>T</code> &amp;",
-              "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ref",
               "param": [
                 {
                   "type_html": "void *",
@@ -935,7 +955,7 @@
                 "simple_raw": "static T& ref(void* ptr)",
                 "detailed_html": "inline static T&amp; ref(void* ptr)",
                 "detailed_raw": "inline static T& ref(void* ptr)",
-                "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
@@ -944,7 +964,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::ref"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a824275fe00ce416814fcb4aabc68b264",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -952,9 +972,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "ref",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -974,7 +995,7 @@
                 "simple_raw": "static const T& ref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; ref(const void* ptr)",
                 "detailed_raw": "inline static const T& ref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ref",
@@ -1022,6 +1043,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;&amp;",
@@ -1069,6 +1091,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(RTag, T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ret",
               "param": [
                 {
                   "type_html": "RTag"
@@ -1119,6 +1142,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ret",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;&amp;",
@@ -1166,6 +1190,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(RTag, T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::ret",
               "param": [
                 {
                   "type_html": "RTag"
@@ -1216,6 +1241,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ret",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;&amp;",
@@ -1263,6 +1289,7 @@
               "definition_html": "static Ptr apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ret",
               "argsstring_html": "(RTag, T &amp;&amp;val)",
               "name_html": "ret",
+              "qualifiedname_html": "apache::thrift::op::detail::MapOp::ret",
               "param": [
                 {
                   "type_html": "RTag"
@@ -1325,6 +1352,7 @@
               "definition_html": "static size_t apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::size",
               "argsstring_html": "(const void *s)",
               "name_html": "size",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::size",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1384,6 +1412,7 @@
               "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
               "argsstring_html": "(T &amp;self, size_t pos)",
               "name_html": "find",
+              "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -1436,7 +1465,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::cref",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1444,9 +1473,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const <code>T</code> &amp;",
-              "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+              "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
               "argsstring_html": "(const void *ptr)",
               "name_html": "cref",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1466,7 +1496,7 @@
                 "simple_raw": "static const T& cref(const void* ptr)",
                 "detailed_html": "inline static const T&amp; cref(const void* ptr)",
                 "detailed_raw": "inline static const T& cref(const void* ptr)",
-                "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+                "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
                 "original_argsstring_html": "(const void *ptr)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -1506,6 +1536,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::delete_",
               "argsstring_html": "(void *ptr)",
               "name_html": "delete_",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::delete_",
               "param": [
                 {
                   "type_html": "void *",
@@ -1554,7 +1585,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::make",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ac3285228ad98a3ae7dc4256740217dcb",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ab2f91a5a30b9f79cf59eb5a42163c2cb",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -1562,9 +1593,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "void *",
-              "definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+              "definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
               "argsstring_html": "(void *ptr, bool consume)",
               "name_html": "make",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::make",
               "param": [
                 {
                   "type_html": "void *",
@@ -1588,7 +1620,7 @@
                 "simple_raw": "static void* make(void* ptr, bool consume)",
                 "detailed_html": "inline static void* make(void* ptr, bool consume)",
                 "detailed_raw": "inline static void* make(void* ptr, bool consume)",
-                "original_definition_html": "static void* apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
+                "original_definition_html": "static void * apache::thrift::op::detail::BaseOp&lt; Tag &gt;::make",
                 "original_argsstring_html": "(void *ptr, bool consume)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/make",
@@ -1628,6 +1660,7 @@
               "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::empty",
               "argsstring_html": "(const void *ptr)",
               "name_html": "empty",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::empty",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1687,6 +1720,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::clear",
               "argsstring_html": "(void *ptr)",
               "name_html": "clear",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::clear",
               "param": [
                 {
                   "type_html": "void *",
@@ -1746,6 +1780,7 @@
               "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
               "argsstring_html": "(void *ptr, const Dyn &amp;val)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
               "param": [
                 {
                   "type_html": "void *",
@@ -1809,6 +1844,7 @@
               "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
               "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
               "name_html": "identical",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1872,6 +1908,7 @@
               "definition_html": "static folly::partial_ordering apache::thrift::op::detail::BaseOp&lt; Tag &gt;::compare",
               "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
               "name_html": "compare",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::compare",
               "param": [
                 {
                   "type_html": "const void *",
@@ -1924,7 +1961,7 @@
           "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::partialCmp",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a003e01decf8f373784ebf4694238816b",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a819462f6ca807354a220bd8ebf42922a",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -1937,9 +1974,10 @@
                 }
               ],
               "type_html": "<code>if_comparable</code>&lt; UTag &gt;",
-              "definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+              "definition_html": "static if_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
               "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
               "name_html": "partialCmp",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::partialCmp",
               "param": [
                 {
                   "type_html": "const <code>T</code> &amp;",
@@ -1963,7 +2001,7 @@
                 "simple_raw": "template <typename UTag>\nstatic if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
                 "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_comparable&lt;UTag&gt; partialCmp(const T&amp; lhs, const T&amp; rhs)",
                 "detailed_raw": "template <typename UTag>\nprivate inline static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
-                "original_definition_html": "static if_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+                "original_definition_html": "static if_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
                 "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",
@@ -1972,7 +2010,7 @@
               "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::cpp_type&lt; T, type::map&lt; KTag, VTag &gt; &gt; &gt;::partialCmp"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1adc9774008343ebca274479f96324051e",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ada8a74dab2d536f4749df3b65509d4a9",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -1985,9 +2023,10 @@
                 }
               ],
               "type_html": "<code>if_not_comparable</code>&lt; UTag &gt;",
-              "definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+              "definition_html": "static if_not_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
               "argsstring_html": "(const T &amp;lhs, const T &amp;rhs)",
               "name_html": "partialCmp",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseOp::partialCmp",
               "param": [
                 {
                   "type_html": "const <code>T</code> &amp;",
@@ -2011,7 +2050,7 @@
                 "simple_raw": "template <typename UTag>\nstatic if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs)",
                 "detailed_html": "template &lt;typename UTag&gt;\nprivate inline static if_not_comparable&lt;UTag&gt; partialCmp(\n    const T&amp; lhs, const T&amp; rhs)",
                 "detailed_raw": "template <typename UTag>\nprivate inline static if_not_comparable<UTag> partialCmp(\n    const T& lhs, const T& rhs)",
-                "original_definition_html": "static if_not_comparable&lt;UTag&gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
+                "original_definition_html": "static if_not_comparable&lt; UTag &gt; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::partialCmp",
                 "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/partialCmp",

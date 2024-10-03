@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::FloatPatch",
       "definition_html": "op::FloatPatch apache::thrift::protocol::DiffVisitorBase::diffFloat",
       "argsstring_html": "(float src, float dst)",
       "name_html": "diffFloat",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffFloat",
       "param": [
         {
           "type_html": "float",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "606",
+        "line": "627",
         "column": "27",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "663",
-        "bodyend": "665"
+        "bodystart": "664",
+        "bodyend": "666"
       },
       "definition": {
         "simple_html": "virtual op::FloatPatch diffFloat(float src, float dst)",

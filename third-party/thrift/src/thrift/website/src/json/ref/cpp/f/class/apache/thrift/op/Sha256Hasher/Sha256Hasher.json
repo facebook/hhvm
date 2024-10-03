@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::Sha256Hasher::Sha256Hasher",
       "argsstring_html": "()",
       "name_html": "Sha256Hasher",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::Sha256Hasher",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "34",

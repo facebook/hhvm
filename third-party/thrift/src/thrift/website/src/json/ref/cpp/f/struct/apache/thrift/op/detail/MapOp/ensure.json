@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::MapOp::ensure",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a499c99a8c48b39f2a33c607e2b8790ba",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a5f51ad5ad41a95d1f9d7e064da4106f6",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -22,9 +22,10 @@
         }
       ],
       "type_html": "<code>V</code> &amp;",
-      "definition_html": "static V&amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+      "definition_html": "static V &amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
       "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::ensure",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -52,7 +53,7 @@
         "simple_raw": "template <typename J = K, typename U = V>\nstatic V& ensure(T& self, J&& key, U&& val)",
         "detailed_html": "template &lt;typename J = K, typename U = V&gt;\ninline static V&amp; ensure(T&amp; self, J&amp;&amp; key, U&amp;&amp; val)",
         "detailed_raw": "template <typename J = K, typename U = V>\ninline static V& ensure(T& self, J&& key, U&& val)",
-        "original_definition_html": "static V&amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
+        "original_definition_html": "static V &amp; apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
         "original_argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapOp/ensure",
@@ -72,6 +73,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::ensure",
       "argsstring_html": "(void *s, FieldId, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::ensure",
       "param": [
         {
           "type_html": "void *",

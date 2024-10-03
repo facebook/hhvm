@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldEnd",
       "argsstring_html": "()",
       "name_html": "readFieldEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "250",

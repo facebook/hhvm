@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear",
       "argsstring_html": "(detail::Badge)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::clear",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -22,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "367",
+        "line": "388",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "367",
-        "bodyend": "370"
+        "bodystart": "388",
+        "bodyend": "391"
       },
       "definition": {
         "simple_html": "void clear(detail::Badge)",

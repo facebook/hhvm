@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::fromSafePatch",
   "functions": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a27d1e7c0cbbfd21b97490e1d0c41af11",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a00ea55d20715d2f2b937210f678d046b",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -21,9 +21,10 @@
         }
       ],
       "type_html": "<code>op::patch_type</code>&lt; Tag &gt;",
-      "definition_html": "op::patch_type&lt;Tag&gt; apache::thrift::op::fromSafePatch",
+      "definition_html": "op::patch_type&lt; Tag &gt; apache::thrift::op::fromSafePatch",
       "argsstring_html": "(const op::safe_patch_type&lt; Tag &gt; &amp;safePatch)",
       "name_html": "fromSafePatch",
+      "qualifiedname_html": "apache::thrift::op::fromSafePatch",
       "param": [
         {
           "type_html": "const <code>op::safe_patch_type</code>&lt; Tag &gt; &amp;",
@@ -43,7 +44,7 @@
         "simple_raw": "template <typename T, typename Tag = type::infer_tag<T>>\nop::patch_type<Tag> fromSafePatch(const op::safe_patch_type<Tag>& safePatch)",
         "detailed_html": "template &lt;typename T, typename Tag = type::infer_tag&lt;T&gt;&gt;\nop::patch_type&lt;Tag&gt; fromSafePatch(const op::safe_patch_type&lt;Tag&gt;&amp; safePatch)",
         "detailed_raw": "template <typename T, typename Tag = type::infer_tag<T>>\nop::patch_type<Tag> fromSafePatch(const op::safe_patch_type<Tag>& safePatch)",
-        "original_definition_html": "op::patch_type&lt;Tag&gt; apache::thrift::op::fromSafePatch",
+        "original_definition_html": "op::patch_type&lt; Tag &gt; apache::thrift::op::fromSafePatch",
         "original_argsstring_html": "(const op::safe_patch_type&lt; Tag &gt; &amp;safePatch)"
       },
       "description": {

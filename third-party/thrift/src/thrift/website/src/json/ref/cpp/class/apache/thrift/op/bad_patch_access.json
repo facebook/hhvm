@@ -30,6 +30,7 @@
       "definition_html": "apache::thrift::op::bad_patch_access::bad_patch_access",
       "argsstring_html": "() noexcept",
       "name_html": "bad_patch_access",
+      "qualifiedname_html": "apache::thrift::op::bad_patch_access::bad_patch_access",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "40",
@@ -94,6 +95,7 @@
               "definition_html": "apache::thrift::op::bad_patch_access::bad_patch_access",
               "argsstring_html": "() noexcept",
               "name_html": "bad_patch_access",
+              "qualifiedname_html": "apache::thrift::op::bad_patch_access::bad_patch_access",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
                 "line": "40",

@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",

@@ -22,6 +22,7 @@
       "definition_html": "using apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::T =  std::underlying_type_t&lt;StrongInteger&gt;",
       "argsstring_html": "",
       "name_html": "T",
+      "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::T",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/id.h",
         "line": "38",
@@ -46,6 +47,7 @@
       "definition_html": "static StrongInteger apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::fromThrift",
       "argsstring_html": "(T t)",
       "name_html": "fromThrift",
+      "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::fromThrift",
       "param": [
         {
           "type_html": "T",
@@ -83,6 +85,7 @@
       "definition_html": "static T apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::toThrift",
       "argsstring_html": "(StrongInteger t)",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::toThrift",
       "param": [
         {
           "type_html": "StrongInteger",
@@ -152,6 +155,7 @@
               "definition_html": "static StrongInteger apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::fromThrift",
               "argsstring_html": "(T t)",
               "name_html": "fromThrift",
+              "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::fromThrift",
               "param": [
                 {
                   "type_html": "T",
@@ -211,6 +215,7 @@
               "definition_html": "static T apache::thrift::type::detail::StrongIntegerAdapter&lt; StrongInteger &gt;::toThrift",
               "argsstring_html": "(StrongInteger t)",
               "name_html": "toThrift",
+              "qualifiedname_html": "apache::thrift::type::detail::StrongIntegerAdapter::toThrift",
               "param": [
                 {
                   "type_html": "StrongInteger",

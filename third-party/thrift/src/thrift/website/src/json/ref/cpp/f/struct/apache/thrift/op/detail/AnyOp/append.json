@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::AnyOp&lt; Tag, typename &gt;::append",
       "argsstring_html": "(void *, const Dyn &amp;)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyOp::append",
       "param": [
         {
           "type_html": "void *"
@@ -62,6 +63,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(T &amp;self, V &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -111,6 +113,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(T &amp;self, V &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -154,6 +157,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "void *",
@@ -197,6 +201,7 @@
       "definition_html": "static void apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::append",
       "param": [
         {
           "type_html": "void *",
@@ -240,6 +245,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const std::string &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -283,6 +289,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const std::string &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -326,6 +333,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const std::string &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -369,6 +377,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const std::string &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -412,6 +421,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -455,6 +465,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -498,6 +509,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -541,6 +553,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -584,6 +597,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -627,6 +641,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -670,6 +685,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -713,6 +729,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -761,6 +778,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -809,6 +827,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -857,6 +876,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -905,6 +925,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -948,6 +969,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -991,6 +1013,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1034,6 +1057,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1077,6 +1101,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1125,6 +1150,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1173,6 +1199,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1221,6 +1248,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1269,6 +1297,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1312,6 +1341,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1355,6 +1385,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1398,6 +1429,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1441,6 +1473,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -1484,6 +1517,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "void *",
@@ -1527,6 +1561,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "void *",
@@ -1570,6 +1605,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "void *",
@@ -1613,6 +1649,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::append",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::append",
       "param": [
         {
           "type_html": "void *",

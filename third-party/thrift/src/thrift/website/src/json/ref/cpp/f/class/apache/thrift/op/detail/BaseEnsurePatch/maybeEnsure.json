@@ -20,13 +20,14 @@
       "definition_html": "bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::maybeEnsure",
       "argsstring_html": "()",
       "name_html": "maybeEnsure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::maybeEnsure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "462",
+        "line": "466",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "462",
-        "bodyend": "504"
+        "bodystart": "466",
+        "bodyend": "526"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nbool maybeEnsure()",

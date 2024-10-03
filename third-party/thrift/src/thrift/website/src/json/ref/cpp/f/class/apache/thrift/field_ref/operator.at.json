@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_ERASE auto apache::thrift::field_ref&lt; T &gt;::operator[]",
       "argsstring_html": "(const Index &amp;index) const -&gt; decltype(auto)",
       "name_html": "operator[]",
+      "qualifiedname_html": "apache::thrift::field_ref::operator[]",
       "param": [
         {
           "type_html": "const Index &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "367",
+        "line": "379",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "367",
-        "bodyend": "369"
+        "bodystart": "379",
+        "bodyend": "381"
       },
       "definition": {
         "simple_html": "template &lt;typename Index&gt;\nFOLLY_ERASE auto operator[](const Index&amp; index) const -&gt; decltype(auto)",

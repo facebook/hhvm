@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::GetDefault&lt; type::struct_t&lt; T &gt; &gt;::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ab66bdfc0b69978c26a206f58a9ef2760",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_EXPORT const auto &amp;",
-      "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+      "definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
       "argsstring_html": "() const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::CreateDefault::operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
         "line": "158",
@@ -28,7 +29,7 @@
         "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
         "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
         "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
-        "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+        "original_definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AssignPatch::reset",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1ae1e3e576acc65d980c130b1ab8fca8dc",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch_1af6312a3c2fd6d3daefd11e4b027843a5",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,23 +12,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+      "definition_html": "void apache::thrift::op::detail::AssignPatch&lt; class &gt;::reset",
       "argsstring_html": "()",
       "name_html": "reset",
+      "qualifiedname_html": "apache::thrift::op::detail::AssignPatch::reset",
       "location": {
-        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "138",
+        "file": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "line": "137",
         "column": "8",
-        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "138",
-        "bodyend": "141"
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/AssignPatch.h",
+        "bodystart": "137",
+        "bodyend": "140"
       },
       "definition": {
         "simple_html": "void reset()",
         "simple_raw": "void reset()",
         "detailed_html": "inline void reset()",
         "detailed_raw": "inline void reset()",
-        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; Patch &gt;::reset",
+        "original_definition_html": "void apache::thrift::op::detail::AssignPatch&lt; class &gt;::reset",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AssignPatch/reset",

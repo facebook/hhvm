@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::add",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberPatch::add",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "257",
+        "line": "123",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "257",
-        "bodyend": "259"
+        "bodystart": "123",
+        "bodyend": "125"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid add(U&amp;&amp; val)",

@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldBegin",
       "argsstring_html": "(std::string &amp;name, TType &amp;fieldType, int16_t &amp;fieldId)",
       "name_html": "readFieldBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldBegin",
       "param": [
         {
           "type_html": "std::string &amp;",

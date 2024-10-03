@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMessageBegin",
       "argsstring_html": "(std::string &amp;name, TMessageType &amp;messageType, int32_t &amp;seqid)",
       "name_html": "readMessageBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMessageBegin",
       "param": [
         {
           "type_html": "std::string &amp;",

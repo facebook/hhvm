@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensure",
       "argsstring_html": "(detail::Badge, FieldId id, Value v)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensure",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -30,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "377",
+        "line": "398",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "377",
-        "bodyend": "380"
+        "bodystart": "398",
+        "bodyend": "401"
       },
       "definition": {
         "simple_html": "void ensure(detail::Badge, FieldId id, Value v)",

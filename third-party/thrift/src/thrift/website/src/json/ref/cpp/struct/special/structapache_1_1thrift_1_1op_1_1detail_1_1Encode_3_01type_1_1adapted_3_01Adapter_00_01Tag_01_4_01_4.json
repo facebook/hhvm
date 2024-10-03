@@ -80,6 +80,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::AdaptedEncode&lt; Adapter, Tag &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const U &amp;m) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::AdaptedEncode::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::detail::ValueAdapter::toThrift",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ValueAdapter_1ad76fdf5c18443130e848dbaaf9617d56",
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ValueAdapter_1a289c0cbaaf25dd77684f7f432ce7467c",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "<code>Value</code> &amp;",
-      "definition_html": "static Value&amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
+      "definition_html": "static Value &amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
       "argsstring_html": "(ValueWrapper&lt; Value &gt; &amp;obj)",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueAdapter::toThrift",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ValueWrapper\">ValueWrapper</a>&lt; <code>Value</code> &gt; &amp;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "168",
+        "line": "164",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "168",
-        "bodyend": "170"
+        "bodystart": "164",
+        "bodyend": "166"
       },
       "definition": {
         "simple_html": "template &lt;class Value&gt;\nstatic Value&amp; toThrift(ValueWrapper&lt;Value&gt;&amp; obj)",
         "simple_raw": "template <class Value>\nstatic Value& toThrift(ValueWrapper<Value>& obj)",
         "detailed_html": "template &lt;class Value&gt;\ninline static Value&amp; toThrift(ValueWrapper&lt;Value&gt;&amp; obj)",
         "detailed_raw": "template <class Value>\ninline static Value& toThrift(ValueWrapper<Value>& obj)",
-        "original_definition_html": "static Value&amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
+        "original_definition_html": "static Value &amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
         "original_argsstring_html": "(ValueWrapper&lt; Value &gt; &amp;obj)"
       },
       "filepath": "fns/struct/apache/thrift/protocol/detail/ValueAdapter/toThrift",
@@ -48,7 +49,7 @@
       "compoundname_html": "apache::thrift::protocol::detail::ValueAdapter::toThrift"
     },
     {
-      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ValueAdapter_1a7909c2d155be4815c0e2fa80b8ac800e",
+      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ValueAdapter_1aa4f5991b61eff955d90105aaf7d8a9c4",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -61,9 +62,10 @@
         }
       ],
       "type_html": "const <code>Value</code> &amp;",
-      "definition_html": "static const Value&amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
+      "definition_html": "static const Value &amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
       "argsstring_html": "(const ValueWrapper&lt; Value &gt; &amp;obj)",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueAdapter::toThrift",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/detail/ValueWrapper\">ValueWrapper</a>&lt; <code>Value</code> &gt; &amp;",
@@ -72,18 +74,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "172",
+        "line": "168",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "172",
-        "bodyend": "174"
+        "bodystart": "168",
+        "bodyend": "170"
       },
       "definition": {
         "simple_html": "template &lt;class Value&gt;\nstatic const Value&amp; toThrift(const ValueWrapper&lt;Value&gt;&amp; obj)",
         "simple_raw": "template <class Value>\nstatic const Value& toThrift(const ValueWrapper<Value>& obj)",
         "detailed_html": "template &lt;class Value&gt;\ninline static const Value&amp; toThrift(const ValueWrapper&lt;Value&gt;&amp; obj)",
         "detailed_raw": "template <class Value>\ninline static const Value& toThrift(const ValueWrapper<Value>& obj)",
-        "original_definition_html": "static const Value&amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
+        "original_definition_html": "static const Value &amp; apache::thrift::protocol::detail::ValueAdapter::toThrift",
         "original_argsstring_html": "(const ValueWrapper&lt; Value &gt; &amp;obj)"
       },
       "filepath": "fns/struct/apache/thrift/protocol/detail/ValueAdapter/toThrift",

@@ -38,10 +38,11 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr auto",
-      "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
+      "type_html": "auto",
+      "definition_html": "auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
       "argsstring_html": "() const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetDefault::operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
         "line": "48",
@@ -51,11 +52,11 @@
         "bodyend": "48"
       },
       "definition": {
-        "simple_html": "constexpr auto operator()() const",
-        "simple_raw": "constexpr auto operator()() const",
-        "detailed_html": "inline constexpr auto operator()() const",
-        "detailed_raw": "inline constexpr auto operator()() const",
-        "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
+        "simple_html": "auto operator()() const",
+        "simple_raw": "auto operator()() const",
+        "detailed_html": "inline auto operator()() const",
+        "detailed_raw": "inline auto operator()() const",
+        "original_definition_html": "auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetDefault/operator.call",
@@ -111,10 +112,11 @@
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
-              "type_html": "constexpr auto",
-              "definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
+              "type_html": "auto",
+              "definition_html": "auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::GetDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "48",
@@ -124,11 +126,11 @@
                 "bodyend": "48"
               },
               "definition": {
-                "simple_html": "constexpr auto operator()() const",
-                "simple_raw": "constexpr auto operator()() const",
-                "detailed_html": "inline constexpr auto operator()() const",
-                "detailed_raw": "inline constexpr auto operator()() const",
-                "original_definition_html": "constexpr auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
+                "simple_html": "auto operator()() const",
+                "simple_raw": "auto operator()() const",
+                "detailed_html": "inline auto operator()() const",
+                "detailed_raw": "inline auto operator()() const",
+                "original_definition_html": "auto apache::thrift::op::detail::GetDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/GetDefault/operator.call",
@@ -137,7 +139,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ab66bdfc0b69978c26a206f58a9ef2760",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -145,9 +147,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_EXPORT const auto &amp;",
-              "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+              "definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CreateDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "158",
@@ -161,7 +164,7 @@
                 "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
                 "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
                 "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
-                "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+                "original_definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",
@@ -170,7 +173,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ab66bdfc0b69978c26a206f58a9ef2760",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -178,9 +181,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_EXPORT const auto &amp;",
-              "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+              "definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CreateDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "158",
@@ -194,7 +198,7 @@
                 "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
                 "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
                 "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
-                "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+                "original_definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",
@@ -203,7 +207,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ab66bdfc0b69978c26a206f58a9ef2760",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -211,9 +215,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_EXPORT const auto &amp;",
-              "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+              "definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CreateDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "158",
@@ -227,7 +232,7 @@
                 "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
                 "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
                 "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
-                "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+                "original_definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",
@@ -236,7 +241,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ad68cfd2b9ef59a87132e991e2938c2ab",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CreateDefault_1ab66bdfc0b69978c26a206f58a9ef2760",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -244,9 +249,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_EXPORT const auto &amp;",
-              "definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+              "definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CreateDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "158",
@@ -260,7 +266,7 @@
                 "simple_raw": "FOLLY_EXPORT const auto& operator()() const",
                 "detailed_html": "inline FOLLY_EXPORT const auto&amp; operator()() const",
                 "detailed_raw": "inline FOLLY_EXPORT const auto& operator()() const",
-                "original_definition_html": "FOLLY_EXPORT const auto&amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
+                "original_definition_html": "FOLLY_EXPORT const auto &amp; apache::thrift::op::detail::CreateDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/CreateDefault/operator.call",
@@ -269,7 +275,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1a84f34b1a6d0bbd35d7d7f1727c9eca38",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1a5b0a3f06122a69058b3e5b51d37f24c7",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -283,9 +289,10 @@
                 }
               ],
               "type_html": "const adapt_detail::if_not_field_adapter&lt; AdapterT, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "definition_html": "const adapt_detail:: if_not_field_adapter&lt; AdapterT, type::native_type&lt; UTag &gt;, Struct &gt; &amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "207",
@@ -299,7 +306,7 @@
                 "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
                 "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
                 "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_definition_html": "const adapt_detail:: if_not_field_adapter&lt; AdapterT, type::native_type&lt; UTag &gt;, Struct &gt; &amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",
@@ -308,7 +315,7 @@
               "compoundname_html": "apache::thrift::op::detail::GetDefault::operator()"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1adf63c82cfb7a74de7b7ab9f4d5903877",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7_1af0b5a030e85457ae39b294231ad0cbd4",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -322,9 +329,10 @@
                 }
               ],
               "type_html": "const adapt_detail::if_field_adapter&lt; AdapterT, <code>FieldId</code>, type::native_type&lt; UTag &gt;, Struct &gt; &amp;",
-              "definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+              "definition_html": "const adapt_detail:: if_field_adapter&lt; AdapterT, FieldId, type::native_type&lt; UTag &gt;, Struct &gt; &amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "214",
@@ -338,7 +346,7 @@
                 "simple_raw": "template <typename AdapterT = Adapter>\nconst adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
                 "detailed_html": "template &lt;typename AdapterT = Adapter&gt;\ninline const adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
                 "detailed_raw": "template <typename AdapterT = Adapter>\ninline const adapt_detail::\n    if_field_adapter<AdapterT, FieldId, type::native_type<UTag>, Struct>&\n    operator()() const",
-                "original_definition_html": "const adapt_detail:: if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
+                "original_definition_html": "const adapt_detail:: if_field_adapter&lt; AdapterT, FieldId, type::native_type&lt; UTag &gt;, Struct &gt; &amp; apache::thrift::op::detail::GetDefault&lt; type::field&lt; type::adapted&lt; Adapter, UTag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1GetDefault_3_01type_1_1field_3_01type_1_1adapted_3_01A7d2cf44f79abb740c9c974957fdfbde7/operator.call",

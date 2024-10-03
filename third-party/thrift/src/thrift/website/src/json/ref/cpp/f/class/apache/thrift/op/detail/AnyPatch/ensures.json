@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::ensures",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ae36c28ed8de60b7edb1ea4eea59e20a3",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a9d487832a600b6821108b2d924b16ef2",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensures",
+      "definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensures",
       "argsstring_html": "(const type::Type &amp;type)",
       "name_html": "ensures",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::ensures",
       "param": [
         {
           "type_html": "const type::Type &amp;",
@@ -23,18 +24,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "247",
+        "line": "272",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "247",
-        "bodyend": "250"
+        "bodystart": "272",
+        "bodyend": "275"
       },
       "definition": {
         "simple_html": "bool ensures(const type::Type&amp; type)",
         "simple_raw": "bool ensures(const type::Type& type)",
         "detailed_html": "private inline bool ensures(const type::Type&amp; type)",
         "detailed_raw": "private inline bool ensures(const type::Type& type)",
-        "original_definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensures",
+        "original_definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensures",
         "original_argsstring_html": "(const type::Type &amp;type)"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/ensures",
@@ -43,7 +44,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyPatch::ensures"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ac5176519286fd62270178e268c5d5cc9",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1af7af2b70603b17dce6814721ffd1a98c",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -56,23 +57,24 @@
         }
       ],
       "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensures",
+      "definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensures",
       "argsstring_html": "()",
       "name_html": "ensures",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::ensures",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "253",
+        "line": "278",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "253",
-        "bodyend": "255"
+        "bodystart": "278",
+        "bodyend": "280"
       },
       "definition": {
         "simple_html": "template &lt;typename Tag&gt;\nbool ensures()",
         "simple_raw": "template <typename Tag>\nbool ensures()",
         "detailed_html": "template &lt;typename Tag&gt; private inline bool ensures()",
         "detailed_raw": "template <typename Tag> private inline bool ensures()",
-        "original_definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::ensures",
+        "original_definition_html": "bool apache::thrift::op::detail::AnyPatch&lt; typename &gt;::ensures",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/ensures",

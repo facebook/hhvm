@@ -32,6 +32,7 @@
       "definition_html": "bool apache::thrift::test::EmptyMatcher&lt; Tag &gt;::MatchAndExplain",
       "argsstring_html": "(const U &amp;actual, ::testing::MatchResultListener *) const",
       "name_html": "MatchAndExplain",
+      "qualifiedname_html": "apache::thrift::test::EmptyMatcher::MatchAndExplain",
       "param": [
         {
           "type_html": "const U &amp;",
@@ -72,6 +73,7 @@
       "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeTo",
+      "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeTo",
       "param": [
         {
           "type_html": "std::ostream *",
@@ -109,6 +111,7 @@
       "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeNegationTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeNegationTo",
+      "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeNegationTo",
       "param": [
         {
           "type_html": "std::ostream *",
@@ -183,6 +186,7 @@
               "definition_html": "bool apache::thrift::test::EmptyMatcher&lt; Tag &gt;::MatchAndExplain",
               "argsstring_html": "(const U &amp;actual, ::testing::MatchResultListener *) const",
               "name_html": "MatchAndExplain",
+              "qualifiedname_html": "apache::thrift::test::EmptyMatcher::MatchAndExplain",
               "param": [
                 {
                   "type_html": "const U &amp;",
@@ -245,6 +249,7 @@
               "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeTo",
               "argsstring_html": "(std::ostream *os) const",
               "name_html": "DescribeTo",
+              "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeTo",
               "param": [
                 {
                   "type_html": "std::ostream *",
@@ -304,6 +309,7 @@
               "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeNegationTo",
               "argsstring_html": "(std::ostream *os) const",
               "name_html": "DescribeNegationTo",
+              "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeNegationTo",
               "param": [
                 {
                   "type_html": "std::ostream *",

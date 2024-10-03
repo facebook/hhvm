@@ -15,13 +15,14 @@
       "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
       "argsstring_html": "()",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "279",
+        "line": "284",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "279",
-        "bodyend": "279"
+        "bodystart": "284",
+        "bodyend": "284"
       },
       "definition": {
         "simple_html": "void clear()",
@@ -56,13 +57,14 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::clear",
       "argsstring_html": "()",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "398",
+        "line": "402",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "398",
-        "bodyend": "406"
+        "bodystart": "402",
+        "bodyend": "410"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
@@ -76,10 +78,49 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseEnsurePatch/clear",
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch",
       "compoundname_html": "apache::thrift::op::detail::UnionPatch::clear"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a8092fff54a0afb730b0853785a7bf21d",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Id"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::clear",
+      "argsstring_html": "()",
+      "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::UnionPatch::clear",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "line": "693",
+        "column": "3",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
+        "bodystart": "402",
+        "bodyend": "410"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Id&gt;\nvoid clear()",
+        "simple_raw": "template <typename Id>\nvoid clear()",
+        "detailed_html": "template &lt;typename Id&gt;\ninline void clear()",
+        "detailed_raw": "template <typename Id>\ninline void clear()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::clear",
+        "original_argsstring_html": "()"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/UnionPatch/clear",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/UnionPatch/clear",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch",
+      "compoundname_html": "apache::thrift::op::detail::UnionPatch::clear"
     }
   ],
   "filepath": "f/class/apache/thrift/op/detail/UnionPatch/clear",
-  "minprot": "protected",
+  "minprot": "public",
   "displayname_html": "clear",
   "brief_html": "<p>Clears the value. </p>",
   "groupname_html": "",

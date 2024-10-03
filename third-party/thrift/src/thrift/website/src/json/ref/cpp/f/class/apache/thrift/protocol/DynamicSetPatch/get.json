@@ -4,17 +4,19 @@
   "compoundname_html": "apache::thrift::protocol::DynamicSetPatch::get",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a8a92483a941dafde2fa9f28a3a5a5fcf",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatchBase_1a81f6def84dda66e6dcbea38a10890ca2",
       "prot": "protected",
       "static": "no",
       "const": "no",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "Value &amp;",
-      "definition_html": "Value&amp; apache::thrift::protocol::DynamicPatchBase::get",
+      "definition_html": "Value &amp; apache::thrift::protocol::DynamicPatchBase::get",
       "argsstring_html": "(op::PatchOp patchOp)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::get",
       "param": [
         {
           "type_html": "op::PatchOp",
@@ -23,18 +25,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "114",
+        "line": "135",
         "column": "10",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "114",
-        "bodyend": "116"
+        "bodystart": "135",
+        "bodyend": "137"
       },
       "definition": {
         "simple_html": "Value&amp; get(op::PatchOp patchOp)",
         "simple_raw": "Value& get(op::PatchOp patchOp)",
         "detailed_html": "protected inline Value&amp; get(op::PatchOp patchOp)",
         "detailed_raw": "protected inline Value& get(op::PatchOp patchOp)",
-        "original_definition_html": "Value&amp; apache::thrift::protocol::DynamicPatchBase::get",
+        "original_definition_html": "Value &amp; apache::thrift::protocol::DynamicPatchBase::get",
         "original_argsstring_html": "(op::PatchOp patchOp)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicPatchBase/get",

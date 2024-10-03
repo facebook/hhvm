@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
       "argsstring_html": "(AdaptedType &amp;, const TypeToPatchInternalDoNotUse &amp;)",
       "name_html": "addDynamicPatchToMap",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
       "param": [
         {
           "type_html": "<code>AdaptedType</code> &amp;",
@@ -27,7 +28,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "115",
+        "line": "123",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "98",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicMapPatch::undoChanges",
       "argsstring_html": "(const Value &amp;k)",
       "name_html": "undoChanges",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::undoChanges",
       "param": [
         {
           "type_html": "const Value &amp;",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "343",
+        "line": "364",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "317",
-        "bodyend": "324"
+        "bodystart": "318",
+        "bodyend": "325"
       },
       "definition": {
         "simple_html": "void undoChanges(const Value&amp; k)",

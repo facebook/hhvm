@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readVarint32",
       "argsstring_html": "(int32_t &amp;i32)",
       "name_html": "readVarint32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readVarint32",
       "param": [
         {
           "type_html": "int32_t &amp;",

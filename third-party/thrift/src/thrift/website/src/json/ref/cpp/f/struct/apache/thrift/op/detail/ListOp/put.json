@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::put",
       "param": [
         {
           "type_html": "void *",

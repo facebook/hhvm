@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::AnyOp&lt; Tag, typename &gt;::put",
       "argsstring_html": "(void *, FieldId, size_t, const Dyn &amp;, const Dyn &amp;)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyOp::put",
       "param": [
         {
           "type_html": "void *"
@@ -65,6 +66,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::put",
       "param": [
         {
           "type_html": "void *",
@@ -118,6 +120,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::put",
       "param": [
         {
           "type_html": "void *",
@@ -171,6 +174,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::put",
       "param": [
         {
           "type_html": "void *",
@@ -234,6 +238,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -291,6 +296,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -338,6 +344,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "void *",
@@ -391,6 +398,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "void *",
@@ -444,6 +452,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId fid, size_t, const Dyn &amp;n, const Dyn &amp;val)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::put",
       "param": [
         {
           "type_html": "void *",

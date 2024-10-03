@@ -15,6 +15,7 @@
       "definition_html": "Object apache::thrift::protocol::fromSafePatch",
       "argsstring_html": "(const protocol::Object &amp;safePatch)",
       "name_html": "fromSafePatch",
+      "qualifiedname_html": "apache::thrift::protocol::fromSafePatch",
       "param": [
         {
           "type_html": "const protocol::Object &amp;",

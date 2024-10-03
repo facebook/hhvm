@@ -15,9 +15,10 @@
       "definition_html": "apache::thrift::op::detail::BaseContainerPatch&lt; Patch, Derived &gt;::~BaseContainerPatch",
       "argsstring_html": "()=default",
       "name_html": "~BaseContainerPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseContainerPatch::~BaseContainerPatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "297",
+        "line": "302",
         "column": "3"
       },
       "definition": {

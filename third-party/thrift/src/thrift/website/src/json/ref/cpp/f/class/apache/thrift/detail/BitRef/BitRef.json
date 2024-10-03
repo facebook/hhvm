@@ -15,6 +15,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::detail::BitRef&lt; kIsConst &gt;::BitRef",
       "argsstring_html": "(Isset &amp;isset, uint8_t bit_index)",
       "name_html": "BitRef",
+      "qualifiedname_html": "apache::thrift::detail::BitRef::BitRef",
       "param": [
         {
           "type_html": "<code>Isset</code> &amp;",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "190",
+        "line": "191",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "190",
-        "bodyend": "191"
+        "bodystart": "191",
+        "bodyend": "192"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE BitRef(Isset&amp; isset, uint8_t bit_index)",
@@ -59,6 +60,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::detail::BitRef&lt; kIsConst &gt;::BitRef",
       "argsstring_html": "(AtomicIsset &amp;isset, uint8_t bit_index)",
       "name_html": "BitRef",
+      "qualifiedname_html": "apache::thrift::detail::BitRef::BitRef",
       "param": [
         {
           "type_html": "<code>AtomicIsset</code> &amp;",
@@ -71,11 +73,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "193",
+        "line": "194",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "193",
-        "bodyend": "194"
+        "bodystart": "194",
+        "bodyend": "195"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE BitRef(AtomicIsset&amp; isset, uint8_t bit_index)",
@@ -110,6 +112,7 @@
       "definition_html": "apache::thrift::detail::BitRef&lt; kIsConst &gt;::BitRef",
       "argsstring_html": "(const BitRef&lt; B &gt; &amp;other)",
       "name_html": "BitRef",
+      "qualifiedname_html": "apache::thrift::detail::BitRef::BitRef",
       "param": [
         {
           "type_html": "const <code>BitRef</code>&lt; B &gt; &amp;",
@@ -118,11 +121,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "197",
+        "line": "198",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "197",
-        "bodyend": "202"
+        "bodystart": "198",
+        "bodyend": "203"
       },
       "definition": {
         "simple_html": "template &lt;bool B&gt;\nBitRef(const BitRef&lt;B&gt;&amp; other)",

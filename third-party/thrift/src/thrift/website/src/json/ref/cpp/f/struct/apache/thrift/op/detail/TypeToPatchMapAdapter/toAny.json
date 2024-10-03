@@ -15,6 +15,7 @@
       "definition_html": "type::AnyStruct apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
       "argsstring_html": "(const protocol::DynamicPatch &amp;, const type::Type &amp;)",
       "name_html": "toAny",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">protocol::DynamicPatch</a> &amp;",
@@ -27,7 +28,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "118",
+        "line": "126",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "106",

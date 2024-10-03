@@ -15,13 +15,14 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pop",
       "argsstring_html": "()",
       "name_html": "pop",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pop",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "637",
+        "line": "658",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "1026",
-        "bodyend": "1029"
+        "bodystart": "1027",
+        "bodyend": "1030"
       },
       "definition": {
         "simple_html": "void pop()",

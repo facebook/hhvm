@@ -20,6 +20,7 @@
       "definition_html": "static void apache::thrift::detail::union_field_ref_owner_vtable_impl::reset",
       "argsstring_html": "(void *obj)",
       "name_html": "reset",
+      "qualifiedname_html": "apache::thrift::detail::union_field_ref_owner_vtable_impl::reset",
       "param": [
         {
           "type_html": "void *",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1954",
+        "line": "2010",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1954",
-        "bodyend": "1956"
+        "bodystart": "2010",
+        "bodyend": "2012"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic void reset(void* obj)",

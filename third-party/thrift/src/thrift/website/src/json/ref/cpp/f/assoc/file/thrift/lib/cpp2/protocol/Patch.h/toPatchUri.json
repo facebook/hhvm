@@ -1,0 +1,53 @@
+{
+  "kind": "overloadset",
+  "name_html": "toPatchUri",
+  "compoundname_html": "apache::thrift::protocol::toPatchUri",
+  "functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a8ed2774afcc0dbcd50a270d77a17c419",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "std::string",
+      "definition_html": "std::string apache::thrift::protocol::toPatchUri",
+      "argsstring_html": "(std::string s)",
+      "name_html": "toPatchUri",
+      "qualifiedname_html": "apache::thrift::protocol::toPatchUri",
+      "param": [
+        {
+          "type_html": "std::string",
+          "declname_html": "s"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "132",
+        "column": "13",
+        "declfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "declline": "132",
+        "declcolumn": "13"
+      },
+      "definition": {
+        "simple_html": "std::string toPatchUri(std::string s)",
+        "simple_raw": "std::string toPatchUri(std::string s)",
+        "detailed_html": "std::string toPatchUri(std::string s)",
+        "detailed_raw": "std::string toPatchUri(std::string s)",
+        "original_definition_html": "std::string apache::thrift::protocol::toPatchUri",
+        "original_argsstring_html": "(std::string s)"
+      },
+      "compoundname_html": "apache::thrift::protocol::toPatchUri",
+      "namespace_html": "apache::thrift::protocol"
+    }
+  ],
+  "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/toPatchUri",
+  "namespace_html": "apache::thrift::protocol",
+  "minprot": "public",
+  "displayname_html": "toPatchUri",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/toPatchUri",
+  "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.h/toPatchUri"
+}

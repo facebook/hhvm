@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::terse_field_ref&lt; T &gt;::value",
       "argsstring_html": "() const noexcept",
       "name_html": "value",
+      "qualifiedname_html": "apache::thrift::terse_field_ref::value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2312",
+        "line": "2368",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2312",
-        "bodyend": "2314"
+        "bodystart": "2368",
+        "bodyend": "2370"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type value() const",

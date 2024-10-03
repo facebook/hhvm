@@ -16,6 +16,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
       "argsstring_html": "(T value, get_default_t get_default) noexcept",
       "name_html": "terse_intern_boxed_field_ref",
+      "qualifiedname_html": "apache::thrift::terse_intern_boxed_field_ref::terse_intern_boxed_field_ref",
       "param": [
         {
           "type_html": "T",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1409",
+        "line": "1429",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1409",
-        "bodyend": "1411"
+        "bodystart": "1429",
+        "bodyend": "1431"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE terse_intern_boxed_field_ref(T value, get_default_t get_default)",
@@ -70,6 +71,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::terse_intern_boxed_field_ref&lt; T &gt;::terse_intern_boxed_field_ref",
       "argsstring_html": "(const terse_intern_boxed_field_ref&lt; U &gt; &amp;other) noexcept",
       "name_html": "terse_intern_boxed_field_ref",
+      "qualifiedname_html": "apache::thrift::terse_intern_boxed_field_ref::terse_intern_boxed_field_ref",
       "param": [
         {
           "type_html": "const <code>terse_intern_boxed_field_ref</code>&lt; U &gt; &amp;",
@@ -78,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1416",
+        "line": "1436",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1416",
-        "bodyend": "1418"
+        "bodystart": "1436",
+        "bodyend": "1438"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = apache::thrift::detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE terse_intern_boxed_field_ref(\n    const terse_intern_boxed_field_ref&lt;U&gt;&amp; other)",

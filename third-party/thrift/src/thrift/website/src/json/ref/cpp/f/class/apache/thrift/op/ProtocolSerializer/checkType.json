@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::Serializer::checkType",
       "argsstring_html": "(const type::Type &amp;actual, const type::Type &amp;expected)",
       "name_html": "checkType",
+      "qualifiedname_html": "apache::thrift::op::Serializer::checkType",
       "param": [
         {
           "type_html": "const type::Type &amp;",

@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readByte",
       "argsstring_html": "(int8_t &amp;byte)",
       "name_html": "readByte",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readByte",
       "param": [
         {
           "type_html": "int8_t &amp;",

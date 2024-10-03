@@ -27,12 +27,13 @@
       "definition_html": "using apache::thrift::op::detail::GetOrdinalImpl&lt; std::integral_constant&lt; type::Ordinal, Ord &gt;, Tag &gt;::type =  type::ordinal_tag&lt;Ord&gt;",
       "argsstring_html": "",
       "name_html": "type",
+      "qualifiedname_html": "apache::thrift::op::detail::GetOrdinalImpl&lt; std::integral_constant&lt; type::Ordinal, Ord &gt;, Tag &gt;::type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "192",
+        "line": "198",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "192",
+        "bodystart": "198",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl_3_01std_1_1integral__constant_3_01type_d5c0fbdfa58f5168df45602fb44b8b6c"
@@ -40,11 +41,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "186",
+    "line": "192",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "186",
-    "bodyend": "193"
+    "bodystart": "192",
+    "bodyend": "199"
   },
   "namespacednames_html": [
     "apache",

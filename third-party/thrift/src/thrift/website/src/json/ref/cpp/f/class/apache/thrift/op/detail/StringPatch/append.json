@@ -22,6 +22,7 @@
       "definition_html": "void apache::thrift::op::detail::StringPatch&lt; Patch &gt;::append",
       "argsstring_html": "(Args &amp;&amp;... args)",
       "name_html": "append",
+      "qualifiedname_html": "apache::thrift::op::detail::StringPatch::append",
       "param": [
         {
           "type_html": "Args &amp;&amp;...",
@@ -30,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "445",
+        "line": "318",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "445",
-        "bodyend": "447"
+        "bodystart": "318",
+        "bodyend": "320"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nvoid append(Args&amp;&amp;... args)",

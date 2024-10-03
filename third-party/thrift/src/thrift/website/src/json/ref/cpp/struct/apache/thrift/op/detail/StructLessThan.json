@@ -35,6 +35,7 @@
       "definition_html": "bool apache::thrift::op::detail::StructLessThan&lt; LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StructLessThan::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -47,11 +48,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "636",
+        "line": "652",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "636",
-        "bodyend": "672"
+        "bodystart": "652",
+        "bodyend": "688"
       },
       "definition": {
         "simple_html": "template &lt;class T&gt;\nbool operator()(const T&amp; lhs, const T&amp; rhs) const",
@@ -67,11 +68,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "line": "634",
+    "line": "650",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-    "bodystart": "634",
-    "bodyend": "673"
+    "bodystart": "650",
+    "bodyend": "689"
   },
   "namespacednames_html": [
     "apache",
@@ -114,6 +115,7 @@
               "definition_html": "bool apache::thrift::op::detail::StructLessThan&lt; LessThanImpl &gt;::operator()",
               "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::StructLessThan::operator()",
               "param": [
                 {
                   "type_html": "const T &amp;",
@@ -126,11 +128,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "line": "636",
+                "line": "652",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-                "bodystart": "636",
-                "bodyend": "672"
+                "bodystart": "652",
+                "bodyend": "688"
               },
               "definition": {
                 "simple_html": "template &lt;class T&gt;\nbool operator()(const T&amp; lhs, const T&amp; rhs) const",

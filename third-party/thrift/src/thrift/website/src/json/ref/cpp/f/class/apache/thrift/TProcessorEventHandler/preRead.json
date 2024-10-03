@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::preRead",
       "argsstring_html": "(void *, const char *)",
       "name_html": "preRead",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::preRead",
       "param": [
         {
           "type_html": "void *"

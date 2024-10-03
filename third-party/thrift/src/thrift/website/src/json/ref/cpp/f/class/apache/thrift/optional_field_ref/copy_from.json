@@ -12,6 +12,7 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_assignable< value_type &, U >::value",
       "tparams": [
         {
           "type_html": "typename U"
@@ -19,8 +20,9 @@
       ],
       "type_html": "FOLLY_ERASE void",
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::copy_from",
-      "argsstring_html": "(const optional_field_ref&lt; U &gt; &amp;other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &gt;::value)",
+      "argsstring_html": "(const optional_field_ref&lt; U &gt; &amp;other)",
       "name_html": "copy_from",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::copy_from",
       "param": [
         {
           "type_html": "const <code>optional_field_ref</code>&lt; U &gt; &amp;",
@@ -29,19 +31,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "568",
+        "line": "580",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "568",
-        "bodyend": "572"
+        "bodystart": "580",
+        "bodyend": "584"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(const optional_field_ref&lt;U&gt;&amp; other)",
         "simple_raw": "template <typename U>\nFOLLY_ERASE void copy_from(const optional_field_ref<U>& other)",
-        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(const optional_field_ref&lt;U&gt;&amp; other) noexcept(\n    (std::is_nothrow_assignable&lt;value_type&amp;, U&gt;::value))",
-        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(const optional_field_ref<U>& other) noexcept(\n    (std::is_nothrow_assignable<value_type&, U>::value))",
+        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(const optional_field_ref&lt;U&gt;&amp; other)",
+        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(const optional_field_ref<U>& other)",
         "original_definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::copy_from",
-        "original_argsstring_html": "(const optional_field_ref&lt; U &gt; &amp;other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &gt;::value)"
+        "original_argsstring_html": "(const optional_field_ref&lt; U &gt; &amp;other)"
       },
       "filepath": "fns/class/apache/thrift/optional_field_ref/copy_from",
       "href": "/ref/cpp/fns/class/apache/thrift/optional_field_ref/copy_from",

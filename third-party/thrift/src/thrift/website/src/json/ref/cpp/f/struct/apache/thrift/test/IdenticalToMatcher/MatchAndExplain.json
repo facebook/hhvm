@@ -20,6 +20,7 @@
       "definition_html": "bool apache::thrift::test::IdenticalToMatcher&lt; Tag, T &gt;::MatchAndExplain",
       "argsstring_html": "(const U &amp;actual, ::testing::MatchResultListener *) const",
       "name_html": "MatchAndExplain",
+      "qualifiedname_html": "apache::thrift::test::IdenticalToMatcher::MatchAndExplain",
       "param": [
         {
           "type_html": "const U &amp;",

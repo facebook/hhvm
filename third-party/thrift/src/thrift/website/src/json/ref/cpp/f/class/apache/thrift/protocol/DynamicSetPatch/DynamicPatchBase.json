@@ -15,9 +15,10 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "()=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "77",
+        "line": "98",
         "column": "3"
       },
       "definition": {
@@ -46,6 +47,7 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "(const DynamicPatchBase &amp;)=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;"
@@ -53,7 +55,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "78",
+        "line": "99",
         "column": "3"
       },
       "definition": {
@@ -82,6 +84,7 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "(DynamicPatchBase &amp;&amp;)=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;&amp;"
@@ -89,7 +92,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "79",
+        "line": "100",
         "column": "3"
       },
       "definition": {
@@ -118,9 +121,10 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "()=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::DynamicPatchBase",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "216",
+        "line": "237",
         "column": "3"
       },
       "definition": {
@@ -148,6 +152,7 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "(const DynamicPatchBase &amp;)=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::DynamicPatchBase",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;"
@@ -155,7 +160,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "216",
+        "line": "237",
         "column": "3"
       },
       "definition": {
@@ -183,6 +188,7 @@
       "definition_html": "apache::thrift::protocol::DynamicPatchBase::DynamicPatchBase",
       "argsstring_html": "(DynamicPatchBase &amp;&amp;)=default",
       "name_html": "DynamicPatchBase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::DynamicPatchBase",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatchBase\">DynamicPatchBase</a> &amp;&amp;"
@@ -190,7 +196,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "216",
+        "line": "237",
         "column": "3"
       },
       "definition": {

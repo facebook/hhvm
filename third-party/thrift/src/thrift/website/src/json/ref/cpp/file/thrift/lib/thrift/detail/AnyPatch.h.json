@@ -95,6 +95,14 @@
       "text_html": "apache::thrift"
     },
     {
+      "refid": "namespaceapache_1_1thrift_1_1protocol",
+      "text_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1_1detail",
+      "text_html": "apache::thrift::protocol::detail"
+    },
+    {
       "refid": "namespaceapache_1_1thrift_1_1op",
       "text_html": "apache::thrift::op"
     },

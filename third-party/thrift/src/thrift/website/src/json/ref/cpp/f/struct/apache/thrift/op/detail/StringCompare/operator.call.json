@@ -15,6 +15,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(fmt::string_view lhs, fmt::string_view rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "fmt::string_view",
@@ -58,6 +59,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(fmt::string_view lhs, const folly::IOBuf &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "fmt::string_view",
@@ -101,6 +103,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(fmt::string_view lhs, const IOBufPtr &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "fmt::string_view",
@@ -144,6 +147,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(const folly::IOBuf &amp;lhs, fmt::string_view rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -187,6 +191,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(const folly::IOBuf &amp;lhs, const IOBufPtr &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -230,6 +235,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(const IOBufPtr &amp;lhs, fmt::string_view rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -273,6 +279,7 @@
       "definition_html": "folly::ordering apache::thrift::op::detail::StringCompare::operator()",
       "argsstring_html": "(const IOBufPtr &amp;lhs, const folly::IOBuf &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StringCompare::operator()",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",

@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_NODISCARD auto apache::thrift::op::makeUnorderedHashGuard",
       "argsstring_html": "(Accumulator &amp;accumulator)",
       "name_html": "makeUnorderedHashGuard",
+      "qualifiedname_html": "apache::thrift::op::makeUnorderedHashGuard",
       "param": [
         {
           "type_html": "Accumulator &amp;",

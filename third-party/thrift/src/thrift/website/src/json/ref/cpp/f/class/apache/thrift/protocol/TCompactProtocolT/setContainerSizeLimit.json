@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setContainerSizeLimit",
       "argsstring_html": "(int32_t container_limit)",
       "name_html": "setContainerSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setContainerSizeLimit",
       "param": [
         {
           "type_html": "int32_t",

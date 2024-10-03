@@ -34,6 +34,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, int32_t i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -80,6 +81,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, uint32_t i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -159,6 +161,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, int32_t i) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",
@@ -207,6 +210,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, uint32_t i) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i32_t &gt;::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

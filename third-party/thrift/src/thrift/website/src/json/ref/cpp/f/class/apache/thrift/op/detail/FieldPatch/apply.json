@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; U &gt;",
@@ -67,6 +68,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(terse_field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; U &gt;",
@@ -114,6 +116,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(required_field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; U &gt;",
@@ -148,7 +151,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a0aeb164300eb9524c20fb509d914031f",
       "prot": "public",
       "static": "no",
-      "const": "no",
+      "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
@@ -161,6 +164,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; U &gt;",
@@ -195,7 +199,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a7803ad989a91ae4b6ff4798c294e8788",
       "prot": "public",
       "static": "no",
-      "const": "no",
+      "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
@@ -208,6 +212,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(terse_field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; U &gt;",
@@ -242,7 +247,7 @@
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a57c713a3220fc8ae29525f2ed561fa7d",
       "prot": "public",
       "static": "no",
-      "const": "no",
+      "const": "yes",
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
@@ -255,6 +260,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::apply",
       "argsstring_html": "(required_field_ref&lt; U &gt; field) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::apply",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; U &gt;",

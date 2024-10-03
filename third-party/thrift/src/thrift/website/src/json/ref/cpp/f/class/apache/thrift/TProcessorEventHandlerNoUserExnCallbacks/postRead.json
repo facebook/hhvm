@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::postRead",
       "argsstring_html": "(void *, const char *, apache::thrift::transport::THeader *, uint32_t)",
       "name_html": "postRead",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::postRead",
       "param": [
         {
           "type_html": "void *"

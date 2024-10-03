@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<code>op::AnyPatch</code>",
       "definition_html": "op::AnyPatch apache::thrift::protocol::DiffVisitorBase::diffAny",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffAny",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffAny",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "622",
+        "line": "643",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "901",
-        "bodyend": "938"
+        "bodystart": "902",
+        "bodyend": "939"
       },
       "definition": {
         "simple_html": "op::AnyPatch diffAny(const Object&amp; src, const Object&amp; dst)",

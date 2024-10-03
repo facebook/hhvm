@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::DeterministicAccumulator::context",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1ae6acfedfd85beb5604223c7505203d78",
+      "refid": "classapache_1_1thrift_1_1op_1_1DeterministicAccumulator_1a3a20ac583e6bae384e871205d6d37073",
       "prot": "private",
       "static": "no",
       "constexpr": "yes",
@@ -12,10 +12,11 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr auto &amp;",
-      "definition_html": "constexpr auto&amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
+      "type_html": "auto &amp;",
+      "definition_html": "auto &amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
       "argsstring_html": "()",
       "name_html": "context",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::context",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "150",
@@ -25,11 +26,11 @@
         "bodyend": "155"
       },
       "definition": {
-        "simple_html": "constexpr auto&amp; context()",
-        "simple_raw": "constexpr auto& context()",
-        "detailed_html": "private inline constexpr auto&amp; context()",
-        "detailed_raw": "private inline constexpr auto& context()",
-        "original_definition_html": "constexpr auto&amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
+        "simple_html": "auto&amp; context()",
+        "simple_raw": "auto& context()",
+        "detailed_html": "private inline auto&amp; context()",
+        "detailed_raw": "private inline auto& context()",
+        "original_definition_html": "auto &amp; apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::context",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/op/DeterministicAccumulator/context",

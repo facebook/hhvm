@@ -15,6 +15,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldBeginInternal",
       "argsstring_html": "(const char *name, const TType fieldType, const int16_t fieldId, int8_t typeOverride)",
       "name_html": "writeFieldBeginInternal",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldBeginInternal",
       "param": [
         {
           "type_html": "const char *",

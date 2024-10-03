@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::StdHasher::combine",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1StdHasher_1a25fa334aaaaaba6d633ca4baaa2d8e43",
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasher_1a607cf2ec5fa3168efd950e2d58c0e940",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -17,10 +17,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;::<code>value</code> &gt;",
-      "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasher::combine",
+      "type_html": "std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;<code>::value</code> &gt;",
+      "definition_html": "std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;::value &gt; apache::thrift::op::StdHasher::combine",
       "argsstring_html": "(const T &amp;val)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::combine",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -36,11 +37,11 @@
         "bodyend": "38"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(const T&amp; val)",
-        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(const T& val)",
-        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(\n    const T&amp; val)",
-        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic<T>::value> combine(\n    const T& val)",
-        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; apache::thrift::op::StdHasher::combine",
+        "simple_html": "template &lt;typename T&gt;\nstd::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nstd::enable_if_t<std::is_arithmetic<T>::value> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline std::enable_if_t&lt;std::is_arithmetic&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline std::enable_if_t<std::is_arithmetic<T>::value> combine(const T& val)",
+        "original_definition_html": "std::enable_if_t&lt; std::is_arithmetic&lt; T &gt;::value &gt; apache::thrift::op::StdHasher::combine",
         "original_argsstring_html": "(const T &amp;val)"
       },
       "filepath": "fns/class/apache/thrift/op/StdHasher/combine",
@@ -49,7 +50,7 @@
       "compoundname_html": "apache::thrift::op::StdHasher::combine"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1StdHasher_1a553f9c3d86a88877e822341ede146dd1",
+      "refid": "classapache_1_1thrift_1_1op_1_1StdHasher_1a63e2dd833a91f291f532ea3a6abb1674",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -62,10 +63,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr std::enable_if_t&lt; std::is_enum&lt; T &gt;::<code>value</code> &gt;",
-      "definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasher::combine",
+      "type_html": "std::enable_if_t&lt; std::is_enum&lt; T &gt;<code>::value</code> &gt;",
+      "definition_html": "std::enable_if_t&lt; std::is_enum&lt; T &gt;::value &gt; apache::thrift::op::StdHasher::combine",
       "argsstring_html": "(const T &amp;val)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::combine",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -81,11 +83,11 @@
         "bodyend": "42"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
-        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
-        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
-        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
-        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; apache::thrift::op::StdHasher::combine",
+        "simple_html": "template &lt;typename T&gt;\nstd::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nstd::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline std::enable_if_t&lt;std::is_enum&lt;T&gt;::value&gt; combine(const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline std::enable_if_t<std::is_enum<T>::value> combine(const T& val)",
+        "original_definition_html": "std::enable_if_t&lt; std::is_enum&lt; T &gt;::value &gt; apache::thrift::op::StdHasher::combine",
         "original_argsstring_html": "(const T &amp;val)"
       },
       "filepath": "fns/class/apache/thrift/op/StdHasher/combine",
@@ -105,6 +107,7 @@
       "definition_html": "void apache::thrift::op::StdHasher::combine",
       "argsstring_html": "(folly::ByteRange value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::combine",
       "param": [
         {
           "type_html": "folly::ByteRange",
@@ -144,6 +147,7 @@
       "definition_html": "void apache::thrift::op::StdHasher::combine",
       "argsstring_html": "(const StdHasher &amp;other)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::combine",
       "param": [
         {
           "type_html": "const <code>StdHasher</code> &amp;",
@@ -183,6 +187,7 @@
       "definition_html": "void apache::thrift::op::StdHasher::combine",
       "argsstring_html": "(const folly::IOBuf &amp;value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::StdHasher::combine",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",

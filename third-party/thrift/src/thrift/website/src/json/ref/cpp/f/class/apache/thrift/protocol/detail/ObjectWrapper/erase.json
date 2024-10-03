@@ -15,6 +15,7 @@
       "definition_html": "std::size_t apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::erase",
       "argsstring_html": "(FieldId i)",
       "name_html": "erase",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::erase",
       "param": [
         {
           "type_html": "FieldId",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "84",
+        "line": "80",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "84",
-        "bodyend": "86"
+        "bodystart": "80",
+        "bodyend": "82"
       },
       "definition": {
         "simple_html": "std::size_t erase(FieldId i)",

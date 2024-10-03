@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::postWrite",
       "argsstring_html": "(void *, const char *, uint32_t)",
       "name_html": "postWrite",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::postWrite",
       "param": [
         {
           "type_html": "void *"

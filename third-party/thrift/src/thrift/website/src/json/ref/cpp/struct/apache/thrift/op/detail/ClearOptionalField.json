@@ -44,6 +44,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
       "argsstring_html": "(optional_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &gt;",
@@ -92,6 +93,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
       "argsstring_html": "(optional_field_ref&lt; T &gt; field, Struct &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &gt;",
@@ -140,6 +142,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
       "argsstring_html": "(union_field_ref&lt; T &gt; field, Union &amp;u) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/union_field_ref\">union_field_ref</a>&lt; T &gt;",
@@ -189,6 +192,7 @@
       "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
       "argsstring_html": "(terse_intern_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; T &gt;",
@@ -270,6 +274,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(optional_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &gt;",
@@ -320,6 +325,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(optional_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &gt;",
@@ -370,6 +376,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(union_field_ref&lt; T &gt; field, Union &amp;u) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/union_field_ref\">union_field_ref</a>&lt; T &gt;",
@@ -421,6 +428,7 @@
               "definition_html": "void apache::thrift::op::detail::ClearOptionalField::operator()",
               "argsstring_html": "(terse_intern_boxed_field_ref&lt; T &gt; field, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ClearOptionalField::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; T &gt;",

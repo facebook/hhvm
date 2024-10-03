@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::StringPatch&lt; Patch &gt;::prepend",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringPatch::prepend",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "451",
+        "line": "324",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "451",
-        "bodyend": "454"
+        "bodystart": "324",
+        "bodyend": "327"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid prepend(U&amp;&amp; val)",

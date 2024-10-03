@@ -15,13 +15,14 @@
       "definition_html": "void apache::thrift::op::detail::BoolPatch&lt; Patch &gt;::invert",
       "argsstring_html": "()",
       "name_html": "invert",
+      "qualifiedname_html": "apache::thrift::op::detail::BoolPatch::invert",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "181",
+        "line": "47",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "181",
-        "bodyend": "184"
+        "bodystart": "47",
+        "bodyend": "50"
       },
       "definition": {
         "simple_html": "void invert()",

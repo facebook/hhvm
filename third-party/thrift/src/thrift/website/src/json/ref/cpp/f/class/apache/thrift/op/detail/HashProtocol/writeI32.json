@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeI32",
       "argsstring_html": "(int32_t val)",
       "name_html": "writeI32",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeI32",
       "param": [
         {
           "type_html": "int32_t",

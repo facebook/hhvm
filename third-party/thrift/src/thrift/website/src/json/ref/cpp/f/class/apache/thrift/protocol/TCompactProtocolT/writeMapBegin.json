@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMapBegin",
       "argsstring_html": "(const TType keyType, const TType valType, const uint32_t size)",
       "name_html": "writeMapBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMapBegin",
       "param": [
         {
           "type_html": "const TType",

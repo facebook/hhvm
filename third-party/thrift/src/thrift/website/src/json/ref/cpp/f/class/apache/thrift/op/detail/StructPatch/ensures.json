@@ -17,10 +17,11 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "constexpr bool",
-      "definition_html": "constexpr bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
       "argsstring_html": "() const",
       "name_html": "ensures",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::ensures",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "181",
@@ -30,11 +31,11 @@
         "bodyend": "183"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id&gt;\nconstexpr bool ensures() const",
-        "simple_raw": "template <typename Id>\nconstexpr bool ensures() const",
-        "detailed_html": "template &lt;typename Id&gt;\ninline constexpr bool ensures() const",
-        "detailed_raw": "template <typename Id>\ninline constexpr bool ensures() const",
-        "original_definition_html": "constexpr bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
+        "simple_html": "template &lt;typename Id&gt;\nbool ensures() const",
+        "simple_raw": "template <typename Id>\nbool ensures() const",
+        "detailed_html": "template &lt;typename Id&gt;\ninline bool ensures() const",
+        "detailed_raw": "template <typename Id>\ninline bool ensures() const",
+        "original_definition_html": "bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::ensures",
         "original_argsstring_html": "() const"
       },
       "description": {

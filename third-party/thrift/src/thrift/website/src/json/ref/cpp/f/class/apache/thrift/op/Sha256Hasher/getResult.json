@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::Sha256Hasher::getResult",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a055dbf196ce84f85492999c69feaf815",
+      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a838d36f7a1a7c308bc6c43fdd4885ea7",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "std::array&lt; uint8_t, SHA256_DIGEST_LENGTH &gt;",
-      "definition_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; apache::thrift::op::Sha256Hasher::getResult",
+      "definition_html": "std::array&lt; uint8_t, SHA256_DIGEST_LENGTH &gt; apache::thrift::op::Sha256Hasher::getResult",
       "argsstring_html": "() const",
       "name_html": "getResult",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Sha256Hasher.h",
         "line": "35",
@@ -28,7 +29,7 @@
         "simple_raw": "std::array<uint8_t, SHA256_DIGEST_LENGTH> getResult() const",
         "detailed_html": "inline std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; getResult() const",
         "detailed_raw": "inline std::array<uint8_t, SHA256_DIGEST_LENGTH> getResult() const",
-        "original_definition_html": "std::array&lt;uint8_t, SHA256_DIGEST_LENGTH&gt; apache::thrift::op::Sha256Hasher::getResult",
+        "original_definition_html": "std::array&lt; uint8_t, SHA256_DIGEST_LENGTH &gt; apache::thrift::op::Sha256Hasher::getResult",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/op/Sha256Hasher/getResult",

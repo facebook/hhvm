@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::toThrift",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1acfdc9ac13b3214a8f8790a96c5d61ab6",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a9e080dab7bf87dad6c957a69e6e07cf4",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -13,9 +13,10 @@
       "refqual": "lvalue",
       "virtual": "non-virtual",
       "type_html": "auto &amp;&amp;",
-      "definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+      "definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
       "argsstring_html": "() &amp;",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::toThrift",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "114",
@@ -29,7 +30,7 @@
         "simple_raw": "auto&& toThrift() &",
         "detailed_html": "inline auto&amp;&amp; toThrift() &amp;",
         "detailed_raw": "inline auto&& toThrift() &",
-        "original_definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+        "original_definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
         "original_argsstring_html": "() &amp;"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BasePatch/toThrift",
@@ -38,7 +39,7 @@
       "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::toThrift"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a82bf177e84694b9d456472460dea30ba",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a0232903c623315b0786991206337383b",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -47,9 +48,10 @@
       "refqual": "rvalue",
       "virtual": "non-virtual",
       "type_html": "auto &amp;&amp;",
-      "definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+      "definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
       "argsstring_html": "() &amp;&amp;",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::toThrift",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "118",
@@ -63,7 +65,7 @@
         "simple_raw": "auto&& toThrift() &&",
         "detailed_html": "inline auto&amp;&amp; toThrift() &amp;&amp;",
         "detailed_raw": "inline auto&& toThrift() &&",
-        "original_definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+        "original_definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
         "original_argsstring_html": "() &amp;&amp;"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BasePatch/toThrift",
@@ -72,7 +74,7 @@
       "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::toThrift"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a48583b7a332c6bccc69dd1564c1b966f",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a1c78794eee45afd65d3bed40bd0c49ba",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -81,9 +83,10 @@
       "refqual": "lvalue",
       "virtual": "non-virtual",
       "type_html": "auto &amp;&amp;",
-      "definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+      "definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
       "argsstring_html": "() const &amp;",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::toThrift",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "122",
@@ -97,7 +100,7 @@
         "simple_raw": "auto&& toThrift() const&",
         "detailed_html": "inline auto&amp;&amp; toThrift() const&amp;",
         "detailed_raw": "inline auto&& toThrift() const&",
-        "original_definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+        "original_definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
         "original_argsstring_html": "() const &amp;"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BasePatch/toThrift",
@@ -106,7 +109,7 @@
       "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::toThrift"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1a5b4c19d8c340f2484fc4df2dce7deaa8",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BasePatch_1ad2687015460d0ff80984bbc6562313de",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -115,9 +118,10 @@
       "refqual": "rvalue",
       "virtual": "non-virtual",
       "type_html": "auto &amp;&amp;",
-      "definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+      "definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
       "argsstring_html": "() const &amp;&amp;",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::toThrift",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "126",
@@ -131,7 +135,7 @@
         "simple_raw": "auto&& toThrift() const&&",
         "detailed_html": "inline auto&amp;&amp; toThrift() const&amp;&amp;",
         "detailed_raw": "inline auto&& toThrift() const&&",
-        "original_definition_html": "auto&amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
+        "original_definition_html": "auto &amp;&amp; apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::toThrift",
         "original_argsstring_html": "() const &amp;&amp;"
       },
       "filepath": "fns/class/apache/thrift/op/detail/BasePatch/toThrift",

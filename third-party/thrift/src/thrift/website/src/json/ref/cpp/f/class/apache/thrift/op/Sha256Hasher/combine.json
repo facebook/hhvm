@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::Sha256Hasher::combine",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1ac9cc35b39c2275f266dde945b68c2263",
+      "refid": "classapache_1_1thrift_1_1op_1_1Sha256Hasher_1a73b619e4df158b0668f5832e57a9dd4b",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -17,10 +17,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
-      "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Sha256Hasher::combine",
+      "type_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
+      "definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Sha256Hasher::combine",
       "argsstring_html": "(const T &amp;val)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::combine",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -36,11 +37,11 @@
         "bodyend": "46"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Sha256Hasher::combine",
+        "simple_html": "template &lt;typename T&gt;\nstd::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nstd::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+        "original_definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Sha256Hasher::combine",
         "original_argsstring_html": "(const T &amp;val)"
       },
       "filepath": "fns/class/apache/thrift/op/Sha256Hasher/combine",
@@ -60,6 +61,7 @@
       "definition_html": "void apache::thrift::op::Sha256Hasher::combine",
       "argsstring_html": "(const folly::IOBuf &amp;value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::combine",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -99,6 +101,7 @@
       "definition_html": "void apache::thrift::op::Sha256Hasher::combine",
       "argsstring_html": "(folly::ByteRange value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::combine",
       "param": [
         {
           "type_html": "folly::ByteRange",
@@ -138,6 +141,7 @@
       "definition_html": "void apache::thrift::op::Sha256Hasher::combine",
       "argsstring_html": "(const Sha256Hasher &amp;other)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Sha256Hasher::combine",
       "param": [
         {
           "type_html": "const <code>Sha256Hasher</code> &amp;",

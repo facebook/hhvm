@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::preWrite",
       "argsstring_html": "(void *, const char *)",
       "name_html": "preWrite",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::preWrite",
       "param": [
         {
           "type_html": "void *"

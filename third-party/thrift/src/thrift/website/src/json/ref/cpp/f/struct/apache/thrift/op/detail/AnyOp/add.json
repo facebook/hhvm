@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::AnyOp&lt; Tag, typename &gt;::add",
       "argsstring_html": "(void *, const Dyn &amp;)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyOp::add",
       "param": [
         {
           "type_html": "void *"
@@ -62,6 +63,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(T &amp;, V &amp;&amp;)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;"
@@ -109,6 +111,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(T &amp;, V &amp;&amp;)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;"
@@ -150,6 +153,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -193,6 +197,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -242,6 +247,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::add",
       "argsstring_html": "(T &amp;self, K &amp;&amp;key)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -285,6 +291,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;k)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -328,6 +335,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -371,6 +379,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -414,6 +423,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -457,6 +467,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -500,6 +511,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -543,6 +555,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -586,6 +599,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(T &amp;self, const T &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -629,6 +643,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -672,6 +687,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -715,6 +731,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -758,6 +775,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -801,6 +819,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -844,6 +863,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -887,6 +907,7 @@
       "definition_html": "static bool apache::thrift::op::detail::NumberOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -930,6 +951,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -973,6 +995,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -1016,6 +1039,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
       "param": [
         {
           "type_html": "void *",
@@ -1059,6 +1083,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
       "param": [
         {
           "type_html": "void *",

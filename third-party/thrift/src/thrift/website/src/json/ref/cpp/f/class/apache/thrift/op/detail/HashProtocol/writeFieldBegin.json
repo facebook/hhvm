@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeFieldBegin",
       "argsstring_html": "(const char *, protocol::TType, int16_t id)",
       "name_html": "writeFieldBegin",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeFieldBegin",
       "param": [
         {
           "type_html": "const char *"

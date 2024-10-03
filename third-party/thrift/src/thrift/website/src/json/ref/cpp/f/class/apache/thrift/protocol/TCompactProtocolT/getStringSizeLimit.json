@@ -15,6 +15,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getStringSizeLimit",
       "argsstring_html": "()",
       "name_html": "getStringSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getStringSizeLimit",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "130",

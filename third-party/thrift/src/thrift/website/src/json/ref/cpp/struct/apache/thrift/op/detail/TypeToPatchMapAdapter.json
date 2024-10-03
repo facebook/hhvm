@@ -17,12 +17,13 @@
       "definition_html": "using apache::thrift::op::detail::TypeToPatchMapAdapter::StandardType =  std::vector&lt;TypeToPatchInternalDoNotUse&gt;",
       "argsstring_html": "",
       "name_html": "StandardType",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::StandardType",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "63",
+        "line": "71",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "63",
+        "bodystart": "71",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter"
@@ -34,12 +35,13 @@
       "definition_html": "using apache::thrift::op::detail::TypeToPatchMapAdapter::AdaptedType =  folly::F14FastMap&lt;type::Type, protocol::DynamicPatch&gt;",
       "argsstring_html": "",
       "name_html": "AdaptedType",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::AdaptedType",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "64",
+        "line": "72",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "64",
+        "bodystart": "72",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter"
@@ -58,6 +60,7 @@
       "definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
       "argsstring_html": "(StandardType &amp;&amp;vec)",
       "name_html": "fromThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
       "param": [
         {
           "type_html": "<code>StandardType</code> &amp;&amp;",
@@ -66,7 +69,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "66",
+        "line": "74",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "51",
@@ -95,6 +98,7 @@
       "definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::toThrift",
       "argsstring_html": "(const AdaptedType &amp;map)",
       "name_html": "toThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::toThrift",
       "param": [
         {
           "type_html": "const <code>AdaptedType</code> &amp;",
@@ -103,7 +107,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "67",
+        "line": "75",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "66",
@@ -121,7 +125,7 @@
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/toThrift"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a48978d1d738c476ce16a30729067ee86",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a704228f07613b8b1c278a5bfecfcd9d8",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -138,39 +142,40 @@
       ],
       "type_html": "uint32_t",
       "definition_html": "static uint32_t apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
-      "argsstring_html": "(Protocol &amp;prot, const TypeToPatchMapAdapter::AdaptedType &amp;map)",
+      "argsstring_html": "(Protocol &amp;prot, const AdaptedType &amp;map)",
       "name_html": "encode",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
       "param": [
         {
           "type_html": "Protocol &amp;",
           "declname_html": "prot"
         },
         {
-          "type_html": "const <code>TypeToPatchMapAdapter::AdaptedType</code> &amp;",
+          "type_html": "const <code>AdaptedType</code> &amp;",
           "declname_html": "map"
         }
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "70",
+        "line": "78",
         "column": "19",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "70",
-        "bodyend": "88"
+        "bodystart": "78",
+        "bodyend": "96"
       },
       "definition": {
-        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic uint32_t encode(\n    Protocol&amp; prot, const TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "simple_raw": "template <typename Tag, typename Protocol>\nstatic uint32_t encode(\n    Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map)",
-        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static uint32_t encode(\n    Protocol&amp; prot, const TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static uint32_t encode(\n    Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map)",
+        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic uint32_t encode(Protocol&amp; prot, const AdaptedType&amp; map)",
+        "simple_raw": "template <typename Tag, typename Protocol>\nstatic uint32_t encode(Protocol& prot, const AdaptedType& map)",
+        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static uint32_t encode(Protocol&amp; prot, const AdaptedType&amp; map)",
+        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static uint32_t encode(Protocol& prot, const AdaptedType& map)",
         "original_definition_html": "static uint32_t apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
-        "original_argsstring_html": "(Protocol &amp;prot, const TypeToPatchMapAdapter::AdaptedType &amp;map)"
+        "original_argsstring_html": "(Protocol &amp;prot, const AdaptedType &amp;map)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/encode",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/encode"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a9fffbd816d36998dbf3b8f418d2224d5",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1ad7e3cf0ec65daf58d3a205d104ac37a6",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -187,33 +192,34 @@
       ],
       "type_html": "void",
       "definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-      "argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)",
+      "argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)",
       "name_html": "decode",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
       "param": [
         {
           "type_html": "Protocol &amp;",
           "declname_html": "prot"
         },
         {
-          "type_html": "<code>TypeToPatchMapAdapter::AdaptedType</code> &amp;",
+          "type_html": "<code>AdaptedType</code> &amp;",
           "declname_html": "map"
         }
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "91",
+        "line": "99",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "91",
-        "bodyend": "110"
+        "bodystart": "99",
+        "bodyend": "118"
       },
       "definition": {
-        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
-        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(\n    Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(\n    Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
+        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+        "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, AdaptedType& map)",
+        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(Protocol& prot, AdaptedType& map)",
         "original_definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-        "original_argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)"
+        "original_argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode"
@@ -230,6 +236,7 @@
       "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
       "argsstring_html": "(const AdaptedType &amp;, const AdaptedType &amp;)",
       "name_html": "equal",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
       "param": [
         {
           "type_html": "const <code>AdaptedType</code> &amp;",
@@ -242,7 +249,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "112",
+        "line": "120",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "77",
@@ -271,6 +278,7 @@
       "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
       "argsstring_html": "(AdaptedType &amp;, const TypeToPatchInternalDoNotUse &amp;)",
       "name_html": "addDynamicPatchToMap",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
       "param": [
         {
           "type_html": "<code>AdaptedType</code> &amp;",
@@ -283,7 +291,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "115",
+        "line": "123",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "98",
@@ -312,6 +320,7 @@
       "definition_html": "type::AnyStruct apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
       "argsstring_html": "(const protocol::DynamicPatch &amp;, const type::Type &amp;)",
       "name_html": "toAny",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">protocol::DynamicPatch</a> &amp;",
@@ -324,7 +333,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "118",
+        "line": "126",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "106",
@@ -344,11 +353,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "line": "62",
+    "line": "70",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "bodystart": "62",
-    "bodyend": "120"
+    "bodystart": "70",
+    "bodyend": "128"
   },
   "namespacednames_html": [
     "apache",
@@ -385,6 +394,7 @@
               "definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
               "argsstring_html": "(StandardType &amp;&amp;vec)",
               "name_html": "fromThrift",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::fromThrift",
               "param": [
                 {
                   "type_html": "<code>StandardType</code> &amp;&amp;",
@@ -393,7 +403,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "66",
+                "line": "74",
                 "column": "22",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
                 "bodystart": "51",
@@ -444,6 +454,7 @@
               "definition_html": "auto apache::thrift::op::detail::TypeToPatchMapAdapter::toThrift",
               "argsstring_html": "(const AdaptedType &amp;map)",
               "name_html": "toThrift",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::toThrift",
               "param": [
                 {
                   "type_html": "const <code>AdaptedType</code> &amp;",
@@ -452,7 +463,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "67",
+                "line": "75",
                 "column": "23",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
                 "bodystart": "66",
@@ -492,7 +503,7 @@
           "compoundname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a48978d1d738c476ce16a30729067ee86",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a704228f07613b8b1c278a5bfecfcd9d8",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -509,33 +520,34 @@
               ],
               "type_html": "uint32_t",
               "definition_html": "static uint32_t apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
-              "argsstring_html": "(Protocol &amp;prot, const TypeToPatchMapAdapter::AdaptedType &amp;map)",
+              "argsstring_html": "(Protocol &amp;prot, const AdaptedType &amp;map)",
               "name_html": "encode",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
               "param": [
                 {
                   "type_html": "Protocol &amp;",
                   "declname_html": "prot"
                 },
                 {
-                  "type_html": "const <code>TypeToPatchMapAdapter::AdaptedType</code> &amp;",
+                  "type_html": "const <code>AdaptedType</code> &amp;",
                   "declname_html": "map"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "70",
+                "line": "78",
                 "column": "19",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "bodystart": "70",
-                "bodyend": "88"
+                "bodystart": "78",
+                "bodyend": "96"
               },
               "definition": {
-                "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic uint32_t encode(\n    Protocol&amp; prot, const TypeToPatchMapAdapter::AdaptedType&amp; map)",
-                "simple_raw": "template <typename Tag, typename Protocol>\nstatic uint32_t encode(\n    Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map)",
-                "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static uint32_t encode(\n    Protocol&amp; prot, const TypeToPatchMapAdapter::AdaptedType&amp; map)",
-                "detailed_raw": "template <typename Tag, typename Protocol>\ninline static uint32_t encode(\n    Protocol& prot, const TypeToPatchMapAdapter::AdaptedType& map)",
+                "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic uint32_t encode(Protocol&amp; prot, const AdaptedType&amp; map)",
+                "simple_raw": "template <typename Tag, typename Protocol>\nstatic uint32_t encode(Protocol& prot, const AdaptedType& map)",
+                "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static uint32_t encode(Protocol&amp; prot, const AdaptedType&amp; map)",
+                "detailed_raw": "template <typename Tag, typename Protocol>\ninline static uint32_t encode(Protocol& prot, const AdaptedType& map)",
                 "original_definition_html": "static uint32_t apache::thrift::op::detail::TypeToPatchMapAdapter::encode",
-                "original_argsstring_html": "(Protocol &amp;prot, const TypeToPatchMapAdapter::AdaptedType &amp;map)"
+                "original_argsstring_html": "(Protocol &amp;prot, const AdaptedType &amp;map)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/encode",
               "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/encode",
@@ -563,7 +575,7 @@
           "compoundname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a9fffbd816d36998dbf3b8f418d2224d5",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1ad7e3cf0ec65daf58d3a205d104ac37a6",
               "prot": "public",
               "static": "yes",
               "const": "no",
@@ -580,33 +592,34 @@
               ],
               "type_html": "void",
               "definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-              "argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)",
+              "argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)",
               "name_html": "decode",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
               "param": [
                 {
                   "type_html": "Protocol &amp;",
                   "declname_html": "prot"
                 },
                 {
-                  "type_html": "<code>TypeToPatchMapAdapter::AdaptedType</code> &amp;",
+                  "type_html": "<code>AdaptedType</code> &amp;",
                   "declname_html": "map"
                 }
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "91",
+                "line": "99",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "bodystart": "91",
-                "bodyend": "110"
+                "bodystart": "99",
+                "bodyend": "118"
               },
               "definition": {
-                "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-                "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
-                "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(\n    Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-                "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(\n    Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
+                "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+                "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, AdaptedType& map)",
+                "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+                "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(Protocol& prot, AdaptedType& map)",
                 "original_definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-                "original_argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)"
+                "original_argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode",
               "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode",
@@ -645,6 +658,7 @@
               "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
               "argsstring_html": "(const AdaptedType &amp;, const AdaptedType &amp;)",
               "name_html": "equal",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::equal",
               "param": [
                 {
                   "type_html": "const <code>AdaptedType</code> &amp;",
@@ -657,7 +671,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "112",
+                "line": "120",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
                 "bodystart": "77",
@@ -708,6 +722,7 @@
               "definition_html": "bool apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
               "argsstring_html": "(AdaptedType &amp;, const TypeToPatchInternalDoNotUse &amp;)",
               "name_html": "addDynamicPatchToMap",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::addDynamicPatchToMap",
               "param": [
                 {
                   "type_html": "<code>AdaptedType</code> &amp;",
@@ -720,7 +735,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "115",
+                "line": "123",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
                 "bodystart": "98",
@@ -771,6 +786,7 @@
               "definition_html": "type::AnyStruct apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
               "argsstring_html": "(const protocol::DynamicPatch &amp;, const type::Type &amp;)",
               "name_html": "toAny",
+              "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::toAny",
               "param": [
                 {
                   "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">protocol::DynamicPatch</a> &amp;",
@@ -783,7 +799,7 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-                "line": "118",
+                "line": "126",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
                 "bodystart": "106",

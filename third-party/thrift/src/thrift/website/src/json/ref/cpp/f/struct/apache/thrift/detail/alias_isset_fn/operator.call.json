@@ -12,6 +12,7 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "noexcept(functor(ref.value_))",
       "tparams": [
         {
           "type_html": "typename T"
@@ -22,8 +23,9 @@
       ],
       "type_html": "auto",
       "definition_html": "auto apache::thrift::detail::alias_isset_fn::operator()",
-      "argsstring_html": "(optional_field_ref&lt; T &gt; ref, F functor) const noexcept(noexcept(functor(ref.value_)))",
+      "argsstring_html": "(optional_field_ref&lt; T &gt; ref, F functor) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::detail::alias_isset_fn::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &gt;",
@@ -36,19 +38,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1652",
+        "line": "1672",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1652",
-        "bodyend": "1657"
+        "bodystart": "1672",
+        "bodyend": "1677"
       },
       "definition": {
-        "simple_html": "template &lt;typename T, typename F&gt;   auto operator() (optional_field_ref&lt; T &gt; ref, F functor) const noexcept(",
-        "simple_raw": "template <typename T, typename F>   auto operator() (optional_field_ref< T > ref, F functor) const noexcept(",
-        "detailed_html": "template &lt;typename T, typename F&gt;\ninline auto operator()(optional_field_ref&lt;T&gt; ref, F functor) const\n    noexcept(noexcept((functor(ref.value_))))",
-        "detailed_raw": "template <typename T, typename F>\ninline auto operator()(optional_field_ref<T> ref, F functor) const\n    noexcept(noexcept((functor(ref.value_))))",
+        "simple_html": "template &lt;typename T, typename F&gt;\nauto operator()(optional_field_ref&lt;T&gt; ref, F functor) const",
+        "simple_raw": "template <typename T, typename F>\nauto operator()(optional_field_ref<T> ref, F functor) const",
+        "detailed_html": "template &lt;typename T, typename F&gt;\ninline auto operator()(optional_field_ref&lt;T&gt; ref, F functor) const",
+        "detailed_raw": "template <typename T, typename F>\ninline auto operator()(optional_field_ref<T> ref, F functor) const",
         "original_definition_html": "auto apache::thrift::detail::alias_isset_fn::operator()",
-        "original_argsstring_html": "(optional_field_ref&lt; T &gt; ref, F functor) const noexcept(noexcept(functor(ref.value_)))"
+        "original_argsstring_html": "(optional_field_ref&lt; T &gt; ref, F functor) const"
       },
       "filepath": "fns/struct/apache/thrift/detail/alias_isset_fn/operator.call",
       "href": "/ref/cpp/fns/struct/apache/thrift/detail/alias_isset_fn/operator.call",

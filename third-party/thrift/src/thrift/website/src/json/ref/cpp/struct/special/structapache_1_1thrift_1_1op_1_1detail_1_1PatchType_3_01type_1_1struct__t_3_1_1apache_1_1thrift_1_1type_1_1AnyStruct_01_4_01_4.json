@@ -18,12 +18,13 @@
       "definition_html": "using apache::thrift::op::detail::PatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;::type =  AnyPatch&lt;::apache::thrift::op::AnyPatchStruct&gt;",
       "argsstring_html": "",
       "name_html": "type",
+      "qualifiedname_html": "apache::thrift::op::detail::PatchType&lt; type::struct_t&lt;::apache::thrift::type::AnyStruct &gt; &gt;::type",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "302",
+        "line": "327",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "302",
+        "bodystart": "327",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1PatchType_3_01type_1_1struct__t_3_1_1apache_1_1thrift_1_1type_1_1AnyStruct_01_4_01_4"
@@ -31,11 +32,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "line": "301",
+    "line": "326",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "bodystart": "301",
-    "bodyend": "303"
+    "bodystart": "326",
+    "bodyend": "328"
   },
   "namespacednames_html": [
     "apache",

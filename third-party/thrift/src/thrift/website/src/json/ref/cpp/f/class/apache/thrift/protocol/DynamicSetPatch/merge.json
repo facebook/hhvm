@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicSetPatch::merge",
       "argsstring_html": "(detail::Badge badge, const DynamicSetPatch &amp;other)",
       "name_html": "merge",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::merge",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "277",
+        "line": "298",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "277",
-        "bodyend": "279"
+        "bodystart": "298",
+        "bodyend": "300"
       },
       "definition": {
         "simple_html": "void merge(detail::Badge badge, const DynamicSetPatch&amp; other)",

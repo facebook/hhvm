@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::writeString",
       "argsstring_html": "(folly::StringPiece val)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::writeString",
       "param": [
         {
           "type_html": "folly::StringPiece",

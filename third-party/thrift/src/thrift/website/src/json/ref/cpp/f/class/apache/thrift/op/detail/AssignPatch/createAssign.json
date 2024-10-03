@@ -21,6 +21,7 @@
       "definition_html": "static FOLLY_NODISCARD Derived apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::createAssign",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "createAssign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::createAssign",
       "param": [
         {
           "type_html": "U &amp;&amp;",

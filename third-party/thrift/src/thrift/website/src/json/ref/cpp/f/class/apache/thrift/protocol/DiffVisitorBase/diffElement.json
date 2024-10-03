@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffElement",
       "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst, const Value &amp;key, DynamicMapPatch &amp;patch)",
       "name_html": "diffElement",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffElement",
       "param": [
         {
           "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "628",
+        "line": "649",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "800",
-        "bodyend": "827"
+        "bodystart": "801",
+        "bodyend": "828"
       },
       "definition": {
         "simple_html": "void diffElement(\n    const detail::ValueMap&amp; src,\n    const detail::ValueMap&amp; dst,\n    const Value&amp; key,\n    DynamicMapPatch&amp; patch)",

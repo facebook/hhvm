@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::BaseAssignPatch",
       "argsstring_html": "(const BaseAssignPatch &amp;)=default",
       "name_html": "BaseAssignPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::BaseAssignPatch",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch\">BaseAssignPatch</a> &amp;"
@@ -52,6 +53,7 @@
       "definition_html": "apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::BaseAssignPatch",
       "argsstring_html": "(BaseAssignPatch &amp;&amp;) noexcept=default",
       "name_html": "BaseAssignPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::BaseAssignPatch",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/BaseAssignPatch\">BaseAssignPatch</a> &amp;&amp;"

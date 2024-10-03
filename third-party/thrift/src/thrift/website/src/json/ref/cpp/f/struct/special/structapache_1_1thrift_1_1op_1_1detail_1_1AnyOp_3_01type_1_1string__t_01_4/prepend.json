@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(std::string &amp;self, std::string val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -58,6 +59,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -101,6 +103,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -149,6 +152,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(folly::IOBuf &amp;self, T &amp;&amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -192,6 +196,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -240,6 +245,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -283,6 +289,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(IOBufPtr &amp;self, const IOBufPtr &amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "<code>IOBufPtr</code> &amp;",
@@ -326,6 +333,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::prepend",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "prepend",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::prepend",
       "param": [
         {
           "type_html": "void *",

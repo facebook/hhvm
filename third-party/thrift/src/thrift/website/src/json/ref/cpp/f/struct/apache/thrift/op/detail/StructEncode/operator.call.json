@@ -23,6 +23,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::StructEncode&lt; MockStruct &gt;::operator()",
       "argsstring_html": "(T &amp;&amp;, const U &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StructEncode&lt; MockStruct &gt;::operator()",
       "param": [
         {
           "type_html": "T &amp;&amp;"
@@ -72,6 +73,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
       "argsstring_html": "(T &amp;&amp;, const U &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StructEncode&lt; JSONMockStruct &gt;::operator()",
       "param": [
         {
           "type_html": "T &amp;&amp;"
@@ -118,6 +120,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::StructEncode&lt; T &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;t) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::StructEncode::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

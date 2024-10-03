@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI16",
       "argsstring_html": "(const int16_t i16)",
       "name_html": "writeI16",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI16",
       "param": [
         {
           "type_html": "const int16_t",

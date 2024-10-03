@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny",
       "argsstring_html": "(const type::AnyStruct &amp;)",
       "name_html": "ensureAny",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::ensureAny",
       "param": [
         {
           "type_html": "const type::AnyStruct &amp;"
@@ -22,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "139",
+        "line": "143",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "139",
-        "bodyend": "139"
+        "bodystart": "143",
+        "bodyend": "143"
       },
       "definition": {
         "simple_html": "void ensureAny(const type::AnyStruct&amp;)",

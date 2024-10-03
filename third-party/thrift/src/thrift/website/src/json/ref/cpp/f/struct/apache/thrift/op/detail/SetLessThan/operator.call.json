@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::detail::SetLessThan&lt; T, E, LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SetLessThan::operator()",
       "param": [
         {
           "type_html": "const T &amp;",

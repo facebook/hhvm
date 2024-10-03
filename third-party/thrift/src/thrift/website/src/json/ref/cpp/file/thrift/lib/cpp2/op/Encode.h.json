@@ -50,10 +50,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr <code>detail::SerializedSize</code>&lt; ZeroCopy, Tag &gt;",
-      "definition_html": "constexpr detail::SerializedSize&lt;ZeroCopy, Tag&gt; apache::thrift::op::serialized_size",
+      "type_html": "<code>detail::SerializedSize</code>&lt; ZeroCopy, Tag &gt;",
+      "definition_html": "detail::SerializedSize&lt;ZeroCopy, Tag&gt; apache::thrift::op::serialized_size",
       "argsstring_html": "",
       "name_html": "serialized_size",
+      "qualifiedname_html": "apache::thrift::op::serialized_size",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
@@ -61,10 +62,10 @@
         "column": "41",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "29",
-        "bodyend": "-1"
+        "bodyend": "29"
       },
       "description": {
-        "detailed_html": "<p>Returns the serialized size of the avlue using the type tag. For example: serialized_size&lt;false, type::int16_t&gt;(prot, 1); </p>"
+        "detailed_html": "<p>Returns the serialized size of the avlue using the type tag. For example: <code>serialized_size&lt;false, type::int16_t&gt;(prot, 1)</code>; </p>"
       }
     },
     {
@@ -78,10 +79,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr <code>detail::Encode</code>&lt; Tag &gt;",
-      "definition_html": "constexpr detail::Encode&lt;Tag&gt; apache::thrift::op::encode",
+      "type_html": "<code>detail::Encode</code>&lt; Tag &gt;",
+      "definition_html": "detail::Encode&lt;Tag&gt; apache::thrift::op::encode",
       "argsstring_html": "",
       "name_html": "encode",
+      "qualifiedname_html": "apache::thrift::op::encode",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
@@ -89,10 +91,10 @@
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "35",
-        "bodyend": "-1"
+        "bodyend": "35"
       },
       "description": {
-        "detailed_html": "<p>Encodes the given value to the given protocol using the type tag. This handles adapted type. For example: encode&lt;type::int16_t&gt;(prot, 1); </p>"
+        "detailed_html": "<p>Encodes the given value to the given protocol using the type tag. This handles adapted type. For example: <code>encode&lt;type::int16_t&gt;(prot, 1)</code>; </p>"
       }
     },
     {
@@ -106,10 +108,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr <code>detail::Decode</code>&lt; Tag &gt;",
-      "definition_html": "constexpr detail::Decode&lt;Tag&gt; apache::thrift::op::decode",
+      "type_html": "<code>detail::Decode</code>&lt; Tag &gt;",
+      "definition_html": "detail::Decode&lt;Tag&gt; apache::thrift::op::decode",
       "argsstring_html": "",
       "name_html": "decode",
+      "qualifiedname_html": "apache::thrift::op::decode",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",
@@ -117,10 +120,10 @@
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Encode.h",
         "bodystart": "41",
-        "bodyend": "-1"
+        "bodyend": "41"
       },
       "description": {
-        "detailed_html": "<p>Decodes the value from the given protocol using the type tag. This handles adapted type. For example: decode&lt;type::int16_t&gt;(prot, i); // decode to variable i </p>"
+        "detailed_html": "<p>Decodes the value from the given protocol using the type tag. This handles adapted type. For example: <code>decode&lt;type::int16_t&gt;(prot, i)</code>; // decode to variable i </p>"
       }
     },
     {
@@ -134,10 +137,11 @@
           "type_html": "typename Tag"
         }
       ],
-      "type_html": "constexpr apache::thrift::protocol::TType",
-      "definition_html": "constexpr apache::thrift::protocol::TType apache::thrift::op::typeTagToTType",
+      "type_html": "apache::thrift::protocol::TType",
+      "definition_html": "apache::thrift::protocol::TType apache::thrift::op::typeTagToTType",
       "argsstring_html": "",
       "name_html": "typeTagToTType",
+      "qualifiedname_html": "apache::thrift::op::typeTagToTType",
       "initializer_html": "=\n    detail::typeTagToTType&lt;Tag&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Encode.h",

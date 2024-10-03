@@ -25,6 +25,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(T &amp;self, J &amp;&amp;key, U &amp;&amp;val)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -72,6 +73,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::put",
       "param": [
         {
           "type_html": "void *",

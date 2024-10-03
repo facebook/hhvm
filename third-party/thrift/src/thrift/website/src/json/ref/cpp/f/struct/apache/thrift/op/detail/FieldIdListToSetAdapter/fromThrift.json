@@ -15,6 +15,7 @@
       "definition_html": "static FieldIdSet apache::thrift::op::detail::FieldIdListToSetAdapter::fromThrift",
       "argsstring_html": "(const FieldIdList &amp;v)",
       "name_html": "fromThrift",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldIdListToSetAdapter::fromThrift",
       "param": [
         {
           "type_html": "const <code>FieldIdList</code> &amp;",

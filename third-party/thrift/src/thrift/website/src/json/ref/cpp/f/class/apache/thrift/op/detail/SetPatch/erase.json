@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::erase",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "erase",
+      "qualifiedname_html": "apache::thrift::op::detail::SetPatch::erase",
       "param": [
         {
           "type_html": "U &amp;&amp;",

@@ -58,7 +58,7 @@
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "44",
-        "bodyend": "-1"
+        "bodyend": "44"
       }
     },
     {
@@ -67,7 +67,7 @@
       "static": "yes",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr static T",
+      "type_html": "T",
       "definition_html": "const T one",
       "argsstring_html": "",
       "name_html": "one",
@@ -87,7 +87,7 @@
       "static": "yes",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr static T",
+      "type_html": "T",
       "definition_html": "const T otherOne",
       "argsstring_html": "",
       "name_html": "otherOne",
@@ -107,7 +107,7 @@
       "static": "yes",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr static std::array&lt; T, 2 &gt;",
+      "type_html": "std::array&lt; T, 2 &gt;",
       "definition_html": "const std::array&lt;T, 3&gt; many",
       "argsstring_html": "",
       "name_html": "many",
@@ -118,7 +118,7 @@
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/ThriftOpTest.cpp",
         "bodystart": "50",
-        "bodyend": "-1"
+        "bodyend": "50"
       }
     }
   ],

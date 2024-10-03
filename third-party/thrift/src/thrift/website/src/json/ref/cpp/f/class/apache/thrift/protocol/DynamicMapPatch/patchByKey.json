@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a520e05cff516f8d5cad923a0eefa1c8d",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1aadccfd36156fd141d8270c8d8d32aefc",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
       "argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)",
       "name_html": "patchByKey",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -30,18 +31,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "310",
+        "line": "331",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "310",
-        "bodyend": "312"
+        "bodystart": "331",
+        "bodyend": "333"
       },
       "definition": {
         "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
         "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
         "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, const DynamicPatch&amp; p)",
         "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p)",
-        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
         "original_argsstring_html": "(detail::Badge, Value k, const DynamicPatch &amp;p)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",
@@ -50,7 +51,7 @@
       "compoundname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey"
     },
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a7336100ee0f0c61b45722885c09ac634",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicMapPatch_1a3e7a345a9f2b44f92a943b96309a8f12",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -58,9 +59,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
       "argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)",
       "name_html": "patchByKey",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::patchByKey",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -76,18 +78,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "313",
+        "line": "334",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "313",
-        "bodyend": "315"
+        "bodystart": "334",
+        "bodyend": "336"
       },
       "definition": {
         "simple_html": "DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
         "simple_raw": "DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
         "detailed_html": "inline DynamicPatch&amp; patchByKey(detail::Badge, Value k, DynamicPatch&amp;&amp; p)",
         "detailed_raw": "inline DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p)",
-        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicMapPatch::patchByKey",
         "original_argsstring_html": "(detail::Badge, Value k, DynamicPatch &amp;&amp;p)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicMapPatch/patchByKey",

@@ -15,9 +15,14 @@
       "definition_html": "virtual void apache::thrift::op::Serializer::encode",
       "argsstring_html": "(type::ConstRef value, folly::io::QueueAppender &amp;&amp;appender) const =0",
       "name_html": "encode",
+      "qualifiedname_html": "apache::thrift::op::Serializer::encode",
       "reimplementedby": [
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a936bdd16280346c3f02570b6818bc8f3",
+          "refid": "classapache_1_1thrift_1_1op_1_1ProtocolSerializer_1a936bdd16280346c3f02570b6818bc8f3",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1ProtocolSerializer_1a936bdd16280346c3f02570b6818bc8f3",
           "text_html": "encode"
         },
         {
@@ -30,6 +35,18 @@
         },
         {
           "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a936bdd16280346c3f02570b6818bc8f3",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a936bdd16280346c3f02570b6818bc8f3",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a936bdd16280346c3f02570b6818bc8f3",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1test_1_1FollyToStringSerializer_1a936bdd16280346c3f02570b6818bc8f3",
           "text_html": "encode"
         },
         {
@@ -77,9 +94,14 @@
       "definition_html": "virtual void apache::thrift::op::Serializer::encode",
       "argsstring_html": "(type::AnyConstRef value, folly::io::QueueAppender &amp;&amp;appender) const =0",
       "name_html": "encode",
+      "qualifiedname_html": "apache::thrift::op::Serializer::encode",
       "reimplementedby": [
         {
-          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
+          "refid": "classapache_1_1thrift_1_1op_1_1ProtocolSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1ProtocolSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {
@@ -92,6 +114,18 @@
         },
         {
           "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
+          "text_html": "encode"
+        },
+        {
+          "refid": "classapache_1_1thrift_1_1test_1_1FollyToStringSerializer_1a77c27c60ba28e9a70dda78f0024d2cde",
           "text_html": "encode"
         },
         {

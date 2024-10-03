@@ -15,6 +15,7 @@
       "definition_html": "XXH64_hash_t apache::thrift::op::Xxh64Hasher::getResult",
       "argsstring_html": "() const",
       "name_html": "getResult",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "38",

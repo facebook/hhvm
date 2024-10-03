@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::clear",
       "argsstring_html": "(void *ptr)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::clear",
       "param": [
         {
           "type_html": "void *",

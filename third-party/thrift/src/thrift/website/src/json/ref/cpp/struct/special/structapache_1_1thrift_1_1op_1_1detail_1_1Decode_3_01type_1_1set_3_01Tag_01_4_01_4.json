@@ -16,7 +16,7 @@
   ],
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1a6a8f276d54767b5e94aa72d3dc9a4a23",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1ad9c60b45fc38961d0f7c399ab2c999bd",
       "prot": "private",
       "static": "yes",
       "const": "no",
@@ -32,9 +32,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt;",
-      "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+      "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
       "argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)",
       "name_html": "decode_known_length_set",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -62,14 +63,14 @@
         "simple_raw": "template <typename Set, typename Protocol>\nstatic std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
         "detailed_html": "template &lt;typename Set, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
         "detailed_raw": "template <typename Set, typename Protocol>\nprivate inline static std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
-        "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+        "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
         "original_argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
       "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1aba85f1a793fb319f43535a3f9ed6bcd4",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1a80e0792a8ed87a91f8578f2130b3c152",
       "prot": "private",
       "static": "yes",
       "const": "no",
@@ -85,9 +86,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt;",
-      "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+      "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
       "argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)",
       "name_html": "decode_known_length_set",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -115,7 +117,7 @@
         "simple_raw": "template <typename Set, typename Protocol>\nstatic std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
         "detailed_html": "template &lt;typename Set, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
         "detailed_raw": "template <typename Set, typename Protocol>\nprivate inline static std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
-        "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+        "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
         "original_argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
@@ -141,6 +143,7 @@
       "definition_html": "void apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, SetType &amp;set) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -204,7 +207,7 @@
           "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1a6a8f276d54767b5e94aa72d3dc9a4a23",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1ad9c60b45fc38961d0f7c399ab2c999bd",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -220,9 +223,10 @@
                 }
               ],
               "type_html": "std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt;",
-              "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+              "definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
               "argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)",
               "name_html": "decode_known_length_set",
+              "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
               "param": [
                 {
                   "type_html": "Protocol &amp;",
@@ -250,7 +254,7 @@
                 "simple_raw": "template <typename Set, typename Protocol>\nstatic std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
                 "detailed_html": "template &lt;typename Set, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
                 "detailed_raw": "template <typename Set, typename Protocol>\nprivate inline static std::enable_if_t<\n    apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
-                "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+                "original_definition_html": "static std::enable_if_t&lt; apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
                 "original_argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
@@ -259,7 +263,7 @@
               "compoundname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set"
             },
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1aba85f1a793fb319f43535a3f9ed6bcd4",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4_1a80e0792a8ed87a91f8578f2130b3c152",
               "prot": "private",
               "static": "yes",
               "const": "no",
@@ -275,9 +279,10 @@
                 }
               ],
               "type_html": "std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt;",
-              "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+              "definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
               "argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)",
               "name_html": "decode_known_length_set",
+              "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
               "param": [
                 {
                   "type_html": "Protocol &amp;",
@@ -305,7 +310,7 @@
                 "simple_raw": "template <typename Set, typename Protocol>\nstatic std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
                 "detailed_html": "template &lt;typename Set, typename Protocol&gt;\nprivate inline static std::enable_if_t&lt;\n    !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt;&gt;\ndecode_known_length_set(Protocol&amp; prot, Set&amp; set, std::uint32_t set_size)",
                 "detailed_raw": "template <typename Set, typename Protocol>\nprivate inline static std::enable_if_t<\n    !apache::thrift::detail::pm::sorted_unique_constructible_v<Set>>\ndecode_known_length_set(Protocol& prot, Set& set, std::uint32_t set_size)",
-                "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt;Set&gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
+                "original_definition_html": "static std::enable_if_t&lt; !apache::thrift::detail::pm::sorted_unique_constructible_v&lt; Set &gt; &gt; apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::decode_known_length_set",
                 "original_argsstring_html": "(Protocol &amp;prot, Set &amp;set, std::uint32_t set_size)"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1set_3_01Tag_01_4_01_4/decode_known_length_set",
@@ -353,6 +358,7 @@
               "definition_html": "void apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, SetType &amp;set) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::set&lt; Tag &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

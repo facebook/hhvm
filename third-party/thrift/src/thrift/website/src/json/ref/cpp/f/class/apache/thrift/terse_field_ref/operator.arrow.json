@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::terse_field_ref::operator-&gt;",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1terse__field__ref_1a14da189996f869421117afb0b862d809",
+      "refid": "classapache_1_1thrift_1_1terse__field__ref_1a6d0fdc3fe3955c2799bdbbdfc5022e1e",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -19,23 +19,24 @@
         }
       ],
       "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfNonConst</code>&lt; U &gt; *",
-      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "() const noexcept",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::terse_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2325",
+        "line": "2381",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2325",
-        "bodyend": "2327"
+        "bodystart": "2381",
+        "bodyend": "2383"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
         "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->() const",
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()\n    const noexcept",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->()\n    const noexcept",
-        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "() const noexcept"
       },
       "filepath": "fns/class/apache/thrift/terse_field_ref/operator.arrow",
@@ -44,7 +45,7 @@
       "compoundname_html": "apache::thrift::terse_field_ref::operator-&gt;"
     },
     {
-      "refid": "classapache_1_1thrift_1_1terse__field__ref_1a395dead1b2240c1ba989d60f18fa1def",
+      "refid": "classapache_1_1thrift_1_1terse__field__ref_1aa6e8a31d3e373b06bca95972fe53c2a3",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -59,23 +60,24 @@
         }
       ],
       "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfConst</code>&lt; U &gt; *",
-      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "() const noexcept",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::terse_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2330",
+        "line": "2386",
         "column": "53",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2330",
-        "bodyend": "2333"
+        "bodystart": "2386",
+        "bodyend": "2389"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
         "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const",
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;()\n    const noexcept",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->()\n    const noexcept",
-        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "() const noexcept"
       },
       "filepath": "fns/class/apache/thrift/terse_field_ref/operator.arrow",
@@ -84,7 +86,7 @@
       "compoundname_html": "apache::thrift::terse_field_ref::operator-&gt;"
     },
     {
-      "refid": "classapache_1_1thrift_1_1terse__field__ref_1a0ae9ecaaf072f722d47d2a013f9fb677",
+      "refid": "classapache_1_1thrift_1_1terse__field__ref_1acbdfa5e7bb9c35f8387ecf72c766cadb",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -93,23 +95,24 @@
       "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> *",
-      "definition_html": "FOLLY_ERASE value_type* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE value_type * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "() noexcept",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::terse_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2335",
+        "line": "2391",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2335",
-        "bodyend": "2335"
+        "bodystart": "2391",
+        "bodyend": "2391"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",
         "simple_raw": "FOLLY_ERASE value_type* operator->()",
         "detailed_html": "inline FOLLY_ERASE value_type* operator-&gt;() noexcept",
         "detailed_raw": "inline FOLLY_ERASE value_type* operator->() noexcept",
-        "original_definition_html": "FOLLY_ERASE value_type* apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE value_type * apache::thrift::terse_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "() noexcept"
       },
       "filepath": "fns/class/apache/thrift/terse_field_ref/operator.arrow",

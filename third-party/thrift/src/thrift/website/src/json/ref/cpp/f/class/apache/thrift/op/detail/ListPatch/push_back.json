@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::ListPatch&lt; Patch &gt;::push_back",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "push_back",
+      "qualifiedname_html": "apache::thrift::op::detail::ListPatch::push_back",
       "param": [
         {
           "type_html": "U &amp;&amp;",

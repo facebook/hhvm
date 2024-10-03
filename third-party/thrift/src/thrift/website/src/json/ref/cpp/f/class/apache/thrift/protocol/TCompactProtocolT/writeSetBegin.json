@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeSetBegin",
       "argsstring_html": "(const TType elemType, const uint32_t size)",
       "name_html": "writeSetBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeSetBegin",
       "param": [
         {
           "type_html": "const TType",

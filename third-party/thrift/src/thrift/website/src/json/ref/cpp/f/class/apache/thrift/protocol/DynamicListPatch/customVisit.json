@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicListPatch::customVisit",
       "argsstring_html": "(detail::Badge badge, Visitor &amp;&amp;v) const",
       "name_html": "customVisit",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicListPatch::customVisit",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "191",
+        "line": "212",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "191",
-        "bodyend": "206"
+        "bodystart": "212",
+        "bodyend": "227"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge badge, Visitor&amp;&amp; v) const",

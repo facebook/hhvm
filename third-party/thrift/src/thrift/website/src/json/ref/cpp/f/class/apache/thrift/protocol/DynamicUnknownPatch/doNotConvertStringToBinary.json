@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary",
       "argsstring_html": "(detail::Badge)",
       "name_html": "doNotConvertStringToBinary",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::doNotConvertStringToBinary",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -22,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "101",
+        "line": "122",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "101",
-        "bodyend": "103"
+        "bodystart": "122",
+        "bodyend": "124"
       },
       "definition": {
         "simple_html": "void doNotConvertStringToBinary(detail::Badge)",

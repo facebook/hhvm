@@ -1,0 +1,60 @@
+{
+  "kind": "overloadset",
+  "name_html": "stringToIobuf",
+  "compoundname_html": "apache::thrift::op::detail::BinaryPatch::stringToIobuf",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch_1a1550da7853b06f6e7150e69c2eeb8008",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "folly::IOBuf",
+      "definition_html": "static folly::IOBuf apache::thrift::op::detail::BinaryPatch&lt; Patch &gt;::stringToIobuf",
+      "argsstring_html": "(std::string s)",
+      "name_html": "stringToIobuf",
+      "qualifiedname_html": "apache::thrift::op::detail::BinaryPatch::stringToIobuf",
+      "param": [
+        {
+          "type_html": "std::string",
+          "declname_html": "s"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "373",
+        "column": "23",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "373",
+        "bodyend": "383"
+      },
+      "definition": {
+        "simple_html": "static folly::IOBuf stringToIobuf(std::string s)",
+        "simple_raw": "static folly::IOBuf stringToIobuf(std::string s)",
+        "detailed_html": "private inline static folly::IOBuf stringToIobuf(std::string s)",
+        "detailed_raw": "private inline static folly::IOBuf stringToIobuf(std::string s)",
+        "original_definition_html": "static folly::IOBuf apache::thrift::op::detail::BinaryPatch&lt; Patch &gt;::stringToIobuf",
+        "original_argsstring_html": "(std::string s)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BinaryPatch/stringToIobuf",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BinaryPatch/stringToIobuf",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BinaryPatch",
+      "compoundname_html": "apache::thrift::op::detail::BinaryPatch::stringToIobuf"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BinaryPatch/stringToIobuf",
+  "minprot": "private",
+  "displayname_html": "stringToIobuf",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/stringToIobuf",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BinaryPatch/stringToIobuf",
+  "parent_links": [
+    {
+      "text_html": "BinaryPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch"
+    }
+  ]
+}

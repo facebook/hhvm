@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::NumberPatch::operator-=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch_1aa301bd68f160b6758ee192ec724a62a7",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1NumberPatch_1a6cb3cbdcf0bc4bf6e7acae66dfab909d",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "<code>NumberPatch</code> &amp;",
-      "definition_html": "NumberPatch&amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator-=",
+      "definition_html": "NumberPatch &amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator-=",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "operator-=",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberPatch::operator-=",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "line": "319",
+        "line": "185",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
-        "bodystart": "319",
-        "bodyend": "322"
+        "bodystart": "185",
+        "bodyend": "188"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nNumberPatch&amp; operator-=(U&amp;&amp; val)",
         "simple_raw": "template <typename U>\nNumberPatch& operator-=(U&& val)",
         "detailed_html": "template &lt;typename U&gt;\ninline NumberPatch&amp; operator-=(U&amp;&amp; val)",
         "detailed_raw": "template <typename U>\ninline NumberPatch& operator-=(U&& val)",
-        "original_definition_html": "NumberPatch&amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator-=",
+        "original_definition_html": "NumberPatch &amp; apache::thrift::op::detail::NumberPatch&lt; Patch &gt;::operator-=",
         "original_argsstring_html": "(U &amp;&amp;val)"
       },
       "description": {

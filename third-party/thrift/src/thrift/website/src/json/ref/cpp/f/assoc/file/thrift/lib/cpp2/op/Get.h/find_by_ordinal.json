@@ -27,6 +27,7 @@
       "definition_html": "decltype(auto) apache::thrift::op::find_by_ordinal",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "find_by_ordinal",
+      "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "58",
+        "line": "59",
         "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "58",
-        "bodyend": "61"
+        "bodystart": "59",
+        "bodyend": "62"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F, std::enable_if_t&lt;size_v&lt;T&gt; != 0&gt;* = nullptr&gt;\ndecltype(auto) find_by_ordinal(F&amp;&amp; f)",
@@ -56,7 +57,7 @@
       "namespace_html": "apache::thrift::op"
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a117e68a0a022f8249eab743019a954a4",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a226355613f15571e8ad252256c7577ba",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -72,9 +73,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; <code>size_v</code>&lt; T &gt;==0, bool &gt;",
-      "definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+      "definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
       "argsstring_html": "(F &amp;&amp;)",
       "name_html": "find_by_ordinal",
+      "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;"
@@ -82,18 +84,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "64",
+        "line": "65",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "64",
-        "bodyend": "66"
+        "bodystart": "65",
+        "bodyend": "67"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
         "simple_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
         "detailed_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
         "detailed_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
-        "original_definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+        "original_definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
         "original_argsstring_html": "(F &amp;&amp;)"
       },
       "compoundname_html": "apache::thrift::op::find_by_ordinal",

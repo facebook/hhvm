@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::EmptyMatcher&lt; Tag &gt;::DescribeNegationTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeNegationTo",
+      "qualifiedname_html": "apache::thrift::test::EmptyMatcher::DescribeNegationTo",
       "param": [
         {
           "type_html": "std::ostream *",

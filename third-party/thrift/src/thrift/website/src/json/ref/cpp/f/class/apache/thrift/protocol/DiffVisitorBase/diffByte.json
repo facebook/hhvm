@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::BytePatch",
       "definition_html": "op::BytePatch apache::thrift::protocol::DiffVisitorBase::diffByte",
       "argsstring_html": "(std::int8_t src, std::int8_t dst)",
       "name_html": "diffByte",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffByte",
       "param": [
         {
           "type_html": "std::int8_t",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "598",
+        "line": "619",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "647",
-        "bodyend": "649"
+        "bodystart": "648",
+        "bodyend": "650"
       },
       "definition": {
         "simple_html": "virtual op::BytePatch diffByte(std::int8_t src, std::int8_t dst)",

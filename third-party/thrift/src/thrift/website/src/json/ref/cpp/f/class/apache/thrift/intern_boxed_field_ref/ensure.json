@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::intern_boxed_field_ref&lt; T &gt;::ensure",
       "argsstring_html": "() noexcept",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::intern_boxed_field_ref::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1246",
+        "line": "1266",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1246",
-        "bodyend": "1249"
+        "bodystart": "1266",
+        "bodyend": "1269"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",

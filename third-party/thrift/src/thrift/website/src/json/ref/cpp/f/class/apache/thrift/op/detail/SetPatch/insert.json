@@ -21,6 +21,7 @@
       "definition_html": "void apache::thrift::op::detail::SetPatch&lt; Patch &gt;::insert",
       "argsstring_html": "(U &amp;&amp;val)",
       "name_html": "insert",
+      "qualifiedname_html": "apache::thrift::op::detail::SetPatch::insert",
       "param": [
         {
           "type_html": "U &amp;&amp;",

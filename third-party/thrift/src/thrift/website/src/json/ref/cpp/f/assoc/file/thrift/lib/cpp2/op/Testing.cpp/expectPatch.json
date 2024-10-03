@@ -32,6 +32,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected1, const T3 &amp;expected2)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",
@@ -86,6 +87,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const folly::IOBuf &amp;actual, const folly::IOBuf &amp;expected1, const folly::IOBuf &amp;expected2)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",
@@ -148,6 +150,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",

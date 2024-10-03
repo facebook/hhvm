@@ -15,6 +15,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::ensure",
       "argsstring_html": "(void *s, FieldId fid, const Dyn &amp;n, const Dyn &amp;val)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::ensure",
       "param": [
         {
           "type_html": "void *",

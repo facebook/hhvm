@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::contains",
       "argsstring_html": "(FieldId i) const",
       "name_html": "contains",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::contains",
       "param": [
         {
           "type_html": "FieldId",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "80",
+        "line": "76",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "80",
-        "bodyend": "82"
+        "bodystart": "76",
+        "bodyend": "78"
       },
       "definition": {
         "simple_html": "bool contains(FieldId i) const",

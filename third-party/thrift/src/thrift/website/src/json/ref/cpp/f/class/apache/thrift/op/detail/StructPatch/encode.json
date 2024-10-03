@@ -20,6 +20,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::StructPatch&lt; Patch &gt;::encode",
       "argsstring_html": "(Protocol &amp;prot) const",
       "name_html": "encode",
+      "qualifiedname_html": "apache::thrift::op::detail::StructPatch::encode",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "567",
+        "line": "589",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "567",
-        "bodyend": "602"
+        "bodystart": "589",
+        "bodyend": "624"
       },
       "definition": {
         "simple_html": "template &lt;class Protocol&gt;\nuint32_t encode(Protocol&amp; prot) const",

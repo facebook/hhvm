@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::customVisit",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a7dbc6238485605c40ca36251a171715c",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a07dff6f0144498d3688836721105c118",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::customVisit",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::customVisit",
       "argsstring_html": "(Visitor &amp;&amp;v) const",
       "name_html": "customVisit",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::customVisit",
       "param": [
         {
           "type_html": "Visitor &amp;&amp;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "150",
+        "line": "159",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "150",
-        "bodyend": "174"
+        "bodystart": "159",
+        "bodyend": "183"
       },
       "definition": {
         "simple_html": "template &lt;typename Visitor&gt;\nvoid customVisit(Visitor&amp;&amp; v) const",
         "simple_raw": "template <typename Visitor>\nvoid customVisit(Visitor&& v) const",
         "detailed_html": "template &lt;typename Visitor&gt;\ninline void customVisit(Visitor&amp;&amp; v) const",
         "detailed_raw": "template <typename Visitor>\ninline void customVisit(Visitor&& v) const",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::customVisit",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::customVisit",
         "original_argsstring_html": "(Visitor &amp;&amp;v) const"
       },
       "description": {

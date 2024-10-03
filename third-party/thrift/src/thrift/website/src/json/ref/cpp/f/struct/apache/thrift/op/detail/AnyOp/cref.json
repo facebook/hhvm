@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyOp::cref",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -34,7 +35,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -43,7 +44,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -51,9 +52,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -73,7 +75,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -82,7 +84,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -90,9 +92,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -112,7 +115,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -121,7 +124,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -129,9 +132,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -151,7 +155,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -160,7 +164,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -168,9 +172,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -190,7 +195,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -199,7 +204,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -207,9 +212,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -229,7 +235,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -238,7 +244,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -246,9 +252,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -268,7 +275,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -277,7 +284,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -285,9 +292,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -307,7 +315,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -316,7 +324,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -324,9 +332,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -346,7 +355,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -355,7 +364,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -363,9 +372,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -385,7 +395,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -394,7 +404,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -402,9 +412,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -424,7 +435,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -433,7 +444,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -441,9 +452,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -463,7 +475,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -472,7 +484,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -480,9 +492,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -502,7 +515,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -511,7 +524,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -519,9 +532,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -541,7 +555,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -550,7 +564,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -558,9 +572,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -580,7 +595,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -589,7 +604,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -597,9 +612,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -619,7 +635,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -628,7 +644,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -636,9 +652,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -658,7 +675,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",
@@ -667,7 +684,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp::cref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a14450fe732a354800f4801f14635ed7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a59aa2afead584ef1a57372aaaed803d5",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -675,9 +692,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "cref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::cref",
       "param": [
         {
           "type_html": "const void *",
@@ -697,7 +715,7 @@
         "simple_raw": "static const T& cref(const void* ptr)",
         "detailed_html": "inline static const T&amp; cref(const void* ptr)",
         "detailed_raw": "inline static const T& cref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::cref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/cref",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::map&lt; KTag, VTag &gt; &gt;::iter",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a666ad554bc4fc33af3f334e3964a8f70",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ContainerOp_1a797c8731f5367068db0fa3912e9bd9b8",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>I</code> &amp;",
-      "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+      "definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
       "argsstring_html": "(T &amp;self, std::any &amp;i)",
       "name_html": "iter",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::iter",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -38,7 +39,7 @@
         "simple_raw": "static I& iter(T& self, std::any& i)",
         "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
         "detailed_raw": "inline static I& iter(T& self, std::any& i)",
-        "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+        "original_definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
         "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/ContainerOp/iter",
@@ -47,7 +48,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyOp&lt; type::map&lt; KTag, VTag &gt; &gt;::iter"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a666ad554bc4fc33af3f334e3964a8f70",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapOp_1a797c8731f5367068db0fa3912e9bd9b8",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -55,9 +56,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>I</code> &amp;",
-      "definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+      "definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
       "argsstring_html": "(T &amp;self, std::any &amp;i)",
       "name_html": "iter",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::iter",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -81,7 +83,7 @@
         "simple_raw": "static I& iter(T& self, std::any& i)",
         "detailed_html": "inline static I&amp; iter(T&amp; self, std::any&amp; i)",
         "detailed_raw": "inline static I& iter(T& self, std::any& i)",
-        "original_definition_html": "static I&amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
+        "original_definition_html": "static I &amp; apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::iter",
         "original_argsstring_html": "(T &amp;self, std::any &amp;i)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapOp/iter",

@@ -15,6 +15,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::AnyOp&lt; Tag, typename &gt;::get",
       "argsstring_html": "(void *, FieldId, size_t, const Dyn &amp;)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyOp::get",
       "param": [
         {
           "type_html": "void *"
@@ -67,6 +68,7 @@
       "definition_html": "static decltype(auto) apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(U &amp;&amp;self, size_t pos)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -115,6 +117,7 @@
       "definition_html": "static decltype(auto) apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(U &amp;&amp;self, size_t pos)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -158,6 +161,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "void *",
@@ -207,6 +211,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "void *",
@@ -256,6 +261,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::get",
       "param": [
         {
           "type_html": "void *",
@@ -305,6 +311,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::get",
       "param": [
         {
           "type_html": "void *",
@@ -354,6 +361,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::get",
       "param": [
         {
           "type_html": "void *",
@@ -403,6 +411,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId fid, size_t, const Dyn &amp;n)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::get",
       "param": [
         {
           "type_html": "void *",

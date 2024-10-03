@@ -20,6 +20,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::getIf",
       "argsstring_html": "(bool cond, T &amp;self, Ptr &amp;result)",
       "name_html": "getIf",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::getIf",
       "param": [
         {
           "type_html": "bool",

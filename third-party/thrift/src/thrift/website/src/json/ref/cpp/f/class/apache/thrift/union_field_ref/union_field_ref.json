@@ -16,6 +16,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::union_field_ref&lt; T &gt;::union_field_ref",
       "argsstring_html": "(storage_reference_type storage_value, int_t &amp;type, int field_type, owner ow, const vtable &amp;vt) noexcept",
       "name_html": "union_field_ref",
+      "qualifiedname_html": "apache::thrift::union_field_ref::union_field_ref",
       "param": [
         {
           "type_html": "storage_reference_type",
@@ -40,11 +41,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2007",
+        "line": "2063",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2007",
-        "bodyend": "2017"
+        "bodystart": "2063",
+        "bodyend": "2073"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE union_field_ref(\n    storage_reference_type storage_value,\n    int_t&amp; type,\n    int field_type,\n    owner ow,\n    const vtable&amp; vt)",

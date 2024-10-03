@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
       "argsstring_html": "(const char *str)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
       "param": [
         {
           "type_html": "const char *",
@@ -62,6 +63,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
       "argsstring_html": "(const String_ &amp;str)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
       "param": [
         {
           "type_html": "const String_ &amp;",

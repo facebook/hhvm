@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::Xxh64Hasher::operator&lt;",
       "argsstring_html": "(const Xxh64Hasher &amp;other) const",
       "name_html": "operator&lt;",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::operator&lt;",
       "param": [
         {
           "type_html": "const <code>Xxh64Hasher</code> &amp;",

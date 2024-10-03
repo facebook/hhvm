@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k, const Dyn &amp;v)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::put",
       "param": [
         {
           "type_html": "void *",

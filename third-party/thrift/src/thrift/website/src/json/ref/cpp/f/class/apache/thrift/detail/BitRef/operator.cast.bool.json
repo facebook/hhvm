@@ -15,13 +15,14 @@
       "definition_html": "apache::thrift::detail::BitRef&lt; kIsConst &gt;::operator bool",
       "argsstring_html": "() const",
       "name_html": "operator bool",
+      "qualifiedname_html": "apache::thrift::detail::BitRef::operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "217",
+        "line": "218",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "217",
-        "bodyend": "223"
+        "bodystart": "218",
+        "bodyend": "224"
       },
       "definition": {
         "simple_html": "operator bool() const",

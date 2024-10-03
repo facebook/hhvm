@@ -18,6 +18,7 @@
       "definition_html": "using apache::thrift::op::detail::PatchType&lt; type::byte_t &gt;::type =  op::BytePatch",
       "argsstring_html": "",
       "name_html": "type",
+      "qualifiedname_html": "apache::thrift::op::detail::PatchType&lt; type::byte_t &gt;::type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
         "line": "44",

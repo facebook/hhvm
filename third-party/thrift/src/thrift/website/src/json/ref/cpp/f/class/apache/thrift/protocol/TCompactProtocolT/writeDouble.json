@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeDouble",
       "argsstring_html": "(const double dub)",
       "name_html": "writeDouble",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeDouble",
       "param": [
         {
           "type_html": "const double",

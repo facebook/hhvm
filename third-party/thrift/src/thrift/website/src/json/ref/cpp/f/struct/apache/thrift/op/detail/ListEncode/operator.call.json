@@ -23,6 +23,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;list) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::ListEncode::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

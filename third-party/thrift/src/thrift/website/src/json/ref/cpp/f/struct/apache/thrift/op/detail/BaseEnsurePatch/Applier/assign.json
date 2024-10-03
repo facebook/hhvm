@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::assign",
       "argsstring_html": "(const T &amp;t)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::assign",
       "param": [
         {
           "type_html": "const T &amp;",

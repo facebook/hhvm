@@ -21,6 +21,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(T &amp;, V &amp;&amp;)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;"
@@ -62,6 +63,7 @@
       "definition_html": "static bool apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;v)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::add",
       "param": [
         {
           "type_html": "void *",

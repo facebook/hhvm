@@ -15,9 +15,10 @@
       "definition_html": "apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::~BaseEnsurePatch",
       "argsstring_html": "()=default",
       "name_html": "~BaseEnsurePatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::~BaseEnsurePatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "394",
+        "line": "398",
         "column": "3"
       },
       "definition": {

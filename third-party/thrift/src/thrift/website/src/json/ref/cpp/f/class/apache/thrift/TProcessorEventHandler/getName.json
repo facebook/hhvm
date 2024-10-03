@@ -15,6 +15,7 @@
       "definition_html": "virtual std::string apache::thrift::TProcessorEventHandler::getName",
       "argsstring_html": "() const",
       "name_html": "getName",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::getName",
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "line": "47",

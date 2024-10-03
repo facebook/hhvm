@@ -18,12 +18,13 @@
       "definition_html": "using apache::thrift::op::detail::SafePatchValueType&lt;::apache::thrift::op::AnySafePatch &gt;::type =  ::apache::thrift::type::AnyStruct",
       "argsstring_html": "",
       "name_html": "type",
+      "qualifiedname_html": "apache::thrift::op::detail::SafePatchValueType&lt;::apache::thrift::op::AnySafePatch &gt;::type",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "312",
+        "line": "337",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "312",
+        "bodystart": "337",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1SafePatchValueType_3_1_1apache_1_1thrift_1_1op_1_1AnySafePatch_01_4"
@@ -31,11 +32,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "line": "311",
+    "line": "336",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-    "bodystart": "311",
-    "bodyend": "313"
+    "bodystart": "336",
+    "bodyend": "338"
   },
   "namespacednames_html": [
     "apache",

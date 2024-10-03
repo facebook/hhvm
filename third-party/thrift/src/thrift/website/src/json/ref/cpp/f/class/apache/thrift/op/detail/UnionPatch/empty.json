@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::empty",
       "argsstring_html": "() const",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::empty",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "185",

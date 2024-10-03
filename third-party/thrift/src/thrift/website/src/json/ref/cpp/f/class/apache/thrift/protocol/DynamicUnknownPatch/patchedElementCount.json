@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "std::size_t",
       "definition_html": "std::size_t apache::thrift::protocol::DynamicPatchBase::patchedElementCount",
       "argsstring_html": "(detail::Badge) const",
       "name_html": "patchedElementCount",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::patchedElementCount",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -22,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "107",
+        "line": "128",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "625",
-        "bodyend": "641"
+        "bodystart": "626",
+        "bodyend": "642"
       },
       "definition": {
         "simple_html": "std::size_t patchedElementCount(detail::Badge) const",

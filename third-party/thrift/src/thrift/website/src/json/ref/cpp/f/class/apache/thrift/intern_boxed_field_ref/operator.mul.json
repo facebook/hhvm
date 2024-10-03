@@ -15,13 +15,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::intern_boxed_field_ref&lt; T &gt;::operator*",
       "argsstring_html": "()",
       "name_html": "operator*",
+      "qualifiedname_html": "apache::thrift::intern_boxed_field_ref::operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1251",
+        "line": "1271",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1251",
-        "bodyend": "1251"
+        "bodystart": "1271",
+        "bodyend": "1271"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*()",
@@ -48,13 +49,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::intern_boxed_field_ref&lt; T &gt;::operator*",
       "argsstring_html": "() const",
       "name_html": "operator*",
+      "qualifiedname_html": "apache::thrift::intern_boxed_field_ref::operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1252",
+        "line": "1272",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1252",
-        "bodyend": "1252"
+        "bodystart": "1272",
+        "bodyend": "1272"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*() const",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1af802d68554aa91154df0a0687e6ad53f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1abdcd4ec298a5fe9bacdb36e30c8ef5fc",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/field_ref\">field_ref</a>&lt; T &amp; &gt;",
@@ -39,7 +40,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -48,7 +49,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a12ebd1fdb0bfab3c8653cb3e231d4b7c",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a3da93ce02cd372db084c28ade28c9e5a",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -61,9 +62,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(required_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/required_field_ref\">required_field_ref</a>&lt; T &amp; &gt;",
@@ -83,7 +85,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(required_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(required_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(required_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(required_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -92,7 +94,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a950b21d0c98a76a1e9a402ba2adbafc1",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a23b5097de82b5353c7642556989026b8",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -105,9 +107,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(optional_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_field_ref\">optional_field_ref</a>&lt; T &amp; &gt;",
@@ -127,7 +130,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(optional_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(optional_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(optional_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(optional_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -136,7 +139,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1aff4312295ac3a579ea8d8fc5b5325b74",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a9bd84458fd2924e1c96921b79d6bec3d",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -149,9 +152,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(optional_boxed_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &amp; &gt;",
@@ -171,7 +175,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(optional_boxed_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(optional_boxed_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(optional_boxed_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(optional_boxed_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -180,7 +184,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a960a0084406422e3dbd38e8cb6e6ecef",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a566db8aae692b4a78d3d87b4905c334c",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -193,9 +197,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(terse_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_field_ref\">terse_field_ref</a>&lt; T &amp; &gt;",
@@ -215,7 +220,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(terse_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(terse_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(terse_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(terse_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -224,7 +229,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1acec90e1c8e7f5d32ca4125b7505a17ee",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a7c7861422e0c090653349a6e7260bfcd",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -237,9 +242,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(union_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/union_field_ref\">union_field_ref</a>&lt; T &amp; &gt;",
@@ -259,7 +265,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(union_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(union_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(union_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(union_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -268,7 +274,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a6b738c1a1224e7e564da5a1650835c2f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a5b8f7ad26dc963e354fedc831a1d0fb6",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -281,9 +287,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(terse_intern_boxed_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/terse_intern_boxed_field_ref\">terse_intern_boxed_field_ref</a>&lt; T &amp; &gt;",
@@ -303,7 +310,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(terse_intern_boxed_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(terse_intern_boxed_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(terse_intern_boxed_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(terse_intern_boxed_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -312,7 +319,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a7f1f3ab94a62c554264c862a54492fa3",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a531338c061bb923095e006c98cd0442d",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -325,9 +332,10 @@
         }
       ],
       "type_html": "auto *",
-      "definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(intern_boxed_field_ref&lt; T &amp; &gt; field_ref) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/intern_boxed_field_ref\">intern_boxed_field_ref</a>&lt; T &amp; &gt;",
@@ -347,7 +355,7 @@
         "simple_raw": "template <typename T>\nauto* operator()(intern_boxed_field_ref<T&> field_ref) const",
         "detailed_html": "template &lt;typename T&gt;\ninline auto* operator()(intern_boxed_field_ref&lt;T&amp;&gt; field_ref) const",
         "detailed_raw": "template <typename T>\ninline auto* operator()(intern_boxed_field_ref<T&> field_ref) const",
-        "original_definition_html": "auto* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "auto * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(intern_boxed_field_ref&lt; T &amp; &gt; field_ref) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -356,7 +364,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1ae62e90e7ee9ca4e4e0237a1a67f25081",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a5ffbd69dcee9d7ac4d2b48438f56b80f",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -369,9 +377,10 @@
         }
       ],
       "type_html": "T *",
-      "definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(std::optional&lt; T &gt; &amp;opt) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "std::optional&lt; T &gt; &amp;",
@@ -391,7 +400,7 @@
         "simple_raw": "template <typename T>\nT* operator()(std::optional<T>& opt) const",
         "detailed_html": "template &lt;typename T&gt;\ninline T* operator()(std::optional&lt;T&gt;&amp; opt) const",
         "detailed_raw": "template <typename T>\ninline T* operator()(std::optional<T>& opt) const",
-        "original_definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(std::optional&lt; T &gt; &amp;opt) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -400,7 +409,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a9df2c4b0b4ede6dd86be562f3ea53ad9",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1ad587139dbb9db724ff190d07587978d8",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -413,9 +422,10 @@
         }
       ],
       "type_html": "const T *",
-      "definition_html": "const T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "const T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(const std::optional&lt; T &gt; &amp;opt) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "const std::optional&lt; T &gt; &amp;",
@@ -435,7 +445,7 @@
         "simple_raw": "template <typename T>\nconst T* operator()(const std::optional<T>& opt) const",
         "detailed_html": "template &lt;typename T&gt;\ninline const T* operator()(const std::optional&lt;T&gt;&amp; opt) const",
         "detailed_raw": "template <typename T>\ninline const T* operator()(const std::optional<T>& opt) const",
-        "original_definition_html": "const T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "const T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(const std::optional&lt; T &gt; &amp;opt) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -444,7 +454,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a66115fc8bfef69926d7a88efa9874a35",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1ae11179aa61fc4793cea3255cf63c2ec7",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -460,9 +470,10 @@
         }
       ],
       "type_html": "T *",
-      "definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(const std::unique_ptr&lt; T, Deleter &gt; &amp;&amp;ptr) const =delete",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "const std::unique_ptr&lt; T, Deleter &gt; &amp;&amp;",
@@ -479,7 +490,7 @@
         "simple_raw": "template <typename T, typename Deleter>\nT* operator()(const std::unique_ptr<T, Deleter>&& ptr) const",
         "detailed_html": "template &lt;typename T, typename Deleter&gt;\nT* operator()(const std::unique_ptr&lt;T, Deleter&gt;&amp;&amp; ptr) const = delete",
         "detailed_raw": "template <typename T, typename Deleter>\nT* operator()(const std::unique_ptr<T, Deleter>&& ptr) const = delete",
-        "original_definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(const std::unique_ptr&lt; T, Deleter &gt; &amp;&amp;ptr) const =delete"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -488,7 +499,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a92522662059a7b82385d9f1d2f001e8e",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1abd67bf4afe8c3814145086365eb32c67",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -504,9 +515,10 @@
         }
       ],
       "type_html": "T *",
-      "definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(const std::unique_ptr&lt; T, Deleter &gt; &amp;ptr) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "const std::unique_ptr&lt; T, Deleter &gt; &amp;",
@@ -526,7 +538,7 @@
         "simple_raw": "template <typename T, typename Deleter>\nT* operator()(const std::unique_ptr<T, Deleter>& ptr) const",
         "detailed_html": "template &lt;typename T, typename Deleter&gt;\ninline T* operator()(const std::unique_ptr&lt;T, Deleter&gt;&amp; ptr) const",
         "detailed_raw": "template <typename T, typename Deleter>\ninline T* operator()(const std::unique_ptr<T, Deleter>& ptr) const",
-        "original_definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(const std::unique_ptr&lt; T, Deleter &gt; &amp;ptr) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -535,7 +547,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a1c4b77e2f228106cc02f095796709988",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a66d6469637e38fad08605568e96b91ca",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -548,9 +560,10 @@
         }
       ],
       "type_html": "T *",
-      "definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;&amp;ptr) const =delete",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "const std::shared_ptr&lt; T &gt; &amp;&amp;",
@@ -567,7 +580,7 @@
         "simple_raw": "template <typename T>\nT* operator()(const std::shared_ptr<T>&& ptr) const",
         "detailed_html": "template &lt;typename T&gt;\nT* operator()(const std::shared_ptr&lt;T&gt;&amp;&amp; ptr) const = delete",
         "detailed_raw": "template <typename T>\nT* operator()(const std::shared_ptr<T>&& ptr) const = delete",
-        "original_definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;&amp;ptr) const =delete"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",
@@ -576,7 +589,7 @@
       "compoundname_html": "apache::thrift::op::detail::GetValueOrNull::operator()"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a5ba136f2e4eeacb710709ecf15f64313",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetValueOrNull_1a51434d4d4d9c8248b2fa3e95d8bc4280",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -589,9 +602,10 @@
         }
       ],
       "type_html": "T *",
-      "definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+      "definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
       "argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;ptr) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::GetValueOrNull::operator()",
       "param": [
         {
           "type_html": "const std::shared_ptr&lt; T &gt; &amp;",
@@ -611,7 +625,7 @@
         "simple_raw": "template <typename T>\nT* operator()(const std::shared_ptr<T>& ptr) const",
         "detailed_html": "template &lt;typename T&gt;\ninline T* operator()(const std::shared_ptr&lt;T&gt;&amp; ptr) const",
         "detailed_raw": "template <typename T>\ninline T* operator()(const std::shared_ptr<T>& ptr) const",
-        "original_definition_html": "T* apache::thrift::op::detail::GetValueOrNull::operator()",
+        "original_definition_html": "T * apache::thrift::op::detail::GetValueOrNull::operator()",
         "original_argsstring_html": "(const std::shared_ptr&lt; T &gt; &amp;ptr) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/GetValueOrNull/operator.call",

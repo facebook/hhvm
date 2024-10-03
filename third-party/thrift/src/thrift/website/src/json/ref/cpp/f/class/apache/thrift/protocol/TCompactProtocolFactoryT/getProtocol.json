@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::TCompactProtocolFactoryT::getProtocol",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1TCompactProtocolFactoryT_1a07e2650edd9c607305f221ae893ce203",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1TCompactProtocolFactoryT_1a074d969067d2e8dd276e65e37c8ae70e",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "std::shared_ptr&lt; TProtocol &gt;",
-      "definition_html": "std::shared_ptr&lt;TProtocol&gt; apache::thrift::protocol::TCompactProtocolFactoryT&lt; Transport_ &gt;::getProtocol",
+      "definition_html": "std::shared_ptr&lt; TProtocol &gt; apache::thrift::protocol::TCompactProtocolFactoryT&lt; Transport_ &gt;::getProtocol",
       "argsstring_html": "(std::shared_ptr&lt; TTransport &gt; trans) override",
       "name_html": "getProtocol",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolFactoryT::getProtocol",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; TTransport &gt;",
@@ -34,7 +35,7 @@
         "simple_raw": "std::shared_ptr<TProtocol> getProtocol(std::shared_ptr<TTransport> trans)",
         "detailed_html": "inline std::shared_ptr&lt;TProtocol&gt; getProtocol(\n    std::shared_ptr&lt;TTransport&gt; trans) override",
         "detailed_raw": "inline std::shared_ptr<TProtocol> getProtocol(\n    std::shared_ptr<TTransport> trans) override",
-        "original_definition_html": "std::shared_ptr&lt;TProtocol&gt; apache::thrift::protocol::TCompactProtocolFactoryT&lt; Transport_ &gt;::getProtocol",
+        "original_definition_html": "std::shared_ptr&lt; TProtocol &gt; apache::thrift::protocol::TCompactProtocolFactoryT&lt; Transport_ &gt;::getProtocol",
         "original_argsstring_html": "(std::shared_ptr&lt; TTransport &gt; trans) override"
       },
       "filepath": "fns/class/apache/thrift/protocol/TCompactProtocolFactoryT/getProtocol",

@@ -52,6 +52,7 @@
       "definition_html": "void apache::thrift::op::registerStdSerializers",
       "argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)",
       "name_html": "registerStdSerializers",
+      "qualifiedname_html": "apache::thrift::op::registerStdSerializers",
       "param": [
         {
           "type_html": "type::TypeRegistry &amp;",
@@ -114,6 +115,7 @@
               "definition_html": "void apache::thrift::op::registerStdSerializers",
               "argsstring_html": "(type::TypeRegistry &amp;registry, bool skipDuplicates=false)",
               "name_html": "registerStdSerializers",
+              "qualifiedname_html": "apache::thrift::op::registerStdSerializers",
               "param": [
                 {
                   "type_html": "type::TypeRegistry &amp;",

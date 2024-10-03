@@ -22,6 +22,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::MockStruct::write",
       "argsstring_html": "(T &amp;&amp;) const",
       "name_html": "write",
+      "qualifiedname_html": "apache::thrift::op::detail::MockStruct::write",
       "param": [
         {
           "type_html": "T &amp;&amp;"
@@ -74,6 +75,7 @@
       "definition_html": "const bool apache::thrift::op::detail::MockStruct::__fbthrift_cpp2_gen_json",
       "argsstring_html": "",
       "name_html": "__fbthrift_cpp2_gen_json",
+      "qualifiedname_html": "apache::thrift::op::detail::MockStruct::__fbthrift_cpp2_gen_json",
       "initializer_html": "= false",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/EncodeTest.cpp",
@@ -116,6 +118,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::MockStruct::write",
               "argsstring_html": "(T &amp;&amp;) const",
               "name_html": "write",
+              "qualifiedname_html": "apache::thrift::op::detail::MockStruct::write",
               "param": [
                 {
                   "type_html": "T &amp;&amp;"

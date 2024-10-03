@@ -17,6 +17,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::assign",
       "argsstring_html": "(const T &amp;t)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::assign",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -54,6 +55,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::clear",
       "argsstring_html": "()",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "118",
@@ -93,6 +95,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::patchIfSet",
       "argsstring_html": "(const FieldPatch &amp;patch)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::patchIfSet",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
@@ -135,6 +138,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "126",
@@ -174,6 +178,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
       "argsstring_html": "(const Field &amp;def)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
       "param": [
         {
           "type_html": "const Field &amp;",
@@ -216,6 +221,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::remove",
       "argsstring_html": "()",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::remove",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "138",
@@ -264,6 +270,7 @@
       "definition_html": "T&amp; apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::v",
       "argsstring_html": "",
       "name_html": "v",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::v",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "115",
@@ -300,6 +307,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::assign",
               "argsstring_html": "(const T &amp;t)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::assign",
               "param": [
                 {
                   "type_html": "const T &amp;",
@@ -359,6 +367,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::clear",
               "argsstring_html": "()",
               "name_html": "clear",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::clear",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
                 "line": "118",
@@ -420,6 +429,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::patchIfSet",
               "argsstring_html": "(const FieldPatch &amp;patch)",
               "name_html": "patchIfSet",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::patchIfSet",
               "param": [
                 {
                   "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
@@ -484,6 +494,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
               "argsstring_html": "()",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
                 "line": "126",
@@ -525,6 +536,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::ensure",
               "argsstring_html": "(const Field &amp;def)",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::ensure",
               "param": [
                 {
                   "type_html": "const Field &amp;",
@@ -589,6 +601,7 @@
               "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::remove",
               "argsstring_html": "()",
               "name_html": "remove",
+              "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::remove",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
                 "line": "138",

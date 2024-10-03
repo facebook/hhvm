@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::add",
       "argsstring_html": "(const T &amp;)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::add",
       "param": [
         {
           "type_html": "const T &amp;"
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "110",
+        "line": "114",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "110",
-        "bodyend": "110"
+        "bodystart": "114",
+        "bodyend": "114"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid add(const T&amp;)",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicPatchBase::clear",
       "argsstring_html": "(detail::Badge)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatchBase::clear",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -22,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "83",
+        "line": "104",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "83",
-        "bodyend": "86"
+        "bodystart": "104",
+        "bodyend": "107"
       },
       "definition": {
         "simple_html": "void clear(detail::Badge)",

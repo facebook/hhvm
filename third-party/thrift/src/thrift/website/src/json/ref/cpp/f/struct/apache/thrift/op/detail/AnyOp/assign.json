@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -58,6 +59,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -101,6 +103,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -144,6 +147,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -187,6 +191,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -230,6 +235,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -273,6 +279,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -316,6 +323,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -359,6 +367,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -402,6 +411,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -445,6 +455,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -488,6 +499,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -531,6 +543,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -574,6 +587,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -617,6 +631,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -660,6 +675,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -703,6 +719,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -746,6 +763,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *ptr, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -789,6 +807,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -832,6 +851,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -875,6 +895,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -918,6 +939,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -961,6 +983,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -1004,6 +1027,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -1047,6 +1071,7 @@
       "definition_html": "static void apache::thrift::op::detail::NumberOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *lhs, const Dyn &amp;rhs)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -1090,6 +1115,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, std::string val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1133,6 +1159,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, std::string val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1176,6 +1203,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, std::string val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1219,6 +1247,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, std::string val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1262,6 +1291,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1305,6 +1335,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1348,6 +1379,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1391,6 +1423,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1434,6 +1467,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const std::string &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1477,6 +1511,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const std::string &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1520,6 +1555,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const std::string &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1563,6 +1599,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const std::string &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1606,6 +1643,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1649,6 +1687,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1692,6 +1731,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1735,6 +1775,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const folly::IOBuf &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1778,6 +1819,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1821,6 +1863,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1864,6 +1907,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1907,6 +1951,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(std::string &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1950,6 +1995,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -1993,6 +2039,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -2036,6 +2083,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -2079,6 +2127,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(folly::IOBuf &amp;self, const IOBufPtr &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "folly::IOBuf &amp;",
@@ -2127,6 +2176,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(const IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -2175,6 +2225,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(const IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -2223,6 +2274,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(const IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -2271,6 +2323,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(const IOBufPtr &amp;self, T &amp;&amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "const <code>IOBufPtr</code> &amp;",
@@ -2314,6 +2367,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -2357,6 +2411,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -2400,6 +2455,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "void *",
@@ -2443,6 +2499,7 @@
       "definition_html": "static void apache::thrift::op::detail::StringOp&lt; Tag &gt;::assign",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::assign",
       "param": [
         {
           "type_html": "void *",

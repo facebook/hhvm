@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
       "argsstring_html": "(const T &amp;)",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
       "param": [
         {
           "type_html": "const T &amp;"
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "114",
+        "line": "118",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "114",
-        "bodyend": "114"
+        "bodystart": "118",
+        "bodyend": "118"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nvoid remove(const T&amp;)",
@@ -63,13 +64,14 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
       "argsstring_html": "()",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::remove",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "128",
+        "line": "132",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "128",
-        "bodyend": "128"
+        "bodystart": "132",
+        "bodyend": "132"
       },
       "definition": {
         "simple_html": "template &lt;typename&gt;\nvoid remove()",

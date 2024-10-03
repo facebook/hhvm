@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::pushField",
       "argsstring_html": "(FieldId)",
       "name_html": "pushField",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::pushField",
       "param": [
         {
           "type_html": "FieldId",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "634",
+        "line": "655",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "980",
-        "bodyend": "985"
+        "bodystart": "981",
+        "bodyend": "986"
       },
       "definition": {
         "simple_html": "void pushField(FieldId)",

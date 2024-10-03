@@ -25,6 +25,7 @@
       "definition_html": "using apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::field_tag =  type::field&lt;Tag, Context&gt;",
       "argsstring_html": "",
       "name_html": "field_tag",
+      "qualifiedname_html": "apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::field_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Create.h",
         "line": "196",
@@ -57,6 +58,7 @@
       "definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
       "argsstring_html": "(T &amp;&amp;val, Struct &amp;) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "T &amp;&amp;",
@@ -138,6 +140,7 @@
               "definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
               "argsstring_html": "(T &amp;&amp;val, Struct &amp;) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Ensure&lt; type::field&lt; Tag, Context &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "T &amp;&amp;",

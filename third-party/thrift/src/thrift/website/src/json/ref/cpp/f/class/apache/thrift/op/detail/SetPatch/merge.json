@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::BasePatch&lt; Patch, Derived &gt;::merge",
       "argsstring_html": "(U &amp;&amp;next)",
       "name_html": "merge",
+      "qualifiedname_html": "apache::thrift::op::detail::BasePatch::merge",
       "param": [
         {
           "type_html": "U &amp;&amp;",

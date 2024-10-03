@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::detail::BitRef&lt; kIsConst &gt;::operator=",
       "argsstring_html": "(bool flag)",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::detail::BitRef::operator=",
       "param": [
         {
           "type_html": "bool",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "209",
+        "line": "210",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "209",
-        "bodyend": "215"
+        "bodystart": "210",
+        "bodyend": "216"
       },
       "definition": {
         "simple_html": "void operator=(bool flag)",

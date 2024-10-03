@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1abf7155508c8c7a421373eaf8bf88e22a",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a4926580a390d43722cb1c6b03773e413",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIs",
       "argsstring_html": "(const VPatch &amp;patch)",
       "name_html": "patchIfTypeIs",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs",
       "param": [
         {
           "type_html": "const VPatch &amp;",
@@ -28,18 +29,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "197",
+        "line": "206",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "197",
-        "bodyend": "205"
+        "bodystart": "206",
+        "bodyend": "214"
       },
       "definition": {
         "simple_html": "template &lt;typename VPatch&gt;\nvoid patchIfTypeIs(const VPatch&amp; patch)",
         "simple_raw": "template <typename VPatch>\nvoid patchIfTypeIs(const VPatch& patch)",
         "detailed_html": "template &lt;typename VPatch&gt;\ninline void patchIfTypeIs(const VPatch&amp; patch)",
         "detailed_raw": "template <typename VPatch>\ninline void patchIfTypeIs(const VPatch& patch)",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIs",
         "original_argsstring_html": "(const VPatch &amp;patch)"
       },
       "description": {
@@ -51,7 +52,7 @@
       "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1adeeea2d6a775836b1da90918a35862ef",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1ac5fa928a1bd26e3af2d615fac40478e3",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -59,10 +60,14 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
-      "argsstring_html": "(type::Type type, type::AnyStruct patch)",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIs",
+      "argsstring_html": "(protocol::detail::Badge, type::Type type, type::AnyStruct patch)",
       "name_html": "patchIfTypeIs",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs",
       "param": [
+        {
+          "type_html": "<code>protocol::detail::Badge</code>"
+        },
         {
           "type_html": "type::Type",
           "declname_html": "type"
@@ -74,19 +79,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "222",
+        "line": "231",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "222",
-        "bodyend": "230"
+        "bodystart": "231",
+        "bodyend": "240"
       },
       "definition": {
-        "simple_html": "void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
-        "simple_raw": "void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
-        "detailed_html": "inline void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
-        "detailed_raw": "inline void patchIfTypeIs(type::Type type, type::AnyStruct patch)",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
-        "original_argsstring_html": "(type::Type type, type::AnyStruct patch)"
+        "simple_html": "void patchIfTypeIs(\n    protocol::detail::Badge, type::Type type, type::AnyStruct patch)",
+        "simple_raw": "void patchIfTypeIs(\n    protocol::detail::Badge, type::Type type, type::AnyStruct patch)",
+        "detailed_html": "inline void patchIfTypeIs(\n    protocol::detail::Badge, type::Type type, type::AnyStruct patch)",
+        "detailed_raw": "inline void patchIfTypeIs(\n    protocol::detail::Badge, type::Type type, type::AnyStruct patch)",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIs",
+        "original_argsstring_html": "(protocol::detail::Badge, type::Type type, type::AnyStruct patch)"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIs",
@@ -105,6 +110,7 @@
       "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIs",
       "argsstring_html": "(const type::Type &amp;type, const protocol::DynamicPatch &amp;patch)",
       "name_html": "patchIfTypeIs",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIs",
       "param": [
         {
           "type_html": "const type::Type &amp;",
@@ -117,7 +123,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "289",
+        "line": "314",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "181",

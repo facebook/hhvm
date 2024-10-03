@@ -20,6 +20,7 @@
       "definition_html": "static decltype(auto) apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(U &amp;&amp;self, size_t pos)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -63,6 +64,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t pos, const Dyn &amp;)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::get",
       "param": [
         {
           "type_html": "void *",

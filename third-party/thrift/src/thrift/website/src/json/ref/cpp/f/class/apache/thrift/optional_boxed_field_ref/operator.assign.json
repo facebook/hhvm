@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::optional_boxed_field_ref::operator=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1optional__boxed__field__ref_1afc8fb0575d102a2b8524f7e5c2d1cb3c",
+      "refid": "classapache_1_1thrift_1_1optional__boxed__field__ref_1a04de01ff2601d356bf34cc57666cbe01",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,10 +17,11 @@
           "defval_html": "<code>value_type</code>"
         }
       ],
-      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; <code>value_type</code> &amp;, U &amp;&amp; &gt;::<code>value</code>, <code>optional_boxed_field_ref</code> &amp; &gt;",
-      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, optional_boxed_field_ref&amp;&gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::operator=",
+      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; <code>value_type</code> &amp;, U &amp;&amp; &gt;<code>::value</code>, <code>optional_boxed_field_ref</code> &amp; &gt;",
+      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; value_type &amp;, U &amp;&amp; &gt;::value, optional_boxed_field_ref &amp; &gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::operator=",
       "argsstring_html": "(U &amp;&amp;value)",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::optional_boxed_field_ref::operator=",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -29,18 +30,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "889",
+        "line": "901",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "889",
-        "bodyend": "892"
+        "bodystart": "901",
+        "bodyend": "904"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    optional_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
         "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    optional_boxed_field_ref&>\noperator=(U&& value)",
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value,\n    optional_boxed_field_ref&amp;&gt;\noperator=(U&amp;&amp; value)",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_assignable<value_type&, U&&>::value,\n    optional_boxed_field_ref&>\noperator=(U&& value)",
-        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt;value_type&amp;, U&amp;&amp;&gt;::value, optional_boxed_field_ref&amp;&gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::operator=",
+        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_assignable&lt; value_type &amp;, U &amp;&amp; &gt;::value, optional_boxed_field_ref &amp; &gt; apache::thrift::optional_boxed_field_ref&lt; T &gt;::operator=",
         "original_argsstring_html": "(U &amp;&amp;value)"
       },
       "filepath": "fns/class/apache/thrift/optional_boxed_field_ref/operator.assign",

@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicUnionPatch\">DynamicUnionPatch</a>",
       "definition_html": "DynamicUnionPatch apache::thrift::protocol::DiffVisitorBase::diffUnion",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst)",
       "name_html": "diffUnion",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffUnion",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "620",
+        "line": "641",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "872",
-        "bodyend": "899"
+        "bodystart": "873",
+        "bodyend": "900"
       },
       "definition": {
         "simple_html": "DynamicUnionPatch diffUnion(const Object&amp; src, const Object&amp; dst)",

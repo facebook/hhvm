@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE apache::thrift::optional_field_ref&lt; T &gt;::operator bool",
       "argsstring_html": "() const noexcept",
       "name_html": "operator bool",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "618",
+        "line": "630",
         "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "618",
-        "bodyend": "618"
+        "bodystart": "630",
+        "bodyend": "630"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE operator bool() const",

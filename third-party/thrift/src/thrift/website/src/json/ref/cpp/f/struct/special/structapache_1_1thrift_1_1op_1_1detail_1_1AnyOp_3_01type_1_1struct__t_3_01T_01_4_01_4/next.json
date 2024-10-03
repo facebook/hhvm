@@ -15,6 +15,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::next",
       "argsstring_html": "(T &amp;self, IterType type, size_type &amp;itr)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::next",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -62,6 +63,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType type, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::next",
       "param": [
         {
           "type_html": "void *",

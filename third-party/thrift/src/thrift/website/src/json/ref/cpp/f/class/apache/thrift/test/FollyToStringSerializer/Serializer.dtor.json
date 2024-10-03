@@ -15,6 +15,7 @@
       "definition_html": "virtual apache::thrift::op::Serializer::~Serializer",
       "argsstring_html": "()=default",
       "name_html": "~Serializer",
+      "qualifiedname_html": "apache::thrift::op::Serializer::~Serializer",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "49",

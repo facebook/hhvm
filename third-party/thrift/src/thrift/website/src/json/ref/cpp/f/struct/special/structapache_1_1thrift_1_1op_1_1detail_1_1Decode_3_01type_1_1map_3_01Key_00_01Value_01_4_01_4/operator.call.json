@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, MapType &amp;map) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::map&lt; Key, Value &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

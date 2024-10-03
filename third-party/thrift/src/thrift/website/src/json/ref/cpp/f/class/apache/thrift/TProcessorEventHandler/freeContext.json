@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::freeContext",
       "argsstring_html": "(void *, const char *)",
       "name_html": "freeContext",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::freeContext",
       "param": [
         {
           "type_html": "void *"

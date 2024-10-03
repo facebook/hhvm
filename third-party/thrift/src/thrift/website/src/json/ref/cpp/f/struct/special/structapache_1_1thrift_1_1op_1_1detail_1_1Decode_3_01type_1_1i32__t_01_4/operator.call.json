@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::Decode&lt; type::i32_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, int32_t &amp;i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::i32_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -68,6 +69,7 @@
       "definition_html": "void apache::thrift::op::detail::Decode&lt; type::i32_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, uint32_t &amp;i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Decode&lt; type::i32_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

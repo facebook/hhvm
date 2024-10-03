@@ -20,6 +20,7 @@
       "definition_html": "static auto apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
       "argsstring_html": "(Object &amp;&amp;obj)",
       "name_html": "fromThrift",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectAdapter::fromThrift",
       "param": [
         {
           "type_html": "<code>Object</code> &amp;&amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "98",
+        "line": "94",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "98",
-        "bodyend": "100"
+        "bodystart": "94",
+        "bodyend": "96"
       },
       "definition": {
         "simple_html": "template &lt;class Object&gt;\nstatic auto fromThrift(Object&amp;&amp; obj)",

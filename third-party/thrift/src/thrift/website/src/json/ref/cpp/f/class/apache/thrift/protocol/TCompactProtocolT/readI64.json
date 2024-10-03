@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI64",
       "argsstring_html": "(int64_t &amp;i64)",
       "name_html": "readI64",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI64",
       "param": [
         {
           "type_html": "int64_t &amp;",

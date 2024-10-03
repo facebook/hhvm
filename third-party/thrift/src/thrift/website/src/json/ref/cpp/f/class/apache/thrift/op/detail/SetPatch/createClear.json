@@ -15,6 +15,7 @@
       "definition_html": "static FOLLY_NODISCARD Derived apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::createClear",
       "argsstring_html": "()",
       "name_html": "createClear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::createClear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "240",

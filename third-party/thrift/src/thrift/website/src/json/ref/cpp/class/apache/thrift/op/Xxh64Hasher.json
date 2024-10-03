@@ -22,6 +22,7 @@
       "definition_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
       "argsstring_html": "()",
       "name_html": "Xxh64Hasher",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "35",
@@ -53,6 +54,7 @@
       "definition_html": "XXH64_hash_t apache::thrift::op::Xxh64Hasher::getResult",
       "argsstring_html": "() const",
       "name_html": "getResult",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::getResult",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "38",
@@ -73,7 +75,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/Xxh64Hasher/getResult"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1ab72c2a24702c5e47d067a70e4b785c0a",
+      "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1a84dfaf03e35ac0835181867567d6f97f",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -86,10 +88,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
-      "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
+      "type_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
+      "definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
       "argsstring_html": "(const T &amp;val)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -105,11 +108,11 @@
         "bodyend": "47"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-        "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-        "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-        "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-        "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
+        "simple_html": "template &lt;typename T&gt;\nstd::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+        "simple_raw": "template <typename T>\nstd::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+        "detailed_html": "template &lt;typename T&gt;\ninline std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+        "detailed_raw": "template <typename T>\ninline std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+        "original_definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
         "original_argsstring_html": "(const T &amp;val)"
       },
       "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/combine",
@@ -127,6 +130,7 @@
       "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
       "argsstring_html": "(const folly::IOBuf &amp;value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -164,6 +168,7 @@
       "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
       "argsstring_html": "(folly::ByteRange value)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
       "param": [
         {
           "type_html": "folly::ByteRange",
@@ -201,6 +206,7 @@
       "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
       "argsstring_html": "(const Xxh64Hasher &amp;other)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
       "param": [
         {
           "type_html": "const <code>Xxh64Hasher</code> &amp;",
@@ -238,6 +244,7 @@
       "definition_html": "void apache::thrift::op::Xxh64Hasher::finalize",
       "argsstring_html": "()",
       "name_html": "finalize",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::finalize",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "62",
@@ -269,6 +276,7 @@
       "definition_html": "bool apache::thrift::op::Xxh64Hasher::operator&lt;",
       "argsstring_html": "(const Xxh64Hasher &amp;other) const",
       "name_html": "operator&lt;",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::operator&lt;",
       "param": [
         {
           "type_html": "const <code>Xxh64Hasher</code> &amp;",
@@ -306,6 +314,7 @@
       "definition_html": "bool apache::thrift::op::Xxh64Hasher::finalized",
       "argsstring_html": "() const",
       "name_html": "finalized",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::finalized",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "73",
@@ -352,6 +361,7 @@
       "definition_html": "folly::Optional&lt;XXH64_hash_t&gt; apache::thrift::op::Xxh64Hasher::result_",
       "argsstring_html": "",
       "name_html": "result_",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::result_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "75",
@@ -370,6 +380,7 @@
       "definition_html": "std::unique_ptr&lt;XXH3_state_t, decltype(&amp;XXH3_freeState)&gt; apache::thrift::op::Xxh64Hasher::state_",
       "argsstring_html": "",
       "name_html": "state_",
+      "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::state_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
         "line": "76",
@@ -406,6 +417,7 @@
               "definition_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
               "argsstring_html": "()",
               "name_html": "Xxh64Hasher",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::Xxh64Hasher",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "35",
@@ -460,6 +472,7 @@
               "definition_html": "XXH64_hash_t apache::thrift::op::Xxh64Hasher::getResult",
               "argsstring_html": "() const",
               "name_html": "getResult",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::getResult",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "38",
@@ -502,7 +515,7 @@
           "compoundname_html": "apache::thrift::op::Xxh64Hasher::combine",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1ab72c2a24702c5e47d067a70e4b785c0a",
+              "refid": "classapache_1_1thrift_1_1op_1_1Xxh64Hasher_1a84dfaf03e35ac0835181867567d6f97f",
               "prot": "public",
               "static": "no",
               "constexpr": "yes",
@@ -515,10 +528,11 @@
                   "type_html": "typename T"
                 }
               ],
-              "type_html": "constexpr std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
-              "definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
+              "type_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt;",
+              "definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
               "argsstring_html": "(const T &amp;val)",
               "name_html": "combine",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
               "param": [
                 {
                   "type_html": "const T &amp;",
@@ -534,11 +548,11 @@
                 "bodyend": "47"
               },
               "definition": {
-                "simple_html": "template &lt;typename T&gt;\nconstexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-                "simple_raw": "template <typename T>\nconstexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-                "detailed_html": "template &lt;typename T&gt;\ninline constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
-                "detailed_raw": "template <typename T>\ninline constexpr std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
-                "original_definition_html": "constexpr std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
+                "simple_html": "template &lt;typename T&gt;\nstd::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+                "simple_raw": "template <typename T>\nstd::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+                "detailed_html": "template &lt;typename T&gt;\ninline std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;&gt; combine(const T&amp; val)",
+                "detailed_raw": "template <typename T>\ninline std::enable_if_t<std::is_arithmetic_v<T>> combine(const T& val)",
+                "original_definition_html": "std::enable_if_t&lt; std::is_arithmetic_v&lt; T &gt; &gt; apache::thrift::op::Xxh64Hasher::combine",
                 "original_argsstring_html": "(const T &amp;val)"
               },
               "filepath": "fns/class/apache/thrift/op/Xxh64Hasher/combine",
@@ -558,6 +572,7 @@
               "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
               "argsstring_html": "(const folly::IOBuf &amp;value)",
               "name_html": "combine",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
               "param": [
                 {
                   "type_html": "const folly::IOBuf &amp;",
@@ -597,6 +612,7 @@
               "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
               "argsstring_html": "(folly::ByteRange value)",
               "name_html": "combine",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
               "param": [
                 {
                   "type_html": "folly::ByteRange",
@@ -636,6 +652,7 @@
               "definition_html": "void apache::thrift::op::Xxh64Hasher::combine",
               "argsstring_html": "(const Xxh64Hasher &amp;other)",
               "name_html": "combine",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::combine",
               "param": [
                 {
                   "type_html": "const <code>Xxh64Hasher</code> &amp;",
@@ -695,6 +712,7 @@
               "definition_html": "void apache::thrift::op::Xxh64Hasher::finalize",
               "argsstring_html": "()",
               "name_html": "finalize",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::finalize",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "62",
@@ -748,6 +766,7 @@
               "definition_html": "bool apache::thrift::op::Xxh64Hasher::operator&lt;",
               "argsstring_html": "(const Xxh64Hasher &amp;other) const",
               "name_html": "operator&lt;",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::operator&lt;",
               "param": [
                 {
                   "type_html": "const <code>Xxh64Hasher</code> &amp;",
@@ -807,6 +826,7 @@
               "definition_html": "bool apache::thrift::op::Xxh64Hasher::finalized",
               "argsstring_html": "() const",
               "name_html": "finalized",
+              "qualifiedname_html": "apache::thrift::op::Xxh64Hasher::finalized",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Xxh64Hasher.h",
                 "line": "73",

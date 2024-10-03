@@ -28,6 +28,7 @@
       "definition_html": "FOLLY_ERASE auto apache::thrift::detail::move_to_unique_ptr_fn::operator()",
       "argsstring_html": "(optional_boxed_field_ref&lt; T &gt; ref) const noexcept",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::detail::move_to_unique_ptr_fn::operator()",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &gt;",
@@ -36,11 +37,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1676",
+        "line": "1708",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1676",
-        "bodyend": "1678"
+        "bodystart": "1708",
+        "bodyend": "1710"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE auto operator()(optional_boxed_field_ref&lt;T&gt; ref) const",
@@ -56,11 +57,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1674",
+    "line": "1706",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1674",
-    "bodyend": "1679"
+    "bodystart": "1706",
+    "bodyend": "1711"
   },
   "namespacednames_html": [
     "apache",
@@ -103,6 +104,7 @@
               "definition_html": "FOLLY_ERASE auto apache::thrift::detail::move_to_unique_ptr_fn::operator()",
               "argsstring_html": "(optional_boxed_field_ref&lt; T &gt; ref) const noexcept",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::detail::move_to_unique_ptr_fn::operator()",
               "param": [
                 {
                   "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/optional_boxed_field_ref\">optional_boxed_field_ref</a>&lt; T &gt;",
@@ -111,11 +113,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "1676",
+                "line": "1708",
                 "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "1676",
-                "bodyend": "1678"
+                "bodystart": "1708",
+                "bodyend": "1710"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nFOLLY_ERASE auto operator()(optional_boxed_field_ref&lt;T&gt; ref) const",

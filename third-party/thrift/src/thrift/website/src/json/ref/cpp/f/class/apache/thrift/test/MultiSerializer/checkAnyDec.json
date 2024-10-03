@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkAnyDec",
       "argsstring_html": "() const",
       "name_html": "checkAnyDec",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkAnyDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "260",

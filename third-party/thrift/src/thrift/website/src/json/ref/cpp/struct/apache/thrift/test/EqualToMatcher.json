@@ -35,6 +35,7 @@
       "definition_html": "bool apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::MatchAndExplain",
       "argsstring_html": "(const U &amp;actual, ::testing::MatchResultListener *) const",
       "name_html": "MatchAndExplain",
+      "qualifiedname_html": "apache::thrift::test::EqualToMatcher::MatchAndExplain",
       "param": [
         {
           "type_html": "const U &amp;",
@@ -75,6 +76,7 @@
       "definition_html": "void apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::DescribeTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeTo",
+      "qualifiedname_html": "apache::thrift::test::EqualToMatcher::DescribeTo",
       "param": [
         {
           "type_html": "std::ostream *",
@@ -112,6 +114,7 @@
       "definition_html": "void apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::DescribeNegationTo",
       "argsstring_html": "(std::ostream *os) const",
       "name_html": "DescribeNegationTo",
+      "qualifiedname_html": "apache::thrift::test::EqualToMatcher::DescribeNegationTo",
       "param": [
         {
           "type_html": "std::ostream *",
@@ -164,6 +167,7 @@
       "definition_html": "T apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::expected",
       "argsstring_html": "",
       "name_html": "expected",
+      "qualifiedname_html": "apache::thrift::test::EqualToMatcher::expected",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "58",
@@ -205,6 +209,7 @@
               "definition_html": "bool apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::MatchAndExplain",
               "argsstring_html": "(const U &amp;actual, ::testing::MatchResultListener *) const",
               "name_html": "MatchAndExplain",
+              "qualifiedname_html": "apache::thrift::test::EqualToMatcher::MatchAndExplain",
               "param": [
                 {
                   "type_html": "const U &amp;",
@@ -267,6 +272,7 @@
               "definition_html": "void apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::DescribeTo",
               "argsstring_html": "(std::ostream *os) const",
               "name_html": "DescribeTo",
+              "qualifiedname_html": "apache::thrift::test::EqualToMatcher::DescribeTo",
               "param": [
                 {
                   "type_html": "std::ostream *",
@@ -326,6 +332,7 @@
               "definition_html": "void apache::thrift::test::EqualToMatcher&lt; Tag, T &gt;::DescribeNegationTo",
               "argsstring_html": "(std::ostream *os) const",
               "name_html": "DescribeNegationTo",
+              "qualifiedname_html": "apache::thrift::test::EqualToMatcher::DescribeNegationTo",
               "param": [
                 {
                   "type_html": "std::ostream *",

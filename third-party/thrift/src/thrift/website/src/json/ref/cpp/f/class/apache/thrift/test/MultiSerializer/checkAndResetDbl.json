@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkAndResetDbl",
       "argsstring_html": "(size_t enc, size_t dec) const",
       "name_html": "checkAndResetDbl",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkAndResetDbl",
       "param": [
         {
           "type_html": "size_t",

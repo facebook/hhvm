@@ -15,6 +15,7 @@
       "definition_html": "static auto apache::thrift::op::detail::SetIdenticalTo&lt; KTag, Tag, T &gt;::createHashMap",
       "argsstring_html": "(const T &amp;set)",
       "name_html": "createHashMap",
+      "qualifiedname_html": "apache::thrift::op::detail::SetIdenticalTo::createHashMap",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "489",
+        "line": "505",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "489",
-        "bodyend": "495"
+        "bodystart": "505",
+        "bodyend": "511"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; set)",
@@ -54,6 +55,7 @@
       "definition_html": "static auto apache::thrift::op::detail::SetIdenticalTo&lt; KTag, Tag, T &gt;::createHashMap",
       "argsstring_html": "(const T &amp;set)",
       "name_html": "createHashMap",
+      "qualifiedname_html": "apache::thrift::op::detail::SetIdenticalTo::createHashMap",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -62,11 +64,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "489",
+        "line": "505",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "489",
-        "bodyend": "495"
+        "bodystart": "505",
+        "bodyend": "511"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; set)",
@@ -93,6 +95,7 @@
       "definition_html": "static auto apache::thrift::op::detail::MapEquality&lt; KTag, VTag, Equality, Tag, T &gt;::createHashMap",
       "argsstring_html": "(const T &amp;map)",
       "name_html": "createHashMap",
+      "qualifiedname_html": "apache::thrift::op::detail::MapEquality::createHashMap",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -101,11 +104,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "540",
+        "line": "556",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "540",
-        "bodyend": "546"
+        "bodystart": "556",
+        "bodyend": "562"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; map)",
@@ -132,6 +135,7 @@
       "definition_html": "static auto apache::thrift::op::detail::MapEquality&lt; KTag, VTag, Equality, Tag, T &gt;::createHashMap",
       "argsstring_html": "(const T &amp;map)",
       "name_html": "createHashMap",
+      "qualifiedname_html": "apache::thrift::op::detail::MapEquality::createHashMap",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -140,11 +144,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "540",
+        "line": "556",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "540",
-        "bodyend": "546"
+        "bodystart": "556",
+        "bodyend": "562"
       },
       "definition": {
         "simple_html": "static auto createHashMap(const T&amp; map)",

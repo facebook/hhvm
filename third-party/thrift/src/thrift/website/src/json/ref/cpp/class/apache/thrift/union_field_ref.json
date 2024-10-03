@@ -23,35 +23,37 @@
   ],
   "types": [
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a6f4db1b818571070fc78ee56c855a732",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1a77abbd014b7b0c9910589e98591f07f8",
       "prot": "private",
       "type_html": "std::bool_constant&lt;\n    <code>detail::is_boxed_value_ptr_v</code>&lt;folly::remove_cvref_t&lt;T&gt;&gt; ||\n    detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::is_cpp_ref_or_boxed =  std::bool_constant&lt; detail::is_boxed_value_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt; || detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt; &gt;&gt;",
+      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::is_cpp_ref_or_boxed =  std::bool_constant&lt;\n      detail::is_boxed_value_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt; ||\n      detail::is_shared_or_unique_ptr_v&lt;folly::remove_cvref_t&lt;T&gt;&gt;&gt;",
       "argsstring_html": "",
       "name_html": "is_cpp_ref_or_boxed",
+      "qualifiedname_html": "apache::thrift::union_field_ref::is_cpp_ref_or_boxed",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1981",
+        "line": "2037",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1983",
+        "bodystart": "2037",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a7cecddca96acb00ee081953e08e5985f",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1aa5d51665bb36671150570eeac67d8e9e",
       "prot": "private",
-      "type_html": "typename std::conditional_t&lt;\n    <code>is_cpp_ref_or_boxed::value</code>,\n    folly::remove_cvref_t&lt;T&gt;,\n    element_type_adapter&gt;::element_type",
-      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::element_type =  typename std::conditional_t&lt; is_cpp_ref_or_boxed::value, folly::remove_cvref_t&lt;T&gt;, element_type_adapter&gt;::element_type",
+      "type_html": "typename std::conditional_t&lt;\n    is_cpp_ref_or_boxed::value,\n    folly::remove_cvref_t&lt;T&gt;,\n    element_type_adapter&gt;::element_type",
+      "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::element_type =  typename std::conditional_t&lt;\n      is_cpp_ref_or_boxed::value,\n      folly::remove_cvref_t&lt;T&gt;,\n      element_type_adapter&gt;::element_type",
       "argsstring_html": "",
       "name_html": "element_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::element_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1989",
+        "line": "2045",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1992",
+        "bodystart": "2045",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -63,12 +65,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::storage_reference_type =  T",
       "argsstring_html": "",
       "name_html": "storage_reference_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::storage_reference_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1994",
+        "line": "2050",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1994",
+        "bodystart": "2050",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -80,12 +83,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::storage_value_type =  std::remove_reference_t&lt;T&gt;",
       "argsstring_html": "",
       "name_html": "storage_value_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::storage_value_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1995",
+        "line": "2051",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1995",
+        "bodystart": "2051",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -97,12 +101,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::int_t =  detail::copy_const_t&lt;T, int&gt;",
       "argsstring_html": "",
       "name_html": "int_t",
+      "qualifiedname_html": "apache::thrift::union_field_ref::int_t",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2002",
+        "line": "2058",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2002",
+        "bodystart": "2058",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -114,12 +119,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::owner =  detail::copy_const_t&lt;T, void&gt;*",
       "argsstring_html": "",
       "name_html": "owner",
+      "qualifiedname_html": "apache::thrift::union_field_ref::owner",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2003",
+        "line": "2059",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2003",
+        "bodystart": "2059",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -131,12 +137,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::vtable =  apache::thrift::detail::union_field_ref_owner_vtable",
       "argsstring_html": "",
       "name_html": "vtable",
+      "qualifiedname_html": "apache::thrift::union_field_ref::vtable",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2004",
+        "line": "2060",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2004",
+        "bodystart": "2060",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -148,12 +155,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::value_type =  detail::copy_const_t&lt;T, element_type&gt;",
       "argsstring_html": "",
       "name_html": "value_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::value_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1998",
+        "line": "2054",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1998",
+        "bodystart": "2054",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -165,12 +173,13 @@
       "definition_html": "using apache::thrift::union_field_ref&lt; T &gt;::reference_type =  detail::copy_reference_t&lt;T, value_type&gt;",
       "argsstring_html": "",
       "name_html": "reference_type",
+      "qualifiedname_html": "apache::thrift::union_field_ref::reference_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1999",
+        "line": "2055",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1999",
+        "bodystart": "2055",
         "bodyend": "-1"
       },
       "parentid": "classapache_1_1thrift_1_1union__field__ref"
@@ -190,6 +199,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::union_field_ref&lt; T &gt;::union_field_ref",
       "argsstring_html": "(storage_reference_type storage_value, int_t &amp;type, int field_type, owner ow, const vtable &amp;vt) noexcept",
       "name_html": "union_field_ref",
+      "qualifiedname_html": "apache::thrift::union_field_ref::union_field_ref",
       "param": [
         {
           "type_html": "storage_reference_type",
@@ -214,11 +224,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2007",
+        "line": "2063",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2007",
-        "bodyend": "2017"
+        "bodystart": "2063",
+        "bodyend": "2073"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE union_field_ref(\n    storage_reference_type storage_value,\n    int_t&amp; type,\n    int field_type,\n    owner ow,\n    const vtable&amp; vt)",
@@ -232,7 +242,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/union_field_ref"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a6c8bf4c4a63997fd9f641bd483d20e3f",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1aba58beba206ad9efec9b760f4622a295",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -240,20 +250,22 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_constructible< value_type, U >::value &&std::is_nothrow_assignable< value_type, U >::value",
       "tparams": [
         {
           "type_html": "typename U",
           "defval_html": "<code>value_type</code>"
         },
         {
-          "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;::<code>value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;::<code>value</code>, int &gt;",
+          "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;<code>::value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;<code>::value</code>, int &gt;",
           "defval_html": "0"
         }
       ],
       "type_html": "FOLLY_ERASE <code>union_field_ref</code> &amp;",
-      "definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-      "argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)",
+      "definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+      "argsstring_html": "(U &amp;&amp;other)",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator=",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -262,19 +274,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2025",
+        "line": "2081",
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2025",
-        "bodyend": "2035"
+        "bodystart": "2081",
+        "bodyend": "2091"
       },
       "definition": {
         "simple_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\nFOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
         "simple_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\nFOLLY_ERASE union_field_ref& operator=(U&& other)",
-        "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other) noexcept(\n    (std::is_nothrow_constructible&lt;value_type, U&gt;::value &amp;&amp;\n     std::is_nothrow_assignable&lt;value_type, U&gt;::value))",
-        "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other) noexcept(\n    (std::is_nothrow_constructible<value_type, U>::value &&\n     std::is_nothrow_assignable<value_type, U>::value))",
-        "original_definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-        "original_argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)"
+        "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
+        "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other)",
+        "original_definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+        "original_argsstring_html": "(U &amp;&amp;other)"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/operator.assign",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.assign"
@@ -291,13 +303,14 @@
       "definition_html": "FOLLY_ERASE bool apache::thrift::union_field_ref&lt; T &gt;::has_value",
       "argsstring_html": "() const",
       "name_html": "has_value",
+      "qualifiedname_html": "apache::thrift::union_field_ref::has_value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2037",
+        "line": "2093",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2037",
-        "bodyend": "2037"
+        "bodystart": "2093",
+        "bodyend": "2093"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool has_value() const",
@@ -322,13 +335,14 @@
       "definition_html": "FOLLY_ERASE apache::thrift::union_field_ref&lt; T &gt;::operator bool",
       "argsstring_html": "() const",
       "name_html": "operator bool",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator bool",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2039",
+        "line": "2095",
         "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2039",
-        "bodyend": "2039"
+        "bodystart": "2095",
+        "bodyend": "2095"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE operator bool() const",
@@ -353,13 +367,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::value",
       "argsstring_html": "() const",
       "name_html": "value",
+      "qualifiedname_html": "apache::thrift::union_field_ref::value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2043",
+        "line": "2099",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2043",
-        "bodyend": "2046"
+        "bodystart": "2099",
+        "bodyend": "2102"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type value() const",
@@ -373,7 +388,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/value"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1ad1b329806843f7a4ad6fd568664f912a",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1acd5578825088758fc881708dd8c13968",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -387,9 +402,10 @@
         }
       ],
       "type_html": "FOLLY_ERASE std::remove_const_t&lt; <code>value_type</code> &gt;",
-      "definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
+      "definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
       "argsstring_html": "(U &amp;&amp;default_value) const",
       "name_html": "value_or",
+      "qualifiedname_html": "apache::thrift::union_field_ref::value_or",
       "param": [
         {
           "type_html": "U &amp;&amp;",
@@ -398,18 +414,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2049",
+        "line": "2105",
         "column": "35",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2049",
-        "bodyend": "2054"
+        "bodystart": "2105",
+        "bodyend": "2110"
       },
       "definition": {
         "simple_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\nFOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(U&amp;&amp; default_value) const",
         "simple_raw": "template <typename U = std::remove_const_t<value_type>>\nFOLLY_ERASE std::remove_const_t<value_type> value_or(U&& default_value) const",
         "detailed_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\ninline FOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(\n    U&amp;&amp; default_value) const",
         "detailed_raw": "template <typename U = std::remove_const_t<value_type>>\ninline FOLLY_ERASE std::remove_const_t<value_type> value_or(\n    U&& default_value) const",
-        "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
+        "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
         "original_argsstring_html": "(U &amp;&amp;default_value) const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/value_or",
@@ -427,13 +443,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::operator*",
       "argsstring_html": "() const",
       "name_html": "operator*",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2056",
+        "line": "2112",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2056",
-        "bodyend": "2056"
+        "bodystart": "2112",
+        "bodyend": "2112"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type operator*() const",
@@ -447,7 +464,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.mul"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1ad3241511be0217a9461b0234f78fa603",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1abe22686d831638bcf099f482779345e1",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -461,30 +478,31 @@
         }
       ],
       "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfNonConst</code>&lt; U &gt; *",
-      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "() const",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2063",
+        "line": "2119",
         "column": "7",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2063",
-        "bodyend": "2066"
+        "bodystart": "2119",
+        "bodyend": "2122"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
         "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->() const",
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()\n    const",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->()\n    const",
-        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.arrow"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a507f41856954b0df762556e024457c70",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1a053a66a8515d9f940f192e818c890fdf",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -498,30 +516,31 @@
         }
       ],
       "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfConst</code>&lt; U &gt; *",
-      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "() const",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2069",
+        "line": "2125",
         "column": "53",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2069",
-        "bodyend": "2072"
+        "bodystart": "2125",
+        "bodyend": "2128"
       },
       "definition": {
         "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
         "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const",
         "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
         "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const",
-        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.arrow"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a2b13dd4722c5025c4662746335fdffc0",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1ae84712eb86d5c66cbf3d5e51d5cfff58",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -529,23 +548,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> *",
-      "definition_html": "FOLLY_ERASE value_type* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+      "definition_html": "FOLLY_ERASE value_type * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
       "argsstring_html": "()",
       "name_html": "operator-&gt;",
+      "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2074",
+        "line": "2130",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2074",
-        "bodyend": "2077"
+        "bodystart": "2130",
+        "bodyend": "2133"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",
         "simple_raw": "FOLLY_ERASE value_type* operator->()",
         "detailed_html": "inline FOLLY_ERASE value_type* operator-&gt;()",
         "detailed_raw": "inline FOLLY_ERASE value_type* operator->()",
-        "original_definition_html": "FOLLY_ERASE value_type* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+        "original_definition_html": "FOLLY_ERASE value_type * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
         "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
@@ -563,13 +583,14 @@
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::ensure",
       "argsstring_html": "()",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::union_field_ref::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2079",
+        "line": "2135",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2079",
-        "bodyend": "2084"
+        "bodystart": "2135",
+        "bodyend": "2140"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",
@@ -583,7 +604,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/ensure"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a3cae6a7acb0d46f3a0a24d98e7df6c55",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1a4b92fc71cce6b28d8bae7b0f7bfd4bf9",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -598,9 +619,10 @@
         }
       ],
       "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-      "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+      "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
       "argsstring_html": "(Args &amp;&amp;... args)",
       "name_html": "emplace",
+      "qualifiedname_html": "apache::thrift::union_field_ref::emplace",
       "param": [
         {
           "type_html": "Args &amp;&amp;...",
@@ -609,25 +631,25 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2087",
+        "line": "2143",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2087",
-        "bodyend": "2092"
+        "bodystart": "2143",
+        "bodyend": "2148"
       },
       "definition": {
         "simple_html": "template &lt;typename... Args&gt;\nFOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
         "simple_raw": "template <typename... Args>\nFOLLY_ERASE value_type& emplace(Args&&... args)",
         "detailed_html": "template &lt;typename... Args&gt;\ninline FOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
         "detailed_raw": "template <typename... Args>\ninline FOLLY_ERASE value_type& emplace(Args&&... args)",
-        "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+        "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
         "original_argsstring_html": "(Args &amp;&amp;... args)"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/emplace",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/emplace"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a0968c054ba410fa7d856ad8d34616bf9",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1ae8fcfbc4b589129b80102011f5b32263",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -644,10 +666,11 @@
           "defname_html": "Args"
         }
       ],
-      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;::<code>value</code>, <code>value_type</code> &amp; &gt;",
-      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+      "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;<code>::value</code>, <code>value_type</code> &amp; &gt;",
+      "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; value_type, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;:: value, value_type &amp; &gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
       "argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)",
       "name_html": "emplace",
+      "qualifiedname_html": "apache::thrift::union_field_ref::emplace",
       "param": [
         {
           "type_html": "std::initializer_list&lt; U &gt;",
@@ -660,18 +683,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2099",
+        "line": "2155",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2099",
-        "bodyend": "2104"
+        "bodystart": "2155",
+        "bodyend": "2160"
       },
       "definition": {
         "simple_html": "template &lt;class U, class... Args&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
         "simple_raw": "template <class U, class... Args>\nFOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
         "detailed_html": "template &lt;class U, class... Args&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
         "detailed_raw": "template <class U, class... Args>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
-        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+        "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; value_type, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;:: value, value_type &amp; &gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
         "original_argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/emplace",
@@ -689,13 +712,14 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::throw_if_unset",
       "argsstring_html": "() const",
       "name_html": "throw_if_unset",
+      "qualifiedname_html": "apache::thrift::union_field_ref::throw_if_unset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2107",
+        "line": "2163",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2107",
-        "bodyend": "2111"
+        "bodystart": "2163",
+        "bodyend": "2167"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void throw_if_unset() const",
@@ -709,7 +733,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/throw_if_unset"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1ab7d96cbd94c4afa584d2e6be0eda72a0",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1add30b4eb08828b81e494e862c9afb528",
       "prot": "private",
       "static": "no",
       "const": "yes",
@@ -717,30 +741,31 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-      "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+      "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
       "argsstring_html": "() const",
       "name_html": "get_value",
+      "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2113",
+        "line": "2169",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2113",
-        "bodyend": "2115"
+        "bodystart": "2169",
+        "bodyend": "2171"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type&amp; get_value() const",
         "simple_raw": "FOLLY_ERASE value_type& get_value() const",
         "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value() const",
         "detailed_raw": "private inline FOLLY_ERASE value_type& get_value() const",
-        "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+        "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/get_value"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a1f91269300e9eb3e6718085a57d9644f",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1aa4f5981cac82a26519596ebf0830a627",
       "prot": "private",
       "static": "no",
       "const": "yes",
@@ -748,9 +773,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-      "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+      "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
       "argsstring_html": "(std::false_type) const",
       "name_html": "get_value",
+      "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
       "param": [
         {
           "type_html": "std::false_type"
@@ -758,25 +784,25 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2116",
+        "line": "2172",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2116",
-        "bodyend": "2118"
+        "bodystart": "2172",
+        "bodyend": "2174"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type&amp; get_value(std::false_type) const",
         "simple_raw": "FOLLY_ERASE value_type& get_value(std::false_type) const",
         "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value(std::false_type) const",
         "detailed_raw": "private inline FOLLY_ERASE value_type& get_value(std::false_type) const",
-        "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+        "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
         "original_argsstring_html": "(std::false_type) const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
       "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/get_value"
     },
     {
-      "refid": "classapache_1_1thrift_1_1union__field__ref_1a8758180d4e102781eacc82e587d32fc3",
+      "refid": "classapache_1_1thrift_1_1union__field__ref_1aeaaa7fceed8bc110e848c353464c2165",
       "prot": "private",
       "static": "no",
       "const": "yes",
@@ -784,9 +810,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-      "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+      "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
       "argsstring_html": "(std::true_type) const",
       "name_html": "get_value",
+      "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
       "param": [
         {
           "type_html": "std::true_type"
@@ -794,18 +821,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2119",
+        "line": "2175",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2119",
-        "bodyend": "2126"
+        "bodystart": "2175",
+        "bodyend": "2182"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE value_type&amp; get_value(std::true_type) const",
         "simple_raw": "FOLLY_ERASE value_type& get_value(std::true_type) const",
         "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value(std::true_type) const",
         "detailed_raw": "private inline FOLLY_ERASE value_type& get_value(std::true_type) const",
-        "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+        "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
         "original_argsstring_html": "(std::true_type) const"
       },
       "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
@@ -830,6 +857,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::emplace_impl",
       "argsstring_html": "(std::false_type, Args &amp;&amp;... args)",
       "name_html": "emplace_impl",
+      "qualifiedname_html": "apache::thrift::union_field_ref::emplace_impl",
       "param": [
         {
           "type_html": "std::false_type"
@@ -841,11 +869,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2129",
+        "line": "2185",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2129",
-        "bodyend": "2131"
+        "bodystart": "2185",
+        "bodyend": "2187"
       },
       "definition": {
         "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::false_type, Args&amp;&amp;... args)",
@@ -877,6 +905,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::emplace_impl",
       "argsstring_html": "(std::true_type, Args &amp;&amp;... args)",
       "name_html": "emplace_impl",
+      "qualifiedname_html": "apache::thrift::union_field_ref::emplace_impl",
       "param": [
         {
           "type_html": "std::true_type"
@@ -888,11 +917,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2134",
+        "line": "2190",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2134",
-        "bodyend": "2138"
+        "bodystart": "2190",
+        "bodyend": "2194"
       },
       "definition": {
         "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::true_type, Args&amp;&amp;... args)",
@@ -924,6 +953,7 @@
       "definition_html": "friend class union_field_ref",
       "argsstring_html": "",
       "name_html": "union_field_ref",
+      "qualifiedname_html": "apache::thrift::union_field_ref::union_field_ref",
       "param": [
         {
           "type_html": "<code>union_field_ref</code>"
@@ -931,10 +961,10 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1978",
-        "column": "3",
+        "line": "2034",
+        "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1975",
+        "bodystart": "2034",
         "bodyend": "-1"
       }
     },
@@ -950,6 +980,7 @@
       "definition_html": "friend struct detail::union_value_unsafe_fn",
       "argsstring_html": "",
       "name_html": "detail::union_value_unsafe_fn",
+      "qualifiedname_html": "apache::thrift::union_field_ref::union_value_unsafe_fn",
       "param": [
         {
           "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/detail/union_value_unsafe_fn\">detail::union_value_unsafe_fn</a>"
@@ -957,21 +988,21 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1979",
-        "column": "3",
+        "line": "2035",
+        "column": "17",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1979",
+        "bodystart": "2035",
         "bodyend": "-1"
       }
     }
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "line": "1974",
+    "line": "2030",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-    "bodystart": "1974",
-    "bodyend": "2145"
+    "bodystart": "2030",
+    "bodyend": "2201"
   },
   "namespacednames_html": [
     "apache",
@@ -989,12 +1020,13 @@
       "definition_html": "storage_value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::storage_value_",
       "argsstring_html": "",
       "name_html": "storage_value_",
+      "qualifiedname_html": "apache::thrift::union_field_ref::storage_value_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2140",
+        "line": "2196",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2140",
+        "bodystart": "2196",
         "bodyend": "-1"
       }
     },
@@ -1007,12 +1039,13 @@
       "definition_html": "int_t&amp; apache::thrift::union_field_ref&lt; T &gt;::type_",
       "argsstring_html": "",
       "name_html": "type_",
+      "qualifiedname_html": "apache::thrift::union_field_ref::type_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2141",
+        "line": "2197",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2141",
+        "bodystart": "2197",
         "bodyend": "-1"
       }
     },
@@ -1025,12 +1058,13 @@
       "definition_html": "const int apache::thrift::union_field_ref&lt; T &gt;::field_type_",
       "argsstring_html": "",
       "name_html": "field_type_",
+      "qualifiedname_html": "apache::thrift::union_field_ref::field_type_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2142",
+        "line": "2198",
         "column": "13",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2142",
+        "bodystart": "2198",
         "bodyend": "-1"
       }
     },
@@ -1043,12 +1077,13 @@
       "definition_html": "owner apache::thrift::union_field_ref&lt; T &gt;::owner_",
       "argsstring_html": "",
       "name_html": "owner_",
+      "qualifiedname_html": "apache::thrift::union_field_ref::owner_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2143",
+        "line": "2199",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2143",
+        "bodystart": "2199",
         "bodyend": "-1"
       }
     },
@@ -1061,12 +1096,13 @@
       "definition_html": "const vtable&amp; apache::thrift::union_field_ref&lt; T &gt;::vtable_",
       "argsstring_html": "",
       "name_html": "vtable_",
+      "qualifiedname_html": "apache::thrift::union_field_ref::vtable_",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "2144",
+        "line": "2200",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "2144",
+        "bodystart": "2200",
         "bodyend": "-1"
       }
     }
@@ -1097,6 +1133,7 @@
               "definition_html": "FOLLY_ERASE apache::thrift::union_field_ref&lt; T &gt;::union_field_ref",
               "argsstring_html": "(storage_reference_type storage_value, int_t &amp;type, int field_type, owner ow, const vtable &amp;vt) noexcept",
               "name_html": "union_field_ref",
+              "qualifiedname_html": "apache::thrift::union_field_ref::union_field_ref",
               "param": [
                 {
                   "type_html": "storage_reference_type",
@@ -1121,11 +1158,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2007",
+                "line": "2063",
                 "column": "15",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2007",
-                "bodyend": "2017"
+                "bodystart": "2063",
+                "bodyend": "2073"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE union_field_ref(\n    storage_reference_type storage_value,\n    int_t&amp; type,\n    int field_type,\n    owner ow,\n    const vtable&amp; vt)",
@@ -1162,7 +1199,7 @@
           "compoundname_html": "apache::thrift::union_field_ref::operator=",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a6c8bf4c4a63997fd9f641bd483d20e3f",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1aba58beba206ad9efec9b760f4622a295",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1170,20 +1207,22 @@
               "inline": "yes",
               "noexcept": "yes",
               "virtual": "non-virtual",
+              "noexceptexpression": "std::is_nothrow_constructible< value_type, U >::value &&std::is_nothrow_assignable< value_type, U >::value",
               "tparams": [
                 {
                   "type_html": "typename U",
                   "defval_html": "<code>value_type</code>"
                 },
                 {
-                  "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;::<code>value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;::<code>value</code>, int &gt;",
+                  "type_html": "std::enable_if_t&lt; std::is_assignable&lt; <code>reference_type</code>, U &amp;&amp; &gt;<code>::value</code> &amp;&amp;std::is_constructible&lt; <code>value_type</code>, U &amp;&amp; &gt;<code>::value</code>, int &gt;",
                   "defval_html": "0"
                 }
               ],
               "type_html": "FOLLY_ERASE <code>union_field_ref</code> &amp;",
-              "definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-              "argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)",
+              "definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+              "argsstring_html": "(U &amp;&amp;other)",
               "name_html": "operator=",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator=",
               "param": [
                 {
                   "type_html": "U &amp;&amp;",
@@ -1192,19 +1231,19 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2025",
+                "line": "2081",
                 "column": "31",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2025",
-                "bodyend": "2035"
+                "bodystart": "2081",
+                "bodyend": "2091"
               },
               "definition": {
                 "simple_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\nFOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
                 "simple_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\nFOLLY_ERASE union_field_ref& operator=(U&& other)",
-                "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other) noexcept(\n    (std::is_nothrow_constructible&lt;value_type, U&gt;::value &amp;&amp;\n     std::is_nothrow_assignable&lt;value_type, U&gt;::value))",
-                "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other) noexcept(\n    (std::is_nothrow_constructible<value_type, U>::value &&\n     std::is_nothrow_assignable<value_type, U>::value))",
-                "original_definition_html": "FOLLY_ERASE union_field_ref&amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
-                "original_argsstring_html": "(U &amp;&amp;other) noexcept(std::is_nothrow_constructible&lt; value_type, U &gt;::value &amp;&amp;std::is_nothrow_assignable&lt; value_type, U &gt;::value)"
+                "detailed_html": "template &lt;\n    typename U = value_type,\n    std::enable_if_t&lt;\n        std::is_assignable&lt;reference_type, U&amp;&amp;&gt;::value &amp;&amp;\n            std::is_constructible&lt;value_type, U&amp;&amp;&gt;::value,\n        int&gt; = 0&gt;\ninline FOLLY_ERASE union_field_ref&amp; operator=(U&amp;&amp; other)",
+                "detailed_raw": "template <\n    typename U = value_type,\n    std::enable_if_t<\n        std::is_assignable<reference_type, U&&>::value &&\n            std::is_constructible<value_type, U&&>::value,\n        int> = 0>\ninline FOLLY_ERASE union_field_ref& operator=(U&& other)",
+                "original_definition_html": "FOLLY_ERASE union_field_ref &amp; apache::thrift::union_field_ref&lt; T &gt;::operator=",
+                "original_argsstring_html": "(U &amp;&amp;other)"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/operator.assign",
               "href": "/ref/cpp/fns/class/apache/thrift/union_field_ref/operator.assign",
@@ -1243,13 +1282,14 @@
               "definition_html": "FOLLY_ERASE bool apache::thrift::union_field_ref&lt; T &gt;::has_value",
               "argsstring_html": "() const",
               "name_html": "has_value",
+              "qualifiedname_html": "apache::thrift::union_field_ref::has_value",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2037",
+                "line": "2093",
                 "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2037",
-                "bodyend": "2037"
+                "bodystart": "2093",
+                "bodyend": "2093"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE bool has_value() const",
@@ -1296,13 +1336,14 @@
               "definition_html": "FOLLY_ERASE apache::thrift::union_field_ref&lt; T &gt;::operator bool",
               "argsstring_html": "() const",
               "name_html": "operator bool",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator bool",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2039",
+                "line": "2095",
                 "column": "24",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2039",
-                "bodyend": "2039"
+                "bodystart": "2095",
+                "bodyend": "2095"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE operator bool() const",
@@ -1349,13 +1390,14 @@
               "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::value",
               "argsstring_html": "() const",
               "name_html": "value",
+              "qualifiedname_html": "apache::thrift::union_field_ref::value",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2043",
+                "line": "2099",
                 "column": "30",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2043",
-                "bodyend": "2046"
+                "bodystart": "2099",
+                "bodyend": "2102"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE reference_type value() const",
@@ -1391,7 +1433,7 @@
           "compoundname_html": "apache::thrift::union_field_ref::value_or",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1ad1b329806843f7a4ad6fd568664f912a",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1acd5578825088758fc881708dd8c13968",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -1405,9 +1447,10 @@
                 }
               ],
               "type_html": "FOLLY_ERASE std::remove_const_t&lt; <code>value_type</code> &gt;",
-              "definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
+              "definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
               "argsstring_html": "(U &amp;&amp;default_value) const",
               "name_html": "value_or",
+              "qualifiedname_html": "apache::thrift::union_field_ref::value_or",
               "param": [
                 {
                   "type_html": "U &amp;&amp;",
@@ -1416,18 +1459,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2049",
+                "line": "2105",
                 "column": "35",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2049",
-                "bodyend": "2054"
+                "bodystart": "2105",
+                "bodyend": "2110"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\nFOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(U&amp;&amp; default_value) const",
                 "simple_raw": "template <typename U = std::remove_const_t<value_type>>\nFOLLY_ERASE std::remove_const_t<value_type> value_or(U&& default_value) const",
                 "detailed_html": "template &lt;typename U = std::remove_const_t&lt;value_type&gt;&gt;\ninline FOLLY_ERASE std::remove_const_t&lt;value_type&gt; value_or(\n    U&amp;&amp; default_value) const",
                 "detailed_raw": "template <typename U = std::remove_const_t<value_type>>\ninline FOLLY_ERASE std::remove_const_t<value_type> value_or(\n    U&& default_value) const",
-                "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt;value_type&gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
+                "original_definition_html": "FOLLY_ERASE std::remove_const_t&lt; value_type &gt; apache::thrift::union_field_ref&lt; T &gt;::value_or",
                 "original_argsstring_html": "(U &amp;&amp;default_value) const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/value_or",
@@ -1467,13 +1510,14 @@
               "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::operator*",
               "argsstring_html": "() const",
               "name_html": "operator*",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator*",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2056",
+                "line": "2112",
                 "column": "30",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2056",
-                "bodyend": "2056"
+                "bodystart": "2112",
+                "bodyend": "2112"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE reference_type operator*() const",
@@ -1509,7 +1553,7 @@
           "compoundname_html": "apache::thrift::union_field_ref::operator-&gt;",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1ad3241511be0217a9461b0234f78fa603",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1abe22686d831638bcf099f482779345e1",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -1523,23 +1567,24 @@
                 }
               ],
               "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfNonConst</code>&lt; U &gt; *",
-              "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+              "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
               "argsstring_html": "() const",
               "name_html": "operator-&gt;",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2063",
+                "line": "2119",
                 "column": "7",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2063",
-                "bodyend": "2066"
+                "bodystart": "2119",
+                "bodyend": "2122"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;() const",
                 "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->() const",
                 "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* operator-&gt;()\n    const",
                 "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfNonConst<U>* operator->()\n    const",
-                "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+                "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfNonConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
@@ -1548,7 +1593,7 @@
               "compoundname_html": "apache::thrift::union_field_ref::operator-&gt;"
             },
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a507f41856954b0df762556e024457c70",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1a053a66a8515d9f940f192e818c890fdf",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -1562,23 +1607,24 @@
                 }
               ],
               "type_html": "FOLLY_ERASE <code>apache::thrift::detail::EnableIfConst</code>&lt; U &gt; *",
-              "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+              "definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
               "argsstring_html": "() const",
               "name_html": "operator-&gt;",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2069",
+                "line": "2125",
                 "column": "53",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2069",
-                "bodyend": "2072"
+                "bodystart": "2125",
+                "bodyend": "2128"
               },
               "definition": {
                 "simple_html": "template &lt;typename U = value_type&gt;\nFOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
                 "simple_raw": "template <typename U = value_type>\nFOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const",
                 "detailed_html": "template &lt;typename U = value_type&gt;\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* operator-&gt;() const",
                 "detailed_raw": "template <typename U = value_type>\ninline FOLLY_ERASE apache::thrift::detail::EnableIfConst<U>* operator->() const",
-                "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt;U&gt;* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+                "original_definition_html": "FOLLY_ERASE apache::thrift::detail::EnableIfConst&lt; U &gt; * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
@@ -1587,7 +1633,7 @@
               "compoundname_html": "apache::thrift::union_field_ref::operator-&gt;"
             },
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a2b13dd4722c5025c4662746335fdffc0",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1ae84712eb86d5c66cbf3d5e51d5cfff58",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1595,23 +1641,24 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_ERASE <code>value_type</code> *",
-              "definition_html": "FOLLY_ERASE value_type* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+              "definition_html": "FOLLY_ERASE value_type * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
               "argsstring_html": "()",
               "name_html": "operator-&gt;",
+              "qualifiedname_html": "apache::thrift::union_field_ref::operator-&gt;",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2074",
+                "line": "2130",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2074",
-                "bodyend": "2077"
+                "bodystart": "2130",
+                "bodyend": "2133"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE value_type* operator-&gt;()",
                 "simple_raw": "FOLLY_ERASE value_type* operator->()",
                 "detailed_html": "inline FOLLY_ERASE value_type* operator-&gt;()",
                 "detailed_raw": "inline FOLLY_ERASE value_type* operator->()",
-                "original_definition_html": "FOLLY_ERASE value_type* apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
+                "original_definition_html": "FOLLY_ERASE value_type * apache::thrift::union_field_ref&lt; T &gt;::operator-&gt;",
                 "original_argsstring_html": "()"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/operator.arrow",
@@ -1651,13 +1698,14 @@
               "definition_html": "FOLLY_ERASE reference_type apache::thrift::union_field_ref&lt; T &gt;::ensure",
               "argsstring_html": "()",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::union_field_ref::ensure",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2079",
+                "line": "2135",
                 "column": "30",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2079",
-                "bodyend": "2084"
+                "bodystart": "2135",
+                "bodyend": "2140"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE reference_type ensure()",
@@ -1693,7 +1741,7 @@
           "compoundname_html": "apache::thrift::union_field_ref::emplace",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a3cae6a7acb0d46f3a0a24d98e7df6c55",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1a4b92fc71cce6b28d8bae7b0f7bfd4bf9",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1708,9 +1756,10 @@
                 }
               ],
               "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-              "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+              "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
               "argsstring_html": "(Args &amp;&amp;... args)",
               "name_html": "emplace",
+              "qualifiedname_html": "apache::thrift::union_field_ref::emplace",
               "param": [
                 {
                   "type_html": "Args &amp;&amp;...",
@@ -1719,18 +1768,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2087",
+                "line": "2143",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2087",
-                "bodyend": "2092"
+                "bodystart": "2143",
+                "bodyend": "2148"
               },
               "definition": {
                 "simple_html": "template &lt;typename... Args&gt;\nFOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
                 "simple_raw": "template <typename... Args>\nFOLLY_ERASE value_type& emplace(Args&&... args)",
                 "detailed_html": "template &lt;typename... Args&gt;\ninline FOLLY_ERASE value_type&amp; emplace(Args&amp;&amp;... args)",
                 "detailed_raw": "template <typename... Args>\ninline FOLLY_ERASE value_type& emplace(Args&&... args)",
-                "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+                "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::emplace",
                 "original_argsstring_html": "(Args &amp;&amp;... args)"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/emplace",
@@ -1739,7 +1788,7 @@
               "compoundname_html": "apache::thrift::union_field_ref::emplace"
             },
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a0968c054ba410fa7d856ad8d34616bf9",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1ae8fcfbc4b589129b80102011f5b32263",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1756,10 +1805,11 @@
                   "defname_html": "Args"
                 }
               ],
-              "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;::<code>value</code>, <code>value_type</code> &amp; &gt;",
-              "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+              "type_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; <code>value_type</code>, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;<code>::value</code>, <code>value_type</code> &amp; &gt;",
+              "definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; value_type, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;:: value, value_type &amp; &gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
               "argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)",
               "name_html": "emplace",
+              "qualifiedname_html": "apache::thrift::union_field_ref::emplace",
               "param": [
                 {
                   "type_html": "std::initializer_list&lt; U &gt;",
@@ -1772,18 +1822,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2099",
+                "line": "2155",
                 "column": "3",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2099",
-                "bodyend": "2104"
+                "bodystart": "2155",
+                "bodyend": "2160"
               },
               "definition": {
                 "simple_html": "template &lt;class U, class... Args&gt;\nFOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
                 "simple_raw": "template <class U, class... Args>\nFOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
                 "detailed_html": "template &lt;class U, class... Args&gt;\ninline FOLLY_ERASE std::enable_if_t&lt;\n    std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;::\n        value,\n    value_type&amp;&gt;\nemplace(std::initializer_list&lt;U&gt; ilist, Args&amp;&amp;... args)",
                 "detailed_raw": "template <class U, class... Args>\ninline FOLLY_ERASE std::enable_if_t<\n    std::is_constructible<value_type, std::initializer_list<U>, Args&&...>::\n        value,\n    value_type&>\nemplace(std::initializer_list<U> ilist, Args&&... args)",
-                "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt;value_type, std::initializer_list&lt;U&gt;, Args&amp;&amp;...&gt;:: value, value_type&amp;&gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
+                "original_definition_html": "FOLLY_ERASE std::enable_if_t&lt; std::is_constructible&lt; value_type, std::initializer_list&lt; U &gt;, Args &amp;&amp;... &gt;:: value, value_type &amp; &gt; apache::thrift::union_field_ref&lt; T &gt;::emplace",
                 "original_argsstring_html": "(std::initializer_list&lt; U &gt; ilist, Args &amp;&amp;... args)"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/emplace",
@@ -1823,13 +1873,14 @@
               "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::throw_if_unset",
               "argsstring_html": "() const",
               "name_html": "throw_if_unset",
+              "qualifiedname_html": "apache::thrift::union_field_ref::throw_if_unset",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2107",
+                "line": "2163",
                 "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2107",
-                "bodyend": "2111"
+                "bodystart": "2163",
+                "bodyend": "2167"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE void throw_if_unset() const",
@@ -1865,7 +1916,7 @@
           "compoundname_html": "apache::thrift::union_field_ref::get_value",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1ab7d96cbd94c4afa584d2e6be0eda72a0",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1add30b4eb08828b81e494e862c9afb528",
               "prot": "private",
               "static": "no",
               "const": "yes",
@@ -1873,23 +1924,24 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-              "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+              "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
               "argsstring_html": "() const",
               "name_html": "get_value",
+              "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2113",
+                "line": "2169",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2113",
-                "bodyend": "2115"
+                "bodystart": "2169",
+                "bodyend": "2171"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE value_type&amp; get_value() const",
                 "simple_raw": "FOLLY_ERASE value_type& get_value() const",
                 "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value() const",
                 "detailed_raw": "private inline FOLLY_ERASE value_type& get_value() const",
-                "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+                "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
@@ -1898,7 +1950,7 @@
               "compoundname_html": "apache::thrift::union_field_ref::get_value"
             },
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a1f91269300e9eb3e6718085a57d9644f",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1aa4f5981cac82a26519596ebf0830a627",
               "prot": "private",
               "static": "no",
               "const": "yes",
@@ -1906,9 +1958,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-              "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+              "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
               "argsstring_html": "(std::false_type) const",
               "name_html": "get_value",
+              "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
               "param": [
                 {
                   "type_html": "std::false_type"
@@ -1916,18 +1969,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2116",
+                "line": "2172",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2116",
-                "bodyend": "2118"
+                "bodystart": "2172",
+                "bodyend": "2174"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE value_type&amp; get_value(std::false_type) const",
                 "simple_raw": "FOLLY_ERASE value_type& get_value(std::false_type) const",
                 "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value(std::false_type) const",
                 "detailed_raw": "private inline FOLLY_ERASE value_type& get_value(std::false_type) const",
-                "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+                "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
                 "original_argsstring_html": "(std::false_type) const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
@@ -1936,7 +1989,7 @@
               "compoundname_html": "apache::thrift::union_field_ref::get_value"
             },
             {
-              "refid": "classapache_1_1thrift_1_1union__field__ref_1a8758180d4e102781eacc82e587d32fc3",
+              "refid": "classapache_1_1thrift_1_1union__field__ref_1aeaaa7fceed8bc110e848c353464c2165",
               "prot": "private",
               "static": "no",
               "const": "yes",
@@ -1944,9 +1997,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "FOLLY_ERASE <code>value_type</code> &amp;",
-              "definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+              "definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
               "argsstring_html": "(std::true_type) const",
               "name_html": "get_value",
+              "qualifiedname_html": "apache::thrift::union_field_ref::get_value",
               "param": [
                 {
                   "type_html": "std::true_type"
@@ -1954,18 +2008,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2119",
+                "line": "2175",
                 "column": "26",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2119",
-                "bodyend": "2126"
+                "bodystart": "2175",
+                "bodyend": "2182"
               },
               "definition": {
                 "simple_html": "FOLLY_ERASE value_type&amp; get_value(std::true_type) const",
                 "simple_raw": "FOLLY_ERASE value_type& get_value(std::true_type) const",
                 "detailed_html": "private inline FOLLY_ERASE value_type&amp; get_value(std::true_type) const",
                 "detailed_raw": "private inline FOLLY_ERASE value_type& get_value(std::true_type) const",
-                "original_definition_html": "FOLLY_ERASE value_type&amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
+                "original_definition_html": "FOLLY_ERASE value_type &amp; apache::thrift::union_field_ref&lt; T &gt;::get_value",
                 "original_argsstring_html": "(std::true_type) const"
               },
               "filepath": "fns/class/apache/thrift/union_field_ref/get_value",
@@ -2012,6 +2066,7 @@
               "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::emplace_impl",
               "argsstring_html": "(std::false_type, Args &amp;&amp;... args)",
               "name_html": "emplace_impl",
+              "qualifiedname_html": "apache::thrift::union_field_ref::emplace_impl",
               "param": [
                 {
                   "type_html": "std::false_type"
@@ -2023,11 +2078,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2129",
+                "line": "2185",
                 "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2129",
-                "bodyend": "2131"
+                "bodystart": "2185",
+                "bodyend": "2187"
               },
               "definition": {
                 "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::false_type, Args&amp;&amp;... args)",
@@ -2061,6 +2116,7 @@
               "definition_html": "FOLLY_ERASE void apache::thrift::union_field_ref&lt; T &gt;::emplace_impl",
               "argsstring_html": "(std::true_type, Args &amp;&amp;... args)",
               "name_html": "emplace_impl",
+              "qualifiedname_html": "apache::thrift::union_field_ref::emplace_impl",
               "param": [
                 {
                   "type_html": "std::true_type"
@@ -2072,11 +2128,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "line": "2134",
+                "line": "2190",
                 "column": "20",
                 "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-                "bodystart": "2134",
-                "bodyend": "2138"
+                "bodystart": "2190",
+                "bodyend": "2194"
               },
               "definition": {
                 "simple_html": "template &lt;class... Args&gt;\nFOLLY_ERASE void emplace_impl(std::true_type, Args&amp;&amp;... args)",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1a9fffbd816d36998dbf3b8f418d2224d5",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1TypeToPatchMapAdapter_1ad7e3cf0ec65daf58d3a205d104ac37a6",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -21,33 +21,34 @@
       ],
       "type_html": "void",
       "definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-      "argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)",
+      "argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)",
       "name_html": "decode",
+      "qualifiedname_html": "apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
       "param": [
         {
           "type_html": "Protocol &amp;",
           "declname_html": "prot"
         },
         {
-          "type_html": "<code>TypeToPatchMapAdapter::AdaptedType</code> &amp;",
+          "type_html": "<code>AdaptedType</code> &amp;",
           "declname_html": "map"
         }
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "91",
+        "line": "99",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "91",
-        "bodyend": "110"
+        "bodystart": "99",
+        "bodyend": "118"
       },
       "definition": {
-        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
-        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(\n    Protocol&amp; prot, TypeToPatchMapAdapter::AdaptedType&amp; map)",
-        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(\n    Protocol& prot, TypeToPatchMapAdapter::AdaptedType& map)",
+        "simple_html": "template &lt;typename Tag, typename Protocol&gt;\nstatic void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+        "simple_raw": "template <typename Tag, typename Protocol>\nstatic void decode(Protocol& prot, AdaptedType& map)",
+        "detailed_html": "template &lt;typename Tag, typename Protocol&gt;\ninline static void decode(Protocol&amp; prot, AdaptedType&amp; map)",
+        "detailed_raw": "template <typename Tag, typename Protocol>\ninline static void decode(Protocol& prot, AdaptedType& map)",
         "original_definition_html": "static void apache::thrift::op::detail::TypeToPatchMapAdapter::decode",
-        "original_argsstring_html": "(Protocol &amp;prot, TypeToPatchMapAdapter::AdaptedType &amp;map)"
+        "original_argsstring_html": "(Protocol &amp;prot, AdaptedType &amp;map)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode",
       "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/TypeToPatchMapAdapter/decode",

@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StringOp&lt; Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;val)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::StringOp::add",
       "param": [
         {
           "type_html": "void *",

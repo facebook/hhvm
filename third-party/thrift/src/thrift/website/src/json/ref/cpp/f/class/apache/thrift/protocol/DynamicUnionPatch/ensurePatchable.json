@@ -15,13 +15,14 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensurePatchable",
       "argsstring_html": "()",
       "name_html": "ensurePatchable",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "409",
+        "line": "430",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "369",
-        "bodyend": "383"
+        "bodystart": "370",
+        "bodyend": "384"
       },
       "definition": {
         "simple_html": "void ensurePatchable()",

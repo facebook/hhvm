@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -55,6 +56,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans, int32_t string_limit, int32_t container_limit)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -103,6 +105,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(Transport_ *trans)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "Transport_ *",

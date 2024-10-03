@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::DynamicPatch::get_if",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1a58c1383cee154162f3c53c154edd0d36",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicPatch_1a167d303ed2451d1753ef3a6c817011d9",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "PatchType *",
-      "definition_html": "PatchType* apache::thrift::protocol::DynamicPatch::get_if",
+      "definition_html": "PatchType * apache::thrift::protocol::DynamicPatch::get_if",
       "argsstring_html": "(detail::Badge)",
       "name_html": "get_if",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::get_if",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -27,18 +28,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "474",
+        "line": "495",
         "column": "13",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "474",
-        "bodyend": "476"
+        "bodystart": "495",
+        "bodyend": "497"
       },
       "definition": {
         "simple_html": "template &lt;class PatchType&gt;\nPatchType* get_if(detail::Badge)",
         "simple_raw": "template <class PatchType>\nPatchType* get_if(detail::Badge)",
         "detailed_html": "template &lt;class PatchType&gt;\ninline PatchType* get_if(detail::Badge)",
         "detailed_raw": "template <class PatchType>\ninline PatchType* get_if(detail::Badge)",
-        "original_definition_html": "PatchType* apache::thrift::protocol::DynamicPatch::get_if",
+        "original_definition_html": "PatchType * apache::thrift::protocol::DynamicPatch::get_if",
         "original_argsstring_html": "(detail::Badge)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicPatch/get_if",

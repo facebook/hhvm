@@ -12,6 +12,7 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_assignable< value_type &, U >::value",
       "tparams": [
         {
           "type_html": "typename U"
@@ -19,8 +20,9 @@
       ],
       "type_html": "FOLLY_ERASE void",
       "definition_html": "FOLLY_ERASE void apache::thrift::field_ref&lt; T &gt;::copy_from",
-      "argsstring_html": "(field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &gt;::value)",
+      "argsstring_html": "(field_ref&lt; U &gt; other)",
       "name_html": "copy_from",
+      "qualifiedname_html": "apache::thrift::field_ref::copy_from",
       "param": [
         {
           "type_html": "<code>field_ref</code>&lt; U &gt;",
@@ -29,19 +31,19 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "315",
+        "line": "318",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "315",
-        "bodyend": "319"
+        "bodystart": "318",
+        "bodyend": "322"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void copy_from(field_ref&lt;U&gt; other)",
         "simple_raw": "template <typename U>\nFOLLY_ERASE void copy_from(field_ref<U> other)",
-        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(field_ref&lt;U&gt; other) noexcept(\n    (std::is_nothrow_assignable&lt;value_type&amp;, U&gt;::value))",
-        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(field_ref<U> other) noexcept(\n    (std::is_nothrow_assignable<value_type&, U>::value))",
+        "detailed_html": "template &lt;typename U&gt;\ninline FOLLY_ERASE void copy_from(field_ref&lt;U&gt; other)",
+        "detailed_raw": "template <typename U>\ninline FOLLY_ERASE void copy_from(field_ref<U> other)",
         "original_definition_html": "FOLLY_ERASE void apache::thrift::field_ref&lt; T &gt;::copy_from",
-        "original_argsstring_html": "(field_ref&lt; U &gt; other) noexcept(std::is_nothrow_assignable&lt; value_type &amp;, U &gt;::value)"
+        "original_argsstring_html": "(field_ref&lt; U &gt; other)"
       },
       "description": {
         "detailed_html": "<p>Assignment from <code>field_ref</code> is intentionally not provided to prevent potential confusion between two possible behaviors, copying and reference rebinding. The copy_from method is provided instead. </p>"

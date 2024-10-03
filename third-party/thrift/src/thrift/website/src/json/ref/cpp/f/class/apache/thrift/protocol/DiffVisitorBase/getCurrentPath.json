@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ac181e1aed31844dc91720422091c7241",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DiffVisitorBase_1ab100d71277a2e27cfd6afa2597cfd9c1",
       "prot": "protected",
       "static": "no",
       "const": "yes",
@@ -12,23 +12,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const Mask &amp;",
-      "definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+      "definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
       "argsstring_html": "() const",
       "name_html": "getCurrentPath",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "639",
+        "line": "660",
         "column": "14",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "639",
-        "bodyend": "639"
+        "bodystart": "660",
+        "bodyend": "660"
       },
       "definition": {
         "simple_html": "const Mask&amp; getCurrentPath() const",
         "simple_raw": "const Mask& getCurrentPath() const",
         "detailed_html": "protected inline const Mask&amp; getCurrentPath() const",
         "detailed_raw": "protected inline const Mask& getCurrentPath() const",
-        "original_definition_html": "const Mask&amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
+        "original_definition_html": "const Mask &amp; apache::thrift::protocol::DiffVisitorBase::getCurrentPath",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/protocol/DiffVisitorBase/getCurrentPath",

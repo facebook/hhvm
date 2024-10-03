@@ -20,6 +20,7 @@
       "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
       "argsstring_html": "(T &amp;val, type::structured_c)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::Clear::clear",
       "param": [
         {
           "type_html": "T &amp;",
@@ -67,6 +68,7 @@
       "definition_html": "static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
       "argsstring_html": "(T &amp;val, type::container_c)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::Clear::clear",
       "param": [
         {
           "type_html": "T &amp;",
@@ -98,7 +100,7 @@
       "compoundname_html": "apache::thrift::op::detail::Clear::clear"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a65fe4ba06b5655367f53b516b5b9df7f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_1a580ae9f4d32197cb62f9322700961a66",
       "prot": "private",
       "static": "yes",
       "constexpr": "yes",
@@ -111,10 +113,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr static void",
-      "definition_html": "constexpr static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+      "type_html": "void",
+      "definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
       "argsstring_html": "(T &amp;val, type::all_c)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::Clear::clear",
       "param": [
         {
           "type_html": "T &amp;",
@@ -133,11 +136,11 @@
         "bodyend": "79"
       },
       "definition": {
-        "simple_html": "template &lt;typename T&gt;\nstatic constexpr static void clear(T&amp; val, type::all_c)",
-        "simple_raw": "template <typename T>\nstatic constexpr static void clear(T& val, type::all_c)",
-        "detailed_html": "template &lt;typename T&gt;\nprivate inline static constexpr static void clear(T&amp; val, type::all_c)",
-        "detailed_raw": "template <typename T>\nprivate inline static constexpr static void clear(T& val, type::all_c)",
-        "original_definition_html": "constexpr static void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
+        "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::all_c)",
+        "simple_raw": "template <typename T>\nstatic void clear(T& val, type::all_c)",
+        "detailed_html": "template &lt;typename T&gt; private inline static void clear(T&amp; val, type::all_c)",
+        "detailed_raw": "template <typename T> private inline static void clear(T& val, type::all_c)",
+        "original_definition_html": "static constexpr void apache::thrift::op::detail::Clear&lt; TagOrId, PTag, typename &gt;::clear",
         "original_argsstring_html": "(T &amp;val, type::all_c)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/Clear/clear",

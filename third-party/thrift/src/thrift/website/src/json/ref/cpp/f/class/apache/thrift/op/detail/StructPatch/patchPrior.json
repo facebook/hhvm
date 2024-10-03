@@ -20,13 +20,14 @@
       "definition_html": "decltype(auto) apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::patchPrior",
       "argsstring_html": "()",
       "name_html": "patchPrior",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::patchPrior",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "415",
+        "line": "419",
         "column": "12",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "415",
-        "bodyend": "417"
+        "bodystart": "419",
+        "bodyend": "421"
       },
       "definition": {
         "simple_html": "template &lt;typename Id&gt;\ndecltype(auto) patchPrior()",

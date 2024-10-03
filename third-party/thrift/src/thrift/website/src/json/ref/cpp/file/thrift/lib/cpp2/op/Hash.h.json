@@ -49,10 +49,11 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <code>Hash</code>&lt; Tag, Hasher &gt;",
-      "definition_html": "constexpr Hash&lt;Tag, Hasher&gt; apache::thrift::op::hash",
+      "type_html": "<code>Hash</code>&lt; Tag, Hasher &gt;",
+      "definition_html": "Hash&lt;Tag, Hasher&gt; apache::thrift::op::hash",
       "argsstring_html": "",
       "name_html": "hash",
+      "qualifiedname_html": "apache::thrift::op::hash",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
@@ -60,13 +61,13 @@
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Hash.h",
         "bodystart": "38",
-        "bodyend": "-1"
+        "bodyend": "38"
       }
     }
   ],
   "free_typedefs": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a851401609f0715afe6ba90f006169554",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a8031a776ee56a18e9d13279f9bae6c26",
       "prot": "public",
       "tparams": [
         {
@@ -78,9 +79,10 @@
         }
       ],
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Hash\">detail::Hash</a>&lt;Tag, Hasher&gt;",
-      "definition_html": "using apache::thrift::op::Hash = typedef detail::Hash&lt;Tag, Hasher&gt;",
+      "definition_html": "using apache::thrift::op::Hash =  detail::Hash&lt;Tag, Hasher&gt;",
       "argsstring_html": "",
       "name_html": "Hash",
+      "qualifiedname_html": "apache::thrift::op::Hash",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Hash.h",
         "line": "27",

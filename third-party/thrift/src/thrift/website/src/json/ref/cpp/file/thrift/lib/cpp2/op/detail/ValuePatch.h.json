@@ -9,36 +9,12 @@
       "text_html": "utility"
     },
     {
-      "local": "no",
-      "text_html": "glog/logging.h"
-    },
-    {
-      "local": "no",
-      "text_html": "folly/json.h"
-    },
-    {
-      "local": "no",
-      "text_html": "folly/logging/xlog.h"
-    },
-    {
       "refid": "BasePatch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/BasePatch.h"
-    },
-    {
-      "refid": "protocol_2Patch_8h",
-      "local": "no",
-      "text_html": "thrift/lib/cpp2/protocol/Patch.h"
     }
   ],
   "innerclass": [
-    {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AssignPatch",
-      "prot": "public",
-      "text_html": "apache::thrift::op::detail::AssignPatch",
-      "href": "/ref/cpp/class/apache/thrift/op/detail/AssignPatch",
-      "is_transitive_innerclass": false
-    },
     {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BoolPatch",
       "prot": "public",
@@ -73,13 +49,6 @@
       "text_html": "apache::thrift::op::detail::BinaryPatch",
       "href": "/ref/cpp/class/apache/thrift/op/detail/BinaryPatch",
       "is_transitive_innerclass": false
-    },
-    {
-      "refid": "structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
-      "prot": "public",
-      "text_html": "apache::thrift::protocol::detail::ProtocolValueToThriftValue&lt; type::adapted&lt; InlineAdapter&lt; op::detail::AssignPatch&lt; PatchStruct &gt; &gt;, type::struct_t&lt; PatchStruct &gt; &gt; &gt;",
-      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1protocol_1_1detail_1_1ProtocolValueToThriftValue_3_01type_1_1adapted_34b90dc4b3db1c385944c8d06c0a76bee",
-      "is_transitive_innerclass": false
     }
   ],
   "innernamespace": [
@@ -92,24 +61,12 @@
       "text_html": "apache::thrift"
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1ident",
-      "text_html": "apache::thrift::ident"
-    },
-    {
       "refid": "namespaceapache_1_1thrift_1_1op",
       "text_html": "apache::thrift::op"
     },
     {
       "refid": "namespaceapache_1_1thrift_1_1op_1_1detail",
       "text_html": "apache::thrift::op::detail"
-    },
-    {
-      "refid": "namespaceapache_1_1thrift_1_1protocol",
-      "text_html": "apache::thrift::protocol"
-    },
-    {
-      "refid": "namespaceapache_1_1thrift_1_1protocol_1_1detail",
-      "text_html": "apache::thrift::protocol::detail"
     }
   ],
   "file_location": {

@@ -16,11 +16,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "263",
+    "line": "269",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "263",
-    "bodyend": "265"
+    "bodystart": "269",
+    "bodyend": "271"
   },
   "namespacednames_html": [
     "apache",

@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -58,6 +59,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -101,6 +103,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -144,6 +147,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -187,6 +191,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -230,6 +235,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -273,6 +279,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -316,6 +323,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -359,6 +367,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -402,6 +411,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -445,6 +455,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -488,6 +499,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -531,6 +543,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -574,6 +587,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -617,6 +631,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -660,6 +675,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -703,6 +719,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",
@@ -746,6 +763,7 @@
       "definition_html": "static bool apache::thrift::op::detail::BaseOp&lt; Tag &gt;::identical",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "identical",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::identical",
       "param": [
         {
           "type_html": "const void *",

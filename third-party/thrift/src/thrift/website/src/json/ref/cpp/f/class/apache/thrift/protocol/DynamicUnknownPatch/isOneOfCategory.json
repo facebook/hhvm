@@ -15,6 +15,7 @@
       "definition_html": "bool apache::thrift::protocol::DynamicUnknownPatch::isOneOfCategory",
       "argsstring_html": "(std::initializer_list&lt; Category &gt; c) const",
       "name_html": "isOneOfCategory",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicUnknownPatch::isOneOfCategory",
       "param": [
         {
           "type_html": "std::initializer_list&lt; Category &gt;",
@@ -23,11 +24,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "170",
+        "line": "191",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "170",
-        "bodyend": "172"
+        "bodystart": "191",
+        "bodyend": "193"
       },
       "definition": {
         "simple_html": "bool isOneOfCategory(std::initializer_list&lt;Category&gt; c) const",

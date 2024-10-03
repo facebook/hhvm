@@ -15,6 +15,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::put",
       "argsstring_html": "(void *s, FieldId fid, size_t, const Dyn &amp;n, const Dyn &amp;val)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::put",
       "param": [
         {
           "type_html": "void *",

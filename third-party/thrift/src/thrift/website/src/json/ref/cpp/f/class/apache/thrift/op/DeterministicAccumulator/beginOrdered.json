@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::beginOrdered",
       "argsstring_html": "()",
       "name_html": "beginOrdered",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::beginOrdered",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/DeterministicAccumulator.h",
         "line": "125",

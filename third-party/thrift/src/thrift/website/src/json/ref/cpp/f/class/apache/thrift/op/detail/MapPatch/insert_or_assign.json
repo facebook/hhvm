@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::MapPatch&lt; Patch &gt;::insert_or_assign",
       "argsstring_html": "(K &amp;&amp;key, V &amp;&amp;value)",
       "name_html": "insert_or_assign",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::insert_or_assign",
       "param": [
         {
           "type_html": "K &amp;&amp;",

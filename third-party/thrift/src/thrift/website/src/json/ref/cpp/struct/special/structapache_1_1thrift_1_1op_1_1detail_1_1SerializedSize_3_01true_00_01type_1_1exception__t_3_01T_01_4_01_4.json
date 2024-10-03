@@ -32,6 +32,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; true, type::exception_t&lt; T &gt; &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; true, type::exception_t&lt; T &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -111,6 +112,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; true, type::exception_t&lt; T &gt; &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; true, type::exception_t&lt; T &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

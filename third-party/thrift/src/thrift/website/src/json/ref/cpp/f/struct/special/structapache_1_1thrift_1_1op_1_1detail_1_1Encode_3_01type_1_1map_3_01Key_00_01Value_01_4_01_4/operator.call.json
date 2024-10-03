@@ -23,6 +23,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::MapEncode::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

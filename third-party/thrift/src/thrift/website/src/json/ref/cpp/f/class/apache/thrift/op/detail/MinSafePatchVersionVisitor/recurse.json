@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse",
       "argsstring_html": "(const Patch &amp;patch)",
       "name_html": "recurse",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::recurse",
       "param": [
         {
           "type_html": "const Patch &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "96",
+        "line": "100",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "96",
-        "bodyend": "106"
+        "bodystart": "100",
+        "bodyend": "110"
       },
       "definition": {
         "simple_html": "template &lt;typename Patch&gt;\nvoid recurse(const Patch&amp; patch)",

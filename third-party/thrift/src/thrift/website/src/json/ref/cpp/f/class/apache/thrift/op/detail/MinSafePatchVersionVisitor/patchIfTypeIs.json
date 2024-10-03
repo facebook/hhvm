@@ -22,6 +22,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfTypeIs",
       "argsstring_html": "(T &amp;&amp;...)",
       "name_html": "patchIfTypeIs",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfTypeIs",
       "param": [
         {
           "type_html": "T &amp;&amp;",
@@ -30,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "136",
+        "line": "140",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "136",
-        "bodyend": "138"
+        "bodystart": "140",
+        "bodyend": "142"
       },
       "definition": {
         "simple_html": "template &lt;typename... T&gt;\nvoid patchIfTypeIs(T&amp;&amp;...)",

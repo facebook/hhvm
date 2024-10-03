@@ -12,10 +12,11 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr bool",
+      "type_html": "bool",
       "definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
       "argsstring_html": "()",
       "name_html": "kSortKeys",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::kSortKeys",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/HashProtocol.h",
         "line": "120",
@@ -25,10 +26,10 @@
         "bodyend": "120"
       },
       "definition": {
-        "simple_html": "static constexpr bool kSortKeys()",
-        "simple_raw": "static constexpr bool kSortKeys()",
-        "detailed_html": "inline static constexpr bool kSortKeys()",
-        "detailed_raw": "inline static constexpr bool kSortKeys()",
+        "simple_html": "static bool kSortKeys()",
+        "simple_raw": "static bool kSortKeys()",
+        "detailed_html": "inline static bool kSortKeys()",
+        "detailed_raw": "inline static bool kSortKeys()",
         "original_definition_html": "static constexpr bool apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::kSortKeys",
         "original_argsstring_html": "()"
       },

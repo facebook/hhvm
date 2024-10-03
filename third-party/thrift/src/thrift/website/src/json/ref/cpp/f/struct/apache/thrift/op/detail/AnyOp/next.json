@@ -20,6 +20,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -72,6 +73,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -124,6 +126,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -176,6 +179,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -228,6 +232,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -280,6 +285,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -332,6 +338,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -379,6 +386,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType t, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::next",
       "param": [
         {
           "type_html": "void *",
@@ -426,6 +434,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ListOp&lt; VTag, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType t, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::next",
       "param": [
         {
           "type_html": "void *",
@@ -478,6 +487,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::next",
       "argsstring_html": "(ITag tag, T &amp;self, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::next",
       "param": [
         {
           "type_html": "ITag",
@@ -525,6 +535,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType t, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::next",
       "param": [
         {
           "type_html": "void *",
@@ -572,6 +583,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
       "argsstring_html": "(T &amp;self, IterType type, typename T::iterator &amp;itr)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -619,6 +631,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
       "argsstring_html": "(T &amp;self, IterType type, typename T::iterator &amp;itr)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -666,6 +679,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType type, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
       "param": [
         {
           "type_html": "void *",
@@ -713,6 +727,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::MapOp&lt; KTag, VTag, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType type, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::MapOp::next",
       "param": [
         {
           "type_html": "void *",
@@ -760,6 +775,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::next",
       "argsstring_html": "(T &amp;self, IterType type, size_type &amp;itr)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::next",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -807,6 +823,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::next",
       "argsstring_html": "(void *s, IterType type, std::any &amp;i)",
       "name_html": "next",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::next",
       "param": [
         {
           "type_html": "void *",

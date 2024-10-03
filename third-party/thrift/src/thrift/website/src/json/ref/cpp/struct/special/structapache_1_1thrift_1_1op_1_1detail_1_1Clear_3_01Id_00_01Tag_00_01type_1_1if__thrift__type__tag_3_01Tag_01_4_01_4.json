@@ -14,17 +14,18 @@
       "type_html": "typename Id"
     },
     {
-      "type_html": "typename <code>Tag</code>"
+      "type_html": "typename Tag"
     }
   ],
   "types": [
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4_1af731726c3116d249c10893ff6b1691f2",
       "prot": "public",
-      "type_html": "type::native_type&lt;<code>Tag</code>&gt;",
+      "type_html": "type::native_type&lt;Tag&gt;",
       "definition_html": "using apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::T =  type::native_type&lt;Tag&gt;",
       "argsstring_html": "",
       "name_html": "T",
+      "qualifiedname_html": "apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::T",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
         "line": "439",
@@ -46,10 +47,11 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
-      "type_html": "constexpr void",
-      "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
       "argsstring_html": "(T &amp;val) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -65,11 +67,11 @@
         "bodyend": "443"
       },
       "definition": {
-        "simple_html": "constexpr void operator()(T&amp; val) const",
-        "simple_raw": "constexpr void operator()(T& val) const",
-        "detailed_html": "inline constexpr void operator()(T&amp; val) const",
-        "detailed_raw": "inline constexpr void operator()(T& val) const",
-        "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+        "simple_html": "void operator()(T&amp; val) const",
+        "simple_raw": "void operator()(T& val) const",
+        "detailed_html": "inline void operator()(T&amp; val) const",
+        "detailed_raw": "inline void operator()(T& val) const",
+        "original_definition_html": "void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
         "original_argsstring_html": "(T &amp;val) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",
@@ -117,10 +119,11 @@
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
-              "type_html": "constexpr void",
-              "definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
               "argsstring_html": "(T &amp;val) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "<code>T</code> &amp;",
@@ -136,11 +139,11 @@
                 "bodyend": "443"
               },
               "definition": {
-                "simple_html": "constexpr void operator()(T&amp; val) const",
-                "simple_raw": "constexpr void operator()(T& val) const",
-                "detailed_html": "inline constexpr void operator()(T&amp; val) const",
-                "detailed_raw": "inline constexpr void operator()(T& val) const",
-                "original_definition_html": "constexpr void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
+                "simple_html": "void operator()(T&amp; val) const",
+                "simple_raw": "void operator()(T& val) const",
+                "detailed_html": "inline void operator()(T&amp; val) const",
+                "detailed_raw": "inline void operator()(T& val) const",
+                "original_definition_html": "void apache::thrift::op::detail::Clear&lt; Id, Tag, type::if_thrift_type_tag&lt; Tag &gt; &gt;::operator()",
                 "original_argsstring_html": "(T &amp;val) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Clear_3_01Id_00_01Tag_00_01type_1_1if__thrift__type__tag_3_01Tag_01_4_01_4/operator.call",

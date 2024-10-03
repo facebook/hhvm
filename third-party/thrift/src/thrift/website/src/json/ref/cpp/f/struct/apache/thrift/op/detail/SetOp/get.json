@@ -15,6 +15,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId, size_t, const Dyn &amp;k)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::get",
       "param": [
         {
           "type_html": "void *",

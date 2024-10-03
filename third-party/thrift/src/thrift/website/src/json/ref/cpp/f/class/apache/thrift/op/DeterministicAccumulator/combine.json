@@ -20,6 +20,7 @@
       "definition_html": "void apache::thrift::op::DeterministicAccumulator&lt; HasherGenerator &gt;::combine",
       "argsstring_html": "(const T &amp;val)",
       "name_html": "combine",
+      "qualifiedname_html": "apache::thrift::op::DeterministicAccumulator::combine",
       "param": [
         {
           "type_html": "const T &amp;",

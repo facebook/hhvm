@@ -22,6 +22,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, Value &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -60,6 +61,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, bool &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -98,6 +100,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -136,6 +139,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -174,6 +178,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -212,6 +217,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -250,6 +256,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, float &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -288,6 +295,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, double &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -326,6 +334,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -364,6 +373,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -402,6 +412,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, folly::F14FastSet&lt; Value &gt; &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -440,6 +451,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, folly::F14FastMap&lt; Value, Value &gt; &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -478,6 +490,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(const Object &amp;patch, Object &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "const <code>Object</code> &amp;",
@@ -516,6 +529,7 @@
       "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
       "argsstring_html": "(Object &amp;&amp;patch, Object &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
       "param": [
         {
           "type_html": "<code>Object</code> &amp;&amp;",
@@ -587,6 +601,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, Value &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -627,6 +642,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, bool &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -667,6 +683,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, int8_t &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -707,6 +724,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, int16_t &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -747,6 +765,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, int32_t &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -787,6 +806,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, int64_t &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -827,6 +847,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, float &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -867,6 +888,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, double &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -907,6 +929,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, folly::IOBuf &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -947,6 +970,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, std::vector&lt; Value &gt; &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -987,6 +1011,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, folly::F14FastSet&lt; Value &gt; &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -1027,6 +1052,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, folly::F14FastMap&lt; Value, Value &gt; &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -1067,6 +1093,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(const Object &amp;patch, Object &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "const <code>Object</code> &amp;",
@@ -1107,6 +1134,7 @@
               "definition_html": "void apache::thrift::protocol::detail::ApplyPatch::operator()",
               "argsstring_html": "(Object &amp;&amp;patch, Object &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::protocol::detail::ApplyPatch::operator()",
               "param": [
                 {
                   "type_html": "<code>Object</code> &amp;&amp;",

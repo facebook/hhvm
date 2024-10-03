@@ -10,6 +10,10 @@
     },
     {
       "local": "no",
+      "text_html": "folly/CPortability.h"
+    },
+    {
+      "local": "no",
       "text_html": "folly/Overload.h"
     },
     {
@@ -152,17 +156,18 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr std::size_t",
-      "definition_html": "constexpr std::size_t apache::thrift::op::size_v",
+      "type_html": "std::size_t",
+      "definition_html": "std::size_t apache::thrift::op::size_v",
       "argsstring_html": "",
       "name_html": "size_v",
+      "qualifiedname_html": "apache::thrift::op::size_v",
       "initializer_html": "= detail::pa::__fbthrift_field_size_v&lt;T&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "34",
+        "line": "35",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "34",
+        "bodystart": "35",
         "bodyend": "-1"
       },
       "description": {
@@ -183,17 +188,18 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "constexpr type::Ordinal",
-      "definition_html": "constexpr type::Ordinal apache::thrift::op::get_ordinal_v",
+      "type_html": "type::Ordinal",
+      "definition_html": "type::Ordinal apache::thrift::op::get_ordinal_v",
       "argsstring_html": "",
       "name_html": "get_ordinal_v",
-      "initializer_html": "= <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code>",
+      "qualifiedname_html": "apache::thrift::op::get_ordinal_v",
+      "initializer_html": "= <code>get_ordinal</code>&lt;T, Id&gt;<code>::value</code>",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "46",
+        "line": "47",
         "column": "32",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "46",
+        "bodystart": "47",
         "bodyend": "-1"
       },
       "description": {
@@ -214,17 +220,18 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "constexpr <code>FieldId</code>",
-      "definition_html": "constexpr FieldId apache::thrift::op::get_field_id_v",
+      "type_html": "<code>FieldId</code>",
+      "definition_html": "FieldId apache::thrift::op::get_field_id_v",
       "argsstring_html": "",
       "name_html": "get_field_id_v",
-      "initializer_html": "= <code>get_field_id</code>&lt;T, Id&gt;::<code>value</code>",
+      "qualifiedname_html": "apache::thrift::op::get_field_id_v",
+      "initializer_html": "= <code>get_field_id</code>&lt;T, Id&gt;<code>::value</code>",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "79",
+        "line": "80",
         "column": "26",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "79",
+        "bodystart": "80",
         "bodyend": "-1"
       },
       "description": {
@@ -232,7 +239,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a9a190cd652048b8a72492e4439389e2c",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a749867c0f5ceb2e9515dbf5918d1d5e0",
       "prot": "public",
       "static": "no",
       "mutable": "no",
@@ -244,21 +251,22 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "const folly::StringPiece",
-      "definition_html": "const folly::StringPiece apache::thrift::op::get_name_v",
+      "type_html": "FOLLY_PUSH_WARNING const folly::StringPiece",
+      "definition_html": "FOLLY_PUSH_WARNING const folly::StringPiece apache::thrift::op::get_name_v",
       "argsstring_html": "",
       "name_html": "get_name_v",
+      "qualifiedname_html": "apache::thrift::op::get_name_v",
       "initializer_html": "=\n    detail::pa::__fbthrift_get_field_name&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "136",
+        "line": "140",
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "136",
+        "bodystart": "140",
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the thrift field name, for example:</p>\n<p><ul>\n<li><p><code>op::get_name_v</code>&lt;MyStruct, field_id&lt;7&gt;&gt; // Returns the thrift field name associated with field 7 in MyStruct. </p>\n</li></ul>\n</p>"
+        "detailed_html": "<p>Gets the thrift field name, for example:</p>\n<p><ul>\n<li><p><code>op::get_name_v&lt;MyStruct, field_id&lt;7&gt;&gt;</code> // Returns the thrift field name associated with field 7 in MyStruct. </p>\n</li></ul>\n</p>"
       }
     },
     {
@@ -275,13 +283,14 @@
       "definition_html": "const folly::StringPiece apache::thrift::op::get_class_name_v",
       "argsstring_html": "",
       "name_html": "get_class_name_v",
+      "qualifiedname_html": "apache::thrift::op::get_class_name_v",
       "initializer_html": "=\n    detail::pa::__fbthrift_get_class_name&lt;T&gt;()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "144",
+        "line": "148",
         "column": "33",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "144",
+        "bodystart": "148",
         "bodyend": "-1"
       },
       "description": {
@@ -289,7 +298,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1ad37bad5a31f2016f305918220ef02af6",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a1e6fdba991702532f008335a76b84690",
       "prot": "public",
       "static": "no",
       "constexpr": "yes",
@@ -304,21 +313,22 @@
           "defval_html": "void"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Get\">detail::Get</a>&lt; Id, T &gt;",
-      "definition_html": "constexpr detail::Get&lt;Id, T&gt; apache::thrift::op::get",
+      "type_html": "FOLLY_POP_WARNING constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/Get\">detail::Get</a>&lt; Id, T &gt;",
+      "definition_html": "FOLLY_POP_WARNING constexpr detail::Get&lt;Id, T&gt; apache::thrift::op::get",
       "argsstring_html": "",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::get",
       "initializer_html": "= {}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "152",
+        "line": "158",
         "column": "30",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "152",
-        "bodyend": "-1"
+        "bodystart": "158",
+        "bodyend": "158"
       },
       "description": {
-        "detailed_html": "<p>Gets the Thrift field, for example:</p>\n<p><code>op::get</code>&lt;type::field_id&lt;7&gt;&gt;(myStruct) = 4; </p>"
+        "detailed_html": "<p>Gets the Thrift field, for example:</p>\n<p><code>op::get&lt;type::field_id&lt;7&gt;&gt;(myStruct)</code> = 4; </p>"
       }
     },
     {
@@ -327,16 +337,17 @@
       "static": "no",
       "constexpr": "yes",
       "mutable": "no",
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetValueOrNull\">detail::GetValueOrNull</a>",
-      "definition_html": "constexpr detail::GetValueOrNull apache::thrift::op::getValueOrNull",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetValueOrNull\">detail::GetValueOrNull</a>",
+      "definition_html": "detail::GetValueOrNull apache::thrift::op::getValueOrNull",
       "argsstring_html": "",
       "name_html": "getValueOrNull",
+      "qualifiedname_html": "apache::thrift::op::getValueOrNull",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "163",
+        "line": "169",
         "column": "41",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "163",
+        "bodystart": "169",
         "bodyend": "-1"
       },
       "description": {
@@ -354,18 +365,19 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/InvokeByFieldId\">detail::InvokeByFieldId</a>&lt; T &gt;",
-      "definition_html": "constexpr detail::InvokeByFieldId&lt;T&gt; apache::thrift::op::invoke_by_field_id",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/InvokeByFieldId\">detail::InvokeByFieldId</a>&lt; T &gt;",
+      "definition_html": "detail::InvokeByFieldId&lt;T&gt; apache::thrift::op::invoke_by_field_id",
       "argsstring_html": "",
       "name_html": "invoke_by_field_id",
+      "qualifiedname_html": "apache::thrift::op::invoke_by_field_id",
       "initializer_html": "{}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "342",
+        "line": "348",
         "column": "42",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "342",
-        "bodyend": "-1"
+        "bodystart": "348",
+        "bodyend": "348"
       },
       "description": {
         "detailed_html": "<p>Given a Thrift struct, callback with a runtime dynamic field id, convert it to static compile-time field id and invoke the callback. For example,</p>\n<p><code>invoke_by_field_id&lt;T&gt;(FieldId{10}, f)</code> invokes <code>f(field_id&lt;10&gt;{})</code>.</p>\n<p>If field id is not found in T, <code>f()</code> will be invoked.</p>\n<p>In addition, <code>invoke_by_field_id&lt;T&gt;(id, f...)</code> is a syntactic sugar of <code>invoke_by_field_id&lt;T&gt;(id, folly::overload(f...))</code>. WARNING: inline expansion will always be applied to the call sites. </p>"
@@ -390,10 +402,11 @@
           "type_html": "typename F"
         }
       ],
-      "type_html": "constexpr void",
-      "definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::for_each_ordinal",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_ordinal",
+      "qualifiedname_html": "apache::thrift::op::for_each_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -402,18 +415,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "50",
+        "line": "51",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "50",
-        "bodyend": "53"
+        "bodystart": "51",
+        "bodyend": "54"
       },
       "definition": {
-        "simple_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-        "simple_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-        "detailed_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-        "detailed_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-        "original_definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+        "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+        "simple_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+        "detailed_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+        "detailed_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+        "original_definition_html": "void apache::thrift::op::for_each_ordinal",
         "original_argsstring_html": "(F &amp;&amp;f)"
       },
       "description": {
@@ -446,6 +459,7 @@
       "definition_html": "decltype(auto) apache::thrift::op::find_by_ordinal",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "find_by_ordinal",
+      "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -454,11 +468,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "58",
+        "line": "59",
         "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "58",
-        "bodyend": "61"
+        "bodystart": "59",
+        "bodyend": "62"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F, std::enable_if_t&lt;size_v&lt;T&gt; != 0&gt;* = nullptr&gt;\ndecltype(auto) find_by_ordinal(F&amp;&amp; f)",
@@ -475,7 +489,7 @@
       "namespace_html": "apache::thrift::op"
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a117e68a0a022f8249eab743019a954a4",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a226355613f15571e8ad252256c7577ba",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -491,9 +505,10 @@
         }
       ],
       "type_html": "std::enable_if_t&lt; <code>size_v</code>&lt; T &gt;==0, bool &gt;",
-      "definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+      "definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
       "argsstring_html": "(F &amp;&amp;)",
       "name_html": "find_by_ordinal",
+      "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
       "param": [
         {
           "type_html": "F &amp;&amp;"
@@ -501,18 +516,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "64",
+        "line": "65",
         "column": "18",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "64",
-        "bodyend": "66"
+        "bodystart": "65",
+        "bodyend": "67"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
         "simple_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
         "detailed_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
         "detailed_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
-        "original_definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+        "original_definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
         "original_argsstring_html": "(F &amp;&amp;)"
       },
       "compoundname_html": "apache::thrift::op::find_by_ordinal",
@@ -538,6 +553,7 @@
       "definition_html": "void apache::thrift::op::for_each_field_id",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_field_id",
+      "qualifiedname_html": "apache::thrift::op::for_each_field_id",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -546,11 +562,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "83",
+        "line": "84",
         "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "83",
-        "bodyend": "85"
+        "bodystart": "84",
+        "bodyend": "86"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_field_id(F&amp;&amp; f)",
@@ -586,6 +602,7 @@
       "definition_html": "decltype(auto) apache::thrift::op::find_by_field_id",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "find_by_field_id",
+      "qualifiedname_html": "apache::thrift::op::find_by_field_id",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -594,11 +611,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "90",
+        "line": "91",
         "column": "10",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "90",
-        "bodyend": "93"
+        "bodystart": "91",
+        "bodyend": "94"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\ndecltype(auto) find_by_field_id(F&amp;&amp; f)",
@@ -634,6 +651,7 @@
       "definition_html": "void apache::thrift::op::for_each_ident",
       "argsstring_html": "(F &amp;&amp;f)",
       "name_html": "for_each_ident",
+      "qualifiedname_html": "apache::thrift::op::for_each_ident",
       "param": [
         {
           "type_html": "F &amp;&amp;",
@@ -642,11 +660,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "106",
+        "line": "107",
         "column": "6",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "106",
-        "bodyend": "109"
+        "bodystart": "107",
+        "bodyend": "110"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ident(F&amp;&amp; f)",
@@ -665,7 +683,7 @@
   ],
   "free_typedefs": [
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1af1e9d6c6072129ec31b22cb261a62555",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a70fb66db8167b92d4f16c210a8c0d8ae",
       "prot": "public",
       "tparams": [
         {
@@ -676,12 +694,13 @@
         }
       ],
       "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetOrdinalImpl\">detail::GetOrdinalImpl</a>&lt;Id, type::infer_tag&lt;T&gt;&gt;::type",
-      "definition_html": "using apache::thrift::op::get_ordinal = typedef typename detail::GetOrdinalImpl&lt;Id, type::infer_tag&lt;T&gt; &gt;::type",
+      "definition_html": "using apache::thrift::op::get_ordinal = \n    typename detail::GetOrdinalImpl&lt;Id, type::infer_tag&lt;T&gt;&gt;::type",
       "argsstring_html": "",
       "name_html": "get_ordinal",
+      "qualifiedname_html": "apache::thrift::op::get_ordinal",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "37",
+        "line": "38",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
         "bodystart": "38",
@@ -689,7 +708,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a1cc2ff3f076c63ae84d1df67fb6b0334",
+      "refid": "namespaceapache_1_1thrift_1_1op_1aaaa2b7915e50c6b9bf17c583b991eac3",
       "prot": "public",
       "tparams": [
         {
@@ -699,21 +718,22 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "folly::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code> == type::Ordinal{},\n    type::field_id&lt;0&gt;,\n    detail::pa::field_id&lt;T,<code> get_ordinal</code>&lt;T, Id&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_field_id = typedef folly::conditional_t&lt; get_ordinal&lt;T, Id&gt;::value == type::Ordinal{}, type::field_id&lt;0&gt;, detail::pa::field_id&lt;T, get_ordinal&lt;T, Id&gt; &gt;&gt;",
+      "type_html": "folly::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;<code>::value</code> == type::Ordinal{},\n    type::field_id&lt;0&gt;,\n    detail::pa::field_id&lt;T,<code> get_ordinal</code>&lt;T, Id&gt;&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_field_id =  folly::conditional_t&lt;\n    get_ordinal&lt;T, Id&gt;::value == type::Ordinal{},\n    type::field_id&lt;0&gt;,\n    detail::pa::field_id&lt;T, get_ordinal&lt;T, Id&gt;&gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_field_id",
+      "qualifiedname_html": "apache::thrift::op::get_field_id",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "69",
+        "line": "70",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "72",
-        "bodyend": "-1"
+        "bodystart": "70",
+        "bodyend": "71"
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1ada84492fc1972941c81f6ddd514baf18",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a44bb66e49911805bb8f82681ca17132d",
       "prot": "public",
       "tparams": [
         {
@@ -724,15 +744,16 @@
         }
       ],
       "type_html": "detail::pa::ident&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_ident = typedef detail::pa::ident&lt;T, get_ordinal&lt;T, Id&gt; &gt;",
+      "definition_html": "using apache::thrift::op::get_ident =  detail::pa::ident&lt;T, get_ordinal&lt;T, Id&gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_ident",
+      "qualifiedname_html": "apache::thrift::op::get_ident",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "101",
+        "line": "102",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "101",
+        "bodystart": "102",
         "bodyend": "-1"
       },
       "description": {
@@ -740,7 +761,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a65d3e354cd701e9cadbbb387eb454e15",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a71cc1546d42878ed6c97e5bdc602dba7",
       "prot": "public",
       "tparams": [
         {
@@ -751,15 +772,16 @@
         }
       ],
       "type_html": "detail::pa::type_tag&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_type_tag = typedef detail::pa::type_tag&lt;T, get_ordinal&lt;T, Id&gt; &gt;",
+      "definition_html": "using apache::thrift::op::get_type_tag =  detail::pa::type_tag&lt;T, get_ordinal&lt;T, Id&gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_type_tag",
+      "qualifiedname_html": "apache::thrift::op::get_type_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "117",
+        "line": "118",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "117",
+        "bodystart": "118",
         "bodyend": "-1"
       },
       "description": {
@@ -767,7 +789,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1aabd5c84a3146d521fd71db71699df7dc",
+      "refid": "namespaceapache_1_1thrift_1_1op_1ab4793624232b7f7548545e027850d13a",
       "prot": "public",
       "tparams": [
         {
@@ -777,21 +799,22 @@
           "type_html": "typename Id"
         }
       ],
-      "type_html": "typename std::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code> == type::Ordinal{},\n    void,\n    type::field&lt;<code>\n        get_type_tag</code>&lt;T, Id&gt;,\n        FieldContext&lt;T, folly::to_underlying(<code>get_field_id_v</code>&lt;T, Id&gt;)&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_field_tag = typedef typename std::conditional_t&lt; get_ordinal&lt;T, Id&gt;::value == type::Ordinal{}, void, type::field&lt; get_type_tag&lt;T, Id&gt;, FieldContext&lt;T, folly::to_underlying(get_field_id_v&lt;T, Id&gt;)&gt; &gt;&gt;",
+      "type_html": "typename std::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;<code>::value</code> == type::Ordinal{},\n    void,\n    type::field&lt;<code>\n        get_type_tag</code>&lt;T, Id&gt;,\n        FieldContext&lt;T, folly::to_underlying(<code>get_field_id_v</code>&lt;T, Id&gt;)&gt;&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_field_tag =  typename std::conditional_t&lt;\n    get_ordinal&lt;T, Id&gt;::value == type::Ordinal{},\n    void,\n    type::field&lt;\n        get_type_tag&lt;T, Id&gt;,\n        FieldContext&lt;T, folly::to_underlying(get_field_id_v&lt;T, Id&gt;)&gt;&gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_field_tag",
+      "qualifiedname_html": "apache::thrift::op::get_field_tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "120",
+        "line": "121",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "125",
-        "bodyend": "-1"
+        "bodystart": "121",
+        "bodyend": "122"
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1aa9fe99e4ad3dff46dd02cc6a3d9c8e6f",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a75f9c98559c26bc56b257cfcbeae5227",
       "prot": "public",
       "tparams": [
         {
@@ -802,20 +825,21 @@
         }
       ],
       "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;T, Id&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_native_type = typedef type::native_type&lt;get_field_tag&lt;T, Id&gt; &gt;",
+      "definition_html": "using apache::thrift::op::get_native_type =  type::native_type&lt;get_field_tag&lt;T, Id&gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_native_type",
+      "qualifiedname_html": "apache::thrift::op::get_native_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "128",
+        "line": "129",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "128",
+        "bodystart": "129",
         "bodyend": "-1"
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a1e0df33c732cdf0eec44982922547666",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a825a01f5cb09fc0f25c1ac4b6e2a82e5",
       "prot": "public",
       "tparams": [
         {
@@ -826,15 +850,16 @@
         }
       ],
       "type_html": "folly::remove_cvref_t&lt;decltype(<code>get</code>&lt;Id&gt;(std::declval&lt;T&amp;&gt;()))&gt;",
-      "definition_html": "using apache::thrift::op::get_field_ref = typedef folly::remove_cvref_t&lt;decltype(get&lt;Id&gt;(std::declval&lt;T&amp;&gt;()))&gt;",
+      "definition_html": "using apache::thrift::op::get_field_ref = \n    folly::remove_cvref_t&lt;decltype(get&lt;Id&gt;(std::declval&lt;T&amp;&gt;()))&gt;",
       "argsstring_html": "",
       "name_html": "get_field_ref",
+      "qualifiedname_html": "apache::thrift::op::get_field_ref",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "172",
+        "line": "178",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "173",
+        "bodystart": "178",
         "bodyend": "-1"
       },
       "description": {
@@ -868,10 +893,11 @@
                   "type_html": "typename F"
                 }
               ],
-              "type_html": "constexpr void",
-              "definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+              "type_html": "void",
+              "definition_html": "void apache::thrift::op::for_each_ordinal",
               "argsstring_html": "(F &amp;&amp;f)",
               "name_html": "for_each_ordinal",
+              "qualifiedname_html": "apache::thrift::op::for_each_ordinal",
               "param": [
                 {
                   "type_html": "F &amp;&amp;",
@@ -880,18 +906,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "50",
+                "line": "51",
                 "column": "16",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "50",
-                "bodyend": "53"
+                "bodystart": "51",
+                "bodyend": "54"
               },
               "definition": {
-                "simple_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-                "simple_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-                "detailed_html": "template &lt;typename T, typename F&gt;\nconstexpr void for_each_ordinal(F&amp;&amp; f)",
-                "detailed_raw": "template <typename T, typename F>\nconstexpr void for_each_ordinal(F&& f)",
-                "original_definition_html": "constexpr void apache::thrift::op::for_each_ordinal",
+                "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+                "simple_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+                "detailed_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ordinal(F&amp;&amp; f)",
+                "detailed_raw": "template <typename T, typename F>\nvoid for_each_ordinal(F&& f)",
+                "original_definition_html": "void apache::thrift::op::for_each_ordinal",
                 "original_argsstring_html": "(F &amp;&amp;f)"
               },
               "description": {
@@ -939,6 +965,7 @@
               "definition_html": "decltype(auto) apache::thrift::op::find_by_ordinal",
               "argsstring_html": "(F &amp;&amp;f)",
               "name_html": "find_by_ordinal",
+              "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
               "param": [
                 {
                   "type_html": "F &amp;&amp;",
@@ -947,11 +974,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "58",
+                "line": "59",
                 "column": "10",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "58",
-                "bodyend": "61"
+                "bodystart": "59",
+                "bodyend": "62"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F, std::enable_if_t&lt;size_v&lt;T&gt; != 0&gt;* = nullptr&gt;\ndecltype(auto) find_by_ordinal(F&amp;&amp; f)",
@@ -968,7 +995,7 @@
               "namespace_html": "apache::thrift::op"
             },
             {
-              "refid": "namespaceapache_1_1thrift_1_1op_1a117e68a0a022f8249eab743019a954a4",
+              "refid": "namespaceapache_1_1thrift_1_1op_1a226355613f15571e8ad252256c7577ba",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -984,9 +1011,10 @@
                 }
               ],
               "type_html": "std::enable_if_t&lt; <code>size_v</code>&lt; T &gt;==0, bool &gt;",
-              "definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+              "definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
               "argsstring_html": "(F &amp;&amp;)",
               "name_html": "find_by_ordinal",
+              "qualifiedname_html": "apache::thrift::op::find_by_ordinal",
               "param": [
                 {
                   "type_html": "F &amp;&amp;"
@@ -994,18 +1022,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "64",
+                "line": "65",
                 "column": "18",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "64",
-                "bodyend": "66"
+                "bodystart": "65",
+                "bodyend": "67"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
                 "simple_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
                 "detailed_html": "template &lt;typename T, typename F&gt;\n    std::enable_if_t &lt; size_v&lt;T &gt;= = 0, bool&gt; find_by_ordinal(F&amp;&amp;)",
                 "detailed_raw": "template <typename T, typename F>\n    std::enable_if_t < size_v<T >= = 0, bool> find_by_ordinal(F&&)",
-                "original_definition_html": "std::enable_if_t&lt;size_v&lt;T&gt; == 0, bool&gt; apache::thrift::op::find_by_ordinal",
+                "original_definition_html": "std::enable_if_t&lt; size_v&lt; T &gt;==0, bool &gt; apache::thrift::op::find_by_ordinal",
                 "original_argsstring_html": "(F &amp;&amp;)"
               },
               "compoundname_html": "apache::thrift::op::find_by_ordinal",
@@ -1046,6 +1074,7 @@
               "definition_html": "void apache::thrift::op::for_each_field_id",
               "argsstring_html": "(F &amp;&amp;f)",
               "name_html": "for_each_field_id",
+              "qualifiedname_html": "apache::thrift::op::for_each_field_id",
               "param": [
                 {
                   "type_html": "F &amp;&amp;",
@@ -1054,11 +1083,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "83",
+                "line": "84",
                 "column": "6",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "83",
-                "bodyend": "85"
+                "bodystart": "84",
+                "bodyend": "86"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_field_id(F&amp;&amp; f)",
@@ -1109,6 +1138,7 @@
               "definition_html": "decltype(auto) apache::thrift::op::find_by_field_id",
               "argsstring_html": "(F &amp;&amp;f)",
               "name_html": "find_by_field_id",
+              "qualifiedname_html": "apache::thrift::op::find_by_field_id",
               "param": [
                 {
                   "type_html": "F &amp;&amp;",
@@ -1117,11 +1147,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "90",
+                "line": "91",
                 "column": "10",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "90",
-                "bodyend": "93"
+                "bodystart": "91",
+                "bodyend": "94"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F&gt;\ndecltype(auto) find_by_field_id(F&amp;&amp; f)",
@@ -1172,6 +1202,7 @@
               "definition_html": "void apache::thrift::op::for_each_ident",
               "argsstring_html": "(F &amp;&amp;f)",
               "name_html": "for_each_ident",
+              "qualifiedname_html": "apache::thrift::op::for_each_ident",
               "param": [
                 {
                   "type_html": "F &amp;&amp;",
@@ -1180,11 +1211,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "106",
+                "line": "107",
                 "column": "6",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "106",
-                "bodyend": "109"
+                "bodystart": "107",
+                "bodyend": "110"
               },
               "definition": {
                 "simple_html": "template &lt;typename T, typename F&gt;\nvoid for_each_ident(F&amp;&amp; f)",

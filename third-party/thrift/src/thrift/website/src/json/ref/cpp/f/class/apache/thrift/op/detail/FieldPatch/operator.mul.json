@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::FieldPatch::operator*",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a7d364803432902bcdf6782a27ea527a1",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a3976822a4a28cc47e5ef03ae51cfcef6",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -13,9 +13,10 @@
       "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "Patch &amp;",
-      "definition_html": "Patch&amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
+      "definition_html": "Patch &amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
       "argsstring_html": "() noexcept",
       "name_html": "operator*",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "80",
@@ -29,7 +30,7 @@
         "simple_raw": "Patch& operator*()",
         "detailed_html": "inline Patch&amp; operator*() noexcept",
         "detailed_raw": "inline Patch& operator*() noexcept",
-        "original_definition_html": "Patch&amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
+        "original_definition_html": "Patch &amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
         "original_argsstring_html": "() noexcept"
       },
       "description": {
@@ -41,7 +42,7 @@
       "compoundname_html": "apache::thrift::op::detail::FieldPatch::operator*"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a44774e46e111c408c9706961ab12228d",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1FieldPatch_1a33d80c7e8cb6a6350ae4a862a5e51ec3",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -50,9 +51,10 @@
       "noexcept": "yes",
       "virtual": "non-virtual",
       "type_html": "const Patch &amp;",
-      "definition_html": "const Patch&amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
+      "definition_html": "const Patch &amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
       "argsstring_html": "() const noexcept",
       "name_html": "operator*",
+      "qualifiedname_html": "apache::thrift::op::detail::FieldPatch::operator*",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "81",
@@ -66,7 +68,7 @@
         "simple_raw": "const Patch& operator*() const",
         "detailed_html": "inline const Patch&amp; operator*() const noexcept",
         "detailed_raw": "inline const Patch& operator*() const noexcept",
-        "original_definition_html": "const Patch&amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
+        "original_definition_html": "const Patch &amp; apache::thrift::op::detail::FieldPatch&lt; Patch &gt;::operator*",
         "original_argsstring_html": "() const noexcept"
       },
       "filepath": "fns/class/apache/thrift/op/detail/FieldPatch/operator.mul",

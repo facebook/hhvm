@@ -20,6 +20,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i16_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, int16_t i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i16_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",
@@ -68,6 +69,7 @@
       "definition_html": "uint32_t apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i16_t &gt;::operator()",
       "argsstring_html": "(Protocol &amp;prot, uint16_t i) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::SerializedSize&lt; ZeroCopy, type::i16_t &gt;::operator()",
       "param": [
         {
           "type_html": "Protocol &amp;",

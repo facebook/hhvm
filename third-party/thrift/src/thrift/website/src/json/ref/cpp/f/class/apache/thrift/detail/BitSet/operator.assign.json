@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::detail::BitSet::operator=",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1detail_1_1BitSet_1ac361c19fcd121aea1f132dc579de10c2",
+      "refid": "classapache_1_1thrift_1_1detail_1_1BitSet_1a816d6b61db78314e3c702603267f7aee",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "no",
       "virtual": "non-virtual",
       "type_html": "<code>BitSet</code> &amp;",
-      "definition_html": "BitSet&amp; apache::thrift::detail::BitSet&lt; T &gt;::operator=",
+      "definition_html": "BitSet &amp; apache::thrift::detail::BitSet&lt; T &gt;::operator=",
       "argsstring_html": "(const BitSet &amp;other)=default",
       "name_html": "operator=",
+      "qualifiedname_html": "apache::thrift::detail::BitSet::operator=",
       "param": [
         {
           "type_html": "const <code>BitSet</code> &amp;",
@@ -23,7 +24,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "99",
+        "line": "100",
         "column": "10"
       },
       "definition": {
@@ -31,7 +32,7 @@
         "simple_raw": "BitSet& operator=(const BitSet& other)",
         "detailed_html": "BitSet&amp; operator=(const BitSet&amp; other) = default",
         "detailed_raw": "BitSet& operator=(const BitSet& other) = default",
-        "original_definition_html": "BitSet&amp; apache::thrift::detail::BitSet&lt; T &gt;::operator=",
+        "original_definition_html": "BitSet &amp; apache::thrift::detail::BitSet&lt; T &gt;::operator=",
         "original_argsstring_html": "(const BitSet &amp;other)=default"
       },
       "filepath": "fns/class/apache/thrift/detail/BitSet/operator.assign",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkDblDec",
       "argsstring_html": "() const",
       "name_html": "checkDblDec",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkDblDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "264",

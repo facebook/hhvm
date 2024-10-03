@@ -15,6 +15,7 @@
       "definition_html": "static folly::partial_ordering apache::thrift::op::detail::BaseOp&lt; Tag &gt;::compare",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "compare",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::compare",
       "param": [
         {
           "type_html": "const void *",
@@ -66,6 +67,7 @@
       "definition_html": "static folly::ordering apache::thrift::op::detail::NumberOp&lt; Tag &gt;::compare",
       "argsstring_html": "(const L &amp;lhs, const R &amp;rhs)",
       "name_html": "compare",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::compare",
       "param": [
         {
           "type_html": "const L &amp;",
@@ -109,6 +111,7 @@
       "definition_html": "static folly::partial_ordering apache::thrift::op::detail::NumberOp&lt; Tag &gt;::compare",
       "argsstring_html": "(const void *lhs, const Dyn &amp;rhs)",
       "name_html": "compare",
+      "qualifiedname_html": "apache::thrift::op::detail::NumberOp::compare",
       "param": [
         {
           "type_html": "const void *",

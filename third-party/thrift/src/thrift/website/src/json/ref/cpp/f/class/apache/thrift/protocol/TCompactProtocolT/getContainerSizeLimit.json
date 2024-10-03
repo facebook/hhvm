@@ -15,6 +15,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getContainerSizeLimit",
       "argsstring_html": "()",
       "name_html": "getContainerSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getContainerSizeLimit",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "132",

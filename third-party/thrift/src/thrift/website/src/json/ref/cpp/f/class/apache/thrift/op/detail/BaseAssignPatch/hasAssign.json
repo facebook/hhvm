@@ -15,6 +15,7 @@
       "definition_html": "FOLLY_NODISCARD bool apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::hasAssign",
       "argsstring_html": "() const",
       "name_html": "hasAssign",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::hasAssign",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "212",

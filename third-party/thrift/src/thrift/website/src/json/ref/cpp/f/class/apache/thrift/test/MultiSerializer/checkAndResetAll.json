@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkAndResetAll",
       "argsstring_html": "() const",
       "name_html": "checkAndResetAll",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkAndResetAll",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "259",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicMapPatch::put",
       "argsstring_html": "(detail::Badge badge, const detail::ValueMap &amp;m)",
       "name_html": "put",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::put",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -27,11 +28,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "303",
+        "line": "324",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "303",
-        "bodyend": "307"
+        "bodystart": "324",
+        "bodyend": "328"
       },
       "definition": {
         "simple_html": "void put(detail::Badge badge, const detail::ValueMap&amp; m)",

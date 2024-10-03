@@ -303,6 +303,13 @@
       "is_transitive_innerclass": false
     },
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1map_3_01K_00_01V_01_4_00_01type_1_1map_3_01K_00_01V_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::LessThan&lt; type::map&lt; K, V &gt;, type::map&lt; K, V &gt; &gt;",
+      "href": "/ref/cpp/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01type_1_1map_3_01K_00_01V_01_4_00_01type_1_1map_3_01K_00_01V_01_4_01_4",
+      "is_transitive_innerclass": false
+    },
+    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListIdenticalTo",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::ListIdenticalTo",

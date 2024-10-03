@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::MapPatch::patchByKey",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a9c301c3040cdea2337e29e873cb2a62c",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a76ddcbeec17b780724ccbeadbf561624",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -18,9 +18,10 @@
         }
       ],
       "type_html": "FOLLY_NODISCARD VP &amp;",
-      "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchByKey",
+      "definition_html": "FOLLY_NODISCARD VP &amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchByKey",
       "argsstring_html": "(K &amp;&amp;key)",
       "name_html": "patchByKey",
+      "qualifiedname_html": "apache::thrift::op::detail::MapPatch::patchByKey",
       "param": [
         {
           "type_html": "K &amp;&amp;",
@@ -40,7 +41,7 @@
         "simple_raw": "template <typename K = typename T::key_type>\nFOLLY_NODISCARD VP& patchByKey(K&& key)",
         "detailed_html": "template &lt;typename K = typename T::key_type&gt;\ninline FOLLY_NODISCARD VP&amp; patchByKey(K&amp;&amp; key)",
         "detailed_raw": "template <typename K = typename T::key_type>\ninline FOLLY_NODISCARD VP& patchByKey(K&& key)",
-        "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchByKey",
+        "original_definition_html": "FOLLY_NODISCARD VP &amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::patchByKey",
         "original_argsstring_html": "(K &amp;&amp;key)"
       },
       "description": {

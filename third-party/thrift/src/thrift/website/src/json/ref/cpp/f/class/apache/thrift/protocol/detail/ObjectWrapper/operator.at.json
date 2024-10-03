@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a4ef81440023fe63e6d1c766683378b60",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1ab5dde9f2e038fbd0d0423ca78c5ecf37",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>Value</code> &amp;",
-      "definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+      "definition_html": "Value &amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
       "argsstring_html": "(FieldId i)",
       "name_html": "operator[]",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]",
       "param": [
         {
           "type_html": "FieldId",
@@ -34,47 +35,8 @@
         "simple_raw": "Value& operator[](FieldId i)",
         "detailed_html": "inline Value&amp; operator[](FieldId i)",
         "detailed_raw": "inline Value& operator[](FieldId i)",
-        "original_definition_html": "Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
+        "original_definition_html": "Value &amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
         "original_argsstring_html": "(FieldId i)"
-      },
-      "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
-      "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
-      "parentid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper",
-      "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::operator[]"
-    },
-    {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1acf3c72bc0c138b5cd90f5a1532cfad70",
-      "prot": "public",
-      "static": "no",
-      "const": "yes",
-      "explicit": "no",
-      "inline": "yes",
-      "virtual": "non-virtual",
-      "type_html": "const <code>Value</code> &amp;",
-      "definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
-      "argsstring_html": "(FieldId i) const",
-      "name_html": "operator[]",
-      "param": [
-        {
-          "type_html": "FieldId",
-          "declname_html": "i"
-        }
-      ],
-      "location": {
-        "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "61",
-        "column": "15",
-        "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "61",
-        "bodyend": "63"
-      },
-      "definition": {
-        "simple_html": "const Value&amp; operator[](FieldId i) const",
-        "simple_raw": "const Value& operator[](FieldId i) const",
-        "detailed_html": "inline const Value&amp; operator[](FieldId i) const",
-        "detailed_raw": "inline const Value& operator[](FieldId i) const",
-        "original_definition_html": "const Value&amp; apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::operator[]",
-        "original_argsstring_html": "(FieldId i) const"
       },
       "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",
       "href": "/ref/cpp/fns/class/apache/thrift/protocol/detail/ObjectWrapper/operator.at",

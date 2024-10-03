@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::HashProtocol&lt; Accumulator &gt;::HashProtocol",
       "argsstring_html": "(Accumulator &amp;accumulator)",
       "name_html": "HashProtocol",
+      "qualifiedname_html": "apache::thrift::op::detail::HashProtocol::HashProtocol",
       "param": [
         {
           "type_html": "Accumulator &amp;",

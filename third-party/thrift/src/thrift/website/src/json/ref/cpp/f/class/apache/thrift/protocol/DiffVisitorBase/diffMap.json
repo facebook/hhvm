@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicMapPatch\">DynamicMapPatch</a>",
       "definition_html": "DynamicMapPatch apache::thrift::protocol::DiffVisitorBase::diffMap",
       "argsstring_html": "(const detail::ValueMap &amp;src, const detail::ValueMap &amp;dst)",
       "name_html": "diffMap",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffMap",
       "param": [
         {
           "type_html": "const <code>detail::ValueMap</code> &amp;",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "614",
+        "line": "635",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "757",
-        "bodyend": "798"
+        "bodystart": "758",
+        "bodyend": "799"
       },
       "definition": {
         "simple_html": "virtual DynamicMapPatch diffMap(\n    const detail::ValueMap&amp; src, const detail::ValueMap&amp; dst)",

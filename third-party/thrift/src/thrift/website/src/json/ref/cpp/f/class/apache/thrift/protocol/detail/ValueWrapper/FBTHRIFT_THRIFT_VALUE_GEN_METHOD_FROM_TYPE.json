@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(bool)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "bool"
@@ -22,7 +23,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "144",
+        "line": "140",
         "column": "3"
       },
       "definition": {
@@ -50,6 +51,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(byte)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "byte"
@@ -57,7 +59,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "145",
+        "line": "141",
         "column": "3"
       },
       "definition": {
@@ -85,6 +87,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(i16)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "i16"
@@ -92,7 +95,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "146",
+        "line": "142",
         "column": "3"
       },
       "definition": {
@@ -120,6 +123,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(i32)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "i32"
@@ -127,7 +131,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "147",
+        "line": "143",
         "column": "3"
       },
       "definition": {
@@ -155,6 +159,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(i64)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "i64"
@@ -162,7 +167,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "148",
+        "line": "144",
         "column": "3"
       },
       "definition": {
@@ -190,6 +195,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(float)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "float"
@@ -197,7 +203,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "149",
+        "line": "145",
         "column": "3"
       },
       "definition": {
@@ -225,6 +231,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(double)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "double"
@@ -232,7 +239,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "150",
+        "line": "146",
         "column": "3"
       },
       "definition": {
@@ -260,6 +267,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(string)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "string"
@@ -267,7 +275,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "151",
+        "line": "147",
         "column": "3"
       },
       "definition": {
@@ -295,6 +303,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(binary)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "binary"
@@ -302,7 +311,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "152",
+        "line": "148",
         "column": "3"
       },
       "definition": {
@@ -330,6 +339,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(object)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "object"
@@ -337,7 +347,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "153",
+        "line": "149",
         "column": "3"
       },
       "definition": {
@@ -365,6 +375,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(list)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "list"
@@ -372,7 +383,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "154",
+        "line": "150",
         "column": "3"
       },
       "definition": {
@@ -400,6 +411,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(set)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "set"
@@ -407,7 +419,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "155",
+        "line": "151",
         "column": "3"
       },
       "definition": {
@@ -435,6 +447,7 @@
       "definition_html": "apache::thrift::protocol::detail::ValueWrapper&lt; Base &gt;::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "argsstring_html": "(map)",
       "name_html": "FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ValueWrapper::FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE",
       "param": [
         {
           "type_html": "map"
@@ -442,7 +455,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "156",
+        "line": "152",
         "column": "3"
       },
       "definition": {

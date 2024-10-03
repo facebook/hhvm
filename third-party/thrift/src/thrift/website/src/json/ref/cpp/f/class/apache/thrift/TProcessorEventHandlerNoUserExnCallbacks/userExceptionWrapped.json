@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::userExceptionWrapped",
       "argsstring_html": "(void *ctx, const char *fn_name, bool declared, const folly::exception_wrapper &amp;ew_)",
       "name_html": "userExceptionWrapped",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::userExceptionWrapped",
       "reimplementedby": [
         {
           "refid": "classapache_1_1thrift_1_1TProcessorEventHandlerNoUserExnCallbacks_1a4aa8738c9f9c2913ce6b205274a71513",
@@ -73,6 +74,7 @@
       "definition_html": "void apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
       "argsstring_html": "(void *, const char *, bool, const folly::exception_wrapper &amp;) final",
       "name_html": "userExceptionWrapped",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandlerNoUserExnCallbacks::userExceptionWrapped",
       "reimplements": {
         "refid": "classapache_1_1thrift_1_1TProcessorEventHandler_1a1126d3bcf114c4b5fe457fb583d0c784",
         "text_html": "userExceptionWrapped"

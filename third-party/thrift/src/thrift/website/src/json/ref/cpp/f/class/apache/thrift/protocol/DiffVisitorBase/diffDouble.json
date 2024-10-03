@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::DoublePatch",
       "definition_html": "op::DoublePatch apache::thrift::protocol::DiffVisitorBase::diffDouble",
       "argsstring_html": "(double src, double dst)",
       "name_html": "diffDouble",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffDouble",
       "param": [
         {
           "type_html": "double",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "607",
+        "line": "628",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "666",
-        "bodyend": "668"
+        "bodystart": "667",
+        "bodyend": "669"
       },
       "definition": {
         "simple_html": "virtual op::DoublePatch diffDouble(double src, double dst)",

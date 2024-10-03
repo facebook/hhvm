@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::op::detail::BaseAssignPatch&lt; Patch, Derived &gt;::~BaseAssignPatch",
       "argsstring_html": "()=default",
       "name_html": "~BaseAssignPatch",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseAssignPatch::~BaseAssignPatch",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "line": "210",

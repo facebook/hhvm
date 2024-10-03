@@ -16,13 +16,14 @@
       "definition_html": "FOLLY_ERASE bool apache::thrift::required_field_ref&lt; T &gt;::has_value",
       "argsstring_html": "() const noexcept",
       "name_html": "has_value",
+      "qualifiedname_html": "apache::thrift::required_field_ref::has_value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1799",
+        "line": "1855",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1799",
-        "bodyend": "1799"
+        "bodystart": "1855",
+        "bodyend": "1855"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE bool has_value() const",

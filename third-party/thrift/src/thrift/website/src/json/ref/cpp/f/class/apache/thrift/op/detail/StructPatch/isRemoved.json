@@ -20,13 +20,14 @@
       "definition_html": "bool apache::thrift::op::detail::StructPatch&lt; Patch &gt;::isRemoved",
       "argsstring_html": "() const",
       "name_html": "isRemoved",
+      "qualifiedname_html": "apache::thrift::op::detail::StructPatch::isRemoved",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "609",
+        "line": "631",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "609",
-        "bodyend": "631"
+        "bodystart": "631",
+        "bodyend": "653"
       },
       "definition": {
         "simple_html": "template &lt;class Id&gt;\nbool isRemoved() const",

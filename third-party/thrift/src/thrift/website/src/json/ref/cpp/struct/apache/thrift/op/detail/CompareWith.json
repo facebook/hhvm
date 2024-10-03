@@ -81,10 +81,11 @@
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
-              "type_html": "constexpr folly::ordering",
-              "definition_html": "constexpr folly::ordering apache::thrift::op::detail::DefaultCompareWith&lt; LTag, RTag, EqualTo, LessThan, L, R, typename &gt;::operator()",
+              "type_html": "folly::ordering",
+              "definition_html": "folly::ordering apache::thrift::op::detail::DefaultCompareWith&lt; LTag, RTag, EqualTo, LessThan, L, R, typename &gt;::operator()",
               "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::DefaultCompareWith::operator()",
               "param": [
                 {
                   "type_html": "const L &amp;",
@@ -104,11 +105,11 @@
                 "bodyend": "179"
               },
               "definition": {
-                "simple_html": "constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "simple_raw": "constexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "detailed_html": "inline constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "detailed_raw": "inline constexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "original_definition_html": "constexpr folly::ordering apache::thrift::op::detail::DefaultCompareWith&lt; LTag, RTag, EqualTo, LessThan, L, R, typename &gt;::operator()",
+                "simple_html": "folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "simple_raw": "folly::ordering operator()(const L& lhs, const R& rhs) const",
+                "detailed_html": "inline folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "detailed_raw": "inline folly::ordering operator()(const L& lhs, const R& rhs) const",
+                "original_definition_html": "folly::ordering apache::thrift::op::detail::DefaultCompareWith&lt; LTag, RTag, EqualTo, LessThan, L, R, typename &gt;::operator()",
                 "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/DefaultCompareWith/operator.call",
@@ -133,10 +134,11 @@
                   "type_html": "typename R"
                 }
               ],
-              "type_html": "constexpr folly::ordering",
-              "definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t &gt;::operator()",
+              "type_html": "folly::ordering",
+              "definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t &gt;::operator()",
               "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CompareWith&lt; type::void_t &gt;::operator()",
               "param": [
                 {
                   "type_html": "const L &amp;",
@@ -156,11 +158,11 @@
                 "bodyend": "197"
               },
               "definition": {
-                "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "simple_raw": "template <typename L, typename R>\nconstexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "detailed_html": "template &lt;typename L, typename R&gt;\ninline constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "detailed_raw": "template <typename L, typename R>\ninline constexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "original_definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t &gt;::operator()",
+                "simple_html": "template &lt;typename L, typename R&gt;\nfolly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "simple_raw": "template <typename L, typename R>\nfolly::ordering operator()(const L& lhs, const R& rhs) const",
+                "detailed_html": "template &lt;typename L, typename R&gt;\ninline folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "detailed_raw": "template <typename L, typename R>\ninline folly::ordering operator()(const L& lhs, const R& rhs) const",
+                "original_definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t &gt;::operator()",
                 "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01type_1_1void__t_01_4/operator.call",
@@ -185,10 +187,11 @@
                   "type_html": "typename R"
                 }
               ],
-              "type_html": "constexpr folly::ordering",
-              "definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; LTag, type::void_t &gt;::operator()",
+              "type_html": "folly::ordering",
+              "definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; LTag, type::void_t &gt;::operator()",
               "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CompareWith&lt; LTag, type::void_t &gt;::operator()",
               "param": [
                 {
                   "type_html": "const L &amp;",
@@ -208,11 +211,11 @@
                 "bodyend": "204"
               },
               "definition": {
-                "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "simple_raw": "template <typename L, typename R>\nconstexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "detailed_html": "template &lt;typename L, typename R&gt;\ninline constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "detailed_raw": "template <typename L, typename R>\ninline constexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "original_definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; LTag, type::void_t &gt;::operator()",
+                "simple_html": "template &lt;typename L, typename R&gt;\nfolly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "simple_raw": "template <typename L, typename R>\nfolly::ordering operator()(const L& lhs, const R& rhs) const",
+                "detailed_html": "template &lt;typename L, typename R&gt;\ninline folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "detailed_raw": "template <typename L, typename R>\ninline folly::ordering operator()(const L& lhs, const R& rhs) const",
+                "original_definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; LTag, type::void_t &gt;::operator()",
                 "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01LTag_00_01type_1_1void__t_01_4/operator.call",
@@ -237,10 +240,11 @@
                   "type_html": "typename R"
                 }
               ],
-              "type_html": "constexpr folly::ordering",
-              "definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t, RTag &gt;::operator()",
+              "type_html": "folly::ordering",
+              "definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t, RTag &gt;::operator()",
               "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::CompareWith&lt; type::void_t, RTag &gt;::operator()",
               "param": [
                 {
                   "type_html": "const L &amp;",
@@ -260,11 +264,11 @@
                 "bodyend": "211"
               },
               "definition": {
-                "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "simple_raw": "template <typename L, typename R>\nconstexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "detailed_html": "template &lt;typename L, typename R&gt;\ninline constexpr folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "detailed_raw": "template <typename L, typename R>\ninline constexpr folly::ordering operator()(const L& lhs, const R& rhs) const",
-                "original_definition_html": "constexpr folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t, RTag &gt;::operator()",
+                "simple_html": "template &lt;typename L, typename R&gt;\nfolly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "simple_raw": "template <typename L, typename R>\nfolly::ordering operator()(const L& lhs, const R& rhs) const",
+                "detailed_html": "template &lt;typename L, typename R&gt;\ninline folly::ordering operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "detailed_raw": "template <typename L, typename R>\ninline folly::ordering operator()(const L& lhs, const R& rhs) const",
+                "original_definition_html": "folly::ordering apache::thrift::op::detail::CompareWith&lt; type::void_t, RTag &gt;::operator()",
                 "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1CompareWith_3_01type_1_1void__t_00_01RTag_01_4/operator.call",

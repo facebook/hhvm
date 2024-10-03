@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::StructuredOp::ref",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a51f90237dfd720c01f1c875b612a1575",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>T</code> &amp;",
-      "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+      "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
       "argsstring_html": "(void *ptr)",
       "name_html": "ref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
       "param": [
         {
           "type_html": "void *",
@@ -34,7 +35,7 @@
         "simple_raw": "static T& ref(void* ptr)",
         "detailed_html": "inline static T&amp; ref(void* ptr)",
         "detailed_raw": "inline static T& ref(void* ptr)",
-        "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+        "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
         "original_argsstring_html": "(void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -43,7 +44,7 @@
       "compoundname_html": "apache::thrift::op::detail::StructuredOp::ref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1BaseOp_1a824275fe00ce416814fcb4aabc68b264",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -51,9 +52,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "ref",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::ref",
       "param": [
         {
           "type_html": "const void *",
@@ -73,7 +75,7 @@
         "simple_raw": "static const T& ref(const void* ptr)",
         "detailed_html": "inline static const T&amp; ref(const void* ptr)",
         "detailed_raw": "inline static const T& ref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/BaseOp/ref",
@@ -82,7 +84,7 @@
       "compoundname_html": "apache::thrift::op::detail::StructuredOp::ref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a05f0296516ba5055dfcea05bda4dfb3f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a51f90237dfd720c01f1c875b612a1575",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -90,9 +92,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>T</code> &amp;",
-      "definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+      "definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
       "argsstring_html": "(void *ptr)",
       "name_html": "ref",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::ref",
       "param": [
         {
           "type_html": "void *",
@@ -112,7 +115,7 @@
         "simple_raw": "static T& ref(void* ptr)",
         "detailed_html": "inline static T&amp; ref(void* ptr)",
         "detailed_raw": "inline static T& ref(void* ptr)",
-        "original_definition_html": "static T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+        "original_definition_html": "static T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
         "original_argsstring_html": "(void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/StructuredOp/ref",
@@ -121,7 +124,7 @@
       "compoundname_html": "apache::thrift::op::detail::StructuredOp::ref"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1ad1040ba69dd0287d0ae90b0b15a65b4f",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a824275fe00ce416814fcb4aabc68b264",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -129,9 +132,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>T</code> &amp;",
-      "definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+      "definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
       "argsstring_html": "(const void *ptr)",
       "name_html": "ref",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::ref",
       "param": [
         {
           "type_html": "const void *",
@@ -151,7 +155,7 @@
         "simple_raw": "static const T& ref(const void* ptr)",
         "detailed_html": "inline static const T&amp; ref(const void* ptr)",
         "detailed_raw": "inline static const T& ref(const void* ptr)",
-        "original_definition_html": "static const T&amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
+        "original_definition_html": "static const T &amp; apache::thrift::op::detail::BaseOp&lt; Tag &gt;::ref",
         "original_argsstring_html": "(const void *ptr)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/StructuredOp/ref",

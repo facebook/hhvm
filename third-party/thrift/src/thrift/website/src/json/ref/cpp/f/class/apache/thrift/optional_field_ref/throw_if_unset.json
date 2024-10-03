@@ -15,13 +15,14 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_field_ref&lt; T &gt;::throw_if_unset",
       "argsstring_html": "() const",
       "name_html": "throw_if_unset",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::throw_if_unset",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "700",
+        "line": "712",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "700",
-        "bodyend": "704"
+        "bodystart": "712",
+        "bodyend": "716"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE void throw_if_unset() const",

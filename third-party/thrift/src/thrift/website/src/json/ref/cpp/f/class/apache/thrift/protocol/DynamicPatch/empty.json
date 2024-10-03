@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "bool",
       "definition_html": "bool apache::thrift::protocol::DynamicPatch::empty",
       "argsstring_html": "(detail::Badge) const",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicPatch::empty",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -23,11 +25,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "461",
+        "line": "482",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
         "bodystart": "183",
-        "bodyend": "193"
+        "bodyend": "194"
       },
       "definition": {
         "simple_html": "bool empty(detail::Badge) const",

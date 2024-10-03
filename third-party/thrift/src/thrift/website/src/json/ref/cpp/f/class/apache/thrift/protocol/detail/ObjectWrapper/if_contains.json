@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1aa58111a8e78aed0e6fab6562e6609cca",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1af9587fb2cabf626d5183e9633c692ad8",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>Value</code> *",
-      "definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+      "definition_html": "Value * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
       "argsstring_html": "(FieldId i)",
       "name_html": "if_contains",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains",
       "param": [
         {
           "type_html": "FieldId",
@@ -23,18 +24,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "70",
+        "line": "66",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "70",
-        "bodyend": "73"
+        "bodystart": "66",
+        "bodyend": "69"
       },
       "definition": {
         "simple_html": "Value* if_contains(FieldId i)",
         "simple_raw": "Value* if_contains(FieldId i)",
         "detailed_html": "inline Value* if_contains(FieldId i)",
         "detailed_raw": "inline Value* if_contains(FieldId i)",
-        "original_definition_html": "Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+        "original_definition_html": "Value * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
         "original_argsstring_html": "(FieldId i)"
       },
       "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",
@@ -43,7 +44,7 @@
       "compoundname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains"
     },
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a121f12facfd56b5765408489aebb6ceb",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1detail_1_1ObjectWrapper_1a55499c0e1e615cf8675f20373be512bc",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -51,9 +52,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const <code>Value</code> *",
-      "definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+      "definition_html": "const Value * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
       "argsstring_html": "(FieldId i) const",
       "name_html": "if_contains",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::if_contains",
       "param": [
         {
           "type_html": "FieldId",
@@ -62,18 +64,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "75",
+        "line": "71",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "75",
-        "bodyend": "78"
+        "bodystart": "71",
+        "bodyend": "74"
       },
       "definition": {
         "simple_html": "const Value* if_contains(FieldId i) const",
         "simple_raw": "const Value* if_contains(FieldId i) const",
         "detailed_html": "inline const Value* if_contains(FieldId i) const",
         "detailed_raw": "inline const Value* if_contains(FieldId i) const",
-        "original_definition_html": "const Value* apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
+        "original_definition_html": "const Value * apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::if_contains",
         "original_argsstring_html": "(FieldId i) const"
       },
       "filepath": "fns/class/apache/thrift/protocol/detail/ObjectWrapper/if_contains",

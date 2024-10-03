@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::TProcessorEventHandler::TProcessorEventHandler",
       "argsstring_html": "()",
       "name_html": "TProcessorEventHandler",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::TProcessorEventHandler",
       "location": {
         "file": "fbcode/thrift/lib/cpp/TProcessorEventHandler.h",
         "line": "187",

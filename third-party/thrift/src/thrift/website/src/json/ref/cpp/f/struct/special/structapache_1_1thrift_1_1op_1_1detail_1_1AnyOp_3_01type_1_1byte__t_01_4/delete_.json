@@ -15,6 +15,7 @@
       "definition_html": "static void apache::thrift::op::detail::BaseOp&lt; Tag &gt;::delete_",
       "argsstring_html": "(void *ptr)",
       "name_html": "delete_",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseOp::delete_",
       "param": [
         {
           "type_html": "void *",

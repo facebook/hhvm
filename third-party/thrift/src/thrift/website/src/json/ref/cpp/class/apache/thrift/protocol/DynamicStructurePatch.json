@@ -29,6 +29,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::assign",
       "argsstring_html": "(detail::Badge, Object v)",
       "name_html": "assign",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::assign",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -40,11 +41,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "362",
+        "line": "383",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "362",
-        "bodyend": "365"
+        "bodystart": "383",
+        "bodyend": "386"
       },
       "definition": {
         "simple_html": "void assign(detail::Badge, Object v)",
@@ -69,6 +70,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear",
       "argsstring_html": "(detail::Badge)",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::clear",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -76,11 +78,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "367",
+        "line": "388",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "367",
-        "bodyend": "370"
+        "bodystart": "388",
+        "bodyend": "391"
       },
       "definition": {
         "simple_html": "void clear(detail::Badge)",
@@ -105,6 +107,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::remove",
       "argsstring_html": "(detail::Badge, FieldId id)",
       "name_html": "remove",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::remove",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -116,11 +119,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "372",
+        "line": "393",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "372",
-        "bodyend": "375"
+        "bodystart": "393",
+        "bodyend": "396"
       },
       "definition": {
         "simple_html": "void remove(detail::Badge, FieldId id)",
@@ -145,6 +148,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensure",
       "argsstring_html": "(detail::Badge, FieldId id, Value v)",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensure",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -160,11 +164,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "377",
+        "line": "398",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "377",
-        "bodyend": "380"
+        "bodystart": "398",
+        "bodyend": "401"
       },
       "definition": {
         "simple_html": "void ensure(detail::Badge, FieldId id, Value v)",
@@ -178,7 +182,7 @@
       "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/ensure"
     },
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1afb93a4707852a5f39b8f6d3a5be9594b",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a70a1abd99f95dbbc4d2144cedc0b2dbd",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -186,9 +190,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
       "argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -204,25 +209,25 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "382",
+        "line": "403",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "382",
-        "bodyend": "384"
+        "bodystart": "403",
+        "bodyend": "405"
       },
       "definition": {
         "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, const DynamicPatch&amp; p)",
         "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p)",
         "detailed_html": "inline DynamicPatch&amp; patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch&amp; p)",
         "detailed_raw": "inline DynamicPatch& patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch& p)",
-        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
         "original_argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
       "href": "/ref/cpp/fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet"
     },
     {
-      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a989657af096f1fd64388e60f7aa1c9c1",
+      "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a16d2787944d6c7e0cb730d3d2da5f74a",
       "prot": "public",
       "static": "no",
       "const": "no",
@@ -230,9 +235,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-      "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+      "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
       "argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -248,18 +254,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "385",
+        "line": "406",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "385",
-        "bodyend": "387"
+        "bodystart": "406",
+        "bodyend": "408"
       },
       "definition": {
         "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
         "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
         "detailed_html": "inline DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
         "detailed_raw": "inline DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
-        "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+        "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
         "original_argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)"
       },
       "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
@@ -273,10 +279,12 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "bool",
       "definition_html": "bool apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::empty",
       "argsstring_html": "(detail::Badge) const",
       "name_html": "empty",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::empty",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -284,11 +292,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "389",
+        "line": "410",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "389",
-        "bodyend": "392"
+        "bodystart": "410",
+        "bodyend": "413"
       },
       "definition": {
         "simple_html": "bool empty(detail::Badge) const",
@@ -310,17 +318,19 @@
       "inline": "no",
       "refqual": "rvalue",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "Object",
       "definition_html": "Object apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::toObject",
       "argsstring_html": "() &amp;&amp;",
       "name_html": "toObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::toObject",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "394",
+        "line": "415",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "461",
-        "bodyend": "496"
+        "bodystart": "462",
+        "bodyend": "497"
       },
       "definition": {
         "simple_html": "Object toObject() &amp;&amp;",
@@ -342,17 +352,19 @@
       "inline": "yes",
       "refqual": "lvalue",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "Object",
       "definition_html": "Object apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::toObject",
       "argsstring_html": "() const &amp;",
       "name_html": "toObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::toObject",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "395",
+        "line": "416",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "395",
-        "bodyend": "397"
+        "bodystart": "416",
+        "bodyend": "418"
       },
       "definition": {
         "simple_html": "Object toObject() const&amp;",
@@ -377,6 +389,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::fromObject",
       "argsstring_html": "(detail::Badge, Object obj)",
       "name_html": "fromObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::fromObject",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -388,11 +401,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "398",
+        "line": "419",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "499",
-        "bodyend": "537"
+        "bodystart": "500",
+        "bodyend": "538"
       },
       "definition": {
         "simple_html": "void fromObject(detail::Badge, Object obj)",
@@ -417,6 +430,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::doNotConvertStringToBinary",
       "argsstring_html": "(detail::Badge)",
       "name_html": "doNotConvertStringToBinary",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::doNotConvertStringToBinary",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -424,11 +438,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "399",
+        "line": "420",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "399",
-        "bodyend": "401"
+        "bodystart": "420",
+        "bodyend": "422"
       },
       "definition": {
         "simple_html": "void doNotConvertStringToBinary(detail::Badge)",
@@ -458,6 +472,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::customVisit",
       "argsstring_html": "(detail::Badge, Visitor &amp;&amp;v) const",
       "name_html": "customVisit",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::customVisit",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>",
@@ -470,11 +485,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "404",
+        "line": "425",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "558",
-        "bodyend": "586"
+        "bodystart": "579",
+        "bodyend": "607"
       },
       "definition": {
         "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge, Visitor&amp;&amp; v) const",
@@ -499,6 +514,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::apply",
       "argsstring_html": "(detail::Badge, Object &amp;obj) const",
       "name_html": "apply",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::apply",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -510,11 +526,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "405",
+        "line": "426",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "540",
-        "bodyend": "570"
+        "bodystart": "541",
+        "bodyend": "571"
       },
       "definition": {
         "simple_html": "void apply(detail::Badge, Object&amp; obj) const",
@@ -539,6 +555,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::undoChanges",
       "argsstring_html": "(FieldId)",
       "name_html": "undoChanges",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::undoChanges",
       "param": [
         {
           "type_html": "FieldId",
@@ -547,11 +564,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "408",
+        "line": "429",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "385",
-        "bodyend": "391"
+        "bodystart": "386",
+        "bodyend": "392"
       },
       "definition": {
         "simple_html": "void undoChanges(FieldId)",
@@ -576,13 +593,14 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensurePatchable",
       "argsstring_html": "()",
       "name_html": "ensurePatchable",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensurePatchable",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "409",
+        "line": "430",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "369",
-        "bodyend": "383"
+        "bodystart": "370",
+        "bodyend": "384"
       },
       "definition": {
         "simple_html": "void ensurePatchable()",
@@ -607,6 +625,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensureStruct",
       "argsstring_html": "(FieldId, Value)",
       "name_html": "ensureStruct",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensureStruct",
       "param": [
         {
           "type_html": "FieldId",
@@ -619,11 +638,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "411",
+        "line": "432",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "435",
-        "bodyend": "458"
+        "bodystart": "436",
+        "bodyend": "459"
       },
       "definition": {
         "simple_html": "void ensureStruct(FieldId, Value)",
@@ -648,6 +667,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensureUnion",
       "argsstring_html": "(FieldId, Value)",
       "name_html": "ensureUnion",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensureUnion",
       "param": [
         {
           "type_html": "FieldId",
@@ -660,11 +680,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "412",
+        "line": "433",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "409",
-        "bodyend": "432"
+        "bodystart": "410",
+        "bodyend": "433"
       },
       "definition": {
         "simple_html": "void ensureUnion(FieldId, Value)",
@@ -694,6 +714,7 @@
       "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSetImpl",
       "argsstring_html": "(FieldId, SubPatch &amp;&amp;)",
       "name_html": "patchIfSetImpl",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSetImpl",
       "param": [
         {
           "type_html": "FieldId",
@@ -706,11 +727,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "415",
+        "line": "436",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "395",
-        "bodyend": "406"
+        "bodystart": "396",
+        "bodyend": "407"
       },
       "definition": {
         "simple_html": "template &lt;class SubPatch&gt;\nDynamicPatch&amp; patchIfSetImpl(FieldId, SubPatch&amp;&amp;)",
@@ -726,11 +747,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "line": "360",
+    "line": "381",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-    "bodystart": "360",
-    "bodyend": "425"
+    "bodystart": "381",
+    "bodyend": "446"
   },
   "namespacednames_html": [
     "apache",
@@ -750,12 +771,13 @@
       "definition_html": "std::optional&lt;Object&gt; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::assign_",
       "argsstring_html": "",
       "name_html": "assign_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::assign_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "418",
+        "line": "439",
         "column": "17",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "418",
+        "bodystart": "439",
         "bodyend": "-1"
       }
     },
@@ -768,13 +790,14 @@
       "definition_html": "bool apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear_",
       "argsstring_html": "",
       "name_html": "clear_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::clear_",
       "initializer_html": "= false",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "419",
+        "line": "440",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "419",
+        "bodystart": "440",
         "bodyend": "-1"
       }
     },
@@ -787,12 +810,13 @@
       "definition_html": "folly::F14VectorMap&lt;FieldId, DynamicPatch&gt; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchPrior_",
       "argsstring_html": "",
       "name_html": "patchPrior_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchPrior_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "420",
+        "line": "441",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "420",
+        "bodystart": "441",
         "bodyend": "-1"
       }
     },
@@ -805,12 +829,13 @@
       "definition_html": "folly::F14FastMap&lt;FieldId, Value&gt; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensure_",
       "argsstring_html": "",
       "name_html": "ensure_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensure_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "421",
+        "line": "442",
         "column": "21",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "421",
+        "bodystart": "442",
         "bodyend": "-1"
       }
     },
@@ -823,12 +848,13 @@
       "definition_html": "folly::F14VectorMap&lt;FieldId, DynamicPatch&gt; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchAfter_",
       "argsstring_html": "",
       "name_html": "patchAfter_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchAfter_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "422",
+        "line": "443",
         "column": "23",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "422",
+        "bodystart": "443",
         "bodyend": "-1"
       }
     },
@@ -841,12 +867,13 @@
       "definition_html": "folly::F14FastSet&lt;FieldId&gt; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::remove_",
       "argsstring_html": "",
       "name_html": "remove_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::remove_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "423",
+        "line": "444",
         "column": "21",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "423",
+        "bodystart": "444",
         "bodyend": "-1"
       }
     },
@@ -859,12 +886,13 @@
       "definition_html": "detail::DynamicPatchOptions apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::options_",
       "argsstring_html": "",
       "name_html": "options_",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::options_",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "424",
+        "line": "445",
         "column": "31",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "424",
+        "bodystart": "445",
         "bodyend": "-1"
       }
     }
@@ -895,6 +923,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::assign",
               "argsstring_html": "(detail::Badge, Object v)",
               "name_html": "assign",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::assign",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -906,11 +935,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "362",
+                "line": "383",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "362",
-                "bodyend": "365"
+                "bodystart": "383",
+                "bodyend": "386"
               },
               "definition": {
                 "simple_html": "void assign(detail::Badge, Object v)",
@@ -957,6 +986,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::clear",
               "argsstring_html": "(detail::Badge)",
               "name_html": "clear",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::clear",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -964,11 +994,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "367",
+                "line": "388",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "367",
-                "bodyend": "370"
+                "bodystart": "388",
+                "bodyend": "391"
               },
               "definition": {
                 "simple_html": "void clear(detail::Badge)",
@@ -1015,6 +1045,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::remove",
               "argsstring_html": "(detail::Badge, FieldId id)",
               "name_html": "remove",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::remove",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1026,11 +1057,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "372",
+                "line": "393",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "372",
-                "bodyend": "375"
+                "bodystart": "393",
+                "bodyend": "396"
               },
               "definition": {
                 "simple_html": "void remove(detail::Badge, FieldId id)",
@@ -1077,6 +1108,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensure",
               "argsstring_html": "(detail::Badge, FieldId id, Value v)",
               "name_html": "ensure",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensure",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1092,11 +1124,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "377",
+                "line": "398",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "377",
-                "bodyend": "380"
+                "bodystart": "398",
+                "bodyend": "401"
               },
               "definition": {
                 "simple_html": "void ensure(detail::Badge, FieldId id, Value v)",
@@ -1132,7 +1164,7 @@
           "compoundname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet",
           "functions": [
             {
-              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1afb93a4707852a5f39b8f6d3a5be9594b",
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a70a1abd99f95dbbc4d2144cedc0b2dbd",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1140,9 +1172,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-              "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+              "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
               "argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)",
               "name_html": "patchIfSet",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1158,18 +1191,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "382",
+                "line": "403",
                 "column": "16",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "382",
-                "bodyend": "384"
+                "bodystart": "403",
+                "bodyend": "405"
               },
               "definition": {
                 "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, const DynamicPatch&amp; p)",
                 "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p)",
                 "detailed_html": "inline DynamicPatch&amp; patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch&amp; p)",
                 "detailed_raw": "inline DynamicPatch& patchIfSet(\n    detail::Badge, FieldId id, const DynamicPatch& p)",
-                "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+                "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
                 "original_argsstring_html": "(detail::Badge, FieldId id, const DynamicPatch &amp;p)"
               },
               "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
@@ -1178,7 +1211,7 @@
               "compoundname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet"
             },
             {
-              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a989657af096f1fd64388e60f7aa1c9c1",
+              "refid": "classapache_1_1thrift_1_1protocol_1_1DynamicStructurePatch_1a16d2787944d6c7e0cb730d3d2da5f74a",
               "prot": "public",
               "static": "no",
               "const": "no",
@@ -1186,9 +1219,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/protocol/DynamicPatch\">DynamicPatch</a> &amp;",
-              "definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+              "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
               "argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)",
               "name_html": "patchIfSet",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSet",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1204,18 +1238,18 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "385",
+                "line": "406",
                 "column": "16",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "385",
-                "bodyend": "387"
+                "bodystart": "406",
+                "bodyend": "408"
               },
               "definition": {
                 "simple_html": "DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
                 "simple_raw": "DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
                 "detailed_html": "inline DynamicPatch&amp; patchIfSet(detail::Badge, FieldId id, DynamicPatch&amp;&amp; p)",
                 "detailed_raw": "inline DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p)",
-                "original_definition_html": "DynamicPatch&amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
+                "original_definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSet",
                 "original_argsstring_html": "(detail::Badge, FieldId id, DynamicPatch &amp;&amp;p)"
               },
               "filepath": "fns/class/apache/thrift/protocol/DynamicStructurePatch/patchIfSet",
@@ -1251,10 +1285,12 @@
               "explicit": "no",
               "inline": "yes",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "bool",
               "definition_html": "bool apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::empty",
               "argsstring_html": "(detail::Badge) const",
               "name_html": "empty",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::empty",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1262,11 +1298,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "389",
+                "line": "410",
                 "column": "9",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "389",
-                "bodyend": "392"
+                "bodystart": "410",
+                "bodyend": "413"
               },
               "definition": {
                 "simple_html": "bool empty(detail::Badge) const",
@@ -1310,17 +1346,19 @@
               "inline": "no",
               "refqual": "rvalue",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "Object",
               "definition_html": "Object apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::toObject",
               "argsstring_html": "() &amp;&amp;",
               "name_html": "toObject",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::toObject",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "394",
+                "line": "415",
                 "column": "11",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "461",
-                "bodyend": "496"
+                "bodystart": "462",
+                "bodyend": "497"
               },
               "definition": {
                 "simple_html": "Object toObject() &amp;&amp;",
@@ -1344,17 +1382,19 @@
               "inline": "yes",
               "refqual": "lvalue",
               "virtual": "non-virtual",
+              "nodiscard": "yes",
               "type_html": "Object",
               "definition_html": "Object apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::toObject",
               "argsstring_html": "() const &amp;",
               "name_html": "toObject",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::toObject",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "395",
+                "line": "416",
                 "column": "11",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "395",
-                "bodyend": "397"
+                "bodystart": "416",
+                "bodyend": "418"
               },
               "definition": {
                 "simple_html": "Object toObject() const&amp;",
@@ -1401,6 +1441,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::fromObject",
               "argsstring_html": "(detail::Badge, Object obj)",
               "name_html": "fromObject",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::fromObject",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1412,11 +1453,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "398",
+                "line": "419",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "499",
-                "bodyend": "537"
+                "bodystart": "500",
+                "bodyend": "538"
               },
               "definition": {
                 "simple_html": "void fromObject(detail::Badge, Object obj)",
@@ -1463,6 +1504,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::doNotConvertStringToBinary",
               "argsstring_html": "(detail::Badge)",
               "name_html": "doNotConvertStringToBinary",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::doNotConvertStringToBinary",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1470,11 +1512,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "399",
+                "line": "420",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "399",
-                "bodyend": "401"
+                "bodystart": "420",
+                "bodyend": "422"
               },
               "definition": {
                 "simple_html": "void doNotConvertStringToBinary(detail::Badge)",
@@ -1526,6 +1568,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::customVisit",
               "argsstring_html": "(detail::Badge, Visitor &amp;&amp;v) const",
               "name_html": "customVisit",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::customVisit",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>",
@@ -1538,11 +1581,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "404",
+                "line": "425",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "bodystart": "558",
-                "bodyend": "586"
+                "bodystart": "579",
+                "bodyend": "607"
               },
               "definition": {
                 "simple_html": "template &lt;class Visitor&gt;\nvoid customVisit(detail::Badge, Visitor&amp;&amp; v) const",
@@ -1589,6 +1632,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::apply",
               "argsstring_html": "(detail::Badge, Object &amp;obj) const",
               "name_html": "apply",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::apply",
               "param": [
                 {
                   "type_html": "<code>detail::Badge</code>"
@@ -1600,11 +1644,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "405",
+                "line": "426",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "540",
-                "bodyend": "570"
+                "bodystart": "541",
+                "bodyend": "571"
               },
               "definition": {
                 "simple_html": "void apply(detail::Badge, Object&amp; obj) const",
@@ -1651,6 +1695,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::undoChanges",
               "argsstring_html": "(FieldId)",
               "name_html": "undoChanges",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::undoChanges",
               "param": [
                 {
                   "type_html": "FieldId",
@@ -1659,11 +1704,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "408",
+                "line": "429",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "385",
-                "bodyend": "391"
+                "bodystart": "386",
+                "bodyend": "392"
               },
               "definition": {
                 "simple_html": "void undoChanges(FieldId)",
@@ -1710,13 +1755,14 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensurePatchable",
               "argsstring_html": "()",
               "name_html": "ensurePatchable",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensurePatchable",
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "409",
+                "line": "430",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "369",
-                "bodyend": "383"
+                "bodystart": "370",
+                "bodyend": "384"
               },
               "definition": {
                 "simple_html": "void ensurePatchable()",
@@ -1763,6 +1809,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensureStruct",
               "argsstring_html": "(FieldId, Value)",
               "name_html": "ensureStruct",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensureStruct",
               "param": [
                 {
                   "type_html": "FieldId",
@@ -1775,11 +1822,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "411",
+                "line": "432",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "435",
-                "bodyend": "458"
+                "bodystart": "436",
+                "bodyend": "459"
               },
               "definition": {
                 "simple_html": "void ensureStruct(FieldId, Value)",
@@ -1826,6 +1873,7 @@
               "definition_html": "void apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::ensureUnion",
               "argsstring_html": "(FieldId, Value)",
               "name_html": "ensureUnion",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::ensureUnion",
               "param": [
                 {
                   "type_html": "FieldId",
@@ -1838,11 +1886,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "412",
+                "line": "433",
                 "column": "8",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "409",
-                "bodyend": "432"
+                "bodystart": "410",
+                "bodyend": "433"
               },
               "definition": {
                 "simple_html": "void ensureUnion(FieldId, Value)",
@@ -1894,6 +1942,7 @@
               "definition_html": "DynamicPatch &amp; apache::thrift::protocol::DynamicStructurePatch&lt; IsUnion &gt;::patchIfSetImpl",
               "argsstring_html": "(FieldId, SubPatch &amp;&amp;)",
               "name_html": "patchIfSetImpl",
+              "qualifiedname_html": "apache::thrift::protocol::DynamicStructurePatch::patchIfSetImpl",
               "param": [
                 {
                   "type_html": "FieldId",
@@ -1906,11 +1955,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-                "line": "415",
+                "line": "436",
                 "column": "16",
                 "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-                "bodystart": "395",
-                "bodyend": "406"
+                "bodystart": "396",
+                "bodyend": "407"
               },
               "definition": {
                 "simple_html": "template &lt;class SubPatch&gt;\nDynamicPatch&amp; patchIfSetImpl(FieldId, SubPatch&amp;&amp;)",

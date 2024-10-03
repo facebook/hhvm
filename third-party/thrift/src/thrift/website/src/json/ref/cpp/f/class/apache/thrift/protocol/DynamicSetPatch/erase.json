@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DynamicSetPatch::erase",
       "argsstring_html": "(detail::Badge, Value v)",
       "name_html": "erase",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicSetPatch::erase",
       "param": [
         {
           "type_html": "<code>detail::Badge</code>"
@@ -26,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "233",
+        "line": "254",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "bodystart": "233",
-        "bodyend": "242"
+        "bodystart": "254",
+        "bodyend": "263"
       },
       "definition": {
         "simple_html": "void erase(detail::Badge, Value v)",

@@ -20,6 +20,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_boxed_field_ref&lt; T &gt;::from_optional",
       "argsstring_html": "(const std::optional&lt; U &gt; &amp;other)",
       "name_html": "from_optional",
+      "qualifiedname_html": "apache::thrift::optional_boxed_field_ref::from_optional",
       "param": [
         {
           "type_html": "const std::optional&lt; U &gt; &amp;",
@@ -28,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "911",
+        "line": "923",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "911",
-        "bodyend": "919"
+        "bodystart": "923",
+        "bodyend": "931"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void from_optional(const std::optional&lt;U&gt;&amp; other)",
@@ -64,6 +65,7 @@
       "definition_html": "FOLLY_ERASE void apache::thrift::optional_boxed_field_ref&lt; T &gt;::from_optional",
       "argsstring_html": "(std::optional&lt; U &gt; &amp;&amp;other)",
       "name_html": "from_optional",
+      "qualifiedname_html": "apache::thrift::optional_boxed_field_ref::from_optional",
       "param": [
         {
           "type_html": "std::optional&lt; U &gt; &amp;&amp;",
@@ -72,11 +74,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "924",
+        "line": "936",
         "column": "20",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "924",
-        "bodyend": "932"
+        "bodystart": "936",
+        "bodyend": "944"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nFOLLY_ERASE void from_optional(std::optional&lt;U&gt;&amp;&amp; other)",

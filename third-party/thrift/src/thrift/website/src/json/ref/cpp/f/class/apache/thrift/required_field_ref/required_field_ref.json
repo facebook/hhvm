@@ -16,6 +16,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::required_field_ref&lt; T &gt;::required_field_ref",
       "argsstring_html": "(reference_type value) noexcept",
       "name_html": "required_field_ref",
+      "qualifiedname_html": "apache::thrift::required_field_ref::required_field_ref",
       "param": [
         {
           "type_html": "<code>reference_type</code>",
@@ -24,11 +25,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1760",
+        "line": "1816",
         "column": "24",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1760",
-        "bodyend": "1761"
+        "bodystart": "1816",
+        "bodyend": "1817"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE required_field_ref(reference_type value)",
@@ -66,6 +67,7 @@
       "definition_html": "FOLLY_ERASE apache::thrift::required_field_ref&lt; T &gt;::required_field_ref",
       "argsstring_html": "(const required_field_ref&lt; U &gt; &amp;other) noexcept",
       "name_html": "required_field_ref",
+      "qualifiedname_html": "apache::thrift::required_field_ref::required_field_ref",
       "param": [
         {
           "type_html": "const <code>required_field_ref</code>&lt; U &gt; &amp;",
@@ -74,11 +76,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "1766",
+        "line": "1822",
         "column": "16",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "1766",
-        "bodyend": "1768"
+        "bodystart": "1822",
+        "bodyend": "1824"
       },
       "definition": {
         "simple_html": "template &lt;typename U, typename = apache::thrift::detail::EnableIfImplicit&lt;T, U&gt;&gt;\nFOLLY_ERASE required_field_ref(const required_field_ref&lt;U&gt;&amp; other)",

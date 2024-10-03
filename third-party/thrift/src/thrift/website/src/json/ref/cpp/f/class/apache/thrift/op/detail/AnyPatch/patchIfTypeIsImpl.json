@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIsImpl",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a443c034f90a453ceaba57ec98701bc52",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1AnyPatch_1a05e2920f559d0c6a1f768393bf93ad46",
       "prot": "private",
       "static": "no",
       "const": "no",
@@ -17,9 +17,10 @@
         }
       ],
       "type_html": "void",
-      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIsImpl",
+      "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIsImpl",
       "argsstring_html": "(const VPatch &amp;patch, bool after)",
       "name_html": "patchIfTypeIsImpl",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIsImpl",
       "param": [
         {
           "type_html": "const VPatch &amp;",
@@ -32,18 +33,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "278",
+        "line": "303",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "bodystart": "278",
-        "bodyend": "284"
+        "bodystart": "303",
+        "bodyend": "309"
       },
       "definition": {
         "simple_html": "template &lt;typename VPatch&gt;\nvoid patchIfTypeIsImpl(const VPatch&amp; patch, bool after)",
         "simple_raw": "template <typename VPatch>\nvoid patchIfTypeIsImpl(const VPatch& patch, bool after)",
         "detailed_html": "template &lt;typename VPatch&gt;\nprivate inline void patchIfTypeIsImpl(const VPatch&amp; patch, bool after)",
         "detailed_raw": "template <typename VPatch>\nprivate inline void patchIfTypeIsImpl(const VPatch& patch, bool after)",
-        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIsImpl",
+        "original_definition_html": "void apache::thrift::op::detail::AnyPatch&lt; typename &gt;::patchIfTypeIsImpl",
         "original_argsstring_html": "(const VPatch &amp;patch, bool after)"
       },
       "filepath": "fns/class/apache/thrift/op/detail/AnyPatch/patchIfTypeIsImpl",
@@ -63,6 +64,7 @@
       "definition_html": "void apache::thrift::op::detail::AnyPatch&lt; Patch &gt;::patchIfTypeIsImpl",
       "argsstring_html": "(type::Type type, type::AnyStruct any, bool after)",
       "name_html": "patchIfTypeIsImpl",
+      "qualifiedname_html": "apache::thrift::op::detail::AnyPatch::patchIfTypeIsImpl",
       "param": [
         {
           "type_html": "type::Type",
@@ -79,7 +81,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/AnyPatch.h",
-        "line": "286",
+        "line": "311",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/AnyPatch.cpp",
         "bodystart": "169",

@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::StructPatch::removedFields",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a70799d5982f6fe45368676cf29b42cc1",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a6138ef42cc992602965e489fabcbf393",
       "prot": "private",
       "static": "no",
       "const": "yes",
@@ -12,23 +12,24 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "std::unordered_set&lt; <code>FieldId</code> &gt;",
-      "definition_html": "std::unordered_set&lt;FieldId&gt; apache::thrift::op::detail::StructPatch&lt; Patch &gt;::removedFields",
+      "definition_html": "std::unordered_set&lt; FieldId &gt; apache::thrift::op::detail::StructPatch&lt; Patch &gt;::removedFields",
       "argsstring_html": "() const",
       "name_html": "removedFields",
+      "qualifiedname_html": "apache::thrift::op::detail::StructPatch::removedFields",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "line": "634",
+        "line": "656",
         "column": "22",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
-        "bodystart": "634",
-        "bodyend": "646"
+        "bodystart": "656",
+        "bodyend": "668"
       },
       "definition": {
         "simple_html": "std::unordered_set&lt;FieldId&gt; removedFields() const",
         "simple_raw": "std::unordered_set<FieldId> removedFields() const",
         "detailed_html": "private inline std::unordered_set&lt;FieldId&gt; removedFields() const",
         "detailed_raw": "private inline std::unordered_set<FieldId> removedFields() const",
-        "original_definition_html": "std::unordered_set&lt;FieldId&gt; apache::thrift::op::detail::StructPatch&lt; Patch &gt;::removedFields",
+        "original_definition_html": "std::unordered_set&lt; FieldId &gt; apache::thrift::op::detail::StructPatch&lt; Patch &gt;::removedFields",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/op/detail/StructPatch/removedFields",

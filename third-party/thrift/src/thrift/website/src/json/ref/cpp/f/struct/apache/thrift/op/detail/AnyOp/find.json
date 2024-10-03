@@ -15,6 +15,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -58,6 +59,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -101,6 +103,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -144,6 +147,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -187,6 +191,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ContainerOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -230,6 +235,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -273,6 +279,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::ListOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -316,6 +323,7 @@
       "definition_html": "static auto apache::thrift::op::detail::ContainerOp&lt; Tag &gt;::find",
       "argsstring_html": "(T &amp;self, size_t pos)",
       "name_html": "find",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::find",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",

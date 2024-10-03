@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkIntEnc",
       "argsstring_html": "() const",
       "name_html": "checkIntEnc",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkIntEnc",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "261",

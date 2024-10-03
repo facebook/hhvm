@@ -89,11 +89,11 @@
         "initializer_html": "decltype(auto) as_##TYPE() { return *Base::TYPE##Value_ref(); }             \\\n  decltype(auto) as_##TYPE() const { return *Base::TYPE##Value_ref(); }       \\\n  bool is_##TYPE() const { return Base::TYPE##Value_ref().has_value(); }      \\\n  decltype(auto) ensure_##TYPE() { return Base::TYPE##Value_ref().ensure(); } \\\n  template &lt;typename... Args&gt;                                                 \\\n  decltype(auto) emplace_##TYPE(Args&amp;&amp;... args) {                             \\\n    return Base::TYPE##Value_ref().emplace(static_cast&lt;Args&amp;&amp;&gt;(args)...);     \\\n  }                                                                           \\\n  decltype(auto) if_##TYPE() {                                                \\\n    return is_##TYPE() ? &amp;*Base::TYPE##Value_ref() : nullptr;                 \\\n  }                                                                           \\\n  decltype(auto) if_##TYPE() const {                                          \\\n    return is_##TYPE() ? &amp;*Base::TYPE##Value_ref() : nullptr;                 \\\n  }                                                                           \\\n  /* enforce semicolon after macro */ static_assert(true, \"\")",
         "location": {
           "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-          "line": "127",
+          "line": "123",
           "column": "9",
           "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-          "bodystart": "127",
-          "bodyend": "-1"
+          "bodystart": "123",
+          "bodyend": "138"
         }
       }
     ]

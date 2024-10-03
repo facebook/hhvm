@@ -12,25 +12,27 @@
       "inline": "yes",
       "noexcept": "yes",
       "virtual": "non-virtual",
+      "noexceptexpression": "std::is_nothrow_move_assignable< value_type >::value",
       "type_html": "FOLLY_ERASE <code>reference_type</code>",
       "definition_html": "FOLLY_ERASE reference_type apache::thrift::optional_field_ref&lt; T &gt;::ensure",
-      "argsstring_html": "() noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)",
+      "argsstring_html": "()",
       "name_html": "ensure",
+      "qualifiedname_html": "apache::thrift::optional_field_ref::ensure",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "670",
+        "line": "682",
         "column": "3",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "670",
-        "bodyend": "676"
+        "bodystart": "682",
+        "bodyend": "688"
       },
       "definition": {
         "simple_html": "FOLLY_ERASE reference_type ensure()",
         "simple_raw": "FOLLY_ERASE reference_type ensure()",
-        "detailed_html": "inline FOLLY_ERASE reference_type\nensure() noexcept((std::is_nothrow_move_assignable&lt;value_type&gt;::value))",
-        "detailed_raw": "inline FOLLY_ERASE reference_type\nensure() noexcept((std::is_nothrow_move_assignable<value_type>::value))",
+        "detailed_html": "inline FOLLY_ERASE reference_type ensure()",
+        "detailed_raw": "inline FOLLY_ERASE reference_type ensure()",
         "original_definition_html": "FOLLY_ERASE reference_type apache::thrift::optional_field_ref&lt; T &gt;::ensure",
-        "original_argsstring_html": "() noexcept(std::is_nothrow_move_assignable&lt; value_type &gt;::value)"
+        "original_argsstring_html": "()"
       },
       "filepath": "fns/class/apache/thrift/optional_field_ref/ensure",
       "href": "/ref/cpp/fns/class/apache/thrift/optional_field_ref/ensure",

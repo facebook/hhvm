@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeVarint32",
       "argsstring_html": "(uint32_t n)",
       "name_html": "writeVarint32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeVarint32",
       "param": [
         {
           "type_html": "uint32_t",

@@ -28,10 +28,11 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "constexpr decltype(auto)",
-      "definition_html": "constexpr decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
+      "type_html": "decltype(auto)",
+      "definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
       "argsstring_html": "(Id, T &amp;obj) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
       "param": [
         {
           "type_html": "Id"
@@ -50,11 +51,11 @@
         "bodyend": "147"
       },
       "definition": {
-        "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr decltype(auto) operator()(Id, T&amp; obj) const",
-        "simple_raw": "template <typename Id, typename T>\nconstexpr decltype(auto) operator()(Id, T& obj) const",
-        "detailed_html": "template &lt;typename Id, typename T&gt;\ninline constexpr decltype(auto) operator()(Id, T&amp; obj) const",
-        "detailed_raw": "template <typename Id, typename T>\ninline constexpr decltype(auto) operator()(Id, T& obj) const",
-        "original_definition_html": "constexpr decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
+        "simple_html": "template &lt;typename Id, typename T&gt;\ndecltype(auto) operator()(Id, T&amp; obj) const",
+        "simple_raw": "template <typename Id, typename T>\ndecltype(auto) operator()(Id, T& obj) const",
+        "detailed_html": "template &lt;typename Id, typename T&gt;\ninline decltype(auto) operator()(Id, T&amp; obj) const",
+        "detailed_raw": "template <typename Id, typename T>\ninline decltype(auto) operator()(Id, T& obj) const",
+        "original_definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
         "original_argsstring_html": "(Id, T &amp;obj) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4/operator.call",
@@ -111,10 +112,11 @@
                   "type_html": "typename T"
                 }
               ],
-              "type_html": "constexpr decltype(auto)",
-              "definition_html": "constexpr decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
+              "type_html": "decltype(auto)",
+              "definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
               "argsstring_html": "(Id, T &amp;obj) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
               "param": [
                 {
                   "type_html": "Id"
@@ -133,11 +135,11 @@
                 "bodyend": "147"
               },
               "definition": {
-                "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr decltype(auto) operator()(Id, T&amp; obj) const",
-                "simple_raw": "template <typename Id, typename T>\nconstexpr decltype(auto) operator()(Id, T& obj) const",
-                "detailed_html": "template &lt;typename Id, typename T&gt;\ninline constexpr decltype(auto) operator()(Id, T&amp; obj) const",
-                "detailed_raw": "template <typename Id, typename T>\ninline constexpr decltype(auto) operator()(Id, T& obj) const",
-                "original_definition_html": "constexpr decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
+                "simple_html": "template &lt;typename Id, typename T&gt;\ndecltype(auto) operator()(Id, T&amp; obj) const",
+                "simple_raw": "template <typename Id, typename T>\ndecltype(auto) operator()(Id, T& obj) const",
+                "detailed_html": "template &lt;typename Id, typename T&gt;\ninline decltype(auto) operator()(Id, T&amp; obj) const",
+                "detailed_raw": "template <typename Id, typename T>\ninline decltype(auto) operator()(Id, T& obj) const",
+                "original_definition_html": "decltype(auto) apache::thrift::op::detail::Ensure&lt; void, void &gt;::operator()",
                 "original_argsstring_html": "(Id, T &amp;obj) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Ensure_3_01void_00_01void_01_4/operator.call",

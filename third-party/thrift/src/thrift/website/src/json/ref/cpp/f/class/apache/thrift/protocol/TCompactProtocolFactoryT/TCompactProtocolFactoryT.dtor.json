@@ -15,6 +15,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolFactoryT&lt; Transport_ &gt;::~TCompactProtocolFactoryT",
       "argsstring_html": "() override",
       "name_html": "~TCompactProtocolFactoryT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolFactoryT::~TCompactProtocolFactoryT",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "277",

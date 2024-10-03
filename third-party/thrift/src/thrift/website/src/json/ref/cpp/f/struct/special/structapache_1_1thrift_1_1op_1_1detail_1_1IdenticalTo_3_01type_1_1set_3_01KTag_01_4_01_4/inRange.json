@@ -23,6 +23,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetIdenticalTo&lt; KTag, Tag, T &gt;::inRange",
       "argsstring_html": "(const K &amp;key, const R &amp;range)",
       "name_html": "inRange",
+      "qualifiedname_html": "apache::thrift::op::detail::SetIdenticalTo::inRange",
       "param": [
         {
           "type_html": "const K &amp;",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "499",
+        "line": "515",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "499",
-        "bodyend": "506"
+        "bodystart": "515",
+        "bodyend": "522"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",

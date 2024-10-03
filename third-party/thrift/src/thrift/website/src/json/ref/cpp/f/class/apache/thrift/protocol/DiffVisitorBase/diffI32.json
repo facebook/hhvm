@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::I32Patch",
       "definition_html": "op::I32Patch apache::thrift::protocol::DiffVisitorBase::diffI32",
       "argsstring_html": "(std::int32_t src, std::int32_t dst)",
       "name_html": "diffI32",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffI32",
       "param": [
         {
           "type_html": "std::int32_t",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "602",
+        "line": "623",
         "column": "25",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "655",
-        "bodyend": "657"
+        "bodystart": "656",
+        "bodyend": "658"
       },
       "definition": {
         "simple_html": "virtual op::I32Patch diffI32(std::int32_t src, std::int32_t dst)",

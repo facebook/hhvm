@@ -11,10 +11,12 @@
       "explicit": "no",
       "inline": "no",
       "virtual": "virtual",
+      "nodiscard": "yes",
       "type_html": "op::BinaryPatch",
       "definition_html": "op::BinaryPatch apache::thrift::protocol::DiffVisitorBase::diffBinary",
       "argsstring_html": "(const folly::IOBuf &amp;src, const folly::IOBuf &amp;dst)",
       "name_html": "diffBinary",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffBinary",
       "param": [
         {
           "type_html": "const folly::IOBuf &amp;",
@@ -27,11 +29,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "608",
+        "line": "629",
         "column": "28",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "670",
-        "bodyend": "698"
+        "bodystart": "671",
+        "bodyend": "699"
       },
       "definition": {
         "simple_html": "virtual op::BinaryPatch diffBinary(\n    const folly::IOBuf&amp; src, const folly::IOBuf&amp; dst)",

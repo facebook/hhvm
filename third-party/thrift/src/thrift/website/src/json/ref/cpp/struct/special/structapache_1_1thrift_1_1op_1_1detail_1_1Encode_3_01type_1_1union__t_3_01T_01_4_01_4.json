@@ -74,6 +74,7 @@
               "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
               "argsstring_html": "(Protocol &amp;prot, const T &amp;t) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Encode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
               "param": [
                 {
                   "type_html": "Protocol &amp;",

@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::test::MultiSerializer::checkIntDec",
       "argsstring_html": "() const",
       "name_html": "checkIntDec",
+      "qualifiedname_html": "apache::thrift::test::MultiSerializer::checkIntDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "262",

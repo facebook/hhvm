@@ -20,6 +20,7 @@
       "definition_html": "static bool apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::putIf",
       "argsstring_html": "(bool cond, T &amp;self, const Dyn &amp;val)",
       "name_html": "putIf",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::putIf",
       "param": [
         {
           "type_html": "bool",

@@ -34,6 +34,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -71,6 +72,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans, int32_t string_limit, int32_t container_limit)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -116,6 +118,7 @@
       "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
       "argsstring_html": "(Transport_ *trans)",
       "name_html": "TCompactProtocolT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
       "param": [
         {
           "type_html": "Transport_ *",
@@ -156,6 +159,7 @@
       "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setStringSizeLimit",
       "argsstring_html": "(int32_t string_limit)",
       "name_html": "setStringSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setStringSizeLimit",
       "param": [
         {
           "type_html": "int32_t",
@@ -193,6 +197,7 @@
       "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setContainerSizeLimit",
       "argsstring_html": "(int32_t container_limit)",
       "name_html": "setContainerSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setContainerSizeLimit",
       "param": [
         {
           "type_html": "int32_t",
@@ -230,6 +235,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getStringSizeLimit",
       "argsstring_html": "()",
       "name_html": "getStringSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getStringSizeLimit",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "130",
@@ -261,6 +267,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getContainerSizeLimit",
       "argsstring_html": "()",
       "name_html": "getContainerSizeLimit",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getContainerSizeLimit",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "132",
@@ -292,6 +299,7 @@
       "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setVersion",
       "argsstring_html": "(const int8_t version)",
       "name_html": "setVersion",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setVersion",
       "param": [
         {
           "type_html": "const int8_t",
@@ -332,6 +340,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMessageBegin",
       "argsstring_html": "(const std::string &amp;name, const TMessageType messageType, const int32_t seqid)",
       "name_html": "writeMessageBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMessageBegin",
       "param": [
         {
           "type_html": "const std::string &amp;",
@@ -380,6 +389,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeStructBegin",
       "argsstring_html": "(const char *name)",
       "name_html": "writeStructBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeStructBegin",
       "param": [
         {
           "type_html": "const char *",
@@ -420,6 +430,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeStructEnd",
       "argsstring_html": "()",
       "name_html": "writeStructEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeStructEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "148",
@@ -454,6 +465,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldBegin",
       "argsstring_html": "(const char *name, const TType fieldType, const int16_t fieldId)",
       "name_html": "writeFieldBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldBegin",
       "param": [
         {
           "type_html": "const char *",
@@ -502,6 +514,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldStop",
       "argsstring_html": "()",
       "name_html": "writeFieldStop",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldStop",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "153",
@@ -536,6 +549,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeListBegin",
       "argsstring_html": "(const TType elemType, const uint32_t size)",
       "name_html": "writeListBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeListBegin",
       "param": [
         {
           "type_html": "const TType",
@@ -580,6 +594,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeSetBegin",
       "argsstring_html": "(const TType elemType, const uint32_t size)",
       "name_html": "writeSetBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeSetBegin",
       "param": [
         {
           "type_html": "const TType",
@@ -624,6 +639,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMapBegin",
       "argsstring_html": "(const TType keyType, const TType valType, const uint32_t size)",
       "name_html": "writeMapBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMapBegin",
       "param": [
         {
           "type_html": "const TType",
@@ -672,6 +688,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeBool",
       "argsstring_html": "(const bool value)",
       "name_html": "writeBool",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeBool",
       "param": [
         {
           "type_html": "const bool",
@@ -712,6 +729,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeByte",
       "argsstring_html": "(const int8_t byte)",
       "name_html": "writeByte",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeByte",
       "param": [
         {
           "type_html": "const int8_t",
@@ -749,6 +767,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI16",
       "argsstring_html": "(const int16_t i16)",
       "name_html": "writeI16",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI16",
       "param": [
         {
           "type_html": "const int16_t",
@@ -789,6 +808,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI32",
       "argsstring_html": "(const int32_t i32)",
       "name_html": "writeI32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI32",
       "param": [
         {
           "type_html": "const int32_t",
@@ -829,6 +849,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI64",
       "argsstring_html": "(const int64_t i64)",
       "name_html": "writeI64",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI64",
       "param": [
         {
           "type_html": "const int64_t",
@@ -869,6 +890,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeDouble",
       "argsstring_html": "(const double dub)",
       "name_html": "writeDouble",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeDouble",
       "param": [
         {
           "type_html": "const double",
@@ -909,6 +931,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFloat",
       "argsstring_html": "(const float flt)",
       "name_html": "writeFloat",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFloat",
       "param": [
         {
           "type_html": "const float",
@@ -949,6 +972,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
       "argsstring_html": "(const char *str)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
       "param": [
         {
           "type_html": "const char *",
@@ -994,6 +1018,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
       "argsstring_html": "(const String_ &amp;str)",
       "name_html": "writeString",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
       "param": [
         {
           "type_html": "const String_ &amp;",
@@ -1036,6 +1061,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeBinary",
       "argsstring_html": "(const String_ &amp;str)",
       "name_html": "writeBinary",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeBinary",
       "param": [
         {
           "type_html": "const String_ &amp;",
@@ -1073,6 +1099,7 @@
       "definition_html": "virtual uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMessageEnd",
       "argsstring_html": "()",
       "name_html": "writeMessageEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMessageEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "188",
@@ -1107,6 +1134,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMapEnd",
       "argsstring_html": "()",
       "name_html": "writeMapEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMapEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "189",
@@ -1138,6 +1166,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeListEnd",
       "argsstring_html": "()",
       "name_html": "writeListEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeListEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "190",
@@ -1169,6 +1198,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeSetEnd",
       "argsstring_html": "()",
       "name_html": "writeSetEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeSetEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "191",
@@ -1200,6 +1230,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldEnd",
       "argsstring_html": "()",
       "name_html": "writeFieldEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "192",
@@ -1231,6 +1262,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMessageBegin",
       "argsstring_html": "(std::string &amp;name, TMessageType &amp;messageType, int32_t &amp;seqid)",
       "name_html": "readMessageBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMessageBegin",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1279,6 +1311,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readStructBegin",
       "argsstring_html": "(std::string &amp;name)",
       "name_html": "readStructBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readStructBegin",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1319,6 +1352,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readStructEnd",
       "argsstring_html": "()",
       "name_html": "readStructEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readStructEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "211",
@@ -1353,6 +1387,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldBegin",
       "argsstring_html": "(std::string &amp;name, TType &amp;fieldType, int16_t &amp;fieldId)",
       "name_html": "readFieldBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldBegin",
       "param": [
         {
           "type_html": "std::string &amp;",
@@ -1401,6 +1436,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMapBegin",
       "argsstring_html": "(TType &amp;keyType, TType &amp;valType, uint32_t &amp;size, bool &amp;sizeUnknown)",
       "name_html": "readMapBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMapBegin",
       "param": [
         {
           "type_html": "TType &amp;",
@@ -1453,6 +1489,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readListBegin",
       "argsstring_html": "(TType &amp;elemType, uint32_t &amp;size, bool &amp;sizeUnknown)",
       "name_html": "readListBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readListBegin",
       "param": [
         {
           "type_html": "TType &amp;",
@@ -1501,6 +1538,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readSetBegin",
       "argsstring_html": "(TType &amp;elemType, uint32_t &amp;size, bool &amp;sizeUnknown)",
       "name_html": "readSetBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readSetBegin",
       "param": [
         {
           "type_html": "TType &amp;",
@@ -1549,6 +1587,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readBool",
       "argsstring_html": "(bool &amp;value)",
       "name_html": "readBool",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readBool",
       "param": [
         {
           "type_html": "bool &amp;",
@@ -1589,6 +1628,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readByte",
       "argsstring_html": "(int8_t &amp;byte)",
       "name_html": "readByte",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readByte",
       "param": [
         {
           "type_html": "int8_t &amp;",
@@ -1629,6 +1669,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI16",
       "argsstring_html": "(int16_t &amp;i16)",
       "name_html": "readI16",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI16",
       "param": [
         {
           "type_html": "int16_t &amp;",
@@ -1669,6 +1710,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI32",
       "argsstring_html": "(int32_t &amp;i32)",
       "name_html": "readI32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI32",
       "param": [
         {
           "type_html": "int32_t &amp;",
@@ -1709,6 +1751,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI64",
       "argsstring_html": "(int64_t &amp;i64)",
       "name_html": "readI64",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI64",
       "param": [
         {
           "type_html": "int64_t &amp;",
@@ -1749,6 +1792,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readDouble",
       "argsstring_html": "(double &amp;dub)",
       "name_html": "readDouble",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readDouble",
       "param": [
         {
           "type_html": "double &amp;",
@@ -1789,6 +1833,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFloat",
       "argsstring_html": "(float &amp;flt)",
       "name_html": "readFloat",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFloat",
       "param": [
         {
           "type_html": "float &amp;",
@@ -1834,6 +1879,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readString",
       "argsstring_html": "(String_ &amp;str)",
       "name_html": "readString",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readString",
       "param": [
         {
           "type_html": "String_ &amp;",
@@ -1876,6 +1922,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readBinary",
       "argsstring_html": "(String_ &amp;str)",
       "name_html": "readBinary",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readBinary",
       "param": [
         {
           "type_html": "String_ &amp;",
@@ -1916,6 +1963,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMessageEnd",
       "argsstring_html": "()",
       "name_html": "readMessageEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMessageEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "249",
@@ -1947,6 +1995,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldEnd",
       "argsstring_html": "()",
       "name_html": "readFieldEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "250",
@@ -1978,6 +2027,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMapEnd",
       "argsstring_html": "()",
       "name_html": "readMapEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMapEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "251",
@@ -2009,6 +2059,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readListEnd",
       "argsstring_html": "()",
       "name_html": "readListEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readListEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "252",
@@ -2040,6 +2091,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readSetEnd",
       "argsstring_html": "()",
       "name_html": "readSetEnd",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readSetEnd",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "253",
@@ -2071,6 +2123,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldBeginInternal",
       "argsstring_html": "(const char *name, const TType fieldType, const int16_t fieldId, int8_t typeOverride)",
       "name_html": "writeFieldBeginInternal",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldBeginInternal",
       "param": [
         {
           "type_html": "const char *",
@@ -2123,6 +2176,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeCollectionBegin",
       "argsstring_html": "(int8_t elemType, int32_t size)",
       "name_html": "writeCollectionBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeCollectionBegin",
       "param": [
         {
           "type_html": "int8_t",
@@ -2167,6 +2221,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeVarint32",
       "argsstring_html": "(uint32_t n)",
       "name_html": "writeVarint32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeVarint32",
       "param": [
         {
           "type_html": "uint32_t",
@@ -2207,6 +2262,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeVarint64",
       "argsstring_html": "(uint64_t n)",
       "name_html": "writeVarint64",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeVarint64",
       "param": [
         {
           "type_html": "uint64_t",
@@ -2247,6 +2303,7 @@
       "definition_html": "int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getCompactType",
       "argsstring_html": "(int8_t ttype)",
       "name_html": "getCompactType",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getCompactType",
       "param": [
         {
           "type_html": "int8_t",
@@ -2287,6 +2344,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readVarint32",
       "argsstring_html": "(int32_t &amp;i32)",
       "name_html": "readVarint32",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readVarint32",
       "param": [
         {
           "type_html": "int32_t &amp;",
@@ -2327,6 +2385,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readVarint64",
       "argsstring_html": "(int64_t &amp;i64)",
       "name_html": "readVarint64",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readVarint64",
       "param": [
         {
           "type_html": "int64_t &amp;",
@@ -2367,6 +2426,7 @@
       "definition_html": "TType apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getTType",
       "argsstring_html": "(int8_t type)",
       "name_html": "getTType",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getTType",
       "param": [
         {
           "type_html": "int8_t",
@@ -2419,6 +2479,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::VERSION_N",
       "argsstring_html": "",
       "name_html": "VERSION_N",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::VERSION_N",
       "initializer_html": "= 2",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2438,6 +2499,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::VERSION_LOW",
       "argsstring_html": "",
       "name_html": "VERSION_LOW",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::VERSION_LOW",
       "initializer_html": "= 1",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2457,6 +2519,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::VERSION_DOUBLE_BE",
       "argsstring_html": "",
       "name_html": "VERSION_DOUBLE_BE",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::VERSION_DOUBLE_BE",
       "initializer_html": "= 2",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2476,6 +2539,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::PROTOCOL_ID",
       "argsstring_html": "",
       "name_html": "PROTOCOL_ID",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::PROTOCOL_ID",
       "initializer_html": "= static_cast&lt;int8_t&gt;(0x82)",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2495,6 +2559,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::VERSION_MASK",
       "argsstring_html": "",
       "name_html": "VERSION_MASK",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::VERSION_MASK",
       "initializer_html": "= 0x1f",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2514,6 +2579,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TYPE_MASK",
       "argsstring_html": "",
       "name_html": "TYPE_MASK",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TYPE_MASK",
       "initializer_html": "= 0xE0",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2533,6 +2599,7 @@
       "definition_html": "const int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TYPE_SHIFT_AMOUNT",
       "argsstring_html": "",
       "name_html": "TYPE_SHIFT_AMOUNT",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TYPE_SHIFT_AMOUNT",
       "initializer_html": "= 5",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2552,6 +2619,7 @@
       "definition_html": "const int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TYPE_SHIFTED_MASK",
       "argsstring_html": "",
       "name_html": "TYPE_SHIFTED_MASK",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TYPE_SHIFTED_MASK",
       "initializer_html": "= 0x07",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
@@ -2571,6 +2639,7 @@
       "definition_html": "Transport_* apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::trans_",
       "argsstring_html": "",
       "name_html": "trans_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::trans_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "49",
@@ -2585,10 +2654,11 @@
       "prot": "protected",
       "static": "no",
       "mutable": "no",
-      "type_html": "struct apache::thrift::protocol::TCompactProtocolT::@0",
-      "definition_html": "struct apache::thrift::protocol::TCompactProtocolT::@0 apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::booleanField_",
+      "type_html": "struct <code>apache::thrift::protocol::TCompactProtocolT</code>",
+      "definition_html": "struct apache::thrift::protocol::TCompactProtocolT apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::booleanField_",
       "argsstring_html": "",
       "name_html": "booleanField_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::booleanField_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "59",
@@ -2603,10 +2673,11 @@
       "prot": "protected",
       "static": "no",
       "mutable": "no",
-      "type_html": "struct apache::thrift::protocol::TCompactProtocolT::@1",
-      "definition_html": "struct apache::thrift::protocol::TCompactProtocolT::@1 apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::boolValue_",
+      "type_html": "struct <code>apache::thrift::protocol::TCompactProtocolT</code>",
+      "definition_html": "struct apache::thrift::protocol::TCompactProtocolT apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::boolValue_",
       "argsstring_html": "",
       "name_html": "boolValue_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::boolValue_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "68",
@@ -2625,6 +2696,7 @@
       "definition_html": "std::stack&lt;int16_t, folly::fbvector&lt;int16_t&gt; &gt; apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::lastField_",
       "argsstring_html": "",
       "name_html": "lastField_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::lastField_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "75",
@@ -2646,6 +2718,7 @@
       "definition_html": "int16_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::lastFieldId_",
       "argsstring_html": "",
       "name_html": "lastFieldId_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::lastFieldId_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "76",
@@ -2664,6 +2737,7 @@
       "definition_html": "int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::version_",
       "argsstring_html": "",
       "name_html": "version_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::version_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "77",
@@ -2682,6 +2756,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::string_limit_",
       "argsstring_html": "",
       "name_html": "string_limit_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::string_limit_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "260",
@@ -2700,6 +2775,7 @@
       "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::container_limit_",
       "argsstring_html": "",
       "name_html": "container_limit_",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::container_limit_",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "261",
@@ -2718,6 +2794,7 @@
       "definition_html": "const char* apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::name",
       "argsstring_html": "",
       "name_html": "name",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::name",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "56",
@@ -2736,6 +2813,7 @@
       "definition_html": "TType apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::fieldType",
       "argsstring_html": "",
       "name_html": "fieldType",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::fieldType",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "57",
@@ -2754,6 +2832,7 @@
       "definition_html": "int16_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::fieldId",
       "argsstring_html": "",
       "name_html": "fieldId",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::fieldId",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "58",
@@ -2772,6 +2851,7 @@
       "definition_html": "bool apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::hasBoolValue",
       "argsstring_html": "",
       "name_html": "hasBoolValue",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::hasBoolValue",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "66",
@@ -2790,6 +2870,7 @@
       "definition_html": "bool apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::boolValue",
       "argsstring_html": "",
       "name_html": "boolValue",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::boolValue",
       "location": {
         "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
         "line": "67",
@@ -2829,6 +2910,7 @@
               "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
               "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans)",
               "name_html": "TCompactProtocolT",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
               "param": [
                 {
                   "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -2869,6 +2951,7 @@
               "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
               "argsstring_html": "(std::shared_ptr&lt; Transport_ &gt; trans, int32_t string_limit, int32_t container_limit)",
               "name_html": "TCompactProtocolT",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
               "param": [
                 {
                   "type_html": "std::shared_ptr&lt; Transport_ &gt;",
@@ -2917,6 +3000,7 @@
               "definition_html": "apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::TCompactProtocolT",
               "argsstring_html": "(Transport_ *trans)",
               "name_html": "TCompactProtocolT",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::TCompactProtocolT",
               "param": [
                 {
                   "type_html": "Transport_ *",
@@ -2980,6 +3064,7 @@
               "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setStringSizeLimit",
               "argsstring_html": "(int32_t string_limit)",
               "name_html": "setStringSizeLimit",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setStringSizeLimit",
               "param": [
                 {
                   "type_html": "int32_t",
@@ -3039,6 +3124,7 @@
               "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setContainerSizeLimit",
               "argsstring_html": "(int32_t container_limit)",
               "name_html": "setContainerSizeLimit",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setContainerSizeLimit",
               "param": [
                 {
                   "type_html": "int32_t",
@@ -3098,6 +3184,7 @@
               "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getStringSizeLimit",
               "argsstring_html": "()",
               "name_html": "getStringSizeLimit",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getStringSizeLimit",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "130",
@@ -3151,6 +3238,7 @@
               "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getContainerSizeLimit",
               "argsstring_html": "()",
               "name_html": "getContainerSizeLimit",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getContainerSizeLimit",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "132",
@@ -3204,6 +3292,7 @@
               "definition_html": "void apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::setVersion",
               "argsstring_html": "(const int8_t version)",
               "name_html": "setVersion",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::setVersion",
               "param": [
                 {
                   "type_html": "const int8_t",
@@ -3266,6 +3355,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMessageBegin",
               "argsstring_html": "(const std::string &amp;name, const TMessageType messageType, const int32_t seqid)",
               "name_html": "writeMessageBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMessageBegin",
               "param": [
                 {
                   "type_html": "const std::string &amp;",
@@ -3336,6 +3426,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeStructBegin",
               "argsstring_html": "(const char *name)",
               "name_html": "writeStructBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeStructBegin",
               "param": [
                 {
                   "type_html": "const char *",
@@ -3398,6 +3489,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeStructEnd",
               "argsstring_html": "()",
               "name_html": "writeStructEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeStructEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "148",
@@ -3454,6 +3546,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldBegin",
               "argsstring_html": "(const char *name, const TType fieldType, const int16_t fieldId)",
               "name_html": "writeFieldBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldBegin",
               "param": [
                 {
                   "type_html": "const char *",
@@ -3524,6 +3617,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldStop",
               "argsstring_html": "()",
               "name_html": "writeFieldStop",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldStop",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "153",
@@ -3580,6 +3674,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeListBegin",
               "argsstring_html": "(const TType elemType, const uint32_t size)",
               "name_html": "writeListBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeListBegin",
               "param": [
                 {
                   "type_html": "const TType",
@@ -3646,6 +3741,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeSetBegin",
               "argsstring_html": "(const TType elemType, const uint32_t size)",
               "name_html": "writeSetBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeSetBegin",
               "param": [
                 {
                   "type_html": "const TType",
@@ -3712,6 +3808,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMapBegin",
               "argsstring_html": "(const TType keyType, const TType valType, const uint32_t size)",
               "name_html": "writeMapBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMapBegin",
               "param": [
                 {
                   "type_html": "const TType",
@@ -3782,6 +3879,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeBool",
               "argsstring_html": "(const bool value)",
               "name_html": "writeBool",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeBool",
               "param": [
                 {
                   "type_html": "const bool",
@@ -3844,6 +3942,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeByte",
               "argsstring_html": "(const int8_t byte)",
               "name_html": "writeByte",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeByte",
               "param": [
                 {
                   "type_html": "const int8_t",
@@ -3903,6 +4002,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI16",
               "argsstring_html": "(const int16_t i16)",
               "name_html": "writeI16",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI16",
               "param": [
                 {
                   "type_html": "const int16_t",
@@ -3965,6 +4065,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI32",
               "argsstring_html": "(const int32_t i32)",
               "name_html": "writeI32",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI32",
               "param": [
                 {
                   "type_html": "const int32_t",
@@ -4027,6 +4128,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeI64",
               "argsstring_html": "(const int64_t i64)",
               "name_html": "writeI64",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeI64",
               "param": [
                 {
                   "type_html": "const int64_t",
@@ -4089,6 +4191,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeDouble",
               "argsstring_html": "(const double dub)",
               "name_html": "writeDouble",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeDouble",
               "param": [
                 {
                   "type_html": "const double",
@@ -4151,6 +4254,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFloat",
               "argsstring_html": "(const float flt)",
               "name_html": "writeFloat",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFloat",
               "param": [
                 {
                   "type_html": "const float",
@@ -4213,6 +4317,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
               "argsstring_html": "(const char *str)",
               "name_html": "writeString",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
               "param": [
                 {
                   "type_html": "const char *",
@@ -4260,6 +4365,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeString",
               "argsstring_html": "(const String_ &amp;str)",
               "name_html": "writeString",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeString",
               "param": [
                 {
                   "type_html": "const String_ &amp;",
@@ -4324,6 +4430,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeBinary",
               "argsstring_html": "(const String_ &amp;str)",
               "name_html": "writeBinary",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeBinary",
               "param": [
                 {
                   "type_html": "const String_ &amp;",
@@ -4383,6 +4490,7 @@
               "definition_html": "virtual uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMessageEnd",
               "argsstring_html": "()",
               "name_html": "writeMessageEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMessageEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "188",
@@ -4439,6 +4547,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeMapEnd",
               "argsstring_html": "()",
               "name_html": "writeMapEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeMapEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "189",
@@ -4492,6 +4601,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeListEnd",
               "argsstring_html": "()",
               "name_html": "writeListEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeListEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "190",
@@ -4545,6 +4655,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeSetEnd",
               "argsstring_html": "()",
               "name_html": "writeSetEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeSetEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "191",
@@ -4598,6 +4709,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldEnd",
               "argsstring_html": "()",
               "name_html": "writeFieldEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "192",
@@ -4651,6 +4763,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMessageBegin",
               "argsstring_html": "(std::string &amp;name, TMessageType &amp;messageType, int32_t &amp;seqid)",
               "name_html": "readMessageBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMessageBegin",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -4721,6 +4834,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readStructBegin",
               "argsstring_html": "(std::string &amp;name)",
               "name_html": "readStructBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readStructBegin",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -4783,6 +4897,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readStructEnd",
               "argsstring_html": "()",
               "name_html": "readStructEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readStructEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "211",
@@ -4839,6 +4954,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldBegin",
               "argsstring_html": "(std::string &amp;name, TType &amp;fieldType, int16_t &amp;fieldId)",
               "name_html": "readFieldBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldBegin",
               "param": [
                 {
                   "type_html": "std::string &amp;",
@@ -4909,6 +5025,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMapBegin",
               "argsstring_html": "(TType &amp;keyType, TType &amp;valType, uint32_t &amp;size, bool &amp;sizeUnknown)",
               "name_html": "readMapBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMapBegin",
               "param": [
                 {
                   "type_html": "TType &amp;",
@@ -4983,6 +5100,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readListBegin",
               "argsstring_html": "(TType &amp;elemType, uint32_t &amp;size, bool &amp;sizeUnknown)",
               "name_html": "readListBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readListBegin",
               "param": [
                 {
                   "type_html": "TType &amp;",
@@ -5053,6 +5171,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readSetBegin",
               "argsstring_html": "(TType &amp;elemType, uint32_t &amp;size, bool &amp;sizeUnknown)",
               "name_html": "readSetBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readSetBegin",
               "param": [
                 {
                   "type_html": "TType &amp;",
@@ -5123,6 +5242,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readBool",
               "argsstring_html": "(bool &amp;value)",
               "name_html": "readBool",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readBool",
               "param": [
                 {
                   "type_html": "bool &amp;",
@@ -5185,6 +5305,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readByte",
               "argsstring_html": "(int8_t &amp;byte)",
               "name_html": "readByte",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readByte",
               "param": [
                 {
                   "type_html": "int8_t &amp;",
@@ -5247,6 +5368,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI16",
               "argsstring_html": "(int16_t &amp;i16)",
               "name_html": "readI16",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI16",
               "param": [
                 {
                   "type_html": "int16_t &amp;",
@@ -5309,6 +5431,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI32",
               "argsstring_html": "(int32_t &amp;i32)",
               "name_html": "readI32",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI32",
               "param": [
                 {
                   "type_html": "int32_t &amp;",
@@ -5371,6 +5494,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readI64",
               "argsstring_html": "(int64_t &amp;i64)",
               "name_html": "readI64",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readI64",
               "param": [
                 {
                   "type_html": "int64_t &amp;",
@@ -5433,6 +5557,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readDouble",
               "argsstring_html": "(double &amp;dub)",
               "name_html": "readDouble",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readDouble",
               "param": [
                 {
                   "type_html": "double &amp;",
@@ -5495,6 +5620,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFloat",
               "argsstring_html": "(float &amp;flt)",
               "name_html": "readFloat",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFloat",
               "param": [
                 {
                   "type_html": "float &amp;",
@@ -5562,6 +5688,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readString",
               "argsstring_html": "(String_ &amp;str)",
               "name_html": "readString",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readString",
               "param": [
                 {
                   "type_html": "String_ &amp;",
@@ -5626,6 +5753,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readBinary",
               "argsstring_html": "(String_ &amp;str)",
               "name_html": "readBinary",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readBinary",
               "param": [
                 {
                   "type_html": "String_ &amp;",
@@ -5688,6 +5816,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMessageEnd",
               "argsstring_html": "()",
               "name_html": "readMessageEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMessageEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "249",
@@ -5741,6 +5870,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readFieldEnd",
               "argsstring_html": "()",
               "name_html": "readFieldEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readFieldEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "250",
@@ -5794,6 +5924,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMapEnd",
               "argsstring_html": "()",
               "name_html": "readMapEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMapEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "251",
@@ -5847,6 +5978,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readListEnd",
               "argsstring_html": "()",
               "name_html": "readListEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readListEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "252",
@@ -5900,6 +6032,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readSetEnd",
               "argsstring_html": "()",
               "name_html": "readSetEnd",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readSetEnd",
               "location": {
                 "file": "fbcode/thrift/lib/cpp/protocol/TCompactProtocol.h",
                 "line": "253",
@@ -5953,6 +6086,7 @@
               "definition_html": "int32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeFieldBeginInternal",
               "argsstring_html": "(const char *name, const TType fieldType, const int16_t fieldId, int8_t typeOverride)",
               "name_html": "writeFieldBeginInternal",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeFieldBeginInternal",
               "param": [
                 {
                   "type_html": "const char *",
@@ -6027,6 +6161,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeCollectionBegin",
               "argsstring_html": "(int8_t elemType, int32_t size)",
               "name_html": "writeCollectionBegin",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeCollectionBegin",
               "param": [
                 {
                   "type_html": "int8_t",
@@ -6093,6 +6228,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeVarint32",
               "argsstring_html": "(uint32_t n)",
               "name_html": "writeVarint32",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeVarint32",
               "param": [
                 {
                   "type_html": "uint32_t",
@@ -6155,6 +6291,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::writeVarint64",
               "argsstring_html": "(uint64_t n)",
               "name_html": "writeVarint64",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::writeVarint64",
               "param": [
                 {
                   "type_html": "uint64_t",
@@ -6217,6 +6354,7 @@
               "definition_html": "int8_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getCompactType",
               "argsstring_html": "(int8_t ttype)",
               "name_html": "getCompactType",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getCompactType",
               "param": [
                 {
                   "type_html": "int8_t",
@@ -6279,6 +6417,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readVarint32",
               "argsstring_html": "(int32_t &amp;i32)",
               "name_html": "readVarint32",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readVarint32",
               "param": [
                 {
                   "type_html": "int32_t &amp;",
@@ -6341,6 +6480,7 @@
               "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readVarint64",
               "argsstring_html": "(int64_t &amp;i64)",
               "name_html": "readVarint64",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readVarint64",
               "param": [
                 {
                   "type_html": "int64_t &amp;",
@@ -6403,6 +6543,7 @@
               "definition_html": "TType apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::getTType",
               "argsstring_html": "(int8_t type)",
               "name_html": "getTType",
+              "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::getTType",
               "param": [
                 {
                   "type_html": "int8_t",

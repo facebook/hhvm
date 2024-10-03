@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::StructuredOp::pos",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a45d86dc7ea9ee39fadbffba02864d890",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a415e062ac423330741ee1dc3c6ff5c65",
       "prot": "public",
       "static": "yes",
       "const": "no",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "<code>size_type</code> &amp;",
-      "definition_html": "static size_type&amp; apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::pos",
+      "definition_html": "static size_type &amp; apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::pos",
       "argsstring_html": "(std::any &amp;i)",
       "name_html": "pos",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::pos",
       "param": [
         {
           "type_html": "std::any &amp;",
@@ -34,7 +35,7 @@
         "simple_raw": "static size_type& pos(std::any& i)",
         "detailed_html": "inline static size_type&amp; pos(std::any&amp; i)",
         "detailed_raw": "inline static size_type& pos(std::any& i)",
-        "original_definition_html": "static size_type&amp; apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::pos",
+        "original_definition_html": "static size_type &amp; apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::pos",
         "original_argsstring_html": "(std::any &amp;i)"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/StructuredOp/pos",

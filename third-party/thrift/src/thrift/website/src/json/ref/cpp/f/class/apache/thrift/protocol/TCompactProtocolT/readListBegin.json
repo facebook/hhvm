@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readListBegin",
       "argsstring_html": "(TType &amp;elemType, uint32_t &amp;size, bool &amp;sizeUnknown)",
       "name_html": "readListBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readListBegin",
       "param": [
         {
           "type_html": "TType &amp;",

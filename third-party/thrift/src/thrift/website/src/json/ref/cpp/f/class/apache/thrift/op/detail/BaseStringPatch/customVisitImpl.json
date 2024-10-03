@@ -1,0 +1,75 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisitImpl",
+  "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::customVisitImpl",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch_1a3848d2f7f5bbd7da4619263968afea10",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "class Self"
+        },
+        {
+          "type_html": "class Visitor"
+        }
+      ],
+      "type_html": "void",
+      "definition_html": "static void apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::customVisitImpl",
+      "argsstring_html": "(Self &amp;&amp;self, Visitor &amp;&amp;v)",
+      "name_html": "customVisitImpl",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseStringPatch::customVisitImpl",
+      "param": [
+        {
+          "type_html": "Self &amp;&amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "line": "259",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ValuePatch.h",
+        "bodystart": "259",
+        "bodyend": "273"
+      },
+      "definition": {
+        "simple_html": "template &lt;class Self, class Visitor&gt;\nstatic void customVisitImpl(Self&amp;&amp; self, Visitor&amp;&amp; v)",
+        "simple_raw": "template <class Self, class Visitor>\nstatic void customVisitImpl(Self&& self, Visitor&& v)",
+        "detailed_html": "template &lt;class Self, class Visitor&gt;\nprivate inline static void customVisitImpl(Self&amp;&amp; self, Visitor&amp;&amp; v)",
+        "detailed_raw": "template <class Self, class Visitor>\nprivate inline static void customVisitImpl(Self&& self, Visitor&& v)",
+        "original_definition_html": "static void apache::thrift::op::detail::BaseStringPatch&lt; Patch, Derived &gt;::customVisitImpl",
+        "original_argsstring_html": "(Self &amp;&amp;self, Visitor &amp;&amp;v)"
+      },
+      "description": {
+        "detailed_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const String&amp;);\n  void clear();\n  void prepend(const String&amp;);\n  void append(const String&amp;);\n}\n</pre> For example: <pre>auto patch = StringPatch::createPrepend(\"(\");\npatch += \")\";\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.prepend(\"(\");\nv.append(\")\"); \n</pre> </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseStringPatch/customVisitImpl",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseStringPatch/customVisitImpl",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseStringPatch",
+      "compoundname_html": "apache::thrift::op::detail::BaseStringPatch::customVisitImpl"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/BaseStringPatch/customVisitImpl",
+  "minprot": "private",
+  "displayname_html": "customVisitImpl",
+  "brief_html": "<p>Users should provide a visitor with the following methods <pre>struct Visitor {\n  void assign(const String&amp;);\n  void clear();\n  void prepend(const String&amp;);\n  void append(const String&amp;);\n}\n</pre> For example: <pre>auto patch = StringPatch::createPrepend(\"(\");\npatch += \")\";\n</pre> <code>patch.customVisit(v)</code> will invoke the following methods <pre>v.prepend(\"(\");\nv.append(\")\"); \n</pre> </p>",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/customVisitImpl",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/BaseStringPatch/customVisitImpl",
+  "parent_links": [
+    {
+      "text_html": "BaseStringPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/BaseStringPatch"
+    }
+  ]
+}

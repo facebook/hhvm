@@ -38,6 +38,7 @@
       "definition_html": "void apache::thrift::op::detail::Hash&lt; Tag, Hasher &gt;::operator()",
       "argsstring_html": "(const T &amp;value, Accumulator &amp;accumulator) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Hash::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -85,6 +86,7 @@
       "definition_html": "auto apache::thrift::op::detail::Hash&lt; Tag, Hasher &gt;::operator()",
       "argsstring_html": "(const T &amp;value) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::Hash::operator()",
       "param": [
         {
           "type_html": "const T &amp;",
@@ -163,6 +165,7 @@
               "definition_html": "void apache::thrift::op::detail::Hash&lt; Tag, Hasher &gt;::operator()",
               "argsstring_html": "(const T &amp;value, Accumulator &amp;accumulator) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Hash::operator()",
               "param": [
                 {
                   "type_html": "const T &amp;",
@@ -212,6 +215,7 @@
               "definition_html": "auto apache::thrift::op::detail::Hash&lt; Tag, Hasher &gt;::operator()",
               "argsstring_html": "(const T &amp;value) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::Hash::operator()",
               "param": [
                 {
                   "type_html": "const T &amp;",

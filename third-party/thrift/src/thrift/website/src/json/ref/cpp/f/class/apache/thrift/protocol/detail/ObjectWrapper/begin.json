@@ -11,17 +11,19 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "auto",
       "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
       "argsstring_html": "()",
       "name_html": "begin",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::begin",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "88",
+        "line": "84",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "88",
-        "bodyend": "88"
+        "bodystart": "84",
+        "bodyend": "84"
       },
       "definition": {
         "simple_html": "auto begin()",
@@ -44,17 +46,19 @@
       "explicit": "no",
       "inline": "yes",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "auto",
       "definition_html": "auto apache::thrift::protocol::detail::ObjectWrapper&lt; Base &gt;::begin",
       "argsstring_html": "() const",
       "name_html": "begin",
+      "qualifiedname_html": "apache::thrift::protocol::detail::ObjectWrapper::begin",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "line": "89",
+        "line": "85",
         "column": "9",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/protocol.h",
-        "bodystart": "89",
-        "bodyend": "89"
+        "bodystart": "85",
+        "bodyend": "85"
       },
       "definition": {
         "simple_html": "auto begin() const",

@@ -20,6 +20,7 @@
       "definition_html": "static void apache::thrift::detail::BitSet&lt; T &gt;::set",
       "argsstring_html": "(U &amp;u, std::size_t bit)",
       "name_html": "set",
+      "qualifiedname_html": "apache::thrift::detail::BitSet::set",
       "param": [
         {
           "type_html": "U &amp;",
@@ -32,11 +33,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "144",
+        "line": "145",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "144",
-        "bodyend": "146"
+        "bodystart": "145",
+        "bodyend": "147"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void set(U&amp; u, std::size_t bit)",
@@ -68,6 +69,7 @@
       "definition_html": "static void apache::thrift::detail::BitSet&lt; T &gt;::set",
       "argsstring_html": "(std::atomic&lt; U &gt; &amp;u, std::size_t bit)",
       "name_html": "set",
+      "qualifiedname_html": "apache::thrift::detail::BitSet::set",
       "param": [
         {
           "type_html": "std::atomic&lt; U &gt; &amp;",
@@ -80,11 +82,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "162",
+        "line": "163",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "162",
-        "bodyend": "164"
+        "bodystart": "163",
+        "bodyend": "165"
       },
       "definition": {
         "simple_html": "template &lt;class U&gt;\nstatic void set(std::atomic&lt;U&gt;&amp; u, std::size_t bit)",
@@ -111,6 +113,7 @@
       "definition_html": "void apache::thrift::detail::BitSet&lt; T &gt;::set",
       "argsstring_html": "(std::size_t bit)",
       "name_html": "set",
+      "qualifiedname_html": "apache::thrift::detail::BitSet::set",
       "param": [
         {
           "type_html": "std::size_t",
@@ -119,11 +122,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "line": "172",
+        "line": "173",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/FieldRef.h",
-        "bodystart": "172",
-        "bodyend": "172"
+        "bodystart": "173",
+        "bodyend": "173"
       },
       "definition": {
         "simple_html": "void set(std::size_t bit)",

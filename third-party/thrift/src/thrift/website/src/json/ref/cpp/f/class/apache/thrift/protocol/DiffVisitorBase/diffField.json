@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::protocol::DiffVisitorBase::diffField",
       "argsstring_html": "(const Object &amp;src, const Object &amp;dst, FieldId id, DynamicStructPatch &amp;patch)",
       "name_html": "diffField",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::diffField",
       "param": [
         {
           "type_html": "const Object &amp;",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "623",
+        "line": "644",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "940",
-        "bodyend": "978"
+        "bodystart": "941",
+        "bodyend": "979"
       },
       "definition": {
         "simple_html": "void diffField(\n    const Object&amp; src, const Object&amp; dst, FieldId id, DynamicStructPatch&amp; patch)",

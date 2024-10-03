@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::TagSerializer::derived",
   "functions": [
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1ad4af17e1a80fc04030596d16f9fcbfe1",
+      "refid": "classapache_1_1thrift_1_1op_1_1TagSerializer_1a2f273f6111878339fb53e268657c13b1",
       "prot": "private",
       "static": "no",
       "const": "yes",
@@ -12,9 +12,10 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "const Derived &amp;",
-      "definition_html": "const Derived&amp; apache::thrift::op::TagSerializer&lt; Tag, Derived &gt;::derived",
+      "definition_html": "const Derived &amp; apache::thrift::op::TagSerializer&lt; Tag, Derived &gt;::derived",
       "argsstring_html": "() const",
       "name_html": "derived",
+      "qualifiedname_html": "apache::thrift::op::TagSerializer::derived",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
         "line": "138",
@@ -28,7 +29,7 @@
         "simple_raw": "const Derived& derived() const",
         "detailed_html": "private inline const Derived&amp; derived() const",
         "detailed_raw": "private inline const Derived& derived() const",
-        "original_definition_html": "const Derived&amp; apache::thrift::op::TagSerializer&lt; Tag, Derived &gt;::derived",
+        "original_definition_html": "const Derived &amp; apache::thrift::op::TagSerializer&lt; Tag, Derived &gt;::derived",
         "original_argsstring_html": "() const"
       },
       "filepath": "fns/class/apache/thrift/op/TagSerializer/derived",

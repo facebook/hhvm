@@ -58,6 +58,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineBool)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -97,6 +98,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineInt8)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -136,6 +138,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineInt16)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -175,6 +178,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineInt32)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -214,6 +218,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineInt64)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -253,6 +258,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineFloat)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -292,6 +298,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineDouble)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -331,6 +338,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineIOBuf)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -370,6 +378,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineByteRange)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -409,6 +418,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkCombineStdHasher)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -448,6 +458,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkLess)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -487,6 +498,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(StdHasherTest, checkFinalize)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "StdHasherTest"
@@ -536,6 +548,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineBool)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -575,6 +588,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineInt8)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -614,6 +628,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineInt16)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -653,6 +668,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineInt32)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -692,6 +708,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineInt64)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -731,6 +748,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineFloat)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -770,6 +788,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineDouble)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -809,6 +828,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineIOBuf)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -848,6 +868,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineByteRange)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -887,6 +908,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkCombineStdHasher)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -926,6 +948,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkLess)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"
@@ -965,6 +988,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(StdHasherTest, checkFinalize)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "StdHasherTest"

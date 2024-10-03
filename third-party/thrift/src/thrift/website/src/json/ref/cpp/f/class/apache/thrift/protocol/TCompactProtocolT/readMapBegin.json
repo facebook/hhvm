@@ -15,6 +15,7 @@
       "definition_html": "uint32_t apache::thrift::protocol::TCompactProtocolT&lt; Transport_ &gt;::readMapBegin",
       "argsstring_html": "(TType &amp;keyType, TType &amp;valType, uint32_t &amp;size, bool &amp;sizeUnknown)",
       "name_html": "readMapBegin",
+      "qualifiedname_html": "apache::thrift::protocol::TCompactProtocolT::readMapBegin",
       "param": [
         {
           "type_html": "TType &amp;",

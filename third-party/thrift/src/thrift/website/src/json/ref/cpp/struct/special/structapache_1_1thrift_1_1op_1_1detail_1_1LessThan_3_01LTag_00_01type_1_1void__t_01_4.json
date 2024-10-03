@@ -32,10 +32,11 @@
           "type_html": "typename R"
         }
       ],
-      "type_html": "constexpr bool",
-      "definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
+      "type_html": "bool",
+      "definition_html": "bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
       "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
       "name_html": "operator()",
+      "qualifiedname_html": "apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
       "param": [
         {
           "type_html": "const L &amp;",
@@ -55,11 +56,11 @@
         "bodyend": "137"
       },
       "definition": {
-        "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
-        "simple_raw": "template <typename L, typename R>\nconstexpr bool operator()(const L& lhs, const R& rhs) const",
-        "detailed_html": "template &lt;typename L, typename R&gt;\ninline constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
-        "detailed_raw": "template <typename L, typename R>\ninline constexpr bool operator()(const L& lhs, const R& rhs) const",
-        "original_definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
+        "simple_html": "template &lt;typename L, typename R&gt;\nbool operator()(const L&amp; lhs, const R&amp; rhs) const",
+        "simple_raw": "template <typename L, typename R>\nbool operator()(const L& lhs, const R& rhs) const",
+        "detailed_html": "template &lt;typename L, typename R&gt;\ninline bool operator()(const L&amp; lhs, const R&amp; rhs) const",
+        "detailed_raw": "template <typename L, typename R>\ninline bool operator()(const L& lhs, const R& rhs) const",
+        "original_definition_html": "bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
         "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
       },
       "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01LTag_00_01type_1_1void__t_01_4/operator.call",
@@ -116,10 +117,11 @@
                   "type_html": "typename R"
                 }
               ],
-              "type_html": "constexpr bool",
-              "definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
+              "type_html": "bool",
+              "definition_html": "bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
               "argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
               "param": [
                 {
                   "type_html": "const L &amp;",
@@ -139,11 +141,11 @@
                 "bodyend": "137"
               },
               "definition": {
-                "simple_html": "template &lt;typename L, typename R&gt;\nconstexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "simple_raw": "template <typename L, typename R>\nconstexpr bool operator()(const L& lhs, const R& rhs) const",
-                "detailed_html": "template &lt;typename L, typename R&gt;\ninline constexpr bool operator()(const L&amp; lhs, const R&amp; rhs) const",
-                "detailed_raw": "template <typename L, typename R>\ninline constexpr bool operator()(const L& lhs, const R& rhs) const",
-                "original_definition_html": "constexpr bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
+                "simple_html": "template &lt;typename L, typename R&gt;\nbool operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "simple_raw": "template <typename L, typename R>\nbool operator()(const L& lhs, const R& rhs) const",
+                "detailed_html": "template &lt;typename L, typename R&gt;\ninline bool operator()(const L&amp; lhs, const R&amp; rhs) const",
+                "detailed_raw": "template <typename L, typename R>\ninline bool operator()(const L& lhs, const R& rhs) const",
+                "original_definition_html": "bool apache::thrift::op::detail::LessThan&lt; LTag, type::void_t &gt;::operator()",
                 "original_argsstring_html": "(const L &amp;lhs, const R &amp;rhs) const"
               },
               "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1LessThan_3_01LTag_00_01type_1_1void__t_01_4/operator.call",

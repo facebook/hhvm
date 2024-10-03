@@ -23,6 +23,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetIdenticalTo&lt; KTag, Tag, T &gt;::inRange",
       "argsstring_html": "(const K &amp;key, const R &amp;range)",
       "name_html": "inRange",
+      "qualifiedname_html": "apache::thrift::op::detail::SetIdenticalTo::inRange",
       "param": [
         {
           "type_html": "const K &amp;",
@@ -35,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "499",
+        "line": "515",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "499",
-        "bodyend": "506"
+        "bodystart": "515",
+        "bodyend": "522"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",
@@ -74,6 +75,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetIdenticalTo&lt; KTag, Tag, T &gt;::inRange",
       "argsstring_html": "(const K &amp;key, const R &amp;range)",
       "name_html": "inRange",
+      "qualifiedname_html": "apache::thrift::op::detail::SetIdenticalTo::inRange",
       "param": [
         {
           "type_html": "const K &amp;",
@@ -86,11 +88,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "499",
+        "line": "515",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "499",
-        "bodyend": "506"
+        "bodystart": "515",
+        "bodyend": "522"
       },
       "definition": {
         "simple_html": "template &lt;typename K, typename R&gt;\nstatic bool inRange(const K&amp; key, const R&amp; range)",
@@ -125,6 +127,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapEquality&lt; KTag, VTag, Equality, Tag, T &gt;::inRange",
       "argsstring_html": "(const E &amp;entry, const R &amp;range)",
       "name_html": "inRange",
+      "qualifiedname_html": "apache::thrift::op::detail::MapEquality::inRange",
       "param": [
         {
           "type_html": "const E &amp;",
@@ -137,11 +140,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "550",
+        "line": "566",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "550",
-        "bodyend": "558"
+        "bodystart": "566",
+        "bodyend": "574"
       },
       "definition": {
         "simple_html": "template &lt;typename E, typename R&gt;\nstatic bool inRange(const E&amp; entry, const R&amp; range)",
@@ -176,6 +179,7 @@
       "definition_html": "static bool apache::thrift::op::detail::MapEquality&lt; KTag, VTag, Equality, Tag, T &gt;::inRange",
       "argsstring_html": "(const E &amp;entry, const R &amp;range)",
       "name_html": "inRange",
+      "qualifiedname_html": "apache::thrift::op::detail::MapEquality::inRange",
       "param": [
         {
           "type_html": "const E &amp;",
@@ -188,11 +192,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "550",
+        "line": "566",
         "column": "15",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "550",
-        "bodyend": "558"
+        "bodystart": "566",
+        "bodyend": "574"
       },
       "definition": {
         "simple_html": "template &lt;typename E, typename R&gt;\nstatic bool inRange(const E&amp; entry, const R&amp; range)",

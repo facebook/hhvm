@@ -15,6 +15,7 @@
       "definition_html": "void apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::Applier::clear",
       "argsstring_html": "()",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseEnsurePatch::Applier::clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/StructPatch.h",
         "line": "118",

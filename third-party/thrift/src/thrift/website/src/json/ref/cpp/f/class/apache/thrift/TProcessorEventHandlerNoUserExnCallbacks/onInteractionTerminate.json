@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::onInteractionTerminate",
       "argsstring_html": "(void *, int64_t)",
       "name_html": "onInteractionTerminate",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::onInteractionTerminate",
       "param": [
         {
           "type_html": "void *"

@@ -74,6 +74,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineBool)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -113,6 +114,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineInt8)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -152,6 +154,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineInt16)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -191,6 +194,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineInt32)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -230,6 +234,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineInt64)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -269,6 +274,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineFloat)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -308,6 +314,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineDouble)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -347,6 +354,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineIOBuf)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -386,6 +394,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineChainedIOBuf)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -425,6 +434,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineByteRange)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -464,6 +474,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkCombineSha256Hasher)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -503,6 +514,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, checkLess)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -542,6 +554,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, e2eSimpleStruct)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -581,6 +594,7 @@
       "definition_html": "apache::thrift::op::TEST",
       "argsstring_html": "(Sha256HasherTest, e2eComplexStruct)",
       "name_html": "TEST",
+      "qualifiedname_html": "apache::thrift::op::TEST",
       "param": [
         {
           "type_html": "Sha256HasherTest"
@@ -630,6 +644,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineBool)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -669,6 +684,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineInt8)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -708,6 +724,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineInt16)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -747,6 +764,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineInt32)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -786,6 +804,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineInt64)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -825,6 +844,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineFloat)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -864,6 +884,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineDouble)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -903,6 +924,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineIOBuf)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -942,6 +964,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineChainedIOBuf)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -981,6 +1004,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineByteRange)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -1020,6 +1044,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkCombineSha256Hasher)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -1059,6 +1084,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, checkLess)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -1098,6 +1124,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, e2eSimpleStruct)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"
@@ -1137,6 +1164,7 @@
               "definition_html": "apache::thrift::op::TEST",
               "argsstring_html": "(Sha256HasherTest, e2eComplexStruct)",
               "name_html": "TEST",
+              "qualifiedname_html": "apache::thrift::op::TEST",
               "param": [
                 {
                   "type_html": "Sha256HasherTest"

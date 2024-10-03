@@ -15,6 +15,7 @@
       "definition_html": "virtual void apache::thrift::TProcessorEventHandler::onReadData",
       "argsstring_html": "(void *, const char *, const SerializedMessage &amp;)",
       "name_html": "onReadData",
+      "qualifiedname_html": "apache::thrift::TProcessorEventHandler::onReadData",
       "param": [
         {
           "type_html": "void *"

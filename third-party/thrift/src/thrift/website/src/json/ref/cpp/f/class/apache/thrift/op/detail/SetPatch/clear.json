@@ -15,13 +15,14 @@
       "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
       "argsstring_html": "()",
       "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::clear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "line": "279",
+        "line": "284",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
-        "bodystart": "279",
-        "bodyend": "279"
+        "bodystart": "284",
+        "bodyend": "284"
       },
       "definition": {
         "simple_html": "void clear()",
@@ -38,10 +39,47 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/clear",
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
       "compoundname_html": "apache::thrift::op::detail::SetPatch::clear"
+    },
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseContainerPatch_1af46653854514e1089770c98171077a7e",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "type_html": "void",
+      "definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+      "argsstring_html": "()",
+      "name_html": "clear",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseContainerPatch::clear",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "299",
+        "column": "3",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "284",
+        "bodyend": "284"
+      },
+      "definition": {
+        "simple_html": "void clear()",
+        "simple_raw": "void clear()",
+        "detailed_html": "inline void clear()",
+        "detailed_raw": "inline void clear()",
+        "original_definition_html": "void apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::clear",
+        "original_argsstring_html": "()"
+      },
+      "description": {
+        "brief_html": "<p>Clears the value. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseContainerPatch/clear",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseContainerPatch/clear",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseContainerPatch",
+      "compoundname_html": "apache::thrift::op::detail::SetPatch::clear"
     }
   ],
   "filepath": "f/class/apache/thrift/op/detail/SetPatch/clear",
-  "minprot": "protected",
+  "minprot": "public",
   "displayname_html": "clear",
   "brief_html": "<p>Clears the value. </p>",
   "groupname_html": "",

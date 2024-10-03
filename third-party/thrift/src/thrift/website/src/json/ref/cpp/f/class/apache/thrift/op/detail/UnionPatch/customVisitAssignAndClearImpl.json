@@ -1,0 +1,72 @@
+{
+  "kind": "overloadset",
+  "name_html": "customVisitAssignAndClearImpl",
+  "compoundname_html": "apache::thrift::op::detail::UnionPatch::customVisitAssignAndClearImpl",
+  "functions": [
+    {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch_1a0ef341d82b9389dd4640196e6a7eb0cc",
+      "prot": "private",
+      "static": "yes",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename Self"
+        },
+        {
+          "type_html": "typename Visitor"
+        }
+      ],
+      "type_html": "bool",
+      "definition_html": "static bool apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::customVisitAssignAndClearImpl",
+      "argsstring_html": "(Self &amp;&amp;self, Visitor &amp;&amp;v)",
+      "name_html": "customVisitAssignAndClearImpl",
+      "qualifiedname_html": "apache::thrift::op::detail::BaseClearPatch::customVisitAssignAndClearImpl",
+      "param": [
+        {
+          "type_html": "Self &amp;&amp;",
+          "declname_html": "self"
+        },
+        {
+          "type_html": "Visitor &amp;&amp;",
+          "declname_html": "v"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "line": "268",
+        "column": "15",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
+        "bodystart": "268",
+        "bodyend": "277"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename Self, typename Visitor&gt;\nstatic bool customVisitAssignAndClearImpl(Self&amp;&amp; self, Visitor&amp;&amp; v)",
+        "simple_raw": "template <typename Self, typename Visitor>\nstatic bool customVisitAssignAndClearImpl(Self&& self, Visitor&& v)",
+        "detailed_html": "template &lt;typename Self, typename Visitor&gt;\nprivate inline static bool customVisitAssignAndClearImpl(\n    Self&amp;&amp; self, Visitor&amp;&amp; v)",
+        "detailed_raw": "template <typename Self, typename Visitor>\nprivate inline static bool customVisitAssignAndClearImpl(\n    Self&& self, Visitor&& v)",
+        "original_definition_html": "static bool apache::thrift::op::detail::BaseClearPatch&lt; Patch, Derived &gt;::customVisitAssignAndClearImpl",
+        "original_argsstring_html": "(Self &amp;&amp;self, Visitor &amp;&amp;v)"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/BaseClearPatch/customVisitAssignAndClearImpl",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/BaseClearPatch/customVisitAssignAndClearImpl",
+      "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseClearPatch",
+      "compoundname_html": "apache::thrift::op::detail::UnionPatch::customVisitAssignAndClearImpl"
+    }
+  ],
+  "filepath": "f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClearImpl",
+  "minprot": "private",
+  "displayname_html": "customVisitAssignAndClearImpl",
+  "brief_html": "",
+  "groupname_html": "",
+  "href": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClearImpl",
+  "refid": "/ref/cpp/f/class/apache/thrift/op/detail/UnionPatch/customVisitAssignAndClearImpl",
+  "parent_links": [
+    {
+      "text_html": "UnionPatch",
+      "href": "/ref/cpp/class/apache/thrift/op/detail/UnionPatch"
+    }
+  ]
+}

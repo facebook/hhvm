@@ -23,6 +23,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfSet",
       "argsstring_html": "(const folly::F14NodeMap&lt; Key, ValuePatch &gt; &amp;patches)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfSet",
       "param": [
         {
           "type_html": "const folly::F14NodeMap&lt; Key, ValuePatch &gt; &amp;",
@@ -31,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "116",
+        "line": "120",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "116",
-        "bodyend": "120"
+        "bodystart": "120",
+        "bodyend": "124"
       },
       "definition": {
         "simple_html": "template &lt;typename Key, typename ValuePatch&gt;\nvoid patchIfSet(const folly::F14NodeMap&lt;Key, ValuePatch&gt;&amp; patches)",
@@ -70,6 +71,7 @@
       "definition_html": "void apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfSet",
       "argsstring_html": "(const FieldPatch &amp;fieldPatch)",
       "name_html": "patchIfSet",
+      "qualifiedname_html": "apache::thrift::op::detail::MinSafePatchVersionVisitor::patchIfSet",
       "param": [
         {
           "type_html": "const <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/class/apache/thrift/op/detail/FieldPatch\">FieldPatch</a> &amp;",
@@ -78,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "line": "130",
+        "line": "134",
         "column": "8",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Patch.h",
-        "bodystart": "130",
-        "bodyend": "132"
+        "bodystart": "134",
+        "bodyend": "136"
       },
       "definition": {
         "simple_html": "template &lt;typename, typename FieldPatch&gt;\nvoid patchIfSet(const FieldPatch&amp; fieldPatch)",

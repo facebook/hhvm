@@ -21,6 +21,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::add",
       "argsstring_html": "(T &amp;self, K &amp;&amp;key)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::add",
       "param": [
         {
           "type_html": "<code>T</code> &amp;",
@@ -64,6 +65,7 @@
       "definition_html": "static bool apache::thrift::op::detail::SetOp&lt; KTag, Tag &gt;::add",
       "argsstring_html": "(void *s, const Dyn &amp;k)",
       "name_html": "add",
+      "qualifiedname_html": "apache::thrift::op::detail::SetOp::add",
       "param": [
         {
           "type_html": "void *",

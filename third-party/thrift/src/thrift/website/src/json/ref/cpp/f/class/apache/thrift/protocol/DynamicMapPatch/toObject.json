@@ -12,17 +12,19 @@
       "inline": "no",
       "refqual": "rvalue",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "Object",
       "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
       "argsstring_html": "() &amp;&amp;",
       "name_html": "toObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::toObject",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "317",
+        "line": "338",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "208",
-        "bodyend": "245"
+        "bodystart": "209",
+        "bodyend": "246"
       },
       "definition": {
         "simple_html": "Object toObject() &amp;&amp;",
@@ -46,17 +48,19 @@
       "inline": "no",
       "refqual": "lvalue",
       "virtual": "non-virtual",
+      "nodiscard": "yes",
       "type_html": "Object",
       "definition_html": "Object apache::thrift::protocol::DynamicMapPatch::toObject",
       "argsstring_html": "() const &amp;",
       "name_html": "toObject",
+      "qualifiedname_html": "apache::thrift::protocol::DynamicMapPatch::toObject",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "318",
+        "line": "339",
         "column": "11",
         "bodyfile": "fbcode/thrift/lib/thrift/detail/DynamicPatch.cpp",
-        "bodystart": "246",
-        "bodyend": "248"
+        "bodystart": "247",
+        "bodyend": "249"
       },
       "definition": {
         "simple_html": "Object toObject() const&amp;",

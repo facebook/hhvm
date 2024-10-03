@@ -15,9 +15,10 @@
       "definition_html": "virtual apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
       "argsstring_html": "()=default",
       "name_html": "~DiffVisitorBase",
+      "qualifiedname_html": "apache::thrift::protocol::DiffVisitorBase::~DiffVisitorBase",
       "location": {
         "file": "fbcode/thrift/lib/thrift/detail/DynamicPatch.h",
-        "line": "594",
+        "line": "615",
         "column": "11"
       },
       "definition": {

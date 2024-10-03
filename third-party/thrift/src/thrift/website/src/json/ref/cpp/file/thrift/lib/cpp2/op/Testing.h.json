@@ -125,6 +125,7 @@
       "definition_html": "const type::Protocol apache::thrift::test::kFollyToStringProtocol",
       "argsstring_html": "",
       "name_html": "kFollyToStringProtocol",
+      "qualifiedname_html": "apache::thrift::test::kFollyToStringProtocol",
       "initializer_html": "=\n    Protocol::fromName(thriftType(\"FollyToString\"))",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
@@ -161,6 +162,7 @@
       "definition_html": "auto apache::thrift::test::IsIdenticalTo",
       "argsstring_html": "(T expected)",
       "name_html": "IsIdenticalTo",
+      "qualifiedname_html": "apache::thrift::test::IsIdenticalTo",
       "param": [
         {
           "type_html": "T",
@@ -207,6 +209,7 @@
       "definition_html": "auto apache::thrift::test::IsEqualTo",
       "argsstring_html": "(T expected)",
       "name_html": "IsEqualTo",
+      "qualifiedname_html": "apache::thrift::test::IsEqualTo",
       "param": [
         {
           "type_html": "T",
@@ -249,6 +252,7 @@
       "definition_html": "auto apache::thrift::test::IsEmpty",
       "argsstring_html": "()",
       "name_html": "IsEmpty",
+      "qualifiedname_html": "apache::thrift::test::IsEmpty",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
         "line": "88",
@@ -297,6 +301,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected1, const T3 &amp;expected2)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",
@@ -351,6 +356,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const folly::IOBuf &amp;actual, const folly::IOBuf &amp;expected1, const folly::IOBuf &amp;expected2)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",
@@ -413,6 +419,7 @@
       "definition_html": "void apache::thrift::test::expectPatch",
       "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected)",
       "name_html": "expectPatch",
+      "qualifiedname_html": "apache::thrift::test::expectPatch",
       "param": [
         {
           "type_html": "P",
@@ -470,6 +477,7 @@
       "definition_html": "void apache::thrift::test::expectRoundTrip",
       "argsstring_html": "(const S &amp;seralizer, const T &amp;expected)",
       "name_html": "expectRoundTrip",
+      "qualifiedname_html": "apache::thrift::test::expectRoundTrip",
       "param": [
         {
           "type_html": "const S &amp;",
@@ -530,6 +538,7 @@
               "definition_html": "auto apache::thrift::test::IsIdenticalTo",
               "argsstring_html": "(T expected)",
               "name_html": "IsIdenticalTo",
+              "qualifiedname_html": "apache::thrift::test::IsIdenticalTo",
               "param": [
                 {
                   "type_html": "T",
@@ -591,6 +600,7 @@
               "definition_html": "auto apache::thrift::test::IsEqualTo",
               "argsstring_html": "(T expected)",
               "name_html": "IsEqualTo",
+              "qualifiedname_html": "apache::thrift::test::IsEqualTo",
               "param": [
                 {
                   "type_html": "T",
@@ -648,6 +658,7 @@
               "definition_html": "auto apache::thrift::test::IsEmpty",
               "argsstring_html": "()",
               "name_html": "IsEmpty",
+              "qualifiedname_html": "apache::thrift::test::IsEmpty",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
                 "line": "88",
@@ -711,6 +722,7 @@
               "definition_html": "void apache::thrift::test::expectPatch",
               "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected1, const T3 &amp;expected2)",
               "name_html": "expectPatch",
+              "qualifiedname_html": "apache::thrift::test::expectPatch",
               "param": [
                 {
                   "type_html": "P",
@@ -765,6 +777,7 @@
               "definition_html": "void apache::thrift::test::expectPatch",
               "argsstring_html": "(P patch, const folly::IOBuf &amp;actual, const folly::IOBuf &amp;expected1, const folly::IOBuf &amp;expected2)",
               "name_html": "expectPatch",
+              "qualifiedname_html": "apache::thrift::test::expectPatch",
               "param": [
                 {
                   "type_html": "P",
@@ -827,6 +840,7 @@
               "definition_html": "void apache::thrift::test::expectPatch",
               "argsstring_html": "(P patch, const T1 &amp;actual, const T2 &amp;expected)",
               "name_html": "expectPatch",
+              "qualifiedname_html": "apache::thrift::test::expectPatch",
               "param": [
                 {
                   "type_html": "P",
@@ -899,6 +913,7 @@
               "definition_html": "void apache::thrift::test::expectRoundTrip",
               "argsstring_html": "(const S &amp;seralizer, const T &amp;expected)",
               "name_html": "expectRoundTrip",
+              "qualifiedname_html": "apache::thrift::test::expectRoundTrip",
               "param": [
                 {
                   "type_html": "const S &amp;",

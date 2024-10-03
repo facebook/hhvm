@@ -15,6 +15,7 @@
       "definition_html": "static Ptr apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::get",
       "argsstring_html": "(void *s, FieldId fid, size_t, const Dyn &amp;n)",
       "name_html": "get",
+      "qualifiedname_html": "apache::thrift::op::detail::StructuredOp::get",
       "param": [
         {
           "type_html": "void *",

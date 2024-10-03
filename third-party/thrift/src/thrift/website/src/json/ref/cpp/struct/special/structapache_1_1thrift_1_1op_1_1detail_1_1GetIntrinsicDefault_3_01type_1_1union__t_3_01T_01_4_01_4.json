@@ -59,7 +59,7 @@
           "compoundname_html": "apache::thrift::op::detail::GetIntrinsicDefault&lt; type::union_t&lt; T &gt; &gt;::operator()",
           "functions": [
             {
-              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ThriftClearDefault_1a01e5e3193c60a6e30dc6f3c780d865ef",
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ThriftClearDefault_1a3e59b3e1cc64bc09874ea5ae9a20b7e0",
               "prot": "public",
               "static": "no",
               "const": "yes",
@@ -67,9 +67,10 @@
               "inline": "yes",
               "virtual": "non-virtual",
               "type_html": "const auto &amp;",
-              "definition_html": "const auto&amp; apache::thrift::op::detail::ThriftClearDefault&lt; Tag &gt;::operator()",
+              "definition_html": "const auto &amp; apache::thrift::op::detail::ThriftClearDefault&lt; Tag &gt;::operator()",
               "argsstring_html": "() const",
               "name_html": "operator()",
+              "qualifiedname_html": "apache::thrift::op::detail::ThriftClearDefault::operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
                 "line": "142",
@@ -83,7 +84,7 @@
                 "simple_raw": "const auto& operator()() const",
                 "detailed_html": "inline const auto&amp; operator()() const",
                 "detailed_raw": "inline const auto& operator()() const",
-                "original_definition_html": "const auto&amp; apache::thrift::op::detail::ThriftClearDefault&lt; Tag &gt;::operator()",
+                "original_definition_html": "const auto &amp; apache::thrift::op::detail::ThriftClearDefault&lt; Tag &gt;::operator()",
                 "original_argsstring_html": "() const"
               },
               "filepath": "fns/struct/apache/thrift/op/detail/ThriftClearDefault/operator.call",

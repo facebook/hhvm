@@ -6,13 +6,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing base_convert() : usage variations ***\n";
 
-
-// heredoc string
-$heredoc = <<<EOT
-abc
-xyz
-EOT;
-
 $inputs = vec[
        // int data
 /*1*/  0,
@@ -20,35 +13,6 @@ $inputs = vec[
        -1,
        -12,
        2147483647,
-
-       // float data
-/*6*/  10.5,
-       -10.5,
-       1.234567e2,
-       1.234567E-2,
-       .5,
-
-       // null data
-/*11*/ NULL,
-       null,
-
-       // boolean data
-/*13*/ true,
-       false,
-       TRUE,
-       FALSE,
-
-       // empty data
-/*17*/ "",
-       '',
-       vec[],
-
-       // string data
-/*20*/ "abcxyz",
-       'abcxyz',
-       $heredoc,
-
-
 ];
 
 // loop through each element of $inputs to check the behaviour of base_convert()

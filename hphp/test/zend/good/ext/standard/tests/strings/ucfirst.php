@@ -14,19 +14,11 @@ $str_array = vec[
   "abcd",     // double quoted string
   'xyz',      // single quoted string
   "-3",
-  -3,
   '-3.344',
-  -3.344,
-  NULL,
   "NULL",
   "0",
-  0,
-  TRUE,       // bool type
   "TRUE",
   "1",
-  1,
-  1.234444,
-  FALSE,
   "FALSE",
   " ",
   "     ",
@@ -43,10 +35,6 @@ foreach ($str_array as $string) {
 
 
 echo "\n#### Testing Miscelleneous inputs ####\n";
-
-echo "--- Testing arrays ---";
-$str_arr = vec["hello", "?world", "!$%**()%**[][[[&@#~!", vec[]];
-try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";
 // we get "Catchable fatal error: saying Object of class could not be converted

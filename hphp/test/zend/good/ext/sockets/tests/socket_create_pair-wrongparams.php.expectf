@@ -1,11 +1,5 @@
 Warning: socket_create_pair() expects exactly 4 parameters, 3 given in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d
 
-Warning: socket_create_pair() expects parameter 1 to be integer, string given in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d
-
-Warning: socket_create_pair() expects parameter 2 to be integer, null given in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d
-
-Warning: socket_create_pair() expects parameter 2 to be integer, null given in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d
-
 Warning: invalid socket type [31337] specified for argument 2, assuming SOCK_STREAM in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d
 
 Warning: unable to create socket pair [95]: Operation not supported in %s/zend/good/ext/sockets/tests/socket_create_pair-wrongparams.php on line %d

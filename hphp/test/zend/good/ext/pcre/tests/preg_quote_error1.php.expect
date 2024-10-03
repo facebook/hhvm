@@ -1,0 +1,5 @@
+*** Testing preg_quote() : error conditions ***
+
+Arg value is: this is a string
+string(16) "this is a string"
+Done

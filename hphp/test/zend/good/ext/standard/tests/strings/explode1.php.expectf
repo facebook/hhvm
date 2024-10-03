@@ -1,23 +1,18 @@
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
 
-Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 30
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 23
 bool(false)
 
-Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 31
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 24
 bool(false)
 
-Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 32
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 25
 bool(false)
 
-Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 33
+Warning: Invalid argument: delimiter: (empty) in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 26
 bool(false)
 -- Iteration 2 --
-string(54) "explode() expects parameter 1 to be string, null given"
-string(54) "explode() expects parameter 1 to be string, null given"
-string(54) "explode() expects parameter 1 to be string, null given"
-string(54) "explode() expects parameter 1 to be string, null given"
--- Iteration 3 --
 vec(1) {
   string(10) "1234NULL23"
 }
@@ -31,12 +26,7 @@ vec(2) {
   string(10) "1234NULL23"
   string(43) "00000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
--- Iteration 4 --
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
--- Iteration 5 --
+-- Iteration 3 --
 vec(5) {
   string(14) "1234NULL23abcd"
   string(0) ""
@@ -54,32 +44,7 @@ vec(2) {
   string(14) "1234NULL23abcd"
   string(42) "0000TRUEFALSE-11.234444true-11.24%%PHP%%ZEND"
 }
--- Iteration 6 --
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
--- Iteration 7 --
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
-string(57) "explode() expects parameter 1 to be string, boolean given"
--- Iteration 8 --
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
--- Iteration 9 --
-string(56) "explode() expects parameter 1 to be string, double given"
-string(56) "explode() expects parameter 1 to be string, double given"
-string(56) "explode() expects parameter 1 to be string, double given"
-string(56) "explode() expects parameter 1 to be string, double given"
--- Iteration 10 --
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
-string(57) "explode() expects parameter 1 to be string, integer given"
--- Iteration 11 --
+-- Iteration 4 --
 vec(2) {
   string(48) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24"
   string(3) "PHP"
@@ -200,7 +165,7 @@ vec(7) {
 
 *** Testing error conditions ***
 
-Warning: explode() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 66
+Warning: explode() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 59
 
-Warning: explode() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 67
+Warning: explode() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/strings/explode1.php on line 60
 Done

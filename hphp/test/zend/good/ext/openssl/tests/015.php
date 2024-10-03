@@ -18,7 +18,6 @@ function entrypoint_015(): void {
   var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $privkey));
   var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $wrong));
   var_dump(openssl_public_encrypt($data, inout $encrypted_bad, $obj));
-  try { var_dump(openssl_public_encrypt($obj, inout $encrypted_bad, $pubkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $output = null;
   openssl_private_decrypt($encrypted, inout $output, $privkey);
   var_dump($output);

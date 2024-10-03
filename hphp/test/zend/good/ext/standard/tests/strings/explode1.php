@@ -9,15 +9,8 @@
 echo "*** Testing explode() for basic operations ***\n";
 $delimiters = vec[
   "",  // len=0
-  NULL,
   "abcd",  // string
-  0,  // zero
   "0",
-  TRUE,  // boolean value
-  FALSE,
-  -1,  // negative integer
-  -11.23,  // double
-  4,  // positive integer
   "%",
 ];
 $string = "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND";

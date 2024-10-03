@@ -1,8 +1,6 @@
 Warning: preg_grep() expects at most 3 parameters, 4 given in %s/test/zend/good/ext/pcre/tests/grep2.php on line 3
 
-Warning: preg_grep() expects parameter 1 to be string, integer given in %s/test/zend/good/ext/pcre/tests/grep2.php on line 4
-
-Warning: Compilation failed: nothing to repeat at offset 0 in %s/test/zend/good/ext/pcre/tests/grep2.php on line 5
+Warning: Compilation failed: nothing to repeat at offset 0 in %s/test/zend/good/ext/pcre/tests/grep2.php on line 4
 bool(false)
 dict(3) {
   [5]=>

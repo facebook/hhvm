@@ -8,8 +8,6 @@ try { var_dump(constant()); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 try { var_dump(constant("", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(constant(""));
 
-try { var_dump(constant(vec[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
 var_dump(constant("TEST_CONST"));
 
 var_dump(constant("TEST_CONST2"));

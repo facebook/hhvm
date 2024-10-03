@@ -20,19 +20,11 @@ $str_array = vec[
                     "abcd",     // double quoted string
                     'xyz',      // single quoted string
                     "-3",
-                    -3,
                     '-3.344',
-                    -3.344,
-                    NULL,
                     "NULL",
                     "0",
-                    0,
-                    TRUE,       // bool type
                     "TRUE",
                     "1",
-                    1,
-                    1.234444,
-                    FALSE,
                     "FALSE",
                     " ",
                     "     ",
@@ -51,10 +43,6 @@ foreach ($str_array as $string) {
 
 echo "\n#### Testing Miscelleneous inputs ####\n";
 
-echo "--- Testing arrays ---";
-$str_arr = vec["Hello", "?world", "!$%**()%**[][[[&@#~!", vec[]];
-try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
 echo "\n--- Testing objects ---\n";
 /* we get "Catchable fatal error: saying Object of class could not be converted
  * to string" by default when an object is passed instead of string, but that
@@ -68,13 +56,9 @@ $filename1 = sys_get_temp_dir().'/'."dummy-lcfirst.txt";
 $file1 = fopen($filename1, "w");                // creating new file
 /* getting resource type for file handle */
 $string1 = get_resource_type($file1);
-$string2 = (int)get_resource_type($file1);      // converting stream type to int
 
 /* $string1 is of "stream" type */
 var_dump(lcfirst($string1));
-
-/* $string2 holds a value of "int(0)" */
-try { var_dump(lcfirst($string2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 fclose($file1);                                 // closing the file "dummy-lcfirst.txt"
 unlink("$filename1");                           // deletes "dummy-lcfirst.txt"

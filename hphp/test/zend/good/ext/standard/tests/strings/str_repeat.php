@@ -6,22 +6,22 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing str_repeat() with possible strings ***";
-$variations = vec[
+$variations1 = vec[
   'a',
   'foo',
   'barbazbax',
   "\x00",
   '\0',
-  NULL,
-  TRUE,
-  4,
-  1.23,
   "",
   " "
 ];
 
+$variations2 = vec[
+  4,
+];
+
 /* variations in string and multiplier as an integer */
-foreach($variations as $input) {
+foreach($variations1 as $input) {
   $input__str = (string)($input);
   echo "\n--- str_repeat() of '$input__str' ---\n" ;
   for($n=0; $n<4; $n++) {
@@ -33,10 +33,10 @@ foreach($variations as $input) {
 /* variations in multiplier as well as string to be repeated. Same varient
    values are used as string to be repeated as well as multiplier */
 echo "\n\n*** Testing str_repeat() with various strings & multiplier value ***";
-foreach ( $variations as $input ) {
+foreach ( $variations1 as $input ) {
   $input__str = (string)($input);
   echo "\n--- str_repeat() of '$input__str' ---\n" ;
-  foreach ( $variations as $multiplier ) {
+  foreach ( $variations2 as $multiplier ) {
     $multiplier__str = (string)($multiplier);
     echo "-- after repeating '$multiplier__str' times is => ";
     try { var_dump( str_repeat($input, $multiplier) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

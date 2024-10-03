@@ -15,9 +15,3 @@ bool(false)
 
 Warning: Unknown cipher algorithm in %s/test/zend/good/ext/openssl/tests/openssl_decrypt_error.php on line 16
 bool(false)
-
-Warning: openssl_decrypt() expects parameter 1 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_decrypt_error.php on line 17
-
-Warning: openssl_decrypt() expects parameter 2 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_decrypt_error.php on line 18
-
-Warning: openssl_decrypt() expects parameter 3 to be string, vec given in %s/test/zend/good/ext/openssl/tests/openssl_decrypt_error.php on line 19

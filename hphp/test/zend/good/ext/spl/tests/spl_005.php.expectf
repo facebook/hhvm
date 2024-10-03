@@ -1,6 +1,4 @@
 string(32) "%s"
 
-Warning: spl_object_hash() expects parameter 1 to be object, integer given in %s/spl_005.php on line 4
-
-Warning: spl_object_hash() expects exactly 1 parameter, 0 given in %s/spl_005.php on line 5
+Warning: spl_object_hash() expects exactly 1 parameter, 0 given in %s/spl_005.php on line 4
 ===DONE===

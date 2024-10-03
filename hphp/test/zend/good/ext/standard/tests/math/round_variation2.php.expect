@@ -1,0 +1,17 @@
+*** Testing round() : usage variations ***
+
+-- Iteration 1 --
+float(123)
+
+-- Iteration 2 --
+float(123.4)
+
+-- Iteration 3 --
+float(123.4456789)
+
+-- Iteration 4 --
+float(0)
+
+-- Iteration 5 --
+float(123.4456789)
+===Done===

@@ -8,7 +8,7 @@
 #include <fizz/server/TicketTypes.h>
 #include <fizz/util/FizzUtil.h>
 
-#include <fizz/crypto/exchange/X25519.h>
+#include <fizz/backend/libsodium/crypto/exchange/X25519.h>
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/io/async/SSLContext.h>
@@ -153,7 +153,7 @@ std::unique_ptr<KeyExchange> FizzUtil::createKeyExchangeFromBuf(
       return kex;
     }
     case hpke::KEMId::x25519: {
-      auto kex = std::make_unique<X25519KeyExchange>();
+      auto kex = std::make_unique<libsodium::X25519KeyExchange>();
       kex->setPrivateKey(folly::IOBuf::copyBuffer(
           folly::unhexlify(folly::StringPiece(privKey))));
       return kex;

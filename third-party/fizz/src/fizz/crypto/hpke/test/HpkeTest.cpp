@@ -6,6 +6,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#include <fizz/backend/libsodium/LibSodium.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/crypto/hpke/Hpke.h>
 #include <fizz/crypto/hpke/Utils.h>
@@ -1883,7 +1884,7 @@ MATCHER_P(TrafficKeyMatcher, expectedKey, "") {
       folly::IOBufEqualTo()(expectedKey->key, arg->key);
 }
 
-class HpkeMockX25519KeyExchange : public X25519KeyExchange {
+class HpkeMockX25519KeyExchange : public libsodium::X25519KeyExchange {
  public:
   MOCK_METHOD(void, generateKeyPair, ());
 };
@@ -1931,7 +1932,7 @@ std::unique_ptr<KeyExchange> generateAuthKex(
   }
   switch (group) {
     case NamedGroup::x25519: {
-      auto dKex = std::make_unique<X25519KeyExchange>();
+      auto dKex = std::make_unique<libsodium::X25519KeyExchange>();
       dKex->setKeyPair(toIOBuf(privateKey), toIOBuf(publicKey));
       return dKex;
     }
@@ -1972,7 +1973,7 @@ SetupParam getSetupParam(
     std::unique_ptr<MockAeadCipher> cipher) {
   switch (group) {
     case NamedGroup::x25519: {
-      auto dKex = dynamic_cast<X25519KeyExchange*>(kex.get());
+      auto dKex = dynamic_cast<libsodium::X25519KeyExchange*>(kex.get());
       CHECK(dKex);
       dKex->setKeyPair(toIOBuf(privateKey), toIOBuf(publicKey));
       break;
@@ -2091,7 +2092,7 @@ TEST(HpkeTest, TestSetup) {
     std::unique_ptr<KeyExchange> decapKex;
     switch (testParam.group) {
       case NamedGroup::x25519: {
-        decapKex = std::make_unique<X25519KeyExchange>();
+        decapKex = std::make_unique<libsodium::X25519KeyExchange>();
         break;
       }
       case NamedGroup::secp256r1: {

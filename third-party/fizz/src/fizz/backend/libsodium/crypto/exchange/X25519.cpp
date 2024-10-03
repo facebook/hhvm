@@ -6,16 +6,14 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/crypto/exchange/X25519.h>
-
-#include <fizz/crypto/Utils.h>
+#include <fizz/backend/libsodium/crypto/exchange/X25519.h>
 
 #include <folly/Conv.h>
 #include <sodium.h>
 
 using namespace folly;
 
-namespace fizz {
+namespace fizz::libsodium {
 
 void X25519KeyExchange::setKeyPair(
     std::unique_ptr<folly::IOBuf> gotPrivKey,
@@ -114,4 +112,4 @@ std::size_t X25519KeyExchange::getExpectedKeyShareSize() const {
   return kCurve25519PubBytes;
 }
 
-} // namespace fizz
+} // namespace fizz::libsodium

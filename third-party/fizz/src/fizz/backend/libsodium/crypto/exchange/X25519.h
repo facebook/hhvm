@@ -14,7 +14,7 @@
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
-namespace fizz {
+namespace fizz::libsodium {
 
 /**
  * X25519 key exchange implementation using libsodium.
@@ -45,4 +45,4 @@ class X25519KeyExchange : public KeyExchange {
   folly::Optional<PrivKey> privKey_;
   folly::Optional<PubKey> pubKey_;
 };
-} // namespace fizz
+} // namespace fizz::libsodium

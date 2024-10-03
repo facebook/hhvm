@@ -12,13 +12,11 @@
 
 #include <fizz/backend/libaegis/LibAEGIS.h>
 #include <fizz/backend/liboqs/LibOQS.h>
+#include <fizz/backend/libsodium/LibSodium.h>
 #include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/Hkdf.h>
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
-#include <fizz/crypto/exchange/X25519.h>
-
-#include <sodium.h>
 
 namespace fizz {
 
@@ -34,12 +32,12 @@ std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     case NamedGroup::secp521r1:
       return fizz::openssl::makeKeyExchange<fizz::P521>();
     case NamedGroup::x25519:
-      return std::make_unique<X25519KeyExchange>();
+      return fizz::libsodium::makeKeyExchange<fizz::X25519>();
 #if FIZZ_HAVE_OQS
     case NamedGroup::x25519_kyber512:
     case NamedGroup::x25519_kyber512_experimental:
       return std::make_unique<HybridKeyExchange>(
-          std::make_unique<X25519KeyExchange>(),
+          fizz::libsodium::makeKeyExchange<fizz::X25519>(),
           fizz::liboqs::makeKeyExchange<Kyber512>(role));
     case NamedGroup::secp256r1_kyber512:
       return std::make_unique<HybridKeyExchange>(
@@ -50,7 +48,7 @@ std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
     case NamedGroup::x25519_kyber768_draft00:
     case NamedGroup::x25519_kyber768_experimental:
       return std::make_unique<HybridKeyExchange>(
-          std::make_unique<X25519KeyExchange>(),
+          fizz::libsodium::makeKeyExchange<fizz::X25519>(),
           fizz::liboqs::makeKeyExchange<Kyber768>(role));
     case NamedGroup::secp256r1_kyber768_draft00:
       return std::make_unique<HybridKeyExchange>(
@@ -103,7 +101,7 @@ const HasherFactoryWithMetadata* MultiBackendFactory::makeHasherFactory(
 
 void MultiBackendFactory::makeRandomBytes(unsigned char* out, size_t count)
     const {
-  randombytes_buf(out, count);
+  libsodium::random(out, count);
 }
 
 std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(

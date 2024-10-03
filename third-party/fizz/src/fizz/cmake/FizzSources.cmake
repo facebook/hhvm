@@ -1,4 +1,4 @@
-# @generated SignedSource<<40c6f40d7a7dd11f2990134b5af6fa45>>
+# @generated SignedSource<<b886bc306435900c000f58aa3c6387f5>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -14,6 +14,7 @@ set(
     FIZZ_LIBRARY_SOURCES
         backend/libaegis/AEGISCipher.cpp
         backend/liboqs/OQSKeyExchange.cpp
+        backend/libsodium/crypto/exchange/X25519.cpp
         backend/openssl/certificate/CertUtils.cpp
         backend/openssl/crypto/OpenSSLKeyUtils.cpp
         backend/openssl/crypto/Sha.cpp
@@ -41,7 +42,6 @@ set(
         crypto/Utils.cpp
         crypto/aead/IOBufUtil.cpp
         crypto/exchange/HybridKeyExchange.cpp
-        crypto/exchange/X25519.cpp
         crypto/hpke/Context.cpp
         crypto/hpke/DHKEM.cpp
         crypto/hpke/Hkdf.cpp
@@ -105,6 +105,8 @@ set(
         backend/libaegis/LibAEGIS.h
         backend/liboqs/LibOQS.h
         backend/liboqs/OQSKeyExchange.h
+        backend/libsodium/LibSodium.h
+        backend/libsodium/crypto/exchange/X25519.h
         backend/openssl/Hasher.h
         backend/openssl/OpenSSL.h
         backend/openssl/Properties.h
@@ -158,7 +160,6 @@ set(
         crypto/exchange/AsyncKeyExchange.h
         crypto/exchange/HybridKeyExchange.h
         crypto/exchange/KeyExchange.h
-        crypto/exchange/X25519.h
         crypto/hpke/Context.h
         crypto/hpke/DHKEM.h
         crypto/hpke/Hkdf.h

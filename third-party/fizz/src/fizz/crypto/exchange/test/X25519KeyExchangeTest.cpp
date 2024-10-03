@@ -8,12 +8,13 @@
 
 #include <folly/portability/GTest.h>
 
-#include <fizz/crypto/exchange/X25519.h>
+#include <fizz/backend/libsodium/crypto/exchange/X25519.h>
 #include <folly/Range.h>
 #include <folly/String.h>
 
 using namespace folly;
 
+using namespace fizz::libsodium;
 namespace fizz {
 namespace test {
 

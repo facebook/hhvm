@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -14,10 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class AnEnum(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class AnEnum(thrift.py3.types.CompiledEnum):
     NOTSET = 0
     ONE = 1
     TWO = 2
@@ -51,10 +47,7 @@ class AnEnum(
 
 
 
-class AnEnumRenamed(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class AnEnumRenamed(thrift.py3.types.CompiledEnum):
     name_ = 0
     value_ = 1
     renamed_ = 2
@@ -86,10 +79,7 @@ class AnEnumRenamed(
 
 
 
-class Flags(
-    thrift.py3.types.Flag,
-    metaclass=__EnumMeta,
-):
+class Flags(thrift.py3.types.Flag):
     flag_A = 1
     flag_B = 2
     flag_C = 4
@@ -123,10 +113,7 @@ class Flags(
 
 
 
-class __BinaryUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __BinaryUnionType(thrift.py3.types.CompiledEnum):
     iobuf_val = 1
     EMPTY = 0
 

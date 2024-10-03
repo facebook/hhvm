@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.namespace_from_package_without_module_name.module.thrift_metadata
 

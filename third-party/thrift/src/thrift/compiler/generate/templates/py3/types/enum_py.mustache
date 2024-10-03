@@ -22,11 +22,9 @@ This is a template for creating thrift-python enums
 {{#program:enums}}
 
 
-class {{enum:name}}(
-    thrift.py3.types.{{^enum:flags?}}CompiledEnum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}},
-    {{! TODO: int, }}
-    metaclass=__EnumMeta,
-):
+class {{enum:name}}(thrift.py3.types.{{!
+        }}{{^enum:flags?}}CompiledEnum{{/enum:flags?}}{{!
+        }}{{#enum:flags?}}Flag{{/enum:flags?}}):
     {{#enum:values}}
     {{enum_value:py_name}} = {{enum_value:value}}
     {{/enum:values}}

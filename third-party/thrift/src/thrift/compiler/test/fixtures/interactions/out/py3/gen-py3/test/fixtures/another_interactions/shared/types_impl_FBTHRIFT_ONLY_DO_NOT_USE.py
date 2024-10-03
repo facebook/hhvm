@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.another_interactions.shared.thrift_metadata
 

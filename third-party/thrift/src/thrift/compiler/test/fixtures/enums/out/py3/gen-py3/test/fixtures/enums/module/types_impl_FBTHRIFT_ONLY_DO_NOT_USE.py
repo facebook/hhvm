@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.enums.module.thrift_metadata
 
@@ -14,10 +13,7 @@ _fbthrift__module_name__ = "test.fixtures.enums.module.types"
 
 
 
-class Metasyntactic(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class Metasyntactic(thrift.py3.types.CompiledEnum):
     FOO = 1
     BAR = 2
     BAZ = 3
@@ -50,10 +46,7 @@ class Metasyntactic(
 
 
 
-class MyEnum1(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnum1(thrift.py3.types.CompiledEnum):
     ME1_0 = 0
     ME1_1 = 1
     ME1_2 = 2
@@ -88,10 +81,7 @@ class MyEnum1(
 
 
 
-class MyEnum2(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnum2(thrift.py3.types.CompiledEnum):
     ME2_0 = 0
     ME2_1 = 1
     ME2_2 = 2
@@ -123,10 +113,7 @@ class MyEnum2(
 
 
 
-class MyEnum3(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnum3(thrift.py3.types.CompiledEnum):
     ME3_0 = 0
     ME3_1 = 1
     ME3_N2 = -2
@@ -161,10 +148,7 @@ class MyEnum3(
 
 
 
-class MyEnum4(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnum4(thrift.py3.types.CompiledEnum):
     ME4_A = 2147483645
     ME4_B = 2147483646
     ME4_C = 2147483647
@@ -197,10 +181,7 @@ class MyEnum4(
 
 
 
-class MyBitmaskEnum1(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
     FOUR = 4
@@ -232,10 +213,7 @@ class MyBitmaskEnum1(
 
 
 
-class MyBitmaskEnum2(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
     FOUR = 4

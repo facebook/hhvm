@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -14,10 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class MyEnumA(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnumA(thrift.py3.types.CompiledEnum):
     fieldA = 1
     fieldB = 2
     fieldC = 4
@@ -49,10 +45,7 @@ class MyEnumA(
 
 
 
-class AnnotatedEnum(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class AnnotatedEnum(thrift.py3.types.CompiledEnum):
     FIELDA = 2
     FIELDB = 4
     FIELDC = 9
@@ -84,10 +77,7 @@ class AnnotatedEnum(
 
 
 
-class AnnotatedEnum2(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
     FIELDA = 2
     FIELDB = 4
     FIELDC = 9
@@ -119,10 +109,7 @@ class AnnotatedEnum2(
 
 
 
-class MyEnumB(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnumB(thrift.py3.types.CompiledEnum):
     AField = 0
 
     __module__ = _fbthrift__module_name__
@@ -153,10 +140,7 @@ class MyEnumB(
 
 
 
-class __SimpleUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __SimpleUnionType(thrift.py3.types.CompiledEnum):
     intValue = 7
     stringValue = 2
     EMPTY = 0
@@ -165,10 +149,7 @@ class __SimpleUnionType(
     __slots__ = ()
 
 
-class __ComplexUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     intValue = 1
     opt_intValue = 201
     stringValue = 3
@@ -203,10 +184,7 @@ class __ComplexUnionType(
     __slots__ = ()
 
 
-class __FloatUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __FloatUnionType(thrift.py3.types.CompiledEnum):
     floatSide = 1
     doubleSide = 2
     EMPTY = 0

@@ -23,11 +23,7 @@ This is a template for creating compiled Enum and Flag pyx information
 {{#program:filtered_structs}}
 {{#struct:union?}}
 
-class __{{struct:name}}Type(
-    thrift.py3.types.CompiledEnum,
-    {{! TODO: int, }}
-    metaclass=__EnumMeta,
-):
+class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
     {{#struct:fields}}
     {{field:py_name}} = {{field:key}}
     {{/struct:fields}}

@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -15,10 +14,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class __ComplexUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     intValue = 1
     stringValue = 5
     intListValue = 2
@@ -31,10 +27,7 @@ class __ComplexUnionType(
     __slots__ = ()
 
 
-class __ListUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __ListUnionType(thrift.py3.types.CompiledEnum):
     intListValue = 2
     stringListValue = 3
     EMPTY = 0
@@ -43,10 +36,7 @@ class __ListUnionType(
     __slots__ = ()
 
 
-class __DataUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __DataUnionType(thrift.py3.types.CompiledEnum):
     binaryData = 1
     stringData = 2
     EMPTY = 0
@@ -55,10 +45,7 @@ class __DataUnionType(
     __slots__ = ()
 
 
-class __ValUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __ValUnionType(thrift.py3.types.CompiledEnum):
     v1 = 1
     v2 = 2
     EMPTY = 0
@@ -67,10 +54,7 @@ class __ValUnionType(
     __slots__ = ()
 
 
-class __VirtualComplexUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
     thingOne = 1
     thingTwo = 2
     EMPTY = 0
@@ -79,10 +63,7 @@ class __VirtualComplexUnionType(
     __slots__ = ()
 
 
-class __NonCopyableUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
     s = 1
     EMPTY = 0
 

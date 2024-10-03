@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import module0.thrift_metadata
 
@@ -14,10 +13,7 @@ _fbthrift__module_name__ = "module0.types"
 
 
 
-class Enum(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class Enum(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
     THREE = 3

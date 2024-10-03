@@ -6,7 +6,6 @@
 #
 
 
-from thrift.python.types import EnumMeta as __EnumMeta
 import thrift.py3.types
 import test.fixtures.basic.module.thrift_metadata
 
@@ -14,10 +13,7 @@ _fbthrift__module_name__ = "test.fixtures.basic.module.types"
 
 
 
-class MyEnum(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class MyEnum(thrift.py3.types.CompiledEnum):
     MyValue1 = 0
     MyValue2 = 1
 
@@ -48,10 +44,7 @@ class MyEnum(
 
 
 
-class HackEnum(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class HackEnum(thrift.py3.types.CompiledEnum):
     Value1 = 0
     Value2 = 1
 
@@ -83,10 +76,7 @@ class HackEnum(
 
 
 
-class __MyUnionType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __MyUnionType(thrift.py3.types.CompiledEnum):
     myEnum = 1
     myStruct = 2
     myDataItem = 3
@@ -97,10 +87,7 @@ class __MyUnionType(
     __slots__ = ()
 
 
-class __UnionToBeRenamedType(
-    thrift.py3.types.CompiledEnum,
-    metaclass=__EnumMeta,
-):
+class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
     reserved_field = 1
     EMPTY = 0
 

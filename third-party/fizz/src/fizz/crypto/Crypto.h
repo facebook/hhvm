@@ -16,39 +16,39 @@ namespace fizz {
 
 // AEAD Ciphers
 struct AESGCM128 {
-  static const size_t kKeyLength{16};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{16};
+  static constexpr size_t kIVLength{12};
+  static constexpr size_t kTagLength{16};
 };
 
 struct AESGCM256 {
-  static const size_t kKeyLength{32};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{32};
+  static constexpr size_t kIVLength{12};
+  static constexpr size_t kTagLength{16};
 };
 
 struct AESOCB128 {
-  static const size_t kKeyLength{16};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{16};
+  static constexpr size_t kIVLength{12};
+  static constexpr size_t kTagLength{16};
 };
 
 struct ChaCha20Poly1305 {
-  static const size_t kKeyLength{32};
-  static const size_t kIVLength{12};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{32};
+  static constexpr size_t kIVLength{12};
+  static constexpr size_t kTagLength{16};
 };
 
 struct AEGIS128L {
-  static const size_t kKeyLength{16};
-  static const size_t kIVLength{16};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{16};
+  static constexpr size_t kIVLength{16};
+  static constexpr size_t kTagLength{16};
 };
 
 struct AEGIS256 {
-  static const size_t kKeyLength{32};
-  static const size_t kIVLength{32};
-  static const size_t kTagLength{16};
+  static constexpr size_t kKeyLength{32};
+  static constexpr size_t kIVLength{32};
+  static constexpr size_t kTagLength{16};
 };
 
 enum class HashFunction { Sha256, Sha384, Sha512 };

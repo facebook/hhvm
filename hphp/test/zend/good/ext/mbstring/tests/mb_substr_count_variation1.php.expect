@@ -1,0 +1,17 @@
+*** Testing mb_substr_count() : usage variations ***
+
+-- Iteration 1 --
+int(0)
+
+-- Iteration 2 --
+int(0)
+
+-- Iteration 3 --
+int(1)
+
+-- Iteration 4 --
+int(1)
+
+-- Iteration 5 --
+int(1)
+Done

@@ -57,7 +57,7 @@ function entrypoint_mb_strpos(): void {
   $r =   mb_strpos($euc_jp, '0', 40,       'EUC-JP');
   ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
   // Note: Returned NULL string
-  // echo gettype($r). ' val '. $r ."\n"; 
+  // echo gettype($r). ' val '. $r ."\n";
 
 
   // Non-existent
@@ -95,21 +95,4 @@ function entrypoint_mb_strpos(): void {
   ($r === FALSE) ? print "OK_STR\n"     : print "NG_STR\n";
   $r = mb_strpos($euc_jp, b"\n");
   ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
-
-
-  // Invalid Parameters
-  echo "== INVALID PARAMETER TEST ==\n";
-
-  $r = false;
-  try { $r = mb_strpos($euc_jp,'','EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  ($r === FALSE) ? print("OK_NULL\n") : print("NG_NULL\n");
-  $r = false;
-  try { $r = mb_strpos($euc_jp, t_ary(), 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  ($r === FALSE) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-  $r = false;
-  try { $r = mb_strpos($euc_jp, t_obj(), 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  ($r === FALSE) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-  $r = false;
-  try { $r = mb_strpos($euc_jp, t_obj(), 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  ($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 }

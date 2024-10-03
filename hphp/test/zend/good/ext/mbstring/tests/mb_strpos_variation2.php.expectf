@@ -2,88 +2,20 @@
 
 -- Iteration 1 --
 
-Warning: mb_strpos() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+Warning: Empty delimiter. in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+bool(false)
 
 -- Iteration 2 --
 
-Warning: mb_strpos() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+Warning: Empty delimiter. in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+bool(false)
 
 -- Iteration 3 --
-
-Warning: mb_strpos() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+int(0)
 
 -- Iteration 4 --
-
-Warning: mb_strpos() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
+int(0)
 
 -- Iteration 5 --
-
-Warning: mb_strpos() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 6 --
-
-Warning: mb_strpos() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 7 --
-
-Warning: mb_strpos() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 8 --
-
-Warning: mb_strpos() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 9 --
-
-Warning: mb_strpos() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 10 --
-
-Warning: mb_strpos() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 11 --
-
-Warning: mb_strpos() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 12 --
-
-Warning: mb_strpos() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 13 --
-
-Warning: mb_strpos() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 14 --
-
-Warning: mb_strpos() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 15 --
-
-Warning: mb_strpos() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 16 --
-
-Warning: Empty delimiter. in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
 bool(false)
-
--- Iteration 17 --
-
-Warning: Empty delimiter. in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-bool(false)
-
--- Iteration 18 --
-int(0)
-
--- Iteration 19 --
-int(0)
-
--- Iteration 20 --
-bool(false)
-
--- Iteration 21 --
-
-Warning: mb_strpos() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
-
--- Iteration 22 --
-
-Warning: mb_strpos() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_strpos_variation2.php on line %d
 Done

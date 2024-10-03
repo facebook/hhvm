@@ -1,0 +1,26 @@
+*** Testing mb_ereg() : usage variations ***
+
+-- Iteration 1 --
+bool(false)
+NULL
+
+-- Iteration 2 --
+bool(false)
+NULL
+
+-- Iteration 3 --
+int(3)
+vec(1) {
+  string(3) "str"
+}
+
+-- Iteration 4 --
+int(3)
+vec(1) {
+  string(3) "str"
+}
+
+-- Iteration 5 --
+bool(false)
+NULL
+Done

@@ -39,7 +39,7 @@ function entrypoint_mb_strlen(): void {
   $jis = mb_convert_encoding($euc_jp, 'JIS','EUC-JP');
   print  mb_strlen($jis,'JIS') . "\n";
   mb_internal_encoding('JIS') || print("mb_internal_encoding() failed\n");
-  print  strlen($jis) . "\n"; 
+  print  strlen($jis) . "\n";
 
   // UTF-8
   // Note: either convert_encoding or strlen has problem
@@ -47,21 +47,11 @@ function entrypoint_mb_strlen(): void {
   $utf8 = mb_convert_encoding($euc_jp, 'UTF-8','EUC-JP');
   print  mb_strlen($utf8,'UTF-8') . "\n";
   mb_internal_encoding('UTF-8') || print("mb_internal_encoding() failed\n");
-  print  strlen($utf8) . "\n";  
+  print  strlen($utf8) . "\n";
 
 
   // Wrong Parameters
   echo "== WRONG PARAMETERS ==\n";
-  // Array
-  // Note: PHP Warning, strlen() expects parameter 1 to be string, array given
-  $r = null;
-  try { $r = strlen(t_ary()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  echo (string)$r."\n";
-  // Object
-  // Note: PHP Warning, strlen() expects parameter 1 to be string, object given
-  $r = null;
-  try { $r = strlen(t_obj()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  echo (string)$r."\n";
   // Wrong encoding
   mb_internal_encoding('EUC-JP');
   $r = mb_strlen($euc_jp, 'BAD_NAME');

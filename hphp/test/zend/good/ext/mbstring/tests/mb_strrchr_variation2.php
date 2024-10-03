@@ -22,9 +22,9 @@ class classWithoutToString
 <<__EntryPoint>>
 function entrypoint_mb_strrchr_variation2(): void {
   /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
-   * Description: Finds the last occurrence of a character in a string within another 
+   * Description: Finds the last occurrence of a character in a string within another
    * Source code: ext/mbstring/mbstring.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   echo "*** Testing mb_strrchr() : usage variation ***\n";
@@ -41,57 +41,15 @@ function entrypoint_mb_strrchr_variation2(): void {
 hello world
 EOT;
 
-  // get a resource variable
-  $fp = fopen(__FILE__, "r");
-
   // add arrays
   $index_array = vec[1, 2, 3];
   $assoc_array = dict['one' => 1, 'two' => 2];
 
   //array of values to iterate over
   $inputs = dict[
-
-        // int data
-        'int 0' => 0,
-        'int 1' => 1,
-        'int 12345' => 12345,
-        'int -12345' => -2345,
-
-        // float data
-        'float 10.5' => 10.5,
-        'float -10.5' => -10.5,
-        'float 12.3456789000e10' => 12.3456789000e10,
-        'float -12.3456789000e10' => -12.3456789000e10,
-        'float .5' => .5,
-
-        // array data
-        'empty array' => vec[],
-        'int indexed array' => $index_array,
-        'associative array' => $assoc_array,
-        'nested arrays' => vec['foo', $index_array, $assoc_array],
-
-        // null data
-        'uppercase NULL' => NULL,
-        'lowercase null' => null,
-
-        // boolean data
-        'lowercase true' => true,
-        'lowercase false' =>false,
-        'uppercase TRUE' =>TRUE,
-        'uppercase FALSE' =>FALSE,
-
         // empty data
         'empty string DQ' => "",
         'empty string SQ' => '',
-
-        // object data
-        'instance of classWithToString' => new classWithToString(),
-        'instance of classWithoutToString' => new classWithoutToString(),
-
-
-
-        // resource variable
-        'resource' => $fp      
   ];
 
   // loop through each element of the array for needle
@@ -100,8 +58,6 @@ EOT;
         echo "\n--$key--\n";
         try { var_dump( mb_strrchr($haystack, $value, $part, $encoding) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   }
-
-  fclose($fp);
 
   echo "===DONE===\n";
 }

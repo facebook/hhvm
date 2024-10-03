@@ -1,0 +1,40 @@
+*** Testing mb_split() : usage variations ***
+
+-- Iteration 1 --
+vec(1) {
+  string(10) "string_val"
+}
+
+-- Iteration 2 --
+vec(1) {
+  string(10) "string_val"
+}
+
+-- Iteration 3 --
+vec(10) {
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(1) "_"
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+
+-- Iteration 4 --
+vec(10) {
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(0) ""
+  string(1) "_"
+  string(0) ""
+  string(0) ""
+  string(0) ""
+}
+Done

@@ -1,0 +1,17 @@
+*** Testing mb_strtoupper() : usage variations ***
+
+-- Iteration 1 --
+string(0) ""
+
+-- Iteration 2 --
+string(0) ""
+
+-- Iteration 3 --
+string(6) "STRING"
+
+-- Iteration 4 --
+string(6) "STRING"
+
+-- Iteration 5 --
+string(12) "HELLO, WORLD"
+Done

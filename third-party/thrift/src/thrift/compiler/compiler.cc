@@ -43,7 +43,6 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/t_generator.h>
 #include <thrift/compiler/parse/parse_ast.h>
-#include <thrift/compiler/sema/ast_mutator.h>
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/sema/sema_context.h>
@@ -773,9 +772,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   // C++ codegen inserts an empty const if this is false. Other languages may
   // dynamically determine whether the schema const exists.
   if (gparams.inject_schema_const) {
-    mutator_context mctx;
-    mctx.bundle = program_bundle.get();
-    schema_mutator()(ctx, mctx, *program_bundle->root_program());
+    sema::add_schema(ctx, *program_bundle);
   }
 
   program_bundle->root_program()->set_include_prefix(
@@ -793,8 +790,8 @@ parse_and_mutate_program(
     parsing_params params,
     diagnostic_params dparams) {
   diagnostic_results results;
-  sema_context ctx(sm, results, std::move(dparams));
-  return {parse_ast(sm, ctx, filename, std::move(params)), results};
+  diagnostics_engine diags(sm, results, std::move(dparams));
+  return {parse_ast(sm, diags, filename, std::move(params)), results};
 }
 
 std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
@@ -803,8 +800,8 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
     parsing_params pparams,
     diagnostic_params dparams) {
   diagnostic_results results;
-  sema_context ctx(sm, results, std::move(dparams));
-  auto programs = parse_ast(sm, ctx, filename, std::move(pparams));
+  diagnostics_engine diags(sm, results, std::move(dparams));
+  auto programs = parse_ast(sm, diags, filename, std::move(pparams));
   for (const auto& diag : results.diagnostics()) {
     fmt::print(stderr, "{}\n", diag);
   }

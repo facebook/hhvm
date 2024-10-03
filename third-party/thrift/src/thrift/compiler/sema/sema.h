@@ -16,15 +16,11 @@
 
 #pragma once
 
+#include <thrift/compiler/sema/sema_context.h>
+
 namespace apache::thrift::compiler {
 
-class ast_mutator;
-class sema_context;
 class t_program_bundle;
-
-// Extra mutator for schema support. It is separate from the rest of sema
-// because it is run optionally.
-ast_mutator schema_mutator();
 
 // Thrift semantic analyzer consisting of a sequence of mutation and validation
 // stages.
@@ -45,6 +41,9 @@ struct sema {
   };
 
   result run(sema_context& ctx, t_program_bundle& bundle);
+
+  // Adds schema to the to the root program.
+  static void add_schema(sema_context& ctx, t_program_bundle& bundle);
 };
 
 } // namespace apache::thrift::compiler

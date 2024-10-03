@@ -36,7 +36,6 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/lexer.h>
 #include <thrift/compiler/parse/parser.h>
-#include <thrift/compiler/sema/ast_mutator.h>
 #include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/source_location.h>
 
@@ -1095,6 +1094,9 @@ std::unique_ptr<t_program_bundle> parse_ast(
   } catch (const parsing_terminator&) {
     return {}; // Return a null program bundle if parsing failed.
   }
+  if (diags.has_errors()) {
+    return programs;
+  }
 
   sema_context ctx(
       diags.source_mgr(),
@@ -1103,21 +1105,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
   if (sparams) {
     ctx.sema_parameters() = *sparams;
   }
-
-  // Resolve types in the root program.
-  if (!params.use_legacy_type_ref_resolution) {
-    type_ref_resolver().run(ctx, *programs);
-  }
-  std::string program_prefix = root_program.name() + ".";
-  for (t_placeholder_typedef& t :
-       root_program.scope()->placeholder_typedefs()) {
-    if (!t.resolve() && t.name().find(program_prefix) == 0) {
-      diags.error(t, "Type `{}` not defined.", t.name());
-    }
-  }
-  if (!diags.has_errors()) {
-    sema(params.use_legacy_type_ref_resolution).run(ctx, *programs);
-  }
+  sema(params.use_legacy_type_ref_resolution).run(ctx, *programs);
   return programs;
 }
 

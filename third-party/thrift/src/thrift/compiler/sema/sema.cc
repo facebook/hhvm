@@ -21,16 +21,134 @@
 #include <type_traits>
 #include <unordered_set>
 
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
-#include <thrift/compiler/sema/ast_mutator.h>
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
 namespace apache::thrift::compiler {
 namespace {
+
+// Mutators have mutable access to the AST.
+struct mutator_context : visitor_context {
+  t_program_bundle* bundle;
+};
+
+// An AST mutator is an ast_visitor that collects diagnostics and
+// may change the AST.
+class ast_mutator
+    : public basic_ast_visitor<false, sema_context&, mutator_context&> {
+  using base = basic_ast_visitor<false, sema_context&, mutator_context&>;
+
+ public:
+  using base::base;
+
+  void mutate(sema_context& ctx, t_program_bundle& bundle) {
+    mutator_context mctx;
+    mctx.bundle = &bundle;
+    for (auto itr = bundle.programs().rbegin(); itr != bundle.programs().rend();
+         ++itr) {
+      (*this)(ctx, mctx, *itr);
+    }
+  }
+};
+
+/// An AST mutator that replaces placeholder_typedefs with resolved types.
+class type_ref_resolver {
+ private:
+  bool unresolved_ = false;
+
+ public:
+  void resolve_in_place(t_type_ref& ref) {
+    unresolved_ = !ref.resolve() || unresolved_;
+  }
+
+  [[nodiscard]] t_type_ref resolve(t_type_ref ref) {
+    resolve_in_place(ref);
+    return ref;
+  }
+
+  bool run(sema_context& ctx, t_program_bundle& bundle) {
+    ast_mutator mutator;
+
+    auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {
+      node.set_ttype(resolve(node.ttype()));
+
+      if (node.kind() == t_const_value::CV_MAP) {
+        for (auto& map_val : node.get_map()) {
+          recurse(*map_val.first, recurse);
+          recurse(*map_val.second, recurse);
+        }
+      } else if (node.kind() == t_const_value::CV_LIST) {
+        for (auto& list_val : node.get_list()) {
+          recurse(*list_val, recurse);
+        }
+      }
+    };
+
+    mutator.add_field_visitor(
+        [&](sema_context&, mutator_context&, t_field& node) {
+          node.set_type(resolve(node.type()));
+
+          if (auto* dflt = node.get_default_value()) {
+            resolve_const_value(*dflt, resolve_const_value);
+          }
+        });
+
+    mutator.add_typedef_visitor(
+        [&](sema_context&, mutator_context&, t_typedef& node) {
+          node.set_type(resolve(node.type()));
+        });
+
+    mutator.add_function_visitor(
+        [&](sema_context& ctx, mutator_context& mctx, t_function& node) {
+          resolve_in_place(node.return_type());
+          resolve_in_place(node.interaction());
+          for (auto& field : node.params().fields()) {
+            mutator(ctx, mctx, field);
+          }
+        });
+    mutator.add_throws_visitor(
+        [&](sema_context& ctx, mutator_context& mctx, t_throws& node) {
+          for (auto& field : node.fields()) {
+            mutator(ctx, mctx, field);
+          }
+        });
+    mutator.add_stream_visitor(
+        [&](sema_context&, mutator_context&, t_stream& node) {
+          resolve_in_place(node.elem_type());
+        });
+    mutator.add_sink_visitor(
+        [&](sema_context&, mutator_context&, t_sink& node) {
+          resolve_in_place(node.elem_type());
+          resolve_in_place(node.final_response_type());
+        });
+
+    mutator.add_map_visitor([&](sema_context&, mutator_context&, t_map& node) {
+      resolve_in_place(node.key_type());
+      resolve_in_place(node.val_type());
+    });
+    mutator.add_set_visitor([&](sema_context&, mutator_context&, t_set& node) {
+      resolve_in_place(node.elem_type());
+    });
+    mutator.add_list_visitor(
+        [&](sema_context&, mutator_context&, t_list& node) {
+          resolve_in_place(node.elem_type());
+        });
+
+    mutator.add_const_visitor(
+        [&](sema_context&, mutator_context&, t_const& node) {
+          resolve_in_place(node.type_ref());
+          resolve_const_value(*node.value(), resolve_const_value);
+        });
+
+    mutator.mutate(ctx, bundle);
+    return !unresolved_;
+  }
+};
 
 void match_type_with_const_value(
     sema_context& ctx,
@@ -478,12 +596,6 @@ std::vector<ast_mutator> standard_mutators() {
 
 } // namespace
 
-ast_mutator schema_mutator() {
-  ast_mutator mutator;
-  mutator.add_program_visitor(&inject_schema_const);
-  return mutator;
-}
-
 bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
   bool success = true;
   if (!use_legacy_type_ref_resolution_) {
@@ -507,16 +619,43 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
 }
 
 sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
+  // Resolve types in the root program.
+  if (!use_legacy_type_ref_resolution_) {
+    type_ref_resolver().run(ctx, bundle);
+  }
+
+  t_program& root_program = *bundle.root_program();
+  std::string program_prefix = root_program.name() + ".";
+
+  result ret;
+  for (t_placeholder_typedef& t :
+       root_program.scope()->placeholder_typedefs()) {
+    if (!t.resolve() && t.name().find(program_prefix) == 0) {
+      ctx.error(t, "Type `{}` not defined.", t.name());
+      ret.unresolved_types = true;
+    }
+  }
+  if (ctx.has_errors()) {
+    return ret;
+  }
+
   for (auto& mutator : standard_mutators()) {
     mutator.mutate(ctx, bundle);
   }
   // We have no more mutators, so all type references **must** resolve.
-  result ret;
   ret.unresolved_types = !resolve_all_types(ctx, bundle);
   if (!ret.unresolved_types) {
     standard_validator()(ctx, *bundle.root_program());
   }
   return ret;
+}
+
+void sema::add_schema(sema_context& ctx, t_program_bundle& bundle) {
+  mutator_context mctx;
+  mctx.bundle = &bundle;
+  ast_mutator mutator;
+  mutator.add_program_visitor(&inject_schema_const);
+  mutator(ctx, mctx, *bundle.root_program());
 }
 
 } // namespace apache::thrift::compiler

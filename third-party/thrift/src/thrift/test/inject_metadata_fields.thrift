@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/internal.thrift"
 include "thrift/test/clear.thrift"
 include "thrift/test/inject_metadata_fields_annot.thrift"

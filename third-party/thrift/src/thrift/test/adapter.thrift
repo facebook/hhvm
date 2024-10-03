@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 cpp_include "thrift/test/AdapterTest.h"

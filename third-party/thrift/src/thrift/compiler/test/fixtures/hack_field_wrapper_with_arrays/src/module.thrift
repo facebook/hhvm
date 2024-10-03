@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/hack.thrift"
 include "include.thrift"
 
 struct MyStruct {

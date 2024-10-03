@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/scope.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/test/python_capi/thrift_dep.thrift"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/perf/cpp2/if/ApiBase.thrift"
 include "thrift/perf/cpp2/if/Api.thrift"
 
 namespace cpp2 facebook.thrift.benchmarks

@@ -23,7 +23,7 @@ PayloadSerializer::PayloadSerializerHolder::~PayloadSerializerHolder() {
 }
 
 PayloadSerializer& PayloadSerializer::PayloadSerializerHolder::get() {
-  auto* serializer = serializer_.load(std::memory_order_relaxed);
+  auto* serializer = serializer_.load(std::memory_order_acquire);
   if (FOLLY_UNLIKELY(serializer == nullptr)) {
     auto* newSerializer =
         new PayloadSerializer(LegacyPayloadSerializerStrategy());

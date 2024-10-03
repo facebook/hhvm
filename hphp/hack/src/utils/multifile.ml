@@ -31,6 +31,7 @@ let split_multifile_content content : (string * content) list =
   let file_name_of_header header =
     let pattern = Str.regexp "\n////" in
     let header = Str.global_replace pattern "" header in
+    let header = String.lstrip ~drop:(fun c -> Char.equal c '/') header in
     let pattern = Str.regexp "[ |\n]*" in
     let filename = Str.global_replace pattern "" header in
     filename

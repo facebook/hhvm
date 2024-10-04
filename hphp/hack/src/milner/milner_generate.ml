@@ -968,21 +968,25 @@ end = struct
       (env, Case { name; disjuncts })
     | Kind.Enum ->
       let name = fresh "E" in
-      let (bound, underlying_ty) =
+      let ty = Enum { name } in
+      let (env, bound, underlying_ty, value) =
         if Random.bool () then
           let bound = mk_arraykey env in
           let underlying_ty = subtypes_of env bound ~pick:true |> List.hd_exn in
-          (Some bound, underlying_ty)
+          let value = inhabitant_of env underlying_ty in
+          let env = Environment.record_subtype env ~super:bound ~sub:ty in
+          (env, Some bound, underlying_ty, value)
         else
           let underlying_ty = mk_arraykey env in
-          (None, underlying_ty)
+          let value = inhabitant_of env underlying_ty in
+          let env = Environment.record_subtype env ~super:Mixed ~sub:ty in
+          (env, None, underlying_ty, value)
       in
-      let value = inhabitant_of env underlying_ty in
       let env =
         Environment.add_definition env
         @@ Definition.enum ~name ~bound underlying_ty ~value
       in
-      (env, Enum { name })
+      (env, ty)
     | Kind.Container -> begin
       let env = Environment.{ env with for_option = false } in
       match Container.pick () with

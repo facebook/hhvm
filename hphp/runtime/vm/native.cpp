@@ -78,17 +78,8 @@ void pushInt(Registers& regs, const int64_t value) {
   }
 }
 
-void pushRval(Registers& regs, tv_rval tv, bool isFCallBuiltin) {
-  if (isFCallBuiltin) {
-    // tv_rval either points at the stack, or we don't have wide
-    // tv_vals. In either case, its actually pointing at a TypedValue
-    // already.
-    static_assert(TVOFF(m_data) == 0, "");
-    assertx((const char*)&val(tv) + TVOFF(m_type) == (const char*)&type(tv));
-    return pushInt(regs, (int64_t)&val(tv));
-  }
-  // Otherwise we need to materialize the TypedValue and push a
-  // pointer to it.
+void pushRval(Registers& regs, tv_rval tv) {
+  // We need to materialize the TypedValue and push a pointer to it.
   assertx(regs.spilled_rval_count < kMaxBuiltinArgs);
   regs.spilled_rvals[regs.spilled_rval_count++] = *tv;
   pushInt(regs, (int64_t)&regs.spilled_rvals[regs.spilled_rval_count - 1]);
@@ -139,23 +130,13 @@ void pushNativeArg(Registers& regs, const Func* const func, const int i,
 void populateArgs(Registers& regs,
                   const ActRec* fp,
                   const Func* const func,
-                  TypedValue* stk,
-                  const int numArgs,
-                  bool isFCallBuiltin) {
+                  const int numArgs) {
   // Regular FCalls will have their out parameter locations below the ActRec on
   // the stack, while FCallBuiltin has no ActRec to skip over.
-  auto io = isFCallBuiltin
-    ? stk + 1
-    : reinterpret_cast<TypedValue*>(const_cast<ActRec*>(fp) + 1);
-
-  auto const get = [&] (int idx) {
-    return isFCallBuiltin
-      ? tv_lval{&stk[-idx]}
-      : frame_local(fp, idx);
-  };
+  auto io = reinterpret_cast<TypedValue*>(const_cast<ActRec*>(fp) + 1);
 
   for (auto i = 0; i < numArgs; ++i) {
-    auto const arg = get(i);
+    auto const arg = frame_local(fp, i);
     auto const& pi = func->params()[i];
     auto const type = pi.builtinType();
     if (func->isInOut(i)) {
@@ -174,7 +155,7 @@ void populateArgs(Registers& regs,
       }
 
       // Set the input value to null to avoid double freeing it
-      arg.type() = KindOfNull;
+      tvWriteNull(arg);
 
       pushInt(regs, (int64_t)io++);
     } else if (pi.isTakenAsTypedValue()) {
@@ -182,7 +163,7 @@ void populateArgs(Registers& regs,
     } else if (pi.isNativeArg()) {
       pushNativeArg(regs, func, i, type, *arg);
     } else if (pi.isTakenAsVariant() || !type) {
-      pushRval(regs, arg, isFCallBuiltin);
+      pushRval(regs, arg);
     } else if (type == KindOfDouble) {
       pushDouble(regs, val(arg));
     } else if (isBuiltinByRef(type)) {
@@ -205,16 +186,14 @@ void populateArgs(Registers& regs,
 void callFuncImpl(const Func* const func,
                   const ActRec* fp,
                   const void* const ctx,
-                  TypedValue* args,
-                  TypedValue& ret,
-                  bool isFCallBuiltin) {
+                  TypedValue& ret) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
   auto retType = func->returnTypeConstraint().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
-  populateArgs(regs, fp, func, args, numArgs, isFCallBuiltin);
+  populateArgs(regs, fp, func, numArgs);
 
   // Decide how many int and double arguments we need to call func. Note that
   // spilled arguments come after the GP registers, in line with them. We can
@@ -308,12 +287,10 @@ void callFuncImpl(const Func* const func,
 
 TypedValue callFunc(const Func* const func,
                     const ActRec* fp,
-                    const void* const ctx,
-                    TypedValue* args,
-                    bool isFCallBuiltin) {
+                    const void* const ctx) {
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFuncImpl(func, fp, ctx, args, rv, isFCallBuiltin);
+  callFuncImpl(func, fp, ctx, rv);
   assertx(tvIsPlausible(rv));
   assertx(rv.m_type != KindOfUninit);
   return rv;
@@ -420,11 +397,10 @@ TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
   auto numArgs = func->numParams();
-  TypedValue* args = ((TypedValue*)ar) - 1;
 
   coerceFCallArgsFromLocals(ar, numArgs, func);
 
-  TypedValue rv = callFunc(func, ar, nullptr, args, false);
+  TypedValue rv = callFunc(func, ar, nullptr);
 
   frame_free_locals_no_this_inl(
     ar,
@@ -442,7 +418,6 @@ TypedValue* methodWrapper(ActRec* ar) {
   auto func = ar->func();
   auto numArgs = func->numParams();
   bool isStatic = func->isStatic();
-  TypedValue* args = ((TypedValue*)ar) - 1;
 
   coerceFCallArgsFromLocals(ar, numArgs, func);
 
@@ -462,7 +437,7 @@ TypedValue* methodWrapper(ActRec* ar) {
     ctx = ar->getClass();
   }
 
-  TypedValue rv = callFunc(func, ar, ctx, args, false);
+  TypedValue rv = callFunc(func, ar, ctx);
 
   if (isStatic) {
     frame_free_locals_no_this_inl(

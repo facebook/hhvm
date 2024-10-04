@@ -312,12 +312,8 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (* Error code printing. *)
 (*****************************************************************************)
 let compare_internal
-    (x : ('a, 'b) User_error.t)
-    (y : ('a, 'b) User_error.t)
-    ~compare_code
-    ~compare_claim_fn
-    ~compare_claim
-    ~compare_reason : int =
+    (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) ~compare_code : int
+    =
   let User_error.
         {
           severity = x_severity;
@@ -346,7 +342,9 @@ let compare_internal
   in
   (* The primary sort order is by file *)
   let comparison =
-    compare_claim_fn (fst x_claim |> Pos.filename) (fst y_claim |> Pos.filename)
+    Relative_path.compare
+      (fst x_claim |> Pos.filename)
+      (fst y_claim |> Pos.filename)
   in
   (* Then sort by severity *)
   let comparison =
@@ -365,7 +363,7 @@ let compare_internal
   (* If the error codes are the same, sort by position *)
   let comparison =
     if comparison = 0 then
-      compare_claim (fst x_claim) (fst y_claim)
+      Pos.compare (fst x_claim) (fst y_claim)
     else
       comparison
   in
@@ -380,7 +378,7 @@ let compare_internal
      the reason messages (which indicate the reason why Hack believes
      there is an error reported in the claim message) *)
   if comparison = 0 then
-    (List.compare (Message.compare compare_reason)) x_messages y_messages
+    (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
   else
     comparison
 
@@ -389,29 +387,10 @@ let sort (err : error list) : error list =
   let compare_category x_code y_code =
     Int.compare (x_code / 1000) (y_code / 1000)
   in
-  let compare_claim_fn = Relative_path.compare in
-  let compare_claim = Pos.compare in
-  let compare_reason = Pos_or_decl.compare in
   (* Sort using the exact code to ensure sort stability, but use the category to deduplicate *)
-  let equal x y =
-    compare_internal
-      ~compare_code:compare_category
-      ~compare_claim_fn
-      ~compare_claim
-      ~compare_reason
-      x
-      y
-    = 0
-  in
+  let equal x y = compare_internal ~compare_code:compare_category x y = 0 in
   List.sort
-    ~compare:(fun x y ->
-      compare_internal
-        ~compare_code:compare_exact_code
-        ~compare_claim_fn
-        ~compare_claim
-        ~compare_reason
-        x
-        y)
+    ~compare:(fun x y -> compare_internal ~compare_code:compare_exact_code x y)
     err
   |> List.remove_consecutive_duplicates
        ~equal:(fun x y -> equal x y)

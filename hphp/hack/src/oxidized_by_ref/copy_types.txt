@@ -34,6 +34,7 @@ aast_defs::ReifyKind
 aast_defs::RequireKind
 aast_defs::Sid
 aast_defs::Stmt_
+aast_defs::TupleExtra
 aast_defs::TypeconstAbstractKind
 aast_defs::XhpAttribute
 ast_defs::Abstraction

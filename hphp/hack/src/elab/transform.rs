@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0d3826fb4781ea3d5d467c6c2f723e87>>
+// @generated SignedSource<<098c9eaeee65e0690321bf2587c74e8a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2523,16 +2523,55 @@ impl Transform for TupleInfo {
         match self {
             TupleInfo {
                 required: ref mut __binding_0,
-                optional: ref mut __binding_1,
-                variadic: ref mut __binding_2,
+                extra: ref mut __binding_1,
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
                 }
+                { __binding_1.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for TupleExtraInfo {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_tuple_extra_info_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_tuple_extra_info_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            TupleExtraInfo {
+                optional: ref mut __binding_0,
+                variadic: ref mut __binding_1,
+            } => {
                 {
-                    __binding_1.transform(env, &mut pass.clone())
+                    __binding_0.transform(env, &mut pass.clone())
                 }
-                { __binding_2.transform(env, &mut pass.clone()) }
+                { __binding_1.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
+impl Transform for TupleExtra {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_tuple_extra_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_tuple_extra_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            TupleExtra::Hextra(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
+            }
+            TupleExtra::Hsplat(ref mut __binding_0) => {
+                __binding_0.transform(env, &mut pass.clone())
             }
         }
     }

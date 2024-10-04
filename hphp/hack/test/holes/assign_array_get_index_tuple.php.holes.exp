@@ -9,7 +9,8 @@
         f_readonly_ret = None; f_ret = ((void), (Some ([3:71-75], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = ((string, int));
-           param_type_hint = (((string, int)), (Some ([3:39-52], (Htuple { tup_required = [([3:40-46], (Hprim Tstring)); ([3:48-51], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+           param_type_hint =
+           (((string, int)), (Some ([3:39-52], (Htuple { tup_required = [([3:40-46], (Hprim Tstring)); ([3:48-51], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
            param_pos = [3:53-56]; param_name = "$xs"; param_info = Param_required; 
            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };

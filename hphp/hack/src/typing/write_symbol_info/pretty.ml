@@ -68,7 +68,7 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
       parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) hints;
       append ">"
     (* TODO optional and variadic components T201398626 T201398652 *)
-    | Htuple { tup_required; tup_optional = _; tup_variadic = _ } ->
+    | Htuple { tup_required; tup_extra = _ } ->
       append "(";
       parse_gen_seq ~sep:", " ~f:(parse ~is_ctx) tup_required;
       append ")"
@@ -264,7 +264,9 @@ let rec hint_to_angle h =
   | Hlike h -> Hint.(Key (Like (hint_to_angle h)))
   | Hsoft h -> Hint.(Key (Like (hint_to_angle h)))
   | Hvar h -> Hint.(Key (Var_ h))
-  | Htuple { tup_required; tup_optional; tup_variadic } ->
+  (* TODO splat fields T203492030 *)
+  | Htuple { tup_required; tup_extra = Hextra { tup_optional; tup_variadic } }
+    ->
     let req = List.map tup_required ~f:hint_to_angle in
     let opt = List.map tup_optional ~f:hint_to_angle in
     let variadic = Option.map tup_variadic ~f:hint_to_angle in
@@ -320,6 +322,7 @@ let rec hint_to_angle h =
   | Hthis -> Hint.(Key (This_ ()))
   | Hrefinement _
   | Hfun _
+  | Htuple _
   | Haccess (_, _)
   | Habstr (_, _) ->
     Hint.(Key (Other (Type.Key (hint_to_string ~is_ctx:false h))))

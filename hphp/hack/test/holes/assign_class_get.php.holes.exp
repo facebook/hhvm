@@ -17,7 +17,8 @@
           cv_span = [5:23-44] };
         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Private;
-          cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple { tup_required = [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]; tup_optional = []; tup_variadic = None }))));
+          cv_type =
+          ((~(int, string)), (Some ([6:18-31], (Htuple { tup_required = [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
           cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
           cv_span = [6:32-57] };
@@ -103,7 +104,9 @@
           m_name = ([23:19-32], "set_pair_prop"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = ((int, bool));
-             param_type_hint = (((int, bool)), (Some ([23:33-44], (Htuple { tup_required = [([23:34-37], (Hprim Tint)); ([23:39-43], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             (((int, bool)),
+              (Some ([23:33-44], (Htuple { tup_required = [([23:34-37], (Hprim Tint)); ([23:39-43], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [23:45-47]; param_name = "$x"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -228,7 +231,9 @@
            cv_span = [5:23-44] };
          { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Private;
-           cv_type = ((~(int, string)), (Some ([6:18-31], (Htuple { tup_required = [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]; tup_optional = []; tup_variadic = None }))));
+           cv_type =
+           ((~(int, string)),
+            (Some ([6:18-31], (Htuple { tup_required = [([6:19-22], (Hprim Tint)); ([6:24-30], (Hprim Tstring))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
            cv_id = ([6:32-42], "pair_prop"); cv_expr = (Some (((int, string)), [6:45-57], (Tuple [((int), [6:51-52], (Int "0")); ((string), [6:54-56], (String ""))]))); 
            cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
            cv_span = [6:32-57] };

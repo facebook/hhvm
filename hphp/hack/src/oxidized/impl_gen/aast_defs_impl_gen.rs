@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ee9f8de90509d276b575f3df431900a>>
+// @generated SignedSource<<372ec79097ea6d8be0d4cfbbc4b3d235>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -4215,6 +4215,62 @@ impl CtxRefinement {
     pub fn as_crloose_into(self) -> Option<CtxRefinementBounds> {
         match self {
             CtxRefinement::CRloose(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl TupleExtra {
+    pub fn mk_hextra(p0: TupleExtraInfo) -> Self {
+        TupleExtra::Hextra(p0)
+    }
+    pub fn mk_hsplat(p0: Hint) -> Self {
+        TupleExtra::Hsplat(p0)
+    }
+    pub fn is_hextra(&self) -> bool {
+        match self {
+            TupleExtra::Hextra(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_hsplat(&self) -> bool {
+        match self {
+            TupleExtra::Hsplat(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_hextra(&self) -> Option<&TupleExtraInfo> {
+        match self {
+            TupleExtra::Hextra(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hsplat(&self) -> Option<&Hint> {
+        match self {
+            TupleExtra::Hsplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hextra_mut(&mut self) -> Option<&mut TupleExtraInfo> {
+        match self {
+            TupleExtra::Hextra(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hsplat_mut(&mut self) -> Option<&mut Hint> {
+        match self {
+            TupleExtra::Hsplat(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hextra_into(self) -> Option<TupleExtraInfo> {
+        match self {
+            TupleExtra::Hextra(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_hsplat_into(self) -> Option<Hint> {
+        match self {
+            TupleExtra::Hsplat(p0) => Some(p0),
             _ => None,
         }
     }

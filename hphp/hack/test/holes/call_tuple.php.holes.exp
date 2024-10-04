@@ -10,7 +10,8 @@
          m_name = ([4:19-20], "a"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = ((int, int));
-            param_type_hint = (((int, int)), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            (((int, int)), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [4:32-34]; param_name = "$a"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -39,7 +40,8 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([7:28-32], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = ((int, int));
-            param_type_hint = (((int, int)), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            (((int, int)), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [7:23-25]; param_name = "$a"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -59,12 +61,14 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = ((int, bool));
-            param_type_hint = (((int, bool)), (Some ([10:3-14], (Htuple { tup_required = [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            (((int, bool)), (Some ([10:3-14], (Htuple { tup_required = [([10:4-7], (Hprim Tint)); ([10:9-13], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [10:15-18]; param_name = "$a1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = ((bool, int));
-             param_type_hint = (((bool, int)), (Some ([11:3-14], (Htuple { tup_required = [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             (((bool, int)), (Some ([11:3-14], (Htuple { tup_required = [([11:4-8], (Hprim Tbool)); ([11:10-13], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [11:15-18]; param_name = "$a2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -126,12 +130,14 @@
          f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = ((int, bool));
-            param_type_hint = (((int, bool)), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            (((int, bool)), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [27:15-18]; param_name = "$a1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = ((bool, int));
-             param_type_hint = (((bool, int)), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             (((bool, int)), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [28:15-18]; param_name = "$a2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -150,8 +156,8 @@
                         ((~(int, int)), [31:5-53],
                          (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
                             (UnsafeCast
-                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }));
-                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                             ))))
                         ];
                       unpacked_arg = None }))));
@@ -166,8 +172,8 @@
                          ((~(int, int)), [33:5-53],
                           (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
                              (UnsafeCast
-                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_optional = []; tup_variadic = None }));
-                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))));
@@ -190,8 +196,8 @@
                          ((~(int, int)), [38:11-59],
                           (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
                              (UnsafeCast
-                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }));
-                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))));
@@ -208,8 +214,8 @@
                          ((~(int, int)), [40:11-59],
                           (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
                              (UnsafeCast
-                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_optional = []; tup_variadic = None }));
-                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))))
@@ -230,7 +236,8 @@
           m_name = ([4:19-20], "a"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (dynamic);
-             param_type_hint = ((dynamic), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             ((dynamic), (Some ([4:21-31], (Htuple { tup_required = [([4:22-25], (Hprim Tint)); ([4:27-30], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [4:32-34]; param_name = "$a"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -259,7 +266,8 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([7:28-32], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic);
-            param_type_hint = ((dynamic), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            ((dynamic), (Some ([7:12-22], (Htuple { tup_required = [([7:13-16], (Hprim Tint)); ([7:18-21], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [7:23-25]; param_name = "$a"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
@@ -279,12 +287,14 @@
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (dynamic);
-            param_type_hint = ((dynamic), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }))));
+            param_type_hint =
+            ((dynamic), (Some ([27:3-14], (Htuple { tup_required = [([27:4-7], (Hprim Tint)); ([27:9-13], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
             param_pos = [27:15-18]; param_name = "$a1"; param_info = Param_required; 
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
-             param_type_hint = ((dynamic), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             ((dynamic), (Some ([28:3-14], (Htuple { tup_required = [([28:4-8], (Hprim Tbool)); ([28:10-13], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [28:15-18]; param_name = "$a2"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -303,8 +313,8 @@
                         ((~(int, int)), [31:5-53],
                          (Hole (((dynamic), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
                             (UnsafeCast
-                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }));
-                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                             ))))
                         ];
                       unpacked_arg = None }))));
@@ -319,8 +329,8 @@
                          ((~(int, int)), [33:5-53],
                           (Hole (((dynamic), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
                              (UnsafeCast
-                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_optional = []; tup_variadic = None }));
-                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))));
@@ -343,8 +353,8 @@
                          ((~(int, int)), [38:11-59],
                           (Hole (((dynamic), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
                              (UnsafeCast
-                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_optional = []; tup_variadic = None }));
-                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))));
@@ -361,8 +371,8 @@
                          ((~(int, int)), [40:11-59],
                           (Hole (((dynamic), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
                              (UnsafeCast
-                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_optional = []; tup_variadic = None }));
-                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))])
+                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
                              ))))
                          ];
                        unpacked_arg = None }))))

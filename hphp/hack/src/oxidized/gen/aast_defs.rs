@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67cbccb8828762a1f39b1eee011f13fa>>
+// @generated SignedSource<<0ea7eed8e573ab4af3fd1a39e5ba7242>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2786,8 +2786,50 @@ pub struct NastShapeInfo {
 #[repr(C)]
 pub struct TupleInfo {
     pub required: Vec<Hint>,
+    pub extra: TupleExtra,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "tup_")]
+#[repr(C)]
+pub struct TupleExtraInfo {
     pub optional: Vec<Hint>,
     pub variadic: Option<Hint>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum TupleExtra {
+    Hextra(TupleExtraInfo),
+    Hsplat(Hint),
 }
 
 #[derive(

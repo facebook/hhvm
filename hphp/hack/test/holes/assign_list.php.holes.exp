@@ -12,7 +12,9 @@ Errors:
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None;
         f_ret =
-        ((~(int, int, int)), (Some ([3:37-52], (Htuple { tup_required = [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+        ((~(int, int, int)),
+         (Some ([3:37-52],
+                (Htuple { tup_required = [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_pos = [3:32-34]; param_name = "$x"; param_info = Param_required; 
@@ -33,7 +35,8 @@ Errors:
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None;
-         f_ret = ((~(int, int)), (Some ([7:37-47], (Htuple { tup_required = [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+         f_ret =
+         ((~(int, int)), (Some ([7:37-47], (Htuple { tup_required = [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([7:27-31], (Hprim Tbool)))); 
             param_pos = [7:32-34]; param_name = "$x"; param_info = Param_required; 

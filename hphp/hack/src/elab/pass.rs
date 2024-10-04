@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<317a62f8a0b8ef48a5b53f3ee4636705>>
+// @generated SignedSource<<7891b4ab4ddf64e29140af117fe2df10>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1197,6 +1197,30 @@ pub trait Pass: PassClone {
     }
     #[inline(always)]
     fn on_ty_tuple_info_bottom_up(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_info_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut TupleExtraInfo,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_info_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut TupleExtraInfo,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_top_down(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_bottom_up(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -2988,6 +3012,42 @@ impl Pass for Passes {
     fn on_ty_tuple_info_bottom_up(&mut self, env: &Env, elem: &mut TupleInfo) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_tuple_info_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_info_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut TupleExtraInfo,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_extra_info_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_info_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut TupleExtraInfo,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_extra_info_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_top_down(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_extra_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_tuple_extra_bottom_up(&mut self, env: &Env, elem: &mut TupleExtra) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_tuple_extra_bottom_up(env, elem)?;
         }
         Continue(())
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3783730fc221db9bda43a4ef7c204590>>
+// @generated SignedSource<<ad1e858ab5aacad070f838e016f4c7ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -634,6 +634,20 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node Tprim,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_tuple_extra(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node TupleExtra,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_tuple_extra_info(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node TupleExtraInfo,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<510805f478e00a0d495862377a9084d0>>
+// @generated SignedSource<<46c85ce90c609ea1e4eaa3320df2d006>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2201,6 +2201,42 @@ impl<P: Params> NodeMut<P> for Tprim {
         }
     }
 }
+impl<P: Params> NodeMut<P> for TupleExtra {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_tuple_extra(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            TupleExtra::Hextra(a0) => a0.accept(c, v),
+            TupleExtra::Hsplat(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for TupleExtraInfo {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_tuple_extra_info(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.optional.accept(c, v)?;
+        self.variadic.accept(c, v)
+    }
+}
 impl<P: Params> NodeMut<P> for TupleInfo {
     fn accept<'node>(
         &'node mut self,
@@ -2215,8 +2251,7 @@ impl<P: Params> NodeMut<P> for TupleInfo {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.required.accept(c, v)?;
-        self.optional.accept(c, v)?;
-        self.variadic.accept(c, v)
+        self.extra.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for TypeHint<P::Ex> {

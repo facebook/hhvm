@@ -1005,8 +1005,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
 
             Ok(Htuple(ast::TupleInfo {
                 required,
-                optional,
-                variadic,
+                extra: ast::TupleExtra::Hextra(ast::TupleExtraInfo { optional, variadic }),
             }))
         }
         UnionTypeSpecifier(c) => Ok(Hunion(could_map(

@@ -1298,9 +1298,17 @@ and nast_shape_info = {
 
 and tuple_info = {
   tup_required: hint list;
+  tup_extra: tuple_extra;
+}
+
+and tuple_extra_info = {
   tup_optional: hint list;
   tup_variadic: hint option;
 }
+
+and tuple_extra =
+  | Hextra of tuple_extra_info
+  | Hsplat of hint
 
 and kvc_kind =
   | Map

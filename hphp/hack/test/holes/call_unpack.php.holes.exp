@@ -67,7 +67,8 @@ Errors:
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = ((float, int));
-             param_type_hint = (((float, int)), (Some ([5:29-41], (Htuple { tup_required = [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             (((float, int)), (Some ([5:29-41], (Htuple { tup_required = [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [5:42-44]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -176,7 +177,7 @@ Errors:
                      (Htuple
                         { tup_required =
                           [([15:2-5], (Hprim Tint)); ([15:7-12], (Hprim Tfloat)); ([15:14-17], (Hprim Tint)); ([15:19-24], (Hprim Tfloat)); ([15:26-29], (Hprim Tint)); ([15:31-36], (Hprim Tfloat))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [15:38-40]; param_name = "$b"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -186,7 +187,7 @@ Errors:
               (Some ([16:1-30],
                      (Htuple
                         { tup_required = [([16:2-7], (Hprim Tfloat)); ([16:9-22], (Happly (([16:9-15], "\\HH\\vec"), [([16:16-21], (Hprim Tfloat))]))); ([16:24-29], (Hprim Tfloat))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [16:31-33]; param_name = "$c"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -197,7 +198,7 @@ Errors:
                      (Htuple
                         { tup_required =
                           [([17:2-7], (Hprim Tfloat)); ([17:9-20], (Happly (([17:9-15], "\\HH\\vec"), [([17:16-19], (Hprim Tint))]))); ([17:22-27], (Hprim Tfloat)); ([17:29-32], (Hprim Tint))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [17:34-36]; param_name = "$d"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -206,7 +207,8 @@ Errors:
              (((float, int, float, float)),
               (Some ([18:1-27],
                      (Htuple
-                        { tup_required = [([18:2-7], (Hprim Tfloat)); ([18:9-12], (Hprim Tint)); ([18:14-19], (Hprim Tfloat)); ([18:21-26], (Hprim Tfloat))]; tup_optional = []; tup_variadic = None }))));
+                        { tup_required = [([18:2-7], (Hprim Tfloat)); ([18:9-12], (Hprim Tint)); ([18:14-19], (Hprim Tfloat)); ([18:21-26], (Hprim Tfloat))];
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [18:28-30]; param_name = "$e"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -230,9 +232,10 @@ Errors:
               (Some ([20:1-29],
                      (Htuple
                         { tup_required =
-                          [([20:2-7], (Hprim Tfloat)); ([20:9-23], (Htuple { tup_required = [([20:10-15], (Hprim Tfloat)); ([20:17-22], (Hprim Tfloat))]; tup_optional = []; tup_variadic = None }));
+                          [([20:2-7], (Hprim Tfloat));
+                            ([20:9-23], (Htuple { tup_required = [([20:10-15], (Hprim Tfloat)); ([20:17-22], (Hprim Tfloat))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
                             ([20:25-28], (Hprim Tint))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [20:30-32]; param_name = "$g"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -251,7 +254,7 @@ Errors:
                                     { sfi_optional = false; sfi_hint = ([21:34-37], (Hprim Tint)); sfi_name = (SFlit_str ([21:27-30], "v")) }]
                                   }))
                             ];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [21:40-42]; param_name = "$h"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -276,7 +279,7 @@ Errors:
                                   ]
                                 )));
                             ([22:38-41], (Hprim Tint))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [22:43-45]; param_name = "$i"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
@@ -301,7 +304,7 @@ Errors:
                                   ]
                                 )));
                             ([23:39-42], (Hprim Tint))];
-                          tup_optional = []; tup_variadic = None }))));
+                          tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [23:44-46]; param_name = "$j"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
@@ -445,7 +448,8 @@ Errors:
             param_readonly = None; param_splat = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (dynamic);
-             param_type_hint = ((dynamic), (Some ([5:29-41], (Htuple { tup_required = [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))]; tup_optional = []; tup_variadic = None }))));
+             param_type_hint =
+             ((dynamic), (Some ([5:29-41], (Htuple { tup_required = [([5:30-35], (Hprim Tfloat)); ([5:37-40], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))));
              param_pos = [5:42-44]; param_name = "$y"; param_info = Param_required; 
              param_readonly = None; param_splat = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };

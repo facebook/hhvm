@@ -40,7 +40,7 @@ let rec pp_hint ~is_ctx ppf (pos, hint_) =
   | Aast.Hsoft hint ->
     Fmt.(prefix (const string "@") @@ pp_hint ~is_ctx:false) ppf hint
   (* TODO optional and variadic components T201398626 T201398652 *)
-  | Aast.(Htuple { tup_required; tup_optional = _; tup_variadic = _ }) ->
+  | Aast.(Htuple { tup_required; tup_extra = _ }) ->
     Fmt.(parens @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf tup_required
   | Aast.Hunion hints ->
     Fmt.(parens @@ list ~sep:vbar @@ pp_hint ~is_ctx:false) ppf hints

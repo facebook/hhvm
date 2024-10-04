@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b86c5ef75d618971d038cb5feb2c4533>>
+// @generated SignedSource<<0417eed290ce53e190d367fd94b83935>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2201,6 +2201,42 @@ impl<P: Params> Node<P> for Tprim {
         }
     }
 }
+impl<P: Params> Node<P> for TupleExtra {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_tuple_extra(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            TupleExtra::Hextra(a0) => a0.accept(c, v),
+            TupleExtra::Hsplat(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> Node<P> for TupleExtraInfo {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_tuple_extra_info(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.optional.accept(c, v)?;
+        self.variadic.accept(c, v)
+    }
+}
 impl<P: Params> Node<P> for TupleInfo {
     fn accept<'node>(
         &'node self,
@@ -2215,8 +2251,7 @@ impl<P: Params> Node<P> for TupleInfo {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.required.accept(c, v)?;
-        self.optional.accept(c, v)?;
-        self.variadic.accept(c, v)
+        self.extra.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for TypeHint<P::Ex> {

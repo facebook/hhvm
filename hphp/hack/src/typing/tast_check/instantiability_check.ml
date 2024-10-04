@@ -141,10 +141,15 @@ let rec check_hint env (pos, hint) =
   | Aast.Hunion hl
   | Aast.Hintersection hl ->
     List.iter hl ~f:(check_hint env)
-  | Aast.Htuple { tup_required; tup_optional; tup_variadic } ->
+  | Aast.Htuple { tup_required; tup_extra } ->
     List.iter tup_required ~f:(check_hint env);
-    List.iter tup_optional ~f:(check_hint env);
-    Option.iter tup_variadic ~f:(check_hint env)
+    begin
+      match tup_extra with
+      | Aast.Hextra { tup_optional; tup_variadic } ->
+        List.iter tup_optional ~f:(check_hint env);
+        Option.iter tup_variadic ~f:(check_hint env)
+      | Aast.Hsplat h -> check_hint env h
+    end
 
 and check_shape env Aast.{ nsi_allows_unknown_fields = _; nsi_field_map } =
   List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map

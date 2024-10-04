@@ -27,7 +27,9 @@
  (modules
   package
   packageInfo)
- (libraries pos)
+ (libraries
+  pos
+  utils_multifile)
  (preprocess
   (pps ppx_deriving.std)))
 

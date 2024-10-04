@@ -20,7 +20,10 @@ import unittest
 
 from folly.iobuf import IOBuf
 from testing.types import Color, ComplexUnion, easy, Integers, IOBufUnion, ReservedUnion
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Union
@@ -31,17 +34,28 @@ class UnionTests(unittest.TestCase):
         hash(Integers())
 
     def test_union_dir(self) -> None:
-        expected = [
-            "digits",
-            "large",
-            "medium",
-            "name_",
-            "small",
-            "tiny",
-            "type",
-            "unbounded",
-            "value",
-        ]
+        expected = (
+            [
+                "digits",
+            ]
+            + (
+                # thrift-python added these to reduce the disparity between
+                # immutable and mutable union APIs.
+                ["fbthrift_current_field", "fbthrift_current_value"]
+                if is_auto_migrated()
+                else []
+            )
+            + [
+                "large",
+                "medium",
+                "name_",
+                "small",
+                "tiny",
+                "type",
+                "unbounded",
+                "value",
+            ]
+        )
         self.assertEqual(expected, dir(Integers()))
         self.assertEqual(expected, dir(Integers))
 

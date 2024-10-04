@@ -1591,10 +1591,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             TupleOrUnionOrIntersectionElementTypeSpecifier(x) => {
-                get_index(3).and_then(|index| { match index {
+                get_index(4).and_then(|index| { match index {
                         0 => Some(&x.optional),
-                    1 => Some(&x.type_),
-                    2 => Some(&x.ellipsis),
+                    1 => Some(&x.pre_ellipsis),
+                    2 => Some(&x.type_),
+                    3 => Some(&x.ellipsis),
                         _ => None,
                     }
                 })

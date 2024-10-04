@@ -2348,6 +2348,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.TupleOrUnionOrIntersectionElementTypeSpecifier
         {
           tuple_or_union_or_intersection_element_optional = optional;
+          tuple_or_union_or_intersection_element_pre_ellipsis = pre_ellipsis;
           tuple_or_union_or_intersection_element_type = cp_type;
           tuple_or_union_or_intersection_element_ellipsis = ellipsis;
         } ->
@@ -2355,6 +2356,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env optional;
           when_present optional space;
+          t env pre_ellipsis;
           t env cp_type;
           t env ellipsis;
         ]

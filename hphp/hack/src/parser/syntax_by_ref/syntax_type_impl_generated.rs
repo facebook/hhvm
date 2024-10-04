@@ -1733,9 +1733,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_tuple_or_union_or_intersection_element_type_specifier(ctx: &C, optional: Self, type_: Self, ellipsis: Self) -> Self {
+    fn make_tuple_or_union_or_intersection_element_type_specifier(ctx: &C, optional: Self, pre_ellipsis: Self, type_: Self, ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(ctx.get_arena().alloc(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
             optional,
+            pre_ellipsis,
             type_,
             ellipsis,
         }));

@@ -820,6 +820,7 @@ pub struct ClosureTypeHint<'a> {
 #[derive(Debug)]
 pub struct TupleComponentNode<'a> {
     optional: bool,
+    pre_ellipsis: bool,
     hint: Node<'a>,
     ellipsis: bool,
 }
@@ -1485,9 +1486,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         match node {
             Node::TupleComponent(TupleComponentNode {
                 optional,
+                pre_ellipsis,
                 hint,
                 ellipsis,
-            }) if !ellipsis && *optional == select_optional => self.node_to_ty(*hint),
+            }) if !ellipsis && !pre_ellipsis && *optional == select_optional => {
+                self.node_to_ty(*hint)
+            }
             _ => None,
         }
     }
@@ -1496,9 +1500,22 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         match node {
             Node::TupleComponent(TupleComponentNode {
                 optional: _,
+                pre_ellipsis: _,
                 hint,
                 ellipsis,
             }) if *ellipsis => self.node_to_ty(*hint),
+            _ => None,
+        }
+    }
+
+    fn node_to_tuple_splat_ty(&self, node: Node<'a>) -> Option<&'a Ty<'a>> {
+        match node {
+            Node::TupleComponent(TupleComponentNode {
+                optional: _,
+                pre_ellipsis,
+                hint,
+                ellipsis: _,
+            }) if *pre_ellipsis => self.node_to_ty(*hint),
             _ => None,
         }
     }
@@ -5608,12 +5625,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let variadic_opt = tys
             .iter()
             .find_map(|&node| self.node_to_tuple_variadic_ty(node));
+        let splat_opt = tys
+            .iter()
+            .find_map(|&node| self.node_to_tuple_splat_ty(node));
         let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
         let variadic = match variadic_opt {
             None => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
             Some(ty) => ty,
         };
-        let extra = self.alloc(TupleExtra::Textra { optional, variadic });
+        let extra = match splat_opt {
+            None => self.alloc(TupleExtra::Textra { optional, variadic }),
+            Some(hint) => self.alloc(TupleExtra::Tsplat(hint)),
+        };
         self.hint_ty(
             pos,
             Ty_::Ttuple(self.alloc(TupleType {
@@ -5626,11 +5649,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
     fn make_tuple_or_union_or_intersection_element_type_specifier(
         &mut self,
         optional: Self::Output,
+        pre_ellipsis: Self::Output,
         type_: Self::Output,
         ellipsis: Self::Output,
     ) -> Self::Output {
         Node::TupleComponent(self.alloc(TupleComponentNode {
             optional: optional.is_present(),
+            pre_ellipsis: pre_ellipsis.is_present(),
             hint: type_,
             ellipsis: ellipsis.is_present(),
         }))

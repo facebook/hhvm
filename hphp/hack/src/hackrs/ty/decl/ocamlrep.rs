@@ -336,7 +336,7 @@ impl<R: Reason> ToOcamlRep for TupleExtra<R> {
             }
             TupleExtra::Tsplat(splat) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 1u8);
-                alloc.set_field(&mut block, 1, alloc.add(splat));
+                alloc.set_field(&mut block, 0, alloc.add(splat));
                 block.build()
             }
         }

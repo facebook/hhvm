@@ -1727,9 +1727,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_tuple_or_union_or_intersection_element_type_specifier(_: &C, tuple_or_union_or_intersection_element_optional: Self, tuple_or_union_or_intersection_element_type: Self, tuple_or_union_or_intersection_element_ellipsis: Self) -> Self {
+    fn make_tuple_or_union_or_intersection_element_type_specifier(_: &C, tuple_or_union_or_intersection_element_optional: Self, tuple_or_union_or_intersection_element_pre_ellipsis: Self, tuple_or_union_or_intersection_element_type: Self, tuple_or_union_or_intersection_element_ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(Box::new(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
             tuple_or_union_or_intersection_element_optional,
+            tuple_or_union_or_intersection_element_pre_ellipsis,
             tuple_or_union_or_intersection_element_type,
             tuple_or_union_or_intersection_element_ellipsis,
         }));
@@ -3303,8 +3304,9 @@ where
                 acc
             },
             SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => {
-                let TupleOrUnionOrIntersectionElementTypeSpecifierChildren { tuple_or_union_or_intersection_element_optional, tuple_or_union_or_intersection_element_type, tuple_or_union_or_intersection_element_ellipsis } = *x;
+                let TupleOrUnionOrIntersectionElementTypeSpecifierChildren { tuple_or_union_or_intersection_element_optional, tuple_or_union_or_intersection_element_pre_ellipsis, tuple_or_union_or_intersection_element_type, tuple_or_union_or_intersection_element_ellipsis } = *x;
                 let acc = f(tuple_or_union_or_intersection_element_optional, acc);
+                let acc = f(tuple_or_union_or_intersection_element_pre_ellipsis, acc);
                 let acc = f(tuple_or_union_or_intersection_element_type, acc);
                 let acc = f(tuple_or_union_or_intersection_element_ellipsis, acc);
                 acc
@@ -4809,9 +4811,10 @@ where
                  closure_parameter_optional: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::TupleOrUnionOrIntersectionElementTypeSpecifier, 3) => SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(Box::new(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
+             (SyntaxKind::TupleOrUnionOrIntersectionElementTypeSpecifier, 4) => SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(Box::new(TupleOrUnionOrIntersectionElementTypeSpecifierChildren {
                  tuple_or_union_or_intersection_element_ellipsis: ts.pop().unwrap(),
                  tuple_or_union_or_intersection_element_type: ts.pop().unwrap(),
+                 tuple_or_union_or_intersection_element_pre_ellipsis: ts.pop().unwrap(),
                  tuple_or_union_or_intersection_element_optional: ts.pop().unwrap(),
                  
              })),
@@ -5166,7 +5169,7 @@ where
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 11) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 6) },
-            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_or_union_or_intersection_element_optional, 3) },
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.ctx_in_refinement_keyword, 6) },
@@ -5358,7 +5361,7 @@ where
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
             SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 11) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 6) },
-            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_or_union_or_intersection_element_optional, 3) },
+            SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
             SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
             SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_in_refinement_keyword, 6) },
@@ -6787,6 +6790,7 @@ pub struct ClosureParameterTypeSpecifierChildren<T, V> {
 #[repr(C)]
 pub struct TupleOrUnionOrIntersectionElementTypeSpecifierChildren<T, V> {
     pub tuple_or_union_or_intersection_element_optional: Syntax<T, V>,
+    pub tuple_or_union_or_intersection_element_pre_ellipsis: Syntax<T, V>,
     pub tuple_or_union_or_intersection_element_type: Syntax<T, V>,
     pub tuple_or_union_or_intersection_element_ellipsis: Syntax<T, V>,
 }
@@ -8798,10 +8802,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             TupleOrUnionOrIntersectionElementTypeSpecifier(x) => {
-                get_index(3).and_then(|index| { match index {
+                get_index(4).and_then(|index| { match index {
                         0 => Some(&x.tuple_or_union_or_intersection_element_optional),
-                    1 => Some(&x.tuple_or_union_or_intersection_element_type),
-                    2 => Some(&x.tuple_or_union_or_intersection_element_ellipsis),
+                    1 => Some(&x.tuple_or_union_or_intersection_element_pre_ellipsis),
+                    2 => Some(&x.tuple_or_union_or_intersection_element_type),
+                    3 => Some(&x.tuple_or_union_or_intersection_element_ellipsis),
                         _ => None,
                     }
                 })

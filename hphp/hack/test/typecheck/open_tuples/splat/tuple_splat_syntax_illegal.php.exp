@@ -1,0 +1,10 @@
+ERROR: File "tuple_splat_syntax_illegal.php", line 6, characters 18-33:
+Cannot use unstable feature: `type_splat` (Parsing[1002])
+ERROR: File "tuple_splat_syntax_illegal.php", line 8, characters 58-61:
+Cannot use unstable feature: `type_splat` (Parsing[1002])
+ERROR: File "tuple_splat_syntax_illegal.php", line 10, characters 22-25:
+Cannot use unstable feature: `type_splat` (Parsing[1002])
+ERROR: File "tuple_splat_syntax_illegal.php", line 17, characters 10-25:
+Cannot use unstable feature: `type_splat` (Parsing[1002])
+ERROR: File "tuple_splat_syntax_illegal.php", line 18, characters 11-14:
+Cannot use unstable feature: `type_splat` (Parsing[1002])

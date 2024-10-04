@@ -1452,6 +1452,7 @@ pub struct ClosureParameterTypeSpecifierChildren<'a, T, V> {
 #[derive(Debug, Clone)]
 pub struct TupleOrUnionOrIntersectionElementTypeSpecifierChildren<'a, T, V> {
     pub optional: Syntax<'a, T, V>,
+    pub pre_ellipsis: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
     pub ellipsis: Syntax<'a, T, V>,
 }

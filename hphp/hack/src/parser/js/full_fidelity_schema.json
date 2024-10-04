@@ -1993,6 +1993,7 @@
       "prefix" : "tuple_or_union_or_intersection_element",
       "fields" : [
         { "field_name" : "optional" },
+        { "field_name" : "pre_ellipsis" },
         { "field_name" : "type" },
         { "field_name" : "ellipsis" }
       ] },

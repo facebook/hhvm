@@ -3,7 +3,7 @@ Optional keyword not required for initializer (Parsing[1002])
 ERROR: File "optional_parameters_bad.php", line 40, characters 32-53:
 Cannot use `optional` on `inout` parameters (Parsing[1002])
 ERROR: File "optional_parameters_bad.php", line 42, characters 32-50:
-Cannot use `optional` on variadic parameters (Parsing[1002])
+Cannot use `optional` on variadic or splat parameters (Parsing[1002])
 ERROR: File "optional_parameters_bad.php", line 36, characters 57-58:
 A previous parameter has a default value or is optional.
 Remove all the optional or default values for the preceding parameters,

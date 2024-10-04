@@ -5526,6 +5526,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if has_optional || has_ellipsis {
                     self.check_can_use_feature(node, &FeatureName::OpenTuples);
                 }
+                if !c.pre_ellipsis.is_missing() {
+                    self.check_can_use_feature(node, &FeatureName::TypeSplat);
+                }
             }
             ClosureParameterTypeSpecifier(x) => {
                 if !x.pre_ellipsis.is_missing() {

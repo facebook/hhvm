@@ -134,7 +134,7 @@ impl<R: Reason> From<obr::typing_defs::TupleExtra<'_>> for ty::TupleExtra<R> {
             TupleExtra::Textra { optional, variadic } => {
                 ty::TupleExtra::Textra(slice(optional), variadic.into())
             }
-            TupleExtra::Tsplat(splat) => TupleExtra::Tsplat(splat).into(),
+            TupleExtra::Tsplat(splat) => ty::TupleExtra::Tsplat(splat.into()),
         }
     }
 }

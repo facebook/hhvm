@@ -948,24 +948,32 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         }
         TupleTypeSpecifier(c) => {
             let nodes = c.types.syntax_node_to_list_skip_separator();
-            let mut seen_optional = false;
-            let mut seen_ellipsis = false;
             let (min, _) = nodes.size_hint();
+            let mut seen_optional = false;
             let mut required = Vec::with_capacity(min);
             let mut optional = Vec::with_capacity(min);
             let mut variadic = None;
+            let mut splat = None;
             for n in nodes {
                 match &n.children {
                     TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {
                         let hint = p_hint(&c.type_, env)?;
                         let has_optional = !c.optional.is_missing();
                         let has_ellipsis = !c.ellipsis.is_missing();
-                        if has_ellipsis {
-                            if seen_ellipsis {
+                        let has_pre_ellipsis = !c.pre_ellipsis.is_missing();
+                        if has_ellipsis && has_pre_ellipsis {
+                            raise_parsing_error(
+                                node,
+                                env,
+                                "A splat element cannot also be variadic",
+                            );
+                        }
+                        if has_ellipsis || has_pre_ellipsis {
+                            if variadic.is_some() || splat.is_some() {
                                 raise_parsing_error(
                                     node,
                                     env,
-                                    "There must be only one variadic element",
+                                    "There must be only one variadic or splat element",
                                 );
                             } else if has_optional {
                                 raise_parsing_error(
@@ -974,14 +982,24 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                                     &syntax_error::no_optional_on_variadic_parameter,
                                 );
                             }
-                            seen_ellipsis = true;
-                            variadic = Some(hint);
+                            if has_ellipsis {
+                                variadic = Some(hint);
+                            } else if has_pre_ellipsis {
+                                if seen_optional {
+                                    raise_parsing_error(
+                                        node,
+                                        env,
+                                        "There must be no splat elements following an optional element",
+                                    );
+                                }
+                                splat = Some(hint);
+                            }
                         } else {
-                            if seen_ellipsis {
+                            if variadic.is_some() || splat.is_some() {
                                 raise_parsing_error(
                                     node,
                                     env,
-                                    "There must be no elements following a variadic element",
+                                    "There must be no elements following a variadic or splat element",
                                 );
                             }
                             if has_optional {
@@ -1002,11 +1020,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                     _ => raise_missing_syntax("tuple element", node, env),
                 }
             }
-
-            Ok(Htuple(ast::TupleInfo {
-                required,
-                extra: ast::TupleExtra::Hextra(ast::TupleExtraInfo { optional, variadic }),
-            }))
+            let extra = match splat {
+                Some(h) => ast::TupleExtra::Hsplat(h),
+                None => ast::TupleExtra::Hextra(ast::TupleExtraInfo { optional, variadic }),
+            };
+            Ok(Htuple(ast::TupleInfo { required, extra }))
         }
         UnionTypeSpecifier(c) => Ok(Hunion(could_map(
             &c.types,

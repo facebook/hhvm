@@ -582,7 +582,7 @@ pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant"
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
 pub const no_optional_on_variadic_parameter: Error =
-    Cow::Borrowed("Cannot use `optional` on variadic parameters");
+    Cow::Borrowed("Cannot use `optional` on variadic or splat parameters");
 pub const no_optional_on_inout_parameter: Error =
     Cow::Borrowed("Cannot use `optional` on `inout` parameters");
 pub const no_attributes_on_enum_class_enumerator: Error =

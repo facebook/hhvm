@@ -2204,6 +2204,8 @@ let schema : schema_node list =
       fields =
         [
           ("optional", ZeroOrOne Token);
+          (* This is for type splats e.g. ...Targs $x *)
+          ("pre_ellipsis", ZeroOrOne Token);
           ("type", Aggregate Specifier);
           ("ellipsis", ZeroOrOne Token);
         ];

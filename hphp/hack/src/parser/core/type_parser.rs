@@ -634,11 +634,23 @@ where
 
     fn parse_tuple_or_union_or_intersection_element_type(&mut self) -> S::Output {
         let optional = self.parse_optional_opt();
+        let ellipsis1 = self.parse_ellipsis_opt();
         let ts =
             self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ true);
-        let ellipsis = self.parse_ellipsis_opt();
+        let (pre_ellipsis, ellipsis) = if ts.is_missing() {
+            let pos = self.pos();
+            (self.sc_mut().make_missing(pos), ellipsis1)
+        } else {
+            let ellipsis = self.parse_ellipsis_opt();
+            (ellipsis1, ellipsis)
+        };
         self.sc_mut()
-            .make_tuple_or_union_or_intersection_element_type_specifier(optional, ts, ellipsis)
+            .make_tuple_or_union_or_intersection_element_type_specifier(
+                optional,
+                pre_ellipsis,
+                ts,
+                ellipsis,
+            )
     }
 
     fn parse_optionally_reified_type(&mut self) -> S::Output {
@@ -961,7 +973,7 @@ where
             _ => self.parse_separated_list_predicate(
                 |x| x == TokenKind::Bar || x == TokenKind::Ampersand || x == TokenKind::Comma,
                 SeparatedListKind::TrailingAllowed,
-                |x| x == TokenKind::RightParen || x == TokenKind::DotDotDot,
+                |x| x == TokenKind::RightParen,
                 Errors::error1007,
                 |x| x.parse_tuple_or_union_or_intersection_element_type(),
             ),

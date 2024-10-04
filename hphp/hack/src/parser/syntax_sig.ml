@@ -945,6 +945,7 @@ module type Syntax_S = sig
       }
     | TupleOrUnionOrIntersectionElementTypeSpecifier of {
         tuple_or_union_or_intersection_element_optional: t;
+        tuple_or_union_or_intersection_element_pre_ellipsis: t;
         tuple_or_union_or_intersection_element_type: t;
         tuple_or_union_or_intersection_element_ellipsis: t;
       }
@@ -1482,7 +1483,7 @@ module type Syntax_S = sig
   val make_closure_parameter_type_specifier : t -> t -> t -> t -> t -> t -> t
 
   val make_tuple_or_union_or_intersection_element_type_specifier :
-    t -> t -> t -> t
+    t -> t -> t -> t -> t
 
   val make_type_refinement : t -> t -> t -> t -> t -> t
 

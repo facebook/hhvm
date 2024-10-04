@@ -1076,6 +1076,7 @@ struct
       }
     | TupleOrUnionOrIntersectionElementTypeSpecifier of {
         tuple_or_union_or_intersection_element_optional: t;
+        tuple_or_union_or_intersection_element_pre_ellipsis: t;
         tuple_or_union_or_intersection_element_type: t;
         tuple_or_union_or_intersection_element_ellipsis: t;
       }

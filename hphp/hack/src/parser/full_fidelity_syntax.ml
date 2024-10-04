@@ -2365,10 +2365,12 @@ module WithToken (Token : TokenType) = struct
       | TupleOrUnionOrIntersectionElementTypeSpecifier
           {
             tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
             tuple_or_union_or_intersection_element_type;
             tuple_or_union_or_intersection_element_ellipsis;
           } ->
         let acc = f acc tuple_or_union_or_intersection_element_optional in
+        let acc = f acc tuple_or_union_or_intersection_element_pre_ellipsis in
         let acc = f acc tuple_or_union_or_intersection_element_type in
         let acc = f acc tuple_or_union_or_intersection_element_ellipsis in
         acc
@@ -4161,11 +4163,13 @@ module WithToken (Token : TokenType) = struct
       | TupleOrUnionOrIntersectionElementTypeSpecifier
           {
             tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
             tuple_or_union_or_intersection_element_type;
             tuple_or_union_or_intersection_element_ellipsis;
           } ->
         [
           tuple_or_union_or_intersection_element_optional;
+          tuple_or_union_or_intersection_element_pre_ellipsis;
           tuple_or_union_or_intersection_element_type;
           tuple_or_union_or_intersection_element_ellipsis;
         ]
@@ -5966,11 +5970,13 @@ module WithToken (Token : TokenType) = struct
       | TupleOrUnionOrIntersectionElementTypeSpecifier
           {
             tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
             tuple_or_union_or_intersection_element_type;
             tuple_or_union_or_intersection_element_ellipsis;
           } ->
         [
           "tuple_or_union_or_intersection_element_optional";
+          "tuple_or_union_or_intersection_element_pre_ellipsis";
           "tuple_or_union_or_intersection_element_type";
           "tuple_or_union_or_intersection_element_ellipsis";
         ]
@@ -7984,12 +7990,14 @@ module WithToken (Token : TokenType) = struct
       | ( SyntaxKind.TupleOrUnionOrIntersectionElementTypeSpecifier,
           [
             tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
             tuple_or_union_or_intersection_element_type;
             tuple_or_union_or_intersection_element_ellipsis;
           ] ) ->
         TupleOrUnionOrIntersectionElementTypeSpecifier
           {
             tuple_or_union_or_intersection_element_optional;
+            tuple_or_union_or_intersection_element_pre_ellipsis;
             tuple_or_union_or_intersection_element_type;
             tuple_or_union_or_intersection_element_ellipsis;
           }
@@ -10511,12 +10519,14 @@ module WithToken (Token : TokenType) = struct
 
       let make_tuple_or_union_or_intersection_element_type_specifier
           tuple_or_union_or_intersection_element_optional
+          tuple_or_union_or_intersection_element_pre_ellipsis
           tuple_or_union_or_intersection_element_type
           tuple_or_union_or_intersection_element_ellipsis =
         let syntax =
           TupleOrUnionOrIntersectionElementTypeSpecifier
             {
               tuple_or_union_or_intersection_element_optional;
+              tuple_or_union_or_intersection_element_pre_ellipsis;
               tuple_or_union_or_intersection_element_type;
               tuple_or_union_or_intersection_element_ellipsis;
             }

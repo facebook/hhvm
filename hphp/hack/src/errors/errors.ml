@@ -384,24 +384,6 @@ let compare_internal
   else
     comparison
 
-let compare (x : error) (y : error) : int =
-  compare_internal
-    x
-    y
-    ~compare_code:Int.compare
-    ~compare_claim_fn:Relative_path.compare
-    ~compare_claim:Pos.compare
-    ~compare_reason:Pos_or_decl.compare
-
-let compare_finalized (x : finalized_error) (y : finalized_error) : int =
-  compare_internal
-    x
-    y
-    ~compare_code:Int.compare
-    ~compare_claim_fn:String.compare
-    ~compare_claim:Pos.compare_absolute
-    ~compare_reason:Pos.compare_absolute
-
 let sort (err : error list) : error list =
   let compare_exact_code = Int.compare in
   let compare_category x_code y_code =

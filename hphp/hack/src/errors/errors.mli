@@ -221,10 +221,6 @@ val as_telemetry :
 
 val choose_code_opt : t -> int option
 
-val compare : error -> error -> int
-
-val compare_finalized : finalized_error -> finalized_error -> int
-
 val sort : error list -> error list
 
 (***************************************

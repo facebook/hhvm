@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/gen/cpp/type_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 #include <memory>
@@ -86,7 +86,7 @@ class TypeResolverTest : public ::testing::Test {
     return resolver_.get_type_tag(type);
   }
 
-  type_resolver resolver_;
+  cpp_name_resolver resolver_;
 
  protected:
   t_program program_;

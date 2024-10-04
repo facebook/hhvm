@@ -27,7 +27,7 @@
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -616,7 +616,7 @@ class python_capi_mstch_struct : public mstch_struct {
   mstch::node fields_size() { return struct_->fields().size(); }
 
  private:
-  gen::cpp::type_resolver cpp_resolver_;
+  cpp_name_resolver cpp_resolver_;
 };
 
 class python_capi_mstch_field : public mstch_field {

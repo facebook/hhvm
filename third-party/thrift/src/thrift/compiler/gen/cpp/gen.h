@@ -19,12 +19,7 @@
 #include <initializer_list>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
-namespace detail {
+namespace apache::thrift::compiler::detail {
 
 template <typename C, typename K = typename C::key_type, typename G>
 auto& get_or_gen(C& cache, const K& key, const G& gen_func) {
@@ -38,9 +33,4 @@ auto& get_or_gen(C& cache, const K& key, const G& gen_func) {
 std::string gen_template_type(
     std::string template_name, std::initializer_list<std::string> args);
 
-} // namespace detail
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::detail

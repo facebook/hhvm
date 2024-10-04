@@ -38,8 +38,8 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/reserved_identifier.h>
 #include <thrift/compiler/lib/uri.h>
@@ -1286,7 +1286,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
 template <typename Node>
 bool has_cursor_serialization_adapter(const Node& node) {
   try {
-    if (auto* adapter = gen::cpp::type_resolver::find_first_adapter(node)) {
+    if (auto* adapter = cpp_name_resolver::find_first_adapter(node)) {
       return adapter->find("apache::thrift::CursorSerializationAdapter") !=
           adapter->npos;
     }

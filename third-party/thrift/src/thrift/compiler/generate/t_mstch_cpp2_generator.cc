@@ -29,7 +29,7 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_field.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -238,13 +238,13 @@ class cpp2_generator_context {
     return cpp2::is_orderable(memo, type);
   }
 
-  gen::cpp::type_resolver& resolver() { return resolver_; }
+  cpp_name_resolver& resolver() { return resolver_; }
 
  private:
   cpp2_generator_context() = default;
 
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
-  gen::cpp::type_resolver resolver_;
+  cpp_name_resolver resolver_;
 };
 
 int checked_stoi(const std::string& s, std::string msg) {
@@ -386,7 +386,7 @@ class cpp_mstch_program : public mstch_program {
       if (alias->is_typedef() && alias->has_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
         if ((ttype->is_struct() || ttype->is_exception()) &&
-            !gen::cpp::type_resolver::find_first_adapter(*ttype)) {
+            !cpp_name_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
         }
       }
@@ -424,8 +424,7 @@ class cpp_mstch_program : public mstch_program {
   std::vector<std::string> get_fatal_struct_names() {
     std::vector<std::string> result;
     for (const t_structured* obj : program_->structured_definitions()) {
-      if (!obj->is_union() &&
-          !gen::cpp::type_resolver::find_first_adapter(*obj)) {
+      if (!obj->is_union() && !cpp_name_resolver::find_first_adapter(*obj)) {
         result.push_back(get_fatal_string_short_id(obj));
       }
     }
@@ -1007,7 +1006,7 @@ bool needs_op_encode(const t_type& type) {
               type, kCppUseOpEncodeUri)) ||
       t_typedef::get_first_structured_annotation_or_null(
              &type, kCppUseOpEncodeUri) ||
-      gen::cpp::type_resolver::find_first_adapter(type) ||
+      cpp_name_resolver::find_first_adapter(type) ||
       check_container_needs_op_encode(type);
 }
 
@@ -1022,7 +1021,7 @@ bool needs_op_encode(const t_field& field, const t_structured& strct) {
           strct.program()->inherit_annotation_or_null(
               strct, kCppUseOpEncodeUri)) ||
       strct.find_structured_annotation_or_null(kCppUseOpEncodeUri) ||
-      gen::cpp::type_resolver::find_first_adapter(field) ||
+      cpp_name_resolver::find_first_adapter(field) ||
       check_container_needs_op_encode(*field.type());
 }
 
@@ -1153,8 +1152,7 @@ class cpp_mstch_type : public mstch_type {
     return cpp_context_->resolver().get_standard_type(*type_);
   }
   mstch::node cpp_adapter() {
-    if (const auto* adapter =
-            gen::cpp::type_resolver::find_first_adapter(*type_)) {
+    if (const auto* adapter = cpp_name_resolver::find_first_adapter(*type_)) {
       return *adapter;
     }
     return {};
@@ -1371,7 +1369,7 @@ class cpp_mstch_struct : public mstch_struct {
     }
     for (const auto& f : struct_->fields()) {
       if (cpp2::field_transitively_refers_to_unique(&f) || cpp2::is_lazy(&f) ||
-          gen::cpp::type_resolver::find_first_adapter(f)) {
+          cpp_name_resolver::find_first_adapter(f)) {
         return true;
       }
     }
@@ -1382,7 +1380,7 @@ class cpp_mstch_struct : public mstch_struct {
     return cpp_context_->resolver().get_underlying_namespaced_name(*struct_);
   }
   mstch::node cpp_underlying_name() {
-    return gen::cpp::type_resolver::get_underlying_name(*struct_);
+    return cpp_name_resolver::get_underlying_name(*struct_);
   }
   mstch::node cpp_underlying_type() {
     return cpp_context_->resolver().get_underlying_type_name(*struct_);
@@ -1895,8 +1893,8 @@ class cpp_mstch_field : public mstch_field {
   }
   mstch::node has_deprecated_accessors() {
     return !cpp2::is_explicit_ref(field_) && !cpp2::is_lazy(field_) &&
-        !gen::cpp::type_resolver::find_first_adapter(*field_) &&
-        !gen::cpp::type_resolver::find_field_interceptor(*field_) &&
+        !cpp_name_resolver::find_first_adapter(*field_) &&
+        !cpp_name_resolver::find_field_interceptor(*field_) &&
         !has_option("no_getters_setters");
   }
   mstch::node cpp_ref() { return cpp2::is_explicit_ref(field_); }
@@ -1966,21 +1964,21 @@ class cpp_mstch_field : public mstch_field {
   }
   mstch::node cpp_first_adapter() {
     if (const std::string* adapter =
-            gen::cpp::type_resolver::find_first_adapter(*field_)) {
+            cpp_name_resolver::find_first_adapter(*field_)) {
       return *adapter;
     }
     return {};
   }
   mstch::node cpp_exactly_one_adapter() {
     bool hasFieldAdapter =
-        gen::cpp::type_resolver::find_structured_adapter_annotation(*field_);
+        cpp_name_resolver::find_structured_adapter_annotation(*field_);
     bool hasTypeAdapter =
-        gen::cpp::type_resolver::find_first_adapter(*field_->type());
+        cpp_name_resolver::find_first_adapter(*field_->type());
     return hasFieldAdapter != hasTypeAdapter;
   }
   mstch::node cpp_field_interceptor() {
     if (const std::string* interceptor =
-            gen::cpp::type_resolver::find_field_interceptor(*field_)) {
+            cpp_name_resolver::find_field_interceptor(*field_)) {
       return *interceptor;
     }
     return {};
@@ -2003,8 +2001,7 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_adapter() {
     // Only find a structured adapter on the field.
     if (const std::string* adapter =
-            gen::cpp::type_resolver::find_structured_adapter_annotation(
-                *field_)) {
+            cpp_name_resolver::find_structured_adapter_annotation(*field_)) {
       return *adapter;
     }
     return {};
@@ -2091,12 +2088,12 @@ class cpp_mstch_field : public mstch_field {
 
   mstch::node raw_binary() {
     return field_->type()->get_true_type()->is_binary() &&
-        !gen::cpp::type_resolver::find_first_adapter(*field_);
+        !cpp_name_resolver::find_first_adapter(*field_);
   }
 
   mstch::node raw_string_or_binary() {
     return field_->type()->get_true_type()->is_string_or_binary() &&
-        !gen::cpp::type_resolver::find_first_adapter(*field_);
+        !cpp_name_resolver::find_first_adapter(*field_);
   }
 
   mstch::node cpp_has_runtime_annotation() {
@@ -2388,7 +2385,7 @@ class cpp_mstch_const_value : public mstch_const_value {
  private:
   mstch::node default_construct() {
     return std::get<bool>(is_empty_container()) &&
-        !gen::cpp::type_resolver::find_first_adapter(
+        !cpp_name_resolver::find_first_adapter(
                *const_value_->get_owner()->type());
   }
 

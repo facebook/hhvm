@@ -21,8 +21,8 @@
 #include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
@@ -123,8 +123,7 @@ bool is_func_supported(bool no_stream, const t_function* func) {
 }
 
 bool is_hidden(const t_type& node) {
-  return node.generated() ||
-      gen::cpp::type_resolver::is_directly_adapted(node) ||
+  return node.generated() || cpp_name_resolver::is_directly_adapted(node) ||
       node.has_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }

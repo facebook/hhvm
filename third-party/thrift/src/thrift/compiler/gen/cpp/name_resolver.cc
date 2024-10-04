@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/gen/cpp/type_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 
 #include <stdexcept>
 
@@ -27,17 +27,13 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
+namespace apache::thrift::compiler {
 namespace {
 
 const t_type* find_first_type(const t_type& node) {
   const t_type* result = nullptr;
   t_typedef::find_type_if(&node, [&result](const t_type* type) {
-    if (type_resolver::find_type(*type)) {
+    if (cpp_name_resolver::find_type(*type)) {
       result = type;
       return true;
     }
@@ -48,7 +44,7 @@ const t_type* find_first_type(const t_type& node) {
 
 } // namespace
 
-const std::string& type_resolver::get_native_type(
+const std::string& cpp_name_resolver::get_native_type(
     const t_field& field, const t_structured& parent) {
   const t_type& type = *field.type();
 
@@ -76,7 +72,7 @@ const std::string& type_resolver::get_native_type(
   return get_native_type(type);
 }
 
-const std::string& type_resolver::get_native_type(const t_const& cnst) {
+const std::string& cpp_name_resolver::get_native_type(const t_const& cnst) {
   const t_type& type = *cnst.type();
 
   if (auto* annotation =
@@ -96,7 +92,7 @@ const std::string& type_resolver::get_native_type(const t_const& cnst) {
   return get_native_type(type);
 }
 
-const std::string& type_resolver::get_return_type(const t_function& fun) {
+const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
   // Most functions don't have sinks or streams so handle the common case first.
   if (!fun.sink_or_stream()) {
     const t_type& return_type = *fun.return_type();
@@ -104,7 +100,7 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
         type_cache_, &return_type, [&]() { return gen_type(return_type); });
   }
 
-  type_resolve_fn resolve_fn = &type_resolver::get_native_type;
+  type_resolve_fn resolve_fn = &cpp_name_resolver::get_native_type;
   if (const t_sink* sink = fun.sink()) {
     return detail::get_or_gen(sink_cache_, sink, [&]() {
       if (fun.has_return_type()) {
@@ -135,7 +131,8 @@ const std::string& type_resolver::get_return_type(const t_function& fun) {
   });
 }
 
-const std::string& type_resolver::get_underlying_type_name(const t_type& node) {
+const std::string& cpp_name_resolver::get_underlying_type_name(
+    const t_type& node) {
   if (auto* annotation = find_nontransitive_adapter(node)) {
     if (auto* adapted_type =
             annotation->get_value_from_structured_annotation_or_null(
@@ -151,7 +148,7 @@ const std::string& type_resolver::get_underlying_type_name(const t_type& node) {
   return get_native_type(node);
 }
 
-const std::string& type_resolver::get_underlying_type_name(
+const std::string& cpp_name_resolver::get_underlying_type_name(
     const t_typedef& node) {
   // When `t_placeholder_typedef` is used, `t_type_ref::deref` will
   // automatically dereference `t_placeholder_typedef` as well. Since
@@ -177,7 +174,7 @@ const std::string& type_resolver::get_underlying_type_name(
   return get_native_type(*type);
 }
 
-const std::string& type_resolver::get_underlying_namespaced_name(
+const std::string& cpp_name_resolver::get_underlying_namespaced_name(
     const t_type& node) {
   return detail::get_or_gen(underlying_namespaced_name_cache_, &node, [&] {
     if (auto program = node.get_program()) {
@@ -189,11 +186,11 @@ const std::string& type_resolver::get_underlying_namespaced_name(
           get_underlying_name(node));
     }
     return gen_standard_type(
-        node, &type_resolver::get_underlying_namespaced_name);
+        node, &cpp_name_resolver::get_underlying_namespaced_name);
   });
 }
 
-const std::string& type_resolver::get_underlying_name(const t_type& node) {
+const std::string& cpp_name_resolver::get_underlying_name(const t_type& node) {
   if (const t_const* annotation = find_nontransitive_adapter(node)) {
     if (const t_const_value* value =
             annotation->get_value_from_structured_annotation_or_null(
@@ -201,10 +198,10 @@ const std::string& type_resolver::get_underlying_name(const t_type& node) {
       return value->get_string();
     }
   }
-  return namespace_resolver::get_cpp_name(node);
+  return gen::cpp::namespace_resolver::get_cpp_name(node);
 }
 
-const std::string* type_resolver::get_extra_namespace(const t_type& node) {
+const std::string* cpp_name_resolver::get_extra_namespace(const t_type& node) {
   if (const t_const* annotation = find_nontransitive_adapter(node)) {
     const auto* ns = annotation->get_value_from_structured_annotation_or_null(
         "extraNamespace");
@@ -222,11 +219,11 @@ const std::string* type_resolver::get_extra_namespace(const t_type& node) {
   return nullptr;
 }
 
-const std::string& type_resolver::get_storage_type(
+const std::string& cpp_name_resolver::get_storage_type(
     const t_field& field, const t_structured& parent) {
-  auto ref_type = find_ref_type(field);
+  auto ref_type = gen::cpp::find_ref_type(field);
   const std::string& native_type = get_native_type(field, parent);
-  if (ref_type == reference_type::none) {
+  if (ref_type == cpp_reference_type::none) {
     // The storage type is just the type name.
     return native_type;
   }
@@ -235,20 +232,21 @@ const std::string& type_resolver::get_storage_type(
   });
 }
 
-const std::string& type_resolver::get_reference_type(const t_field& node) {
+const std::string& cpp_name_resolver::get_reference_type(const t_field& node) {
   return detail::get_or_gen(field_reference_type_cache_, &node, [&]() {
     return gen_reference_type(node);
   });
 }
 
-const t_const* type_resolver::find_nontransitive_adapter(const t_type& node) {
+const t_const* cpp_name_resolver::find_nontransitive_adapter(
+    const t_type& node) {
   if (!is_transitive_annotation(node)) {
     return node.find_structured_annotation_or_null(kCppAdapterUri);
   }
   return nullptr;
 }
 
-const std::string* type_resolver::find_first_adapter(const t_type& node) {
+const std::string* cpp_name_resolver::find_first_adapter(const t_type& node) {
   if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
           &node, kCppAdapterUri)) {
     return &annotation->get_value_from_structured_annotation("name")
@@ -257,7 +255,7 @@ const std::string* type_resolver::find_first_adapter(const t_type& node) {
   return nullptr;
 }
 
-const std::string* type_resolver::find_first_adapter(const t_field& field) {
+const std::string* cpp_name_resolver::find_first_adapter(const t_field& field) {
   if (const std::string* adapter = find_structured_adapter_annotation(field)) {
     return adapter;
   }
@@ -267,12 +265,13 @@ const std::string* type_resolver::find_first_adapter(const t_field& field) {
   return nullptr;
 }
 
-bool type_resolver::can_resolve_to_scalar(const t_type& node) {
+bool cpp_name_resolver::can_resolve_to_scalar(const t_type& node) {
   return node.get_true_type()->is_scalar() || find_first_adapter(node) ||
       find_first_type(node);
 }
 
-const std::string& type_resolver::default_template(t_container::type ctype) {
+const std::string& cpp_name_resolver::default_template(
+    t_container::type ctype) {
   switch (ctype) {
     case t_container::type::t_list: {
       static const auto& kValue = *new std::string("::std::vector");
@@ -291,7 +290,8 @@ const std::string& type_resolver::default_template(t_container::type ctype) {
       "unknown container type: " + std::to_string(static_cast<int>(ctype)));
 }
 
-const std::string& type_resolver::default_type(t_primitive_type::type btype) {
+const std::string& cpp_name_resolver::default_type(
+    t_primitive_type::type btype) {
   switch (btype) {
     case t_primitive_type::type::t_void: {
       static const auto& kValue = *new std::string("void");
@@ -335,16 +335,16 @@ const std::string& type_resolver::default_type(t_primitive_type::type btype) {
       "unknown base type: " + std::to_string(static_cast<int>(btype)));
 }
 
-std::string type_resolver::gen_type(const t_type& node) {
+std::string cpp_name_resolver::gen_type(const t_type& node) {
   if (const auto* type = find_type(node)) {
     // Use the override.
     return *type;
   }
   // Use the unmodified name.
-  return gen_standard_type(node, &type_resolver::get_native_type);
+  return gen_standard_type(node, &cpp_name_resolver::get_native_type);
 }
 
-std::string type_resolver::gen_standard_type(const t_type& node) {
+std::string cpp_name_resolver::gen_standard_type(const t_type& node) {
   if (const auto* type = find_type(node)) {
     // Return the override.
     return *type;
@@ -367,31 +367,31 @@ std::string type_resolver::gen_standard_type(const t_type& node) {
     return get_underlying_namespaced_name(node);
   }
 
-  return gen_standard_type(node, &type_resolver::get_standard_type);
+  return gen_standard_type(node, &cpp_name_resolver::get_standard_type);
 }
 
-std::string type_resolver::gen_storage_type(
+std::string cpp_name_resolver::gen_storage_type(
     const std::string& native_type,
-    reference_type& ref_type,
+    cpp_reference_type& ref_type,
     const t_field& field) {
   const std::string* cpp_template =
       field.find_annotation_or_null("cpp.template");
   switch (ref_type) {
-    case reference_type::unique:
+    case cpp_reference_type::unique:
       if (cpp_template != nullptr) {
         return detail::gen_template_type(*cpp_template, {native_type});
       } else {
         return detail::gen_template_type("::std::unique_ptr", {native_type});
       }
-    case reference_type::shared_mutable:
+    case cpp_reference_type::shared_mutable:
       return detail::gen_template_type("::std::shared_ptr", {native_type});
-    case reference_type::shared_const:
+    case cpp_reference_type::shared_const:
       return detail::gen_template_type(
           "::std::shared_ptr", {"const " + native_type});
-    case reference_type::boxed:
+    case cpp_reference_type::boxed:
       return detail::gen_template_type(
           "::apache::thrift::detail::boxed_value_ptr", {native_type});
-    case reference_type::boxed_intern:
+    case cpp_reference_type::boxed_intern:
       return detail::gen_template_type(
           "::apache::thrift::detail::boxed_value", {native_type});
     default:
@@ -399,7 +399,7 @@ std::string type_resolver::gen_storage_type(
   }
 }
 
-std::string type_resolver::gen_standard_type(
+std::string cpp_name_resolver::gen_standard_type(
     const t_type& node, type_resolve_fn resolve_fn) {
   // Base types have fixed type mappings.
   if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&node)) {
@@ -424,7 +424,7 @@ std::string type_resolver::gen_standard_type(
   return namespaces_.get_namespaced_name(node);
 }
 
-std::string type_resolver::gen_container_type(
+std::string cpp_name_resolver::gen_container_type(
     const t_container& node,
     type_resolve_fn resolve_fn,
     const std::string* val) {
@@ -456,14 +456,14 @@ std::string type_resolver::gen_container_type(
       std::to_string(static_cast<int>(node.container_type())));
 }
 
-std::string type_resolver::gen_adapted_type(
+std::string cpp_name_resolver::gen_adapted_type(
     const std::string* adapter, const std::string& standard_type) {
   return adapter == nullptr ? standard_type
                             : detail::gen_template_type(
                                   "::apache::thrift::adapt_detail::adapted_t",
                                   {*adapter, standard_type});
 }
-std::string type_resolver::gen_adapted_type(
+std::string cpp_name_resolver::gen_adapted_type(
     const std::string* adapter,
     int16_t field_id,
     const std::string& standard_type,
@@ -480,7 +480,7 @@ std::string type_resolver::gen_adapted_type(
             });
 }
 
-std::string type_resolver::gen_type_tag(const t_type& type) {
+std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
   std::string tag = type.is_typedef()
       ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
       : gen_thrift_type_tag(type);
@@ -492,7 +492,8 @@ std::string type_resolver::gen_type_tag(const t_type& type) {
         tag);
   }
 
-  if (type_resolver::find_type(type) || type_resolver::find_template(type)) {
+  if (cpp_name_resolver::find_type(type) ||
+      cpp_name_resolver::find_template(type)) {
     return fmt::format(
         "::apache::thrift::type::cpp_type<{}, {}>", get_native_type(type), tag);
   }
@@ -508,7 +509,7 @@ std::string type_resolver::gen_type_tag(const t_type& type) {
   return tag;
 }
 
-std::string type_resolver::gen_type_tag(const t_field& field) {
+std::string cpp_name_resolver::gen_type_tag(const t_field& field) {
   std::string type_tag = gen_type_tag(*field.type());
   if (const std::string* adapter = find_structured_adapter_annotation(field)) {
     return fmt::format(
@@ -517,7 +518,8 @@ std::string type_resolver::gen_type_tag(const t_field& field) {
   return type_tag;
 }
 
-std::string type_resolver::gen_thrift_type_tag(const t_type& original_type) {
+std::string cpp_name_resolver::gen_thrift_type_tag(
+    const t_type& original_type) {
   static const std::string ns = "::apache::thrift::type::";
   const auto& type = *original_type.get_true_type();
   if (type.is_void()) {
@@ -570,10 +572,10 @@ std::string type_resolver::gen_thrift_type_tag(const t_type& original_type) {
   }
 }
 
-std::string type_resolver::gen_reference_type(const t_field& node) {
+std::string cpp_name_resolver::gen_reference_type(const t_field& node) {
   const std::string ns = "::apache::thrift::";
 
-  if (find_ref_type(node) == reference_type::boxed) {
+  if (gen::cpp::find_ref_type(node) == cpp_reference_type::boxed) {
     switch (node.get_req()) {
       case t_field::e_req::optional:
         return ns + "optional_boxed_field_ref";
@@ -585,7 +587,7 @@ std::string type_resolver::gen_reference_type(const t_field& node) {
     }
   }
 
-  if (find_ref_type(node) == reference_type::boxed_intern) {
+  if (gen::cpp::find_ref_type(node) == cpp_reference_type::boxed_intern) {
     switch (node.get_req()) {
       case t_field::e_req::opt_in_req_out:
         return ns + "intern_boxed_field_ref";
@@ -612,7 +614,7 @@ std::string type_resolver::gen_reference_type(const t_field& node) {
   }
 }
 
-const std::string* type_resolver::get_string_from_annotation_or_null(
+const std::string* cpp_name_resolver::get_string_from_annotation_or_null(
     const t_named& node, const char* uri, const char* key) {
   if (const t_const* annotation =
           node.find_structured_annotation_or_null(uri)) {
@@ -621,8 +623,4 @@ const std::string* type_resolver::get_string_from_annotation_or_null(
   return nullptr;
 }
 
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

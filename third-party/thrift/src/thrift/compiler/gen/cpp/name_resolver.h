@@ -17,21 +17,13 @@
 #pragma once
 
 #include <stdint.h>
-#include <initializer_list>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
-#include <fmt/core.h>
-
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_field.h>
-#include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_sink.h>
-#include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/gen/cpp/gen.h>
 #include <thrift/compiler/gen/cpp/namespace_resolver.h>
@@ -55,15 +47,17 @@ struct std::hash<std::pair<
   }
 };
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
+namespace apache::thrift::compiler {
 
-// A class that resolves C++ type names from Thrift types and caches the
-// results.
-class type_resolver {
+class t_named;
+class t_program;
+class t_sink;
+class t_stream;
+
+using cpp_reference_type = gen::cpp::reference_type;
+
+// A class that resolves C++ names from Thrift entities and caches the results.
+class cpp_name_resolver {
  public:
   // Returns C++ type name for the given Thrift type.
   const std::string& get_native_type(const t_type& node) {
@@ -120,18 +114,10 @@ class type_resolver {
   // Note, the 'cpp.template' annotation only applies to container
   // types, so it could never resolve to a scalar.
   // In C++, scalars sometimes require a special treatment. For
-  // example, they are not initialized unless the default
-  // constructor is explicitly invoked. So if we declare
-  // two variables, like:
-  //   int i, j{};
-  // At this point, i could be any value, as it has not been
-  // explicitly initalized, while j is guaranteed to be 0, the
-  // intrinsic default for an int. On the other hand, if i
-  // had not been a scalar, it would have been initalized
-  // implicitly.
+  // example, they are not initialized by default.
   static bool can_resolve_to_scalar(const t_type& node);
 
-  // Returns the c++ type that should be used to store the field's value.
+  // Returns the C++ type that should be used to store the field's value.
   //
   // This differs from the type name, when a 'cpp.ref' or 'cpp.ref_type'
   // annotation is applied to the field.
@@ -166,9 +152,9 @@ class type_resolver {
 
  private:
   using type_resolve_fn =
-      const std::string& (type_resolver::*)(const t_type& node);
+      const std::string& (cpp_name_resolver::*)(const t_type& node);
 
-  namespace_resolver namespaces_;
+  gen::cpp::namespace_resolver namespaces_;
   std::unordered_map<const t_type*, std::string> type_cache_;
   std::unordered_map<const t_sink*, std::string> sink_cache_;
   std::unordered_map<const t_const*, std::string> const_cache_;
@@ -177,7 +163,7 @@ class type_resolver {
   std::unordered_map<const t_type*, std::string> underlying_type_cache_;
   std::unordered_map<const t_type*, std::string>
       underlying_namespaced_name_cache_;
-  std::unordered_map<std::pair<const t_field*, reference_type>, std::string>
+  std::unordered_map<std::pair<const t_field*, cpp_reference_type>, std::string>
       storage_type_cache_;
   std::unordered_map<const t_type*, std::string> type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_type_tag_cache_;
@@ -191,7 +177,7 @@ class type_resolver {
 
   const std::string& get_namespace(const t_program& program);
 
-  // Generatating functions.
+  // Generating functions.
   std::string gen_type(const t_type& node);
   std::string gen_field_type(
       int16_t field_id,
@@ -203,7 +189,9 @@ class type_resolver {
   std::string gen_standard_type(const t_type& node);
   std::string gen_standard_type(const t_type& node, type_resolve_fn resolve_fn);
   std::string gen_storage_type(
-      const std::string& native_type, reference_type& ref_type, const t_field&);
+      const std::string& native_type,
+      cpp_reference_type& ref_type,
+      const t_field&);
   std::string gen_container_type(
       const t_container& node,
       type_resolve_fn resolve_fn,
@@ -226,8 +214,4 @@ class type_resolver {
   }
 };
 
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

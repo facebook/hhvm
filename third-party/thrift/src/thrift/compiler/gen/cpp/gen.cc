@@ -16,12 +16,7 @@
 
 #include <thrift/compiler/gen/cpp/gen.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
-namespace detail {
+namespace apache::thrift::compiler::detail {
 
 std::string gen_template_type(
     std::string template_name, std::initializer_list<std::string> args) {
@@ -36,9 +31,4 @@ std::string gen_template_type(
   return template_name;
 }
 
-} // namespace detail
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::detail

@@ -35,7 +35,7 @@
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
-#include <thrift/compiler/gen/cpp/type_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/lib/uri.h>
 
 namespace apache {
@@ -67,7 +67,7 @@ bool is_custom_type(const t_type& type) {
 }
 
 bool is_custom_type(const t_field& field) {
-  return gen::cpp::type_resolver::find_first_adapter(field) ||
+  return cpp_name_resolver::find_first_adapter(field) ||
       is_custom_type(*field.get_type());
 }
 
@@ -364,7 +364,7 @@ bool is_orderable(t_type const& type) {
 }
 
 std::string_view get_type(const t_type* type) {
-  return value_or_empty(gen::cpp::type_resolver::find_type(*type));
+  return value_or_empty(cpp_name_resolver::find_type(*type));
 }
 
 bool is_implicit_ref(const t_type* type) {

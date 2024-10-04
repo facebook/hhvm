@@ -132,7 +132,7 @@ add_library(
   gen/cpp/gen.cc
   gen/cpp/namespace_resolver.cc
   gen/cpp/reference_type.cc
-  gen/cpp/type_resolver.cc
+  gen/cpp/name_resolver.cc
 
   lib/cpp2/util.cc
   lib/go/util.cc

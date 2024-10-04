@@ -15,15 +15,17 @@ open Typing_env_types
 
 val error : ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string
 
-val full : env -> Typing_defs.locl_ty -> string
+val full : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
-val full_i : env -> Typing_defs.internal_type -> string
+val full_i : hide_internals:bool -> env -> Typing_defs.internal_type -> string
 
-val full_rec : env -> Tvid.t -> Typing_defs.locl_ty -> string
+val full_rec :
+  hide_internals:bool -> env -> Tvid.t -> Typing_defs.locl_ty -> string
 
-val full_strip_ns : env -> Typing_defs.locl_ty -> string
+val full_strip_ns : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
-val full_strip_ns_i : env -> Typing_defs.internal_type -> string
+val full_strip_ns_i :
+  hide_internals:bool -> env -> Typing_defs.internal_type -> string
 
 (** Print a decl type, stripping backslash namespaces.
 
@@ -44,19 +46,18 @@ val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
 
 (** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity :
+  hide_internals:bool ->
   env ->
   Typing_defs.locl_ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string
 
-val debug : env -> Typing_defs.locl_ty -> string
+val debug : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
 val debug_decl : env -> Typing_defs.decl_ty -> string
 
-val debug_i : env -> Typing_defs.internal_type -> string
-
-val with_blank_tyvars : (unit -> 'a) -> 'a
+val debug_i : hide_internals:bool -> env -> Typing_defs.internal_type -> string
 
 val class_ : Provider_context.t -> Decl_provider.class_decl -> string
 
@@ -66,11 +67,13 @@ val fun_ : TypecheckerOptions.t -> Decl_provider.fun_decl -> string
 
 val typedef : TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
 
-val constraints_for_type : env -> Typing_defs.locl_ty -> string
+val constraints_for_type :
+  hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 
 val classish_kind : Ast_defs.classish_kind -> bool -> string
 
-val subtype_prop : env -> Typing_logic.subtype_prop -> string
+val subtype_prop :
+  hide_internals:bool -> env -> Typing_logic.subtype_prop -> string
 
 val coeffects : env -> Typing_defs.locl_ty -> string
 

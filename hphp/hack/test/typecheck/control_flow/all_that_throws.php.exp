@@ -1,4 +1,4 @@
 File "all_that_throws.php", line 69, characters 5-15:
-  (exact A | exact B | exact C | exact D | exact E | exact F | exact G | exact H | exact I | exact J | exact K | exact L | exact M | exact N | exact O | exact P)
+  (A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P)
 WARN: File "all_that_throws.php", line 64, characters 5-16:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `string`. (Warn[12012])

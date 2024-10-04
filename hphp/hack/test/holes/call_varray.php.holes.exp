@@ -73,17 +73,17 @@
                       unpacked_arg = None }))));
              ([15:3-27],
               (Expr
-                 ((TestVarray), [15:3-26],
+                 ((exact TestVarray), [15:3-26],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarray), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((TestVarray), [15:10-26], (New (((TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarray), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((exact TestVarray), [15:10-26], (New (((exact TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [18:3-10],
-                        (Obj_get (((TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $c): void)), [18:9-10], (Id ([18:9-10], "c"))), OG_nullthrows, Is_method)));
                        targs = []; args = [(Pnormal, ((vec<float>), [18:11-13], (Hole (((vec<float>), [18:11-13], (Lvar ([18:11-13], $c))), (vec<float>), (vec<int>), Typing))))]; 
                        unpacked_arg = None }))))
              ]
@@ -126,17 +126,17 @@
                       unpacked_arg = None }))));
              ([27:3-27],
               (Expr
-                 ((TestVarray), [27:3-26],
+                 ((exact TestVarray), [27:3-26],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVarray), [27:10-26], (New (((TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
              ([30:3-65],
               (Expr
                  ((~void), [30:3-64],
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [30:3-10],
-                        (Obj_get (((TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -235,17 +235,17 @@
                       unpacked_arg = None }))));
              ([27:3-27],
               (Expr
-                 ((TestVarray), [27:3-26],
+                 ((exact TestVarray), [27:3-26],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVarray), [27:10-26], (New (((TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
              ([30:3-65],
               (Expr
                  ((~void), [30:3-64],
                   (Call
                      { func =
                        (((function(vec<int> $c): void)), [30:3-10],
-                        (Obj_get (((TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVarray), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $c): void)), [30:9-10], (Id ([30:9-10], "c"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,

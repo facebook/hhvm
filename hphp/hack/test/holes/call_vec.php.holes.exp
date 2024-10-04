@@ -73,17 +73,17 @@
                       unpacked_arg = None }))));
              ([15:3-24],
               (Expr
-                 ((TestVec), [15:3-23],
+                 ((exact TestVec), [15:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVec), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((TestVec), [15:10-23], (New (((TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVec), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((exact TestVec), [15:10-23], (New (((exact TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call
                      { func =
                        (((function(vec<int> $e): void)), [18:3-10],
-                        (Obj_get (((TestVec), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $e): void)), [18:9-10], (Id ([18:9-10], "e"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVec), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(vec<int> $e): void)), [18:9-10], (Id ([18:9-10], "e"))), OG_nullthrows, Is_method)));
                        targs = []; args = [(Pnormal, ((vec<float>), [18:11-13], (Hole (((vec<float>), [18:11-13], (Lvar ([18:11-13], $e))), (vec<float>), (vec<int>), Typing))))]; 
                        unpacked_arg = None }))))
              ]
@@ -126,17 +126,17 @@
                       unpacked_arg = None }))));
              ([27:3-24],
               (Expr
-                 ((TestVec), [27:3-23],
+                 ((exact TestVec), [27:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([30:3-59],
               (Expr
                  ((~void), [30:3-58],
                   (Call
                      { func =
                        (((function(vec<int> $e): void)), [30:3-10],
-                        (Obj_get (((TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -235,17 +235,17 @@
                       unpacked_arg = None }))));
              ([27:3-24],
               (Expr
-                 ((TestVec), [27:3-23],
+                 ((exact TestVec), [27:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([30:3-59],
               (Expr
                  ((~void), [30:3-58],
                   (Call
                      { func =
                        (((function(vec<int> $e): void)), [30:3-10],
-                        (Obj_get (((TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestVec), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(vec<int> $e): void)), [30:9-10], (Id ([30:9-10], "e"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,

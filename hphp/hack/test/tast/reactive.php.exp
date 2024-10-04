@@ -32,8 +32,9 @@ Errors:
         { fb_ast =
           [([5:3-25],
             (Throw
-               ((Exception), [5:9-24],
-                (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
+               ((exact Exception), [5:9-24],
+                (New (((exact Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), 
+                   [], [], None, ((function(optional string $message, optional int $code, optional ?Exception $previous)[]: void)))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] }; { ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 

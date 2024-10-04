@@ -45,4 +45,4 @@ Invalid `as` expression hint (Typing[4195])
   File "wildcard_invalid_as_tuple.php", line 13, characters 10-10:
   The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
 WARN: File "wildcard_invalid_as_tuple.php", line 5, characters 3-16:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(nothing)` which shares no values with `(#14, int)`. (Warn[12012])
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `(nothing)` which shares no values with `(_, int)`. (Warn[12012])

@@ -89,17 +89,17 @@
                        unpacked_arg = None }))));
              ([18:3-25],
               (Expr
-                 ((TestDict), [18:3-24],
+                 ((exact TestDict), [18:3-24],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo)));
-                       rhs = ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestDict), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs = ((exact TestDict), [18:10-24], (New (((exact TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [21:3-10],
-                        (Obj_get (((TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(dict<int, int> $n): void)), [21:9-10], (Id ([21:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args = [(Pnormal, ((dict<string, int>), [21:11-14], (Hole (((dict<string, int>), [21:11-14], (Lvar ([21:11-14], $n1))), (dict<string, int>), (dict<int, int>), Typing))))];
                        unpacked_arg = None }))));
@@ -109,7 +109,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [23:3-10],
-                        (Obj_get (((TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(dict<int, int> $n): void)), [23:9-10], (Id ([23:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args = [(Pnormal, ((dict<int, string>), [23:11-14], (Hole (((dict<int, string>), [23:11-14], (Lvar ([23:11-14], $n2))), (dict<int, string>), (dict<int, int>), Typing))))];
                        unpacked_arg = None }))))
@@ -176,17 +176,17 @@
                        unpacked_arg = None }))));
              ([35:3-25],
               (Expr
-                 ((TestDict), [35:3-24],
+                 ((exact TestDict), [35:3-24],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((exact TestDict), [35:10-24], (New (((exact TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([38:3-71],
               (Expr
                  ((~void), [38:3-70],
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [38:3-10],
-                        (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -204,7 +204,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [40:3-10],
-                        (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -325,17 +325,17 @@
                        unpacked_arg = None }))));
              ([35:3-25],
               (Expr
-                 ((TestDict), [35:3-24],
+                 ((exact TestDict), [35:3-24],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((exact TestDict), [35:10-24], (New (((exact TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([38:3-71],
               (Expr
                  ((~void), [38:3-70],
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [38:3-10],
-                        (Obj_get (((TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(dict<int, int> $n): void)), [38:9-10], (Id ([38:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -353,7 +353,7 @@
                   (Call
                      { func =
                        (((function(dict<int, int> $n): void)), [40:3-10],
-                        (Obj_get (((TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestDict), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(dict<int, int> $n): void)), [40:9-10], (Id ([40:9-10], "n"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,

@@ -30,7 +30,11 @@ let handler =
             | (A.Tbool, A.Tbool)
             | (A.Tfloat, A.Tfloat) ->
               let typing_env = Tast_env.tast_env_as_typing_env env in
-              let cast = "(" ^ Typing_print.full typing_env expr_ty ^ ")" in
+              let cast =
+                "("
+                ^ Typing_print.full ~hide_internals:true typing_env expr_ty
+                ^ ")"
+              in
               let check_status = Tast_env.get_check_status env in
               let can_be_captured = Aast_utils.can_be_captured expr in
               Lints_errors.redundant_cast

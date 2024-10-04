@@ -33,7 +33,7 @@ exception Not_in_class
 
 let get_decl_env env = env.Typing_env_types.decl_env
 
-let print_ty = Typing_print.full_strip_ns
+let print_ty = Typing_print.full_strip_ns ~hide_internals:true
 
 let print_decl_ty = Typing_print.full_strip_ns_decl ~verbose_fun:false
 
@@ -43,7 +43,12 @@ let print_hint env hint =
   print_decl_ty env @@ Decl_hint.hint (get_decl_env env) hint
 
 let print_ty_with_identity env ty sym_occurrence sym_definition =
-  Typing_print.full_with_identity env ty sym_occurrence sym_definition
+  Typing_print.full_with_identity
+    ~hide_internals:true
+    env
+    ty
+    sym_occurrence
+    sym_definition
 
 let ty_to_json env ?show_like_ty ty = Typing_print.to_json env ?show_like_ty ty
 

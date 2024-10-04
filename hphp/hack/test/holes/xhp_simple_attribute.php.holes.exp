@@ -112,11 +112,11 @@
          { fb_ast =
            [([16:5-38],
              (Expr
-                ((XhpSimple\:element), [16:5-37],
+                ((exact XhpSimple\:element), [16:5-37],
                  (Binop
-                    { bop = (Eq None); lhs = ((XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem)));
+                    { bop = (Eq None); lhs = ((exact XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem)));
                       rhs =
-                      ((XhpSimple\:element), [16:13-37],
+                      ((exact XhpSimple\:element), [16:13-37],
                        (Xml (([16:14-21], "\\XhpSimple\\:element"),
                           [(Xhp_simple
                               { xs_name = ([16:22-26], "prop"); xs_type = (~int);

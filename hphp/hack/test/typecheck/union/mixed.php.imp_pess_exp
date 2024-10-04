@@ -1,11 +1,11 @@
 File "mixed.php", line 17, characters 3-13:
-  (_ | exact A)
+  (_ | A)
 File "mixed.php", line 25, characters 3-13:
   nonnull
 File "mixed.php", line 34, characters 3-13:
   mixed
 File "mixed.php", line 43, characters 3-13:
-  (exact A | exact Object)
+  (A | Object)
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): ~(int | string))
 File "mixed.php", line 63, characters 3-13:
@@ -23,7 +23,7 @@ File "mixed.php", line 85, characters 3-13:
 File "mixed.php", line 88, characters 3-13:
   (int | B)
 File "mixed.php", line 91, characters 3-13:
-  (B | exact A)
+  (B | A)
 ERROR: File "mixed.php", line 11, characters 24-31:
 Was expecting a type hint (Typing[4032])
 ERROR: File "mixed.php", line 65, characters 28-29:

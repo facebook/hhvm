@@ -40,14 +40,14 @@
          { fb_ast =
            [([8:3-18],
              (Expr
-                ((Sub), [8:3-17],
+                ((exact Sub), [8:3-17],
                  (Binop
-                    { bop = (Eq None); lhs = ((Sub), [8:3-5], (Lvar ([8:3-5], $b))); 
-                      rhs = ((Sub), [8:8-17], (New (((Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))) }))));
+                    { bop = (Eq None); lhs = ((exact Sub), [8:3-5], (Lvar ([8:3-5], $b)));
+                      rhs = ((exact Sub), [8:8-17], (New (((exact Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))) }))));
              ([10:3-47],
               (Return
                  (Some ((~int), [10:10-46],
-                        (Hole (((Sub), [10:43-45], (Lvar ([10:43-45], $b))), (Super), (int), (UnsafeCast [([10:32-37], (Happly (([10:32-37], "\\Super"), []))); ([10:38-41], (Hprim Tint))])))))))
+                        (Hole (((exact Sub), [10:43-45], (Lvar ([10:43-45], $b))), (Super), (int), (UnsafeCast [([10:32-37], (Happly (([10:32-37], "\\Super"), []))); ([10:38-41], (Hprim Tint))])))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-24], "__SupportDynamicType"); ua_params = [] }]; 

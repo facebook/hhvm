@@ -99,17 +99,19 @@
                        unpacked_arg = None }))));
              ([18:3-37],
               (Expr
-                 ((TestKeyedTraversable), [18:3-36],
+                 ((exact TestKeyedTraversable), [18:3-36],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo)));
-                       rhs = ((TestKeyedTraversable), [18:10-36], (New (((TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs =
+                       ((exact TestKeyedTraversable), [18:10-36], (New (((exact TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
+                       }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [21:3-10],
-                        (Obj_get (((TestKeyedTraversable), [21:3-7], (Lvar ([21:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [21:3-7], (Lvar ([21:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [21:9-10], (Id ([21:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -124,7 +126,7 @@
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [23:3-10],
-                        (Obj_get (((TestKeyedTraversable), [23:3-7], (Lvar ([23:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [23:3-7], (Lvar ([23:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [23:9-10], (Id ([23:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -196,17 +198,19 @@
                        unpacked_arg = None }))));
              ([35:3-37],
               (Expr
-                 ((TestKeyedTraversable), [35:3-36],
+                 ((exact TestKeyedTraversable), [35:3-36],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs = ((TestKeyedTraversable), [35:10-36], (New (((TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs =
+                       ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
+                       }))));
              ([38:3-95],
               (Expr
                  ((~void), [38:3-94],
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
-                        (Obj_get (((TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -225,7 +229,7 @@
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
-                        (Obj_get (((TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -350,17 +354,19 @@
                        unpacked_arg = None }))));
              ([35:3-37],
               (Expr
-                 ((TestKeyedTraversable), [35:3-36],
+                 ((exact TestKeyedTraversable), [35:3-36],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs = ((TestKeyedTraversable), [35:10-36], (New (((TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs =
+                       ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
+                       }))));
              ([38:3-95],
               (Expr
                  ((~void), [38:3-94],
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [38:3-10],
-                        (Obj_get (((TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [38:3-7], (Lvar ([38:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [38:9-10], (Id ([38:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -379,7 +385,7 @@
                   (Call
                      { func =
                        (((function(KeyedTraversable<int, int> $o): void)), [40:3-10],
-                        (Obj_get (((TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
+                        (Obj_get (((exact TestKeyedTraversable), [40:3-7], (Lvar ([40:3-7], $foo))), (
                            ((function(KeyedTraversable<int, int> $o): void)), [40:9-10], (Id ([40:9-10], "o"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =

@@ -69,8 +69,9 @@ module Log = struct
       ~function_name:(Printf.sprintf "Typing.check_expected_ty_res %s" message)
       ~arguments:
         [
-          ("inferred_ty", Typing_print.debug env inferred_ty);
-          ("expected_ty", Typing_print.debug env ty);
+          ( "inferred_ty",
+            Typing_print.debug ~hide_internals:false env inferred_ty );
+          ("expected_ty", Typing_print.debug ~hide_internals:false env ty);
         ]
       ~result:(function
         | Ok _ -> Some "ok"
@@ -702,9 +703,13 @@ let as_expr env ty1 pe e =
   let (ty_mismatch_opt, ty_err_opt2) =
     match ty_err_opt1 with
     | None when is_option ->
-      let ty_str = lazy (Typing_print.full_strip_ns env ty1) in
+      let ty_str =
+        lazy (Typing_print.full_strip_ns ~hide_internals:true env ty1)
+      in
       let ty_ct = SubType.can_traverse_to_iface ct in
-      let ct_str = lazy (Typing_print.full_strip_ns env ty_ct) in
+      let ct_str =
+        lazy (Typing_print.full_strip_ns ~hide_internals:true env ty_ct)
+      in
       let reasons_opt =
         Some
           Lazy.(
@@ -2342,13 +2347,15 @@ end = struct
         | None -> ("", [])
         | Some ExpectedTy.{ reason = r; ty; _ } ->
           ( " " ^ Reason.string_of_ureason r,
-            [("expected_ty", Typing_print.debug env ty)] )
+            [("expected_ty", Typing_print.debug ~hide_internals:false env ty)]
+          )
       in
       Typing_log.log_function
         (Pos_or_decl.of_raw_pos p)
         ~function_name:("Typing.expr " ^ ureason_string)
         ~arguments:(("ctxt", Context.show ctxt) :: expected_ty_log)
-        ~result:(fun (env, _expr, ty) -> Some (Typing_print.debug env ty))
+        ~result:(fun (env, _expr, ty) ->
+          Some (Typing_print.debug ~hide_internals:false env ty))
   end
 
   (* Compute an expected type for a labmda that is being called with the
@@ -4684,14 +4691,12 @@ end = struct
       let err_splice_ty =
         Printf.sprintf
           "Expected `%s` because you are splicing into a `%s` expression or block"
-          (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_decl ~verbose_fun:false env splice_ty))
+          (Typing_print.full_strip_ns_decl ~verbose_fun:false env splice_ty)
           (Utils.strip_ns dsl_name)
       in
       let err_ty =
         Printf.sprintf "But got `%s`"
-        @@ Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns env ty)
+        @@ Typing_print.full_strip_ns ~hide_internals:true env ty
       in
       Reason.to_string err_splice_ty (get_reason splice_ty)
       @ Reason.to_string err_ty (get_reason ty)
@@ -5044,7 +5049,9 @@ end = struct
       let (ty_mismatch_opt, e2) =
         match e1 with
         | None when is_option ->
-          let ty_str = lazy (Typing_print.full_strip_ns env ty_actual) in
+          let ty_str =
+            lazy (Typing_print.full_strip_ns ~hide_internals:true env ty_actual)
+          in
           let reasons_opt =
             Some
               (Lazy.map ty_str ~f:(fun ty_str ->
@@ -8073,10 +8080,12 @@ end = struct
     let (env, unsupported_tys) = find_unsupported_tys env [] expr_ty in
     let ty_was_allowed = List.is_empty unsupported_tys in
     (if not ty_was_allowed then
-      let expr_ty = lazy (Typing_print.full_strip_ns env expr_ty) in
+      let expr_ty =
+        lazy (Typing_print.full_strip_ns ~hide_internals:true env expr_ty)
+      in
       let unsupported_tys =
         List.map unsupported_tys ~f:(fun ty ->
-            lazy (Typing_print.full_strip_ns env ty))
+            lazy (Typing_print.full_strip_ns ~hide_internals:true env ty))
       in
       Typing_error_utils.add_typing_error
         ~env
@@ -8137,7 +8146,9 @@ end = struct
             let lnothing =
               MakeType.locl_like Reason.none (MakeType.nothing Reason.none)
             in
-            let ty_not_covered = lazy (Typing_print.full_strip_ns env ty) in
+            let ty_not_covered =
+              lazy (Typing_print.full_strip_ns ~hide_internals:true env ty)
+            in
             let (env, err_opt) =
               SubType.sub_type_or_fail env ty lnothing
               @@ Some

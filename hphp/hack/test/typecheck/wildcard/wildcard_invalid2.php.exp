@@ -5,4 +5,4 @@ Invalid `is` expression hint (Typing[4195])
   File "wildcard_invalid2.php", line 10, characters 16-27:
   The `is` operator cannot be used with a type with an erased generic type argument
 WARN: File "wildcard_invalid2.php", line 14, characters 10-16:
-This `is` check is always `true`. The expression on the left has type `mixed` which is a subtype of `#1`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `mixed` which is a subtype of `_`. (Warn[12009])

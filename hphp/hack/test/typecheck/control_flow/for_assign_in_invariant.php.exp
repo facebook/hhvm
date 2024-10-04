@@ -1,5 +1,5 @@
 File "for_assign_in_invariant.php", line 55, characters 3-13:
-  (exact A | exact B | exact C | exact D)
+  (A | B | C | D)
 ERROR: File "for_assign_in_invariant.php", line 63, characters 6-7:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 ERROR: File "for_assign_in_invariant.php", line 38, characters 46-47:

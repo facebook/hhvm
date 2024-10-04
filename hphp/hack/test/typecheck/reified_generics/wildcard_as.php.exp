@@ -9,7 +9,7 @@ Invalid `as` expression hint (Typing[4195])
   File "wildcard_as.php", line 10, characters 12-15:
   The `as` operator cannot be used with a reified type containing a wildcard (`_`)
 WARN: File "wildcard_as.php", line 7, characters 3-8:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `#4`. (Warn[12011])
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `_`. (Warn[12011])
 WARN: File "wildcard_as.php", line 8, characters 3-11:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<nothing>`. (Warn[12012])
 WARN: File "wildcard_as.php", line 9, characters 3-14:

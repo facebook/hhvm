@@ -56,8 +56,8 @@
          { fb_ast =
            [([8:3-11:12],
              (Expr
-                ((:hello), [8:3-11:11],
-                 (Xml (([8:4-9], "\\:hello"), [], [((:selam), [9:5-14], (Xml (([9:6-11], "\\:selam"), [], []))); ((:salut), [10:5-14], (Xml (([10:6-11], "\\:salut"), [], [])))])))))
+                ((exact :hello), [8:3-11:11],
+                 (Xml (([8:4-9], "\\:hello"), [], [((exact :selam), [9:5-14], (Xml (([9:6-11], "\\:selam"), [], []))); ((exact :salut), [10:5-14], (Xml (([10:6-11], "\\:salut"), [], [])))])))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 

@@ -58,7 +58,7 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
          (fst id)
          (snd id)
          classname
-         (pos, Typing_print.full_strip_ns env ty))
+         (pos, Typing_print.full_strip_ns ~hide_internals:true env ty))
   ) else
     None
 

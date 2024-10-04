@@ -219,11 +219,11 @@
          { fb_ast =
            [([27:5-37],
              (Expr
-                ((XhpSpread\:element), [27:5-36],
+                ((exact XhpSpread\:element), [27:5-36],
                  (Binop
-                    { bop = (Eq None); lhs = ((XhpSpread\:element), [27:5-10], (Lvar ([27:5-10], $elem)));
+                    { bop = (Eq None); lhs = ((exact XhpSpread\:element), [27:5-10], (Lvar ([27:5-10], $elem)));
                       rhs =
-                      ((XhpSpread\:element), [27:13-36],
+                      ((exact XhpSpread\:element), [27:13-36],
                        (Xml (([27:14-21], "\\XhpSpread\\:element"),
                           [(Xhp_spread ((XhpSpread\:element2), [27:26-32], (Hole (((XhpSpread\:element2), [27:26-32], (Lvar ([27:26-32], $props))), (XhpSpread\:element2), (nothing), Typing))))], 
                           [])))

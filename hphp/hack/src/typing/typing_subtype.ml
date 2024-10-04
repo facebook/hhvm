@@ -172,8 +172,7 @@ end = struct
     | (ConstraintType _, ConstraintType _) -> None
 
   let describe_ty_default env ty =
-    Typing_print.with_blank_tyvars (fun () ->
-        Typing_print.full_strip_ns_i env ty)
+    Typing_print.full_strip_ns_i ~hide_internals:true env ty
 
   let describe_ty ~is_coeffect : env -> internal_type -> string =
     (* Optimization: specialize on partial application, i.e.
@@ -268,8 +267,10 @@ end = struct
       | (_, Ttype_switch _)
       | (_, Tdestructure _) ->
         Markdown_lite.md_codify
-          (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_i env (ConstraintType ty))))
+          (Typing_print.full_strip_ns_i
+             ~hide_internals:true
+             env
+             (ConstraintType ty)))
 end
 
 module Subtype_env = struct
@@ -484,18 +485,18 @@ module Logging = struct
       ~function_name
       ~arguments:
         [
-          ("ty_sub", Typing_print.debug_i env ty_sub);
-          ("ty_super", Typing_print.debug_i env ty_super);
+          ("ty_sub", Typing_print.debug_i ~hide_internals:false env ty_sub);
+          ("ty_super", Typing_print.debug_i ~hide_internals:false env ty_super);
           ( "this_ty",
             match this_ty with
             | None -> "None"
-            | Some ty -> Typing_print.debug env ty );
+            | Some ty -> Typing_print.debug ~hide_internals:false env ty );
         ]
       ~result
 
   let log_subtype_i_prop =
     log_subtype_i_ ~result:(fun (env, prop) ->
-        Some (TL.print (Typing_print.debug_i env) prop))
+        Some (TL.print (Typing_print.debug_i ~hide_internals:false env) prop))
 
   let log_subtype_prop env ty_sub ty_super =
     log_subtype_i_prop env (LoclType ty_sub) (LoclType ty_super)
@@ -5742,9 +5743,7 @@ end = struct
             | Tunapplied_alias _ ) ),
           ListDestructure ) ->
         let ty_sub_descr =
-          lazy
-            (Typing_print.with_blank_tyvars (fun () ->
-                 Typing_print.full_strip_ns env ty_sub))
+          lazy (Typing_print.full_strip_ns ~hide_internals:true env ty_sub)
         in
         invalid
           env
@@ -8192,9 +8191,9 @@ end = struct
           ("non-singleton disjunction "
           ^ msg
           ^ " of "
-          ^ Typing_print.full_i env ty_sub
+          ^ Typing_print.full_i ~hide_internals:false env ty_sub
           ^ " <: "
-          ^ Typing_print.full_i env ty_super)
+          ^ Typing_print.full_i ~hide_internals:false env ty_super)
           env
           disj_prop
     in

@@ -63,7 +63,7 @@ module Type_string = struct
                     lots_of_typing_print_fuel;
                 })
        in
-       Typing_print.full_strip_ns typing_env locl_ty)
+       Typing_print.full_strip_ns ~hide_internals:true typing_env locl_ty)
 
   let to_string = Lazy.force
 end

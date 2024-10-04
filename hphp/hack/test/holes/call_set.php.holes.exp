@@ -73,17 +73,17 @@
                       unpacked_arg = None }))));
              ([15:3-24],
               (Expr
-                 ((TestSet), [15:3-23],
+                 ((exact TestSet), [15:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestSet), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((TestSet), [15:10-23], (New (((TestSet), [15:14-21], (CI ([15:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestSet), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((exact TestSet), [15:10-23], (New (((exact TestSet), [15:14-21], (CI ([15:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call
                      { func =
                        (((function(Set<int> $h): void)), [18:3-10],
-                        (Obj_get (((TestSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Set<int> $h): void)), [18:9-10], (Id ([18:9-10], "h"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestSet), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Set<int> $h): void)), [18:9-10], (Id ([18:9-10], "h"))), OG_nullthrows, Is_method)));
                        targs = []; args = [(Pnormal, ((Set<string>), [18:11-13], (Hole (((Set<string>), [18:11-13], (Lvar ([18:11-13], $h))), (Set<string>), (Set<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
@@ -126,17 +126,17 @@
                       unpacked_arg = None }))));
              ([27:3-24],
               (Expr
-                 ((TestSet), [27:3-23],
+                 ((exact TestSet), [27:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestSet), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestSet), [27:10-23], (New (((TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestSet), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestSet), [27:10-23], (New (((exact TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
              ([30:3-60],
               (Expr
                  ((~void), [30:3-59],
                   (Call
                      { func =
                        (((function(Set<int> $h): void)), [30:3-10],
-                        (Obj_get (((TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -235,17 +235,17 @@
                       unpacked_arg = None }))));
              ([27:3-24],
               (Expr
-                 ((TestSet), [27:3-23],
+                 ((exact TestSet), [27:3-23],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestSet), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestSet), [27:10-23], (New (((TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestSet), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestSet), [27:10-23], (New (((exact TestSet), [27:14-21], (CI ([27:14-21], "\\TestSet"))), [], [], None, ((function(): void))))) }))));
              ([30:3-60],
               (Expr
                  ((~void), [30:3-59],
                   (Call
                      { func =
                        (((function(Set<int> $h): void)), [30:3-10],
-                        (Obj_get (((TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestSet), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Set<int> $h): void)), [30:9-10], (Id ([30:9-10], "h"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,

@@ -443,8 +443,14 @@ let error_unused_cases env expected_ty unused_cases =
           {
             pos;
             kind = "";
-            expected = lazy (Typing_print.full_strip_ns env expected_ty);
-            actual = lazy (Typing_print.full_strip_ns env ty);
+            expected =
+              lazy
+                (Typing_print.full_strip_ns
+                   ~hide_internals:true
+                   env
+                   expected_ty);
+            actual =
+              lazy (Typing_print.full_strip_ns ~hide_internals:true env ty);
             expected_pos = expected_ty |> Typing_defs.get_pos |> Option.some;
           })
 

@@ -33,19 +33,19 @@
          f_body =
          { fb_ast =
            [([9:3-22],
-             (Expr ((:foo), [9:3-21], (Xml (([9:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([9:8-11], "bar"); xs_type = (~?string); xs_expr = ((string), [9:12-18], (String "herp")) })], [])))));
+             (Expr ((exact :foo), [9:3-21], (Xml (([9:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([9:8-11], "bar"); xs_type = (~?string); xs_expr = ((string), [9:12-18], (String "herp")) })], [])))));
              ([10:3-18], (Expr ((string), [10:3-17], (Binop { bop = (Eq None); lhs = ((string), [10:3-8], (Lvar ([10:3-8], $derp))); rhs = ((string), [10:11-17], (String "derp")) }))));
              ([11:3-23],
               (Expr
-                 ((:foo), [11:3-22],
+                 ((exact :foo), [11:3-22],
                   (Xml (([11:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([11:8-11], "bar"); xs_type = (~?string); xs_expr = ((string), [11:13-18], (Lvar ([11:13-18], $derp))) })], [])))));
              ([14:3-18:10],
               (Expr
-                 ((:foo), [14:3-18:9],
+                 ((exact :foo), [14:3-18:9],
                   (Xml (([14:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([14:8-11], "bar"); xs_type = (~?string); xs_expr = ((string), [14:12-18], (String "herp")) })],
-                     [((:foo), [15:5-17:11],
+                     [((exact :foo), [15:5-17:11],
                        (Xml (([15:6-9], "\\:foo"), [(Xhp_simple { xs_name = ([15:10-13], "bar"); xs_type = (~?string); xs_expr = ((string), [15:14-20], (String "derp")) })],
-                          [((:foo), [16:7-25],
+                          [((exact :foo), [16:7-25],
                             (Xml (([16:8-11], "\\:foo"), [(Xhp_simple { xs_name = ([16:12-15], "bar"); xs_type = (~?string); xs_expr = ((string), [16:16-22], (String "herp")) })], [])))]
                           )))
                        ]

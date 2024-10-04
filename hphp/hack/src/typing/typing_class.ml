@@ -1444,7 +1444,11 @@ let check_generic_class_with_SupportDynamicType env c tc parents =
                                    env
                                    parent_ty))
                             ~self_ty_name:
-                              (lazy (Typing_print.full_strip_ns env self_ty)))
+                              (lazy
+                                (Typing_print.full_strip_ns
+                                   ~hide_internals:true
+                                   env
+                                   self_ty)))
                   | _ -> (env, None)
                 end
               | _ -> (env, None)

@@ -74,17 +74,17 @@
                       unpacked_arg = None }))));
              ([15:3-31],
               (Expr
-                 ((TestCollection), [15:3-30],
+                 ((exact TestCollection), [15:3-30],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestCollection), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((TestCollection), [15:10-30], (New (((TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestCollection), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((exact TestCollection), [15:10-30], (New (((exact TestCollection), [15:14-28], (CI ([15:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call
                      { func =
                        (((function(Collection<int> $l): void)), [18:3-10],
-                        (Obj_get (((TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args = [(Pnormal, ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))];
                        unpacked_arg = None }))))
@@ -129,17 +129,17 @@
                       unpacked_arg = None }))));
              ([27:3-31],
               (Expr
-                 ((TestCollection), [27:3-30],
+                 ((exact TestCollection), [27:3-30],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestCollection), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestCollection), [27:10-30], (New (((TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestCollection), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestCollection), [27:10-30], (New (((exact TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
              ([30:3-74],
               (Expr
                  ((~void), [30:3-73],
                   (Call
                      { func =
                        (((function(Collection<int> $l): void)), [30:3-10],
-                        (Obj_get (((TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,
@@ -240,17 +240,17 @@
                       unpacked_arg = None }))));
              ([27:3-31],
               (Expr
-                 ((TestCollection), [27:3-30],
+                 ((exact TestCollection), [27:3-30],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestCollection), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestCollection), [27:10-30], (New (((TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestCollection), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestCollection), [27:10-30], (New (((exact TestCollection), [27:14-28], (CI ([27:14-28], "\\TestCollection"))), [], [], None, ((function(): void))))) }))));
              ([30:3-74],
               (Expr
                  ((~void), [30:3-73],
                   (Call
                      { func =
                        (((function(Collection<int> $l): void)), [30:3-10],
-                        (Obj_get (((TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
+                        (Obj_get (((exact TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
                        [(Pnormal,

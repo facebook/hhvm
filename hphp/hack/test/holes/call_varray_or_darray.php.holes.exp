@@ -78,17 +78,18 @@
                       unpacked_arg = None }))));
              ([15:3-35],
               (Expr
-                 ((TestVarrayOrDarray), [15:3-34],
+                 ((exact TestVarrayOrDarray), [15:3-34],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarrayOrDarray), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((TestVarrayOrDarray), [15:10-34], (New (((TestVarrayOrDarray), [15:14-32], (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarrayOrDarray), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((exact TestVarrayOrDarray), [15:10-34], (New (((exact TestVarrayOrDarray), [15:14-32], (CI ([15:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void)))))
+                       }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
                   (Call
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [18:3-10],
-                        (Obj_get (((TestVarrayOrDarray), [18:3-7], (Lvar ([18:3-7], $foo))), (
+                        (Obj_get (((exact TestVarrayOrDarray), [18:3-7], (Lvar ([18:3-7], $foo))), (
                            ((function(vec_or_dict<arraykey, int> $d): void)), [18:9-10], (Id ([18:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -135,17 +136,18 @@
                       unpacked_arg = None }))));
              ([27:3-35],
               (Expr
-                 ((TestVarrayOrDarray), [27:3-34],
+                 ((exact TestVarrayOrDarray), [27:3-34],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVarrayOrDarray), [27:10-34], (New (((TestVarrayOrDarray), [27:14-32], (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVarrayOrDarray), [27:10-34], (New (((exact TestVarrayOrDarray), [27:14-32], (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void)))))
+                       }))));
              ([30:3-85],
               (Expr
                  ((~void), [30:3-84],
                   (Call
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [30:3-10],
-                        (Obj_get (((TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
+                        (Obj_get (((exact TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
                            ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
@@ -241,17 +243,18 @@
                       unpacked_arg = None }))));
              ([27:3-35],
               (Expr
-                 ((TestVarrayOrDarray), [27:3-34],
+                 ((exact TestVarrayOrDarray), [27:3-34],
                   (Binop
-                     { bop = (Eq None); lhs = ((TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((TestVarrayOrDarray), [27:10-34], (New (((TestVarrayOrDarray), [27:14-32], (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void))))) }))));
+                     { bop = (Eq None); lhs = ((exact TestVarrayOrDarray), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((exact TestVarrayOrDarray), [27:10-34], (New (((exact TestVarrayOrDarray), [27:14-32], (CI ([27:14-32], "\\TestVarrayOrDarray"))), [], [], None, ((function(): void)))))
+                       }))));
              ([30:3-85],
               (Expr
                  ((~void), [30:3-84],
                   (Call
                      { func =
                        (((function(vec_or_dict<arraykey, int> $d): void)), [30:3-10],
-                        (Obj_get (((TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
+                        (Obj_get (((exact TestVarrayOrDarray), [30:3-7], (Lvar ([30:3-7], $foo))), (
                            ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =

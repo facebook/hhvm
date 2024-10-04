@@ -2019,7 +2019,7 @@ module Log = struct
     else
       [
         ("expand_visible_newtype", Bool.to_string expand_visible_newtype);
-        ("this_ty", Typing_print.debug env this_ty);
+        ("this_ty", Typing_print.debug ~hide_internals:false env this_ty);
         ("type_expansions", Type_expansions.to_log_string type_expansions);
         ("make_internal_opaque", Bool.to_string make_internal_opaque);
         ("ish_weakening", Bool.to_string ish_weakening);

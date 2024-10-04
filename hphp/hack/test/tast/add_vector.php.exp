@@ -156,11 +156,12 @@
          { fb_ast =
            [([33:3-28],
              (Expr
-                ((MyPhonyVector<X>), [33:3-27],
+                ((exact MyPhonyVector<X>), [33:3-27],
                  (Binop
-                    { bop = (Eq None); lhs = ((MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x)));
+                    { bop = (Eq None); lhs = ((exact MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x)));
                       rhs =
-                      ((MyPhonyVector<X>), [33:8-27], (New (((MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
+                      ((exact MyPhonyVector<X>), [33:8-27],
+                       (New (((exact MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
                       }))));
              ([34:3-20],
               (Expr
@@ -168,8 +169,8 @@
                   (Call
                      { func =
                        (((function(X $x): void)), [34:3-10],
-                        (Obj_get (((MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
+                        (Obj_get (((exact MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((exact B), [34:11-18], (New (((exact B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([35:3-20],
               (Expr
@@ -177,15 +178,15 @@
                   (Call
                      { func =
                        (((function(X $x): void)), [35:3-10],
-                        (Obj_get (((MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
+                        (Obj_get (((exact MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((exact A), [35:11-18], (New (((exact A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([36:3-12],
               (Expr
                  ((void), [36:3-11],
                   (Call
                      { func = (((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))); 
-                       targs = []; args = [(Pnormal, ((MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x))))]; 
+                       targs = []; args = [(Pnormal, ((exact MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x))))]; 
                        unpacked_arg = None }))))
              ]
            };
@@ -268,12 +269,12 @@
          { fb_ast =
            [([33:3-28],
              (Expr
-                ((MyPhonyVector<#3>), [33:3-27],
+                ((exact MyPhonyVector<#3>), [33:3-27],
                  (Binop
-                    { bop = (Eq None); lhs = ((MyPhonyVector<#3>), [33:3-5], (Lvar ([33:3-5], $x)));
+                    { bop = (Eq None); lhs = ((exact MyPhonyVector<#3>), [33:3-5], (Lvar ([33:3-5], $x)));
                       rhs =
-                      ((MyPhonyVector<#3>), [33:8-27],
-                       (New (((MyPhonyVector<#3>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((#3), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
+                      ((exact MyPhonyVector<#3>), [33:8-27],
+                       (New (((exact MyPhonyVector<#3>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((#3), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
                       }))));
              ([34:3-20],
               (Expr
@@ -281,8 +282,8 @@
                   (Call
                      { func =
                        (((function(#3 $x): void)), [34:3-10],
-                        (Obj_get (((MyPhonyVector<#3>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(#3 $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
+                        (Obj_get (((exact MyPhonyVector<#3>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(#3 $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((exact B), [34:11-18], (New (((exact B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([35:3-20],
               (Expr
@@ -290,15 +291,15 @@
                   (Call
                      { func =
                        (((function(#3 $x): void)), [35:3-10],
-                        (Obj_get (((MyPhonyVector<#3>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(#3 $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
+                        (Obj_get (((exact MyPhonyVector<#3>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(#3 $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, Is_method)));
+                       targs = []; args = [(Pnormal, ((exact A), [35:11-18], (New (((exact A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, ((function(): void))))))]; 
                        unpacked_arg = None }))));
              ([36:3-12],
               (Expr
                  ((void), [36:3-11],
                   (Call
                      { func = (((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))); 
-                       targs = []; args = [(Pnormal, ((MyPhonyVector<#3>), [36:8-10], (Lvar ([36:8-10], $x))))]; 
+                       targs = []; args = [(Pnormal, ((exact MyPhonyVector<#3>), [36:8-10], (Lvar ([36:8-10], $x))))]; 
                        unpacked_arg = None }))))
              ]
            };

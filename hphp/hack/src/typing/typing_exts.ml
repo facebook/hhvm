@@ -150,7 +150,8 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
                  fmt_string = s;
                  class_pos = get_pos class_;
                  fn_name = fname;
-                 class_suggest = Print.full_strip_ns env class_;
+                 class_suggest =
+                   Print.full_strip_ns ~hide_internals:true env class_;
                });
       let (env, xs) = read_text env (i + 1) in
       (env, add_reason xs)

@@ -5584,9 +5584,8 @@ end = struct
           Markdown_lite.md_codify nm ^ acc
         | Either.Second (Custom_error_eval.Value.Ty ty) ->
           (Markdown_lite.md_codify
-          @@ Typing_print.with_blank_tyvars (fun () ->
-                 Typing_print.full_strip_ns_i env
-                 @@ Typing_defs_core.LoclType ty))
+          @@ Typing_print.full_strip_ns_i ~hide_internals:true env
+          @@ Typing_defs_core.LoclType ty)
           ^ acc)
       ~init:""
 
@@ -5674,8 +5673,7 @@ end = struct
        Typing_print.coeffects env ty)
 
   let describe_ty_default env ty =
-    Typing_print.with_blank_tyvars (fun () ->
-        Typing_print.full_strip_ns_i env ty)
+    Typing_print.full_strip_ns_i ~hide_internals:true env ty
 
   let describe_ty ~is_coeffect =
     (* Optimization: specialize on partial application, i.e.
@@ -5775,12 +5773,16 @@ end = struct
       | (_, Tcan_index _) -> "an array that can be indexed"
       | (_, Tdestructure _) ->
         Markdown_lite.md_codify
-          (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_i env (ConstraintType ty)))
+          (Typing_print.full_strip_ns_i
+             ~hide_internals:true
+             env
+             (ConstraintType ty))
       | (_, Ttype_switch _) ->
         Markdown_lite.md_codify
-          (Typing_print.with_blank_tyvars (fun () ->
-               Typing_print.full_strip_ns_i env (ConstraintType ty)))
+          (Typing_print.full_strip_ns_i
+             ~hide_internals:true
+             env
+             (ConstraintType ty))
       | (_, Thas_const { name; ty = _ }) ->
         Printf.sprintf "a class with a constant `%s`" name)
 
@@ -5788,7 +5790,8 @@ end = struct
     let ty_descr = describe_ty ~is_coeffect env ety in
     let ty_constraints =
       match ety with
-      | Typing_defs.LoclType ty -> Typing_print.constraints_for_type env ty
+      | Typing_defs.LoclType ty ->
+        Typing_print.constraints_for_type ~hide_internals:true env ty
       | Typing_defs.ConstraintType _ -> ""
     in
 

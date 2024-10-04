@@ -23,12 +23,15 @@ exception Dont_simplify
 module Log = struct
   let debug_ty (env, ty) =
     let (env, ty) = Typing_env.expand_type env ty in
-    Some (Typing_print.debug env ty)
+    Some (Typing_print.debug ~hide_internals:false env ty)
 
   let debug_ty_opt (env, ty_opt) =
     (match ty_opt with
     | None -> "None"
-    | Some ty -> Printf.sprintf "Some (%s)" (Typing_print.debug env ty))
+    | Some ty ->
+      Printf.sprintf
+        "Some (%s)"
+        (Typing_print.debug ~hide_internals:false env ty))
     |> Option.some
 
   let log_union env ty1 ty2 =
@@ -37,8 +40,8 @@ module Log = struct
       ~function_name:"Typing_union.union"
       ~arguments:
         [
-          ("ty1", Typing_print.debug env ty1);
-          ("ty2", Typing_print.debug env ty2);
+          ("ty1", Typing_print.debug ~hide_internals:false env ty1);
+          ("ty2", Typing_print.debug ~hide_internals:false env ty2);
         ]
       ~result:debug_ty
 
@@ -50,8 +53,8 @@ module Log = struct
       ~function_name:"Typing_union.simplify_union"
       ~arguments:
         [
-          ("ty1", Typing_print.debug env ty1);
-          ("ty2", Typing_print.debug env ty2);
+          ("ty1", Typing_print.debug ~hide_internals:false env ty1);
+          ("ty2", Typing_print.debug ~hide_internals:false env ty2);
         ]
       ~result:debug_ty_opt
 
@@ -59,14 +62,16 @@ module Log = struct
     Typing_log.log_function
       (Reason.to_pos r)
       ~function_name:"Typing_union.union_list"
-      ~arguments:(List.map tyl ~f:(fun ty -> ("ty", Typing_print.debug env ty)))
+      ~arguments:
+        (List.map tyl ~f:(fun ty ->
+             ("ty", Typing_print.debug ~hide_internals:false env ty)))
       ~result:debug_ty
 
   let log_simplify_unions env ty =
     Typing_log.log_function
       (get_pos ty)
       ~function_name:"Typing_union.simplify_unions"
-      ~arguments:[("ty", Typing_print.debug env ty)]
+      ~arguments:[("ty", Typing_print.debug ~hide_internals:false env ty)]
       ~result:debug_ty
 end
 

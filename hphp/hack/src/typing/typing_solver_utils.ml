@@ -203,9 +203,7 @@ let err_if_var_in_ty_pure env var ty =
              {
                pos = Env.get_tyvar_pos env var;
                ty_name =
-                 lazy
-                   Typing_print.(
-                     with_blank_tyvars (fun () -> full_rec env var ty));
+                 lazy Typing_print.(full_rec ~hide_internals:true env var ty);
              })
     in
     (MakeType.union (get_reason ty) [], Some ty_err)

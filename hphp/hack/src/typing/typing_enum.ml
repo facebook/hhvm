@@ -116,7 +116,9 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
              @@ Primary.Enum.Enum_type_bad_case_type
                   {
                     pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                    ty_name = lazy (Typing_print.full_strip_ns env ty);
+                    ty_name =
+                      lazy
+                        (Typing_print.full_strip_ns ~hide_internals:true env ty);
                     case_type_decl_pos = td_pos;
                   })
       | _ -> ())
@@ -169,7 +171,12 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
                   {
                     pos = Pos_or_decl.unsafe_to_raw_pos pos;
                     is_enum_class = true;
-                    ty_name = lazy (Typing_print.full_strip_ns env interface);
+                    ty_name =
+                      lazy
+                        (Typing_print.full_strip_ns
+                           ~hide_internals:true
+                           env
+                           interface);
                     trail = [];
                   }));
       (env, None)
@@ -184,7 +191,9 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
                  {
                    pos = Pos_or_decl.unsafe_to_raw_pos pos;
                    is_enum_class = false;
-                   ty_name = lazy (Typing_print.full_strip_ns env ty);
+                   ty_name =
+                     lazy
+                       (Typing_print.full_strip_ns ~hide_internals:true env ty);
                    trail = [];
                  }))
       in

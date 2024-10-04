@@ -290,7 +290,10 @@ module TagWithReason = struct
         Printf.sprintf "  via this requirement on `%s`" @@ strip_ns name
       | ExpansionOfTypeConstant { root_ty; name } ->
         let name =
-          Printf.sprintf "%s::%s" (Typing_print.full_strip_ns env root_ty) name
+          Printf.sprintf
+            "%s::%s"
+            (Typing_print.full_strip_ns ~hide_internals:true env root_ty)
+            name
         in
         Printf.sprintf "  via the expansion of the type constant `%s`" @@ name
     in

@@ -121,7 +121,6 @@ let show_supportdyn env =
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
 (* This is used in server/symbolTypeService and elsewhere                    *)
-(* With debug_mode set it is used for hh_show_env                            *)
 (*****************************************************************************)
 
 module Full = struct
@@ -135,8 +134,6 @@ module Full = struct
 
   let ( ^^ ) a b = Concat [a; b]
 
-  let debug_mode = ref false
-
   let show_verbose penv =
     match penv with
     | Loclenv env -> Typing_env_types.get_log_level env "show" > 1
@@ -149,8 +146,6 @@ module Full = struct
     match penv with
     | Loclenv env -> show_supportdyn env
     | Declenv -> false
-
-  let blank_tyvars = ref false
 
   let comma_sep = Concat [text ","; Space]
 
@@ -929,13 +924,15 @@ module Full = struct
 
   (* Prints a locl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
-  let rec locl_ty ~fuel : _ -> _ -> _ -> locl_ty -> Fuel.t * Doc.t =
+  let rec locl_ty ~fuel ~hide_internals :
+      _ -> _ -> _ -> locl_ty -> Fuel.t * Doc.t =
    fun to_doc st penv ty ->
     Fuel.provide fuel (fun ~fuel ->
         let (_r, x) = deref ty in
-        locl_ty_ ~fuel to_doc st penv x)
+        locl_ty_ ~fuel ~hide_internals to_doc st penv x)
 
-  and locl_ty_ ~fuel : _ -> _ -> penv -> locl_phase ty_ -> Fuel.t * Doc.t =
+  and locl_ty_ ~fuel ~hide_internals :
+      _ -> _ -> penv -> locl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
     let ty = locl_ty in
     let verbose = show_verbose penv in
@@ -944,7 +941,7 @@ module Full = struct
       | Declenv -> failwith "must provide a locl-env here"
       | Loclenv env -> env
     in
-    let k ~fuel x = ty ~fuel to_doc st (Loclenv env) x in
+    let k ~fuel x = ty ~fuel ~hide_internals to_doc st (Loclenv env) x in
     match x with
     | Tany _ -> (fuel, text "_")
     | Tdynamic -> (fuel, text "dynamic")
@@ -976,7 +973,7 @@ module Full = struct
           let tvar_doc =
             if Tvid.Set.mem n' st then
               text "[rec]"
-            else if !blank_tyvars then
+            else if hide_internals then
               text "_"
             else
               text ("#" ^ Tvid.show n')
@@ -995,11 +992,19 @@ module Full = struct
               Nothing
           in
           let st = Tvid.Set.add n st in
-          let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
+          let (fuel, ty_doc) = ty ~fuel ~hide_internals to_doc st penv ety in
           (fuel, Concat [prepend; ty_doc])
       end
     | Tfun ft ->
-      tfun ~fuel ~ty to_doc st penv ~verbose:false ft fun_locl_implicit_params
+      tfun
+        ~fuel
+        ~ty:(ty ~hide_internals)
+        to_doc
+        st
+        penv
+        ~verbose:false
+        ft
+        (fun_locl_implicit_params ~hide_internals)
     | Tclass ((_, s), exact, tyl) ->
       let (fuel, targs_doc) =
         if List.is_empty tyl then
@@ -1011,7 +1016,8 @@ module Full = struct
       let class_doc = to_doc s ^^ targs_doc ^^ with_doc in
       let class_doc =
         match exact with
-        | Exact when !debug_mode -> Concat [text "exact"; Space; class_doc]
+        | Exact when not hide_internals ->
+          Concat [text "exact"; Space; class_doc]
         | _ -> class_doc
       in
       (fuel, class_doc)
@@ -1024,7 +1030,7 @@ module Full = struct
         (* Generic replacement type for parameter used for dependent context *)
         match get_constraints_on_tparam env s with
         | [(_, Ast_defs.Constraint_as, ty)] ->
-          locl_ty ~fuel to_doc st (Loclenv env) ty
+          locl_ty ~fuel ~hide_internals to_doc st (Loclenv env) ty
         | _ -> (* this case shouldn't occur *) (fuel, to_doc s)
       end
       | _ -> (fuel, to_doc s)
@@ -1263,14 +1269,14 @@ module Full = struct
     in
     (fuel, doc)
 
-  and fun_locl_implicit_params ~fuel =
+  and fun_locl_implicit_params ~fuel ~hide_internals =
     fun_implicit_params
-      locl_ty
+      (locl_ty ~hide_internals)
       (Typing_make_type.default_capability Pos_or_decl.none)
       ~fuel
 
-  let rec constraint_type_ ~fuel to_doc st penv x =
-    let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in
+  let rec constraint_type_ ~fuel ~hide_internals to_doc st penv x =
+    let k ~fuel lty = locl_ty ~fuel ~hide_internals to_doc st penv lty in
     match x with
     | Thas_member hm -> thas_member ~fuel k hm
     | Thas_type_member htm ->
@@ -1320,14 +1326,15 @@ module Full = struct
       in
       (fuel, has_const_doc)
 
-  and constraint_type ~fuel to_doc st penv ty =
+  and constraint_type ~fuel ~hide_internals to_doc st penv ty =
     let (_r, x) = deref_constraint_type ty in
-    constraint_type_ ~fuel to_doc st penv x
+    constraint_type_ ~fuel ~hide_internals to_doc st penv x
 
-  let internal_type ~fuel to_doc st penv ty =
+  let internal_type ~fuel ~hide_internals to_doc st penv ty =
     match ty with
-    | LoclType ty -> locl_ty ~fuel to_doc st penv ty
-    | ConstraintType ty -> constraint_type ~fuel to_doc st penv ty
+    | LoclType ty -> locl_ty ~fuel ~hide_internals to_doc st penv ty
+    | ConstraintType ty ->
+      constraint_type ~fuel ~hide_internals to_doc st penv ty
 
   let to_string ~fuel ~ty to_doc env x =
     let (fuel, doc) = ty ~fuel to_doc Tvid.Set.empty env x in
@@ -1337,7 +1344,7 @@ module Full = struct
   (** Print a suffix for type parameters in [typ] that have constraints
       If the type itself is a type parameter with a single constraint, just
       represent this as `as t` or `super t`, otherwise use full `where` syntax *)
-  let constraints_for_type ~fuel to_doc env typ =
+  let constraints_for_type ~fuel ~hide_internals to_doc env typ =
     let tparams =
       SSet.elements
         (Typing_env_types.get_tparams_in_ty_and_acc env SSet.empty typ)
@@ -1351,13 +1358,19 @@ module Full = struct
     | (_, []) -> (fuel, Nothing)
     | (Tgeneric (tparam, []), [(tparam', ck, typ)])
       when String.equal tparam tparam' ->
-      tparam_constraint ~fuel ~ty:locl_ty to_doc Tvid.Set.empty penv (ck, typ)
+      tparam_constraint
+        ~fuel
+        ~ty:(locl_ty ~hide_internals)
+        to_doc
+        Tvid.Set.empty
+        penv
+        (ck, typ)
     | _ ->
       let to_tparam_constraint_doc ~fuel (tparam, ck, typ) =
         let (fuel, tparam_constraint_doc) =
           tparam_constraint
             ~fuel
-            ~ty:locl_ty
+            ~ty:(locl_ty ~hide_internals)
             to_doc
             Tvid.Set.empty
             penv
@@ -1380,9 +1393,15 @@ module Full = struct
       in
       (fuel, doc)
 
-  let to_string_rec ~fuel penv n x =
+  let to_string_rec ~fuel ~hide_internals penv n x =
     let (fuel, doc) =
-      locl_ty ~fuel text_strip_ns (Tvid.Set.add n Tvid.Set.empty) penv x
+      locl_ty
+        ~fuel
+        ~hide_internals
+        text_strip_ns
+        (Tvid.Set.add n Tvid.Set.empty)
+        penv
+        x
     in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
@@ -1410,9 +1429,10 @@ module Full = struct
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
-  let to_string_with_identity ~fuel env x occurrence definition_opt =
+  let to_string_with_identity
+      ~fuel ~hide_internals env x occurrence definition_opt =
     let open SymbolOccurrence in
-    let ty = locl_ty in
+    let ty = locl_ty ~hide_internals in
     let penv = Loclenv env in
     let prefix =
       SymbolDefinition.(
@@ -1474,7 +1494,7 @@ module Full = struct
             penv
             ~verbose:false
             ft
-            fun_locl_implicit_params
+            (fun_locl_implicit_params ~hide_internals)
         in
         let fun_doc =
           Concat [text "function"; Space; text_strip_all_ns name; fun_ty_doc]
@@ -1512,7 +1532,9 @@ module Full = struct
         (fuel, doc)
       | _ -> ty ~fuel text_strip_ns Tvid.Set.empty penv x
     in
-    let (fuel, constraints) = constraints_for_type ~fuel text_strip_ns env x in
+    let (fuel, constraints) =
+      constraints_for_type ~fuel ~hide_internals text_strip_ns env x
+    in
     let str =
       Concat [prefix; body_doc; constraints]
       |> Libhackfmt.format_doc format_env
@@ -1520,12 +1542,6 @@ module Full = struct
     in
     (fuel, str)
 end
-
-let with_blank_tyvars f =
-  Full.blank_tyvars := true;
-  let res = f () in
-  Full.blank_tyvars := false;
-  res
 
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.              *)
@@ -1546,8 +1562,11 @@ module ErrorString = struct
 
   let rec type_ ~fuel ?(ignore_dynamic = false) env ety =
     let ety_to_string ety =
-      with_blank_tyvars (fun () ->
-          Full.to_string_strip_ns ~fuel ~ty:Full.locl_ty (Loclenv env) ety)
+      Full.to_string_strip_ns
+        ~fuel
+        ~ty:(Full.locl_ty ~hide_internals:true)
+        (Loclenv env)
+        ety
     in
     match get_node ety with
     | Tany _ -> (fuel, "an untyped value")
@@ -2776,28 +2795,44 @@ let supply_fuel ?(msg = true) tcopt printer =
 let error ?(ignore_dynamic = false) env ty =
   supply_fuel env.genv.tcopt (ErrorString.to_string ~ignore_dynamic env ty)
 
-let full env ty =
+let full ~hide_internals env ty =
   supply_fuel
     env.genv.tcopt
-    (Full.to_string ~ty:Full.locl_ty Doc.text (Loclenv env) ty)
+    (Full.to_string
+       ~ty:(Full.locl_ty ~hide_internals)
+       Doc.text
+       (Loclenv env)
+       ty)
 
-let full_i env ty =
+let full_i ~hide_internals env ty =
   supply_fuel
     env.genv.tcopt
-    (Full.to_string ~ty:Full.internal_type Doc.text (Loclenv env) ty)
+    (Full.to_string
+       ~ty:(Full.internal_type ~hide_internals)
+       Doc.text
+       (Loclenv env)
+       ty)
 
-let full_rec env n ty =
-  supply_fuel env.genv.tcopt (Full.to_string_rec (Loclenv env) n ty)
-
-let full_strip_ns env ty =
+let full_rec ~hide_internals env n ty =
   supply_fuel
     env.genv.tcopt
-    (Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env) ty)
+    (Full.to_string_rec ~hide_internals (Loclenv env) n ty)
 
-let full_strip_ns_i env ty =
+let full_strip_ns ~hide_internals env ty =
   supply_fuel
     env.genv.tcopt
-    (Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty)
+    (Full.to_string_strip_ns
+       ~ty:(Full.locl_ty ~hide_internals)
+       (Loclenv env)
+       ty)
+
+let full_strip_ns_i ~hide_internals env ty =
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_strip_ns
+       ~ty:(Full.internal_type ~hide_internals)
+       (Loclenv env)
+       ty)
 
 let full_strip_ns_decl ?(msg = true) ~verbose_fun env ty =
   supply_fuel
@@ -2805,30 +2840,29 @@ let full_strip_ns_decl ?(msg = true) ~verbose_fun env ty =
     env.genv.tcopt
     (Full.to_string_strip_ns ~ty:(Full.decl_ty ~verbose_fun) (Loclenv env) ty)
 
-let full_with_identity env x occurrence definition_opt =
+let full_with_identity ~hide_internals env x occurrence definition_opt =
   supply_fuel
     env.genv.tcopt
-    (Full.to_string_with_identity env x occurrence definition_opt)
+    (Full.to_string_with_identity
+       ~hide_internals
+       env
+       x
+       occurrence
+       definition_opt)
 
 let full_decl ?(msg = true) tcopt ty =
   supply_fuel ~msg tcopt (Full.to_string_decl ty)
 
-let debug env ty =
-  Full.debug_mode := true;
-  let f_str = full_strip_ns env ty in
-  Full.debug_mode := false;
+let debug ~hide_internals env ty =
+  let f_str = full_strip_ns ~hide_internals env ty in
   f_str
 
 let debug_decl env ty =
-  Full.debug_mode := true;
   let f_str = full_strip_ns_decl ~verbose_fun:true env ty in
-  Full.debug_mode := false;
   f_str
 
-let debug_i env ty =
-  Full.debug_mode := true;
-  let f_str = full_strip_ns_i env ty in
-  Full.debug_mode := false;
+let debug_i ~hide_internals env ty =
+  let f_str = full_strip_ns_i ~hide_internals env ty in
   f_str
 
 let class_ ctx c =
@@ -2842,10 +2876,15 @@ let fun_type tcopt f = supply_fuel tcopt (Full.fun_to_string f)
 
 let typedef tcopt td = supply_fuel tcopt (PrintTypedef.typedef td)
 
-let constraints_for_type env ty =
+let constraints_for_type ~hide_internals env ty =
   supply_fuel env.genv.tcopt (fun ~fuel ->
       let (fuel, doc) =
-        Full.constraints_for_type ~fuel Full.text_strip_ns env ty
+        Full.constraints_for_type
+          ~fuel
+          ~hide_internals
+          Full.text_strip_ns
+          env
+          ty
       in
       let str =
         Libhackfmt.format_doc_unbroken Full.format_env doc |> String.strip
@@ -2859,7 +2898,7 @@ let coercion_direction cd =
   | CoerceToDynamic -> "to"
   | CoerceFromDynamic -> "from"
 
-let subtype_prop env prop =
+let subtype_prop ~hide_internals env prop =
   let rec subtype_prop = function
     | Conj [] -> "TRUE"
     | Conj ps ->
@@ -2867,9 +2906,14 @@ let subtype_prop env prop =
     | Disj (_, []) -> "FALSE"
     | Disj (_, ps) ->
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
-    | IsSubtype (None, ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
+    | IsSubtype (None, ty1, ty2) ->
+      debug_i ~hide_internals env ty1 ^ " <: " ^ debug_i ~hide_internals env ty2
     | IsSubtype (Some cd, ty1, ty2) ->
-      debug_i env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug_i env ty2
+      debug_i ~hide_internals env ty1
+      ^ " "
+      ^ coercion_direction cd
+      ^ "~> "
+      ^ debug_i ~hide_internals env ty2
   in
   let p_str = subtype_prop prop in
   p_str
@@ -2877,13 +2921,12 @@ let subtype_prop env prop =
 let coeffects env ty =
   supply_fuel env.genv.tcopt @@ fun ~fuel ->
   let to_string ~fuel ty =
-    with_blank_tyvars (fun () ->
-        Full.to_string
-          ~fuel
-          ~ty:Full.locl_ty
-          (fun s -> Doc.text (Utils.strip_all_ns s))
-          (Loclenv env)
-          ty)
+    Full.to_string
+      ~fuel
+      ~ty:(Full.locl_ty ~hide_internals:true)
+      (fun s -> Doc.text (Utils.strip_all_ns s))
+      (Loclenv env)
+      ty
   in
   let exception UndesugarableCoeffect of locl_ty in
   let rec desugar_simple_intersection ~fuel (ty : locl_ty) :

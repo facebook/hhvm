@@ -21,8 +21,8 @@ This `is` check is always `true`. The expression on the left has type `C<(int, s
 WARN: File "is-expression-generics-tuples.php", line 12, characters 3-24:
 This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, string)>`. (Warn[12009])
 WARN: File "is-expression-generics-tuples.php", line 13, characters 3-19:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, #7)>`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(int, _)>`. (Warn[12009])
 WARN: File "is-expression-generics-tuples.php", line 14, characters 3-22:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(#8, string)>`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, string)>`. (Warn[12009])
 WARN: File "is-expression-generics-tuples.php", line 15, characters 3-17:
-This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(#9, #10)>`. (Warn[12009])
+This `is` check is always `true`. The expression on the left has type `C<(int, string)>` which is a subtype of `C<(_, _)>`. (Warn[12009])

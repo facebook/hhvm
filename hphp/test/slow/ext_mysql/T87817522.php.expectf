@@ -1,3 +1,2 @@
 
-Warning: Argument 8 to mysql_connect_with_ssl() must be of type ?MySSLContextProvider, stdClass given in %s on line 4
-Invalid argument. Expected MySSLContextProvider, received stdClass
+Catchable fatal error: Argument 8 to mysql_connect_with_ssl() must be of type ?MySSLContextProvider, stdClass given in %s on line 4

@@ -6,10 +6,14 @@ class MyFakeCalendar2 {}
 class MyFakeCalendar3 {}
 
 <<__EntryPoint>>
-function main() :mixed{
+function main(): mixed {
+  set_error_handler(($_, $msg) ==> {
+    throw new Exception($msg);
+  });
+
   $calendar = IntlCalendar::createInstance('UTC');
-  var_dump($calendar->after(new MyFakeCalendar0()));
-  var_dump($calendar->before(new MyFakeCalendar1()));
-  var_dump($calendar->equals(new MyFakeCalendar2()));
-  var_dump($calendar->isEquivalentTo(new MyFakeCalendar3()));
+  try { $calendar->after(new MyFakeCalendar0()); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $calendar->before(new MyFakeCalendar1()); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $calendar->equals(new MyFakeCalendar2()); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { $calendar->isEquivalentTo(new MyFakeCalendar3()); } catch (Exception $e) { var_dump($e->getMessage()); }
 }

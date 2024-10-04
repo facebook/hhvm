@@ -1,0 +1,4 @@
+string(101) "Argument 1 passed to IntlCalendar::after() must be an instance of IntlCalendar, MyFakeCalendar0 given"
+string(102) "Argument 1 passed to IntlCalendar::before() must be an instance of IntlCalendar, MyFakeCalendar1 given"
+string(102) "Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, MyFakeCalendar2 given"
+string(110) "Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, MyFakeCalendar3 given"

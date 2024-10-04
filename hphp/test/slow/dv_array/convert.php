@@ -84,56 +84,60 @@ function test_indirect($c, $v) :mixed{
 
 
 <<__EntryPoint>>
-function main_convert() :mixed{
-$values = vec[
-  null,
-  false,
-  true,
-  'abc',
-  123,
-  '123',
-  3.14,
-  dict[],
-  vec[1, 2, 3, 4],
-  dict['a' => 100, 'b' => 200, 'c' => 300],
-  vec[],
-  vec[1, 2, 3, 4],
-  dict[],
-  dict[1 => 'a', 2 => 'b'],
-  keyset[],
-  keyset[100, 'abc', 200],
-  fopen(__FILE__, 'r'),
-  new stdClass,
-  new IterableObj,
-  new ThrowIterableObj,
-  new AggregateObj,
-  dict[100 => 'abc', '100' => 'def'],
-  keyset[100, '100'],
-  Vector{100, 200, 300},
-  Set{'a', 'b', 'c', 'd'},
-  Map{100 => 'a', 200 => 'b', 300 => 'c'},
-  Pair{'a', 100},
-  vec[],
-  vec['a', 'b', 'c'],
-  dict[],
-  dict[0 => 'x', 1 => 'y', 2 => 'z'],
-  dict['key1' => 111, 'key2' => 222]
-];
-$values = __hhvm_intrinsics\launder_value($values);
+function main_convert(): mixed {
+  set_error_handler(($_, $msg) ==> {
+    throw new Exception($msg);
+  });
 
-foreach ($values as $v) {
-  test_varray($v);
-}
-foreach ($values as $v) {
-  test_darray($v);
-}
+  $values = vec[
+    null,
+    false,
+    true,
+    'abc',
+    123,
+    '123',
+    3.14,
+    dict[],
+    vec[1, 2, 3, 4],
+    dict['a' => 100, 'b' => 200, 'c' => 300],
+    vec[],
+    vec[1, 2, 3, 4],
+    dict[],
+    dict[1 => 'a', 2 => 'b'],
+    keyset[],
+    keyset[100, 'abc', 200],
+    fopen(__FILE__, 'r'),
+    new stdClass,
+    new IterableObj,
+    new ThrowIterableObj,
+    new AggregateObj,
+    dict[100 => 'abc', '100' => 'def'],
+    keyset[100, '100'],
+    Vector{100, 200, 300},
+    Set{'a', 'b', 'c', 'd'},
+    Map{100 => 'a', 200 => 'b', 300 => 'c'},
+    Pair{'a', 100},
+    vec[],
+    vec['a', 'b', 'c'],
+    dict[],
+    dict[0 => 'x', 1 => 'y', 2 => 'z'],
+    dict['key1' => 111, 'key2' => 222]
+  ];
+  $values = __hhvm_intrinsics\launder_value($values);
 
-$c1 = __hhvm_intrinsics\launder_value('HH\\varray');
-$c2 = __hhvm_intrinsics\launder_value('HH\\darray');
-foreach ($values as $v) {
-  test_indirect($c1, $v);
-}
-foreach ($values as $v) {
-  test_indirect($c2, $v);
-}
+  foreach ($values as $v) {
+    test_varray($v);
+  }
+  foreach ($values as $v) {
+    test_darray($v);
+  }
+
+  $c1 = __hhvm_intrinsics\launder_value('HH\\varray');
+  $c2 = __hhvm_intrinsics\launder_value('HH\\darray');
+  foreach ($values as $v) {
+    test_indirect($c1, $v);
+  }
+  foreach ($values as $v) {
+    test_indirect($c2, $v);
+  }
 }

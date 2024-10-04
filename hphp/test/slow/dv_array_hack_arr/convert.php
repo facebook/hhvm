@@ -85,6 +85,10 @@ function test_indirect($c, $v) :mixed{
 
 <<__EntryPoint>>
 function main_convert(): void {
+  set_error_handler(($_, $msg) ==> {
+    throw new Exception($msg);
+  });
+
   $values = vec[
     null,
     false,

@@ -132,17 +132,6 @@ class UnionTests(unittest.TestCase):
             else thrift_union.FbThriftUnionFieldEnum
         )
 
-    # pyre-ignore[2, 3]: no type sepcified
-    def get_empty(self, union_type_enum):
-        """
-        Returns Type.EMPTY or FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY
-        """
-        return (
-            union_type_enum.EMPTY
-            if not self.is_mutable_run
-            else union_type_enum.FBTHRIFT_UNION_EMPTY
-        )
-
     def test_constructor(self) -> None:
         self.assertEqual(
             self.get_type(self.Integers(small=2)),
@@ -242,7 +231,7 @@ class UnionTests(unittest.TestCase):
         x = self.serializer.deserialize(
             self.Integers, self.serializer.serialize_iobuf(self.Integers())
         )
-        self.assertEqual(self.get_type(x), self.get_empty(self.get_enum(self.Integers)))
+        self.assertEqual(self.get_type(x), self.get_enum(self.Integers).EMPTY)
 
     def test_deserialize_nonempty(self) -> None:
         x = self.serializer.deserialize(

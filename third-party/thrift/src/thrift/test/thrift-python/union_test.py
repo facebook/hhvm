@@ -453,14 +453,14 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         u = TestUnionMutable()
         self.assertIs(
             u.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+            TestUnionMutable.FbThriftUnionFieldEnum.EMPTY,
         )
         self.assertIsNone(u.fbthrift_current_value)
         with self.assertRaisesRegex(
             AttributeError,
             (
                 r"Error retrieving Thrift union \(TestUnion\) field: requested "
-                r"'string_field', but currently holds 'FBTHRIFT_UNION_EMPTY'."
+                r"'string_field', but currently holds 'EMPTY'."
             ),
         ):
             u.string_field
@@ -568,12 +568,12 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 "string_field",
                 "int_field",
                 "struct_field",
-                "FBTHRIFT_UNION_EMPTY",
+                "EMPTY",
             ],
             fields_enum_type.__members__.keys(),
         )
 
-        self.assertIs(fields_enum_type(0), fields_enum_type.FBTHRIFT_UNION_EMPTY)
+        self.assertIs(fields_enum_type(0), fields_enum_type.EMPTY)
 
         enum_names_and_values = {
             member.name: member.value
@@ -583,7 +583,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(
             enum_names_and_values,
             {
-                "FBTHRIFT_UNION_EMPTY": 0,
+                "EMPTY": 0,
                 "string_field": 1,
                 "int_field": 2,
                 "struct_field": 3,
@@ -594,7 +594,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         u1 = TestUnionAdaptedTypesMutable()
         self.assertIs(
             u1.fbthrift_current_field,
-            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+            TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.EMPTY,
         )
         self.assertIsNone(u1.fbthrift_current_value)
 
@@ -677,7 +677,7 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         u = TestUnionMutable()
         self.assertIs(
             u.fbthrift_current_field,
-            TestUnionMutable.FbThriftUnionFieldEnum.FBTHRIFT_UNION_EMPTY,
+            TestUnionMutable.FbThriftUnionFieldEnum.EMPTY,
         )
         self.assertIsNone(u.fbthrift_current_value)
 

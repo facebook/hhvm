@@ -787,7 +787,7 @@ cdef class MutableUnion(MutableStructOrUnion):
         to the underlying Thrift type.
 
         Raises:
-            AssertionError if `field_id` is 0 (i.e., FBTHRIFT_UNION_EMPTY) but
+            AssertionError if `field_id` is 0 (i.e., EMPTY) but
             `field_python_value` is not `None`.
 
             Exception if the operation cannot be completely successfully.
@@ -956,7 +956,7 @@ cdef class MutableUnion(MutableStructOrUnion):
         return f"{type(self).__name__}({self.fbthrift_current_field.name}={self.fbthrift_current_value!r})"
 
 def _gen_mutable_union_field_enum_members(field_infos):
-    yield ("FBTHRIFT_UNION_EMPTY", 0)
+    yield ("EMPTY", 0)
     for f in field_infos:
         yield (f.py_name, f.id)
 

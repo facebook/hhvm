@@ -320,9 +320,8 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertEqual(expected, dir(self.easy))
 
     def test_repr(self) -> None:
-        union_empty = "EMPTY" if not self.is_mutable_run else "FBTHRIFT_UNION_EMPTY"
         self.assertEqual(
-            f"easy(val=42, val_list=i[], name=None, an_int=Integers({union_empty}=None), py3_hidden=0)",
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None), py3_hidden=0)",
             repr(self.easy(val=42)),
         )
 

@@ -108,12 +108,17 @@ type loaded_info = {
   naming_table_fn: string;
   deptable_fn: string;
   naming_table_fallback_fn: string option;
-  (* Files changed between the loaded naming table saved state and current revision. *)
-  dirty_naming_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  (* Files changed between saved state revision and current public merge base *)
+  changed_files_since_saved_state_rev: Relative_path.Set.t;
+      [@printer Relative_path.Set.pp_large]
+      (** All files changed since the saved state revision according to either watchman
+        if we load the saved state via watchman, or
+        if we initialized with a pre-loaded saved state, the list of files passed to hh_server.
+        This should be the disjoint union of `dirty_master_files` and `dirty_local_files`,
+        which are determined using hg and this set. *)
   dirty_master_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
-  (* Files changed between public merge base and current revision *)
+      (** Files changed between saved state revision and current public merge base *)
   dirty_local_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
+      (** Files changed since the public merge base *)
   old_naming_table: (Naming_table.t[@yojson.opaque]); [@show.opaque]
   old_errors: (SaveStateServiceTypes.saved_state_errors[@yojson.opaque]);
       [@show.opaque]

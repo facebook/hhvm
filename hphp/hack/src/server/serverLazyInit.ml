@@ -86,7 +86,7 @@ let run_saved_state_future
     let {
       Saved_state_loader.main_artifacts;
       additional_info;
-      changed_files;
+      changed_files_according_to_watchman;
       manifold_path;
       is_cached = _;
     } =
@@ -149,7 +149,9 @@ let run_saved_state_future
           local_changes = dirty_local_files;
         } ->
       let () = HackEventLogger.state_loader_dirty_files t in
-      let dirty_naming_files = Relative_path.Set.of_list changed_files in
+      let changed_files_according_to_watchman =
+        Relative_path.Set.of_list changed_files_according_to_watchman
+      in
       let naming_table_manifold_path = Some manifold_path in
       Ok
         {
@@ -157,7 +159,8 @@ let run_saved_state_future
             Path.to_string naming_sqlite_table_path;
           naming_table_fallback_fn = naming_table_fallback_path;
           deptable_fn;
-          dirty_naming_files;
+          changed_files_since_saved_state_rev =
+            changed_files_according_to_watchman;
           dirty_master_files;
           dirty_local_files;
           old_naming_table;
@@ -353,7 +356,7 @@ let use_precomputed_state_exn
     naming_table_fn = naming_table_path;
     naming_table_fallback_fn = naming_table_fallback_path;
     deptable_fn;
-    dirty_naming_files = naming_changes;
+    changed_files_since_saved_state_rev = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
     old_naming_table;
@@ -800,6 +803,9 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
       SSet.filter updates ~f:filter
       |> Relative_path.relativize_set Relative_path.Root
   in
+  Hh_logger.log
+    "Found %d files changed while parsing"
+    (Relative_path.Set.cardinal files_changed_while_parsing);
   ignore
     (Hh_logger.log_duration
        "Finished getting files changed while parsing"
@@ -1011,7 +1017,7 @@ let update_naming_table
   let trace = genv.local_config.SLC.trace_parsing in
   let {
     naming_table_fallback_fn;
-    dirty_naming_files;
+    changed_files_since_saved_state_rev;
     dirty_local_files;
     dirty_master_files;
     old_naming_table;
@@ -1031,13 +1037,17 @@ let update_naming_table
       ~init:Relative_path.Set.empty
       ~f:Relative_path.Set.union
       [
-        dirty_naming_files;
+        changed_files_since_saved_state_rev;
         dirty_master_files;
         dirty_local_files;
         changed_while_parsing;
       ]
     |> Relative_path.Set.filter ~f:FindUtils.path_filter
   in
+  let file_count = Relative_path.Set.cardinal naming_files in
+  Hh_logger.log
+    "Among the changed files, %d are hack/php files (that are not ignored according to ignore_paths flag)."
+    file_count;
   ( CgroupProfiler.step_start_end cgroup_steps "remove fixmes"
   @@ fun _cgroup_step -> Fixme_provider.remove_batch naming_files );
   (* Parse dirty files only *)
@@ -1049,7 +1059,7 @@ let update_naming_table
         (MultiWorker.next
            genv.workers
            (Relative_path.Set.elements naming_files))
-      ~count:(Relative_path.Set.cardinal naming_files)
+      ~count:file_count
       t
       ~trace
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
@@ -1206,7 +1216,7 @@ let post_saved_state_initialization
   in
   let {
     naming_table_fallback_fn = _;
-    dirty_naming_files = _;
+    changed_files_since_saved_state_rev = _;
     dirty_local_files;
     dirty_master_files;
     old_naming_table;

@@ -153,7 +153,7 @@ let load_saved_state ~(env : env) ~(local_config : ServerLocalConfig.t) :
         {
           Saved_state_loader.main_artifacts;
           additional_info;
-          changed_files;
+          changed_files_according_to_watchman = changed_files;
           manifold_path;
           is_cached;
         }
@@ -182,7 +182,7 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
               warning_hashes_path;
             };
           additional_info;
-          changed_files;
+          changed_files_according_to_watchman;
           manifold_path;
           is_cached;
         } ->
@@ -190,14 +190,16 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
       make_replay_token
         ~env
         ~manifold_path
-        ~changed_files
+        ~changed_files:changed_files_according_to_watchman
         ~is_cached
         ~additional_info
     in
     let json =
       Hh_json.JSON_Object
         [
-          ("changed_files", changed_files_to_absolute_paths_json changed_files);
+          ( "changed_files",
+            changed_files_to_absolute_paths_json
+              changed_files_according_to_watchman );
           ( "naming_table_path",
             naming_table_path |> Path.to_string |> Hh_json.string_ );
           ( "naming_sqlite_table_path",

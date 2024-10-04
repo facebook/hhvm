@@ -84,7 +84,7 @@ type ('main_artifacts, 'additional_info) load_result = {
   main_artifacts: 'main_artifacts;
   additional_info: 'additional_info;
   manifold_path: string;
-  changed_files: changed_files;
+  changed_files_according_to_watchman: changed_files;
   corresponding_rev: Hg.Rev.t;
   mergebase_rev: Hg.Rev.t;
   is_cached: bool;

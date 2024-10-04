@@ -19,7 +19,6 @@
  * - manually, from the command line
  *
  * Usage: hh_client [OPTION]... [WWW DIRECTORY] [FILE]...
- *
  *)
 
 open Hh_prelude

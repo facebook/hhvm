@@ -75,6 +75,7 @@ class FieldInfo:
         default_value: object,
         adapter_info: typing.Optional[tuple[object, Struct]],
         is_primitive: bool,
+        idl_type: int = -1,
     ) -> None: ...
 
 class ListTypeInfo:

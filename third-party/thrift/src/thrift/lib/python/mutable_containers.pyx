@@ -543,7 +543,9 @@ cdef class MutableMap:
 
     def setdefault(self, key, default=None):
         internal_key = self._key_typeinfo.to_internal_data(key)
-        return self._map_data.setdefault(internal_key, default)
+        internal_default = self._val_typeinfo.to_internal_data(default)
+        return self._val_typeinfo.to_python_value(
+                    self._map_data.setdefault(internal_key, internal_default))
 
     def update(self, other=(), /, **keywords):
         """

@@ -23,6 +23,7 @@ from thrift.python.mutable_containers import (
     MapItemsView,
     MapKeysView,
     MapValuesView,
+    MutableList,
     MutableMap,
 )
 
@@ -504,6 +505,42 @@ class MutableMapTest(unittest.TestCase):
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
             mutable_map.setdefault(123, 999)
+
+        # Default value for `setdefault()` is `None`, however, `None` is not a
+        # valid thrift value, therefore, it is a TypeError
+        with self.assertRaisesRegex(
+            TypeError, "not a <class 'int'>, is actually of type <class 'NoneType'>"
+        ):
+            mutable_map.setdefault("new-key")
+
+    def test_setdefault_container_value(self) -> None:
+        mutable_map = MutableMap(
+            typeinfo_string,
+            # pyre-ignore[19]:
+            MutableListTypeInfo(typeinfo_i32),
+            {},
+        )
+
+        value_A = mutable_map.setdefault("A", [1, 2, 3])
+        self.assertIsInstance(value_A, MutableList)
+        self.assertEqual([1, 2, 3], value_A)
+
+        # key "A" already exists, we should get [1, 2, 3]
+        value_A = mutable_map.setdefault("A", [4, 5, 6])
+        self.assertIsInstance(value_A, MutableList)
+        self.assertEqual([1, 2, 3], value_A)
+
+        # Wrong value type raises a TypeError
+        with self.assertRaisesRegex(
+            TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            mutable_map.setdefault("B", ["1", "2", "3"])
+
+        # set the key "A" and try to read it back with `setdefault()`
+        mutable_map["A"] = [11, 12, 13]
+        value_A = mutable_map.setdefault("A", [4, 5, 6])
+        self.assertIsInstance(value_A, MutableList)
+        self.assertEqual([11, 12, 13], value_A)
 
     def test_update(self) -> None:
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})

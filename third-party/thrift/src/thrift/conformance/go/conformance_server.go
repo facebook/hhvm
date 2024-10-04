@@ -266,7 +266,7 @@ func newSerializer(protoc *protocol.ProtocolStruct) (*thrift.Serializer, error) 
 	case protocol.StandardProtocol_Json:
 		return thrift.NewSimpleJSONSerializer(), nil
 	case protocol.StandardProtocol_SimpleJson:
-		return thrift.NewJSONSerializer(), nil
+		return thrift.NewCompactJSONSerializer(), nil
 	}
 	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
 	return thrift.NewCompactSerializer(), nil
@@ -283,7 +283,7 @@ func newDeserializer(protoc *protocol.ProtocolStruct) (*thrift.Deserializer, err
 	case protocol.StandardProtocol_Json:
 		return thrift.NewSimpleJSONDeserializer(), nil
 	case protocol.StandardProtocol_SimpleJson:
-		return thrift.NewJSONDeserializer(), nil
+		return thrift.NewCompactJSONDeserializer(), nil
 	}
 	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
 	return thrift.NewCompactDeserializer(), nil

@@ -26,14 +26,14 @@ type Serializer struct {
 	Protocol  types.Encoder
 }
 
-// NewSerializer create a new serializer using the binary protocol
+// NewSerializer create a new serializer using the binary format
 func NewSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewBinaryFormat(transport)
 	return &Serializer{transport, protocol}
 }
 
-// NewCompactSerializer creates a new serializer using the compact protocol
+// NewCompactSerializer creates a new serializer using the compact format
 func NewCompactSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactFormat(transport)
@@ -44,14 +44,14 @@ func serializeCompact(msg types.Struct) ([]byte, error) {
 	return NewCompactSerializer().Write(msg)
 }
 
-// NewJSONSerializer creates a new serializer using the JSON protocol
-func NewJSONSerializer() *Serializer {
+// NewCompactJSONSerializer creates a new serializer using the compact JSON format
+func NewCompactJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
-	protocol := NewJSONFormat(transport)
+	protocol := NewCompactJSONFormat(transport)
 	return &Serializer{transport, protocol}
 }
 
-// NewSimpleJSONSerializer creates a new serializer using the SimpleJSON protocol
+// NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func NewSimpleJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewSimpleJSONFormat(transport)

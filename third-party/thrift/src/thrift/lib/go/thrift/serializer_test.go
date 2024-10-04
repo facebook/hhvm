@@ -132,11 +132,11 @@ func TestSerializer(t *testing.T) {
 	serializers := make(map[string]*Serializer)
 	serializers["Binary"] = NewSerializer()
 	serializers["Compact"] = NewCompactSerializer()
-	serializers["JSON"] = NewJSONSerializer()
+	serializers["JSON"] = NewCompactJSONSerializer()
 	deserializers := make(map[string]*Deserializer)
 	deserializers["Binary"] = NewDeserializer()
 	deserializers["Compact"] = NewCompactDeserializer()
-	deserializers["JSON"] = NewJSONDeserializer()
+	deserializers["JSON"] = NewCompactJSONDeserializer()
 
 	tests := make(map[string]func(*testing.T, *Serializer, *Deserializer) (bool, error))
 	tests["Test 1"] = ProtocolTest1

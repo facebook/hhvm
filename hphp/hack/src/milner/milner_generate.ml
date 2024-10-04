@@ -653,7 +653,7 @@ end = struct
       | Awaitable _ -> [Awaitable Mixed]
       | Alias info -> weaken_for_disjointness info.aliased
       | TypeConst info -> weaken_for_disjointness info.aliased
-      | Newtype _ -> [Mixed]
+      | Newtype info -> weaken_for_disjointness info.aliased
       | Case { name; disjuncts } ->
         let open List.Let_syntax in
         let+ disjuncts =

@@ -176,21 +176,37 @@ module Hg_actual = struct
       in
       Future.merge primary_mergebase p2_mergebase max_global_rev
 
+  let hg_status_common_options repo =
+    [
+      "--cwd";
+      repo;
+      (* We need this "-I" because the "repo" (as defined by the path of .hhconfig)
+         might be within a wider hg repo. *)
+      "-I";
+      repo;
+      (* This is so that file paths are relative to .hhconfig `repo` rather than hg repo root *)
+      "--no-root-relative";
+    ]
+
   (** Returns the files changed since the given global_rev
    *
-   * hg status -n --rev r<global_rev> --cwd <repo> *)
+   * hg status -n --rev r<global_rev> --cwd <repo> -I <repo> --no-root-relative *)
   let files_changed_since_rev rev repo =
     let process =
-      exec_hg ["status"; "-n"; "--rev"; rev_string rev; "--cwd"; repo]
+      exec_hg
+        (["status"; "-n"; "--rev"; rev_string rev]
+        @ hg_status_common_options repo)
     in
     FutureProcess.make process Sys_utils.split_lines
 
   (** Returns the files changed in rev
    *
-   * hg status --change <rev> --cwd <repo> *)
+   * hg status --change <rev> --cwd <repo> -I <repo> --no-root-relative*)
   let files_changed_in_rev rev repo =
     let process =
-      exec_hg ["status"; "-n"; "--change"; rev_string rev; "--cwd"; repo]
+      exec_hg
+        (["status"; "-n"; "--change"; rev_string rev]
+        @ hg_status_common_options repo)
     in
     FutureProcess.make process Sys_utils.split_lines
 
@@ -200,7 +216,7 @@ module Hg_actual = struct
    * i.e. If we start at "start" revision, what files need be changed to get us
    * to "finish" revision.
    *
-   * hg status -n --rev start --rev end --cwd repo
+   * hg status -n --rev <start> --rev <end> --cwd <repo> -I <repo> --no-root-relative
    *)
   let files_changed_since_rev_to_rev ~start ~finish repo =
     if String.equal (rev_string start) (rev_string finish) then
@@ -212,16 +228,15 @@ module Hg_actual = struct
     else
       let process =
         exec_hg
-          [
-            "status";
-            "-n";
-            "--rev";
-            rev_string start;
-            "--rev";
-            rev_string finish;
-            "--cwd";
-            repo;
-          ]
+          ([
+             "status";
+             "-n";
+             "--rev";
+             rev_string start;
+             "--rev";
+             rev_string finish;
+           ]
+          @ hg_status_common_options repo)
       in
       FutureProcess.make process Sys_utils.split_lines
 

@@ -2,12 +2,16 @@
 
 [packages.foo]
 uses = ["x.*"]
-include_paths=["foo", "foo/*", "./foo", "./foo/*"] # well-formed but nonexistent paths
+include_paths=[
+    "//doesnotexist.php",
+    "//doesnotexist/",
+] # well-formed but nonexistent paths
 
 [packages.bar]
 uses = ["y.*"]
 include_paths=[
-    "../tests",  # ok
-    "../*",      # ok
-    "bar*",      # ill-formed and nonexistent
-]
+    "bar",
+    "//bar",
+    "bar/",
+    "*",
+] # ill-formed and nonexistent

@@ -3,8 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ffi::OsStr;
-use std::path::Component;
+// use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -27,6 +26,7 @@ pub struct PackageInfo {
 
 impl PackageInfo {
     pub fn from_text(strict: bool, root: &str, filename: &str) -> Result<PackageInfo> {
+        let mut errors = vec![];
         let root = if !root.is_empty() {
             Path::new(root)
                 .canonicalize()
@@ -43,41 +43,52 @@ impl PackageInfo {
             .filter(|&(_i, c)| c == '\n')
             .map(|(i, _)| i)
             .collect::<Vec<_>>();
-        let mut errors = config.check_config();
 
-        // absolutize allow directories relative to config file's parent directory
+        // absolutize directories relative to config file's parent directory
         for (_, package) in config.packages.iter_mut() {
             if let Some(dirs) = &mut package.include_paths {
                 dirs.clone().iter().for_each(|d| {
-                    let mut dir = dirs.take(d).unwrap();
-                    let span = dir.span();
-                    let rel_path = Path::new(dir.get_ref());
+                    let mut spanned_dir = dirs.take(d).unwrap();
+                    let span = spanned_dir.span();
+                    let dir = spanned_dir.get_ref();
 
-                    let mut abs_path = Path::new(filename)
-                        .canonicalize()
-                        .expect("Package config path must be valid")
+                    if !dir.starts_with("//") || dir.contains("./") {
+                        errors.push(Error::malformed_include_path(dir.clone(), span.clone()))
+                    }
+
+                    let rel_path = Path::new(dir.strip_prefix("//").unwrap_or(dir));
+                    let abs_path = Path::new(filename)
                         .parent()
-                        .expect("Package config path cannot be root or empty")
+                        .expect("Package config path must be valid")
                         .join(rel_path);
 
-                    let path_matches_subdirectories = normalize(&mut abs_path);
-                    let path_exists = abs_path.canonicalize().is_ok();
+                    if strict {
+                        let path_exists = abs_path.canonicalize().is_ok();
+                        if !path_exists {
+                            errors
+                                .push(Error::invalid_include_path(abs_path.clone(), span.clone()));
+                        } else {
+                            let metadata = std::fs::metadata(&abs_path).unwrap();
+                            if metadata.is_dir() && !dir.ends_with("/") {
+                                errors.push(Error::invalid_include_path(
+                                    abs_path.clone(),
+                                    span.clone(),
+                                ));
+                            }
+                        }
+                    }
 
-                    if path_matches_subdirectories {
-                        abs_path.push("*");
-                    }
-                    if strict && !path_exists {
-                        errors.push(Error::invalid_include_path(abs_path.clone(), span));
-                    }
                     let new_dir = abs_path
                         .as_path()
                         .strip_prefix(root.clone())
                         .unwrap_or(&abs_path);
-                    *dir.get_mut() = new_dir.to_string_lossy().into_owned();
-                    dirs.insert(dir);
+                    *spanned_dir.get_mut() = new_dir.to_string_lossy().into_owned();
+                    dirs.insert(spanned_dir);
                 });
             }
         }
+
+        config.check_config(&mut errors);
 
         Ok(Self {
             packages: config.packages,
@@ -119,32 +130,6 @@ impl PackageInfo {
             prev_line_end + 1
         }
     }
-}
-
-// Normalize /path/to/../123/456/./789/* => /path/123/456/789
-// Return whether the path ends with *
-fn normalize(allow_dir: &mut PathBuf) -> bool {
-    let mut normalized = PathBuf::new();
-
-    for component in allow_dir.components() {
-        match component {
-            Component::ParentDir => {
-                normalized.pop();
-            }
-            Component::CurDir => {}
-            _ => normalized.push(component),
-        };
-    }
-
-    let mut matches_subdirectories = false;
-
-    if let Some("*") = normalized.file_name().and_then(OsStr::to_str) {
-        normalized.pop();
-        matches_subdirectories = true;
-    }
-
-    *allow_dir = normalized;
-    matches_subdirectories
 }
 
 #[cfg(test)]
@@ -292,41 +277,20 @@ mod test {
         let included_dirs = info.packages()["foo"].include_paths.as_ref().unwrap();
         assert_eq!(included_dirs.len(), 2);
         assert!(
-            Regex::new(&format!(r#".*{}/tests/foo"#, SRCDIR.to_string_lossy()))
-                .unwrap()
-                .is_match(included_dirs[0].get_ref())
+            Regex::new(&format!(
+                r#".*{}/tests/doesnotexist.php"#,
+                SRCDIR.to_string_lossy()
+            ))
+            .unwrap()
+            .is_match(included_dirs[0].get_ref())
         );
         assert!(
-            Regex::new(&format!(r#".*{}/tests/foo/*"#, SRCDIR.to_string_lossy()))
-                .unwrap()
-                .is_match(included_dirs[1].get_ref())
-        );
-    }
-
-    #[test]
-    fn test_include_paths2() {
-        let test_path = SRCDIR.as_path().join("tests/package-6.toml");
-        let info = PackageInfo::from_text(true, "", test_path.to_str().unwrap()).unwrap();
-        let included_dirs = info.packages()["bar"].include_paths.as_ref().unwrap();
-        assert_eq!(included_dirs.len(), 3);
-
-        // ../* -> <FBCODE>/hphp/hack/src/package/*
-        assert!(
-            Regex::new(&format!(r#".*{}/*"#, SRCDIR.to_string_lossy()))
-                .unwrap()
-                .is_match(included_dirs[0].get_ref())
-        );
-        // ../tests -> <FBCODE>/hphp/hack/src/package/tests
-        assert!(
-            Regex::new(&format!(r#".*{}/tests"#, SRCDIR.to_string_lossy()))
-                .unwrap()
-                .is_match(included_dirs[1].get_ref())
-        );
-        // bar* -> <FBCODE>/hphp/hack/src/package/tests/bar*
-        assert!(
-            Regex::new(&format!(r#".*{}/tests/bar*"#, SRCDIR.to_string_lossy()))
-                .unwrap()
-                .is_match(included_dirs[2].get_ref())
+            Regex::new(&format!(
+                r#".*{}/tests/doesnotexist"#,
+                SRCDIR.to_string_lossy()
+            ))
+            .unwrap()
+            .is_match(included_dirs[1].get_ref())
         );
     }
 
@@ -335,48 +299,60 @@ mod test {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
         let info = PackageInfo::from_text(true, "", test_path.to_str().unwrap()).unwrap();
 
-        let errors = info
-            .errors
-            .iter()
-            .map(|e| e.msg())
-            .collect::<std::collections::BTreeSet<_>>();
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+
+        assert_eq!(errors.len(), 9);
 
         let expected = [
-            format!(
-                r#"include_path .*{}/tests/bar\* does not exist"#,
-                SRCDIR.to_string_lossy()
+            String::from(
+                "include_path * is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
             ),
             format!(
-                r#"include_path .*{}/tests/foo does not exist"#,
+                r#"include_path .*{}/tests/doesnotexist.php does not exist"#,
                 SRCDIR.to_string_lossy()
             ),
-            format!(
-                r#"include_path .*{}/tests/foo/\* does not exist"#,
-                SRCDIR.to_string_lossy()
+            String::from(
+                "include_path bar is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
+            ),
+            String::from(
+                "include_path bar/ is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
             ),
         ];
-        let mut errors_iter = errors.iter();
-        assert!(
-            Regex::new(&expected[0])
-                .unwrap()
-                .is_match(errors_iter.next().unwrap())
-        );
-        assert!(
-            Regex::new(&expected[1])
-                .unwrap()
-                .is_match(errors_iter.next().unwrap())
-        );
-        assert!(
-            Regex::new(&expected[2])
-                .unwrap()
-                .is_match(errors_iter.next().unwrap())
-        );
+
+        assert!(expected[0] == errors[7]);
+        assert!(Regex::new(&expected[1]).unwrap().is_match(&errors[0]));
+        assert!(expected[2] == errors[2]);
+        assert!(expected[3] == errors[5]);
     }
 
     #[test]
     fn test_include_paths_non_strict() {
         let test_path = SRCDIR.as_path().join("tests/package-6.toml");
         let info = PackageInfo::from_text(false, "", test_path.to_str().unwrap()).unwrap();
-        assert!(info.errors.is_empty());
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        assert!(errors.len() == 3);
+        // with non-strict PackageInfo parsing only "malformed path" errors should be generated
+        let expected = Regex::new(r#".*malformed.*"#).unwrap();
+        let filtered_errors = errors.iter().filter(|x| !expected.is_match(x));
+        assert!(filtered_errors.count() == 0);
+    }
+
+    #[test]
+    fn test_include_paths_error_2() {
+        println!(" !!! ");
+        let test_path = SRCDIR.as_path().join("tests/package-7.toml");
+        let info = PackageInfo::from_text(false, "", test_path.to_str().unwrap()).unwrap();
+        let errors = info.errors.iter().map(|e| e.msg()).collect::<Vec<_>>();
+        println!(" *** {:?}", errors);
+        let expected = [
+            String::from(
+                "include_path //doesnotexist/./bar/ is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
+            ),
+            String::from(
+                "include_path //doesnotexist/../bar/ is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
+            ),
+        ];
+        assert!(errors[0] == expected[0]);
+        assert!(errors[1] == expected[1]);
     }
 }

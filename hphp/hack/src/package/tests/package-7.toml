@@ -1,0 +1,7 @@
+[packages]
+
+[packages.zot]
+include_paths=[
+    "//doesnotexist/./bar/",
+    "//doesnotexist/../bar/",
+] # ill-formed and nonexistent

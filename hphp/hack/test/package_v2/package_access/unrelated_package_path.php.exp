@@ -15,12 +15,12 @@ unrelated_package_path.php--pkg6/bar.php:3:10
 4 |
 5 | function zot(): void {
 
-PACKAGES.toml:19:11
-17 | [packages.pkg4]
-18 |
-[3] 19 | [packages.pkg5]
-20 | include_paths=["./pkg5/*"]
-21 |
+PACKAGES.toml:18:11
+16 | [packages.pkg4]
+17 |
+[3] 18 | [packages.pkg5]
+19 | include_paths=["//pkg5/"]
+20 |
 
 error: Typing[4472] Cannot access an element which belongs to package pkg5 from package pkg6 [1]
 -> This is from unrelated_package_path.php--pkg5/foo.php, which belongs to package pkg5 [2]
@@ -39,11 +39,11 @@ unrelated_package_path.php--pkg5/foo.php:3:10
 4 |   bar(); // this should be an error as pkg6 does not include pkg5
 5 | }
 
-PACKAGES.toml:22:11
-20 | include_paths=["./pkg5/*"]
-21 |
-[3] 22 | [packages.pkg6]
-23 | include_paths=["./pkg6/*"]
-24 | includes = ["pkg1"]
+PACKAGES.toml:21:11
+19 | include_paths=["//pkg5/"]
+20 |
+[3] 21 | [packages.pkg6]
+22 | include_paths=["//pkg6/"]
+23 | includes = ["pkg1"]
 
 2 errors found

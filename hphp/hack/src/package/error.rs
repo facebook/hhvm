@@ -30,6 +30,10 @@ pub enum Error {
         abs_path: PathBuf,
         span: (usize, usize),
     },
+    MalformedIncludePath {
+        include_path: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -57,6 +61,14 @@ impl Error {
         }
     }
 
+    pub fn malformed_include_path(include_path: String, span: Range<usize>) -> Self {
+        let Range { start, end } = span;
+        Self::MalformedIncludePath {
+            include_path,
+            span: (start, end),
+        }
+    }
+
     pub fn incomplete_deployment(
         deployment: &Spanned<String>,
         missing_pkgs: Vec<Spanned<String>>,
@@ -76,7 +88,8 @@ impl Error {
             Self::DuplicateUse { span, .. }
             | Self::UndefinedInclude { span, .. }
             | Self::IncompleteDeployment { span, .. }
-            | Self::InvalidIncludePath { span, .. } => *span,
+            | Self::InvalidIncludePath { span, .. }
+            | Self::MalformedIncludePath { span, .. } => *span,
         }
     }
 
@@ -120,6 +133,13 @@ impl Display for Error {
             }
             Self::InvalidIncludePath { abs_path, .. } => {
                 write!(f, "include_path {} does not exist", abs_path.display())?;
+            }
+            Self::MalformedIncludePath { include_path, .. } => {
+                write!(
+                    f,
+                    "include_path {} is malformed: paths must start with // and cannot include ./ or ../, directories must end with /",
+                    include_path
+                )?;
             }
         };
         Ok(())

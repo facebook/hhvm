@@ -20,7 +20,7 @@ pub struct Config {
     pub deployments: Option<DeploymentMap>,
 }
 impl Config {
-    pub fn check_config(&self) -> Vec<Error> {
+    pub fn check_config(&self, errors: &mut Vec<Error>) {
         let check_packages_are_defined =
             |errors: &mut Vec<Error>, pkgs: &Option<NameSet>, soft_pkgs: &Option<NameSet>| {
                 if let Some(packages) = pkgs {
@@ -74,27 +74,21 @@ impl Config {
                     ));
                 }
             };
-        let mut errors = vec![];
         for (_, package) in self.packages.iter() {
-            check_packages_are_defined(&mut errors, &package.includes, &package.soft_includes);
-            check_each_glob_is_used_once(&mut errors, &package.uses);
+            check_packages_are_defined(errors, &package.includes, &package.soft_includes);
+            check_each_glob_is_used_once(errors, &package.uses);
         }
         if let Some(deployments) = &self.deployments {
             for (positioned_name, deployment) in deployments.iter() {
-                check_packages_are_defined(
-                    &mut errors,
-                    &deployment.packages,
-                    &deployment.soft_packages,
-                );
+                check_packages_are_defined(errors, &deployment.packages, &deployment.soft_packages);
                 check_deployed_packages_are_transitively_closed(
-                    &mut errors,
+                    errors,
                     positioned_name,
                     &deployment.packages,
                     &deployment.soft_packages,
                 );
             }
         };
-        errors
     }
 }
 

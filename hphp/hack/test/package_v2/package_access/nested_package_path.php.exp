@@ -19,7 +19,7 @@ PACKAGES.toml:3:11
 1 | [packages]
 2 |
 [3] 3 | [packages.pkg1]
-4 | include_paths=["./*"]
+4 | include_paths=["//"]
 5 |
 
 1 error found

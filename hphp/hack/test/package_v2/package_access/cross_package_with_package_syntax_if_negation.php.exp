@@ -13,12 +13,12 @@ cross_package_with_package_syntax_if_negation.php--pkg1.php:2:10
 1 | <?hh
 [2]  2 | function pkg1_call(): void {}
 
-PACKAGES.toml:14:11
-12 | includes = ["pkg1"]
-13 |
-[3] 14 | [packages.pkg3]
-15 | includes = ["pkg2"]
-16 |
+PACKAGES.toml:13:11
+11 | includes = ["pkg1"]
+12 |
+[3] 13 | [packages.pkg3]
+14 | includes = ["pkg2"]
+15 |
 
 error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
 -> This is from cross_package_with_package_syntax_if_negation.php--pkg1.php, which belongs to package pkg1 [2]
@@ -34,11 +34,11 @@ cross_package_with_package_syntax_if_negation.php--pkg1.php:2:10
 1 | <?hh
 [2]  2 | function pkg1_call(): void {}
 
-PACKAGES.toml:14:11
-12 | includes = ["pkg1"]
-13 |
-[3] 14 | [packages.pkg3]
-15 | includes = ["pkg2"]
-16 |
+PACKAGES.toml:13:11
+11 | includes = ["pkg1"]
+12 |
+[3] 13 | [packages.pkg3]
+14 | includes = ["pkg2"]
+15 |
 
 2 errors found

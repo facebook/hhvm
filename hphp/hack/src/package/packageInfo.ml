@@ -63,7 +63,7 @@ let get_package_for_module (info : t) (md : string) : Package.t option =
 let get_package_for_file
     ?(support_multifile_tests = false) (info : t) (file : Relative_path.t) :
     Package.t option =
-  let filepath_filter =
+  let filepath =
     if support_multifile_tests then
       (* When checking unit tests, attempt to strip out the `filename.php--/`
        * file name prefix added by the multifile support
@@ -76,13 +76,7 @@ let get_package_for_file
     SMap.filter_map
       (fun _ pkg ->
         List.filter_map pkg.Package.include_paths ~f:(fun (_, path) ->
-            let prefix =
-              if String.is_suffix ~suffix:"*" path then
-                String.sub path ~pos:0 ~len:(String.length path - 1)
-              else
-                path
-            in
-            if String.is_prefix ~prefix filepath_filter then
+            if String.is_prefix ~prefix:path filepath then
               Some path
             else
               None)
@@ -98,8 +92,7 @@ let get_package_for_file
            as the strictest matching path; otherwise, we want to find the longest path
            that's a prefix glob of `filepath`. *)
         if
-          (not @@ String.equal path' filepath_filter)
-          && String.compare path path' > 0
+          (not @@ String.equal path' filepath) && String.compare path path' >= 0
         then
           (path, Some pkg)
         else

@@ -1,0 +1,20 @@
+*** Testing date() : usage variation -  unexpected values to second argument $timestamp***
+
+-- int 0 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- int 1 --
+string(24) "January 1, 1970, 1:00 am"
+
+-- int 12345 --
+string(24) "January 1, 1970, 4:25 am"
+
+-- int -12345 --
+string(26) "December 31, 1969, 9:34 pm"
+
+-- uppercase NULL --
+bool(true)
+
+-- lowercase null --
+bool(true)
+===DONE===

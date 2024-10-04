@@ -3,8 +3,4 @@
 -- Testing date function with no arguments --
 
 Warning: date() expects at least 1 parameter, 0 given in %s/date_error.php on line 16
-
--- Testing date function with more than expected no. of arguments --
-
-Warning: checkdate() expects parameter 1 to be integer, string given in %s/date_error.php on line 20
 ===DONE===

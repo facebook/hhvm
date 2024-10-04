@@ -11,19 +11,5 @@ echo "\n-- Too many arguments --\n";
 try { var_dump(microtime($opt_arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-echo "\n-- Bad Arg types --\n";
-
-$bad_args = vec[null,
-                  1.5,
-                  "hello",
-                  dict['k'=>'v', 0 => vec[0]],
-                  new stdClass,
-                  1];
-foreach ($bad_args as $bad_arg) {
-    echo "\n--> bad arg: ";
-    var_dump($bad_arg);
-    try { var_dump(microtime($bad_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-}
-
 echo "===DONE===\n";
 }

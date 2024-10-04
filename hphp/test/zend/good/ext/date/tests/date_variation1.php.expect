@@ -1,0 +1,20 @@
+*** Testing date() : usage variation -  unexpected values to first argument $format***
+
+-- empty string DQ --
+string(0) ""
+
+-- empty string SQ --
+string(0) ""
+
+-- string DQ --
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+
+-- string SQ --
+string(40) "3028Fri, 27 Feb 2009 10:44:30 +000044210"
+
+-- mixed case string --
+string(40) "30GMTFri, 27 Feb 2009 10:44:30 +00000210"
+
+-- heredoc --
+string(76) "10Europe/LondonFridayFriday2009 52009Fri, 27 Feb 2009 10:44:30 +0000Friday27"
+===DONE===

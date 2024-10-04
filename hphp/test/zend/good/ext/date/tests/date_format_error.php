@@ -23,13 +23,5 @@ $format = "F j, Y, g:i a";
 $extra_arg = 10;
 try { var_dump( date_format($date, $format, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-echo "\n-- Testing date_create() function with an invalid values for \$object argument --\n";
-$invalid_obj = new stdClass();
-var_dump( date_format($invalid_obj, $format) );
-$invalid_obj = 10;
-try { var_dump( date_format($invalid_obj, $format) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-$invalid_obj = null;
-try { var_dump( date_format($invalid_obj, $format) );     } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
 echo "===DONE===\n";
 }

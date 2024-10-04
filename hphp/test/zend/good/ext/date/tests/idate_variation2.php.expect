@@ -1,0 +1,8 @@
+*** Testing idate() : usage variation ***
+
+--uppercase NULL--
+bool(true)
+
+--lowercase null--
+bool(true)
+===DONE===

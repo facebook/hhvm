@@ -1,0 +1,12 @@
+*** Testing date_sunset() : usage variation ***
+
+--uppercase NULL--
+string(5) "17:40"
+float(17.68160375644)
+int(1218199253)
+
+--lowercase null--
+string(5) "17:40"
+float(17.68160375644)
+int(1218199253)
+===DONE===

@@ -1,0 +1,12 @@
+*** Testing date_sunrise() : usage variation ***
+
+--uppercase NULL--
+string(5) "10:48"
+float(10.800856481173)
+int(1218174483)
+
+--lowercase null--
+string(5) "10:48"
+float(10.800856481173)
+int(1218174483)
+===DONE===

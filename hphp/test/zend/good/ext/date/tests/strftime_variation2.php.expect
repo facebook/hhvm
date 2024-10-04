@@ -1,0 +1,8 @@
+*** Testing strftime() : usage variation ***
+
+--uppercase NULL--
+bool(true)
+
+--lowercase null--
+bool(true)
+===DONE===

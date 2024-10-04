@@ -1,0 +1,10 @@
+*** Testing gmstrftime() : usage variation ***
+
+--empty string DQ--
+bool(false)
+bool(false)
+
+--empty string SQ--
+bool(false)
+bool(false)
+===DONE===

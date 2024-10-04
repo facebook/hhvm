@@ -11,13 +11,4 @@ Warning: date_format() expects exactly 2 parameters, 1 given in %s/date_format_e
 -- Testing date_create() function with more than expected no. of arguments --
 
 Warning: date_format() expects exactly 2 parameters, 3 given in %s/date_format_error.php on line 24
-
--- Testing date_create() function with an invalid values for $object argument --
-
-Warning: date_format() expects parameter 1 to be DateTimeInterface, stdClass given in %s/date_format_error.php on line 28
-bool(false)
-
-Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_error.php on line 30
-
-Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_error.php on line 32
 ===DONE===

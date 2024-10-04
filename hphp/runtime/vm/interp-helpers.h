@@ -270,9 +270,6 @@ inline void calleeArgumentArityChecks(const Func* callee,
 inline void calleeArgumentTypeChecks(const Func* callee,
                                      uint32_t numArgsInclUnpack,
                                      void* prologueCtx) {
-  // Do not check for builtin parameter type hints if checks are disabled.
-  if (callee->isCPPBuiltin() && RO::EvalCheckBuiltinParamTypeHints == 0) return;
-
   auto const getCtx = [&] () -> const Class* {
     if (!callee->cls()) return nullptr;
     assertx(prologueCtx);

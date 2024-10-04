@@ -173,7 +173,6 @@ template <typename TGetVal,
           typename TFallback>
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
-                    bool isSoft,
                     bool onlyCheckNullability,
                     TGetVal getVal,
                     TGetTcInfo getTcInfo,
@@ -196,7 +195,7 @@ void verifyTypeImpl(IRGS& env,
     if (thisCls == nullptr) thisCls = genThisCls();
 
     auto const failHard = RuntimeOption::RepoAuthoritative
-      && !isSoft
+      && !tc.isSoft()
       && !tc.isThis();
     return fail(val, thisCls, failHard);
   };
@@ -1371,7 +1370,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
     verifyTypeImpl(
       env,
       tc,
-      tc.isSoft(),
       onlyCheckNullability,
       [&] { // Get value to test
         return topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
@@ -1463,7 +1461,6 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
     verifyTypeImpl(
       env,
       tc,
-      tc.isSoftOrBuiltinSoft(func),
       false,  // onlyCheckNullability
       [&] { // Get value to test
         return topC(env, offset, DataTypeGeneric);
@@ -1595,7 +1592,6 @@ void verifyPropType(IRGS& env,
     verifyTypeImpl(
       env,
       *tc,
-      tc->isSoft(),
       false,  // onlyCheckNullability
       [&] { // Get value to check
         // Guard the type only if we may coerce, so that the most common

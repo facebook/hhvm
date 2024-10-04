@@ -231,9 +231,6 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
 
 void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
                                   uint32_t argc, SSATmp* prologueCtx) {
-  // Do not check for builtin parameter type hints if checks are disabled.
-  if (callee->isCPPBuiltin() && RO::EvalCheckBuiltinParamTypeHints == 0) return;
-
   auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   auto const firstArgIdx = argc - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
   for (auto i = 0; i < numArgs; ++i) {

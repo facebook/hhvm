@@ -493,14 +493,6 @@ struct RuntimeOption {
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \
   F(uint32_t, TsameCollisionSampleRate, 1)                              \
-  /* CheckBuiltinParamTypeHints
-   * 0 - Do not check parameter type hints of builtins
-   * 1 - Treat builtin parameter type hints as <<__Soft>>
-   * 2 - Enforce builtin parameter type hints
-   */                                                                   \
-  F(int32_t, CheckBuiltinParamTypeHints, 2)                             \
-  /* Unused. Scheduled for removal: T175741557 */                       \
-  F(int32_t, EnforceGenericsUB,        2)                               \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

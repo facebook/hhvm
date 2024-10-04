@@ -1496,12 +1496,6 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
   not_reached();
 }
 
-bool TypeConstraint::isSoftOrBuiltinSoft(const Func* func) const {
-  if (isSoft()) return true;
-  if (!func->isCPPBuiltin()) return false;
-  return RO::EvalCheckBuiltinParamTypeHints <= 1;
-}
-
 bool TypeConstraint::validForProp() const {
   if (isUnion()) {
     auto const r = eachTypeConstraintInUnion(*this);
@@ -1797,7 +1791,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
   auto const givenType = describe_actual_type(c);
 
   // Handle parameter type constraint failures
-  if (isSoftOrBuiltinSoft(func)) {
+  if (isSoft()) {
     // Soft type hints raise warnings instead of recoverable errors
     raise_warning_unsampled(
       folly::format(
@@ -1839,11 +1833,7 @@ void TypeConstraint::verifyParamFail(tv_lval c,
     }
   }
 
-  assertx(
-    isSoftOrBuiltinSoft(func) ||
-    isThis() ||
-    check(c, ctx)
-  );
+  assertx(isSoft() || isThis() || check(c, ctx));
 }
 
 void TypeConstraint::verifyReturnFail(tv_lval c, const Class* ctx,

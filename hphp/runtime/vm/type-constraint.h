@@ -354,8 +354,6 @@ struct TypeConstraint {
   bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
   bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }
 
-  bool isSoftOrBuiltinSoft(const Func* func) const;
-
   bool isUnresolved() const {
     return isUnion()
       ? !contains(m_flags, TypeConstraintFlags::Resolved)

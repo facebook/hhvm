@@ -652,27 +652,30 @@ end = struct
   let process_errors errors error_stats ~stream_errors ~log_errors : unit =
     error_stats := ErrorStats.update errors !error_stats;
     if log_errors then (
-      let max_errors = 5 in
-      Hh_logger.log
-        "%d errors in batch. Showing first %d:"
-        (Errors.count errors)
-        max_errors;
-      List.iter
-        (List.take (Errors.get_error_list errors) max_errors)
-        ~f:(fun error ->
-          let { User_error.severity; claim; code; _ } = error in
-          let (pos, msg) = claim in
-          let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
-          Hh_logger.log
-            "%s: %s(%d:%d-%d:%d) [%d] %s"
-            (User_error.Severity.to_all_caps_string severity)
-            (Relative_path.suffix @@ Pos.filename pos)
-            l1
-            c1
-            l2
-            c2
-            code
-            msg);
+      let error_count = Errors.count errors in
+      if error_count > 0 then (
+        let max_errors = 5 in
+        Hh_logger.log
+          "%d errors in batch. Showing first %d:"
+          error_count
+          max_errors;
+        List.iter
+          (List.take (Errors.get_error_list errors) max_errors)
+          ~f:(fun error ->
+            let { User_error.severity; claim; code; _ } = error in
+            let (pos, msg) = claim in
+            let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
+            Hh_logger.log
+              "%s: %s(%d:%d-%d:%d) [%d] %s"
+              (User_error.Severity.to_all_caps_string severity)
+              (Relative_path.suffix @@ Pos.filename pos)
+              l1
+              c1
+              l2
+              c2
+              code
+              msg)
+      );
       (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
       if stream_errors then Server_progress.ErrorsWrite.report errors
     )

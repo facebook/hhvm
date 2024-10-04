@@ -65,6 +65,9 @@ inline std::string get_escaped_string(std::string_view str) {
       case '\n':
         escaped.append("\\n");
         break;
+      case '?':
+        escaped.append("\\?");
+        break;
       default:
         if (c < 0x20 || c >= 0x7F) {
           // Use octal escape sequences because they are the most portable

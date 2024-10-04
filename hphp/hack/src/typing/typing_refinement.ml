@@ -35,7 +35,10 @@ let rec split_ty_by_tuple
     (sub_predicates : type_predicate list) : env * TyPartition.t =
   match deref ty with
   (* TODO: optional and variadic fields T201398626 T201398652 *)
-  | (ty_reason, Ttuple { t_required; t_optional = []; t_variadic = _ }) ->
+  | ( ty_reason,
+      Ttuple
+        { t_required; t_extra = Textra { t_optional = []; t_variadic = _ } } )
+    ->
     let predicate_ty_pairs = List.zip sub_predicates t_required in
     begin
       match predicate_ty_pairs with
@@ -355,7 +358,7 @@ module TyPredicate = struct
     | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
     | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
     (* TODO: optional and variadic fields T201398626 T201398652 *)
-    | Ttuple { t_required; t_optional = []; t_variadic }
+    | Ttuple { t_required; t_extra = Textra { t_optional = []; t_variadic } }
       when is_nothing t_variadic -> begin
       match
         List.fold_left t_required ~init:(Result.Ok []) ~f:(fun acc ty ->
@@ -439,8 +442,12 @@ module TyPredicate = struct
           Ttuple
             {
               t_required = List.map tp_required ~f:to_ty;
-              t_optional = [];
-              t_variadic = Typing_make_type.nothing reason;
+              t_extra =
+                Textra
+                  {
+                    t_optional = [];
+                    t_variadic = Typing_make_type.nothing reason;
+                  };
             } )
     | (reason, IsShapeOf { sp_fields }) ->
       let map =

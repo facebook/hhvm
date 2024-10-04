@@ -203,6 +203,7 @@ typing_defs_core::Reactivity
 typing_defs_core::RefinedConst
 typing_defs_core::RefinedConstBound
 typing_defs_core::ShapeKind
+typing_defs_core::TupleExtra
 typing_defs_core::TshapeFieldName
 typing_defs_core::Ty_
 typing_defs_core::TypeOrigin

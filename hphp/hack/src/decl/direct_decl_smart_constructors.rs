@@ -75,6 +75,7 @@ use oxidized_by_ref::typing_defs::ShapeType;
 use oxidized_by_ref::typing_defs::TaccessType;
 use oxidized_by_ref::typing_defs::Tparam;
 use oxidized_by_ref::typing_defs::TshapeFieldName;
+use oxidized_by_ref::typing_defs::TupleExtra;
 use oxidized_by_ref::typing_defs::TupleType;
 use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
@@ -2398,23 +2399,27 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             ))),
             Ty_::Ttuple(&TupleType {
                 required,
-                optional,
-                variadic,
-            }) => Ty_::Ttuple(
-                self.alloc(TupleType {
-                    required: self.slice(
-                        required
-                            .iter()
-                            .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
-                    ),
+                extra: TupleExtra::Textra { optional, variadic },
+            }) => {
+                let extra = self.alloc(TupleExtra::Textra {
                     optional: self.slice(
                         optional
                             .iter()
                             .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                     ),
                     variadic: self.convert_tapply_to_tgeneric(variadic),
-                }),
-            ),
+                });
+                Ty_::Ttuple(
+                    self.alloc(TupleType {
+                        required: self.slice(
+                            required
+                                .iter()
+                                .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                        ),
+                        extra: *extra,
+                    }),
+                )
+            }
             Ty_::Tintersection(tys) => Ty_::Tintersection(
                 self.slice(tys.iter().map(|&ty| self.convert_tapply_to_tgeneric(ty))),
             ),
@@ -2475,7 +2480,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             | Ty_::Tlabel(_)
             | Ty_::Tnewtype(_)
             | Ty_::Tvar(_)
-            | Ty_::TunappliedAlias(_) => panic!("unexpected decl type in constraint"),
+            | Ty_::TunappliedAlias(_)
+            | Ty_::Ttuple(_) => panic!("unexpected decl type in constraint"),
         };
         self.alloc(Ty(ty.0, ty_))
     }
@@ -5607,12 +5613,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             None => self.alloc(Ty(reason, Ty_::Tunion(&[]))),
             Some(ty) => ty,
         };
+        let extra = self.alloc(TupleExtra::Textra { optional, variadic });
         self.hint_ty(
             pos,
             Ty_::Ttuple(self.alloc(TupleType {
                 required,
-                optional,
-                variadic,
+                extra: *extra,
             })),
         )
     }

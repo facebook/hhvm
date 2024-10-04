@@ -174,7 +174,7 @@ let rec truthiness env ty =
         Always_truthy
       else
         Possibly_falsy
-  | Ttuple { t_required = []; t_optional = []; t_variadic }
+  | Ttuple { t_required = []; t_extra = Textra { t_optional = []; t_variadic } }
     when is_nothing t_variadic ->
     Always_falsy
   | Ttuple { t_required = _ :: _; _ } ->

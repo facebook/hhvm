@@ -135,12 +135,17 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         (env, acc_field_with_type fty)
       | ( TSFlit_str (_, "elem_types"),
           _,
-          (r, Ttuple { t_required; t_optional; t_variadic }) ) ->
+          (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
+        ) ->
         let (env, t_required) = List.map_env env t_required ~f:make_ts in
         let (env, t_optional) = List.map_env env t_optional ~f:make_ts in
         ( env,
           acc_field_with_type
-            (mk (r, Ttuple { t_required; t_optional; t_variadic })) )
+            (mk
+               ( r,
+                 Ttuple
+                   { t_required; t_extra = Textra { t_optional; t_variadic } }
+               )) )
       | (TSFlit_str (_, "param_types"), _, (r, Tfun funty)) ->
         let tyl = List.map funty.ft_params ~f:(fun x -> x.fp_type) in
         let (env, tyl) = List.map_env env tyl ~f:make_ts in

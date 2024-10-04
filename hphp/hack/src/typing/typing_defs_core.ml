@@ -469,16 +469,28 @@ and 'phase shape_type = {
 [@@deriving hash]
 
 (**
-  Required, optional and variadic components of a tuple. For example
+  Required and extra components of a tuple. Extra components
+  are either optional + variadic, or a type splat.
+  Exmaple 1:
     (string,bool,optional float,optional bool,int...)
   has require components string, bool, optional components float, bool
   and variadic component int.
+  Example 2:
+    (string,float,...T)
+  has required components string, float, and splat component T.
 *)
 and 'phase tuple_type = {
   t_required: 'phase ty list;
-  t_optional: 'phase ty list;
-  t_variadic: 'phase ty;
+  t_extra: 'phase tuple_extra;
 }
+[@@deriving hash]
+
+and 'phase tuple_extra =
+  | Textra of {
+      t_optional: 'phase ty list;
+      t_variadic: 'phase ty;
+    }
+  | Tsplat of 'phase ty
 [@@deriving hash]
 
 let nonexact = Nonexact { cr_consts = SMap.empty }
@@ -784,8 +796,25 @@ module Pp = struct
 
     Format.fprintf fmt "@ }@]"
 
+  and pp_tuple_extra : type a. Format.formatter -> a tuple_extra -> unit =
+   fun fmt extra ->
+    match extra with
+    | Textra { t_optional; t_variadic } ->
+      Format.fprintf fmt "@[%s =@ " "t_optional";
+      pp_list pp_ty fmt t_optional;
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt ";@ ";
+
+      Format.fprintf fmt "@[%s =@ " "t_variadic";
+      pp_ty fmt t_variadic;
+      Format.fprintf fmt "@]"
+    | Tsplat t_splat ->
+      Format.fprintf fmt "@[%s =@ " "t_splat";
+      pp_ty fmt t_splat;
+      Format.fprintf fmt "@]"
+
   and pp_tuple_type : type a. Format.formatter -> a tuple_type -> unit =
-   fun fmt { t_required; t_optional; t_variadic } ->
+   fun fmt { t_required; t_extra } ->
     Format.fprintf fmt "@[<2>{ ";
 
     Format.fprintf fmt "@[%s =@ " "t_required";
@@ -793,14 +822,7 @@ module Pp = struct
     Format.fprintf fmt "@]";
     Format.fprintf fmt ";@ ";
 
-    Format.fprintf fmt "@[%s =@ " "t_optional";
-    pp_list pp_ty fmt t_optional;
-    Format.fprintf fmt "@]";
-    Format.fprintf fmt ";@ ";
-
-    Format.fprintf fmt "@[%s =@ " "t_variadic";
-    pp_ty fmt t_variadic;
-    Format.fprintf fmt "@]";
+    pp_tuple_extra fmt t_extra;
 
     Format.fprintf fmt "@ }@]"
 
@@ -999,31 +1021,24 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
           (TShapeMap.elements fields2)
       | n -> n
     end
+  and tuple_extra_compare : type a. a tuple_extra -> a tuple_extra -> int =
+   fun t1 t2 ->
+    match (t1, t2) with
+    | (Textra _, Tsplat _) -> -1
+    | (Tsplat _, Textra _) -> 1
+    | (Tsplat t_splat1, Tsplat t_splat2) -> ty_compare t_splat1 t_splat2
+    | ( Textra { t_optional = t_optional1; t_variadic = t_variadic1 },
+        Textra { t_optional = t_optional2; t_variadic = t_variadic2 } ) ->
+      (match ty_compare t_variadic1 t_variadic2 with
+      | 0 -> List.compare ty_compare t_optional1 t_optional2
+      | n -> n)
   and tuple_type_compare : type a. a tuple_type -> a tuple_type -> int =
    fun t1 t2 ->
-    let {
-      t_variadic = t_variadic1;
-      t_optional = t_optional1;
-      t_required = t_required1;
-    } =
-      t1
-    in
-    let {
-      t_variadic = t_variadic2;
-      t_optional = t_optional2;
-      t_required = t_required2;
-    } =
-      t2
-    in
-    begin
-      match ty_compare t_variadic1 t_variadic2 with
-      | 0 -> begin
-        match List.compare ty_compare t_optional1 t_optional2 with
-        | 0 -> List.compare ty_compare t_required1 t_required2
-        | n -> n
-      end
-      | n -> n
-    end
+    let { t_required = t_required1; t_extra = t_extra1 } = t1 in
+    let { t_required = t_required2; t_extra = t_extra2 } = t2 in
+    match List.compare ty_compare t_required1 t_required2 with
+    | 0 -> tuple_extra_compare t_extra1 t_extra2
+    | n -> n
   and user_attribute_param_compare p1 p2 =
     let dest_user_attribute_param p =
       match p with

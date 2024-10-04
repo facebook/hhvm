@@ -317,15 +317,13 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
           Ttuple
             {
               t_required = t_required1;
-              t_optional = [];
-              t_variadic = t_variadic1;
+              t_extra = Textra { t_optional = []; t_variadic = t_variadic1 };
             } ),
         ( _,
           Ttuple
             {
               t_required = t_required2;
-              t_optional = [];
-              t_variadic = t_variadic2;
+              t_extra = Textra { t_optional = []; t_variadic = t_variadic2 };
             } ) ) ->
       if Int.equal (List.length t_required1) (List.length t_required2) then
         let (env, t_required) =
@@ -338,7 +336,15 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         let (env, t_variadic) =
           union ~approx_cancel_neg env t_variadic1 t_variadic2
         in
-        (env, Some (mk (r, Ttuple { t_required; t_optional = []; t_variadic })))
+        ( env,
+          Some
+            (mk
+               ( r,
+                 Ttuple
+                   {
+                     t_required;
+                     t_extra = Textra { t_optional = []; t_variadic };
+                   } )) )
       else
         (env, None)
     | ( ( r1,

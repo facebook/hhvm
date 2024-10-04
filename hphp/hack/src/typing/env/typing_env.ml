@@ -1588,10 +1588,13 @@ and get_tyvars_i env (ty : internal_type) =
     | Tneg _ ->
       (env, Tvid.Set.empty, Tvid.Set.empty)
     | Toption ty -> get_tyvars env ty
-    | Ttuple { t_required; t_optional; t_variadic } ->
+    | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
       get_tyvars env t_variadic |> fun init ->
       List.fold_left t_required ~init ~f:get_tyvars_union |> fun init ->
       List.fold_left t_optional ~f:get_tyvars_union ~init
+    | Ttuple { t_required; t_extra = Tsplat t_splat } ->
+      get_tyvars env t_splat |> fun init ->
+      List.fold_left t_required ~f:get_tyvars_union ~init
     | Tunion tyl
     | Tintersection tyl ->
       List.fold_left

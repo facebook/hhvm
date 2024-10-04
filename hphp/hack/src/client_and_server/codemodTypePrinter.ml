@@ -53,16 +53,22 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       "(function(%s): %s)"
       (String.concat ~sep:", " params)
       (print_ty_exn ft.ft_ret)
-  | Ttuple { t_required; t_optional; t_variadic } ->
+  | Ttuple { t_required; t_extra } ->
     let required = List.map t_required ~f:print_ty_exn in
-    let optional = List.map t_optional ~f:print_optional_tuple_field in
-    let variadic =
-      if is_nothing t_variadic then
-        []
-      else
-        [print_ty_exn ty ^ "..."]
+    let extra =
+      match t_extra with
+      | Textra { t_optional; t_variadic } ->
+        let optional = List.map t_optional ~f:print_optional_tuple_field in
+        let variadic =
+          if is_nothing t_variadic then
+            []
+          else
+            [print_ty_exn t_variadic ^ "..."]
+        in
+        optional @ variadic
+      | Tsplat t_splat -> ["..." ^ print_ty_exn t_splat]
     in
-    "(" ^ String.concat ~sep:", " (required @ optional @ variadic) ^ ")"
+    "(" ^ String.concat ~sep:", " (required @ extra) ^ ")"
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =

@@ -157,14 +157,12 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Tprim(x) => typing_defs::Ty_::Tprim(arena.alloc(*x)),
             Ty_::Tfun(x) => typing_defs::Ty_::Tfun(x.to_oxidized(arena)),
             Ty_::Ttuple(tuple) => {
-                let TupleType(required, optional, variadic) = &**tuple;
-                let variadic = variadic.to_oxidized(arena);
+                let TupleType(required, extra) = &**tuple;
                 let required = required.to_oxidized(arena);
-                let optional = optional.to_oxidized(arena);
+                let extra = extra.to_oxidized(arena);
                 typing_defs::Ty_::Ttuple(arena.alloc(typing_defs::TupleType {
-                    variadic,
-                    optional,
                     required,
+                    extra: *extra,
                 }))
             }
             Ty_::Tshape(shape) => {
@@ -211,6 +209,22 @@ impl<'a, R: Reason> ToOxidized<'a> for RefinedConstBound<Ty<R>> {
         arena.alloc(match self {
             Self::Exact(ty) => TRexact(ty.to_oxidized(arena)),
             Self::Loose(bounds) => TRloose(bounds.to_oxidized(arena)),
+        })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TupleExtra<R> {
+    type Output = &'a obr::typing_defs::TupleExtra<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::typing_defs::TupleExtra::Textra;
+        use obr::typing_defs::TupleExtra::*;
+        arena.alloc(match self {
+            Self::Textra(optional, variadic) => Textra {
+                optional: optional.to_oxidized(arena),
+                variadic: variadic.to_oxidized(arena),
+            },
+            Self::Tsplat(splat) => Tsplat(splat.to_oxidized(arena)),
         })
     }
 }

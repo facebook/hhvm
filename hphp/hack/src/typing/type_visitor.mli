@@ -51,6 +51,9 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty list ->
       'a
 
+    method on_tuple_extra :
+      'a -> Typing_defs.decl_phase Typing_defs.tuple_extra -> 'a
+
     method on_ttuple :
       'a ->
       Typing_reason.decl_t ->
@@ -120,6 +123,9 @@ class type ['a] locl_type_visitor_type =
       Typing_defs.dependent_type ->
       Typing_defs.locl_ty ->
       'a
+
+    method on_tuple_extra :
+      'a -> Typing_defs.locl_phase Typing_defs.tuple_extra -> 'a
 
     method on_ttuple :
       'a ->

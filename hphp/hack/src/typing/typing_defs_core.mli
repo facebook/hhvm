@@ -416,16 +416,28 @@ and 'phase shape_type = {
 [@@deriving hash]
 
 (**
-  Required, optional and variadic components of a tuple. For example
+  Required and extra components of a tuple. Extra components
+  are either optional + variadic, or a type splat.
+  Exmaple 1:
     (string,bool,optional float,optional bool,int...)
   has require components string, bool, optional components float, bool
   and variadic component int.
+  Example 2:
+    (string,float,...T)
+  has required components string, float, and splat component T.
 *)
 and 'phase tuple_type = {
   t_required: 'phase ty list;
-  t_optional: 'phase ty list;
-  t_variadic: 'phase ty;
+  t_extra: 'phase tuple_extra;
 }
+[@@deriving hash]
+
+and 'phase tuple_extra =
+  | Textra of {
+      t_optional: 'phase ty list;
+      t_variadic: 'phase ty;
+    }
+  | Tsplat of 'phase ty
 [@@deriving hash]
 
 val equal_decl_ty : decl_ty -> decl_ty -> bool

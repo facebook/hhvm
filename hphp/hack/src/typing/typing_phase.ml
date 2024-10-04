@@ -567,7 +567,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         lty
     in
     (env_err, lty)
-  | Ttuple { t_required; t_optional; t_variadic } ->
+  | Ttuple { t_required; t_extra } ->
     let ((env, ty_err_opt1, cycles1), t_required) =
       list_map_env_err_cycles
         env
@@ -575,22 +575,14 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         ~f:(localize ~ety_env)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    let ((env, ty_err_opt2, cycles2), t_optional) =
-      list_map_env_err_cycles
-        env
-        t_optional
-        ~f:(localize ~ety_env)
-        ~combine_ty_errs:Typing_error.multiple_opt
-    in
-    let ((env, ty_err_opt3, cycles3), t_variadic) =
-      localize ~ety_env env t_variadic
+    let ((env, ty_err_opt2, cycles2), t_extra) =
+      localize_tuple_extra ~ety_env env t_extra
     in
     let ty_err_opt =
       Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
     in
-    let ty_err_opt = Option.merge ty_err_opt ty_err_opt3 ~f:Typing_error.both in
-    ( (env, ty_err_opt, cycles1 @ cycles2 @ cycles3),
-      mk (r, Ttuple { t_required; t_optional; t_variadic }) )
+    ( (env, ty_err_opt, cycles1 @ cycles2),
+      mk (r, Ttuple { t_required; t_extra }) )
   | Tunion tyl ->
     let ((env, ty_err_opt, cycles), tyl) =
       list_map_env_err_cycles
@@ -695,6 +687,27 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               s_unknown_value = shape_kind;
               s_fields = tym;
             } ) )
+
+and localize_tuple_extra ~ety_env env e =
+  match e with
+  | Textra { t_optional; t_variadic } ->
+    let ((env, ty_err_opt1, cycles1), t_optional) =
+      list_map_env_err_cycles
+        env
+        t_optional
+        ~f:(localize ~ety_env)
+        ~combine_ty_errs:Typing_error.multiple_opt
+    in
+    let ((env, ty_err_opt2, cycles2), t_variadic) =
+      localize ~ety_env env t_variadic
+    in
+    let ty_err_opt =
+      Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
+    in
+    ((env, ty_err_opt, cycles1 @ cycles2), Textra { t_optional; t_variadic })
+  | Tsplat t_splat ->
+    let ((env, ty_err_opt, cycles), t_splat) = localize ~ety_env env t_splat in
+    ((env, ty_err_opt, cycles), Tsplat t_splat)
 
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_targs_by_kind

@@ -94,7 +94,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
       let args = List.map args ~f:of_decl_ty in
       Printf.sprintf "%s<%s>" name (String.concat ~sep:", " args))
   (* TODO akenn: open tuples *)
-  | Ttuple { t_required; t_optional = _; t_variadic = _ } ->
+  | Ttuple { t_required; t_extra = _ } ->
     let args = List.map t_required ~f:of_decl_ty in
     Printf.sprintf "(%s)" (String.concat ~sep:", " args)
   | Tshape { s_origin = _; s_fields = fields; s_unknown_value = kind } ->

@@ -268,7 +268,7 @@ and hint_ p env = function
       | None -> hint env (p, Hnothing)
       | Some t -> hint env t
     in
-    Ttuple { t_required; t_optional; t_variadic }
+    Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }
   | Hunion hl ->
     let tyl = List.map hl ~f:(hint env) in
     Tunion tyl

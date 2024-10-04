@@ -204,7 +204,10 @@ let matches_locl_ty ?(env = Env.empty) t ~scrut =
         >>= fun env -> aux_params patt_params [ty_key; ty_val] ~env)
     | (Option t, Ty.Toption ty) -> aux t ty ~env
     (* TODO optional and variadic fields T201398626 T201398652 *)
-    | (Tuple ts, Ty.(Ttuple { t_required; t_optional = []; t_variadic }))
+    | ( Tuple ts,
+        Ty.(
+          Ttuple
+            { t_required; t_extra = Textra { t_optional = []; t_variadic } }) )
       when Ty.is_nothing t_variadic ->
       aux_tuple ts t_required ~env
     (* -- Primitives & other base types ------------------------------------- *)

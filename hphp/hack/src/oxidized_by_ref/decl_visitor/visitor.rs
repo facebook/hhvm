@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28de4c79e3c088dc5b09d5cbe4dda467>>
+// @generated SignedSource<<a12f13d04a897c88a17ca85c59f7ccee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -142,6 +142,9 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_tuple_type(&mut self, p: &'a TupleType<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_tuple_extra(&mut self, p: &'a TupleExtra<'a>) {
         p.recurse(self.object())
     }
     fn visit_class_const_from(&mut self, p: &'a ClassConstFrom<'a>) {

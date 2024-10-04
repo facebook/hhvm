@@ -127,6 +127,18 @@ fn decl_shape_field_type<R: Reason>(
     }
 }
 
+impl<R: Reason> From<obr::typing_defs::TupleExtra<'_>> for ty::TupleExtra<R> {
+    fn from(x: obr::typing_defs::TupleExtra<'_>) -> Self {
+        use obr::typing_defs_core::TupleExtra;
+        match x {
+            TupleExtra::Textra { optional, variadic } => {
+                ty::TupleExtra::Textra(slice(optional), variadic.into())
+            }
+            TupleExtra::Tsplat(splat) => TupleExtra::Tsplat(splat).into(),
+        }
+    }
+}
+
 impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
     fn from(ty: &obr::typing_defs::Ty<'_>) -> Self {
         use obr::typing_defs_core;
@@ -146,15 +158,9 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Toption(ty) => Toption(ty.into()),
             typing_defs_core::Ty_::Tprim(prim) => Tprim(*prim),
             typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),
-            typing_defs_core::Ty_::Ttuple(&typing_defs_core::TupleType {
-                required,
-                optional,
-                variadic,
-            }) => Ttuple(Box::new(ty::TupleType(
-                slice(required),
-                slice(optional),
-                variadic.into(),
-            ))),
+            typing_defs_core::Ty_::Ttuple(&typing_defs_core::TupleType { required, extra }) => {
+                Ttuple(Box::new(ty::TupleType(slice(required), extra.into())))
+            }
             typing_defs_core::Ty_::Tshape(&typing_defs_core::ShapeType {
                 origin: _,
                 unknown_value: kind,

@@ -292,8 +292,14 @@ pub struct ShapeType<R: Reason>(pub Ty<R>, pub BTreeMap<TshapeFieldName, ShapeFi
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct TupleType<R: Reason>(pub Box<[Ty<R>]>, pub Box<[Ty<R>]>, pub Ty<R>);
+pub struct TupleType<R: Reason>(pub Box<[Ty<R>]>, pub TupleExtra<R>);
 
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
+pub enum TupleExtra<R: Reason> {
+    Tsplat(Ty<R>),
+    Textra(Box<[Ty<R>]>, Ty<R>),
+}
 walkable!(ShapeType<R> => [0, 1]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
@@ -406,10 +412,9 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
             Tfun(ft) => ft.accept(v),
             Tunion(tys) | Tintersection(tys) => tys.accept(v),
             Ttuple(tup) => {
-                let TupleType(required, optional, variadic) = &**tup;
+                let TupleType(required, extra) = &**tup;
                 required.accept(v);
-                optional.accept(v);
-                variadic.accept(v)
+                extra.accept(v)
             }
             Tshape(kind_and_fields) => {
                 let ShapeType(_, fields) = &**kind_and_fields;
@@ -426,6 +431,18 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
             }
             Taccess(tt) => tt.accept(v),
             Trefinement(tr) => tr.accept(v),
+        }
+    }
+}
+
+impl<R: Reason> crate::visitor::Walkable<R> for TupleExtra<R> {
+    fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
+        match self {
+            TupleExtra::Textra(optional, variadic) => {
+                optional.accept(v);
+                variadic.accept(v)
+            }
+            TupleExtra::Tsplat(splat) => splat.accept(v),
         }
     }
 }

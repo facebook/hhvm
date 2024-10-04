@@ -510,26 +510,38 @@ module Full = struct
     in
     (fuel, tfun_doc)
 
-  let ttuple ~fuel k t_required t_optional t_variadic =
-    let tuple_elem ~fuel (is_optional, is_variadic, ty) =
+  let ttuple ~fuel k t_required t_extra =
+    let tuple_elem ~fuel (is_optional, is_variadic, is_splat, ty) =
       let (fuel, doc) = k ~fuel ty in
       ( fuel,
         if is_optional then
           Concat [text "optional "; doc]
         else if is_variadic then
           Concat [doc; text "..."]
+        else if is_splat then
+          Concat [text "..."; doc]
         else
           doc )
     in
-    let required = List.map t_required ~f:(fun ty -> (false, false, ty)) in
-    let optional = List.map t_optional ~f:(fun ty -> (true, false, ty)) in
-    let variadic =
-      if Typing_defs.is_nothing t_variadic then
-        []
-      else
-        [(false, true, t_variadic)]
+    let extra =
+      match t_extra with
+      | Tsplat t_splat -> [(false, false, true, t_splat)]
+      | Textra { t_optional; t_variadic } ->
+        let optional =
+          List.map t_optional ~f:(fun ty -> (true, false, false, ty))
+        in
+        let variadic =
+          if Typing_defs.is_nothing t_variadic then
+            []
+          else
+            [(false, true, false, t_variadic)]
+        in
+        optional @ variadic
     in
-    list ~fuel "(" tuple_elem (required @ optional @ variadic) ")"
+    let required =
+      List.map t_required ~f:(fun ty -> (false, false, false, ty))
+    in
+    list ~fuel "(" tuple_elem (required @ extra) ")"
 
   let tshape ~fuel k to_doc penv s is_open_mixed =
     let { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } = s in
@@ -834,12 +846,19 @@ module Full = struct
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in
       (fuel, generic_doc)
-    | Ttuple { t_required; t_optional; t_variadic } ->
-      ttuple ~fuel k t_required t_optional t_variadic
+    | Ttuple { t_required; t_extra } -> ttuple ~fuel k t_required t_extra
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let (fuel, tys_doc) =
-        ttuple ~fuel k tyl [] (Typing_make_type.nothing Reason.none)
+        ttuple
+          ~fuel
+          k
+          tyl
+          (Textra
+             {
+               t_optional = [];
+               t_variadic = Typing_make_type.nothing Reason.none;
+             })
       in
       let union_doc = Concat [text "|"; tys_doc] in
       (fuel, union_doc)
@@ -1032,8 +1051,7 @@ module Full = struct
       (fuel, dependent_doc)
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Ttuple { t_required; t_optional; t_variadic } ->
-      ttuple ~fuel k t_required t_optional t_variadic
+    | Ttuple { t_required; t_extra } -> ttuple ~fuel k t_required t_extra
     | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl ->
       let tyl =
@@ -1540,13 +1558,16 @@ module ErrorString = struct
     | Tintersection [] -> (fuel, "a mixed value")
     | Tintersection l -> intersection ~fuel env l
     | Tvec_or_dict _ -> (fuel, "a vec_or_dict")
-    | Ttuple { t_required; t_optional; t_variadic } ->
+    | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
       ( fuel,
         (if List.is_empty t_optional && is_nothing t_variadic then
           "a tuple of size "
         else
           "a tuple of size at least ")
         ^ string_of_int (List.length t_required) )
+    | Ttuple { t_required; t_extra = Tsplat _ } ->
+      ( fuel,
+        "a tuple of size at least " ^ string_of_int (List.length t_required) )
     | Tnonnull -> (fuel, "a nonnull value")
     | Toption x ->
       let str =
@@ -1783,12 +1804,19 @@ module Json = struct
         | (p, Tvar _) -> obj @@ kind p "var"
         | _ -> from_type env ~show_like_ty ty
       end
-    | (p, Ttuple { t_required; t_optional = _; t_variadic }) ->
+    | (p, Ttuple { t_required; t_extra = Textra { t_optional = _; t_variadic } })
+      ->
       let fields_known = is_nothing t_variadic in
       obj
       @@ kind p "tuple"
       @ is_array false
       @ [("fields_known", JSON_Bool fields_known)]
+      @ args t_required
+    | (p, Ttuple { t_required; t_extra = Tsplat _ }) ->
+      obj
+      @@ kind p "tuple"
+      @ is_array false
+      @ [("fields_known", JSON_Bool false)]
       @ args t_required
     | (p, Tany _) -> obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
@@ -2074,7 +2102,12 @@ module Json = struct
             else
               Typing_make_type.mixed Reason.none
           in
-          ty (Ttuple { t_required = args; t_optional = []; t_variadic })
+          ty
+            (Ttuple
+               {
+                 t_required = args;
+                 t_extra = Textra { t_optional = []; t_variadic };
+               })
         | "nullable" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin

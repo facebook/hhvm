@@ -162,10 +162,13 @@ let validator =
                ( Typing_defs_core.get_reason ty,
                  "_ in a " ^ s ^ " (use `mixed` instead)" )))
 
-    method! on_ttuple acc _ { t_required; t_optional; t_variadic = _ } =
+    method! on_ttuple acc _ { t_required; t_extra } =
       let acc = List.fold_left t_required ~f:this#on_type ~init:acc in
-      let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
-      this#check_for_wildcards acc t_required "tuple"
+      match t_extra with
+      | Textra { t_optional; t_variadic = _ } ->
+        let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
+        this#check_for_wildcards acc t_required "tuple"
+      | Tsplat t_splat -> this#on_type acc t_splat
 
     method! on_tshape acc _ { s_fields = fdm; _ } =
       let tyl = TShapeMap.values fdm |> List.map ~f:(fun s -> s.sft_ty) in

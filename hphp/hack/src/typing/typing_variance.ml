@@ -370,10 +370,12 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tunion tyl
   | Tintersection tyl ->
     get_typarams_list tyl
-  | Ttuple { t_required; t_optional; t_variadic } ->
+  | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
     union
       (get_typarams_list t_optional)
       (union (get_typarams_list t_required) (get_typarams t_variadic))
+  | Ttuple { t_required; t_extra = Tsplat t_splat } ->
+    union (get_typarams_list t_required) (get_typarams t_splat)
   | Tshape { s_fields = m; _ } ->
     TShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)

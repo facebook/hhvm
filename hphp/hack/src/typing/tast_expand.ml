@@ -33,15 +33,19 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tunion tyl) -> mk (p, Tunion (exp_tys tyl))
       | (p, Tintersection tyl) -> mk (p, Tintersection (exp_tys tyl))
       | (p, Toption ty) -> mk (p, Toption (exp_ty ty))
-      | (p, Ttuple { t_required; t_optional; t_variadic }) ->
-        mk
-          ( p,
-            Ttuple
+      | (p, Ttuple { t_required; t_extra }) ->
+        let t_required = exp_tys t_required in
+        let t_extra =
+          match t_extra with
+          | Textra { t_optional; t_variadic } ->
+            Textra
               {
-                t_required = exp_tys t_required;
                 t_optional = exp_tys t_optional;
                 t_variadic = exp_ty t_variadic;
-              } )
+              }
+          | Tsplat t_splat -> Tsplat (exp_ty t_splat)
+        in
+        mk (p, Ttuple { t_required = exp_tys t_required; t_extra })
       | (p, Tfun ft) -> mk (p, Tfun (exp_fun_type ft))
       | (p, Tnewtype (n, tyl, ty)) ->
         mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))

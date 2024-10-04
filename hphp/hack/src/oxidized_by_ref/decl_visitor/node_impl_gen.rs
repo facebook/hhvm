@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<539591eb5be5fa759c78f4e57e0645f6>>
+// @generated SignedSource<<e9dc8d84abe0c00b2101757aaf332cfd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -838,17 +838,32 @@ impl<'a> Node<'a> for TupleType<'a> {
         match self {
             TupleType {
                 required: ref __binding_0,
-                optional: ref __binding_1,
-                variadic: ref __binding_2,
+                extra: ref __binding_1,
             } => {
                 {
                     __binding_0.accept(v)
                 }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
+                { __binding_1.accept(v) }
             }
+        }
+    }
+}
+impl<'a> Node<'a> for TupleExtra<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tuple_extra(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TupleExtra::Textra {
+                optional: ref __binding_0,
+                variadic: ref __binding_1,
+            } => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+            TupleExtra::Tsplat(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

@@ -46,6 +46,8 @@ class type ['a] decl_type_visitor_type =
     method on_tapply :
       'a -> decl_phase Reason.t_ -> pos_id -> decl_ty list -> 'a
 
+    method on_tuple_extra : 'a -> decl_phase tuple_extra -> 'a
+
     method on_ttuple : 'a -> decl_phase Reason.t_ -> decl_phase tuple_type -> 'a
 
     method on_tunion : 'a -> decl_phase Reason.t_ -> decl_ty list -> 'a
@@ -141,10 +143,16 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_taccess acc _ (root, _ids) = this#on_type acc root
 
-    method on_ttuple acc _ { t_variadic; t_optional; t_required } =
-      let acc = this#on_type acc t_variadic in
-      let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
+    method on_ttuple acc _ { t_required; t_extra } =
+      let acc = this#on_tuple_extra acc t_extra in
       List.fold_left t_required ~f:this#on_type ~init:acc
+
+    method on_tuple_extra acc e =
+      match e with
+      | Tsplat t_splat -> this#on_type acc t_splat
+      | Textra { t_optional; t_variadic } ->
+        let acc = this#on_type acc t_variadic in
+        List.fold_left t_optional ~f:this#on_type ~init:acc
 
     method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
@@ -205,6 +213,8 @@ class type ['a] locl_type_visitor_type =
       'a -> Reason.t -> string -> locl_ty list -> locl_ty -> 'a
 
     method on_tdependent : 'a -> Reason.t -> dependent_type -> locl_ty -> 'a
+
+    method on_tuple_extra : 'a -> locl_phase tuple_extra -> 'a
 
     method on_ttuple : 'a -> Reason.t -> locl_phase tuple_type -> 'a
 
@@ -279,10 +289,16 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       let acc = this#on_type acc ty in
       acc
 
-    method on_ttuple acc _ { t_variadic; t_optional; t_required } =
-      let acc = this#on_type acc t_variadic in
-      let acc = List.fold_left t_optional ~f:this#on_type ~init:acc in
+    method on_ttuple acc _ { t_required; t_extra } =
+      let acc = this#on_tuple_extra acc t_extra in
       List.fold_left t_required ~f:this#on_type ~init:acc
+
+    method on_tuple_extra acc e =
+      match e with
+      | Tsplat t_splat -> this#on_type acc t_splat
+      | Textra { t_optional; t_variadic } ->
+        let acc = this#on_type acc t_variadic in
+        List.fold_left t_optional ~f:this#on_type ~init:acc
 
     method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 

@@ -226,13 +226,19 @@ and refresh_type renv v ty_orig =
     in
     let (renv, ft_ret, changed') = refresh_type renv v ft.ft_ret in
     (renv, mk (r, Tfun { ft with ft_params; ft_ret }), changed || changed')
-  | (r, Ttuple { t_required; t_optional; t_variadic }) ->
+  | (r, Ttuple { t_required; t_extra }) ->
     let (renv, t_required, changed) = refresh_types renv v t_required in
-    let (renv, t_optional, changed') = refresh_types renv v t_optional in
-    let (renv, t_variadic, changed'') = refresh_type renv v t_variadic in
-    ( renv,
-      mk (r, Ttuple { t_required; t_optional; t_variadic }),
-      changed || changed' || changed'' )
+    let (renv, t_extra, changed') =
+      match t_extra with
+      | Textra { t_optional; t_variadic } ->
+        let (renv, t_optional, changed) = refresh_types renv v t_optional in
+        let (renv, t_variadic, changed') = refresh_type renv v t_variadic in
+        (renv, Textra { t_optional; t_variadic }, changed || changed')
+      | Tsplat t_splat ->
+        let (renv, t_splat, changed) = refresh_type renv v t_splat in
+        (renv, Tsplat t_splat, changed)
+    in
+    (renv, mk (r, Ttuple { t_required; t_extra }), changed || changed')
   | (r, Tshape { s_origin = _; s_unknown_value = sk; s_fields = sm }) ->
     let (renv, sm, ch) =
       TShapeMap.fold

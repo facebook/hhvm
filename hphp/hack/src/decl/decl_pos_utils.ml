@@ -44,12 +44,11 @@ struct
     | Tvec_or_dict (ty1, ty2) -> Tvec_or_dict (ty ty1, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric (name, args) -> Tgeneric (name, List.map args ~f:ty)
-    | Ttuple { t_required; t_optional; t_variadic } ->
+    | Ttuple { t_required; t_extra } ->
       Ttuple
         {
           t_required = List.map t_required ~f:ty;
-          t_optional = List.map t_optional ~f:ty;
-          t_variadic = ty t_variadic;
+          t_extra = tuple_extra t_extra;
         }
     | Tunion tyl -> Tunion (List.map tyl ~f:ty)
     | Tintersection tyl -> Tintersection (List.map tyl ~f:ty)
@@ -62,6 +61,13 @@ struct
       let rs = Class_refinement.map ty rs in
       Trefinement (ty root_ty, rs)
     | Tshape s -> Tshape (shape_type s)
+
+  and tuple_extra e =
+    match e with
+    | Tsplat t_splat -> Tsplat (ty t_splat)
+    | Textra { t_optional; t_variadic } ->
+      Textra
+        { t_optional = List.map t_optional ~f:ty; t_variadic = ty t_variadic }
 
   and ty_opt x = Option.map x ~f:ty
 

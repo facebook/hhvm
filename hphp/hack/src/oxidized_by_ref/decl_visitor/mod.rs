@@ -66,11 +66,13 @@ mod test {
                         Tapply(a!(((pos(5), "bar"), &[][..]))),
                     )),
                 ])),
-                optional: &[],
-                variadic: a!(Ty(
-                    a!(Reason::FromWitnessDecl(a!(WitnessDecl::Hint(pos(1))))),
-                    Ty_::Tunion(&[])
-                )),
+                extra: TupleExtra::Textra {
+                    optional: &[],
+                    variadic: a!(Ty(
+                        a!(Reason::FromWitnessDecl(a!(WitnessDecl::Hint(pos(1))))),
+                        Ty_::Tunion(&[])
+                    ))
+                },
             })),
         ));
 

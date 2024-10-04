@@ -221,9 +221,14 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
   (* Only error if there isn't a type that it could be that's primitive *)
   | Tunion tyl -> List.exists tyl ~f:(is_safe_mut_ty env seen)
   (* See comment about open shapes *)
-  | Ttuple { t_required; t_optional; t_variadic = _ } ->
+  | Ttuple { t_required; t_extra } ->
     List.for_all t_required ~f:(is_safe_mut_ty env seen)
-    && List.for_all t_optional ~f:(is_safe_mut_ty env seen)
+    && begin
+         match t_extra with
+         | Textra { t_optional; t_variadic = _ } ->
+           List.for_all t_optional ~f:(is_safe_mut_ty env seen)
+         | Tsplat t_splat -> is_safe_mut_ty env seen t_splat
+       end
   | Tdependent (_, upper) ->
     (* check upper bounds *)
     is_safe_mut_ty env seen upper

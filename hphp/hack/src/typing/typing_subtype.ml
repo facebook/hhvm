@@ -1970,8 +1970,12 @@ end = struct
             Ttuple
               {
                 t_required = List.rev acc_required;
-                t_optional = List.rev acc_optional;
-                t_variadic = acc_variadic;
+                t_extra =
+                  Textra
+                    {
+                      t_optional = List.rev acc_optional;
+                      t_variadic = acc_variadic;
+                    };
               } )
       | ({ fp_type; fp_pos; _ } as fn_param) :: fn_params ->
         let acc_pos =
@@ -4173,7 +4177,8 @@ end = struct
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             in
             param_props env &&& ret_prop
-        | (_, Ttuple { t_required; t_optional; t_variadic }) ->
+        | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
+          ->
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res ty_sub ->
@@ -4185,6 +4190,8 @@ end = struct
                     ~rhs:
                       { super_like = false; super_supportdyn = false; ty_super })
             ((t_variadic :: t_optional) @ t_required)
+        (* TODO splats in tuples *)
+        | (_, Ttuple { t_extra = Tsplat _; _ }) -> invalid env ~fail
         | ( _,
             Tshape
               {
@@ -4497,15 +4504,20 @@ end = struct
           Ttuple
             {
               t_required = t_required_sub;
-              t_optional = t_optional_sub;
-              t_variadic = t_variadic_sub;
+              t_extra =
+                Textra
+                  { t_optional = t_optional_sub; t_variadic = t_variadic_sub };
             } ),
         ( _,
           Ttuple
             {
               t_required = t_required_super;
-              t_optional = t_optional_super;
-              t_variadic = t_variadic_super;
+              t_extra =
+                Textra
+                  {
+                    t_optional = t_optional_super;
+                    t_variadic = t_variadic_super;
+                  };
             } ) ) ->
       (* Subtype should have at least as many required elements as supertype *)
       if List.length t_required_sub < List.length t_required_super then

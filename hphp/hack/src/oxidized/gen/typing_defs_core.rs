@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bab3138fe514dc1b865365f29d47a91d>>
+// @generated SignedSource<<c87dd883ca3ddf67c77d4784646839d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -967,10 +967,15 @@ pub struct ShapeType {
     pub fields: t_shape_map::TShapeMap<ShapeFieldType>,
 }
 
-/// Required, optional and variadic components of a tuple. For example
+/// Required and extra components of a tuple. Extra components
+/// are either optional + variadic, or a type splat.
+/// Exmaple 1:
 /// (string,bool,optional float,optional bool,int...)
 /// has require components string, bool, optional components float, bool
 /// and variadic component int.
+/// Example 2:
+/// (string,float,...T)
+/// has required components string, float, and splat component T.
 #[derive(
     Clone,
     Debug,
@@ -992,8 +997,34 @@ pub struct ShapeType {
 #[repr(C)]
 pub struct TupleType {
     pub required: Vec<Ty>,
-    pub optional: Vec<Ty>,
-    pub variadic: Ty,
+    pub extra: TupleExtra,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "deriving hash")]
+#[repr(C, u8)]
+pub enum TupleExtra {
+    #[rust_to_ocaml(prefix = "t_")]
+    Textra {
+        optional: Vec<Ty>,
+        variadic: Ty,
+    },
+    Tsplat(Ty),
 }
 
 #[derive(

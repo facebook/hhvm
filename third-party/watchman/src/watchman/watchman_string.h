@@ -559,7 +559,7 @@ struct formatter<w_string> {
 
   template <typename FormatContext>
   auto format(const w_string& s, FormatContext& ctx) const {
-    return format_to(ctx.out(), "{}", s.view());
+    return fmt::format_to(ctx.out(), "{}", s.view());
   }
 };
 
@@ -572,7 +572,7 @@ struct formatter<w_string_piece> {
 
   template <typename FormatContext>
   auto format(const w_string_piece& s, FormatContext& ctx) const {
-    return format_to(ctx.out(), "{}", s.view());
+    return fmt::format_to(ctx.out(), "{}", s.view());
   }
 };
 } // namespace fmt

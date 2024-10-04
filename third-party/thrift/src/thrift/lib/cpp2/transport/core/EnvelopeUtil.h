@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/Optional.h>
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>

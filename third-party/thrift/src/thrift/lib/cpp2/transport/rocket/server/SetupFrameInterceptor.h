@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
+#include <thrift/lib/cpp2/server/LoggingEvent.h>
 
 namespace apache {
 namespace thrift {

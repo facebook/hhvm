@@ -220,8 +220,6 @@ and Definition : sig
 
   val show : t -> string
 
-  val function_ : name:string -> ret:Type.t -> ret_expr:string -> t
-
   val typeconst : name:string -> Type.t -> t
 
   val classish :
@@ -243,13 +241,6 @@ end = struct
   type t = string
 
   let show def = def
-
-  let function_ ~name ~ret ~ret_expr =
-    Format.sprintf
-      "function %s(): %s { return %s; }"
-      name
-      (Type.show ret)
-      ret_expr
 
   let typeconst ~name aliased =
     Format.sprintf "const type %s = %s;" name (Type.show aliased)
@@ -371,7 +362,7 @@ end = struct
       }
     | Newtype of {
         name: string;
-        producer: string;
+        aliased: t;
       }
     | TypeConst of {
         name: string;
@@ -424,7 +415,6 @@ end = struct
         false
       | Kind.Class -> true
     end
-    | Newtype _ -> true
     | Enum _ -> true
     | Vec _ -> true
     | Dict _ -> true
@@ -439,6 +429,7 @@ end = struct
     | Mixed
     | Option _
     | Alias _
+    | Newtype _
     | TypeConst _
     | Case _ ->
       false
@@ -502,7 +493,7 @@ end = struct
             | Classish _ -> []
             | Alias info -> subtypes_of info.aliased
             | TypeConst info -> subtypes_of info.aliased
-            | Newtype _ -> []
+            | Newtype info -> subtypes_of info.aliased
             | Case info -> List.concat_map ~f:subtypes_of info.disjuncts
             | Enum _ -> []
             | Vec ty ->
@@ -741,7 +732,6 @@ end = struct
         in
         Some (Format.sprintf "new %s%s()" info.name generic)
     end
-    | Newtype info -> Some (info.producer ^ "()")
     | Enum info -> Some (info.name ^ "::A")
     | Vec _ -> Some "vec[]"
     | Dict _ -> Some "dict[]"
@@ -795,6 +785,7 @@ end = struct
     | Mixed
     | Option _
     | Alias _
+    | Newtype _
     | TypeConst _
     | Case _ ->
       None
@@ -924,7 +915,6 @@ end = struct
       (env, Alias { name; aliased })
     | Kind.Newtype ->
       let name = fresh "N" in
-      let producer = fresh ("mk" ^ name) in
       let mk = mk ~for_alias:true in
       let (env, aliased, bound) =
         if Random.bool () then
@@ -939,12 +929,7 @@ end = struct
         Environment.add_definition env
         @@ Definition.newtype ~name ~bound aliased
       in
-      let aliased_expr = inhabitant_of env aliased in
-      let ty = Newtype { name; producer } in
-      let env =
-        Environment.add_definition env
-        @@ Definition.function_ ~name:producer ~ret:ty ~ret_expr:aliased_expr
-      in
+      let ty = Newtype { name; aliased } in
       (env, ty)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in

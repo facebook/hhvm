@@ -234,7 +234,7 @@ and Definition : sig
 
   val newtype : name:string -> bound:Type.t option -> Type.t -> t
 
-  val case_type : name:string -> Type.t list -> t
+  val case_type : name:string -> bound:Type.t option -> Type.t list -> t
 
   val enum : name:string -> bound:Type.t option -> Type.t -> value:string -> t
 end = struct
@@ -305,9 +305,12 @@ end = struct
         (Type.show aliased)
     | None -> Format.sprintf "newtype %s = %s;" name (Type.show aliased)
 
-  let case_type ~name disjuncts =
+  let case_type ~name ~bound disjuncts =
     let rhs = String.concat ~sep:" | " (List.map ~f:Type.show disjuncts) in
-    Format.sprintf "case type %s = %s;" name rhs
+    match bound with
+    | Some bound ->
+      Format.sprintf "case type %s as %s = %s;" name (Type.show bound) rhs
+    | None -> Format.sprintf "case type %s = %s;" name rhs
 
   let enum ~name ~bound ty ~value =
     match bound with
@@ -949,7 +952,20 @@ end = struct
       (env, TypeConst { name = qualified_name; aliased })
     | Kind.Case ->
       let name = fresh "CT" in
-      let mk = mk ~for_alias:true in
+      let (env, bound) =
+        if Random.bool () then
+          let (env, bound) = mk env in
+          (env, Some bound)
+        else
+          (env, None)
+      in
+      let mk env =
+        match bound with
+        | Some bound ->
+          let ty = subtypes_of env bound ~pick:true |> List.hd_exn in
+          (env, ty)
+        | None -> mk env ~for_alias:true
+      in
       let rec add_disjuncts (env, disjuncts) =
         if Random.bool () then
           let (env, disjunct) = mk env in
@@ -963,7 +979,8 @@ end = struct
       let (env, ty) = mk env in
       let (env, disjuncts) = add_disjuncts (env, [ty]) in
       let env =
-        Environment.add_definition env @@ Definition.case_type ~name disjuncts
+        Environment.add_definition env
+        @@ Definition.case_type ~name ~bound disjuncts
       in
       (env, Case { name; disjuncts })
     | Kind.Enum ->

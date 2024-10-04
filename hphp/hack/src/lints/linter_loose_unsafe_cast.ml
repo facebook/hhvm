@@ -43,7 +43,9 @@ let handler =
       | (_, _, Aast.Hole ((exp_ty, hole_pos, _), src_ty, _, Aast.UnsafeCast _))
         when is_mixed src_ty && (not (is_mixed exp_ty)) && T.is_denotable exp_ty
         ->
-        let ty_str = Typing_print.debug ~hide_internals:true env exp_ty in
+        let ty_str =
+          Typing_print.full_strip_ns ~hide_internals:true env exp_ty
+        in
         let ty_str_opt =
           if String.length ty_str <= 20 then
             Some ty_str

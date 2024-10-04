@@ -174,7 +174,7 @@ module Log = struct
         :: Typing_env.Log.expand_env env ety_env)
       ~result:(fun ((env, _, _), ty) ->
         let (env, ty) = Typing_env.expand_type env ty in
-        Some (Typing_print.debug ~hide_internals:false env ty))
+        Some (Typing_print.debug env ty))
 
   let should_log_check_tparams_constraints env =
     Typing_log.should_log env ~category:"generics" ~level:1
@@ -185,8 +185,8 @@ module Log = struct
       ~function_name:"Typing_phase.check_tparams_constraints"
       ~arguments:
         [
-          ("cstr_ty", Typing_print.debug ~hide_internals:false env cstr_ty);
-          ("ty", Typing_print.debug ~hide_internals:false env ty);
+          ("cstr_ty", Typing_print.debug env cstr_ty);
+          ("ty", Typing_print.debug env ty);
         ]
       ~result:(fun (_env, err) ->
         Some (Printf.sprintf "%d error(s)" (List.length err)))

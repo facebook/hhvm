@@ -69,9 +69,8 @@ module Log = struct
       ~function_name:(Printf.sprintf "Typing.check_expected_ty_res %s" message)
       ~arguments:
         [
-          ( "inferred_ty",
-            Typing_print.debug ~hide_internals:false env inferred_ty );
-          ("expected_ty", Typing_print.debug ~hide_internals:false env ty);
+          ("inferred_ty", Typing_print.debug env inferred_ty);
+          ("expected_ty", Typing_print.debug env ty);
         ]
       ~result:(function
         | Ok _ -> Some "ok"
@@ -2347,15 +2346,13 @@ end = struct
         | None -> ("", [])
         | Some ExpectedTy.{ reason = r; ty; _ } ->
           ( " " ^ Reason.string_of_ureason r,
-            [("expected_ty", Typing_print.debug ~hide_internals:false env ty)]
-          )
+            [("expected_ty", Typing_print.debug env ty)] )
       in
       Typing_log.log_function
         (Pos_or_decl.of_raw_pos p)
         ~function_name:("Typing.expr " ^ ureason_string)
         ~arguments:(("ctxt", Context.show ctxt) :: expected_ty_log)
-        ~result:(fun (env, _expr, ty) ->
-          Some (Typing_print.debug ~hide_internals:false env ty))
+        ~result:(fun (env, _expr, ty) -> Some (Typing_print.debug env ty))
   end
 
   (* Compute an expected type for a labmda that is being called with the

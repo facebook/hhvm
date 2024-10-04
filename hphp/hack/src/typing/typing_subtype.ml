@@ -485,18 +485,18 @@ module Logging = struct
       ~function_name
       ~arguments:
         [
-          ("ty_sub", Typing_print.debug_i ~hide_internals:false env ty_sub);
-          ("ty_super", Typing_print.debug_i ~hide_internals:false env ty_super);
+          ("ty_sub", Typing_print.debug_i env ty_sub);
+          ("ty_super", Typing_print.debug_i env ty_super);
           ( "this_ty",
             match this_ty with
             | None -> "None"
-            | Some ty -> Typing_print.debug ~hide_internals:false env ty );
+            | Some ty -> Typing_print.debug env ty );
         ]
       ~result
 
   let log_subtype_i_prop =
     log_subtype_i_ ~result:(fun (env, prop) ->
-        Some (TL.print (Typing_print.debug_i ~hide_internals:false env) prop))
+        Some (TL.print (Typing_print.debug_i env) prop))
 
   let log_subtype_prop env ty_sub ty_super =
     log_subtype_i_prop env (LoclType ty_sub) (LoclType ty_super)
@@ -8191,9 +8191,9 @@ end = struct
           ("non-singleton disjunction "
           ^ msg
           ^ " of "
-          ^ Typing_print.full_i ~hide_internals:false env ty_sub
+          ^ Typing_print.debug_i env ty_sub
           ^ " <: "
-          ^ Typing_print.full_i ~hide_internals:false env ty_super)
+          ^ Typing_print.debug_i env ty_super)
           env
           disj_prop
     in

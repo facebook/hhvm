@@ -51,8 +51,8 @@ module Log = struct
       ~function_name:"Typing_coercion.coerce_type"
       ~arguments:
         [
-          ("ty_expect", Typing_print.debug ~hide_internals:false env ty_expect);
-          ("ty_have", Typing_print.debug ~hide_internals:false env ty_have);
+          ("ty_expect", Typing_print.debug env ty_expect);
+          ("ty_have", Typing_print.debug env ty_have);
         ]
       ~result:(fun (_env, err_opt) ->
         Some

@@ -2853,17 +2853,11 @@ let full_with_identity ~hide_internals env x occurrence definition_opt =
 let full_decl ?(msg = true) tcopt ty =
   supply_fuel ~msg tcopt (Full.to_string_decl ty)
 
-let debug ~hide_internals env ty =
-  let f_str = full_strip_ns ~hide_internals env ty in
-  f_str
+let debug env ty = full_strip_ns ~hide_internals:false env ty
 
-let debug_decl env ty =
-  let f_str = full_strip_ns_decl ~verbose_fun:true env ty in
-  f_str
+let debug_decl env ty = full_strip_ns_decl ~verbose_fun:true env ty
 
-let debug_i ~hide_internals env ty =
-  let f_str = full_strip_ns_i ~hide_internals env ty in
-  f_str
+let debug_i env ty = full_strip_ns_i ~hide_internals:false env ty
 
 let class_ ctx c =
   supply_fuel (Provider_context.get_tcopt ctx) (PrintClass.class_type ctx c)
@@ -2898,7 +2892,7 @@ let coercion_direction cd =
   | CoerceToDynamic -> "to"
   | CoerceFromDynamic -> "from"
 
-let subtype_prop ~hide_internals env prop =
+let subtype_prop env prop =
   let rec subtype_prop = function
     | Conj [] -> "TRUE"
     | Conj ps ->
@@ -2906,14 +2900,9 @@ let subtype_prop ~hide_internals env prop =
     | Disj (_, []) -> "FALSE"
     | Disj (_, ps) ->
       "(" ^ String.concat ~sep:" || " (List.map ~f:subtype_prop ps) ^ ")"
-    | IsSubtype (None, ty1, ty2) ->
-      debug_i ~hide_internals env ty1 ^ " <: " ^ debug_i ~hide_internals env ty2
+    | IsSubtype (None, ty1, ty2) -> debug_i env ty1 ^ " <: " ^ debug_i env ty2
     | IsSubtype (Some cd, ty1, ty2) ->
-      debug_i ~hide_internals env ty1
-      ^ " "
-      ^ coercion_direction cd
-      ^ "~> "
-      ^ debug_i ~hide_internals env ty2
+      debug_i env ty1 ^ " " ^ coercion_direction cd ^ "~> " ^ debug_i env ty2
   in
   let p_str = subtype_prop prop in
   p_str

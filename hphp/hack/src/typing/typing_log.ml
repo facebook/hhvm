@@ -233,11 +233,8 @@ let rec log_value env value =
     else
       SMap.iter (log_key_value env "") m
   | Set s -> log_sset s
-  | Type ty ->
-    Pr.debug_i ~hide_internals:false env ty |> lprintf (Normal Green) "%s"
-  | SubtypeProp prop ->
-    Pr.subtype_prop ~hide_internals:false env prop
-    |> lprintf (Normal Green) "%s"
+  | Type ty -> Pr.debug_i env ty |> lprintf (Normal Green) "%s"
+  | SubtypeProp prop -> Pr.subtype_prop env prop |> lprintf (Normal Green) "%s"
 
 and log_key_value env prefix k v =
   if is_leaf_value v then (
@@ -295,7 +292,7 @@ and log_key_delta env k d =
     with_indent @@ fun () -> log_delta env d
   )
 
-let type_as_value env ty = Atom (Pr.debug ~hide_internals:false env ty)
+let type_as_value env ty = Atom (Pr.debug env ty)
 
 let decl_type_as_value env ty = Atom (Pr.debug_decl env ty)
 
@@ -322,11 +319,7 @@ let reify_kind_as_value k =
     | Aast.Reified -> "reified")
 
 let tyset_as_value env tys =
-  Set
-    (TySet.fold
-       (fun t s -> SSet.add (Pr.debug ~hide_internals:false env t) s)
-       tys
-       SSet.empty)
+  Set (TySet.fold (fun t s -> SSet.add (Pr.debug env t) s) tys SSet.empty)
 
 let rec tparam_info_as_value env tpinfo =
   let Typing_kinding_defs.
@@ -403,13 +396,13 @@ let local_as_value
         else
           " (undefined)")
       ^ " : "
-      ^ Pr.debug ~hide_internals:false env ty
+      ^ Pr.debug env ty
       ^ ")"
   in
   Atom
     (Printf.sprintf
        "%s %s [expr_id=%s]"
-       (Pr.debug ~hide_internals:false env ty)
+       (Pr.debug env ty)
        bound
        (Expression_id.debug eid))
 
@@ -485,10 +478,7 @@ let log_with_level env category ~level log_f =
 
 let log_subtype_prop env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
-  lprintf
-    (Tty.Normal Tty.Green)
-    "%s"
-    (Pr.subtype_prop ~hide_internals:false env prop);
+  lprintf (Tty.Normal Tty.Green) "%s" (Pr.subtype_prop env prop);
   lnewline ()
 
 let fun_kind_to_string k =
@@ -513,11 +503,11 @@ let lenv_as_value env lenv =
     ]
 
 let param_as_value env (ty, _pos, ty_opt) =
-  let ty_str = Pr.debug ~hide_internals:false env ty in
+  let ty_str = Pr.debug env ty in
   match ty_opt with
   | None -> Atom ty_str
   | Some ty2 ->
-    let ty2_str = Pr.debug ~hide_internals:false env ty2 in
+    let ty2_str = Pr.debug env ty2 in
     Atom (Printf.sprintf "%s inout %s" ty_str ty2_str)
 
 let genv_as_value env genv =
@@ -668,7 +658,7 @@ let hh_show_full_env p env =
 (* Log the type of an expression *)
 let hh_show p env ty =
   log_with_level env "show" ~level:0 @@ fun () ->
-  let s1 = Pr.debug ~hide_internals:true env ty in
+  let s1 = Pr.full_strip_ns ~hide_internals:true env ty in
   let s2 = Pr.constraints_for_type ~hide_internals:false env ty in
   log_position p (fun () ->
       lprintf (Normal Green) "%s" s1;
@@ -695,11 +685,11 @@ let log_types p env items =
             | Log_head (message, items) ->
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
             | Log_type (message, ty) ->
-              print_key_value (message, Pr.debug ~hide_internals:false env ty)
+              print_key_value (message, Pr.debug env ty)
             | Log_decl_type (message, ty) ->
               print_key_value (message, Pr.debug_decl env ty)
             | Log_type_i (message, ty) ->
-              print_key_value (message, Pr.debug_i ~hide_internals:false env ty))
+              print_key_value (message, Pr.debug_i env ty))
       in
       go items)
 

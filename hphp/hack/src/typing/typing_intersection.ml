@@ -28,12 +28,12 @@ module Log = struct
       ~function_name:"Typing_intersection.intersect"
       ~arguments:
         [
-          ("ty1", Typing_print.debug ~hide_internals:false env ty1);
-          ("ty2", Typing_print.debug ~hide_internals:false env ty2);
+          ("ty1", Typing_print.debug env ty1);
+          ("ty2", Typing_print.debug env ty2);
         ]
       ~result:(fun (env, ty) ->
         let (env, ty) = Typing_env.expand_type env ty in
-        Some (Typing_print.debug ~hide_internals:false env ty))
+        Some (Typing_print.debug env ty))
 end
 
 module TrackedOperation = struct

@@ -53,11 +53,13 @@ val full_with_identity :
   'b SymbolDefinition.t option ->
   string
 
-val debug : hide_internals:bool -> env -> Typing_defs.locl_ty -> string
+(** Print a locl_type to a string, stripping namespaces, including exact annotations and type variable numbering *)
+val debug : env -> Typing_defs.locl_ty -> string
 
 val debug_decl : env -> Typing_defs.decl_ty -> string
 
-val debug_i : hide_internals:bool -> env -> Typing_defs.internal_type -> string
+(** Print an internal type to a string, stripping namespaces, including exact annotations and type variable numbering *)
+val debug_i : env -> Typing_defs.internal_type -> string
 
 val class_ : Provider_context.t -> Decl_provider.class_decl -> string
 
@@ -72,8 +74,8 @@ val constraints_for_type :
 
 val classish_kind : Ast_defs.classish_kind -> bool -> string
 
-val subtype_prop :
-  hide_internals:bool -> env -> Typing_logic.subtype_prop -> string
+(** Print a suptype proposition, stripping namespaces, including exact annotations and type variable numbering *)
+val subtype_prop : env -> Typing_logic.subtype_prop -> string
 
 val coeffects : env -> Typing_defs.locl_ty -> string
 

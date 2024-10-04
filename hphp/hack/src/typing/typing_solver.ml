@@ -29,9 +29,7 @@ let log_remaining_prop env =
       Typing_inference_env.get_nongraph_subtype_prop env.inference_env
     in
     (if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
-      let p_as_string =
-        Typing_print.subtype_prop ~hide_internals:false env prop
-      in
+      let p_as_string = Typing_print.subtype_prop env prop in
       let pos = Pos.string (Pos.to_absolute env.genv.callable_pos) in
       let size = TL.size prop in
       let n_disj = TL.n_disj prop in

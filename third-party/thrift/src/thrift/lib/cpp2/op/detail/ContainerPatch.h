@@ -28,10 +28,7 @@
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 // Replace with `std::views::single` in C++20
 template <class T>
@@ -477,7 +474,4 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   std::vector<VP> dummy_;
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

@@ -27,8 +27,7 @@
 
 THRIFT_FLAG_DECLARE_int64(raw_client_rocket_upgrade_timeout_ms);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class TransportUpgradeService
     : public apache::thrift::ServiceHandler<TransportUpgrade> {
@@ -272,5 +271,4 @@ TEST_F(TransportUpgradeTest, Fibers) {
             }).getVia(&evb));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

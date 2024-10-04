@@ -20,9 +20,8 @@
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 #define THRIFT_SCHEMA_AVAILABLE
-namespace apache {
-namespace thrift {
-namespace schema {
+
+namespace apache::thrift::schema {
 struct DefinitionsSchema {
   // Which definitions are of interest (e.g. the root service).
   // Thrift-generated handlers only have a single entry in this vector,
@@ -31,7 +30,6 @@ struct DefinitionsSchema {
   // The schema to look those definitions up in.
   type::Schema schema;
 };
-} // namespace schema
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::schema
+
 #endif

@@ -19,9 +19,7 @@
 // NOTE: link_whole is enabled for this file, all symbols won't be dropped from
 // the binary. Please keep it as small as possible.
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 namespace {
 [[maybe_unused]] const auto registerPrimitiveTypes = [] {
   auto registry = [](auto tag) {
@@ -44,6 +42,4 @@ namespace {
   return 0;
 }();
 } // namespace
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

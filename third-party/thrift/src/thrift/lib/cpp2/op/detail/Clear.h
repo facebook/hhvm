@@ -33,10 +33,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 // Gets a (potentally const&) value representing the default.
 //
@@ -443,7 +440,4 @@ struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
   }
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

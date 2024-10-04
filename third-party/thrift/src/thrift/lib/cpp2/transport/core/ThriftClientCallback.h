@@ -26,8 +26,7 @@
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Callback object for a single response RPC.
@@ -95,5 +94,4 @@ class ThriftClientCallback final : public folly::HHWheelTimer::Callback {
   clock::time_point timeEndSend_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

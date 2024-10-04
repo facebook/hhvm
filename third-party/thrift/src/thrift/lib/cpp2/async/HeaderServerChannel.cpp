@@ -31,8 +31,7 @@ using namespace apache::thrift::transport;
 using apache::thrift::protocol::PROTOCOL_TYPES;
 using apache::thrift::server::TServerObserver;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::atomic<uint32_t> HeaderServerChannel::sample_(0);
 
@@ -456,5 +455,4 @@ void HeaderServerChannel::setCallback(ResponseChannel::Callback* callback) {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

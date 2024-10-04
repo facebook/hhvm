@@ -27,8 +27,7 @@
 
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-namespace facebook {
-namespace thrift {
+namespace facebook::thrift {
 
 /**
  * Compares two objects for difference of underlying Thrift data,
@@ -142,7 +141,6 @@ debug_output_callback<Output> make_debug_output_callback(
   return debug_output_callback<Output>(output, lhs, rhs);
 }
 
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/detail/debug-inl-post.h>

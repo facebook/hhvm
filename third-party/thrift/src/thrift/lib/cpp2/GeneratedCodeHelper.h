@@ -51,8 +51,7 @@
 #include <thrift/lib/cpp2/util/Frozen2ViewHelpers.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class BinaryProtocolReader;
 class CompactProtocolReader;
@@ -350,8 +349,8 @@ class Cpp2Ops<ThriftPresult<hasIsSet, Args...>> {
 };
 
 // Forward declaration
-namespace detail {
-namespace ap {
+
+namespace detail::ap {
 
 template <
     ErrorBlame Blame,
@@ -399,12 +398,11 @@ struct EmptyExMapType {
   }
 };
 
-} // namespace ap
-} // namespace detail
+} // namespace detail::ap
 
 //  AsyncClient helpers
-namespace detail {
-namespace ac {
+
+namespace detail::ac {
 
 template <bool HasReturnType, typename PResult>
 folly::exception_wrapper extract_exn(PResult& result) {
@@ -708,12 +706,11 @@ decltype(auto) withProtocolWriter(
       throw_app_exn("Could not find Protocol");
   }
 }
-} // namespace ac
-} // namespace detail
+} // namespace detail::ac
 
 //  AsyncProcessor helpers
-namespace detail {
-namespace ap {
+
+namespace detail::ap {
 
 //  Everything templated on only protocol goes here. The corresponding .cpp file
 //  explicitly instantiates this struct for each supported protocol.
@@ -1589,12 +1586,11 @@ apache::thrift::detail::SinkConsumerImpl toSinkConsumerImpl(
 #endif
 }
 
-} // namespace ap
-} // namespace detail
+} // namespace detail::ap
 
 //  ServerInterface helpers
-namespace detail {
-namespace si {
+
+namespace detail::si {
 template <typename T>
 folly::Future<T> future(
     folly::SemiFuture<T>&& future, folly::Executor::KeepAlive<> keepAlive) {
@@ -1767,8 +1763,7 @@ class UnimplementedCoroMethod : public std::exception {
 template <typename... Ignore>
 void ignore(Ignore&&...) {}
 
-} // namespace si
-} // namespace detail
+} // namespace detail::si
 
 namespace util {
 
@@ -1868,5 +1863,4 @@ bool includeInRecentRequestsCount(const std::string_view methodName);
 
 } // namespace util
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -39,30 +39,21 @@
   }                                              \
   }
 
-namespace apache {
-namespace thrift {
-namespace frozen {
-namespace schema {
+namespace apache::thrift::frozen::schema {
 
 class MemoryField;
 class MemoryLayoutBase;
 class MemoryLayout;
 class MemorySchema;
 
-} // namespace schema
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen::schema
 
 THRIFT_DECLARE_HASH(apache::thrift::frozen::schema::MemoryField)
 THRIFT_DECLARE_HASH(apache::thrift::frozen::schema::MemoryLayoutBase)
 THRIFT_DECLARE_HASH(apache::thrift::frozen::schema::MemoryLayout)
 THRIFT_DECLARE_HASH(apache::thrift::frozen::schema::MemorySchema)
 
-namespace apache {
-namespace thrift {
-namespace frozen {
-namespace schema {
+namespace apache::thrift::frozen::schema {
 
 // Trivially copyable, hashed bytewise.
 class MemoryField {
@@ -219,7 +210,4 @@ struct SchemaInfo {
 void convert(Schema&& schema, MemorySchema& memSchema);
 void convert(const MemorySchema& memSchema, Schema& schema);
 
-} // namespace schema
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen::schema

@@ -24,9 +24,7 @@
 #include <folly/experimental/channels/detail/AtomicQueue.h>
 #include <folly/lang/Assume.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 namespace twowaybridge_detail {
 
 template <typename T>
@@ -257,6 +255,4 @@ class TwoWayBridge {
   ServerAtomicQueue serverQueue_;
   std::atomic<int8_t> refCount_{1};
 };
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

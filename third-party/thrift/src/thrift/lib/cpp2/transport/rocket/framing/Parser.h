@@ -33,9 +33,7 @@
 
 THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 namespace detail {
 enum class ParserMode { STRATEGY, ALLOCATING };
@@ -90,8 +88,6 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
       allocatingParser_;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket
 
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser-inl.h>

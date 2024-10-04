@@ -39,9 +39,7 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -83,7 +81,7 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
 }
 
 std::string_view extract_module_path(std::string_view fully_qualified_name) {
-  size_t last_dot = fully_qualified_name.rfind(".");
+  size_t last_dot = fully_qualified_name.rfind('.');
   if (last_dot == std::string_view::npos) {
     return "";
   }
@@ -1178,7 +1176,7 @@ class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 
  protected:
   std::string to_python_string_literal(std::string val) const {
-    std::string quotes = "\"\"\"";
+    std::string quotes = R"(""")";
     boost::algorithm::replace_all(val, "\\", "\\\\");
     boost::algorithm::replace_all(val, "\"", "\\\"");
     return quotes + val + quotes;
@@ -1327,6 +1325,4 @@ THRIFT_REGISTER_GENERATOR(
     "      (backwards incompatible) changes and undefined behavior.\n"
     "      NEVER ENABLE THIS OPTION in production environments.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -32,10 +32,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 // named comparison functions, similar to c++20
 //
@@ -769,7 +766,4 @@ struct UnionEquality {
   }
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

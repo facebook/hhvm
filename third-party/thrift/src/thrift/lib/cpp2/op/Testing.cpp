@@ -18,9 +18,7 @@
 
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 using type::AnyRef;
 using type::AnyValue;
 using type::BaseType;
@@ -170,6 +168,4 @@ void MultiSerializer::checkAnyDblDec() const {
   checkAndResetAll();
 }
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

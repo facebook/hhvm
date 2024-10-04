@@ -26,8 +26,7 @@
 #include <fizz/protocol/Exporter.h>
 #include <fizz/server/AsyncFizzServer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // private class meant to encapsulate all the information that needs to be
 // preserved across sockets for the tls downgrade scenario
@@ -217,5 +216,4 @@ template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
     fizz::client::AsyncFizzClient* socket);
 template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
     fizz::server::AsyncFizzServer* socket);
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

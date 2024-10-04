@@ -25,9 +25,7 @@
 
 #include <folly/Demangle.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 struct expect_same {
   expect_same(const char* filename, std::size_t line)
@@ -58,8 +56,6 @@ struct expect_same {
 #define EXPECT_SAME \
   ::apache::thrift::detail::expect_same(__FILE__, __LINE__).check
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 #endif // THRIFT_FATAL_INTERNAL_TEST_HELPERS_H

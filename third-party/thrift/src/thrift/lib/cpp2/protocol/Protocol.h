@@ -49,8 +49,7 @@ FOLLY_GFLAGS_DECLARE_int32(thrift_protocol_max_depth);
  * use the VirtualReader / VitualWriter in VirtualProtocol.h
  */
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 class ProtocolBase {
@@ -398,7 +397,6 @@ struct StringTraits<std::unique_ptr<folly::IOBuf>> {
   }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif

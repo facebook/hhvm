@@ -39,9 +39,7 @@
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/sema_context.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 // Since we can not include `thrift/annotation/cpp.thrift`,
@@ -2897,6 +2895,4 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
 THRIFT_REGISTER_GENERATOR(mstch_cpp2, "cpp2", "");
 
 } // namespace
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

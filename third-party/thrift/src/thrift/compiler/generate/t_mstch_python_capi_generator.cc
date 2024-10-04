@@ -37,9 +37,7 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -735,6 +733,4 @@ THRIFT_REGISTER_GENERATOR(
     "Python Capi",
     "    include_prefix:  Use full include paths in generated files.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

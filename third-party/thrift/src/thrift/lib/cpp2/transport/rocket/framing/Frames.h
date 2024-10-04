@@ -32,9 +32,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class Serializer;
 
@@ -517,6 +515,4 @@ class ExtFrame {
 // All frame sizes (header size + payload size) are encoded in 3 bytes
 constexpr size_t kMaxFragmentedPayloadSize = 0xffffff - 512;
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

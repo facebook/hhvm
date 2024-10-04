@@ -18,9 +18,7 @@
 
 #include <folly/lang/Exception.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 using type::AnyValue;
 using type::Type;
 
@@ -37,6 +35,4 @@ void Serializer::checkType(const Type& actual, const Type& expected) {
   }
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

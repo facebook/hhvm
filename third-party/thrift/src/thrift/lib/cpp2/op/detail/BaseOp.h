@@ -21,10 +21,7 @@
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/detail/Runtime.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 using FieldId = type::FieldId;
 using Ptr = type::detail::Ptr;
 using Dyn = type::detail::Dyn;
@@ -105,7 +102,4 @@ struct BaseOp : type::detail::BaseErasedOp {
   }
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

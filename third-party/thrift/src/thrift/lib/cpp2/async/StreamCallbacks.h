@@ -32,8 +32,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct FirstResponsePayload {
   FirstResponsePayload(
@@ -395,5 +394,4 @@ struct SinkServerCallbackSendError {
 
 using SinkServerCallbackPtr =
     std::unique_ptr<SinkServerCallback, SinkServerCallbackSendError>;
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

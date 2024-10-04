@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/util/TestServerFactory.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename Interface>
 struct TestThriftServerFactory : public TestServerFactory {
@@ -78,5 +77,4 @@ struct TestThriftServerFactory : public TestServerFactory {
   uint32_t idleTimeoutMs_{0};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

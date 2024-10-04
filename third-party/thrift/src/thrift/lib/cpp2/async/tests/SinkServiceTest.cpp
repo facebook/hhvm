@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/async/tests/util/Util.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace apache::thrift::detail::test;
 
@@ -406,5 +405,4 @@ TEST_F(SinkServiceTest, DuplicateStreamIdThrows) {
       });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

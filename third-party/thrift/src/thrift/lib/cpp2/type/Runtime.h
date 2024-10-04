@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/cpp2/type/detail/Runtime.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // A light weight (pass-by-value), non-owning *const* reference to a runtime
 // Thrift value.
@@ -766,6 +764,4 @@ class DynMap<Ref> : public DynMap<ConstRef> {
   using Base::asRef;
 };
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

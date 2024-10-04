@@ -36,9 +36,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 namespace {
 std::unique_ptr<folly::IOBuf> trimBuffer(
@@ -960,6 +958,4 @@ ExtFrame::ExtFrame(
       readPayload(flags_.metadata(), cursor, std::move(underlyingBuffer));
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

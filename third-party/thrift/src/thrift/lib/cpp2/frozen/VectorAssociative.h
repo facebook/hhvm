@@ -22,9 +22,7 @@
 
 #include <thrift/lib/cpp2/frozen/Traits.h>
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 /*
  * Vector-backed associative types without support for lookup, strictly for
  * building large maps and sets with minimal memory. Uniqueness assumed.
@@ -97,9 +95,7 @@ class VectorAsHashMap : public VectorAsMap<K, V> {
   using VectorAsMap<K, V>::VectorAsMap;
 };
 
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen
 
 THRIFT_DECLARE_TRAIT_TEMPLATE(
     IsHashMap, apache::thrift::frozen::VectorAsHashMap)

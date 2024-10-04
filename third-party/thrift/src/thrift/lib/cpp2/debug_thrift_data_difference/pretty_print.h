@@ -29,8 +29,7 @@
 #include <thrift/lib/cpp2/debug_thrift_data_difference/detail/pretty_print-inl-pre.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-namespace facebook {
-namespace thrift {
+namespace facebook::thrift {
 
 /**
  * Pretty-prints an object to the given output stream using Thrift's
@@ -85,7 +84,6 @@ std::string pretty_string(Args&&... args) {
   return out.str();
 }
 
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/detail/pretty_print-inl-post.h>

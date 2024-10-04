@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/server/AdaptiveConcurrency.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 RequestStateMachine::RequestStateMachine(
     bool includeInRecentRequests,
@@ -84,5 +83,4 @@ folly::Optional<std::chrono::milliseconds> RequestStateMachine::queueingTime()
   return folly::none;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

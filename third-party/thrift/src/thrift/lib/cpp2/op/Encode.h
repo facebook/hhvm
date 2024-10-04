@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/op/detail/Encode.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 /// Returns the serialized size of the avlue using the type tag.
 /// For example: serialized_size<false, type::int16_t>(prot, 1);
@@ -45,6 +43,4 @@ template <typename Tag>
 inline constexpr apache::thrift::protocol::TType typeTagToTType =
     detail::typeTagToTType<Tag>;
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

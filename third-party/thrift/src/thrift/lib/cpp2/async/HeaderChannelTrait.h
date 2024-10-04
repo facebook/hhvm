@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp/transport/THeader.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * HeaderChannelTrait manages THeader specific channel level information.
@@ -32,5 +31,4 @@ class HeaderChannelTrait {
   static bool isSupportedClient(CLIENT_TYPE ct);
   static void checkSupportedClient(CLIENT_TYPE ct);
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

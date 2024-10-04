@@ -20,9 +20,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/detail/Create.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 /// Returns the default for the given type.
 ///
@@ -44,6 +42,4 @@ inline constexpr detail::Create<Tag> create{};
 template <typename Id = void, typename Tag = void>
 inline constexpr detail::Ensure<Id, Tag> ensure{};
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

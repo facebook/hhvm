@@ -44,9 +44,7 @@
 #define THRIFT_ANY_AVAILABLE
 #endif
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 namespace {
 ResponseRpcError makeResponseRpcError(
@@ -823,6 +821,4 @@ void ThriftServerRequestSink::closeConnection(
   context_.connection().close(std::move(ew));
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

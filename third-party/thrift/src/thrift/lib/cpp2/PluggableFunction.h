@@ -56,9 +56,7 @@
  * will be 3.
  */
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 template <typename Sig>
 class PluggableFunction;
@@ -111,9 +109,7 @@ class PluggableFunction<Ret(Args...)> {
   const char* name_;
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 #define THRIFT_PLUGGABLE_FUNC_DECLARE(_ret, _name, ...)                       \
   _ret THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name(__VA_ARGS__);                   \

@@ -18,9 +18,7 @@
 
 #include <folly/Range.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 folly::StringPiece toString(ErrorCode ec) {
   switch (ec) {
@@ -52,6 +50,4 @@ folly::StringPiece toString(ErrorCode ec) {
   return "UNKNOWN";
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

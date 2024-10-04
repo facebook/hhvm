@@ -59,10 +59,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 namespace {
 constexpr int32_t kClientVersion = 7;
@@ -614,7 +611,4 @@ void RocketTestServer::setExpectedSetupMetadata(
   expectedSetupMetadata_ = std::move(md);
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

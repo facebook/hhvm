@@ -19,8 +19,7 @@
 
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class T>
 ::testing::AssertionResult thriftEqualHelper(
@@ -55,8 +54,7 @@ template <class Tag, class T>
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #define EXPECT_THRIFT_EQ(a, b) \
   EXPECT_PRED_FORMAT2(::apache::thrift::thriftEqualHelper, a, b)

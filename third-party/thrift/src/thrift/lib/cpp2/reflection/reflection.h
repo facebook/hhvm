@@ -44,8 +44,7 @@
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-pre.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * READ ME FIRST: this file is divided into sections for each specific
@@ -1910,8 +1909,7 @@ struct reflected_variant_member_metadata {
 template <typename T>
 using is_reflectable_union = fatal::has_variant_traits<T>;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/reflection/internal/reflection-inl-post.h>
 

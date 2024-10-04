@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 namespace detail {
 [[noreturn]] void throwUnexpectedFrameType(uint8_t frameType);
@@ -53,6 +51,4 @@ ExtFrameType readExtFrameType(folly::io::Cursor& cursor);
 // Has both false positives and false negatives
 bool isMaybeRocketFrame(const folly::IOBuf& data);
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

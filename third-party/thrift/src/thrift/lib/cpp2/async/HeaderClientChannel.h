@@ -37,8 +37,7 @@
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * HeaderClientChannel
@@ -431,7 +430,6 @@ class HeaderClientChannel : public ClientChannel,
   friend class TransportUpgradeTest_RawClientRocketUpgradeTimeout_Test;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_ASYNC_THEADERCLIENTCHANNEL_H_

@@ -20,10 +20,7 @@
 
 #include "FdUtils.h"
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 std::string abbrevStr(const std::string& s, size_t maxLen) {
   constexpr std::string_view infix = "...";
@@ -102,7 +99,4 @@ void InterceptedAsyncFdSocket::writeChain(
   return folly::AsyncFdSocket::writeChain(callback, std::move(buf), flags);
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

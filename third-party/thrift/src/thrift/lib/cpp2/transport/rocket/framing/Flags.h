@@ -21,9 +21,7 @@
 #include <fmt/core.h>
 #include <glog/logging.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class Flags {
  public:
@@ -82,6 +80,4 @@ class Flags {
   }
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

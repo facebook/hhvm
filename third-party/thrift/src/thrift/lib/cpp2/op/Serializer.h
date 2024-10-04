@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/type/Protocol.h>
 #include <thrift/lib/cpp2/type/Runtime.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 // A serializer interface for any type.
 //
@@ -163,6 +161,4 @@ class ProtocolSerializer
   }
 };
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 namespace test {
 class TestProducerCallback;
 }
@@ -139,8 +137,6 @@ class ServerGeneratorStream : public TwoWayBridge<
   friend class test::TestProducerCallback;
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 #include <thrift/lib/cpp2/async/ServerGeneratorStream-inl.h>

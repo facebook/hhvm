@@ -27,8 +27,7 @@
 
 using output_result = std::false_type;
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 static std::string adjust(std::string input) {
   return folly::rtrimWhitespace(folly::stripLeftMargin(std::move(input))).str();
@@ -783,5 +782,4 @@ TEST(Diff, adapters) {
   TEST_IMPL(adjust(expectedStr), x);
 }
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

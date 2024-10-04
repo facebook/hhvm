@@ -30,9 +30,7 @@
 #include <thrift/compiler/lib/py3/util.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -1071,7 +1069,7 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 
  protected:
   std::string to_python_string_literal(std::string val) const {
-    std::string quotes = "\"\"\"";
+    std::string quotes = R"(""")";
     boost::algorithm::replace_all(val, "\\", "\\\\");
     boost::algorithm::replace_all(val, "\"", "\\\"");
     return quotes + val + quotes;
@@ -1504,6 +1502,4 @@ THRIFT_REGISTER_GENERATOR(
     "Python 3",
     "    include_prefix:  Use full include paths in generated files.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

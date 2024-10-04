@@ -24,8 +24,7 @@
 
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Simple RequestChannel wrapper. Keeps a pool of RequestChannels backed by
 // running on different IO threads. Dispatches requests to these RequestChannels
@@ -192,5 +191,4 @@ class PooledRequestChannel : public RequestChannel {
 
   const protocol::PROTOCOL_TYPES protocolId_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -27,8 +27,7 @@
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftClient;
 
@@ -103,5 +102,4 @@ class ClientConnectionIf {
   virtual void setTimeout(uint32_t ms) = 0;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

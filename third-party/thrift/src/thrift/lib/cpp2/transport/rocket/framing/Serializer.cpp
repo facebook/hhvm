@@ -18,9 +18,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 size_t Serializer::writePayload(Payload&& p) {
   size_t nwritten = 0;
@@ -33,6 +31,4 @@ size_t Serializer::writePayload(Payload&& p) {
   return nwritten;
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

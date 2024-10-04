@@ -27,9 +27,7 @@
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 class ClientSinkBridge;
 
@@ -113,6 +111,4 @@ class ClientSinkBridge : public TwoWayBridge<
   folly::CancellationSource serverCancelSource_;
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

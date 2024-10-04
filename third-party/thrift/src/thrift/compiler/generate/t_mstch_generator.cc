@@ -45,9 +45,7 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -624,6 +622,4 @@ const std::shared_ptr<mstch_base>& t_mstch_generator::cached_program(
   return itr->second;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

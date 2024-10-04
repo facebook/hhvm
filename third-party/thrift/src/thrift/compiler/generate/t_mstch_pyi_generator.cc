@@ -31,9 +31,7 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/py3/util.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -656,6 +654,4 @@ std::filesystem::path t_mstch_pyi_generator::get_root_path() const {
 THRIFT_REGISTER_GENERATOR(
     mstch_pyi, "Legacy Python type information", "    no arguments\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

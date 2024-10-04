@@ -23,8 +23,7 @@
 
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 void processExceptionHeaders(ResponseRpcMetadata& metadata) {
   auto otherMetadataRef = metadata.otherMetadata_ref();
@@ -149,5 +148,4 @@ void ThriftClientCallback::setTimedOut(folly::Function<void()> onTimedout) {
   onTimedout_ = std::move(onTimedout);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

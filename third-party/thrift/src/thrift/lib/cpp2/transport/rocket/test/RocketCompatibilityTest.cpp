@@ -29,8 +29,7 @@
 DECLARE_int32(num_client_connections);
 DECLARE_string(transport); // ConnectionManager depends on this flag.
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace apache::thrift::transport;
 
@@ -302,5 +301,4 @@ TEST_F(RocketManuallyStartServerTest, TestOnWriteQuiescence) {
   compatibilityTest_->TestOnWriteQuiescence();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -29,8 +29,7 @@
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/async/ServerChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * HeaderServerChannel
@@ -238,7 +237,6 @@ class HeaderServerChannel : public ServerChannel,
   std::shared_ptr<Cpp2Channel> cpp2Channel_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_ASYNC_THEADERSERVERCHANNEL_H_

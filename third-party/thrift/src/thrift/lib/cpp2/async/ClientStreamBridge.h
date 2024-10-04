@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct BufferOptions {
   int32_t chunkSize{100};
@@ -117,5 +116,4 @@ class ClientStreamBridge : public TwoWayBridge<
   folly::Executor::KeepAlive<> serverExecutor_;
 };
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

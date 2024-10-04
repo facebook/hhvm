@@ -23,8 +23,7 @@
 #include <string>
 #include <vector>
 
-namespace test_cpp2 {
-namespace cpp_reflection {
+namespace test_cpp2::cpp_reflection {
 
 static struct3 test_data() {
   structA a1;
@@ -489,5 +488,4 @@ TEST(Debug, adapters) {
 
 #undef TEST_IMPL
 
-} // namespace cpp_reflection
-} // namespace test_cpp2
+} // namespace test_cpp2::cpp_reflection

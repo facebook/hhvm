@@ -20,9 +20,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 template <typename LTag = void, typename RTag = LTag>
 struct EqualTo : detail::EqualTo<LTag, RTag> {};
@@ -78,6 +76,4 @@ inline constexpr detail::
     CompareWith<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
         compare{};
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

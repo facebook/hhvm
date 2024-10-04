@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/async/FramingHandler.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void FramingHandler::read(Context* ctx, folly::IOBufQueue& q) {
   // Remaining for this packet.  Will update the class member
@@ -69,5 +68,4 @@ folly::Future<folly::Unit> FramingHandler::close(Context* ctx) {
   return ctx->fireClose();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

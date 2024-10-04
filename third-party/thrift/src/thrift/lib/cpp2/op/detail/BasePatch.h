@@ -28,8 +28,7 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct patch;
 }
@@ -304,5 +303,4 @@ class BaseContainerPatch : public BaseClearPatch<Patch, Derived> {
 
 } // namespace detail
 } // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

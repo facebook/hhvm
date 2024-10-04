@@ -26,9 +26,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Exception.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 /**
  * A deterministic stack-context based accumulator that guarantees the
@@ -271,6 +269,4 @@ void DeterministicAccumulator<HasherGenerator>::combine(const T& val) {
   ctx.hashers.back().finalize();
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

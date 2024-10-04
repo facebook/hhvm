@@ -27,10 +27,7 @@
 #include <thrift/lib/cpp2/type/detail/Runtime.h>
 #include <thrift/lib/cpp2/type/detail/TypeInfo.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 template <typename Tag>
 struct ContainerOp : BaseOp<Tag> {
@@ -261,7 +258,4 @@ template <typename T, typename KTag, typename VTag>
 struct AnyOp<type::cpp_type<T, type::map<KTag, VTag>>>
     : MapOp<KTag, VTag, type::cpp_type<T, type::map<KTag, VTag>>> {};
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

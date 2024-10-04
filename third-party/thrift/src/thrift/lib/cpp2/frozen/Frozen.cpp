@@ -19,9 +19,7 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 std::ostream& operator<<(std::ostream& os, DebugLine dl) {
   os << '\n';
@@ -163,6 +161,4 @@ void BufferHelpers<folly::IOBuf>::thawTo(
 }
 
 } // namespace detail
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

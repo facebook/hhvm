@@ -18,9 +18,7 @@
 #include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 template <class T>
 folly::test::TemporaryFile freezeToTempFile(const T& value) {
@@ -29,6 +27,4 @@ folly::test::TemporaryFile freezeToTempFile(const T& value) {
   return tmp;
 }
 
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

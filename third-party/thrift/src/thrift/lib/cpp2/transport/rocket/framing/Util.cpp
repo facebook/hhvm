@@ -22,9 +22,7 @@
 
 #include <folly/Conv.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 namespace detail {
 
 [[noreturn]] void throwUnexpectedFrameType(uint8_t frameType) {
@@ -140,6 +138,4 @@ bool isMaybeRocketFrame(const folly::IOBuf& data) {
     return false;
   }
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

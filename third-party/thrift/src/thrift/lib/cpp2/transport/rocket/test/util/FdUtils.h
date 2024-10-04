@@ -26,10 +26,7 @@
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 using MessagePair = // Data & FDs that are being sent together.
     std::pair<std::unique_ptr<std::string>, folly::SocketFds::ToSend>;
@@ -90,7 +87,4 @@ struct InterceptedAsyncFdSocket : public folly::AsyncFdSocket {
   MessageQueue* checkQueue_;
 };
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

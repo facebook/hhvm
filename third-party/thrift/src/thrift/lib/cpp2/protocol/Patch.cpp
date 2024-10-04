@@ -39,9 +39,7 @@
 #include <thrift/lib/thrift/gen-cpp2/patch_op_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 namespace detail {
 namespace {
 
@@ -1125,6 +1123,4 @@ std::string fromPatchUri(std::string s) {
   return s;
 }
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/async/ThreadBoundAdaptorChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 
@@ -298,5 +297,4 @@ void ThreadBoundAdaptorChannel::terminateInteraction(InteractionId idWrapper) {
   threadSafeChannel_->terminateInteraction(std::move(idWrapper));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

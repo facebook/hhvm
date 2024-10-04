@@ -19,8 +19,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Get.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 template <typename Union, typename Type>
@@ -116,5 +115,4 @@ void variant_set(V& variant, T&& value) {
       variant, [&](auto p) { p = std::forward<T>(value); });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

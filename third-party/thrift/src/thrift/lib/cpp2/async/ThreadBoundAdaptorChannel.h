@@ -22,8 +22,7 @@
 #include <folly/io/async/EventBaseLocal.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThreadBoundAdaptorChannel : public apache::thrift::RequestChannel {
  public:
@@ -84,5 +83,4 @@ class ThreadBoundAdaptorChannel : public apache::thrift::RequestChannel {
   std::shared_ptr<apache::thrift::RequestChannel> threadSafeChannel_;
   folly::EventBase* evb_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

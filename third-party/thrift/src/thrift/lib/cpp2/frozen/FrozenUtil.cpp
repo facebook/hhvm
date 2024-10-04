@@ -27,9 +27,7 @@ FOLLY_GFLAGS_DEFINE_bool(thrift_frozen_util_mlock_on_fault, false,
     "Use mlock2(MLOCK_ONFAULT) instead of mlock().");
 // clang-format on
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 FrozenFileForwardIncompatible::FrozenFileForwardIncompatible(int fileVersion)
     : std::runtime_error(folly::to<std::string>(
@@ -108,6 +106,4 @@ void MallocFreezer::doAppendBytes(
   range = appendBuffer(padding + n);
   range.advance(padding);
 }
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

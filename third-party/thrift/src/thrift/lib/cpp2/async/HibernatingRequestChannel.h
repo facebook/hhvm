@@ -21,8 +21,7 @@
 #include <folly/io/async/AsyncTimeout.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Simple RequestChannel wrapper. Will close the underlying channel when
 // inactive for sufficiently long. Will reopen when it receives traffic.
@@ -119,5 +118,4 @@ class HibernatingRequestChannel : public RequestChannel {
   std::chrono::milliseconds waitTime_;
   std::unique_ptr<folly::AsyncTimeout> timeout_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -47,15 +47,13 @@ namespace wangle {
 class Acceptor;
 } // namespace wangle
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 class RequestClientCallback;
 class StreamClientCallback;
 class ChannelClientCallback;
 class SinkClientCallback;
 
-namespace rocket {
-namespace test {
+namespace rocket::test {
 
 class RocketTestClient {
  public:
@@ -124,7 +122,6 @@ class RocketTestServer {
   void stop();
 };
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace rocket::test
+
+} // namespace apache::thrift

@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -131,5 +130,4 @@ class FizzPeeker : public wangle::DefaultToFizzPeekingCallback {
       std::chrono::steady_clock::time_point acceptTime,
       wangle::TransportInfo& tinfo);
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

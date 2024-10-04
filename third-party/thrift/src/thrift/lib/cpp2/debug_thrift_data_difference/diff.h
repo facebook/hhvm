@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp2/debug_thrift_data_difference/debug.h>
 #include <thrift/lib/cpp2/debug_thrift_data_difference/pretty_print.h>
 
-namespace facebook {
-namespace thrift {
+namespace facebook::thrift {
 
 /**
  * A handy callback for `debug_thrift_data_difference()` that outputs a
@@ -86,5 +85,4 @@ diff_output_callback<Output> make_diff_output_callback(
   return diff_output_callback<Output>(output, lhs, rhs);
 }
 
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift

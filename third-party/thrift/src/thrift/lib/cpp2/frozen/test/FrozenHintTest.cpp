@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp2/frozen/FrozenTestUtil.h>
 #include <thrift/lib/cpp2/frozen/HintTypes.h>
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 TEST(FrozenVectorTypes, Unpacked) {
   VectorUnpacked<int> viu{2, 3, 5, 7, 9, 11, 13, 17};
@@ -33,6 +31,4 @@ TEST(FrozenVectorTypes, Unpacked) {
   const int* raw = fiu.begin();
   EXPECT_EQ(raw[3], 7);
 }
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

@@ -67,8 +67,7 @@ THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, true);
 
 using namespace apache::thrift::transport;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 struct LegacyResponseSerializationHandler {
@@ -1210,5 +1209,4 @@ InteractionId RocketClientChannel::registerInteraction(
 int32_t RocketClientChannel::getServerVersion() const {
   return rocket::RocketClient::getServerVersion();
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

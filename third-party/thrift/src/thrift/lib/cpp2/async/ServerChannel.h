@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Interface for Thrift Server channels
@@ -28,5 +27,4 @@ class ServerChannel : public ResponseChannel {
  public:
   ServerChannel() {}
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

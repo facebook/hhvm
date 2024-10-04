@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/async/Interaction.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 const transport::THeader::StringToStringMap& kEmptyMap() {
   static const transport::THeader::StringToStringMap& map =
@@ -296,5 +295,4 @@ RpcOptions::Checksum RpcOptions::getChecksum() const {
   return checksum_;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

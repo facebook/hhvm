@@ -28,9 +28,7 @@
 
 using apache::thrift::hash::deterministic_hash;
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 TEST(Xxh64HasherTest, checkCombineBool) {
   Xxh64Hasher hasher1;
@@ -247,6 +245,4 @@ TEST(Xxh64HasherTest, e2eComplexStruct) {
   EXPECT_EQ(result, 2487349242360451610UL);
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

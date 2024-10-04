@@ -27,10 +27,7 @@ THRIFT_IMPL_HASH(apache::thrift::frozen::schema::MemoryLayoutBase)
 THRIFT_IMPL_HASH(apache::thrift::frozen::schema::MemoryLayout)
 THRIFT_IMPL_HASH(apache::thrift::frozen::schema::MemorySchema)
 
-namespace apache {
-namespace thrift {
-namespace frozen {
-namespace schema {
+namespace apache::thrift::frozen::schema {
 
 int16_t MemorySchema::Helper::add(MemoryLayout&& layout) {
   // Add distinct layout, bounds check layoutId
@@ -106,7 +103,4 @@ void convert(const MemorySchema& memSchema, Schema& schema) {
   *schema.rootLayout() = memSchema.getRootLayoutId();
 }
 
-} // namespace schema
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen::schema

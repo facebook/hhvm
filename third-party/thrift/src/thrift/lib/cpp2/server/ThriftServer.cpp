@@ -156,8 +156,7 @@ namespace {
 
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace apache::thrift::server;
 using namespace std;
@@ -2555,5 +2554,4 @@ bool ThriftServer::getTaskExpireTimeForRequest(
   }
   return queueTimeout != taskTimeout;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

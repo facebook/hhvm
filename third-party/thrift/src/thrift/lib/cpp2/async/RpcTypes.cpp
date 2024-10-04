@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 
@@ -303,5 +302,4 @@ LegacySerializedResponse::extractPayload(
   return std::make_pair(mtype, ResponsePayload{std::move(buffer)});
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

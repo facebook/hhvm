@@ -23,8 +23,7 @@ using std::make_unique;
 using std::shared_ptr;
 using std::unique_ptr;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 DuplexChannel::DuplexChannel(
     Who::WhoEnum who,
@@ -134,5 +133,4 @@ std::unique_ptr<folly::IOBuf> DuplexChannel::DuplexFramingHandler::addFrame(
   return buf;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

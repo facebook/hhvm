@@ -23,9 +23,7 @@
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 class StdHasher {
  public:
@@ -60,6 +58,4 @@ class StdHasher {
   size_t result_ = 0;
 };
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/async/HibernatingRequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // RequestCallback will keep owning the connection for inflight requests even
 // after the timeout.
@@ -69,5 +68,4 @@ HibernatingRequestChannel::ImplPtr& HibernatingRequestChannel::impl() {
 
   return impl_;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

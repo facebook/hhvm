@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace ::testing;
 
@@ -251,5 +250,4 @@ TEST_F(ClientBufferedStreamTest, MaxChunkSize) {
   std::move(task).get();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

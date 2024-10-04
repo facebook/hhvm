@@ -27,9 +27,7 @@
 #include <thrift/lib/cpp2/type/Protocol.h>
 #include <thrift/lib/cpp2/type/TypeRegistry.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 namespace detail {
 template <type::StandardProtocol protocol>
@@ -76,6 +74,4 @@ void registerStdSerializers(
   }
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

@@ -20,8 +20,7 @@
 
 #include <thrift/lib/cpp/TApplicationException.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 bool HeaderChannelTrait::isSupportedClient(CLIENT_TYPE ct) {
   static folly::Indestructible<std::bitset<CLIENT_TYPES_LEN>> supportedClients(
@@ -47,5 +46,4 @@ void HeaderChannelTrait::checkSupportedClient(CLIENT_TYPE ct) {
         "Transport does not support this client type");
   }
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

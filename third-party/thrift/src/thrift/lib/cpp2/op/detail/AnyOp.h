@@ -27,10 +27,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 // Compile-time and type-erased Thrift operator implementations.
 template <typename Tag, typename>
@@ -60,7 +57,4 @@ const TypeInfo& getAnyTypeInfo() {
   return type::detail::getTypeInfo<AnyOp<Tag>, Tag>();
 }
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

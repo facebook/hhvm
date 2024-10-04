@@ -20,8 +20,7 @@
 #include <fizz/server/AsyncFizzServer.h>
 #include <folly/io/async/AsyncSocket.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 /*
  * Takes an existing transport and creates a new socket with the same
  * underlying fd while trying to preserve as much information as possible. The
@@ -30,5 +29,4 @@ namespace thrift {
 template <class FizzSocket>
 folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* socket);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -22,9 +22,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 TEST(StdHasherTest, checkCombineBool) {
   StdHasher hasher;
@@ -164,6 +162,4 @@ TEST(StdHasherTest, checkFinalize) {
   EXPECT_EQ(previousResult, hasher.getResult());
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

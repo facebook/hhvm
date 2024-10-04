@@ -30,9 +30,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/FrameType.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class Serializer {
  public:
@@ -163,6 +161,4 @@ class HeaderSerializer {
   size_t maxLen_;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

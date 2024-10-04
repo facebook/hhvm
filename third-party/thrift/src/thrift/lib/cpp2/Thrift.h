@@ -31,8 +31,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 template <typename Tag>
@@ -72,8 +71,7 @@ enum class ExceptionSafety {
             // RPC.
 };
 
-namespace detail {
-namespace st {
+namespace detail::st {
 
 //  (struct_)private_access
 //
@@ -183,8 +181,7 @@ struct IsThriftUnion<T, folly::void_t<typename T::__fbthrift_cpp2_type>>
 using clear_terse_fields_fn = private_access::clear_terse_fields_fn;
 inline static constexpr clear_terse_fields_fn clear_terse_fields{};
 
-} // namespace st
-} // namespace detail
+} // namespace detail::st
 
 using clear_fn = detail::st::private_access::clear_fn;
 inline constexpr clear_fn clear{};
@@ -279,8 +276,7 @@ using safe_overload_t = typename std::enable_if<
     apache::thrift::detail::is_safe_overload<Class, Args...>::type::value>::
     type;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #define FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(...)                       \
   struct __fbthrift_cpp2_indirection_fn {                                    \
@@ -294,8 +290,7 @@ using safe_overload_t = typename std::enable_if<
     }                                                                        \
   }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T>
 using detect_indirection_fn_t = typename T::__fbthrift_cpp2_indirection_fn;
@@ -459,7 +454,6 @@ struct is_cpp_ref_field_terse : std::false_type {
 
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_CPP2_H_

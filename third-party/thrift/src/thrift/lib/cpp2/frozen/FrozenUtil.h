@@ -29,9 +29,7 @@
 FOLLY_GFLAGS_DECLARE_bool(thrift_frozen_util_disable_mlock);
 FOLLY_GFLAGS_DECLARE_bool(thrift_frozen_util_mlock_on_fault);
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 class FrozenFileForwardIncompatible : public std::runtime_error {
  public:
@@ -303,6 +301,4 @@ MappedFrozen<T> mapFrozen(folly::File file) {
       std::move(file), folly::MemoryMapping::LockMode::TRY_LOCK);
 }
 
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

@@ -22,8 +22,7 @@
 
 #include <thrift/lib/cpp2/reflection/internal/helpers-inl-pre.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Gets the reflection metadata for a given struct's member based on a user
@@ -125,7 +124,6 @@ using get_struct_member_by_id =
             void,
             fatal::get_type::id>>::type;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_FATAL_HELPERS_H_

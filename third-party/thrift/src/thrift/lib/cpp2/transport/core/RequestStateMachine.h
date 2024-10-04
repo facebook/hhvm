@@ -26,8 +26,7 @@ namespace folly {
 class EventBase;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AdaptiveConcurrencyController;
 class CPUConcurrencyController;
@@ -101,5 +100,4 @@ class RequestStateMachine {
   CPUConcurrencyController& cpuController_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -28,9 +28,7 @@
 
 using apache::thrift::hash::deterministic_hash;
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 TEST(Sha256HasherTest, checkCombineBool) {
   Sha256Hasher hasher1;
@@ -259,6 +257,4 @@ TEST(Sha256HasherTest, e2eComplexStruct) {
   EXPECT_EQ(result, expectedHash);
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

@@ -22,8 +22,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftClientCallback;
 
@@ -91,5 +90,4 @@ class ThriftChannelIf : public std::enable_shared_from_this<ThriftChannelIf> {
   virtual folly::EventBase* getEventBase() noexcept = 0;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

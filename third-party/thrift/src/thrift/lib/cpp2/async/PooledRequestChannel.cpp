@@ -20,8 +20,7 @@
 
 #include <folly/futures/Future.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 struct InteractionState {
   folly::Executor::KeepAlive<folly::EventBase> keepAlive;
@@ -303,5 +302,4 @@ PooledRequestChannel::globalExecutorProvider(size_t numThreads) {
         return {};
       };
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

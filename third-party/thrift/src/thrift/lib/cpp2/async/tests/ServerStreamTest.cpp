@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class StreamElementEncoderStub final
     : public apache::thrift::detail::StreamElementEncoder<int> {
@@ -404,5 +403,4 @@ TEST(ServerStreamTest, FactoryLeak) {
   stream = apache::thrift::ServerStream<int>::createEmpty();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

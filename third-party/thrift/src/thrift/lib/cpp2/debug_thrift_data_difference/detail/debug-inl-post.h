@@ -28,9 +28,7 @@
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/op/Get.h>
 
-namespace facebook {
-namespace thrift {
-namespace detail {
+namespace facebook::thrift::detail {
 
 struct debug_thrift_data_difference_missing {
   template <typename Tag, typename Iter, typename Callback>
@@ -565,6 +563,4 @@ struct debug_thrift_data_difference_impl<
   }
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::detail

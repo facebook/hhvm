@@ -20,8 +20,7 @@
 #include <wangle/channel/Handler.h>
 #include <wangle/channel/StaticPipeline.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class FramingHandler
     : public wangle::Handler<
@@ -90,5 +89,4 @@ class FramingHandler
   bool closing_{false};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -18,9 +18,7 @@
 
 #include <folly/Range.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 enum class ErrorCode : uint32_t {
   // Reserved
@@ -64,6 +62,4 @@ enum class ErrorCode : uint32_t {
 
 folly::StringPiece toString(ErrorCode ec);
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

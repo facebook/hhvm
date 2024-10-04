@@ -32,15 +32,13 @@
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class BinaryProtocolWriter;
 class CompactProtocolWriter;
 class SimpleJSONProtocolWriter;
 
-namespace op {
-namespace detail {
+namespace op::detail {
 
 template <typename T, typename Tag>
 inline constexpr bool kIsStrongType =
@@ -1168,7 +1166,6 @@ struct Decode<
   }
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace op::detail
+
+} // namespace apache::thrift

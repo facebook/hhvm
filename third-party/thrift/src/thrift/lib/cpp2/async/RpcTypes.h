@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct SerializedRequest {
   explicit SerializedRequest(std::unique_ptr<folly::IOBuf> buffer_)
@@ -181,5 +180,4 @@ inline SerializedResponse::SerializedResponse(
   buffer = std::move(payload).buffer();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

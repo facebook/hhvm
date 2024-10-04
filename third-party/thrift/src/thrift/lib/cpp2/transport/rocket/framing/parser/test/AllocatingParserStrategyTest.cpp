@@ -18,9 +18,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 ParserAllocatorType alloc = ParserAllocatorType();
 
@@ -548,6 +546,4 @@ TEST(AllocatingParserStrategyTest, testWithAllocatorFromSharedPtr) {
 }
 #endif
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

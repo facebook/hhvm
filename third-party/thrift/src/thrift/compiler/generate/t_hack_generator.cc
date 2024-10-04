@@ -5551,11 +5551,13 @@ void t_hack_generator::_generate_sendImplHelper(
     std::ofstream& out,
     const t_function* tfunction,
     const t_service* tservice) {
+  const std::string& tservice_name =
+      (tservice->is_interaction() ? service_name_ : tservice->name());
   out << "$this->sendImplHelper($args, " << "\"" << find_hack_name(tfunction)
       << "\", "
       << (tfunction->qualifier() == t_function_qualifier::oneway ? "true"
                                                                  : "false")
-      << ", \"" << tservice->name() << "\" " << ");\n";
+      << ", \"" << tservice_name << "\" " << ");\n";
 }
 
 /**
@@ -6896,6 +6898,8 @@ void t_hack_generator::_generate_sendImpl(
   const std::string& funname = tfunction->name();
   const std::string& rpc_function_name =
       generate_rpc_function_name(tservice, tfunction);
+  const std::string& tservice_name =
+      (tservice->is_interaction() ? service_name_ : tservice->name());
 
   if (nullable_everything_) {
     indent(out) << "protected function sendImpl_" << funname << "("
@@ -6913,7 +6917,7 @@ void t_hack_generator::_generate_sendImpl(
   out << indent() << "try {\n";
   indent_up();
   out << indent() << "$this->eventHandler_->preSend('" << rpc_function_name
-      << "', $args, $currentseqid);\n";
+      << "', $args, $currentseqid, '" << tservice_name << "');\n";
   out << indent() << "if ($this->output_ is \\TBinaryProtocolAccelerated)\n";
   scope_up(out);
 

@@ -156,7 +156,7 @@ class BadService_BadInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = BadService_BadInteraction_foo_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('BadInteraction.foo', $args, $currentseqid);
+      $this->eventHandler_->preSend('BadInteraction.foo', $args, $currentseqid, 'BadService');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'BadInteraction.foo', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);

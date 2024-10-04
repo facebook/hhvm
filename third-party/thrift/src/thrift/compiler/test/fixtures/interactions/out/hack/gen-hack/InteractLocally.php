@@ -97,7 +97,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractLocally_SharedInteraction_init_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.init', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.init', $args, $currentseqid, 'InteractLocally');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.init', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -153,7 +153,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractLocally_SharedInteraction_do_something_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.do_something', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.do_something', $args, $currentseqid, 'InteractLocally');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.do_something', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -209,7 +209,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractLocally_SharedInteraction_tear_down_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.tear_down', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.tear_down', $args, $currentseqid, 'InteractLocally');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.tear_down', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);

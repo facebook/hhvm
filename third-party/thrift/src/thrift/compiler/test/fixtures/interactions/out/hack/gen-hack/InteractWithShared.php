@@ -163,7 +163,7 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_MyInteraction_frobnicate_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.frobnicate', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.frobnicate', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -219,7 +219,7 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_MyInteraction_ping_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.ping', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.ping', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.ping', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), true);
@@ -275,7 +275,7 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_MyInteraction_truthify_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.truthify', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.truthify', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.truthify', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -331,7 +331,7 @@ $rpc_options->setInteractionId($this->interactionId);
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_MyInteraction_encode_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.encode', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.encode', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.encode', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -401,7 +401,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_SharedInteraction_init_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.init', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.init', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.init', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -457,7 +457,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_SharedInteraction_do_something_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.do_something', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.do_something', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.do_something', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -513,7 +513,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = InteractWithShared_SharedInteraction_tear_down_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SharedInteraction.tear_down', $args, $currentseqid);
+      $this->eventHandler_->preSend('SharedInteraction.tear_down', $args, $currentseqid, 'InteractWithShared');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SharedInteraction.tear_down', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);

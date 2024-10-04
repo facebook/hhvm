@@ -169,7 +169,7 @@ class Perform_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteraction_frobnicate_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.frobnicate', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.frobnicate', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -225,7 +225,7 @@ class Perform_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteraction_ping_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.ping', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.ping', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.ping', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), true);
@@ -281,7 +281,7 @@ class Perform_MyInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteraction_truthify_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.truthify', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.truthify', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.truthify', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -337,7 +337,7 @@ $rpc_options->setInteractionId($this->interactionId);
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteraction_encode_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteraction.encode', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteraction.encode', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteraction.encode', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -407,7 +407,7 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteractionFast_frobnicate_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteractionFast.frobnicate', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteractionFast.frobnicate', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteractionFast.frobnicate', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -463,7 +463,7 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteractionFast_ping_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteractionFast.ping', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteractionFast.ping', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteractionFast.ping', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), true);
@@ -519,7 +519,7 @@ class Perform_MyInteractionFast extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteractionFast_truthify_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteractionFast.truthify', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteractionFast.truthify', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteractionFast.truthify', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -575,7 +575,7 @@ $rpc_options->setInteractionId($this->interactionId);
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_MyInteractionFast_encode_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('MyInteractionFast.encode', $args, $currentseqid);
+      $this->eventHandler_->preSend('MyInteractionFast.encode', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'MyInteractionFast.encode', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);
@@ -645,7 +645,7 @@ class Perform_SerialInteraction extends \ThriftClientBase {
     $currentseqid = $this->getNextSequenceID();
     $args = Perform_SerialInteraction_frobnicate_args::withDefaultValues();
     try {
-      $this->eventHandler_->preSend('SerialInteraction.frobnicate', $args, $currentseqid);
+      $this->eventHandler_->preSend('SerialInteraction.frobnicate', $args, $currentseqid, 'Perform');
       if ($this->output_ is \TBinaryProtocolAccelerated)
       {
         \thrift_protocol_write_binary($this->output_, 'SerialInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, $this->output_->isStrictWrite(), false);

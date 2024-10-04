@@ -658,7 +658,9 @@ let hh_show_full_env p env =
 (* Log the type of an expression *)
 let hh_show p env ty =
   log_with_level env "show" ~level:0 @@ fun () ->
-  let s1 = Pr.full_strip_ns ~hide_internals:true env ty in
+  let s1 =
+    Pr.full_strip_ns ~hide_internals:(get_log_level env "show" = 0) env ty
+  in
   let s2 = Pr.constraints_for_type ~hide_internals:false env ty in
   log_position p (fun () ->
       lprintf (Normal Green) "%s" s1;

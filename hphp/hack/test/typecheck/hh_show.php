@@ -11,4 +11,8 @@
 
 function foo(int $x): void {
   hh_show($x);
+  $v = Vector{};
+  hh_show($v);
+  hh_log_level('show', 1);
+  hh_show($v);
 }

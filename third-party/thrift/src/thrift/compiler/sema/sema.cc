@@ -612,7 +612,6 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
 
     diags.error(td, "Type `{}` not defined.", td.name());
     assert(!td.resolve());
-    assert(!success);
     success = false;
   }
   return success;

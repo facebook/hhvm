@@ -452,116 +452,104 @@ Reason:
         "Lower_bound":{
           "bound":[
             {
-              "Prj_both":{
-                "sub_prj":[
+              "Lower_bound":{
+                "bound":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Hint":[
-                            {
-                              "filename":"workplace_contravariant.php",
-                              "line":12,
-                              "char_start":39,
-                              "char_end":44
-                            }
-                          ]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
+                    "Prj_both":{
+                      "sub_prj":[
                         {
                           "Flow":{
                             "from":[
                               {
-                                "Witness":[
+                                "Hint":[
                                   {
                                     "filename":"workplace_contravariant.php",
                                     "line":12,
-                                    "char_start":46,
-                                    "char_end":47
+                                    "char_start":39,
+                                    "char_end":44
                                   }
                                 ]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_param_hint",
                             "into":[
                               {
-                                "Witness":[
-                                  {
-                                    "filename":"workplace_contravariant.php",
-                                    "line":13,
-                                    "char_start":29,
-                                    "char_end":30
-                                  }
-                                ]
+                                "Flow":{
+                                  "from":[
+                                    {
+                                      "Witness":[
+                                        {
+                                          "filename":"workplace_contravariant.php",
+                                          "line":12,
+                                          "char_start":46,
+                                          "char_end":47
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind":"Flow_local",
+                                  "into":[
+                                    {
+                                      "Witness":[
+                                        {
+                                          "filename":"workplace_contravariant.php",
+                                          "line":13,
+                                          "char_start":29,
+                                          "char_end":30
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
                               }
                             ]
                           }
+                        }
+                      ],
+                      "prj":{"Prj_symm_fn_param":[1,1]},
+                      "sub":[
+                        {
+                          "Support_dynamic_type":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":4,
+                              "char_start":19,
+                              "char_end":29
+                            }
+                          ]
+                        }
+                      ],
+                      "super":[
+                        {
+                          "Witness":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":13,
+                              "char_start":5,
+                              "char_end":40
+                            }
+                          ]
                         }
                       ]
                     }
                   }
                 ],
-                "prj":{"Prj_symm_fn_param":[1,1]},
-                "sub":[
+                "of":[
                   {
-                    "Support_dynamic_type":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":4,
-                        "char_start":19,
-                        "char_end":29
-                      }
-                    ]
-                  }
-                ],
-                "super":[
-                  {
-                    "Witness":[
+                    "Type_variable_generics":[
                       {
                         "filename":"workplace_contravariant.php",
                         "line":13,
                         "char_start":5,
                         "char_end":40
-                      }
+                      },
+                      "TB",
+                      "TestServiceBase",
+                      "1"
                     ]
                   }
                 ]
               }
-            }
-          ],
-          "of":[
-            {
-              "Type_variable_generics":[
-                {
-                  "filename":"workplace_contravariant.php",
-                  "line":13,
-                  "char_start":5,
-                  "char_end":40
-                },
-                "TB",
-                "TestServiceBase",
-                "1"
-              ]
-            }
-          ]
-        }
-      }
-    ],
-    "super":[
-      {
-        "Upper_bound":{
-          "bound":[
-            {
-              "Hint":[
-                {
-                  "filename":"workplace_contravariant.php",
-                  "line":12,
-                  "char_start":63,
-                  "char_end":66
-                }
-              ]
             }
           ],
           "of":[
@@ -742,6 +730,18 @@ Reason:
             }
           ]
         }
+      }
+    ],
+    "super":[
+      {
+        "Hint":[
+          {
+            "filename":"workplace_contravariant.php",
+            "line":12,
+            "char_start":63,
+            "char_end":66
+          }
+        ]
       }
     ]
   }

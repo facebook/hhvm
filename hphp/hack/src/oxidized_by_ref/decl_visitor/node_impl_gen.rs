@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e9dc8d84abe0c00b2101757aaf332cfd>>
+// @generated SignedSource<<ee638d4fad5c87cb8e20e2ff970bb9be>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1306,15 +1306,6 @@ impl<'a> Node<'a> for T_<'a> {
             T_::Instantiate(ref __binding_0) => __binding_0.accept(v),
             T_::NoReason => {}
             T_::FromWitnessLocl(ref __binding_0) => __binding_0.accept(v),
-            T_::UpperBound {
-                bound: ref __binding_0,
-                of__: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
             T_::LowerBound {
                 bound: ref __binding_0,
                 of__: ref __binding_1,

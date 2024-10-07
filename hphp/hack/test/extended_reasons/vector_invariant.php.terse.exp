@@ -26,7 +26,7 @@ File "vector_invariant.php", line 4, character 22 - line 4, character 24:
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by transitivity.
+I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter `T` of `HH\Vector`.
 
 Main
 

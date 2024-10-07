@@ -2,6 +2,9 @@ error: Typing[4110] Invalid return type
 
 File "vector_invariant.php", line 8, character 10 - line 8, character 11:
 
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
  7 |   // hh_force_solve();
  8 |   return »$z«;
  9 | }
@@ -26,7 +29,7 @@ File "vector_invariant.php", line 4, character 22 - line 4, character 24:
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by transitivity.
+I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter `T` of `HH\Vector`.
 
 Main
 
@@ -52,7 +55,7 @@ File "vector_invariant.php", line 3, character 24 - line 3, character 26:
  5 |   $y = $x;
  6 |   $z = $y;
 
-I found the subtype for [Main] is when I checked the subtype constraint in [Lower].
+I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
 Lower
 
@@ -75,6 +78,140 @@ File "vector_invariant.php", line 4, character 9 - line 4, character 26:
 
  3 | function foo(): Vector<int> {
  4 |   $x =  »Vector { 1 , '2' }«;
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+I found the supertype for [Main] when I checked the subtype constraint in [Upper].
+
+Upper
+
+[Upper] Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+File "vector_invariant.php", line 4, character 9 - line 4, character 26:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  »Vector { 1 , '2' }«;
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+and flows into this expression via an assignment
+
+File "vector_invariant.php", line 4, character 3 - line 4, character 4:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   »$x« =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+which itself flows into this expression as the type of the local variable
+
+File "vector_invariant.php", line 5, character 8 - line 5, character 9:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = »$x«;
+ 6 |   $z = $y;
+ 7 |   // hh_force_solve();
+ 8 |   return $z;
+ 9 | }
+
+which itself flows into this expression via an assignment
+
+File "vector_invariant.php", line 5, character 3 - line 5, character 4:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   »$y« = $x;
+ 6 |   $z = $y;
+ 7 |   // hh_force_solve();
+ 8 |   return $z;
+ 9 | }
+
+which itself flows into this expression as the type of the local variable
+
+File "vector_invariant.php", line 6, character 8 - line 6, character 9:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = »$y«;
+ 7 |   // hh_force_solve();
+ 8 |   return $z;
+ 9 | }
+
+which itself flows into this expression via an assignment
+
+File "vector_invariant.php", line 6, character 3 - line 6, character 4:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   »$z« = $y;
+ 7 |   // hh_force_solve();
+ 8 |   return $z;
+ 9 | }
+
+which itself flows into this expression as the type of the local variable
+
+File "vector_invariant.php", line 8, character 10 - line 8, character 11:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+ 7 |   // hh_force_solve();
+ 8 |   return »$z«;
+ 9 | }
+
+which itself flows into this expression because it is used in a return position
+
+File "vector_invariant.php", line 8, character 3 - line 8, character 12:
+
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+ 7 |   // hh_force_solve();
+ 8 |   »return $z;«
+ 9 | }
+
+The supertype comes from this hint
+
+File "vector_invariant.php", line 3, character 17 - line 3, character 27:
+
+ 3 | function foo(): »Vector<int>« {
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+which is defined here
+
+File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+
+ 47 |    */
+ 48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+[Upper] Step 2 of 2
+
+`\HH\Vector` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
+
+The subtype comes from this generic parameter `T` of `HH\Vector`
+
+File "vector_invariant.php", line 4, character 9 - line 4, character 26:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  »Vector { 1 , '2' }«;
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+The supertype comes from this hint
+
+File "vector_invariant.php", line 3, character 24 - line 3, character 26:
+
+ 3 | function foo(): Vector<»int«> {
+ 4 |   $x =  Vector { 1 , '2' };
  5 |   $y = $x;
  6 |   $z = $y;
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fee740c29d05ee32c91722b5cbb04967>>
+// @generated SignedSource<<20534e1077f6a68abb03a54b9f33e45a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -555,15 +555,6 @@ pub enum T_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "From_witness_locl")]
     FromWitnessLocl(&'a WitnessLocl<'a>),
-    /// Records that a type with reason [bound] acted as an upper bound
-    /// for the type with reason [of_]
-    #[rust_to_ocaml(name = "Upper_bound")]
-    UpperBound {
-        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-        bound: &'a T_<'a>,
-        #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-        of__: &'a T_<'a>,
-    },
     /// Records that a type with reason [bound] acted as a lower bound
     /// for the type with reason [of_]
     #[rust_to_ocaml(name = "Lower_bound")]

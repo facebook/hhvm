@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6b91a87a00d2d2cbe95c809ceda6b2f>>
+// @generated SignedSource<<918b60cd8c49eefa45db8a2647a0d896>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -601,13 +601,6 @@ pub enum T_ {
     /// Lift a typing-time witness into a reason
     #[rust_to_ocaml(name = "From_witness_locl")]
     FromWitnessLocl(WitnessLocl),
-    /// Records that a type with reason [bound] acted as an upper bound
-    /// for the type with reason [of_]
-    #[rust_to_ocaml(name = "Upper_bound")]
-    UpperBound {
-        bound: Box<T_>,
-        of__: Box<T_>,
-    },
     /// Records that a type with reason [bound] acted as a lower bound
     /// for the type with reason [of_]
     #[rust_to_ocaml(name = "Lower_bound")]

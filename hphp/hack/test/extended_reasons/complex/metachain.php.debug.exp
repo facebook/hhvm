@@ -511,38 +511,20 @@ Reason:
         "Lower_bound":{
           "bound":[
             {
-              "Prj_one":{
-                "part":[
+              "Lower_bound":{
+                "bound":[
                   {
-                    "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
-                  }
-                ],
-                "prj":"Prj_asymm_union",
-                "whole":[
-                  {
-                    "Solved":{
-                      "solution":[
+                    "Prj_one":{
+                      "part":[
+                        {
+                          "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
+                        }
+                      ],
+                      "prj":"Prj_asymm_union",
+                      "whole":[
                         {
                           "Solved":{
                             "solution":[
-                              {
-                                "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
-                              }
-                            ],
-                            "of_":"6",
-                            "in_":[
-                              {
-                                "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
-                              }
-                            ]
-                          }
-                        }
-                      ],
-                      "of_":"8",
-                      "in_":[
-                        {
-                          "Flow":{
-                            "from":[
                               {
                                 "Solved":{
                                   "solution":[
@@ -559,17 +541,92 @@ Reason:
                                 }
                               }
                             ],
-                            "kind":"Flow_assign",
+                            "of_":"8",
+                            "in_":[
+                              {
+                                "Flow":{
+                                  "from":[
+                                    {
+                                      "Solved":{
+                                        "solution":[
+                                          {
+                                            "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
+                                          }
+                                        ],
+                                        "of_":"6",
+                                        "in_":[
+                                          {
+                                            "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "kind":"Flow_assign",
+                                  "into":[
+                                    {
+                                      "Flow":{
+                                        "from":[
+                                          {"Witness":[{"filename":"metachain.php","line":7,"char_start":3,"char_end":6}]}
+                                        ],
+                                        "kind":"Flow_local",
+                                        "into":[
+                                          {
+                                            "Witness":[{"filename":"metachain.php","line":11,"char_start":28,"char_end":31}]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "of":[
+                  {
+                    "Flow":{
+                      "from":[
+                        {
+                          "Solved":{
+                            "solution":[
+                              {
+                                "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
+                              }
+                            ],
+                            "of_":"6",
+                            "in_":[
+                              {
+                                "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "kind":"Flow_assign",
+                      "into":[
+                        {
+                          "Flow":{
+                            "from":[
+                              {"Witness":[{"filename":"metachain.php","line":7,"char_start":3,"char_end":6}]}
+                            ],
+                            "kind":"Flow_local",
                             "into":[
                               {
                                 "Flow":{
                                   "from":[
-                                    {"Witness":[{"filename":"metachain.php","line":7,"char_start":3,"char_end":6}]}
-                                  ],
-                                  "kind":"Flow_local",
-                                  "into":[
                                     {
                                       "Witness":[{"filename":"metachain.php","line":11,"char_start":28,"char_end":31}]
+                                    }
+                                  ],
+                                  "kind":"Flow_assign",
+                                  "into":[
+                                    {
+                                      "Type_variable":[{"filename":"metachain.php","line":11,"char_start":12,"char_end":23},"10"]
                                     }
                                   ]
                                 }
@@ -583,66 +640,6 @@ Reason:
                 ]
               }
             }
-          ],
-          "of":[
-            {
-              "Flow":{
-                "from":[
-                  {
-                    "Solved":{
-                      "solution":[
-                        {
-                          "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
-                        }
-                      ],
-                      "of_":"6",
-                      "in_":[
-                        {
-                          "Witness":[{"filename":"metachain.php","line":7,"char_start":10,"char_end":104}]
-                        }
-                      ]
-                    }
-                  }
-                ],
-                "kind":"Flow_assign",
-                "into":[
-                  {
-                    "Flow":{
-                      "from":[
-                        {"Witness":[{"filename":"metachain.php","line":7,"char_start":3,"char_end":6}]}
-                      ],
-                      "kind":"Flow_local",
-                      "into":[
-                        {
-                          "Flow":{
-                            "from":[
-                              {
-                                "Witness":[{"filename":"metachain.php","line":11,"char_start":28,"char_end":31}]
-                              }
-                            ],
-                            "kind":"Flow_assign",
-                            "into":[
-                              {
-                                "Type_variable":[{"filename":"metachain.php","line":11,"char_start":12,"char_end":23},"10"]
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      }
-    ],
-    "super":[
-      {
-        "Upper_bound":{
-          "bound":[
-            {"Hint":[{"filename":"metachain.php","line":22,"char_start":17,"char_end":22}]}
           ],
           "of":[
             {
@@ -728,45 +725,61 @@ Reason:
                     "Lower_bound":{
                       "bound":[
                         {
-                          "Prj_both":{
-                            "sub_prj":[
+                          "Lower_bound":{
+                            "bound":[
                               {
-                                "Flow":{
-                                  "from":[
-                                    {
-                                      "Shape_literal":[{"filename":"metachain.php","line":13,"char_start":8,"char_end":47}]
-                                    }
-                                  ],
-                                  "kind":"Flow_assign",
-                                  "into":[
+                                "Prj_both":{
+                                  "sub_prj":[
                                     {
                                       "Flow":{
                                         "from":[
                                           {
-                                            "Witness":[{"filename":"metachain.php","line":13,"char_start":3,"char_end":4}]
+                                            "Shape_literal":[{"filename":"metachain.php","line":13,"char_start":8,"char_end":47}]
                                           }
                                         ],
-                                        "kind":"Flow_local",
+                                        "kind":"Flow_assign",
                                         "into":[
                                           {
-                                            "Witness":[{"filename":"metachain.php","line":16,"char_start":18,"char_end":19}]
+                                            "Flow":{
+                                              "from":[
+                                                {
+                                                  "Witness":[{"filename":"metachain.php","line":13,"char_start":3,"char_end":4}]
+                                                }
+                                              ],
+                                              "kind":"Flow_local",
+                                              "into":[
+                                                {
+                                                  "Witness":[{"filename":"metachain.php","line":16,"char_start":18,"char_end":19}]
+                                                }
+                                              ]
+                                            }
                                           }
                                         ]
                                       }
+                                    }
+                                  ],
+                                  "prj":{"Prj_symm_fn_param":[0,0]},
+                                  "sub":[
+                                    {
+                                      "Support_dynamic_type":[{"filename":"metachain.php","line":27,"char_start":10,"char_end":14}]
+                                    }
+                                  ],
+                                  "super":[
+                                    {
+                                      "Witness":[{"filename":"metachain.php","line":16,"char_start":12,"char_end":20}]
                                     }
                                   ]
                                 }
                               }
                             ],
-                            "prj":{"Prj_symm_fn_param":[0,0]},
-                            "sub":[
+                            "of":[
                               {
-                                "Support_dynamic_type":[{"filename":"metachain.php","line":27,"char_start":10,"char_end":14}]
-                              }
-                            ],
-                            "super":[
-                              {
-                                "Witness":[{"filename":"metachain.php","line":16,"char_start":12,"char_end":20}]
+                                "Type_variable_generics":[
+                                  {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                                  "T",
+                                  "chain",
+                                  "11"
+                                ]
                               }
                             ]
                           }
@@ -786,29 +799,16 @@ Reason:
                   }
                 ],
                 "super":[
-                  {
-                    "Upper_bound":{
-                      "bound":[
-                        {"Hint":[{"filename":"metachain.php","line":21,"char_start":23,"char_end":56}]}
-                      ],
-                      "of":[
-                        {
-                          "Type_variable_generics":[
-                            {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
-                            "T",
-                            "chain",
-                            "11"
-                          ]
-                        }
-                      ]
-                    }
-                  }
+                  {"Hint":[{"filename":"metachain.php","line":21,"char_start":23,"char_end":56}]}
                 ]
               }
             }
           ]
         }
       }
+    ],
+    "super":[
+      {"Hint":[{"filename":"metachain.php","line":22,"char_start":17,"char_end":22}]}
     ]
   }
 }

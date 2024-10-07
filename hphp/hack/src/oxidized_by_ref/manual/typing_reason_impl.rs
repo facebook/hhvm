@@ -193,8 +193,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .finish(),
             DynamicCoercion(p) => f.debug_tuple("RdynamicCoercion").field(p).finish(),
             Invalid => f.debug_tuple("Rinvalid").finish(),
-            UpperBound { .. }
-            | LowerBound { .. }
+            LowerBound { .. }
             | Flow { .. }
             | PrjBoth { .. }
             | PrjOne { .. }

@@ -1,4 +1,4 @@
-error: Typing[4110] Invalid argument
+error: Typing[4323] Invalid argument
 
 File "generic_subtyping_rcvr_upper_bound.php", line 10, character 20 - line 10, character 21:
 
@@ -6,6 +6,26 @@ File "generic_subtyping_rcvr_upper_bound.php", line 10, character 20 - line 10, 
  8 | 
  9 | function call_upper_bound_with_conrete(A $x): void {
 10 |   rcvr_upper_bound(»$x«);
+11 | }
+
+`T` is a constrained type parameter
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 27 - line 7, character 27:
+
+ 7 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+This type constraint is violated
+
+File "generic_subtyping_rcvr_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_conrete(A $x): void {
+10 |   rcvr_upper_bound($x);
 11 | }
 
 Expected `B`
@@ -30,177 +50,127 @@ File "generic_subtyping_rcvr_upper_bound.php", line 9, character 40 - line 9, ch
 
 Derivation:
 {
-  "Upper":{
-    "bound":{
-      "Derivation":[
-        {
-          "Begin":{
-            "sub":[
+  "Derivation":[
+    {
+      "Begin":{
+        "sub":[
+          {
+            "Support_dynamic_type":[
               {
-                "Type_variable_generics":[
-                  {
-                    "filename":"generic_subtyping_rcvr_upper_bound.php",
-                    "line":10,
-                    "char_start":3,
-                    "char_end":18
-                  },
-                  "T",
-                  "rcvr_upper_bound",
-                  "0"
-                ]
-              }
-            ],
-            "super":[
-              {
-                "Cstr_on_generics":[
-                  {
-                    "filename":"generic_subtyping_rcvr_upper_bound.php",
-                    "line":7,
-                    "char_start":32,
-                    "char_end":32
-                  },
-                  {
-                    "Tuple2":[
-                      {
-                        "filename":"generic_subtyping_rcvr_upper_bound.php",
-                        "line":7,
-                        "char_start":27,
-                        "char_end":27
-                      },
-                      "T"
-                    ]
-                  }
-                ]
+                "filename":"generic_subtyping_rcvr_upper_bound.php",
+                "line":7,
+                "char_start":10,
+                "char_end":25
               }
             ]
           }
-        }
-      ]
+        ],
+        "super":[
+          {
+            "Witness":[
+              {
+                "filename":"generic_subtyping_rcvr_upper_bound.php",
+                "line":10,
+                "char_start":3,
+                "char_end":22
+              }
+            ]
+          }
+        ]
+      }
     },
-    "in_":{
-      "Derivation":[
-        {
-          "Begin":{
-            "sub":[
-              {
-                "Support_dynamic_type":[
-                  {
-                    "filename":"generic_subtyping_rcvr_upper_bound.php",
-                    "line":7,
-                    "char_start":10,
-                    "char_end":25
-                  }
-                ]
-              }
-            ],
-            "super":[
-              {
-                "Witness":[
-                  {
-                    "filename":"generic_subtyping_rcvr_upper_bound.php",
-                    "line":10,
-                    "char_start":3,
-                    "char_end":22
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "Step":{
-            "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
-            "on_":"Both",
-            "sub":[
-              {
-                "Flow":{
-                  "from":[
+    {
+      "Step":{
+        "rule":{"Using_prj":{"Prj_symm_fn_param":[0,0]}},
+        "on_":"Both",
+        "sub":[
+          {
+            "Flow":{
+              "from":[
+                {
+                  "Def":[
                     {
-                      "Def":[
-                        {
-                          "filename":"generic_subtyping_rcvr_upper_bound.php",
-                          "line":4,
-                          "char_start":7,
-                          "char_end":7
-                        },
-                        [
+                      "filename":"generic_subtyping_rcvr_upper_bound.php",
+                      "line":4,
+                      "char_start":7,
+                      "char_end":7
+                    },
+                    [
+                      {
+                        "Hint":[
                           {
-                            "Hint":[
-                              {
-                                "filename":"generic_subtyping_rcvr_upper_bound.php",
-                                "line":9,
-                                "char_start":40,
-                                "char_end":40
-                              }
-                            ]
-                          }
-                        ]
-                      ]
-                    }
-                  ],
-                  "kind":"Flow_param_hint",
-                  "into":[
-                    {
-                      "Flow":{
-                        "from":[
-                          {
-                            "Witness":[
-                              {
-                                "filename":"generic_subtyping_rcvr_upper_bound.php",
-                                "line":9,
-                                "char_start":42,
-                                "char_end":43
-                              }
-                            ]
-                          }
-                        ],
-                        "kind":"Flow_local",
-                        "into":[
-                          {
-                            "Witness":[
-                              {
-                                "filename":"generic_subtyping_rcvr_upper_bound.php",
-                                "line":10,
-                                "char_start":20,
-                                "char_end":21
-                              }
-                            ]
+                            "filename":"generic_subtyping_rcvr_upper_bound.php",
+                            "line":9,
+                            "char_start":40,
+                            "char_end":40
                           }
                         ]
                       }
-                    }
+                    ]
                   ]
                 }
-              }
-            ],
-            "super":[
+              ],
+              "kind":"Flow_param_hint",
+              "into":[
+                {
+                  "Flow":{
+                    "from":[
+                      {
+                        "Witness":[
+                          {
+                            "filename":"generic_subtyping_rcvr_upper_bound.php",
+                            "line":9,
+                            "char_start":42,
+                            "char_end":43
+                          }
+                        ]
+                      }
+                    ],
+                    "kind":"Flow_local",
+                    "into":[
+                      {
+                        "Witness":[
+                          {
+                            "filename":"generic_subtyping_rcvr_upper_bound.php",
+                            "line":10,
+                            "char_start":20,
+                            "char_end":21
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "super":[
+          {
+            "Cstr_on_generics":[
               {
-                "Cstr_on_generics":[
+                "filename":"generic_subtyping_rcvr_upper_bound.php",
+                "line":7,
+                "char_start":32,
+                "char_end":32
+              },
+              {
+                "Tuple2":[
                   {
                     "filename":"generic_subtyping_rcvr_upper_bound.php",
                     "line":7,
-                    "char_start":32,
-                    "char_end":32
+                    "char_start":27,
+                    "char_end":27
                   },
-                  {
-                    "Tuple2":[
-                      {
-                        "filename":"generic_subtyping_rcvr_upper_bound.php",
-                        "line":7,
-                        "char_start":27,
-                        "char_end":27
-                      },
-                      "T"
-                    ]
-                  }
+                  "T"
                 ]
               }
             ]
           }
-        }
-      ]
+        ]
+      }
     }
-  }
+  ]
 }
 
 File "", line 0, character 0 - line 0, character -1:
@@ -304,46 +274,25 @@ Reason:
     ],
     "super":[
       {
-        "Upper_bound":{
-          "bound":[
-            {
-              "Cstr_on_generics":[
-                {
-                  "filename":"generic_subtyping_rcvr_upper_bound.php",
-                  "line":7,
-                  "char_start":32,
-                  "char_end":32
-                },
-                {
-                  "Tuple2":[
-                    {
-                      "filename":"generic_subtyping_rcvr_upper_bound.php",
-                      "line":7,
-                      "char_start":27,
-                      "char_end":27
-                    },
-                    "T"
-                  ]
-                }
-              ]
-            }
-          ],
-          "of":[
-            {
-              "Type_variable_generics":[
-                {
-                  "filename":"generic_subtyping_rcvr_upper_bound.php",
-                  "line":10,
-                  "char_start":3,
-                  "char_end":18
-                },
-                "T",
-                "rcvr_upper_bound",
-                "0"
-              ]
-            }
-          ]
-        }
+        "Cstr_on_generics":[
+          {
+            "filename":"generic_subtyping_rcvr_upper_bound.php",
+            "line":7,
+            "char_start":32,
+            "char_end":32
+          },
+          {
+            "Tuple2":[
+              {
+                "filename":"generic_subtyping_rcvr_upper_bound.php",
+                "line":7,
+                "char_start":27,
+                "char_end":27
+              },
+              "T"
+            ]
+          }
+        ]
       }
     ]
   }

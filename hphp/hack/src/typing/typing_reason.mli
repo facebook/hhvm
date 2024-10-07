@@ -381,9 +381,6 @@ val axiom_lower_bound :
 val trans_lower_bound :
   bound:locl_phase t_ -> of_:locl_phase t_ -> locl_phase t_
 
-val trans_upper_bound :
-  bound:locl_phase t_ -> of_:locl_phase t_ -> locl_phase t_
-
 val definition : Pos_or_decl.t -> locl_phase t_ -> locl_phase t_
 
 (** Record the decomposition of a covariant type parameter when simplifying a

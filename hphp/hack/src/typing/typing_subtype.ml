@@ -7832,10 +7832,6 @@ end = struct
       (r_sub, var_sub)
       cty_super
       (on_error : Typing_error.Reasons_callback.t option) =
-    let cty_super =
-      Typing_env.update_cty_reason env cty_super ~f:(fun bound ->
-          Typing_reason.trans_upper_bound ~bound ~of_:r_sub)
-    in
     let ty_super = ConstraintType cty_super in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var_sub in
     let env =
@@ -7885,6 +7881,10 @@ end = struct
           in
           List.fold_left
             ~f:(fun (env, prop1) lower_bound ->
+              let lower_bound =
+                Typing_env.update_reason env lower_bound ~f:(fun bound ->
+                    Typing_reason.trans_lower_bound ~bound ~of_:r_sub)
+              in
               (* Since we can have either the rhs of a subtype constraint or
                    the rhs of any other constraint in the upper bounds we
                    have to inspect the upper bound and dispatch to the
@@ -7917,10 +7917,6 @@ end = struct
       ty_super
       (on_error : Typing_error.Reasons_callback.t option) =
     let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
-    let ty_super =
-      Typing_env.update_reason env ty_super ~f:(fun bound ->
-          Typing_reason.trans_upper_bound ~bound ~of_:r_sub)
-    in
     let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
     let env =
       Env.add_tyvar_upper_bound_and_update_variances
@@ -7970,12 +7966,16 @@ end = struct
           in
           List.fold_left
             ~f:(fun (env, prop1) lower_bound ->
+              let ty_sub =
+                Typing_env.update_reason env lower_bound ~f:(fun bound ->
+                    Typing_reason.trans_lower_bound ~bound ~of_:r_sub)
+              in
               let (env, prop2) =
                 Subtype.(
                   simplify
                     ~subtype_env
                     ~this_ty:None
-                    ~lhs:{ sub_supportdyn = None; ty_sub = lower_bound }
+                    ~lhs:{ sub_supportdyn = None; ty_sub }
                     ~rhs:
                       {
                         super_like = false;
@@ -8225,6 +8225,7 @@ end = struct
   and tell_cstr env (coerce, ty_sub, ty_super) on_error =
     let (env, ty_sub) = Env.expand_internal_type env ty_sub in
     let (env, ty_super) = Env.expand_internal_type env ty_super in
+
     match (ty_sub, ty_super) with
     | (LoclType lty_sub, LoclType lty_super) -> begin
       match (get_node lty_sub, get_node lty_super) with

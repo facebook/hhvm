@@ -1402,13 +1402,6 @@ type _ t_ =
   (* -- Core flow constructors -- *)
   | From_witness_locl : witness_locl -> locl_phase t_
       (** Lift a typing-time witness into a reason   *)
-  | Upper_bound : {
-      bound: locl_phase t_;
-      of_: locl_phase t_;
-    }
-      -> locl_phase t_
-      (** Records that a type with reason [bound] acted as an upper bound
-          for the type with reason [of_] *)
   | Lower_bound : {
       bound: locl_phase t_;
       of_: locl_phase t_;
@@ -1527,7 +1520,6 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   (* Recurse into flow-like reasons to find the position of the leftmost witness *)
   | Flow { from = t; _ }
   | Lower_bound { bound = t; _ }
-  | Upper_bound { bound = t; _ }
   | Axiom { next = t; _ }
   | Prj_both { sub_prj = t; _ }
   | Prj_one { part = t; _ }
@@ -1609,12 +1601,6 @@ let rec map_pos :
         bound = map_pos pos pos_or_decl bound;
         of_ = map_pos pos pos_or_decl of_;
       }
-  | Upper_bound { bound; of_ } ->
-    Upper_bound
-      {
-        bound = map_pos pos pos_or_decl bound;
-        of_ = map_pos pos pos_or_decl of_;
-      }
   | Axiom { prev; axiom; next } ->
     Axiom
       {
@@ -1660,7 +1646,6 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | From_witness_locl witness -> constructor_string_of_witness_locl witness
   | From_witness_decl witness -> constructor_string_of_witness_decl witness
   | Axiom _ -> "Raxiom"
-  | Upper_bound _ -> "Rupper_bound"
   | Lower_bound _ -> "Rlower_bound"
   | Flow _ -> "Rflow"
   | Prj_both _ -> "Rprj_both"
@@ -1795,7 +1780,6 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
     | Dynamic_coercion r -> pp_t_ fmt r
     | Flow { from; _ } -> pp_t_ fmt from
     | Axiom { next; _ } -> pp_t_ fmt next
-    | Upper_bound { bound; _ } -> pp_t_ fmt bound
     | Lower_bound { bound; _ } -> pp_t_ fmt bound
     | Prj_both { sub_prj; _ } -> pp_t_ fmt sub_prj
     | Prj_one { part; _ } -> pp_t_ fmt part
@@ -1992,14 +1976,6 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
               ] );
         ])
     :: acc
-  | Upper_bound { bound; of_ } ->
-    Hh_json.(
-      JSON_Object
-        [
-          ( "Upper_bound",
-            JSON_Object [("bound", to_json bound); ("of", to_json of_)] );
-        ])
-    :: acc
   | Lower_bound { bound; of_ } ->
     Hh_json.(
       JSON_Object
@@ -2097,7 +2073,6 @@ let rec to_string_help :
     to_string_help prefix solutions r
   | From_witness_locl witness -> [witness_locl_to_string prefix witness]
   | From_witness_decl witness -> [witness_decl_to_string prefix witness]
-  | Upper_bound { bound = r; _ }
   | Lower_bound { bound = r; _ }
   | Axiom { next = r; _ }
   | Def (_, r)
@@ -2552,8 +2527,6 @@ module Constructors = struct
   let axiom_lower_bound ~bound ~of_ =
     Axiom { axiom = Lower_bound; prev = of_; next = bound }
 
-  let trans_upper_bound ~bound ~of_ = Upper_bound { bound; of_ }
-
   let trans_lower_bound ~bound ~of_ = Lower_bound { bound; of_ }
 
   let definition def of_ = Def (def, of_)
@@ -2707,8 +2680,6 @@ module Visitor = struct
         | Axiom { prev; axiom; next } ->
           Axiom
             { prev = this#on_reason prev; axiom; next = this#on_reason next }
-        | Upper_bound { bound; of_ } ->
-          Upper_bound { bound = this#on_reason bound; of_ = this#on_reason of_ }
         | Lower_bound { bound; of_ } ->
           Lower_bound { bound = this#on_reason bound; of_ = this#on_reason of_ }
         | Solved { solution; of_; in_ } ->
@@ -3237,10 +3208,6 @@ module Derivation = struct
         bound: t;
         in_: t;
       }
-    | Upper of {
-        bound: t;
-        in_: t;
-      }
     | Transitive of {
         lower: t;
         upper: t;
@@ -3252,8 +3219,6 @@ module Derivation = struct
 
   let transitive ~upper ~lower ~on_ ~in_ = Transitive { in_; on_; upper; lower }
 
-  let upper_bound ~bound ~in_ = Upper { bound; in_ }
-
   let lower_bound ~bound ~in_ = Lower { bound; in_ }
 
   let to_json t =
@@ -3261,10 +3226,6 @@ module Derivation = struct
       | Derivation steps ->
         Hh_json.(
           JSON_Object [("Derivation", array_ Subtype_step.to_json steps)])
-      | Upper { bound; in_ } ->
-        Hh_json.(
-          JSON_Object
-            [("Upper", JSON_Object [("bound", aux bound); ("in_", aux in_)])])
       | Lower { bound; in_ } ->
         Hh_json.(
           JSON_Object
@@ -3325,7 +3286,6 @@ module Derivation = struct
     | Axiom { prev; _ } -> extract_last prev
     | Flow { into; _ } -> extract_last into
     | Lower_bound { of_; _ } -> extract_last of_
-    | Upper_bound { of_; _ } -> extract_last of_
     | Solved _
     | No_reason
     | From_witness_decl _
@@ -3358,7 +3318,6 @@ module Derivation = struct
     | Axiom { next; _ } -> extract_first next
     | Flow { from; _ } -> extract_first from
     | Lower_bound { bound; _ } -> extract_first bound
-    | Upper_bound { bound; _ } -> extract_first bound
     | Solved _
     | No_reason
     | From_witness_decl _
@@ -3405,8 +3364,12 @@ module Derivation = struct
         let solutions = Tvid.Map.add of_ (extract_first solution) solutions in
         aux (sub, in_) ~deriv ~solutions
       (* -- Transitive constraints -- *)
-      | ( Lower_bound { bound = lb_sub; of_ = lb_super },
-          Upper_bound { bound = ub_super; of_ = ub_sub } ) ->
+      | ( Lower_bound
+            {
+              bound = Lower_bound { bound = lb_sub; of_ = lb_super };
+              of_ = ub_sub;
+            },
+          ub_super ) ->
         let lower = aux (lb_sub, lb_super) ~deriv:[] ~solutions
         and upper = aux (ub_sub, ub_super) ~deriv:[] ~solutions
         and in_ = aux (lb_sub, ub_super) ~deriv ~solutions
@@ -3420,14 +3383,6 @@ module Derivation = struct
         let bound = aux (bound, of_) ~deriv:[] ~solutions
         and in_ = aux (sub, bound) ~deriv ~solutions in
         lower_bound ~bound ~in_
-      | (sub, Upper_bound { bound; of_ }) ->
-        let bound = aux (of_, bound) ~deriv:[] ~solutions
-        and in_ = aux (sub, bound) ~deriv ~solutions in
-        upper_bound ~bound ~in_
-      | (Upper_bound { bound; of_ }, super) ->
-        let bound = aux (of_, bound) ~deriv:[] ~solutions
-        and in_ = aux (bound, super) ~deriv ~solutions in
-        upper_bound ~bound ~in_
       (* -- One-sided projection on subtype -- *)
       | (Prj_one { part; whole; prj }, _) ->
         let step =
@@ -3785,36 +3740,6 @@ module Derivation = struct
           @ with_prefix expl_lower ~prefix:prefix_lower ~sep:"\n\n"
         in
         (expl, st)
-      | Upper { bound; in_ } ->
-        let (expl_main, st) =
-          explain in_ ~st ~cfg ~ctxt:(Context.enter_main ctxt)
-        in
-        let ctxt = Context.deepen ctxt in
-        let (expl_upper, st) =
-          explain bound ~st ~cfg ~ctxt:(Context.enter_upper ctxt)
-        in
-
-        let main_path =
-          Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
-        in
-        let prefix_main =
-          Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity."
-            main_path
-        and prefix_upper =
-          let upper_path =
-            Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
-          in
-          Format.sprintf
-            "I found the supertype for [%s] is when I checked the subtype constraint in [%s]."
-            main_path
-            upper_path
-        in
-        let expl =
-          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
-          @ with_prefix expl_upper ~prefix:prefix_upper ~sep:"\n\n"
-        in
-        (expl, st)
 
     and explain_steps steps ~st ~cfg ~ctxt =
       let steps =
@@ -3971,9 +3896,7 @@ module Derivation = struct
           since we can have `Prj_one` in both subtype and supertype or
          `Prj_both` as subtype and `Prj_one` in supertype and we will always
          follow `Prj_one` before moving into `Prj_both` *)
-      | Lower_bound { of_; _ }
-      | Upper_bound { of_; _ } ->
-        explain_reason of_ ~st ~cfg ~ctxt
+      | Lower_bound { of_; _ } -> explain_reason of_ ~st ~cfg ~ctxt
       | Prj_both { sub_prj; _ } -> explain_reason sub_prj ~st ~cfg ~ctxt
       | Prj_one { part; _ } -> explain_reason part ~st ~cfg ~ctxt
       | Axiom { next; _ } -> explain_reason next ~st ~cfg ~ctxt

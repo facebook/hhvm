@@ -1,4 +1,4 @@
-error: Typing[4110] Invalid argument
+error: Typing[4323] Invalid argument
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
@@ -6,6 +6,26 @@ File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, chara
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound(»$x«);
+11 | }
+
+`T` is a constrained type parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 27 - line 7, character 27:
+
+ 7 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+This type constraint is violated
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
 11 | }
 
 Expected `B`
@@ -30,11 +50,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, charact
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by transitivity.
-
-Main
-
-[Main] Step 1 of 3
+Step 1 of 3
 
 I started by checking this subtype relationship.
 
@@ -58,7 +74,7 @@ File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, charac
 10 |   »rcvr_upper_bound($x)«;
 11 | }
 
-[Main] Step 2 of 3
+Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -93,7 +109,7 @@ File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-[Main] Step 3 of 3 (here is where the error occurred)
+Step 3 of 3 (here is where the error occurred)
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
@@ -117,7 +133,7 @@ File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-error: Typing[4110] Invalid argument
+error: Typing[4323] Invalid argument
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
@@ -125,6 +141,26 @@ File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, chara
  8 | 
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound(»$x«);
+11 | }
+
+`T` is a constrained type parameter
+
+File "generic_subtyping_upper_bound.php", line 7, character 27 - line 7, character 27:
+
+ 7 | function rcvr_upper_bound<»T« as B>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
+11 | }
+
+This type constraint is violated
+
+File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, character 32:
+
+ 7 | function rcvr_upper_bound<T as »B«>(T $x): void {}
+ 8 | 
+ 9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
+10 |   rcvr_upper_bound($x);
 11 | }
 
 Expected `B`
@@ -149,11 +185,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, charact
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by transitivity.
-
-Main
-
-[Main] Step 1 of 2
+Step 1 of 2
 
 I started by checking this subtype relationship.
 
@@ -177,7 +209,7 @@ File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, charac
 10 |   »rcvr_upper_bound($x)«;
 11 | }
 
-[Main] Step 2 of 2 (here is where the error occurred)
+Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

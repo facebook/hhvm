@@ -287,69 +287,64 @@ Reason:
         "Lower_bound":{
           "bound":[
             {
-              "Prj_both":{
-                "sub_prj":[
+              "Lower_bound":{
+                "bound":[
                   {
-                    "Flow":{
-                      "from":[
-                        {
-                          "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
-                        }
-                      ],
-                      "kind":"Flow_param_hint",
-                      "into":[
+                    "Prj_both":{
+                      "sub_prj":[
                         {
                           "Flow":{
                             "from":[
                               {
-                                "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                                "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":39,"char_end":44}]
                               }
                             ],
-                            "kind":"Flow_local",
+                            "kind":"Flow_param_hint",
                             "into":[
                               {
-                                "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+                                "Flow":{
+                                  "from":[
+                                    {
+                                      "Witness":[{"filename":"ctor_generic.php","line":20,"char_start":46,"char_end":47}]
+                                    }
+                                  ],
+                                  "kind":"Flow_local",
+                                  "into":[
+                                    {
+                                      "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":29,"char_end":30}]
+                                    }
+                                  ]
+                                }
                               }
                             ]
                           }
+                        }
+                      ],
+                      "prj":{"Prj_symm_fn_param":[1,1]},
+                      "sub":[
+                        {
+                          "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
+                        }
+                      ],
+                      "super":[
+                        {
+                          "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
                         }
                       ]
                     }
                   }
                 ],
-                "prj":{"Prj_symm_fn_param":[1,1]},
-                "sub":[
+                "of":[
                   {
-                    "Support_dynamic_type":[{"filename":"ctor_generic.php","line":12,"char_start":19,"char_end":29}]
-                  }
-                ],
-                "super":[
-                  {
-                    "Witness":[{"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40}]
+                    "Type_variable_generics":[
+                      {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
+                      "TB",
+                      "TestServiceBase",
+                      "1"
+                    ]
                   }
                 ]
               }
-            }
-          ],
-          "of":[
-            {
-              "Type_variable_generics":[
-                {"filename":"ctor_generic.php","line":21,"char_start":5,"char_end":40},
-                "TB",
-                "TestServiceBase",
-                "1"
-              ]
-            }
-          ]
-        }
-      }
-    ],
-    "super":[
-      {
-        "Upper_bound":{
-          "bound":[
-            {
-              "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
             }
           ],
           "of":[
@@ -459,6 +454,11 @@ Reason:
             }
           ]
         }
+      }
+    ],
+    "super":[
+      {
+        "Hint":[{"filename":"ctor_generic.php","line":20,"char_start":63,"char_end":66}]
       }
     ]
   }

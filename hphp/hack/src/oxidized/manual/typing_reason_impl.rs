@@ -129,8 +129,7 @@ impl Reason {
             | ExprDepType(t, _, _)
             | Typeconst(t, _, _, _)
             | Instantiate(_, _, t) => t.pos(),
-            UpperBound { .. }
-            | LowerBound { .. }
+            LowerBound { .. }
             | Flow { .. }
             | PrjBoth { .. }
             | PrjOne { .. }

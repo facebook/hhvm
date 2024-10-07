@@ -2233,8 +2233,8 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
           ^ (strip_ns class_name |> Markdown_lite.md_codify)
           ^ " must match exactly (it is invariant)" );
       ]
-  (* If type originated with an unannotated lambda parameter with type variable type,
-   * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
+    (* If type originated with an unannotated lambda parameter with type variable type,
+     * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
   | Lambda_param
       ( _,
         ( From_witness_decl (Solve_fail _)

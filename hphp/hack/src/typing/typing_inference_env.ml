@@ -292,7 +292,7 @@ let add env ?(tyvar_pos = Pos.none) v ty =
   let env = update_tyvar_occurrences env v ty in
   env
 
-let get_type env r v =
+let get_type env reason_in tvid_in =
   let rec get r v aliases =
     let shorten_paths () =
       Tvid.Set.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
@@ -307,6 +307,16 @@ let get_type env r v =
                "Two type variables are aliasing each other!";
         get r v' (Tvid.Set.add v aliases)
       | _ ->
+        (* When we have a concrete solution r, record the flow of that solution as a
+           prefix to the original type variables's reason; when report in an error
+           we should then see the path of the relevant uppper / lower bounds
+           as the prefix for any flow through typing.
+           We don't record the flow when we are pointing at another tyvar on the
+           heap since we would end up with a chain of flows representing unification *)
+        let ty =
+          map_reason ty ~f:(fun solution ->
+              Typing_reason.(solved tvid_in ~solution ~in_:reason_in))
+        in
         let env = shorten_paths () in
         (env, ty)
     end
@@ -315,7 +325,7 @@ let get_type env r v =
       let env = shorten_paths () in
       (env, mk (r, Tvar v))
   in
-  get r v Tvid.Set.empty
+  get reason_in tvid_in Tvid.Set.empty
 
 let create_tyvar_constraints variance =
   let (appears_covariantly, appears_contravariantly) =

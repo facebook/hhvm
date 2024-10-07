@@ -91,23 +91,6 @@ let log_env_change name ?(level = 1) old_env new_env =
 
 let expand_var env r v =
   let (inference_env, ty_solution) = Inf.expand_var env.inference_env r v in
-  (* When we have a concrete solution r, record the flow of that solution as a
-     prefix to the original type variables's reason; when we linearize the
-     path, we should then see the path of the relevant uppper / lower bounds
-     as the prefix for any flow through typing.
-     We don't record the flow when we are pointing at another tyvar on the
-     heap since we would end up with a chain of flows representing unification
-  *)
-  let ty_solution =
-    if
-      (not (is_tyvar ty_solution))
-      && TypecheckerOptions.using_extended_reasons env.genv.tcopt
-    then
-      map_reason ty_solution ~f:(fun solution ->
-          Typing_reason.(solved v ~solution ~in_:r))
-    else
-      ty_solution
-  in
   ({ env with inference_env }, ty_solution)
 
 let fresh_type_reason ?variance env p r =
@@ -268,10 +251,7 @@ let get_type env r var =
 let expand_type env ty =
   match deref ty with
   | (reason, Tvar tvid) -> expand_var env reason tvid
-  | _ ->
-    (* If this expansion was applied to a concrete type, don't modify the
-       reason *)
-    (env, ty)
+  | _ -> (env, ty)
 
 let expand_internal_type env ty =
   match ty with

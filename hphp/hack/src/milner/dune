@@ -1,8 +1,0 @@
-(executable
- (name milner)
- (libraries
-  cmdliner
-  pcre
-  utils_core)
- (preprocess
-  (pps ppx_deriving.std)))

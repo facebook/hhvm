@@ -54,9 +54,9 @@ Invalid argument (Typing[4110])
     via this generic `T`
 WARN: File "instance_of_refinement.php", line 22, characters 7-20:
 This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `arraykey`. (Warn[12009])
+WARN: File "instance_of_refinement.php", line 35, characters 7-13:
+This `is` check is always `false`. The expression on the left has type `string` which shares no values with `B`. (Warn[12010])
 WARN: File "instance_of_refinement.php", line 50, characters 7-16:
 This `is` check is always `true`. The expression on the left has type `A<string>` which is a subtype of `A<string>`. (Warn[12009])
 WARN: File "instance_of_refinement.php", line 63, characters 14-25:
 This `is` check is always `true`. The expression on the left has type `string` which is a subtype of `string`. (Warn[12009])
-WARN: File "instance_of_refinement.php", line 35, characters 7-13:
-This `is` check is always `false`. The expression on the left has type `string` which shares no values with `B`. (Warn[12010])

@@ -1,9 +1,3 @@
-ERROR: File "array_sub.php", line 21, characters 12-13:
-Invalid argument (Typing[4110])
-  File "array_sub.php", line 12, characters 27-40:
-  Expected `dict<_, _>`
-  File "array_sub.php", line 20, characters 15-25:
-  But got `vec<int>`
 ERROR: File "array_sub.php", line 12, characters 27-40:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -24,3 +18,9 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "array_sub.php", line 12, characters 34-35:
   But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "array_sub.php", line 21, characters 12-13:
+Invalid argument (Typing[4110])
+  File "array_sub.php", line 12, characters 27-40:
+  Expected `dict<_, _>`
+  File "array_sub.php", line 20, characters 15-25:
+  But got `vec<int>`

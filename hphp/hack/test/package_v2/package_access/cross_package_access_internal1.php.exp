@@ -1,16 +1,3 @@
-error: Typing[4444] Cannot access an internal element from module foo in the default module [1]
--> This is from module foo [2]
-
-cross_package_access_internal1.php--bar.php:3:13
-1 | <?hh
-2 | // package pkg1
-[1] 3 | type TBar = TFoo;
-
-cross_package_access_internal1.php--cross_package_access_internal1_foo.php:4:15
-2 | // package pkg2
-3 | module foo;
-[2] 4 | internal type TFoo = int;
-
 error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
 -> This is from cross_package_access_internal1.php--cross_package_access_internal1_foo.php, which belongs to package pkg2 [2]
 -> But cross_package_access_internal1.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
@@ -31,5 +18,18 @@ PACKAGES.toml:3:11
 [3] 3 | [packages.pkg1]
 4 | include_paths=["//"]
 5 |
+
+error: Typing[4444] Cannot access an internal element from module foo in the default module [1]
+-> This is from module foo [2]
+
+cross_package_access_internal1.php--bar.php:3:13
+1 | <?hh
+2 | // package pkg1
+[1] 3 | type TBar = TFoo;
+
+cross_package_access_internal1.php--cross_package_access_internal1_foo.php:4:15
+2 | // package pkg2
+3 | module foo;
+[2] 4 | internal type TFoo = int;
 
 2 errors found

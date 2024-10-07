@@ -1,5 +1,3 @@
-ERROR: File "arity_error.php", line 8, characters 51-53:
-This argument must be a literal format string (Typing[4027])
 ERROR: File "arity_error.php", line 4, characters 10-45:
 Too few arguments (required 1 but got 0) (Typing[4104])
   File "soundness.hhi", line 31, characters 10-20:
@@ -10,3 +8,5 @@ Invalid argument (Typing[4110])
   Expected `HH\FormatString<nothing>`
   File "arity_error.php", line 7, characters 25-31:
   But got `dynamic`
+ERROR: File "arity_error.php", line 8, characters 51-53:
+This argument must be a literal format string (Typing[4027])

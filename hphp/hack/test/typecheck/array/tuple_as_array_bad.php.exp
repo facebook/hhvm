@@ -1,7 +1,7 @@
 ERROR: File "tuple_as_array_bad.php", line 12, characters 38-53:
-Unbound name: `varray_or_darray` (Naming[2049])
-ERROR: File "tuple_as_array_bad.php", line 12, characters 38-53:
 Too few type arguments for this type (Naming[2071])
+ERROR: File "tuple_as_array_bad.php", line 12, characters 38-53:
+Unbound name: `varray_or_darray` (Naming[2049])
 ERROR: File "tuple_as_array_bad.php", line 13, characters 10-11:
 Invalid return type (Typing[4110])
   File "tuple_as_array_bad.php", line 12, characters 38-53:

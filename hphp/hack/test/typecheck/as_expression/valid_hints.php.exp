@@ -1,13 +1,13 @@
+WARN: File "valid_hints.php", line 12, characters 7-13:
+Invalid condition: a value of type `C` will always be truthy (Warn[12006])
 WARN: File "valid_hints.php", line 16, characters 7-18:
 This is a sketchy null check on an expression of type MyEnum.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "valid_hints.php", line 12, characters 7-13:
-Invalid condition: a value of type `C` will always be truthy (Warn[12006])
+WARN: File "valid_hints.php", line 20, characters 7-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `mixed` which is a subtype of `mixed`. (Warn[12011])
 WARN: File "valid_hints.php", line 32, characters 7-36:
 Invalid condition: a value of type `shape('foo' => int, ...)` will always be truthy (Warn[12006])
 WARN: File "valid_hints.php", line 36, characters 7-26:
 Invalid condition: a value of type `(int, ?string)` will always be truthy (Warn[12006])
-WARN: File "valid_hints.php", line 20, characters 7-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `mixed` which is a subtype of `mixed`. (Warn[12011])

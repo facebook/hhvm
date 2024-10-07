@@ -2,10 +2,6 @@ ERROR: File "dict2.php", line 12, characters 31-34:
 Wrong number of type arguments (expected 2, got 0) (Typing[4101])
   File "hackarray.hhi", line 32, characters 24-27:
   Definition is here
-ERROR: File "dict2.php", line 13, characters 31-34:
-Wrong number of type arguments (expected 2, got 0) (Typing[4101])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Definition is here
 ERROR: File "dict2.php", line 13, characters 16-34:
 Invalid argument (Typing[4110])
   File "dict2.php", line 23, characters 28-30:
@@ -18,6 +14,10 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "dict2.php", line 13, characters 16-26:
   But got `mixed` from this "as" assertion
+ERROR: File "dict2.php", line 13, characters 31-34:
+Wrong number of type arguments (expected 2, got 0) (Typing[4101])
+  File "hackarray.hhi", line 32, characters 24-27:
+  Definition is here
 ERROR: File "dict2.php", line 16, characters 16-40:
 Invalid argument (Typing[4110])
   File "dict2.php", line 23, characters 28-30:

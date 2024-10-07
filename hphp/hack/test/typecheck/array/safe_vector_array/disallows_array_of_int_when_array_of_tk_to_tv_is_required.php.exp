@@ -1,9 +1,3 @@
-ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
-Invalid argument (Typing[4110])
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
-  Expected `dict<_, _>`
-  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-25:
-  But got `vec<int>`
 ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 24-25:
@@ -24,3 +18,9 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 46-47:
   But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 6, characters 24-34:
+Invalid argument (Typing[4110])
+  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 3, characters 39-52:
+  Expected `dict<_, _>`
+  File "disallows_array_of_int_when_array_of_tk_to_tv_is_required.php", line 5, characters 15-25:
+  But got `vec<int>`

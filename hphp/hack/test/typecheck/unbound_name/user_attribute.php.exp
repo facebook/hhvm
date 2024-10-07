@@ -5,11 +5,11 @@ Unrecognized user attribute: `NotFound` does not have a class. Please declare a 
 ERROR: File "user_attribute.php", line 20, characters 5-5:
 Unrecognized user attribute: `T` does not have a class. Please declare a class for the attribute. (Naming[2049])
 ERROR: File "user_attribute.php", line 24, characters 5-9:
-Unrecognized user attribute: `Alias` does not have a class. Please declare a class for the attribute. (Naming[2049])
-ERROR: File "user_attribute.php", line 24, characters 5-9:
 Expected a `class` but got a type alias. (Naming[2052])
   File "user_attribute.php", line 5, characters 6-10:
   Alias definition is here.
+ERROR: File "user_attribute.php", line 24, characters 5-9:
+Unrecognized user attribute: `Alias` does not have a class. Please declare a class for the attribute. (Naming[2049])
 ERROR: File "user_attribute.php", line 20, characters 5-5:
 Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
 ERROR: File "user_attribute.php", line 20, characters 5-5:

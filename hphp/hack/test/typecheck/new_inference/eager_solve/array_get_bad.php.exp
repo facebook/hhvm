@@ -1,21 +1,3 @@
-ERROR: File "array_get_bad.php", line 43, characters 15-22:
-Invalid index type for this Map (Typing[4324])
-  File "array_get_bad.php", line 22, characters 7-12:
-  This is a string
-  File "array_get_bad.php", line 43, characters 20-21:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 45, characters 15-23:
-Invalid index type for this ImmMap (Typing[4324])
-  File "array_get_bad.php", line 23, characters 10-15:
-  This is a string
-  File "array_get_bad.php", line 45, characters 21-22:
-  It is incompatible with an int
-ERROR: File "array_get_bad.php", line 47, characters 15-23:
-Invalid index type for this ConstMap (Typing[4324])
-  File "array_get_bad.php", line 24, characters 12-17:
-  This is a string
-  File "array_get_bad.php", line 47, characters 21-22:
-  It is incompatible with an int
 ERROR: File "array_get_bad.php", line 29, characters 14-21:
 Invalid index type for this vec (Typing[4449])
   File "array_get_bad.php", line 14, characters 3-8:
@@ -39,6 +21,24 @@ Invalid index type for this dict (Typing[4449])
   File "array_get_bad.php", line 21, characters 8-13:
   This is a string
   File "array_get_bad.php", line 41, characters 18-19:
+  It is incompatible with an int
+ERROR: File "array_get_bad.php", line 43, characters 15-22:
+Invalid index type for this Map (Typing[4324])
+  File "array_get_bad.php", line 22, characters 7-12:
+  This is a string
+  File "array_get_bad.php", line 43, characters 20-21:
+  It is incompatible with an int
+ERROR: File "array_get_bad.php", line 45, characters 15-23:
+Invalid index type for this ImmMap (Typing[4324])
+  File "array_get_bad.php", line 23, characters 10-15:
+  This is a string
+  File "array_get_bad.php", line 45, characters 21-22:
+  It is incompatible with an int
+ERROR: File "array_get_bad.php", line 47, characters 15-23:
+Invalid index type for this ConstMap (Typing[4324])
+  File "array_get_bad.php", line 24, characters 12-17:
+  This is a string
+  File "array_get_bad.php", line 47, characters 21-22:
   It is incompatible with an int
 ERROR: File "array_get_bad.php", line 49, characters 16-22:
 Invalid index type for this keyset (Typing[4449])

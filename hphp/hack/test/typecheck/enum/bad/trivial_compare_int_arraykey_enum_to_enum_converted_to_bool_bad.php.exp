@@ -10,19 +10,19 @@ This expression is always `false` (Typing[4118])
   This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
   File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 18-22:
   This is a bool because this is the result of a logical operation
+WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 9, characters 11-22:
+Invalid comparison: This expression will always return `false`.
+A value of type `bool` can never be equal to a value of type `X` (Warn[12007])
 WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 9, characters 12-13:
 This is a sketchy null check on an expression of type X.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$x is null` instead (Warn[12003])
+WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 11-22:
+Invalid comparison: This expression will always return `false`.
+A value of type `X` can never be equal to a value of type `bool` (Warn[12007])
 WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 19-22:
 This is a sketchy null check on an expression of type X.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$x is null` instead (Warn[12003])
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 9, characters 11-22:
-Invalid comparison: This expression will always return `false`.
-A value of type `bool` can never be equal to a value of type `X` (Warn[12007])
-WARN: File "trivial_compare_int_arraykey_enum_to_enum_converted_to_bool_bad.php", line 13, characters 11-22:
-Invalid comparison: This expression will always return `false`.
-A value of type `X` can never be equal to a value of type `bool` (Warn[12007])

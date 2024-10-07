@@ -2,24 +2,6 @@ ERROR: File "tconst_on_generics6.php", line 30, characters 82-83:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
 ERROR: File "tconst_on_generics6.php", line 33, characters 69-70:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics6.php", line 44, characters 15-18:
-  Expected `dynamic` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
-  File "tconst_on_generics6.php", line 30, characters 59-60:
-    via this generic `T1`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  But got `Box`
-ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
-  File "tconst_on_generics6.php", line 44, characters 15-18:
-  Expected `~_` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
-  File "tconst_on_generics6.php", line 30, characters 59-60:
-    via this generic `T1`
-  File "tconst_on_generics6.php", line 38, characters 26-28:
-  But got `<expr#3> as Box`
-  File "tconst_on_generics6.php", line 44, characters 20-21:
-    where `<expr#3>` is a reference to this expression
 ERROR: File "tconst_on_generics6.php", line 43, characters 19-20:
 Invalid argument (Typing[4326])
   File "tconst_on_generics6.php", line 10, characters 18-20:
@@ -103,3 +85,21 @@ Invalid argument (Typing[4326])
     resulting from accessing the type constant 'T'
   File "tconst_on_generics6.php", line 30, characters 47-52:
     on an object of type IntBox
+ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
+Invalid argument (Typing[4110])
+  File "tconst_on_generics6.php", line 44, characters 15-18:
+  Expected `dynamic` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
+  File "tconst_on_generics6.php", line 30, characters 59-60:
+    via this generic `T1`
+  File "tconst_on_generics6.php", line 38, characters 26-28:
+  But got `Box`
+ERROR: File "tconst_on_generics6.php", line 44, characters 20-21:
+Invalid argument (Typing[4110])
+  File "tconst_on_generics6.php", line 44, characters 15-18:
+  Expected `~_` because type parameter `T1` of `geta` could not be determined. Please add explicit type parameters to the invocation of `geta`
+  File "tconst_on_generics6.php", line 30, characters 59-60:
+    via this generic `T1`
+  File "tconst_on_generics6.php", line 38, characters 26-28:
+  But got `<expr#3> as Box`
+  File "tconst_on_generics6.php", line 44, characters 20-21:
+    where `<expr#3>` is a reference to this expression

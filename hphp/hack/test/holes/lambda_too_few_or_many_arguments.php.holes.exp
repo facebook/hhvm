@@ -5,11 +5,11 @@ Errors:
   [11:13-15] Invalid argument
   [9:41-68] Too many mandatory arguments (expected 1 but got 2)
   [7:20-42] Because of this definition
+  [12:13-23] Too few arguments (required 1 but got 0)
+  [7:20-42] Definition is here
   [13:13-16:4] Invalid argument
   [13:13-16:4] Too many mandatory arguments (expected 1 but got 2)
   [7:20-42] Because of this definition
-  [12:13-23] Too few arguments (required 1 but got 0)
-  [7:20-42] Definition is here
   [13:13-16:4] Too many arguments (expected 1 but got 2)
   [7:20-42] Definition is here
 [(Fun

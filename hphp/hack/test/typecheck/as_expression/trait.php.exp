@@ -1,8 +1,8 @@
 ERROR: File "trait.php", line 6, characters 9-12:
-`TFoo` is uninstantiable (Typing[4002])
-  File "trait.php", line 3, characters 7-10:
-  Declaration is here
-ERROR: File "trait.php", line 6, characters 9-12:
 Invalid `as` expression hint (Typing[4195])
   File "trait.php", line 6, characters 9-12:
   The `as` operator cannot be used with a trait name
+ERROR: File "trait.php", line 6, characters 9-12:
+`TFoo` is uninstantiable (Typing[4002])
+  File "trait.php", line 3, characters 7-10:
+  Declaration is here

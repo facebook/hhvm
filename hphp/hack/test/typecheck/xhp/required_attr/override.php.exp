@@ -6,10 +6,6 @@ ERROR: File "override.php", line 7, characters 35-37:
 Redeclared attribute must not be less strict (Typing[4315])
   File "override.php", line 4, characters 35-37:
   The attribute is `@required`, which is stricter than not `@required` or `@lateinit`
-ERROR: File "override.php", line 12, characters 35-37:
-Redeclared attribute must not be less strict (Typing[4315])
-  File "override.php", line 9, characters 35-37:
-  The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit`
 ERROR: File "override.php", line 7, characters 35-37:
 The property `:a` has the wrong type (Typing[4341])
   File "override.php", line 7, characters 35-37:
@@ -18,6 +14,10 @@ The property `:a` has the wrong type (Typing[4341])
   Expected `int`
   File "override.php", line 7, characters 35-37:
   But got `?int`
+ERROR: File "override.php", line 12, characters 35-37:
+Redeclared attribute must not be less strict (Typing[4315])
+  File "override.php", line 9, characters 35-37:
+  The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit`
 ERROR: File "override.php", line 12, characters 35-37:
 The property `:a` has the wrong type (Typing[4341])
   File "override.php", line 12, characters 35-37:

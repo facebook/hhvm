@@ -1,7 +1,7 @@
 ERROR: File "dict_to_varray_or_darray.php", line 11, characters 35-50:
-Unbound name: `varray_or_darray` (Naming[2049])
-ERROR: File "dict_to_varray_or_darray.php", line 11, characters 35-50:
 Too few type arguments for this type (Naming[2071])
+ERROR: File "dict_to_varray_or_darray.php", line 11, characters 35-50:
+Unbound name: `varray_or_darray` (Naming[2049])
 ERROR: File "dict_to_varray_or_darray.php", line 12, characters 10-11:
 Invalid return type (Typing[4110])
   File "dict_to_varray_or_darray.php", line 11, characters 35-50:

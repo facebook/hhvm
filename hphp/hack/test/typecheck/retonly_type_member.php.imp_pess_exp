@@ -7,8 +7,8 @@ You can only use the `noreturn` type as the return type of a function or method 
 ERROR: File "retonly_type_member.php", line 7, characters 3-40:
 You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4055 in declarations (Typing[4055])
 ERROR: File "retonly_type_member.php", line 8, characters 26-41:
-Please assign a value (Typing[4055])
-ERROR: File "retonly_type_member.php", line 8, characters 26-41:
 Class `C` cannot support dynamic because property `noreturn_member` does not have an enforceable type (Typing[4402])
   File "retonly_type_member.php", line 8, characters 17-24:
   Property `noreturn_member` has type `noreturn`
+ERROR: File "retonly_type_member.php", line 8, characters 26-41:
+Please assign a value (Typing[4055])

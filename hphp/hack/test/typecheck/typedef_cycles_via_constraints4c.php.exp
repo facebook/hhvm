@@ -1,3 +1,13 @@
+ERROR: File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 15-20:
+Some type arguments violate their constraints (Typing[4323])
+  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 11-11:
+  `T` is a constrained type parameter
+  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 16-19:
+  This type constraint is violated
+  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 16-19:
+  Expected `B<int>`
+  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 17-19:
+  But got `int`
 ERROR: File "typedef_cycles_via_constraints4c.php--uses.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints4c.php--uses.php", line 3, characters 24-29:
@@ -16,13 +26,3 @@ Invalid argument (Typing[4110])
     via this generic `T`
   File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 25-25:
     via this generic `T`
-ERROR: File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 15-20:
-Some type arguments violate their constraints (Typing[4323])
-  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 11-11:
-  `T` is a constrained type parameter
-  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 16-19:
-  This type constraint is violated
-  File "typedef_cycles_via_constraints4c.php--defs.php", line 3, characters 16-19:
-  Expected `B<int>`
-  File "typedef_cycles_via_constraints4c.php--uses.php", line 5, characters 17-19:
-  But got `int`

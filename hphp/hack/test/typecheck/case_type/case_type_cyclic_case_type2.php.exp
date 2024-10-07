@@ -2,20 +2,6 @@ ERROR: File "case_type_cyclic_case_type2.php", line 4, characters 11-19:
 Cyclic type definition (Typing[4014])
   File "case_type_cyclic_case_type2.php", line 4, characters 23-31:
   Cyclic use is here
-ERROR: File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
-Invalid argument (Typing[4110])
-  File "case_type_cyclic_case_type2.php", line 9, characters 13-21:
-  Expected `Recursive`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
-  But got `bool`
-ERROR: File "case_type_cyclic_case_type2.php", line 9, characters 3-28:
-hh_expect type mismatch (Typing[4453])
-  File "case_type_cyclic_case_type2.php", line 9, characters 13-21:
-  Expected `Recursive`
-  File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
-  But got `bool`
 ERROR: File "case_type_cyclic_case_type2.php", line 4, characters 11-19:
 Invalid case type declaration. More than one variant of `Recursive` could contain values with the same runtime tag (Typing[4475])
   File "case_type_cyclic_case_type2.php", line 4, characters 23-31:
@@ -24,3 +10,17 @@ Invalid case type declaration. More than one variant of `Recursive` could contai
     via this variant of the case type `Recursive`
   File "case_type_cyclic_case_type2.php", line 4, characters 35-37:
   It overlaps with `int`, which also includes **ints**
+ERROR: File "case_type_cyclic_case_type2.php", line 9, characters 3-28:
+hh_expect type mismatch (Typing[4453])
+  File "case_type_cyclic_case_type2.php", line 9, characters 13-21:
+  Expected `Recursive`
+  File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
+  But got `bool`
+ERROR: File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
+Invalid argument (Typing[4110])
+  File "case_type_cyclic_case_type2.php", line 9, characters 13-21:
+  Expected `Recursive`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "case_type_cyclic_case_type2.php", line 9, characters 24-27:
+  But got `bool`

@@ -33,14 +33,6 @@ Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 103, characters 10-13:
     where `<expr#8>` is a reference to this expression
 ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
-Invalid argument (Typing[4110])
-  File "tc_in_enum_class.php", line 103, characters 20-23:
-  Expected a class with a constant `Bar`
-  File "tc_in_enum_class.php", line 90, characters 24-30:
-  But got `<expr#8>::T as IAntParent::T`
-  File "tc_in_enum_class.php", line 103, characters 10-13:
-    where `<expr#8>` is a reference to this expression
-ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4323])
   File "tc_in_enum_class.php", line 89, characters 40-46:
   `TGetter` is a constrained type parameter
@@ -50,3 +42,11 @@ Invalid argument (Typing[4323])
   Expected `IAntGetter<_, _>`
   File "tc_in_enum_class.php", line 47, characters 12-36:
   But got `dynamic`
+ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
+Invalid argument (Typing[4110])
+  File "tc_in_enum_class.php", line 103, characters 20-23:
+  Expected a class with a constant `Bar`
+  File "tc_in_enum_class.php", line 90, characters 24-30:
+  But got `<expr#8>::T as IAntParent::T`
+  File "tc_in_enum_class.php", line 103, characters 10-13:
+    where `<expr#8>` is a reference to this expression

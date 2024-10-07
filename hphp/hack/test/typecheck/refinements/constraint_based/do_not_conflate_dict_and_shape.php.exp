@@ -1,42 +1,42 @@
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
+hh_expect type mismatch (Typing[4453])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 11, characters 10-15:
   But got `dict<nothing, nothing>`
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
+hh_expect type mismatch (Typing[4453])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 15, characters 13-29:
   But got `(dict<nothing, nothing> & not shape('x' => int))` from this `is` expression test
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
-Invalid argument (Typing[4110])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
+hh_expect type mismatch (Typing[4453])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 15, characters 13-29:
   But got `not shape('x' => int)` from this `is` expression test
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
+Invalid argument (Typing[4110])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 11, characters 10-15:
   But got `dict<nothing, nothing>`
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
+Invalid argument (Typing[4110])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 15, characters 13-29:
   But got `(dict<nothing, nothing> & not shape('x' => int))` from this `is` expression test
-ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 5-22:
-hh_expect type mismatch (Typing[4453])
+ERROR: File "do_not_conflate_dict_and_shape.php", line 18, characters 20-21:
+Invalid argument (Typing[4110])
   File "do_not_conflate_dict_and_shape.php", line 18, characters 15-17:
   Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
   File "do_not_conflate_dict_and_shape.php", line 15, characters 13-29:
   But got `not shape('x' => int)` from this `is` expression test

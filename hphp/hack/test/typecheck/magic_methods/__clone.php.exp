@@ -1,4 +1,4 @@
-ERROR: File "__clone.php", line 12, characters 10-16:
-`__clone` is a magic method and cannot be called directly (NastCheck[3011])
 ERROR: File "__clone.php", line 4, characters 30-35:
 The return type of `__clone` should be void. `__clone` is called to mutate the new object side-effect-fully (NastCheck[3104])
+ERROR: File "__clone.php", line 12, characters 10-16:
+`__clone` is a magic method and cannot be called directly (NastCheck[3011])

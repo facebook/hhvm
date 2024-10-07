@@ -68,6 +68,12 @@ ERROR: File "user_attributes_params.php", line 5, characters 19-25:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "user_attributes_params.php", line 8, characters 19-25:
 Was expecting a return type hint (Typing[4030])
+ERROR: File "user_attributes_params.php", line 10, characters 9-24:
+This label is not a valid reference to a member of the given enum class (Typing[4110])
+  File "user_attributes_params.php", line 10, characters 18-24:
+  Expected a class with a constant `Label1`
+  File "user_attributes_params.php", line 10, characters 9-17:
+  But got `SomeClass`
 ERROR: File "user_attributes_params.php", line 11, characters 19-29:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "user_attributes_params.php", line 14, characters 19-29:
@@ -88,9 +94,3 @@ ERROR: File "user_attributes_params.php", line 35, characters 19-31:
 Was expecting a return type hint (Typing[4030])
 ERROR: File "user_attributes_params.php", line 38, characters 19-34:
 Was expecting a return type hint (Typing[4030])
-ERROR: File "user_attributes_params.php", line 10, characters 9-24:
-This label is not a valid reference to a member of the given enum class (Typing[4110])
-  File "user_attributes_params.php", line 10, characters 18-24:
-  Expected a class with a constant `Label1`
-  File "user_attributes_params.php", line 10, characters 9-17:
-  But got `SomeClass`

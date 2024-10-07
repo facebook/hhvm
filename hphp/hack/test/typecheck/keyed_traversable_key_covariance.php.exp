@@ -1,15 +1,15 @@
 ERROR: File "keyed_traversable_key_covariance.php", line 8, characters 14-23:
-Invalid index type for this vec (Typing[4324])
-  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
-  But got `string`
-ERROR: File "keyed_traversable_key_covariance.php", line 8, characters 14-23:
 Invalid index type for this vec (Typing[4449])
   File "keyed_traversable_key_covariance.php", line 7, characters 6-8:
   This is an int because only `int` can be used to index into a `Vector` or `vec`.
   File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
   It is incompatible with a string
+ERROR: File "keyed_traversable_key_covariance.php", line 8, characters 14-23:
+Invalid index type for this vec (Typing[4324])
+  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "keyed_traversable_key_covariance.php", line 8, characters 20-22:
+  But got `string`
 ERROR: File "keyed_traversable_key_covariance.php", line 15, characters 14-23:
 Invalid index type for this vec (Typing[4449])
   File "keyed_traversable_key_covariance.php", line 4, characters 10-25:

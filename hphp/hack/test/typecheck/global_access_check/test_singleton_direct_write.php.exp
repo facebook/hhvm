@@ -1,41 +1,45 @@
+ERROR: File "test_singleton_direct_write.php", line 21, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
 ERROR: File "test_singleton_direct_write.php", line 22, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 ERROR: File "test_singleton_direct_write.php", line 25, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
+ERROR: File "test_singleton_direct_write.php", line 27, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 ERROR: File "test_singleton_direct_write.php", line 28, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 ERROR: File "test_singleton_direct_write.php", line 30, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
+ERROR: File "test_singleton_direct_write.php", line 33, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+ERROR: File "test_singleton_direct_write.php", line 35, characters 7-18:
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 ERROR: File "test_singleton_direct_write.php", line 37, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
+ERROR: File "test_singleton_direct_write.php", line 40, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 ERROR: File "test_singleton_direct_write.php", line 41, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 ERROR: File "test_singleton_direct_write.php", line 43, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
+ERROR: File "test_singleton_direct_write.php", line 47, characters 7-18:
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 ERROR: File "test_singleton_direct_write.php", line 49, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
+ERROR: File "test_singleton_direct_write.php", line 52, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 ERROR: File "test_singleton_direct_write.php", line 53, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 ERROR: File "test_singleton_direct_write.php", line 55, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 61, characters 7-27:
-[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-ERROR: File "test_singleton_direct_write.php", line 35, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_direct_write.php", line 47, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 ERROR: File "test_singleton_direct_write.php", line 59, characters 7-18:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-ERROR: File "test_singleton_direct_write.php", line 21, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 27, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 33, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 40, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-ERROR: File "test_singleton_direct_write.php", line 52, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+ERROR: File "test_singleton_direct_write.php", line 61, characters 7-27:
+[Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
+WARN: File "test_singleton_direct_write.php", line 27, characters 9-25:
+This `is` check is always `false`. The expression on the left has type `Bar` which shares no values with `null`. (Warn[12010])
+WARN: File "test_singleton_direct_write.php", line 34, characters 9-21:
+This `is` check is always `true`. The expression on the left has type `Bar` which is a subtype of `nonnull`. (Warn[12009])
 WARN: File "test_singleton_direct_write.php", line 40, characters 9-26:
 Invalid comparison: This expression will always return `false`.
 A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
@@ -48,7 +52,3 @@ A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
 WARN: File "test_singleton_direct_write.php", line 58, characters 9-18:
 Invalid comparison: This expression will always return `false`.
 A value of type `Bar` can never be equal to a value of type `null` (Warn[12007])
-WARN: File "test_singleton_direct_write.php", line 34, characters 9-21:
-This `is` check is always `true`. The expression on the left has type `Bar` which is a subtype of `nonnull`. (Warn[12009])
-WARN: File "test_singleton_direct_write.php", line 27, characters 9-25:
-This `is` check is always `false`. The expression on the left has type `Bar` which shares no values with `null`. (Warn[12010])

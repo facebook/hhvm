@@ -1,7 +1,3 @@
-ERROR: File "shape_coalesce.php", line 18, characters 6-10:
-This shape doesn't have a field `bar` (Typing[4108])
-  File "shape_coalesce.php", line 15, characters 12-18:
-  The shape is defined here
 ERROR: File "shape_coalesce.php", line 12, characters 6-10:
 The field `bar` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
   File "shape_coalesce.php", line 9, characters 19-23:
@@ -14,3 +10,7 @@ ERROR: File "shape_coalesce.php", line 17, characters 3-19:
 You are accessing a field known to not exist (Typing[4321])
   File "shape_coalesce.php", line 15, characters 12-18:
   The field `bar` is not defined in this shape
+ERROR: File "shape_coalesce.php", line 18, characters 6-10:
+This shape doesn't have a field `bar` (Typing[4108])
+  File "shape_coalesce.php", line 15, characters 12-18:
+  The shape is defined here

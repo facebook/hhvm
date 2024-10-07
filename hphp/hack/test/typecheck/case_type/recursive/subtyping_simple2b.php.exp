@@ -1,10 +1,4 @@
 ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
-Invalid constraint on `newtype` (Typing[4332])
-  File "subtyping_simple2b.php", line 4, characters 16-18:
-  Expected `int`
-  File "subtyping_simple2b.php", line 4, characters 22-22:
-  But got `mixed`
-ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
 Invalid case type declaration. More than one variant of `A` could contain values with the same runtime tag (Typing[4475])
   File "subtyping_simple2b.php", line 4, characters 22-22:
   This is the type `A`, which includes **ints** because it is a cyclic type
@@ -12,3 +6,9 @@ Invalid case type declaration. More than one variant of `A` could contain values
     via this variant of the case type `A`
   File "subtyping_simple2b.php", line 5, characters 5-7:
   It overlaps with `int`, which also includes **ints**
+ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
+Invalid constraint on `newtype` (Typing[4332])
+  File "subtyping_simple2b.php", line 4, characters 16-18:
+  Expected `int`
+  File "subtyping_simple2b.php", line 4, characters 22-22:
+  But got `mixed`

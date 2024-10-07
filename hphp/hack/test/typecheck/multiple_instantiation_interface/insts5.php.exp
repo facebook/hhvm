@@ -1,9 +1,3 @@
-ERROR: File "insts5.php", line 22, characters 10-11:
-Invalid argument (Typing[4110])
-  File "insts5.php", line 19, characters 19-24:
-  Expected `string`
-  File "insts5.php", line 5, characters 23-30:
-  But got `arraykey`
 ERROR: File "insts5.php", line 10, characters 23-34:
 This makes Derived implements I<string> but it already implements I at another instantiation (Typing[4480])
   File "insts5.php", line 10, characters 47-47:
@@ -34,5 +28,11 @@ This makes Derived2 implements I<string> but it already implements I at another 
   Expected `string`
   File "insts5.php", line 6, characters 28-28:
     via this generic `T`
+  File "insts5.php", line 5, characters 23-30:
+  But got `arraykey`
+ERROR: File "insts5.php", line 22, characters 10-11:
+Invalid argument (Typing[4110])
+  File "insts5.php", line 19, characters 19-24:
+  Expected `string`
   File "insts5.php", line 5, characters 23-30:
   But got `arraykey`

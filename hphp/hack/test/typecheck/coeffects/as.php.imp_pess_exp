@@ -10,18 +10,12 @@ ERROR: File "as.php", line 11, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
   File "as.php", line 6, characters 18-27:
   The `as` operator cannot be used with an intersection type, which is restricted to coeffects
-ERROR: File "as.php", line 22, characters 8-12:
-Invalid `as` expression hint (Typing[4195])
+ERROR: File "as.php", line 15, characters 5-7:
+Some type arguments violate their constraints (Typing[4323])
+  File "as.php", line 27, characters 10-12:
+  Expected `dynamic`
   File "as.php", line 4, characters 18-19:
-  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
-ERROR: File "as.php", line 23, characters 8-12:
-Invalid `as` expression hint (Typing[4195])
-  File "as.php", line 5, characters 18-30:
-  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
-ERROR: File "as.php", line 24, characters 8-12:
-Invalid `as` expression hint (Typing[4195])
-  File "as.php", line 6, characters 18-27:
-  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "as.php", line 15, characters 9-16:
 Invalid type (Typing[4302])
   File "as.php", line 27, characters 38-38:
@@ -40,6 +34,24 @@ Invalid type (Typing[4302])
   Type parameter `T` was declared `__Enforceable` here
   File "as.php", line 6, characters 18-27:
   This type is not enforceable because it has an intersection type, which is restricted to coeffects
+ERROR: File "as.php", line 22, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 4, characters 18-19:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+ERROR: File "as.php", line 23, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 5, characters 18-30:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+ERROR: File "as.php", line 24, characters 8-12:
+Invalid `as` expression hint (Typing[4195])
+  File "as.php", line 6, characters 18-27:
+  The `as` operator cannot be used with an intersection type, which is restricted to coeffects
+ERROR: File "as.php", line 32, characters 3-5:
+Some type arguments violate their constraints (Typing[4323])
+  File "as.php", line 27, characters 10-12:
+  Expected `dynamic`
+  File "as.php", line 4, characters 18-19:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "as.php", line 32, characters 7-11:
 Invalid type (Typing[4302])
   File "as.php", line 27, characters 38-38:
@@ -58,26 +70,14 @@ Invalid type (Typing[4302])
   Type parameter `T` was declared `__Enforceable` here
   File "as.php", line 6, characters 18-27:
   This type is not enforceable because it has an intersection type, which is restricted to coeffects
-ERROR: File "as.php", line 15, characters 5-7:
-Some type arguments violate their constraints (Typing[4323])
-  File "as.php", line 27, characters 10-12:
-  Expected `dynamic`
-  File "as.php", line 4, characters 18-19:
-  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "as.php", line 32, characters 3-5:
-Some type arguments violate their constraints (Typing[4323])
-  File "as.php", line 27, characters 10-12:
-  Expected `dynamic`
-  File "as.php", line 4, characters 18-19:
-  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
 WARN: File "as.php", line 9, characters 5-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
-WARN: File "as.php", line 22, characters 3-12:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
 WARN: File "as.php", line 10, characters 5-17:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Capabilities\WriteProperty`. (Warn[12012])
 WARN: File "as.php", line 11, characters 5-17:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(HH\Capabilities\ImplicitPolicyLocal & HH\Capabilities\RxLocal & HH\Capabilities\WriteProperty & HH\Capabilities\AccessGlobals & HH\Capabilities\SystemLocal & HH\Capabilities\IO)`. (Warn[12012])
+WARN: File "as.php", line 22, characters 3-12:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `mixed`. (Warn[12011])
 WARN: File "as.php", line 23, characters 3-12:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `HH\Capabilities\WriteProperty`. (Warn[12012])
 WARN: File "as.php", line 24, characters 3-12:

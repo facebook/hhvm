@@ -1,4 +1,4 @@
-ERROR: File "type_constant_projection_where.php", line 10, characters 41-44:
-Type access is only valid for a class, `self`, or `this` (Naming[2061])
 ERROR: File "type_constant_projection_where.php", line 8, characters 62-65:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "type_constant_projection_where.php", line 10, characters 41-44:
+Type access is only valid for a class, `self`, or `this` (Naming[2061])

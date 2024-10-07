@@ -1,3 +1,15 @@
+ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
+Invalid constraint on `newtype` (Typing[4332])
+  File "subtyping_simple4b.php", line 4, characters 20-20:
+  Expected `A`
+  File "subtyping_simple4b.php", line 4, characters 29-29:
+  But got `mixed`
+ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
+Invalid constraint on `newtype` (Typing[4332])
+  File "subtyping_simple4b.php", line 4, characters 20-20:
+  Expected `A`
+  File "subtyping_simple4b.php", line 4, characters 29-29:
+  But got `nonnull`
 ERROR: File "subtyping_simple4b.php", line 22, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 7, characters 26-26:
@@ -27,16 +39,4 @@ Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 8, characters 33-33:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `nonnull`
-ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
-Invalid constraint on `newtype` (Typing[4332])
-  File "subtyping_simple4b.php", line 4, characters 20-20:
-  Expected `A`
-  File "subtyping_simple4b.php", line 4, characters 29-29:
-  But got `mixed`
-ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
-Invalid constraint on `newtype` (Typing[4332])
-  File "subtyping_simple4b.php", line 4, characters 20-20:
-  Expected `A`
-  File "subtyping_simple4b.php", line 4, characters 29-29:
   But got `nonnull`

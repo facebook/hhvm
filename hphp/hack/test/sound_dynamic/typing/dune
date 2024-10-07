@@ -19,14 +19,12 @@
    --in-extension
    .good.php
    --out-extension
-   .legacy_decl.out
+   .out
    --expect-extension
-   .legacy_decl.exp
-   --fallback-expect-extension
    .exp
    --flags
-   --out-extension
-   .legacy_decl.out)))
+   --config
+   everything_sdt=false)))
 
 (rule
  (alias sound_dynamic_typing_bad)
@@ -49,14 +47,12 @@
    --in-extension
    .bad.php
    --out-extension
-   .legacy_decl.out
+   .out
    --expect-extension
-   .legacy_decl.exp
-   --fallback-expect-extension
    .exp
    --flags
-   --out-extension
-   .legacy_decl.out
+   --config
+   everything_sdt=false
    --error-format
    plain)))
 

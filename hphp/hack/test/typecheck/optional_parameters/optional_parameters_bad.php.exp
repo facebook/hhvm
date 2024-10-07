@@ -4,24 +4,6 @@ ERROR: File "optional_parameters_bad.php", line 40, characters 32-53:
 Cannot use `optional` on `inout` parameters (Parsing[1002])
 ERROR: File "optional_parameters_bad.php", line 42, characters 32-50:
 Cannot use `optional` on variadic or splat parameters (Parsing[1002])
-ERROR: File "optional_parameters_bad.php", line 36, characters 57-58:
-A previous parameter has a default value or is optional.
-Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 38, characters 76-77:
-A previous parameter has a default value or is optional.
-Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 44, characters 56-57:
-A previous parameter has a default value or is optional.
-Remove all the optional or default values for the preceding parameters,
-or add a default value or optional to this one. (Typing[4077])
-ERROR: File "optional_parameters_bad.php", line 29, characters 11-15:
-Invalid argument (Typing[4110])
-  File "optional_parameters_bad.php", line 4, characters 23-25:
-  Expected `int`
-  File "optional_parameters_bad.php", line 29, characters 11-15:
-  But got `bool`
 ERROR: File "optional_parameters_bad.php", line 8, characters 19-21:
 The method `foo` is not compatible with the overridden method (Typing[4341])
   File "optional_parameters_bad.php", line 8, characters 19-21:
@@ -73,6 +55,24 @@ The method `foo` is not compatible with the overridden method (Typing[4341])
 ERROR: File "optional_parameters_bad.php", line 24, characters 37-38:
 Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
  (Typing[4484])
+ERROR: File "optional_parameters_bad.php", line 29, characters 11-15:
+Invalid argument (Typing[4110])
+  File "optional_parameters_bad.php", line 4, characters 23-25:
+  Expected `int`
+  File "optional_parameters_bad.php", line 29, characters 11-15:
+  But got `bool`
+ERROR: File "optional_parameters_bad.php", line 36, characters 57-58:
+A previous parameter has a default value or is optional.
+Remove all the optional or default values for the preceding parameters,
+or add a default value or optional to this one. (Typing[4077])
+ERROR: File "optional_parameters_bad.php", line 38, characters 76-77:
+A previous parameter has a default value or is optional.
+Remove all the optional or default values for the preceding parameters,
+or add a default value or optional to this one. (Typing[4077])
+ERROR: File "optional_parameters_bad.php", line 44, characters 56-57:
+A previous parameter has a default value or is optional.
+Remove all the optional or default values for the preceding parameters,
+or add a default value or optional to this one. (Typing[4077])
 ERROR: File "optional_parameters_bad.php", line 48, characters 27-28:
 Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.
  (Typing[4484])

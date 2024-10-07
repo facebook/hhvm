@@ -1,8 +1,8 @@
-ERROR: File "shape_refine_not_keyExists_open.php", line 16, characters 8-10:
-The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
-  File "shape_refine_not_keyExists_open.php", line 13, characters 29-31:
-  This is where the field was declared as optional.
 ERROR: File "shape_refine_not_keyExists_open.php", line 4, characters 7-32:
 This `Shapes::keyExists()` check is always true (Typing[4249])
   File "shape_refine_not_keyExists_open.php", line 3, characters 34-36:
   The field `a` exists because of this definition
+ERROR: File "shape_refine_not_keyExists_open.php", line 16, characters 8-10:
+The field `a` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
+  File "shape_refine_not_keyExists_open.php", line 13, characters 29-31:
+  This is where the field was declared as optional.

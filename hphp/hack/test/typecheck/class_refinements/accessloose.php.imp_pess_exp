@@ -16,6 +16,12 @@ Invalid argument (Typing[4110])
   But got `<expr#2> as Ref<Box with { type T as int }>`
   File "accessloose.php", line 43, characters 18-20:
     where `<expr#2>` is a reference to this expression
+ERROR: File "accessloose.php", line 43, characters 18-20:
+Invalid argument (Typing[4468])
+  File "accessloose.php", line 17, characters 61-61:
+  Type member `T` cannot be accessed
+  File "accessloose.php", line 37, characters 19-44:
+    on a loose refinement
 ERROR: File "accessloose.php", line 50, characters 10-16:
 A `where` type constraint is violated here (Typing[4323])
   File "accessloose.php", line 17, characters 10-16:
@@ -23,10 +29,4 @@ A `where` type constraint is violated here (Typing[4323])
   File "accessloose.php", line 17, characters 61-61:
   Type member `T` cannot be accessed
   File "accessloose.php", line 17, characters 57-61:
-    on a loose refinement
-ERROR: File "accessloose.php", line 43, characters 18-20:
-Invalid argument (Typing[4468])
-  File "accessloose.php", line 17, characters 61-61:
-  Type member `T` cannot be accessed
-  File "accessloose.php", line 37, characters 19-44:
     on a loose refinement

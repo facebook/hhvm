@@ -1,14 +1,14 @@
+ERROR: File "do_not_conflate_tuples.php", line 7, characters 5-26:
+hh_expect type mismatch (Typing[4453])
+  File "do_not_conflate_tuples.php", line 7, characters 15-21:
+  Expected `nothing`
+  File "do_not_conflate_tuples.php", line 6, characters 20-35:
+  But got `(string, string)` from this `is` expression test
 ERROR: File "do_not_conflate_tuples.php", line 7, characters 24-25:
 Invalid argument (Typing[4110])
   File "do_not_conflate_tuples.php", line 7, characters 15-21:
   Expected `nothing`
   File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
     via this generic `T`
-  File "do_not_conflate_tuples.php", line 6, characters 20-35:
-  But got `(string, string)` from this `is` expression test
-ERROR: File "do_not_conflate_tuples.php", line 7, characters 5-26:
-hh_expect type mismatch (Typing[4453])
-  File "do_not_conflate_tuples.php", line 7, characters 15-21:
-  Expected `nothing`
   File "do_not_conflate_tuples.php", line 6, characters 20-35:
   But got `(string, string)` from this `is` expression test

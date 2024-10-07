@@ -1,11 +1,3 @@
-ERROR: File "typedef_cycles_via_constraints4.php--uses.php", line 6, characters 17-18:
-Invalid argument (Typing[4110])
-  File "typedef_cycles_via_constraints4.php--uses.php", line 3, characters 24-29:
-  Expected `string`
-  File "typedef_cycles_via_constraints4.php--uses.php", line 5, characters 17-19:
-  But got `int`
-  File "typedef_cycles_via_constraints4.php--defs.php", line 3, characters 25-25:
-    via this generic `T`
 ERROR: File "typedef_cycles_via_constraints4.php--uses.php", line 5, characters 15-20:
 Some type arguments violate their constraints (Typing[4323])
   File "typedef_cycles_via_constraints4.php--defs.php", line 3, characters 11-11:
@@ -16,3 +8,11 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `A<int>`
   File "typedef_cycles_via_constraints4.php--uses.php", line 5, characters 17-19:
   But got `int`
+ERROR: File "typedef_cycles_via_constraints4.php--uses.php", line 6, characters 17-18:
+Invalid argument (Typing[4110])
+  File "typedef_cycles_via_constraints4.php--uses.php", line 3, characters 24-29:
+  Expected `string`
+  File "typedef_cycles_via_constraints4.php--uses.php", line 5, characters 17-19:
+  But got `int`
+  File "typedef_cycles_via_constraints4.php--defs.php", line 3, characters 25-25:
+    via this generic `T`

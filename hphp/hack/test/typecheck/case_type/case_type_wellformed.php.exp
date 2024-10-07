@@ -1,7 +1,43 @@
-ERROR: File "case_type_wellformed.php", line 16, characters 11-19:
-Cyclic type definition (Typing[4014])
-  File "case_type_wellformed.php", line 16, characters 28-36:
-  Cyclic use is here
+ERROR: File "case_type_wellformed.php", line 4, characters 40-48:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 47-47:
+  But got `T`
+ERROR: File "case_type_wellformed.php", line 4, characters 40-48:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 47-47:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 57-57:
+  But got `T`
+ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "case_type_wellformed.php", line 4, characters 57-57:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "case_type_wellformed.php", line 7, characters 20-23:
 Illegal usage of a covariant type parameter (Typing[4120])
   File "case_type_wellformed.php", line 6, characters 48-51:
@@ -28,46 +64,6 @@ http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
   (+) This type parameter was declared as covariant (+) (cf 'HH\dict')
   File "case_type_wellformed.php", line 7, characters 3-50:
   (+) Aliased types are covariant
-ERROR: File "case_type_wellformed.php", line 4, characters 40-48:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "case_type_wellformed.php", line 4, characters 47-47:
-  But got `T`
-ERROR: File "case_type_wellformed.php", line 4, characters 40-48:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 43, characters 50-50:
-  `T` is a constrained type parameter
-  File "hackarray.hhi", line 43, characters 55-62:
-  This type constraint is violated
-  File "hackarray.hhi", line 43, characters 55-62:
-  Expected `arraykey`
-  File "case_type_wellformed.php", line 4, characters 47-47:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
-ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "case_type_wellformed.php", line 4, characters 57-57:
-  But got `T`
-ERROR: File "case_type_wellformed.php", line 4, characters 52-63:
-Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 33, characters 24-25:
-  `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 33, characters 30-37:
-  This type constraint is violated
-  File "hackarray.hhi", line 33, characters 30-37:
-  Expected `arraykey`
-  File "case_type_wellformed.php", line 4, characters 57-57:
-  But got `mixed` arising from an implicit `as mixed` constraint on this type
 ERROR: File "case_type_wellformed.php", line 11, characters 11-26:
 Invalid constraint on `newtype` (Typing[4332])
   File "case_type_wellformed.php", line 11, characters 31-33:
@@ -92,3 +88,7 @@ Invalid constraint on `newtype` (Typing[4332])
   Expected `arraykey`
   File "case_type_wellformed.php", line 14, characters 83-86:
   But got `bool`
+ERROR: File "case_type_wellformed.php", line 16, characters 11-19:
+Cyclic type definition (Typing[4014])
+  File "case_type_wellformed.php", line 16, characters 28-36:
+  Cyclic use is here

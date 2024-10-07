@@ -2,10 +2,6 @@ ERROR: File "subtyping_mutual5.php", line 33, characters 3-13:
 Unbound name: `expect_vecA` (a global function) (Naming[2049])
 ERROR: File "subtyping_mutual5.php", line 34, characters 3-13:
 Unbound name: `expect_vecB` (a global function) (Naming[2049])
-ERROR: File "subtyping_mutual5.php", line 33, characters 3-13:
-Unbound name (typing): `expect_vecA` (Typing[4107])
-ERROR: File "subtyping_mutual5.php", line 34, characters 3-13:
-Unbound name (typing): `expect_vecB` (Typing[4107])
 ERROR: File "subtyping_mutual5.php", line 24, characters 12-13:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5.php", line 9, characters 19-19:
@@ -24,6 +20,10 @@ Invalid argument (Typing[4110])
   Expected `B`
   File "subtyping_mutual5.php", line 14, characters 3-5:
   But got `int`
+ERROR: File "subtyping_mutual5.php", line 33, characters 3-13:
+Unbound name (typing): `expect_vecA` (Typing[4107])
+ERROR: File "subtyping_mutual5.php", line 34, characters 3-13:
+Unbound name (typing): `expect_vecB` (Typing[4107])
 ERROR: File "subtyping_mutual5.php", line 45, characters 12-14:
 Invalid argument (Typing[4110])
   File "subtyping_mutual5.php", line 8, characters 19-19:

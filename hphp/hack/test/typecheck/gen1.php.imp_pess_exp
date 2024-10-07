@@ -1,4 +1,24 @@
 ERROR: File "gen1.php", line 23, characters 7-8:
+Invalid argument (Typing[4323])
+  File "gen1.php", line 18, characters 14-14:
+  `T` is a constrained type parameter
+  File "gen1.php", line 18, characters 19-19:
+  This type constraint is violated
+  File "gen1.php", line 18, characters 19-19:
+  Expected `A`
+  File "gen1.php", line 22, characters 20-20:
+  But got `B`
+ERROR: File "gen1.php", line 23, characters 7-8:
+Invalid argument (Typing[4323])
+  File "gen1.php", line 18, characters 14-14:
+  `T` is a constrained type parameter
+  File "gen1.php", line 18, characters 19-19:
+  This type constraint is violated
+  File "gen1.php", line 18, characters 19-19:
+  Expected `A`
+  File "gen1.php", line 22, characters 23-23:
+  But got `T as B`
+ERROR: File "gen1.php", line 23, characters 7-8:
 Invalid argument (Typing[4110])
   File "gen1.php", line 23, characters 3-5:
   Expected `dynamic` because type parameter `T` of `foo` could not be determined. Please add explicit type parameters to the invocation of `foo`
@@ -24,23 +44,3 @@ Invalid argument (Typing[4110])
   But got `<expr#2> as T where T as B`
   File "gen1.php", line 23, characters 7-8:
     where `<expr#2>` is a reference to this expression
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4323])
-  File "gen1.php", line 18, characters 14-14:
-  `T` is a constrained type parameter
-  File "gen1.php", line 18, characters 19-19:
-  This type constraint is violated
-  File "gen1.php", line 18, characters 19-19:
-  Expected `A`
-  File "gen1.php", line 22, characters 20-20:
-  But got `B`
-ERROR: File "gen1.php", line 23, characters 7-8:
-Invalid argument (Typing[4323])
-  File "gen1.php", line 18, characters 14-14:
-  `T` is a constrained type parameter
-  File "gen1.php", line 18, characters 19-19:
-  This type constraint is violated
-  File "gen1.php", line 18, characters 19-19:
-  Expected `A`
-  File "gen1.php", line 22, characters 23-23:
-  But got `T as B`

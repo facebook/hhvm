@@ -1,10 +1,4 @@
 ERROR: File "nullable_tparam.php", line 6, characters 10-11:
-Invalid argument (Typing[4110])
-  File "nullable_tparam.php", line 3, characters 27-28:
-  Expected `null` or something of type `int`
-  File "nullable_tparam.php", line 5, characters 19-19:
-  But got `T`
-ERROR: File "nullable_tparam.php", line 6, characters 10-11:
 Invalid argument (Typing[4323])
   File "nullable_tparam.php", line 3, characters 17-17:
   `T` is a constrained type parameter
@@ -24,3 +18,9 @@ Invalid argument (Typing[4323])
   Expected `int`
   File "nullable_tparam.php", line 5, characters 19-19:
   But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "nullable_tparam.php", line 6, characters 10-11:
+Invalid argument (Typing[4110])
+  File "nullable_tparam.php", line 3, characters 27-28:
+  Expected `null` or something of type `int`
+  File "nullable_tparam.php", line 5, characters 19-19:
+  But got `T`

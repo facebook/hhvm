@@ -1,7 +1,19 @@
+ERROR: File "deep_soft_reification.php", line 12, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "deep_soft_reification.php", line 4, characters 7-12:
+  Expected `dynamic`
+  File "deep_soft_reification.php", line 12, characters 14-24:
+  Type `SoftReified` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "deep_soft_reification.php", line 12, characters 14-24:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "deep_soft_reification.php", line 5, characters 7-17:
   Definition is here
+ERROR: File "deep_soft_reification.php", line 15, characters 7-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "deep_soft_reification.php", line 4, characters 7-12:
+  Expected `dynamic`
+  File "deep_soft_reification.php", line 15, characters 14-20:
+  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "deep_soft_reification.php", line 15, characters 14-20:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "deep_soft_reification.php", line 6, characters 7-13:
@@ -30,15 +42,3 @@ Invalid reified hint (Typing[4305])
   This is soft reified, it cannot be used as a reified type argument
   File "deep_soft_reification.php", line 6, characters 21-21:
   `T` is reified
-ERROR: File "deep_soft_reification.php", line 12, characters 7-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "deep_soft_reification.php", line 4, characters 7-12:
-  Expected `dynamic`
-  File "deep_soft_reification.php", line 12, characters 14-24:
-  Type `SoftReified` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "deep_soft_reification.php", line 15, characters 7-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "deep_soft_reification.php", line 4, characters 7-12:
-  Expected `dynamic`
-  File "deep_soft_reification.php", line 15, characters 14-20:
-  Type `Reified` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -1,13 +1,9 @@
-ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
-Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4070])
-  File "BuiltinEnum.hhi", line 139, characters 34-42:
-  You cannot override this method
-  File "BuiltinEnum.hhi", line 34, characters 34-42:
-  It was declared as final
 ERROR: File "typing.extends5.bad.php", line 25, characters 12-12:
 Enum classes can only extend other enum classes. (Typing[4115])
   File "typing.extends5.bad.php", line 25, characters 29-38:
   This is an enum.
+ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
+Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])
 ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
 Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4341])
   File "BuiltinEnum.hhi", line 139, characters 34-42:
@@ -23,4 +19,8 @@ Some members in class `F` are incompatible with those declared in type `NormalEn
   File "BuiltinEnum.hhi", line 139, characters 46-56:
   But got a function that requires the capability WriteProperty
 ERROR: File "typing.extends5.bad.php", line 25, characters 29-38:
-Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])
+Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4070])
+  File "BuiltinEnum.hhi", line 139, characters 34-42:
+  You cannot override this method
+  File "BuiltinEnum.hhi", line 34, characters 34-42:
+  It was declared as final

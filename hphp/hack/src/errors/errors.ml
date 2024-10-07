@@ -311,9 +311,8 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)
-let compare_internal
-    (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) ~compare_code : int
-    =
+let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
+    int =
   let User_error.
         {
           severity = x_severity;
@@ -353,14 +352,16 @@ let compare_internal
     else
       comparison
   in
-  (* Then within each file, sort by category *)
+  (* Then within each file, sort by phase *)
   let comparison =
+    let x_phase = x_code / 1000 in
+    let y_phase = y_code / 1000 in
     if comparison = 0 then
-      compare_code x_code y_code
+      Int.compare x_phase y_phase
     else
       comparison
   in
-  (* If the error codes are the same, sort by position *)
+  (* If the phases are the same, sort by position *)
   let comparison =
     if comparison = 0 then
       Pos.compare (fst x_claim) (fst y_claim)
@@ -374,26 +375,34 @@ let compare_internal
     else
       comparison
   in
-  (* Finally, if the message text is also the same, then continue comparing
+  (* If the message text is also the same, then continue comparing
      the reason messages (which indicate the reason why Hack believes
      there is an error reported in the claim message) *)
-  if comparison = 0 then
-    (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
-  else
-    comparison
+  let comparison =
+    if comparison = 0 then
+      (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
+    else
+      comparison
+  in
+  (* If everything else is the same, compare by code *)
+  let comparison =
+    if comparison = 0 then
+      Int.compare x_code y_code
+    else
+      comparison
+  in
+  comparison
 
 let sort (err : error list) : error list =
-  let compare_exact_code = Int.compare in
-  let compare_category x_code y_code =
-    Int.compare (x_code / 1000) (y_code / 1000)
-  in
-  (* Sort using the exact code to ensure sort stability, but use the category to deduplicate *)
-  let equal x y = compare_internal ~compare_code:compare_category x y = 0 in
-  List.sort
-    ~compare:(fun x y -> compare_internal ~compare_code:compare_exact_code x y)
-    err
+  List.sort ~compare:compare_internal err
   |> List.remove_consecutive_duplicates
-       ~equal:(fun x y -> equal x y)
+       ~equal:(fun x y ->
+         (* If two errors have the exact same messages and positions but different codes,
+            consider them equal for deduplication *)
+         compare_internal
+           { x with User_error.code = x.User_error.code / 1000 * 1000 }
+           { y with User_error.code = y.User_error.code / 1000 * 1000 }
+         |> Int.equal 0)
        ~which_to_keep:`First (* Match Rust dedup_by *)
 
 let get_sorted_error_list ?(drop_fixmed = true) err =

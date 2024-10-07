@@ -4,10 +4,6 @@ Some members in class `B` are incompatible with those declared in type `C` (Typi
   This member visibility is: `private`
   File "abstract_override_concrete1.php", line 24, characters 19-22:
   `public` was expected
-ERROR: File "abstract_override_concrete1.php", line 38, characters 20-23:
-This member visibility is: `private` (Typing[4113])
-  File "abstract_override_concrete1.php", line 26, characters 19-22:
-  `public` was expected
 ERROR: File "abstract_override_concrete1.php", line 34, characters 23-24:
 Cannot re-declare this type constant as abstract (Typing[4142])
   File "abstract_override_concrete1.php", line 18, characters 23-24:
@@ -16,3 +12,7 @@ ERROR: File "abstract_override_concrete1.php", line 36, characters 28-30:
 Cannot re-declare this method as abstract (Typing[4142])
   File "abstract_override_concrete1.php", line 22, characters 19-21:
   Previously defined here
+ERROR: File "abstract_override_concrete1.php", line 38, characters 20-23:
+This member visibility is: `private` (Typing[4113])
+  File "abstract_override_concrete1.php", line 26, characters 19-22:
+  `public` was expected

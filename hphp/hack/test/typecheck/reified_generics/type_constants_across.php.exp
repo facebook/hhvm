@@ -1,3 +1,9 @@
+ERROR: File "type_constants_across.php", line 5, characters 19-23:
+Invalid type hint (Typing[4352])
+  File "type_constants_across.php", line 5, characters 22-23:
+  An abstract type constant is not allowed in this position.
+  File "type_constants_across.php", line 17, characters 23-24:
+  `Tx` is abstract here.
 ERROR: File "type_constants_across.php", line 10, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_across.php", line 17, characters 23-24:
@@ -6,12 +12,6 @@ ERROR: File "type_constants_across.php", line 12, characters 10-18:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_across.php", line 23, characters 20-26:
   The `as` operator cannot be used with a type with an erased generic type argument
-ERROR: File "type_constants_across.php", line 5, characters 19-23:
-Invalid type hint (Typing[4352])
-  File "type_constants_across.php", line 5, characters 22-23:
-  An abstract type constant is not allowed in this position.
-  File "type_constants_across.php", line 17, characters 23-24:
-  `Tx` is abstract here.
 WARN: File "type_constants_across.php", line 10, characters 5-17:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A::Tx`. (Warn[12012])
 WARN: File "type_constants_across.php", line 11, characters 5-17:

@@ -1,7 +1,3 @@
-ERROR: File "meth_caller_visibility_errors.php", line 19, characters 34-38:
-You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4431])
-  File "meth_caller_visibility_errors.php", line 14, characters 20-22:
-  It is declared as `private` here
 ERROR: File "meth_caller_visibility_errors.php", line 7, characters 34-38:
 You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4432])
   File "meth_caller_visibility_errors.php", line 12, characters 22-24:
@@ -14,3 +10,7 @@ ERROR: File "meth_caller_visibility_errors.php", line 18, characters 34-38:
 You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4432])
   File "meth_caller_visibility_errors.php", line 12, characters 22-24:
   It is declared as `protected` here
+ERROR: File "meth_caller_visibility_errors.php", line 19, characters 34-38:
+You cannot access this method with `meth_caller` (even from the same class hierarchy) (Typing[4431])
+  File "meth_caller_visibility_errors.php", line 14, characters 20-22:
+  It is declared as `private` here

@@ -1,20 +1,20 @@
-ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 16-16:
-Invalid type hint (Typing[4146])
-  File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 6-6:
-  Cyclic enum constraint
-ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 16-16:
-Invalid type hint (Typing[4146])
-  File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 6-6:
-  Cyclic enum constraint
 ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 6-6:
 Underlying type for enum is incompatible with constraint (Typing[4330])
   File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 16-16:
   Expected `F`
   File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 9-11:
   But got `int`
+ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 16-16:
+Invalid type hint (Typing[4146])
+  File "fc_enum_cyclic_constraint_mutually.php", line 3, characters 6-6:
+  Cyclic enum constraint
 ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 6-6:
 Underlying type for enum is incompatible with constraint (Typing[4330])
   File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 16-16:
   Expected `E`
   File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 9-11:
   But got `int`
+ERROR: File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 16-16:
+Invalid type hint (Typing[4146])
+  File "fc_enum_cyclic_constraint_mutually.php", line 5, characters 6-6:
+  Cyclic enum constraint

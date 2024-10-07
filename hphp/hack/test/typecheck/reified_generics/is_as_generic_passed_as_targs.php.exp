@@ -6,6 +6,12 @@ ERROR: File "is_as_generic_passed_as_targs.php", line 8, characters 8-17:
 Invalid `as` expression hint (Typing[4195])
   File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
   The `as` operator cannot be used with an erased generic type parameter
+ERROR: File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
+Invalid reified hint (Typing[4305])
+  File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
+  This is not reified, it cannot be used as a reified type argument
+  File "is_as_generic_passed_as_targs.php", line 3, characters 22-23:
+  `Tb` is reified
 ERROR: File "is_as_generic_passed_as_targs.php", line 12, characters 8-17:
 Invalid `as` expression hint (Typing[4195])
   File "is_as_generic_passed_as_targs.php", line 12, characters 8-17:
@@ -14,12 +20,6 @@ ERROR: File "is_as_generic_passed_as_targs.php", line 18, characters 8-17:
 Invalid `as` expression hint (Typing[4195])
   File "is_as_generic_passed_as_targs.php", line 18, characters 8-17:
   The `as` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
-Invalid reified hint (Typing[4305])
-  File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
-  This is not reified, it cannot be used as a reified type argument
-  File "is_as_generic_passed_as_targs.php", line 3, characters 22-23:
-  `Tb` is reified
 WARN: File "is_as_generic_passed_as_targs.php", line 6, characters 3-17:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Both<T, nothing>`. (Warn[12012])
 WARN: File "is_as_generic_passed_as_targs.php", line 8, characters 3-17:

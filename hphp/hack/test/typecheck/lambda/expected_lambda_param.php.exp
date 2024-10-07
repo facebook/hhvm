@@ -4,6 +4,12 @@ No instance method `foo` in `B` (Typing[4053])
   This is why I think it is an object of type B
   File "expected_lambda_param.php", line 3, characters 7-7:
   Declaration of `B` is here
+ERROR: File "expected_lambda_param.php", line 18, characters 19-38:
+Invalid argument (Typing[4110])
+  File "expected_lambda_param.php", line 18, characters 20-20:
+  Expected `C`
+  File "expected_lambda_param.php", line 9, characters 36-36:
+  But got `B`
 ERROR: File "expected_lambda_param.php", line 22, characters 34-36:
 No instance method `foo` in `B` (Typing[4053])
   File "expected_lambda_param.php", line 22, characters 20-20:
@@ -16,9 +22,3 @@ No instance method `foo` in `B` (Typing[4053])
   This is why I think it is an object of type B
   File "expected_lambda_param.php", line 3, characters 7-7:
   Declaration of `B` is here
-ERROR: File "expected_lambda_param.php", line 18, characters 19-38:
-Invalid argument (Typing[4110])
-  File "expected_lambda_param.php", line 18, characters 20-20:
-  Expected `C`
-  File "expected_lambda_param.php", line 9, characters 36-36:
-  But got `B`

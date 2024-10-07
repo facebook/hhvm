@@ -1,10 +1,4 @@
 ERROR: File "typedef17.php", line 23, characters 6-7:
-Invalid argument (Typing[4110])
-  File "typedef17.php", line 14, characters 26-29:
-  Expected `~vec<_>`
-  File "typedef17.php", line 22, characters 13-20:
-  But got `vec<int>`
-ERROR: File "typedef17.php", line 23, characters 6-7:
 Invalid argument (Typing[4323])
   File "typedef17.php", line 14, characters 13-13:
   `T` is a constrained type parameter
@@ -14,3 +8,9 @@ Invalid argument (Typing[4323])
   Expected `string`
   File "typedef17.php", line 22, characters 17-19:
   But got `int`
+ERROR: File "typedef17.php", line 23, characters 6-7:
+Invalid argument (Typing[4110])
+  File "typedef17.php", line 14, characters 26-29:
+  Expected `~vec<_>`
+  File "typedef17.php", line 22, characters 13-20:
+  But got `vec<int>`

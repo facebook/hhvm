@@ -1,6 +1,6 @@
 WARN: File "invalid_lsb_type_const.php", line 9, characters 9-21:
 This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])
-WARN: File "invalid_lsb_type_const.php", line 14, characters 9-35:
-This `is` check is always `true`. The expression on the left has type `shape('a' => int)` which is a subtype of `shape('a' => int)`. (Warn[12009])
 WARN: File "invalid_lsb_type_const.php", line 10, characters 7-19:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
+WARN: File "invalid_lsb_type_const.php", line 14, characters 9-35:
+This `is` check is always `true`. The expression on the left has type `shape('a' => int)` which is a subtype of `shape('a' => int)`. (Warn[12009])

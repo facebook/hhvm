@@ -1,8 +1,8 @@
 ERROR: File "instance_method_private.php", line 7, characters 9-11:
-You cannot access this method (Typing[4112])
-  File "instance_method_private.php", line 12, characters 20-22:
-  This member is private
-ERROR: File "instance_method_private.php", line 7, characters 9-11:
 Cannot access non-public members within expression trees. (Typing[4448])
   File "instance_method_private.php", line 12, characters 20-22:
   Member defined here
+ERROR: File "instance_method_private.php", line 7, characters 9-11:
+You cannot access this method (Typing[4112])
+  File "instance_method_private.php", line 12, characters 20-22:
+  This member is private

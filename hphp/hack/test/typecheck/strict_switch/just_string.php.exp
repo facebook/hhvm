@@ -1,13 +1,13 @@
-ERROR: File "just_string.php", line 40, characters 11-12:
-`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
-  File "just_string.php", line 40, characters 11-12:
-  only unions and intersections of bool, null and enums can be switched on without a default
-ERROR: File "just_string.php", line 31, characters 10-11:
-Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
 ERROR: File "just_string.php", line 19, characters 10-13:
 Redundant `case` statement (Typing[4021])
   File "just_string.php", line 17, characters 10-12:
   `"` already handled here
+ERROR: File "just_string.php", line 31, characters 10-11:
+Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
+ERROR: File "just_string.php", line 40, characters 11-12:
+`switch` statement nonexhaustive; at least the following cases are missing: `default` (Typing[4019])
+  File "just_string.php", line 40, characters 11-12:
+  only unions and intersections of bool, null and enums can be switched on without a default
 ERROR: File "just_string.php", line 53, characters 10-11:
 Redundant `case` statement (Typing[4021])
   File "just_string.php", line 49, characters 10-11:

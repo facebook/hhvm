@@ -1,9 +1,11 @@
+ERROR: File "supportdynamic.bad.php", line 4, characters 3-8:
+This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
+  File "supportdynamic.bad.php", line 3, characters 15-33:
+  Definition is here
 ERROR: File "supportdynamic.bad.php", line 5, characters 3-11:
 a nonnull value does not allow array append (Typing[4006])
   File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-ERROR: File "supportdynamic.bad.php", line 25, characters 6-6:
-Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
 ERROR: File "supportdynamic.bad.php", line 6, characters 3-5:
 Was expecting a class, but got a nonnull value (Typing[4026])
 ERROR: File "supportdynamic.bad.php", line 7, characters 8-8:
@@ -26,16 +28,14 @@ Typing error (Typing[4062])
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
   File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
-ERROR: File "supportdynamic.bad.php", line 23, characters 27-30:
-Invalid type hint (Typing[4062])
-  File "supportdynamic.bad.php", line 23, characters 30-30:
-  You are trying to access the type constant `C` but this is a nonnull value
-  File "supportdynamic.bad.php", line 21, characters 21-27:
-  Definition is here
-ERROR: File "supportdynamic.bad.php", line 26, characters 16-39:
-Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "supportdynamic.hhi", line 6, characters 11-20:
-  Definition is here
+ERROR: File "supportdynamic.bad.php", line 11, characters 9-11:
+Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
+ERROR: File "supportdynamic.bad.php", line 12, characters 3-5:
+Typing error (Typing[4429])
+  File "supportdynamic.bad.php", line 12, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "supportdynamic.bad.php", line 3, characters 26-32:
+  But got `nonnull`
 ERROR: File "supportdynamic.bad.php", line 16, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdynamic.bad.php", line 16, characters 12-14:
@@ -54,15 +54,15 @@ ERROR: File "supportdynamic.bad.php", line 18, characters 3-11:
   Expected `Awaitable<nothing>`
   File "supportdynamic.bad.php", line 15, characters 32-38:
   But got `nonnull`
-ERROR: File "supportdynamic.bad.php", line 11, characters 9-11:
-Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
-ERROR: File "supportdynamic.bad.php", line 4, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a value of type supportdyn<nonnull> (Typing[4324])
-  File "supportdynamic.bad.php", line 3, characters 15-33:
+ERROR: File "supportdynamic.bad.php", line 23, characters 27-30:
+Invalid type hint (Typing[4062])
+  File "supportdynamic.bad.php", line 23, characters 30-30:
+  You are trying to access the type constant `C` but this is a nonnull value
+  File "supportdynamic.bad.php", line 21, characters 21-27:
   Definition is here
-ERROR: File "supportdynamic.bad.php", line 12, characters 3-5:
-Typing error (Typing[4429])
-  File "supportdynamic.bad.php", line 12, characters 3-9:
-  Expected `num` because this is used in an arithmetic operation
-  File "supportdynamic.bad.php", line 3, characters 26-32:
-  But got `nonnull`
+ERROR: File "supportdynamic.bad.php", line 25, characters 6-6:
+Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
+ERROR: File "supportdynamic.bad.php", line 26, characters 16-39:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+  File "supportdynamic.hhi", line 6, characters 11-20:
+  Definition is here

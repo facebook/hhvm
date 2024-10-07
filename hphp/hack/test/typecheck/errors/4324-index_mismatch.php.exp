@@ -1,12 +1,12 @@
 ERROR: File "4324-index_mismatch.php", line 7, characters 10-19:
-Invalid index type for this vec (Typing[4324])
-  File "4324-index_mismatch.php", line 7, characters 13-18:
-  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
-  File "4324-index_mismatch.php", line 7, characters 13-18:
-  But got `string`
-ERROR: File "4324-index_mismatch.php", line 7, characters 10-19:
 Invalid index type for this vec (Typing[4449])
   File "4324-index_mismatch.php", line 6, characters 10-14:
   This is an int because only `int` can be used to index into a `Vector` or `vec`.
   File "4324-index_mismatch.php", line 7, characters 13-18:
   It is incompatible with a string
+ERROR: File "4324-index_mismatch.php", line 7, characters 10-19:
+Invalid index type for this vec (Typing[4324])
+  File "4324-index_mismatch.php", line 7, characters 13-18:
+  Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
+  File "4324-index_mismatch.php", line 7, characters 13-18:
+  But got `string`

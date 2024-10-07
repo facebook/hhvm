@@ -203,8 +203,10 @@ struct AsyncTranslationWorker
 using AsyncTranslationDispatcher = JobQueueDispatcher<AsyncTranslationWorker>;
 std::atomic<AsyncTranslationDispatcher*> s_asyncTranslationDispatcher;
 
-AsyncTranslationDispatcher* asyncTranslationDispatcher() {
-  return s_asyncTranslationDispatcher.load(std::memory_order_acquire);
+AsyncTranslationDispatcher& asyncTranslationDispatcher() {
+  auto const dispatcher = s_asyncTranslationDispatcher.load(std::memory_order_acquire);
+  assertx(dispatcher);
+  return *dispatcher;
 }
 } // namespace
 
@@ -238,12 +240,8 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
       show(ctx.sk)
     );
   } else {
-    auto const dispatcher = asyncTranslationDispatcher();
-    if (!dispatcher) {
-      FTRACE(2, "Async jit threads are not ready\n");
-      return;
-    }
-    dispatcher->enqueue(
+    auto& dispatcher = asyncTranslationDispatcher();
+    dispatcher.enqueue(
       AsyncRegionTranslationContext {ctx, currNumTranslations}
     );
     FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
@@ -253,12 +251,8 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
 void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
   if (!func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
     auto const p = std::make_shared<AsyncPrologueContext>(func, nPassed);
-    auto const dispatcher = asyncTranslationDispatcher();
-    if (!dispatcher) {
-      FTRACE(2, "Async jit threads are not ready\n");
-      return;
-    }
-    dispatcher->enqueue(AsyncPrologueContext {func, nPassed});
+    auto& dispatcher = asyncTranslationDispatcher();
+    dispatcher.enqueue(AsyncPrologueContext {func, nPassed});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,

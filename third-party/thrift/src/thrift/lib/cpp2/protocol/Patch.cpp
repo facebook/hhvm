@@ -43,8 +43,6 @@ namespace apache::thrift::protocol {
 namespace detail {
 namespace {
 
-constexpr std::string_view kPatchUriSuffix = "Patch";
-
 using op::PatchOp;
 
 template <typename Tag>
@@ -965,31 +963,6 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   return masks;
 }
 
-type::Type toPatchType(type::Type input) {
-  for (auto t :
-       {input.toThrift().name()->structType_ref(),
-        input.toThrift().name()->unionType_ref()}) {
-    if (!t) {
-      continue;
-    }
-    if (auto p = t->uri_ref()) {
-      *p = toPatchUri(*p);
-      return input;
-    }
-    if (auto p = t->scopedName_ref()) {
-      *p = toPatchUri(*p);
-      return input;
-    }
-    folly::throw_exception<std::runtime_error>(fmt::format(
-        "Unsupported Uri: {}",
-        apache::thrift::util::enumNameSafe(t->getType())));
-  }
-
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "Unsupported type: {}",
-      apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
-}
-
 int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
   int32_t version = 1;
   for (const auto& [fieldId, patch] : *patch.members()) {
@@ -1105,22 +1078,6 @@ Object toSafePatch(const protocol::Object& patch) {
   safePatch[detail::kSafePatchDataId].emplace_binary(
       *serializeObject<CompactProtocolWriter>(patch));
   return safePatch;
-}
-
-std::string toPatchUri(std::string s) {
-  s += detail::kPatchUriSuffix;
-  return s;
-}
-
-std::string fromPatchUri(std::string s) {
-  auto newSize = s.size() - detail::kPatchUriSuffix.size();
-  if (s.size() <= detail::kPatchUriSuffix.size() ||
-      s.substr(newSize) != detail::kPatchUriSuffix) {
-    folly::throw_exception<std::invalid_argument>(
-        fmt::format("Uri {} is not a Patch.", s));
-  }
-  s.resize(newSize);
-  return s;
 }
 
 } // namespace apache::thrift::protocol

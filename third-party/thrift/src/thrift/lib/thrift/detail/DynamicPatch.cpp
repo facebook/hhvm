@@ -116,6 +116,8 @@ Value emptyValue(const Value::Type& type) {
 
 namespace detail {
 
+constexpr std::string_view kPatchUriSuffix = "Patch";
+
 void convertStringToBinary(ValueList& list) {
   for (Value& i : list) {
     convertStringToBinary(i);
@@ -178,7 +180,48 @@ void convertStringToBinary(Value& v) {
       notImpl();
   }
 }
+
+type::Type toPatchType(type::Type input) {
+  for (auto t :
+       {input.toThrift().name()->structType_ref(),
+        input.toThrift().name()->unionType_ref()}) {
+    if (!t) {
+      continue;
+    }
+    if (auto p = t->uri_ref()) {
+      *p = toPatchUri(*p);
+      return input;
+    }
+    if (auto p = t->scopedName_ref()) {
+      *p = toPatchUri(*p);
+      return input;
+    }
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unsupported Uri: {}",
+        apache::thrift::util::enumNameSafe(t->getType())));
+  }
+
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported type: {}",
+      apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
+}
 } // namespace detail
+
+std::string toPatchUri(std::string s) {
+  s += detail::kPatchUriSuffix;
+  return s;
+}
+
+std::string fromPatchUri(std::string s) {
+  auto newSize = s.size() - detail::kPatchUriSuffix.size();
+  if (s.size() <= detail::kPatchUriSuffix.size() ||
+      s.substr(newSize) != detail::kPatchUriSuffix) {
+    folly::throw_exception<std::invalid_argument>(
+        fmt::format("Uri {} is not a Patch.", s));
+  }
+  s.resize(newSize);
+  return s;
+}
 
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(

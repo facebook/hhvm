@@ -55,8 +55,6 @@ struct ApplyPatch {
   void operator()(Object&& patch, Object& value) const;
 };
 
-type::Type toPatchType(type::Type input);
-
 /**
  * Returns the minimum version of Thrift Patch library required to safely decode
  * and apply the given Thrift Dynamic Patch.
@@ -126,10 +124,6 @@ Object fromSafePatch(const protocol::Object& safePatch);
  * encoded Thrift Dynamic Patch.
  */
 Object toSafePatch(const protocol::Object& patch);
-
-// Convert a normal struct uri to patch uri
-std::string toPatchUri(std::string s);
-std::string fromPatchUri(std::string s);
 
 } // namespace protocol
 } // namespace apache::thrift

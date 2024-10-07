@@ -69,6 +69,7 @@ pub(crate) fn run(func: Func) -> Func {
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[allow(dead_code)]
 struct BlockInput {
     stack: Vec<ValueId>,
 }

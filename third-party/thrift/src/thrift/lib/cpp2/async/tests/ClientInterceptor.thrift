@@ -42,4 +42,6 @@ service ClientInterceptorTest {
     2: string str,
     3: RequestArgsStruct request,
   );
+
+  stream<i32> iota(1: i32 start);
 }

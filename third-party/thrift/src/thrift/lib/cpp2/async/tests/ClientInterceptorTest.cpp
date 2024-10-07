@@ -101,6 +101,17 @@ struct TestHandler
       std::unique_ptr<test::RequestArgsStruct>) override {
     co_return std::make_unique<std::string>("return value");
   }
+
+  apache::thrift::ServerStream<std::int32_t> sync_iota(
+      std::int32_t start) override {
+    return folly::coro::co_invoke(
+        [current =
+             start]() mutable -> folly::coro::AsyncGenerator<std::int32_t&&> {
+          while (true) {
+            co_yield current++;
+          }
+        });
+  }
 };
 
 class ClientInterface {
@@ -125,6 +136,9 @@ class ClientInterface {
 
   virtual folly::coro::Task<std::string> requestArgs(
       std::int32_t arg1, std::string arg2, test::RequestArgsStruct arg3) = 0;
+
+  virtual folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
+      std::int32_t start) = 0;
 
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
@@ -163,6 +177,11 @@ class CoroClientInterface : public ClientInterface {
       test::RequestArgsStruct arg3) override {
     co_return co_await client_->co_requestArgs(
         arg1, std::move(arg2), std::move(arg3));
+  }
+
+  folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
+      std::int32_t start) override {
+    co_return (co_await client_->co_iota(start)).toAsyncGenerator();
   }
 };
 
@@ -203,6 +222,11 @@ class SyncClientInterface : public ClientInterface {
     client_->sync_requestArgs(ret, arg1, std::move(arg2), std::move(arg3));
     co_return ret;
   }
+
+  folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
+      std::int32_t start) override {
+    co_return client_->sync_iota(start).toAsyncGenerator();
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -238,6 +262,11 @@ class SemiFutureClientInterface : public ClientInterface {
     co_return co_await client_->semifuture_requestArgs(
         arg1, std::move(arg2), std::move(arg3));
   }
+
+  folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
+      std::int32_t start) override {
+    co_return (co_await client_->semifuture_iota(start)).toAsyncGenerator();
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -269,6 +298,11 @@ class FutureClientInterface : public ClientInterface {
       test::RequestArgsStruct arg3) override {
     co_return co_await client_->future_requestArgs(
         arg1, std::move(arg2), std::move(arg3));
+  }
+
+  folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
+      std::int32_t) override {
+    throw std::logic_error("future_* functions do not support streaming");
   }
 };
 
@@ -818,6 +852,44 @@ CO_TEST_P(ClientInterceptorTestP, Headers) {
   co_await client->noop(rpcOptions);
   EXPECT_EQ(interceptor->onRequestHeader, "dummy value");
   EXPECT_EQ(interceptor->onResponseHeader, "dummy value");
+}
+
+CO_TEST_P(ClientInterceptorTestP, BasicStream) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports streaming
+    co_return;
+  }
+  if (clientCallbackType() == ClientCallbackKind::FUTURE) {
+    // future_* functions do not support streaming
+    co_return;
+  }
+  auto interceptor1 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor2");
+  auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+  auto client =
+      makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
+  {
+    auto stream = co_await client->iota(1);
+    EXPECT_EQ((co_await stream.next()).value(), 1);
+    EXPECT_EQ((co_await stream.next()).value(), 2);
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 1);
+      EXPECT_EQ(interceptor->onResponseCount, 1);
+    }
+    // close stream
+  }
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onRequestCount, 1);
+    EXPECT_EQ(interceptor->onResponseCount, 1);
+  }
+  using Trace = TracingClientInterceptor::Trace;
+  const std::vector<Trace> expectedTrace{
+      Trace{"ClientInterceptorTest", "iota"},
+  };
+  EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+  EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
 }
 
 INSTANTIATE_TEST_SUITE_P(

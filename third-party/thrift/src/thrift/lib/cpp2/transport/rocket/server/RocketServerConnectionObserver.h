@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <folly/Optional.h>
+
 #include <sys/types.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 

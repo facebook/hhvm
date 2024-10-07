@@ -1,0 +1,112 @@
+error: Typing[4110] Invalid return type
+
+File "vector_invariant.php", line 8, character 10 - line 8, character 11:
+
+ 7 |   // hh_force_solve();
+ 8 |   return »$z«;
+ 9 | }
+
+Expected `int`
+
+File "vector_invariant.php", line 3, character 24 - line 3, character 26:
+
+ 3 | function foo(): Vector<»int«> {
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+But got `string`
+
+File "vector_invariant.php", line 4, character 22 - line 4, character 24:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  Vector { 1 , »'2'« };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+Derivation:
+{
+  "Lower":{
+    "bound":{
+      "Derivation":[
+        {
+          "Begin":{
+            "sub":[
+              {
+                "Witness":[{"filename":"vector_invariant.php","line":4,"char_start":22,"char_end":24}]
+              }
+            ],
+            "super":[
+              {
+                "Type_variable_generics":[
+                  {"filename":"vector_invariant.php","line":4,"char_start":9,"char_end":26},
+                  "T",
+                  "HH\\Vector",
+                  "0"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "in_":{
+      "Derivation":[
+        {
+          "Begin":{
+            "sub":[
+              {
+                "Witness":[{"filename":"vector_invariant.php","line":4,"char_start":22,"char_end":24}]
+              }
+            ],
+            "super":[
+              {
+                "Hint":[{"filename":"vector_invariant.php","line":3,"char_start":24,"char_end":26}]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+File "", line 0, character 0 - line 0, character -1:
+
+
+Reason:
+{
+  "Subtype":{
+    "sub":[
+      {
+        "Lower_bound":{
+          "bound":[
+            {
+              "Witness":[{"filename":"vector_invariant.php","line":4,"char_start":22,"char_end":24}]
+            }
+          ],
+          "of":[
+            {
+              "Type_variable_generics":[
+                {"filename":"vector_invariant.php","line":4,"char_start":9,"char_end":26},
+                "T",
+                "HH\\Vector",
+                "0"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "super":[
+      {
+        "Hint":[{"filename":"vector_invariant.php","line":3,"char_start":24,"char_end":26}]
+      }
+    ]
+  }
+}
+
+File "", line 0, character 0 - line 0, character -1:
+
+
+1 error found

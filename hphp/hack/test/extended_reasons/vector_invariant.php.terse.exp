@@ -1,0 +1,55 @@
+error: Typing[4110] Invalid return type
+
+File "vector_invariant.php", line 8, character 10 - line 8, character 11:
+
+ 7 |   // hh_force_solve();
+ 8 |   return »$z«;
+ 9 | }
+
+Expected `int`
+
+File "vector_invariant.php", line 3, character 24 - line 3, character 26:
+
+ 3 | function foo(): Vector<»int«> {
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+But got `string`
+
+File "vector_invariant.php", line 4, character 22 - line 4, character 24:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  Vector { 1 , »'2'« };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+Here's why:
+
+I checked the subtype constraint in [Main] because it was implied by transitivity.
+
+Main
+
+[Main] Step 1 of 1 (here is where the error occurred)
+
+I started by checking this subtype relationship.
+
+The subtype comes from this expression
+
+File "vector_invariant.php", line 4, character 22 - line 4, character 24:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  Vector { 1 , »'2'« };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+The supertype comes from this hint
+
+File "vector_invariant.php", line 3, character 24 - line 3, character 26:
+
+ 3 | function foo(): Vector<»int«> {
+ 4 |   $x =  Vector { 1 , '2' };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
+1 error found

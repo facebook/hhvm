@@ -6,5 +6,7 @@ No instance method `missing_method` in `MyClass` (Typing[4053])
   This is why I think it is an object of type MyClass
   File "lambda_bad_as_maparray_argument.php", line 22, characters 34-40:
   This type argument to `MyClosureRunner` only allows supertypes (it is contravariant)
+  File "lambda_bad_as_maparray_argument.php", line 11, characters 49-49:
+    via this generic `T`
   File "lambda_bad_as_maparray_argument.php", line 4, characters 7-13:
   Declaration of `MyClass` is here

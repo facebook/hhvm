@@ -4,6 +4,8 @@ No instance method `fo` in `C` (Typing[4053])
   Did you mean `foo` instead?
   File "lambda_apply.php", line 16, characters 30-30:
   This is why I think it is an object of type C
+  File "lambda_apply.php", line 4, characters 33-33:
+    via this generic `T`
   File "lambda_apply.php", line 12, characters 7-7:
   Declaration of `C` is here
 ERROR: File "lambda_apply.php", line 17, characters 32-33:
@@ -12,5 +14,7 @@ No instance method `fo` in `C` (Typing[4053])
   Did you mean `foo` instead?
   File "lambda_apply.php", line 17, characters 16-16:
   This is why I think it is an object of type C
+  File "lambda_apply.php", line 8, characters 42-42:
+    via this generic `T`
   File "lambda_apply.php", line 12, characters 7-7:
   Declaration of `C` is here

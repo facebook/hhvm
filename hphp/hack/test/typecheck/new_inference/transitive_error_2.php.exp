@@ -8,3 +8,5 @@ Invalid argument (Typing[4323])
   Expected `string`
   File "transitive_error_2.php", line 4, characters 20-22:
   But got `int`
+  File "transitive_error_2.php", line 4, characters 28-28:
+    via this generic `T`

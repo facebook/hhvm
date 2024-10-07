@@ -2,5 +2,7 @@ ERROR: File "classmeth_constraints_bad.php", line 11, characters 6-6:
 Invalid argument (Typing[4110])
   File "classmeth_constraints_bad.php", line 6, characters 39-42:
   Expected `Base`
+  File "classmeth_constraints_bad.php", line 6, characters 46-46:
+    via this generic `T`
   File "classmeth_constraints_bad.php", line 11, characters 6-6:
   But got `int`

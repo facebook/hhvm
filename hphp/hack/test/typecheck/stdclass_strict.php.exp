@@ -10,5 +10,7 @@ Typing error (Typing[4053])
   No property `foo` in `stdClass`
   File "stdclass_strict.php", line 8, characters 12-19:
   This is why I think it is an object of type stdClass
+  File "stdclass_strict.php", line 3, characters 23-23:
+    via this generic `T`
   File "classes.hhi", line 31, characters 15-22:
   Declaration of `stdClass` is here

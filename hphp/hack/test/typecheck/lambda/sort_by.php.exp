@@ -4,5 +4,7 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "sort_by.php", line 20, characters 70-76:
   But got `float` because this is the result of an arithmetic operation with a `float` as the first argument.
-  File "sort_by.php", line 20, characters 62-63:
-  Here is why I think the argument is a `float`: this is a `float` because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+  File "sort_by.php", line 20, characters 5-11:
+  Here is why I think the argument is a `float`: this is a `float` because type parameter `Ts` of `sort_by` could not be determined. Please add explicit type parameters to the invocation of `sort_by`
+  File "sort_by.php", line 13, characters 18-19:
+    via this generic `Ts`

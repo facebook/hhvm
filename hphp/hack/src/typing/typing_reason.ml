@@ -2079,24 +2079,47 @@ let to_pos : type ph. ph t_ -> Pos_or_decl.t =
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
  * multiple locations meant that it needed to more than convert to a string *)
-let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
- fun prefix r ->
+let rec to_string_help :
+    type a.
+    string -> locl_phase t_ Tvid.Map.t -> a t_ -> (Pos_or_decl.t * string) list
+    =
+ fun prefix solutions r ->
   let p = to_pos r in
   match r with
   | No_reason -> [(p, prefix)]
   | Missing_field -> [(p, prefix)]
   | Invalid -> [(p, prefix)]
+  | From_witness_locl
+      (Type_variable_generics (_, _, _, tvid) | Type_variable (_, tvid))
+    when Tvid.Map.mem tvid solutions ->
+    let r = Tvid.Map.find tvid solutions in
+    let solutions = Tvid.Map.remove tvid solutions in
+    to_string_help prefix solutions r
   | From_witness_locl witness -> [witness_locl_to_string prefix witness]
   | From_witness_decl witness -> [witness_decl_to_string prefix witness]
-  | Flow { from = r; _ }
   | Upper_bound { bound = r; _ }
   | Lower_bound { bound = r; _ }
   | Axiom { next = r; _ }
   | Def (_, r)
   | Prj_both { sub_prj = r; _ }
-  | Prj_one { part = r; _ }
-  | Solved { solution = r; _ } ->
-    to_string prefix r
+  | Prj_one { part = r; _ } ->
+    to_string_help prefix solutions r
+  (* If we don't have a solution for a type variable use the origin of the flow *)
+  | Flow { from = r; _ } when Tvid.Map.is_empty solutions ->
+    to_string_help prefix solutions r
+  (* otherwise, follow the flow until we reach the type variable *)
+  | Flow { from; into; _ } ->
+    (match from with
+    | From_witness_locl
+        (Type_variable_generics (_, _, _, tvid) | Type_variable (_, tvid))
+      when Tvid.Map.mem tvid solutions ->
+      let r = Tvid.Map.find tvid solutions in
+      let solutions = Tvid.Map.remove tvid solutions in
+      to_string_help prefix solutions r
+    | _ -> to_string_help prefix solutions into)
+  | Solved { solution; of_; in_ = r } ->
+    let solutions = Tvid.Map.add of_ solution solutions in
+    to_string_help prefix solutions r
   | Idx (_, r2) ->
     [(p, prefix)]
     @ [
@@ -2121,8 +2144,9 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
         ^ arg_pos_str s
         ^ " argument." );
     ]
-    @ to_string
+    @ to_string_help
         "Here is why I think the argument is a `float`: this is a `float`"
+        solutions
         r_last
   | Arith_ret_num (_, r, s) ->
     let rec find_last reason =
@@ -2140,8 +2164,9 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
         ^ arg_pos_str s
         ^ " argument, and no `float`s." );
     ]
-    @ to_string
+    @ to_string_help
         "Here is why I think the argument is a `num`: this is a `num`"
+        solutions
         r_last
   | Lost_info (s, r1, Blame (p2, source_of_loss)) ->
     let s = strip_ns s in
@@ -2152,7 +2177,7 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
       | BSassignment -> "by this assignment"
       | BSout_of_scope -> "because of scope change"
     in
-    to_string prefix r1
+    to_string_help prefix solutions r1
     @ [
         ( p2 |> Pos_or_decl.of_raw_pos,
           "All the local information about "
@@ -2169,13 +2194,14 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
       ^ Markdown_lite.md_codify s
       ^ " format specifier"
     in
-    (match to_string "" t with
+    (match to_string_help "" solutions t with
     | [(_, "")] -> [(p, s)]
     | el -> [(p, s)] @ el)
   | Instantiate (r_orig, generic_name, r_inst) ->
-    to_string prefix r_orig
-    @ to_string
+    to_string_help prefix solutions r_orig
+    @ to_string_help
         ("  via this generic " ^ Markdown_lite.md_codify generic_name)
+        solutions
         r_inst
   | Typeconst (No_reason, (pos, tconst), (lazy ty_str), r_root) ->
     let prefix =
@@ -2191,34 +2217,37 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
           prefix
           (Markdown_lite.md_codify tconst) );
     ]
-    @ to_string ("on " ^ ty_str) r_root
+    @ to_string_help ("on " ^ ty_str) solutions r_root
   | Typeconst (r_orig, (pos, tconst), (lazy ty_str), r_root) ->
-    to_string prefix r_orig
+    to_string_help prefix solutions r_orig
     @ [
         (pos, sprintf "  resulting from accessing the type constant '%s'" tconst);
       ]
-    @ to_string ("  on " ^ ty_str) r_root
+    @ to_string_help ("  on " ^ ty_str) solutions r_root
   | Type_access (Typeconst (No_reason, _, _, _), (r, _) :: l) ->
-    to_string prefix (Type_access (r, l))
+    to_string_help prefix solutions (Type_access (r, l))
   | Type_access (Typeconst (r, _, _, _), x) ->
-    to_string prefix (Type_access (r, x))
+    to_string_help prefix solutions (Type_access (r, x))
   | Type_access (Type_access (r, expand2), expand1) ->
-    to_string prefix (Type_access (r, expand1 @ expand2))
-  | Type_access (r, []) -> to_string prefix r
+    to_string_help prefix solutions (Type_access (r, expand1 @ expand2))
+  | Type_access (r, []) -> to_string_help prefix solutions r
   | Type_access (r, (r_hd, (lazy tconst)) :: tail) ->
-    to_string prefix r
-    @ to_string
+    to_string_help prefix solutions r
+    @ to_string_help
         ("  resulting from expanding the type constant "
         ^ Markdown_lite.md_codify tconst)
+        solutions
         r_hd
     @ List.concat_map tail ~f:(fun (r, (lazy s)) ->
-          to_string
+          to_string_help
             ("  then expanding the type constant " ^ Markdown_lite.md_codify s)
+            solutions
             r)
   | Expr_dep_type (r, p, e) ->
-    to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]
+    to_string_help prefix solutions r
+    @ [(p, "  " ^ expr_dep_type_reason_string e)]
   | Contravariant_generic (r_orig, class_name) ->
-    to_string prefix r_orig
+    to_string_help prefix solutions r_orig
     @ [
         ( p,
           "This type argument to "
@@ -2226,7 +2255,7 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
           ^ " only allows supertypes (it is contravariant)" );
       ]
   | Invariant_generic (r_orig, class_name) ->
-    to_string prefix r_orig
+    to_string_help prefix solutions r_orig
     @ [
         ( p,
           "This type argument to "
@@ -2237,33 +2266,42 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
      * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
   | Lambda_param
       ( _,
+        From_witness_locl
+          (Type_variable_generics (_, _, _, tvid) | Type_variable (_, tvid)) )
+    when Tvid.Map.mem tvid solutions ->
+    let r = Tvid.Map.find tvid solutions in
+    let solutions = Tvid.Map.remove tvid solutions in
+    to_string_help prefix solutions r
+  | Lambda_param
+      ( _,
         ( From_witness_decl (Solve_fail _)
-        | From_witness_locl (Type_variable_generics _ | Type_variable _)
-        | Instantiate _ ) ) ->
+        | From_witness_locl (Type_variable_generics _ | Type_variable _) ) ) ->
     [
       ( p,
         prefix
         ^ " because the type of the lambda parameter could not be determined. "
         ^ "Please add a type hint to the parameter" );
     ]
-  | Lambda_param (_, r_orig) -> to_string prefix r_orig
-  | Dynamic_coercion r -> to_string prefix r
+  | Lambda_param (_, r_orig) -> to_string_help prefix solutions r_orig
+  | Dynamic_coercion r -> to_string_help prefix solutions r
   | Dynamic_partial_enforcement (p, cn, r_orig) ->
-    to_string prefix r_orig
+    to_string_help prefix solutions r_orig
     @ [(p, "while allowing dynamic to flow into " ^ Utils.strip_all_ns cn)]
   | Rigid_tvar_escape (p, what, tvar, r_orig) ->
     let tvar = Markdown_lite.md_codify tvar in
     ( Pos_or_decl.of_raw_pos p,
       prefix ^ " because " ^ tvar ^ " escaped from " ^ what )
-    :: to_string ("  where " ^ tvar ^ " originates from") r_orig
+    :: to_string_help ("  where " ^ tvar ^ " originates from") solutions r_orig
   | Opaque_type_from_module (p, module_, r_orig) ->
     ( p,
       prefix
       ^ " because this is an internal symbol from module "
       ^ module_
       ^ ", which is opaque outside of the module." )
-    :: to_string "The type originated from here" r_orig
+    :: to_string_help "The type originated from here" solutions r_orig
 
+let to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
+ (fun prefix r -> to_string_help prefix Tvid.Map.empty r)
 (* -- Constructors ---------------------------------------------------------- *)
 
 module Constructors = struct

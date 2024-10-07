@@ -14,3 +14,5 @@ Invalid return type (Typing[4110])
   Expected `FooDerived123`
   File "super_constraint_2.php", line 10, characters 32-32:
   But got `Foo123`
+  File "super_constraint_2.php", line 10, characters 52-53:
+    via this generic `Tu`

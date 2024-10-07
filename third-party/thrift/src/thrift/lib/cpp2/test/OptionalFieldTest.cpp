@@ -204,7 +204,7 @@ void StatefulHashTest() {
   EXPECT_EQ(hash(f), 42);
 }
 
-TEST(optional_field_ref_test, Hash) {
+TEST(optionalFieldRefTest, Hash) {
   StatelessHashTest<std::hash, field_ref>();
   StatelessHashTest<std::hash, optional_field_ref>();
   StatelessHashTest<folly::hasher, field_ref>();

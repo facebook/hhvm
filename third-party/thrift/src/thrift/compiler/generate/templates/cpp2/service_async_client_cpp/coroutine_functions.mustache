@@ -37,6 +37,11 @@ folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_cl
   {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
 {{/function:creates_interaction?}}
 
+  if (ctx != nullptr) {
+    auto argsAsRefs = std::tie({{ > service_common/param_list}});
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+  }
+
   fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
 
   if (cancellable) {
@@ -44,6 +49,10 @@ folly::coro::Task<{{ > types/return_type_client}}> {{ > service_common/client_cl
     co_await callback.co_waitUntilDone();
   } else {
     co_await callback.co_waitUntilDone();
+  }
+
+  if (ctx != nullptr) {
+    ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
   if (returnState.isException()) {
     co_yield folly::coro::co_error(std::move(returnState.exception()));

@@ -112,6 +112,18 @@ struct TestHandler
           }
         });
   }
+
+  apache::thrift::SinkConsumer<std::int32_t, std::int32_t> dump() override {
+    return apache::thrift::SinkConsumer<std::int32_t, std::int32_t>{
+        [](folly::coro::AsyncGenerator<std::int32_t&&> gen)
+            -> folly::coro::Task<std::int32_t> {
+          std::int32_t count = 0;
+          while (auto chunk = co_await gen.next()) {
+            count++;
+          }
+          co_return count;
+        }};
+  }
 };
 
 class ClientInterface {
@@ -139,6 +151,10 @@ class ClientInterface {
 
   virtual folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
       std::int32_t start) = 0;
+
+  virtual folly::coro::Task<
+      apache::thrift::ClientSink<std::int32_t, std::int32_t>>
+  dump() = 0;
 
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
@@ -182,6 +198,11 @@ class CoroClientInterface : public ClientInterface {
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
       std::int32_t start) override {
     co_return (co_await client_->co_iota(start)).toAsyncGenerator();
+  }
+
+  folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
+  dump() override {
+    co_return co_await client_->co_dump();
   }
 };
 
@@ -227,6 +248,11 @@ class SyncClientInterface : public ClientInterface {
       std::int32_t start) override {
     co_return client_->sync_iota(start).toAsyncGenerator();
   }
+
+  folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
+  dump() override {
+    throw std::logic_error("sync_* functions do not support sinks");
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -267,6 +293,11 @@ class SemiFutureClientInterface : public ClientInterface {
       std::int32_t start) override {
     co_return (co_await client_->semifuture_iota(start)).toAsyncGenerator();
   }
+
+  folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
+  dump() override {
+    throw std::logic_error("semifuture_* functions do not support sinks");
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -303,6 +334,11 @@ class FutureClientInterface : public ClientInterface {
   folly::coro::Task<folly::coro::AsyncGenerator<std::int32_t&&>> iota(
       std::int32_t) override {
     throw std::logic_error("future_* functions do not support streaming");
+  }
+
+  folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
+  dump() override {
+    throw std::logic_error("future_* functions do not support sinks");
   }
 };
 
@@ -887,6 +923,48 @@ CO_TEST_P(ClientInterceptorTestP, BasicStream) {
   using Trace = TracingClientInterceptor::Trace;
   const std::vector<Trace> expectedTrace{
       Trace{"ClientInterceptorTest", "iota"},
+  };
+  EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+  EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
+}
+
+CO_TEST_P(ClientInterceptorTestP, BasicSink) {
+  if (transportType() != TransportType::ROCKET) {
+    // only rocket supports sinks
+    co_return;
+  }
+  if (clientCallbackType() != ClientCallbackKind::CORO) {
+    // only co_* functions support sinks
+    co_return;
+  }
+  auto interceptor1 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor2");
+  auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+  auto client =
+      makeClient(makeInterceptorsList(interceptor1, interceptor2, tracer));
+  {
+    auto sink = co_await client->dump();
+    std::size_t response =
+        co_await sink.sink([]() -> folly::coro::AsyncGenerator<std::int32_t&&> {
+          co_yield 1;
+          co_yield 2;
+          co_yield 3;
+        }());
+    EXPECT_EQ(response, 3);
+    for (auto& interceptor : {interceptor1, interceptor2}) {
+      EXPECT_EQ(interceptor->onRequestCount, 1);
+      EXPECT_EQ(interceptor->onResponseCount, 1);
+    }
+  }
+  for (auto& interceptor : {interceptor1, interceptor2}) {
+    EXPECT_EQ(interceptor->onRequestCount, 1);
+    EXPECT_EQ(interceptor->onResponseCount, 1);
+  }
+  using Trace = TracingClientInterceptor::Trace;
+  const std::vector<Trace> expectedTrace{
+      Trace{"ClientInterceptorTest", "dump"},
   };
   EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
   EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));

@@ -38,7 +38,7 @@ ty = { version = "0.0.0", path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]
 hex = "0.4.3"
-serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.125", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]
 cxx-build = "1.0.119"

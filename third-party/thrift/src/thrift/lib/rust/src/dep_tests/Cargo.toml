@@ -32,7 +32,7 @@ thiserror = "1.0.64"
 fbthrift_test_if = { version = "0.0.1+unstable", path = "cargo_thrift" }
 fbthrift_test_if_clients = { version = "0.0.1+unstable", path = "cargo_thrift/clients" }
 proptest = "1.0"
-serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.125", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

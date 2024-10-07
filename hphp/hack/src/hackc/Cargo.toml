@@ -58,7 +58,7 @@ rayon = "1.9.0"
 regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 sem_diff = { version = "0.0.0", path = "sem_diff" }
-serde_json = { version = "1.0.100", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.125", features = ["float_roundtrip", "unbounded_depth"] }
 shallow_decl_provider = { version = "0.0.0", path = "../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 strum = { version = "0.26.2", features = ["derive"] }
 tempfile = "3.8"

@@ -189,7 +189,7 @@ let bind env v ty = { env with inference_env = Inf.bind env.inference_env v ty }
 
     The simplification is recursive: simplifying a type variable will
     trigger simplification of its own occurrences. *)
-let simplify_occurrences env v =
+let simplify_occurrences env v r =
   let rec simplify_occurrences env v ~seen_tyvars =
     let vars = Inf.get_tyvar_occurrences env.inference_env v in
     let (env, seen_tyvars) =
@@ -227,6 +227,10 @@ let simplify_occurrences env v =
             (* we only call this function when v does not recursively contain unsolved
                type variables, so ty here should not contain unsolved type variables and
                it is safe to simply bind it without reupdating the type var occurrences. *)
+            let ty =
+              map_reason ty ~f:(fun solution ->
+                  Typing_reason.(solved v ~solution ~in_:r))
+            in
             let env = bind env v ty in
             env
         in
@@ -241,7 +245,8 @@ let add env ?(tyvar_pos = Pos.none) v ty =
   let env =
     { env with inference_env = Inf.add env.inference_env ~tyvar_pos v ty }
   in
-  let env = simplify_occurrences env v in
+  let r = get_reason ty in
+  let env = simplify_occurrences env v r in
   env
 
 let get_type env r var =

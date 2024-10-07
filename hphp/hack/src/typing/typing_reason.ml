@@ -2052,6 +2052,17 @@ let to_pos : type ph. ph t_ -> Pos_or_decl.t =
   else
     to_raw_pos r
 
+let rec flow_contains_tyvar = function
+  | Flow
+      {
+        from = From_witness_locl (Type_variable_generics _ | Type_variable _);
+        _;
+      }
+  | From_witness_locl (Type_variable_generics _ | Type_variable _) ->
+    true
+  | Flow { into; _ } -> flow_contains_tyvar into
+  | _ -> false
+
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
  * multiple locations meant that it needed to more than convert to a string *)
@@ -2078,8 +2089,9 @@ let rec to_string_help :
   | Prj_one { part = r; _ } ->
     to_string_help prefix solutions r
   (* If we don't have a solution for a type variable use the origin of the flow *)
-  | Flow { from = r; _ } when Tvid.Map.is_empty solutions ->
-    to_string_help prefix solutions r
+  | Flow { from; _ }
+    when Tvid.Map.is_empty solutions || not (flow_contains_tyvar r) ->
+    to_string_help prefix solutions from
   (* otherwise, follow the flow until we reach the type variable *)
   | Flow { from; into; _ } ->
     (match from with

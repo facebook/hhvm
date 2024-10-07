@@ -20,7 +20,6 @@ namespace carbon {
 namespace test {
 
 class TestRequest;
-class TestCompactRequest;
 
 namespace util {
 

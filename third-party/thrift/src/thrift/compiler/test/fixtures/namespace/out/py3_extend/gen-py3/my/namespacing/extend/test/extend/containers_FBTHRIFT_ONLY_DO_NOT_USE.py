@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "my.namespacing.extend.test.extend.types"
+
 import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 

@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "matching_struct_names.types"
+
 import matching_struct_names.types as _matching_struct_names_types
 import module.types as _module_types
 
@@ -27,7 +29,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__MyStruct(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -66,7 +69,8 @@ Sequence.register(List__MyStruct)
 __all__.append('List__MyStruct')
 
 class List__List__MyStruct(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -109,7 +113,8 @@ Sequence.register(List__List__MyStruct)
 __all__.append('List__List__MyStruct')
 
 class List__module_MyStruct(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -148,7 +153,8 @@ Sequence.register(List__module_MyStruct)
 __all__.append('List__module_MyStruct')
 
 class List__List__module_MyStruct(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:

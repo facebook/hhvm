@@ -30,7 +30,6 @@ from testing.types import (
     Uint32List,
 )
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
-
 from thrift.lib.python.test.testing_utils import Untruthy
 from thrift.py3.types import Container
 
@@ -223,3 +222,8 @@ class ListTests(unittest.TestCase):
         y = Uint32List(x)
         self.assertEqual(y[1], 2)
         self.assertEqual(list(y), x)
+
+    # thrift-python doesn't believe in flat-name containers
+    @brokenInAutoMigrate()
+    def test_list_module(self) -> None:
+        self.assertEqual(I32List.__module__, "testing.types")

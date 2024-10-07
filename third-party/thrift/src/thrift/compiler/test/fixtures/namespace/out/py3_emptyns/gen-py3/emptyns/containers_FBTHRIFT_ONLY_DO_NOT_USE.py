@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "emptyns.types"
+
 import emptyns.types as _emptyns_types
 
 def get_types_reflection():

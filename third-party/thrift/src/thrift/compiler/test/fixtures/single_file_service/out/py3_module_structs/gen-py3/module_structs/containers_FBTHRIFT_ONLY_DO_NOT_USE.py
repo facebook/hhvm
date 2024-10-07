@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "module_structs.types"
+
 import module_structs.types as _module_structs_types
 
 def get_types_reflection():

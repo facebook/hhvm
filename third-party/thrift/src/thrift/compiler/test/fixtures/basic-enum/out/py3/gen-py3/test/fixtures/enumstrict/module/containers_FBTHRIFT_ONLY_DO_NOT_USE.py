@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "test.fixtures.enumstrict.module.types"
+
 import test.fixtures.enumstrict.module.types as _test_fixtures_enumstrict_module_types
 
 def get_types_reflection():

@@ -45,6 +45,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
+
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
@@ -62,7 +64,10 @@ __all__ = []
 {{#program:containerTypes}}
 {{#type:list?}}
 class {{type:flat_name}}(thrift.py3.types.List):
-    __slots__ = []
+    {{! make the type appear to originate from .types module }}
+    __module__ = _fbthrift__module_name__
+    {{! __slots__ prevents accidental treatment as py-deprecated }}
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:

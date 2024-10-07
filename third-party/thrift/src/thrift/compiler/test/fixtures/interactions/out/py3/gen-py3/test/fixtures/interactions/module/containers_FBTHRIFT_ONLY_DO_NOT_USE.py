@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "test.fixtures.interactions.module.types"
+
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 

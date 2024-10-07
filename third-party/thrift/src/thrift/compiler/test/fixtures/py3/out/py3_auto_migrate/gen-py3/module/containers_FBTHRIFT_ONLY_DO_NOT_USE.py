@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "module.types"
+
 import module.types as _module_types
 
 def get_types_reflection():
@@ -26,7 +28,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__i16(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -65,7 +68,8 @@ Sequence.register(List__i16)
 __all__.append('List__i16')
 
 class List__i32(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -104,7 +108,8 @@ Sequence.register(List__i32)
 __all__.append('List__i32')
 
 class List__i64(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -143,7 +148,8 @@ Sequence.register(List__i64)
 __all__.append('List__i64')
 
 class List__string(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -184,7 +190,8 @@ Sequence.register(List__string)
 __all__.append('List__string')
 
 class List__SimpleStruct(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -223,7 +230,8 @@ Sequence.register(List__SimpleStruct)
 __all__.append('List__SimpleStruct')
 
 class List__List__i32(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -266,7 +274,8 @@ Sequence.register(List__List__i32)
 __all__.append('List__List__i32')
 
 class List__Set__string(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -309,7 +318,8 @@ Sequence.register(List__Set__string)
 __all__.append('List__Set__string')
 
 class List__List__string(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -352,7 +362,8 @@ Sequence.register(List__List__string)
 __all__.append('List__List__string')
 
 class List__Set__i32(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -395,7 +406,8 @@ Sequence.register(List__Set__i32)
 __all__.append('List__Set__i32')
 
 class List__Map__string_string(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -438,7 +450,8 @@ Sequence.register(List__Map__string_string)
 __all__.append('List__Map__string_string')
 
 class List__binary(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -479,7 +492,8 @@ Sequence.register(List__binary)
 __all__.append('List__binary')
 
 class List__AnEnum(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
@@ -519,7 +533,8 @@ Sequence.register(List__AnEnum)
 __all__.append('List__AnEnum')
 
 class List__Map__i32_double(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:

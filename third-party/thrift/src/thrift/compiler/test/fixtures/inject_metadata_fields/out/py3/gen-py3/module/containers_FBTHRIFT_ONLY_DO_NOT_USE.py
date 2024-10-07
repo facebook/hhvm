@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "module.types"
+
 import module.types as _module_types
 import foo.types as _foo_types
 

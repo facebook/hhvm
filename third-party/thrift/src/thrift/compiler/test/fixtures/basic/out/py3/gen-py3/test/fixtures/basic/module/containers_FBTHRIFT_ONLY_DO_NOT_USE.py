@@ -16,6 +16,8 @@ from collections.abc import Sequence
     If you `import` them directly from here, you will get nasty import errors.
 """
 
+_fbthrift__module_name__ = "test.fixtures.basic.module.types"
+
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 def get_types_reflection():
@@ -26,7 +28,8 @@ def get_types_reflection():
 __all__ = []
 
 class List__i32(thrift.py3.types.List):
-    __slots__ = []
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:

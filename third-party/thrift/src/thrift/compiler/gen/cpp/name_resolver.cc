@@ -19,9 +19,11 @@
 #include <stdexcept>
 
 #include <fmt/core.h>
+#include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_node.h>
+#include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
@@ -44,6 +46,23 @@ const t_type* find_first_type(const t_type& node) {
 
 } // namespace
 
+namespace detail {
+
+std::string gen_template_type(
+    std::string template_name, std::initializer_list<std::string> args) {
+  template_name += "<";
+  auto delim = "";
+  for (const auto& arg : args) {
+    template_name += delim;
+    delim = ", ";
+    template_name += arg;
+  }
+  template_name += ">";
+  return template_name;
+}
+
+} // namespace detail
+
 const std::string& cpp_name_resolver::get_native_type(
     const t_field& field, const t_structured& parent) {
   const t_type& type = *field.type();
@@ -65,7 +84,7 @@ const std::string& cpp_name_resolver::get_native_type(
   // If @cpp.Adapter is used on typedef of the field, use the typedef name.
   if (const auto* typedf = dynamic_cast<const t_typedef*>(&type)) {
     if (find_structured_adapter_annotation(*typedf)) {
-      return namespaces_.get_namespaced_name(*typedf);
+      return get_namespaced_name(*typedf);
     }
   }
 
@@ -181,7 +200,7 @@ const std::string& cpp_name_resolver::get_underlying_namespaced_name(
       auto extra = get_extra_namespace(node);
       return fmt::format(
           "{}::{}{}",
-          namespaces_.get_namespace(*program),
+          get_namespace(*program),
           extra ? *extra + "::" : "",
           get_underlying_name(node));
     }
@@ -198,7 +217,7 @@ const std::string& cpp_name_resolver::get_underlying_name(const t_type& node) {
       return value->get_string();
     }
   }
-  return gen::cpp::namespace_resolver::get_cpp_name(node);
+  return cpp_name_resolver::get_cpp_name(node);
 }
 
 const std::string* cpp_name_resolver::get_extra_namespace(const t_type& node) {
@@ -212,8 +231,8 @@ const std::string* cpp_name_resolver::get_extra_namespace(const t_type& node) {
     const auto* name = annotation->get_value_from_structured_annotation_or_null(
         "underlyingName");
     if (name == nullptr || name->get_string().empty()) {
-      static const std::string kDefault = "detail";
-      return &kDefault;
+      static const std::string detail = "detail";
+      return &detail;
     }
   }
   return nullptr;
@@ -265,6 +284,28 @@ const std::string* cpp_name_resolver::find_first_adapter(const t_field& field) {
   return nullptr;
 }
 
+std::vector<std::string> cpp_name_resolver::gen_namespace_components(
+    const t_program& program) {
+  t_program::namespace_config conf;
+  conf.no_top_level_domain = true;
+  auto components = program.gen_namespace_or_default("cpp2", conf);
+  if (components.empty()) {
+    components = program.gen_namespace_or_default("cpp", conf);
+    components.push_back("cpp2");
+  }
+  return components;
+}
+
+std::string cpp_name_resolver::gen_namespace(const t_program& program) {
+  return "::" + gen_unprefixed_namespace(program);
+}
+
+std::string cpp_name_resolver::gen_unprefixed_namespace(
+    const t_program& program) {
+  const auto components = gen_namespace_components(program);
+  return fmt::format("{}", fmt::join(components, "::"));
+}
+
 bool cpp_name_resolver::can_resolve_to_scalar(const t_type& node) {
   return node.get_true_type()->is_scalar() || find_first_adapter(node) ||
       find_first_type(node);
@@ -274,16 +315,16 @@ const std::string& cpp_name_resolver::default_template(
     t_container::type ctype) {
   switch (ctype) {
     case t_container::type::t_list: {
-      static const auto& kValue = *new std::string("::std::vector");
-      return kValue;
+      static const auto& value = *new std::string("::std::vector");
+      return value;
     }
     case t_container::type::t_set: {
-      static const auto& kValue = *new std::string("::std::set");
-      return kValue;
+      static const auto& value = *new std::string("::std::set");
+      return value;
     }
     case t_container::type::t_map: {
-      static const auto& kValue = *new std::string("::std::map");
-      return kValue;
+      static const auto& value = *new std::string("::std::map");
+      return value;
     }
   }
   throw std::runtime_error(
@@ -294,41 +335,41 @@ const std::string& cpp_name_resolver::default_type(
     t_primitive_type::type btype) {
   switch (btype) {
     case t_primitive_type::type::t_void: {
-      static const auto& kValue = *new std::string("void");
-      return kValue;
+      static const auto& value = *new std::string("void");
+      return value;
     }
     case t_primitive_type::type::t_bool: {
-      static const auto& kValue = *new std::string("bool");
-      return kValue;
+      static const auto& value = *new std::string("bool");
+      return value;
     }
     case t_primitive_type::type::t_byte: {
-      static const auto& kValue = *new std::string("::std::int8_t");
-      return kValue;
+      static const auto& value = *new std::string("::std::int8_t");
+      return value;
     }
     case t_primitive_type::type::t_i16: {
-      static const auto& kValue = *new std::string("::std::int16_t");
-      return kValue;
+      static const auto& value = *new std::string("::std::int16_t");
+      return value;
     }
     case t_primitive_type::type::t_i32: {
-      static const auto& kValue = *new std::string("::std::int32_t");
-      return kValue;
+      static const auto& value = *new std::string("::std::int32_t");
+      return value;
     }
     case t_primitive_type::type::t_i64: {
-      static const auto& kValue = *new std::string("::std::int64_t");
-      return kValue;
+      static const auto& value = *new std::string("::std::int64_t");
+      return value;
     }
     case t_primitive_type::type::t_float: {
-      static const auto& kValue = *new std::string("float");
-      return kValue;
+      static const auto& value = *new std::string("float");
+      return value;
     }
     case t_primitive_type::type::t_double: {
-      static const auto& kValue = *new std::string("double");
-      return kValue;
+      static const auto& value = *new std::string("double");
+      return value;
     }
     case t_primitive_type::type::t_string:
     case t_primitive_type::type::t_binary: {
-      static const auto& kValue = *new std::string("::std::string");
-      return kValue;
+      static const auto& value = *new std::string("::std::string");
+      return value;
     }
   }
   throw std::runtime_error(
@@ -421,7 +462,7 @@ std::string cpp_name_resolver::gen_standard_type(
   }
 
   // For everything else, just use namespaced name.
-  return namespaces_.get_namespaced_name(node);
+  return get_namespaced_name(node);
 }
 
 std::string cpp_name_resolver::gen_container_type(

@@ -33,7 +33,7 @@
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/namespace_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
@@ -51,7 +51,7 @@ const t_field_id kInjectMetadataFieldsLastId = -2000;
 
 template <typename Node>
 const std::string& get_name(const Node* node) {
-  return gen::cpp::namespace_resolver::get_cpp_name(*node);
+  return cpp_name_resolver::get_cpp_name(*node);
 }
 
 bool is_custom_type(const t_field& field);
@@ -63,15 +63,15 @@ gen_dependency_graph(
 
 inline std::vector<std::string> get_gen_namespace_components(
     const t_program& program) {
-  return gen::cpp::namespace_resolver::gen_namespace_components(program);
+  return cpp_name_resolver::gen_namespace_components(program);
 }
 
 inline std::string get_gen_namespace(const t_program& program) {
-  return gen::cpp::namespace_resolver::gen_namespace(program);
+  return cpp_name_resolver::gen_namespace(program);
 }
 
 inline std::string get_gen_unprefixed_namespace(const t_program& program) {
-  return gen::cpp::namespace_resolver::gen_unprefixed_namespace(program);
+  return cpp_name_resolver::gen_unprefixed_namespace(program);
 }
 
 inline std::string get_service_qualified_name(const t_service& service) {

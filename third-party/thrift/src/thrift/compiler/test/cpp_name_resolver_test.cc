@@ -22,13 +22,15 @@
 #include <string>
 #include <vector>
 
+#include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/gen/cpp/namespace_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 
-namespace apache::thrift::compiler::gen::cpp {
+using namespace apache::thrift::compiler;
+
 namespace {
 // Since we can not include `thrift/annotation/cpp.thrift`
 // This is a copy of apache::thrift::annotation::RefType
@@ -39,7 +41,7 @@ enum class RefType {
   SharedMutable = 2,
 };
 
-struct ref_builder : base_thrift_annotation_builder {
+struct ref_builder : gen::base_thrift_annotation_builder {
   explicit ref_builder(t_program& p, const std::string& lang)
       : base_thrift_annotation_builder(p, lang, "Ref") {}
 
@@ -51,9 +53,9 @@ struct ref_builder : base_thrift_annotation_builder {
 };
 } // namespace
 
-class TypeResolverTest : public ::testing::Test {
+class CppNameResolverTest : public ::testing::Test {
  public:
-  TypeResolverTest() noexcept
+  CppNameResolverTest() noexcept
       : program_("path/to/program.thrift"), struct_(&program_, "ThriftStruct") {
     program_.set_namespace("cpp2", "path.to");
   }
@@ -93,7 +95,65 @@ class TypeResolverTest : public ::testing::Test {
   t_struct struct_;
 };
 
-TEST_F(TypeResolverTest, BaseTypes) {
+TEST_F(CppNameResolverTest, gen_namespace_components_cpp2) {
+  t_program p("path/to/program.thrift");
+  p.set_namespace("cpp2", "foo.bar");
+  p.set_namespace("cpp", "baz.foo");
+  EXPECT_THAT(
+      cpp_name_resolver::gen_namespace_components(p),
+      testing::ElementsAreArray({"foo", "bar"}));
+}
+
+TEST_F(CppNameResolverTest, gen_namespace_components_cpp) {
+  t_program p("path/to/program.thrift");
+  p.set_namespace("cpp", "baz.foo");
+  EXPECT_THAT(
+      cpp_name_resolver::gen_namespace_components(p),
+      testing::ElementsAreArray({"baz", "foo", "cpp2"}));
+}
+
+TEST_F(CppNameResolverTest, gen_namespace_components_none) {
+  t_program p("path/to/program.thrift");
+  EXPECT_THAT(
+      cpp_name_resolver::gen_namespace_components(p),
+      testing::ElementsAreArray({"cpp2"}));
+}
+
+TEST_F(CppNameResolverTest, get_namespace_cpp2) {
+  t_program p("path/to/program.thrift");
+  p.set_namespace("cpp2", "foo.bar");
+  p.set_namespace("cpp", "baz.foo");
+  EXPECT_EQ("::foo::bar", resolver_.get_namespace(p));
+}
+
+TEST_F(CppNameResolverTest, get_namespace_cpp) {
+  t_program p("path/to/program.thrift");
+  p.set_namespace("cpp", "baz.foo");
+  EXPECT_EQ("::baz::foo::cpp2", resolver_.get_namespace(p));
+}
+
+TEST_F(CppNameResolverTest, get_namespace_none) {
+  t_program p("path/to/program.thrift");
+  EXPECT_EQ("::cpp2", resolver_.get_namespace(p));
+}
+
+TEST_F(CppNameResolverTest, get_namespace_from_package) {
+  t_program p("path/to/program.thrift");
+  p.set_package(t_package("foo.bar/path/to/program"));
+  EXPECT_EQ("::foo::path::to::program", resolver_.get_namespace(p));
+}
+
+TEST_F(CppNameResolverTest, gen_namespaced_name) {
+  t_program p("path/to/program.thrift");
+  p.set_namespace("cpp2", "foo.bar");
+  t_enum e1(&p, "MyEnum1");
+  t_enum e2(&p, "MyEnum2");
+  e2.set_annotation("cpp.name", "YourEnum");
+  EXPECT_EQ("::foo::bar::MyEnum1", resolver_.get_namespaced_name(e1));
+  EXPECT_EQ("::foo::bar::YourEnum", resolver_.get_namespaced_name(e2));
+}
+
+TEST_F(CppNameResolverTest, base_types) {
   EXPECT_EQ(get_native_type(t_primitive_type::t_void()), "void");
   EXPECT_EQ(get_native_type(t_primitive_type::t_bool()), "bool");
   EXPECT_EQ(get_native_type(t_primitive_type::t_byte()), "::std::int8_t");
@@ -142,10 +202,10 @@ TEST_F(TypeResolverTest, BaseTypes) {
       "::apache::thrift::type::double_t");
 }
 
-TEST_F(TypeResolverTest, Struct_Adapter) {
+TEST_F(CppNameResolverTest, struct_adapter) {
   t_struct strct(&program_, "Foo");
   strct.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("FooAdapter"));
+      gen::adapter_builder(program_, "cpp").make("FooAdapter"));
   // The standard type is the default.
   EXPECT_EQ(get_standard_type(strct), "::path::to::detail::Foo");
   // The c++ type is adapted.
@@ -155,7 +215,7 @@ TEST_F(TypeResolverTest, Struct_Adapter) {
   t_struct strct2(&program_, "Foo");
   strct2.set_annotation("cpp.name", "Bar");
   strct2.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("FooAdapter"));
+      gen::adapter_builder(program_, "cpp").make("FooAdapter"));
   EXPECT_EQ(get_standard_type(strct2), "::path::to::detail::Bar");
   EXPECT_EQ(get_native_type(strct2), "::path::to::Bar");
 
@@ -163,13 +223,13 @@ TEST_F(TypeResolverTest, Struct_Adapter) {
   EXPECT_TRUE(can_resolve_to_scalar(strct));
 }
 
-TEST_F(TypeResolverTest, CppName) {
+TEST_F(CppNameResolverTest, cpp_name) {
   t_enum tenum(&program_, "MyEnum");
   tenum.set_annotation("cpp.name", "YourEnum");
   EXPECT_EQ(get_native_type(tenum), "::path::to::YourEnum");
 }
 
-TEST_F(TypeResolverTest, Containers) {
+TEST_F(CppNameResolverTest, containers) {
   // A container could not resolve to a scalar.
   t_map tmap(t_primitive_type::t_string(), t_primitive_type::t_i32());
   EXPECT_EQ(get_native_type(tmap), "::std::map<::std::string, ::std::int32_t>");
@@ -184,7 +244,7 @@ TEST_F(TypeResolverTest, Containers) {
   EXPECT_FALSE(can_resolve_to_scalar(tset));
 }
 
-TEST_F(TypeResolverTest, Containers_CustomTemplate) {
+TEST_F(CppNameResolverTest, containers_custom_template) {
   // cpp.template could not resolve to a scalar since it can be only used for
   // container fields.
   t_map tmap(t_primitive_type::t_string(), t_primitive_type::t_i32());
@@ -203,11 +263,11 @@ TEST_F(TypeResolverTest, Containers_CustomTemplate) {
   EXPECT_FALSE(can_resolve_to_scalar(tset));
 }
 
-TEST_F(TypeResolverTest, Containers_Adapter) {
+TEST_F(CppNameResolverTest, containers_adapter) {
   // cpp.adapter could resolve to a scalar.
   t_struct strct(&program_, "Foo");
   strct.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("HashAdapter"));
+      gen::adapter_builder(program_, "cpp").make("HashAdapter"));
   EXPECT_TRUE(can_resolve_to_scalar(strct));
 
   // Adapters work on container type arguments.
@@ -233,7 +293,7 @@ TEST_F(TypeResolverTest, Containers_Adapter) {
   EXPECT_EQ(get_native_type(tlist), "MyList");
 }
 
-TEST_F(TypeResolverTest, Structs) {
+TEST_F(CppNameResolverTest, structs) {
   t_struct tstruct(&program_, "Foo");
   EXPECT_EQ(get_native_type(tstruct), "::path::to::Foo");
   EXPECT_FALSE(can_resolve_to_scalar(tstruct));
@@ -245,7 +305,7 @@ TEST_F(TypeResolverTest, Structs) {
   EXPECT_FALSE(can_resolve_to_scalar(texcept));
 }
 
-TEST_F(TypeResolverTest, TypeDefs) {
+TEST_F(CppNameResolverTest, typedefs) {
   // Scalar
   t_typedef ttypedef1(&program_, "Foo", t_primitive_type::t_bool());
   EXPECT_EQ(get_native_type(ttypedef1), "::path::to::Foo");
@@ -257,7 +317,7 @@ TEST_F(TypeResolverTest, TypeDefs) {
   EXPECT_FALSE(can_resolve_to_scalar(ttypedef2));
 }
 
-TEST_F(TypeResolverTest, TypeDefs_Nested) {
+TEST_F(CppNameResolverTest, typedefs_nested) {
   // Scalar
   t_typedef ttypedef1(&program_, "Foo", t_primitive_type::t_bool());
   t_typedef ttypedef2(&program_, "Bar", ttypedef1);
@@ -273,10 +333,10 @@ TEST_F(TypeResolverTest, TypeDefs_Nested) {
   EXPECT_FALSE(can_resolve_to_scalar(ttypedef4));
 }
 
-TEST_F(TypeResolverTest, TypeDefs_Adapter) {
+TEST_F(CppNameResolverTest, typedefs_adapter) {
   t_struct strct(&program_, "Foo");
   strct.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("HashAdapter"));
+      gen::adapter_builder(program_, "cpp").make("HashAdapter"));
 
   // Type defs can refer to adatped types.
   t_typedef ttypedef1(&program_, "MyHash", strct);
@@ -292,7 +352,7 @@ TEST_F(TypeResolverTest, TypeDefs_Adapter) {
   // Type defs can also be adapted.
   t_typedef ttypedef2(ttypedef1);
   ttypedef2.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("TypeDefAdapter"));
+      gen::adapter_builder(program_, "cpp").make("TypeDefAdapter"));
   EXPECT_EQ(get_standard_type(ttypedef2), "::path::to::detail::Foo");
   EXPECT_EQ(get_native_type(ttypedef2), "::path::to::MyHash");
   EXPECT_TRUE(can_resolve_to_scalar(ttypedef2));
@@ -303,13 +363,13 @@ TEST_F(TypeResolverTest, TypeDefs_Adapter) {
   t_primitive_type booll(t_primitive_type::t_bool());
   t_typedef typedef1(&program_, "MyBool", booll);
   typedef1.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("MyAdapter"));
+      gen::adapter_builder(program_, "cpp").make("MyAdapter"));
   t_typedef typedef2(&program_, "DoubleBool", typedef1);
   ASSERT_TRUE(resolver_.find_first_adapter(typedef2));
   EXPECT_EQ(*resolver_.find_first_adapter(typedef2), "MyAdapter");
 }
 
-TEST_F(TypeResolverTest, CustomType) {
+TEST_F(CppNameResolverTest, custom_type) {
   t_primitive_type tui64(t_primitive_type::t_i64());
   tui64.set_name("ui64");
   tui64.set_annotation("cpp2.type", "::std::uint64_t");
@@ -351,7 +411,7 @@ TEST_F(TypeResolverTest, CustomType) {
   EXPECT_TRUE(can_resolve_to_scalar(tmap3));
 }
 
-TEST_F(TypeResolverTest, Stream) {
+TEST_F(CppNameResolverTest, stream) {
   t_primitive_type ui64(t_primitive_type::t_i64());
   ui64.set_annotation("cpp.type", "uint64_t");
 
@@ -367,7 +427,7 @@ TEST_F(TypeResolverTest, Stream) {
       "::apache::thrift::ResponseAndServerStream<uint64_t, uint64_t>");
 }
 
-TEST_F(TypeResolverTest, Sink) {
+TEST_F(CppNameResolverTest, sink) {
   t_struct tstruct(&program_, "Foo");
 
   auto fun1 = t_function(
@@ -387,10 +447,10 @@ TEST_F(TypeResolverTest, Sink) {
       "::path::to::Foo>");
 }
 
-TEST_F(TypeResolverTest, StorageType) {
+TEST_F(CppNameResolverTest, storage_type) {
   t_struct strct(&program_, "Foo");
   strct.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("HashAdapter"));
+      gen::adapter_builder(program_, "cpp").make("HashAdapter"));
   {
     t_field strct_field(strct, "hash", 1);
     EXPECT_EQ(get_storage_type(strct_field), "::path::to::Foo");
@@ -449,7 +509,7 @@ TEST_F(TypeResolverTest, StorageType) {
   {
     t_field strct_field(strct, "hash", 1);
     strct_field.add_structured_annotation(
-        thrift_annotation_builder::box(program_).make());
+        gen::thrift_annotation_builder::box(program_).make());
     EXPECT_EQ(
         get_storage_type(strct_field),
         "::apache::thrift::detail::boxed_value_ptr<::path::to::Foo>");
@@ -462,7 +522,7 @@ TEST_F(TypeResolverTest, StorageType) {
   }
 }
 
-TEST_F(TypeResolverTest, Typedef_cpptemplate) {
+TEST_F(CppNameResolverTest, typedef_cpptemplate) {
   // cpp.template could not resolve to a scalar since it can be only used for
   // container fields.
   t_map imap(t_primitive_type::t_i32(), t_primitive_type::t_string());
@@ -488,7 +548,7 @@ TEST_F(TypeResolverTest, Typedef_cpptemplate) {
   EXPECT_FALSE(can_resolve_to_scalar(tiumap));
 }
 
-TEST_F(TypeResolverTest, Typedef_cpptype) {
+TEST_F(CppNameResolverTest, typedef_cpptype) {
   t_map imap(t_primitive_type::t_i32(), t_primitive_type::t_string());
   t_typedef iumap(&program_, "iumap", imap);
   iumap.set_annotation(
@@ -518,11 +578,11 @@ TEST_F(TypeResolverTest, Typedef_cpptype) {
   EXPECT_TRUE(can_resolve_to_scalar(tiumap));
 }
 
-TEST_F(TypeResolverTest, AdaptedFieldType) {
+TEST_F(CppNameResolverTest, adapted_field_type) {
   auto i64 = t_primitive_type::t_i64();
   auto field = t_field(i64, "n", 42);
   field.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("MyAdapter"));
+      gen::adapter_builder(program_, "cpp").make("MyAdapter"));
   EXPECT_EQ(
       get_native_type(field),
       "::apache::thrift::adapt_detail::adapted_field_t<"
@@ -533,9 +593,9 @@ TEST_F(TypeResolverTest, AdaptedFieldType) {
       "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
 }
 
-TEST_F(TypeResolverTest, AdaptedFieldStorageType) {
+TEST_F(CppNameResolverTest, adapted_field_storage_type) {
   auto i64 = t_primitive_type::t_i64();
-  auto adapter = adapter_builder(program_, "cpp");
+  auto adapter = gen::adapter_builder(program_, "cpp");
   {
     auto field = t_field(i64, "n", 42);
     field.add_structured_annotation(adapter.make("MyAdapter"));
@@ -618,7 +678,7 @@ TEST_F(TypeResolverTest, AdaptedFieldStorageType) {
     auto field = t_field(i64, "n", 42);
     field.add_structured_annotation(adapter.make("MyAdapter"));
     field.add_structured_annotation(
-        thrift_annotation_builder::box(program_).make());
+        gen::thrift_annotation_builder::box(program_).make());
     EXPECT_EQ(
         get_storage_type(field),
         "::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
@@ -633,11 +693,11 @@ TEST_F(TypeResolverTest, AdaptedFieldStorageType) {
   }
 }
 
-TEST_F(TypeResolverTest, TransitivelyAdaptedFieldType) {
+TEST_F(CppNameResolverTest, transitively_adapted_field_type) {
   auto annotation = t_struct(nullptr, "MyAnnotation");
 
   annotation.add_structured_annotation(
-      adapter_builder(program_, "cpp").make("MyAdapter"));
+      gen::adapter_builder(program_, "cpp").make("MyAdapter"));
 
   auto transitive = t_struct(nullptr, "Transitive");
   transitive.set_uri(kTransitiveUri);
@@ -662,7 +722,7 @@ TEST_F(TypeResolverTest, TransitivelyAdaptedFieldType) {
       "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
 }
 
-TEST_F(TypeResolverTest, GenTypeTagContainer) {
+TEST_F(CppNameResolverTest, gen_type_tag_container) {
   auto i16 = t_primitive_type::t_i16();
   auto i32 = t_primitive_type::t_i32();
   t_list i32_list(i32);
@@ -679,7 +739,7 @@ TEST_F(TypeResolverTest, GenTypeTagContainer) {
       "::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i16_t>");
 }
 
-TEST_F(TypeResolverTest, GenTypeTagStruct) {
+TEST_F(CppNameResolverTest, gen_type_tag_struct) {
   t_program p("path/to/program.thrift");
   t_struct s(&p, "struct_name");
   t_union u(&p, "union_name");
@@ -693,7 +753,7 @@ TEST_F(TypeResolverTest, GenTypeTagStruct) {
       "::apache::thrift::type::exception_t<::cpp2::exception_name>");
 }
 
-TEST_F(TypeResolverTest, BasicQualifier) {
+TEST_F(CppNameResolverTest, basic_qualifier) {
   t_field default_i32 = t_field(t_primitive_type::t_i32(), "i32");
   EXPECT_EQ(get_reference_type(default_i32), "::apache::thrift::field_ref");
 
@@ -707,7 +767,7 @@ TEST_F(TypeResolverTest, BasicQualifier) {
   EXPECT_EQ(get_reference_type(terse_i32), "::apache::thrift::terse_field_ref");
 }
 
-TEST_F(TypeResolverTest, HasReferenceTypeFalse) {
+TEST_F(CppNameResolverTest, has_reference_type_false) {
   {
     t_field field = t_field(t_primitive_type::t_i32(), "i32");
     field.add_structured_annotation(
@@ -724,5 +784,3 @@ TEST_F(TypeResolverTest, HasReferenceTypeFalse) {
         ref_builder(program_, "cpp").make((int)RefType::SharedMutable));
   }
 }
-
-} // namespace apache::thrift::compiler::gen::cpp

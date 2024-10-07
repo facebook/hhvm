@@ -21,7 +21,6 @@
 #include <unordered_set>
 
 #include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/lib/uri.h>
 
 namespace apache {

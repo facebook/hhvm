@@ -17,6 +17,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <initializer_list>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -25,8 +26,6 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/gen.h>
-#include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/gen/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
@@ -48,11 +47,27 @@ struct std::hash<std::pair<
 };
 
 namespace apache::thrift::compiler {
+namespace detail {
+template <typename C, typename K = typename C::key_type, typename G>
+auto& get_or_gen(C& cache, const K& key, const G& gen_func) {
+  auto itr = cache.find(key);
+  if (itr == cache.end()) {
+    itr = cache.emplace(key, gen_func()).first;
+  }
+  return itr->second;
+}
 
+std::string gen_template_type(
+    std::string template_name, std::initializer_list<std::string> args);
+} // namespace detail
+
+class t_function;
 class t_named;
 class t_program;
 class t_sink;
 class t_stream;
+class t_structured;
+class t_typedef;
 
 using cpp_reference_type = gen::cpp::reference_type;
 
@@ -96,10 +111,40 @@ class cpp_name_resolver {
         field_type_tag_cache_, &node, [&] { return gen_type_tag(node); });
   }
 
-  std::string get_namespaced_name(
-      const t_program& program, const t_named& node) {
-    return namespaces_.get_namespaced_name(program, node);
+  // Returns C++ namespace for the given program.
+  const std::string& get_namespace(const t_program& node) {
+    return detail::get_or_gen(
+        namespace_cache_, &node, [&]() { return gen_namespace(node); });
   }
+
+  const std::string& get_namespaced_name(
+      const t_program& program, const t_named& node) {
+    return detail::get_or_gen(name_cache_, &node, [&]() {
+      return gen_namespaced_name(program, node);
+    });
+  }
+  const std::string& get_namespaced_name(
+      const t_program* program, const t_named& node) {
+    return program == nullptr ? get_cpp_name(node)
+                              : get_namespaced_name(*program, node);
+  }
+  const std::string& get_namespaced_name(const t_type& node) {
+    return get_namespaced_name(node.program(), node);
+  }
+
+  static const std::string& get_cpp_name(const t_named& node) {
+    if (const auto* cpp_name =
+            node.find_structured_annotation_or_null(kCppNameUri)) {
+      return cpp_name->get_value_from_structured_annotation("value")
+          .get_string();
+    }
+    return node.get_annotation("cpp.name", &node.name());
+  }
+
+  static std::string gen_namespace(const t_program& progam);
+  static std::string gen_unprefixed_namespace(const t_program& progam);
+  static std::vector<std::string> gen_namespace_components(
+      const t_program& program);
 
   const std::string& get_underlying_namespaced_name(const t_type& node);
 
@@ -154,7 +199,8 @@ class cpp_name_resolver {
   using type_resolve_fn =
       const std::string& (cpp_name_resolver::*)(const t_type& node);
 
-  gen::cpp::namespace_resolver namespaces_;
+  std::unordered_map<const t_program*, std::string> namespace_cache_;
+  std::unordered_map<const t_named*, std::string> name_cache_;
   std::unordered_map<const t_type*, std::string> type_cache_;
   std::unordered_map<const t_sink*, std::string> sink_cache_;
   std::unordered_map<const t_const*, std::string> const_cache_;
@@ -169,13 +215,15 @@ class cpp_name_resolver {
   std::unordered_map<const t_field*, std::string> field_type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_reference_type_cache_;
 
+  std::string gen_namespaced_name(
+      const t_program& program, const t_named& node) {
+    return get_namespace(program) + "::" + get_cpp_name(node);
+  }
   static const std::string* get_string_from_annotation_or_null(
       const t_named& node, const char* uri, const char* key);
 
   static const std::string& default_type(t_primitive_type::type btype);
   static const std::string& default_template(t_container::type ctype);
-
-  const std::string& get_namespace(const t_program& program);
 
   // Generating functions.
   std::string gen_type(const t_type& node);

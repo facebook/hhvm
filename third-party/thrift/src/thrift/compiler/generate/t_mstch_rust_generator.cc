@@ -30,7 +30,7 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_struct.h>
-#include <thrift/compiler/gen/cpp/namespace_resolver.h>
+#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/rust/uri.h>
@@ -2424,8 +2424,7 @@ void t_mstch_rust_generator::generate_program() {
     namespace_rust = program_->name();
   }
 
-  std::string namespace_cpp2 =
-      gen::cpp::namespace_resolver::gen_namespace(*program_);
+  std::string namespace_cpp2 = cpp_name_resolver::gen_namespace(*program_);
 
   std::string service_names;
   for (const t_service* service : program_->services()) {

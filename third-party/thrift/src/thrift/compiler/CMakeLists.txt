@@ -129,8 +129,6 @@ target_link_libraries(
 add_library(
   compiler
 
-  gen/cpp/gen.cc
-  gen/cpp/namespace_resolver.cc
   gen/cpp/reference_type.cc
   gen/cpp/name_resolver.cc
 

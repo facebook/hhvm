@@ -35,6 +35,8 @@ using namespace ::testing;
 
 namespace {
 
+constexpr auto kDummyHeader = "dummy_header";
+
 using TransportType = Cpp2ConnContext::TransportType;
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
@@ -51,7 +53,15 @@ enum class ClientCallbackKind { CORO, SYNC, SEMIFUTURE, FUTURE };
 
 struct TestHandler
     : apache::thrift::ServiceHandler<test::ClientInterceptorTest> {
-  folly::coro::Task<void> co_noop() override { co_return; }
+  folly::coro::Task<void> co_noop(RequestParams requestParams) override {
+    auto* header = requestParams.getRequestContext()->getHeader();
+    auto& readHeaders = header->getHeaders();
+    if (auto dummyHeader = readHeaders.find(kDummyHeader);
+        dummyHeader != readHeaders.end()) {
+      header->setHeader(kDummyHeader, dummyHeader->second);
+    }
+    co_return;
+  }
 
   folly::coro::Task<std::unique_ptr<std::string>> co_echo(
       std::unique_ptr<std::string> str) override {
@@ -104,6 +114,7 @@ class ClientInterface {
 
   virtual folly::coro::Task<std::string> echo(std::string str) = 0;
   virtual folly::coro::Task<void> noop() = 0;
+  virtual folly::coro::Task<void> noop(RpcOptions&) = 0;
   virtual folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
   createInteraction() = 0;
@@ -128,6 +139,10 @@ class CoroClientInterface : public ClientInterface {
   }
   folly::coro::Task<void> noop() override {
     co_await client_->co_noop();
+    co_return;
+  }
+  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
+    co_await client_->co_noop(rpcOptions);
     co_return;
   }
   folly::coro::Task<
@@ -164,6 +179,10 @@ class SyncClientInterface : public ClientInterface {
     client_->sync_noop();
     co_return;
   }
+  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
+    client_->sync_noop(rpcOptions);
+    co_return;
+  }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
   createInteraction() override {
@@ -196,6 +215,9 @@ class SemiFutureClientInterface : public ClientInterface {
   folly::coro::Task<void> noop() override {
     co_await client_->semifuture_noop();
   }
+  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
+    co_await client_->semifuture_noop(rpcOptions);
+  }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
   createInteraction() override {
@@ -226,6 +248,9 @@ class FutureClientInterface : public ClientInterface {
     co_return co_await client_->future_echo(str);
   }
   folly::coro::Task<void> noop() override { co_await client_->future_noop(); }
+  folly::coro::Task<void> noop(RpcOptions& rpcOptions) override {
+    co_await client_->future_noop(rpcOptions);
+  }
   folly::coro::Task<
       apache::thrift::Client<test::ClientInterceptorTest>::SampleInteraction>
   createInteraction() override {
@@ -763,6 +788,36 @@ CO_TEST_P(ClientInterceptorTestP, RequestArguments) {
   EXPECT_EQ(interceptor->arg1, 1);
   EXPECT_EQ(interceptor->arg2, "hello");
   EXPECT_EQ(interceptor->arg3, requestArgs);
+}
+
+CO_TEST_P(ClientInterceptorTestP, Headers) {
+  class ClientInterceptorWithHeaders
+      : public NamedClientInterceptor<folly::Unit> {
+   public:
+    using RequestState = folly::Unit;
+
+    using NamedClientInterceptor::NamedClientInterceptor;
+
+    std::optional<RequestState> onRequest(RequestInfo requestInfo) override {
+      onRequestHeader = requestInfo.headers->getWriteHeaders().at(kDummyHeader);
+      return std::nullopt;
+    }
+    void onResponse(RequestState*, ResponseInfo responseInfo) override {
+      onResponseHeader = responseInfo.headers->getHeaders().at(kDummyHeader);
+    }
+
+    std::string onRequestHeader;
+    std::string onResponseHeader;
+  };
+  auto interceptor =
+      std::make_shared<ClientInterceptorWithHeaders>("WithHeaders");
+  auto client = makeClient(makeInterceptorsList(interceptor));
+
+  RpcOptions rpcOptions;
+  rpcOptions.setWriteHeader(kDummyHeader, "dummy value");
+  co_await client->noop(rpcOptions);
+  EXPECT_EQ(interceptor->onRequestHeader, "dummy value");
+  EXPECT_EQ(interceptor->onResponseHeader, "dummy value");
 }
 
 INSTANTIATE_TEST_SUITE_P(

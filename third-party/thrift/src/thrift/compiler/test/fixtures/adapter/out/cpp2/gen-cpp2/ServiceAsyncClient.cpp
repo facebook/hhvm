@@ -100,15 +100,15 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg1, p_arg2, p_arg3);
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_func(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+      fbthrift_serialize_and_send_func(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
+    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -140,7 +140,7 @@ folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<:
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg1, p_arg2, p_arg3);
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::MyI32_4873>(std::move(exTry).exception());
     }

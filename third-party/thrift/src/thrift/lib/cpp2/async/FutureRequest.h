@@ -81,8 +81,10 @@ class FutureCallbackHelper {
     apache::thrift::ClientReceiveState clientReceiveState =
         extractClientReceiveState(result);
     auto* contextStack = clientReceiveState.ctx();
+    auto* header = clientReceiveState.header();
     if (contextStack != nullptr) {
-      if (auto exTry = contextStack->processClientInterceptorsOnResponse();
+      if (auto exTry =
+              contextStack->processClientInterceptorsOnResponse(header);
           exTry.hasException()) {
         return folly::Try<Result>(std::move(exTry).exception());
       }

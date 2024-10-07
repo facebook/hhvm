@@ -110,15 +110,15 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_coun
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_count(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback));
+      fbthrift_serialize_and_send_count(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
+    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -150,7 +150,7 @@ folly::SemiFuture<::facebook::thrift::test::CountingStruct> apache::thrift::Clie
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::CountingStruct>(std::move(exTry).exception());
     }
@@ -303,15 +303,15 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::sync_adap
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg);
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_adaptedTypes(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
+      fbthrift_serialize_and_send_adaptedTypes(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_arg);
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
+    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
@@ -343,7 +343,7 @@ folly::SemiFuture<::facebook::thrift::test::HeapAllocated> apache::thrift::Clien
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg);
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs));
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::HeapAllocated>(std::move(exTry).exception());
     }

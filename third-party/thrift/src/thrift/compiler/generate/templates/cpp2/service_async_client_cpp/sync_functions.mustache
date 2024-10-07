@@ -55,15 +55,15 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie({{ > service_common/param_list}});
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs)).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
     [&] {
-      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
+      fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     });
   if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse().throwUnlessValue();
+    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
   if (returnState.isException()) {
     returnState.exception().throw_exception();

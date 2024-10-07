@@ -106,8 +106,10 @@ class ContextStack {
   }
 
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest(
-      ClientInterceptorOnRequestArguments arguments) noexcept;
-  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse() noexcept;
+      ClientInterceptorOnRequestArguments arguments,
+      apache::thrift::transport::THeader* headers) noexcept;
+  [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
+      const apache::thrift::transport::THeader* headers) noexcept;
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <stdexcept>
 #include <vector>
 
@@ -24,6 +25,10 @@
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
 
 namespace apache::thrift {
+
+namespace transport {
+class THeader;
+}
 
 class ClientInterceptorBase {
  public:
@@ -34,6 +39,7 @@ class ClientInterceptorBase {
   struct RequestInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
     ClientInterceptorOnRequestArguments arguments;
+    apache::thrift::transport::THeader* headers = nullptr;
     /**
      * The name of the service definition as specified in Thrift IDL.
      */
@@ -49,6 +55,7 @@ class ClientInterceptorBase {
 
   struct ResponseInfo {
     detail::ClientInterceptorOnRequestStorage* storage = nullptr;
+    const apache::thrift::transport::THeader* headers = nullptr;
     /**
      * The name of the service definition as specified in Thrift IDL.
      */

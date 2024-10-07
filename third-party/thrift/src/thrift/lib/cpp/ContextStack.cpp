@@ -366,7 +366,8 @@ void ContextStack::resetClientRequestContextHeader() {
 }
 
 folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
-    ClientInterceptorOnRequestArguments arguments) noexcept {
+    ClientInterceptorOnRequestArguments arguments,
+    apache::thrift::transport::THeader* headers) noexcept {
   if (clientInterceptors_ == nullptr) {
     return {};
   }
@@ -376,6 +377,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
     ClientInterceptorBase::RequestInfo requestInfo{
         getStorageForClientInterceptorOnRequestByIndex(i),
         arguments,
+        headers,
         serviceName_,
         methodNameUnprefixed_};
     try {
@@ -396,7 +398,8 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
   return {};
 }
 
-folly::Try<void> ContextStack::processClientInterceptorsOnResponse() noexcept {
+folly::Try<void> ContextStack::processClientInterceptorsOnResponse(
+    const apache::thrift::transport::THeader* headers) noexcept {
   if (clientInterceptors_ == nullptr) {
     return {};
   }
@@ -405,6 +408,7 @@ folly::Try<void> ContextStack::processClientInterceptorsOnResponse() noexcept {
     const auto& clientInterceptor = (*clientInterceptors_)[i];
     ClientInterceptorBase::ResponseInfo responseInfo{
         getStorageForClientInterceptorOnRequestByIndex(i),
+        headers,
         serviceName_,
         methodNameUnprefixed_};
     try {

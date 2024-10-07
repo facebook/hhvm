@@ -35,13 +35,19 @@ class Metasyntactic(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.Metasyntactic(self.value)
+        return python_types.Metasyntactic(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -70,13 +76,19 @@ class MyEnum1(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum1(self.value)
+        return python_types.MyEnum1(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -102,13 +114,19 @@ class MyEnum2(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum2(self.value)
+        return python_types.MyEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -137,13 +155,19 @@ class MyEnum3(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum3(self.value)
+        return python_types.MyEnum3(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -170,13 +194,19 @@ class MyEnum4(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum4(self.value)
+        return python_types.MyEnum4(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -202,13 +232,19 @@ class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyBitmaskEnum1(self.value)
+        return python_types.MyBitmaskEnum1(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -234,13 +270,19 @@ class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyBitmaskEnum2(self.value)
+        return python_types.MyBitmaskEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 

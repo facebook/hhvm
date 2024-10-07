@@ -240,7 +240,6 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(str(e), "Color." + color)
             self.assertEqual(f"{e=}", f"e=<Color.{color}: {i}>")
 
-    @brokenInAutoMigrate()
     def test_isinstance_Enum(self) -> None:
         self.assertIsInstance(Color.red, Enum)
         self.assertTrue(issubclass(Color, Enum))
@@ -341,7 +340,6 @@ class FlagTests(unittest.TestCase):
         x = Perm(-2)
         self.assertIs(x, Perm.read | Perm.write)
 
-    @brokenInAutoMigrate()
     def test_isinstance_Flag(self) -> None:
         self.assertIsInstance(Perm.read, Flag)
         self.assertTrue(issubclass(Perm, Flag))

@@ -34,13 +34,19 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.MyEnumA(self.value)
+        return python_types.MyEnumA(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -66,13 +72,19 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.AnnotatedEnum(self.value)
+        return python_types.AnnotatedEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -98,13 +110,19 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.AnnotatedEnum2(self.value)
+        return python_types.AnnotatedEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -128,13 +146,19 @@ class MyEnumB(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.MyEnumB(self.value)
+        return python_types.MyEnumB(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -147,6 +171,13 @@ class __SimpleUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 
 
 class __ComplexUnionType(thrift.py3.types.CompiledEnum):
@@ -183,6 +214,13 @@ class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __FloatUnionType(thrift.py3.types.CompiledEnum):
     floatSide = 1
@@ -191,4 +229,11 @@ class __FloatUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 

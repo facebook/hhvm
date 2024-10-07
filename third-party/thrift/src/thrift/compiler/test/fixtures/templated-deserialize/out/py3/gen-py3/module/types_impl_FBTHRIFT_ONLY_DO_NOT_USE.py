@@ -34,13 +34,19 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.MyEnumA(self.value)
+        return python_types.MyEnumA(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 

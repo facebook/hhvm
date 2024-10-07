@@ -34,5 +34,13 @@ class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
     {{! prevent accidental treatment as py-deprecated }}
     __slots__ = ()
 
+    {{! will move these to python.types.Enum base class when it's no longer int }}
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 {{/struct:union?}}
 {{/program:filtered_structs}}

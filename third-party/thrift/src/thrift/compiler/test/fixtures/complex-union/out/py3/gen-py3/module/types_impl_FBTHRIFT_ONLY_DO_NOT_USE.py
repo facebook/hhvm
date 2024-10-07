@@ -26,6 +26,13 @@ class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __ListUnionType(thrift.py3.types.CompiledEnum):
     intListValue = 2
@@ -34,6 +41,13 @@ class __ListUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 
 
 class __DataUnionType(thrift.py3.types.CompiledEnum):
@@ -44,6 +58,13 @@ class __DataUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __ValUnionType(thrift.py3.types.CompiledEnum):
     v1 = 1
@@ -52,6 +73,13 @@ class __ValUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 
 
 class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
@@ -62,6 +90,13 @@ class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
     s = 1
@@ -69,4 +104,11 @@ class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 

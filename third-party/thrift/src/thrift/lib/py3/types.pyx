@@ -32,6 +32,7 @@ from thrift.python.types import (
     Enum as _fbthrift_python_Enum,
     EnumMeta as _fbthrift_python_EnumMeta,
     Flag as _fbthrift_python_Flag,
+    StructOrUnion as _fbthrift_python_StructOrUnion,
 )
 
 # ensures that common classes can be reliably imported from thrift.py3.types
@@ -510,28 +511,13 @@ cdef class Map(Container):
         except KeyError:
             return default
 
-# to reduce issues with logic that relies on 
-# the assumption that CompiledEnum implies thrift-py3
-# leave an intermediate base class for now
-class CompiledEnum(_fbthrift_python_Enum):
-    # as a next step, remove these methods and make the
-    # generated enums inherit from int directly
-    def __int__(self):
-        return self.value
-    def __index__(self):
-        return self.value
-
-
-Enum = CompiledEnum
+CompiledEnum = _fbthrift_python_Enum
+Enum = _fbthrift_python_Enum
 # I wanted to call the base class Enum, but there is a cython bug
 # See https://github.com/cython/cython/issues/2474
 # Will move when the bug is fixed
 
-# to reduce issues with logic that relies on 
-# the assumption that py3.types.Flag implies thrift-py3,
-# leave an intermediate base class for now
-class Flag(CompiledEnum, _fbthrift_python_Flag):
-    pass
+Flag = _fbthrift_python_Flag
 
 cdef class StructFieldsSetter:
     cdef void set_field(self, const char* name, object val) except *:
@@ -545,14 +531,11 @@ cdef translate_cpp_enum_to_python(object EnumClass, int value):
         return BadEnum(EnumClass, value)
 
 
-try:
-    import thrift.python.types
-    def _is_python_struct(obj):
-        return isinstance(obj, thrift.python.types.StructOrUnion)
-    def _is_python_enum(obj):
-        return "thrift_types" in obj.__class__.__module__ 
-except ImportError:
-    def _is_python_struct(obj):
-        return False
-    def _is_python_enum(obj):
-        return False
+def _is_python_struct(obj):
+    return isinstance(obj, _fbthrift_python_StructOrUnion)
+
+def _is_python_enum(obj):
+    return (
+        isinstance(obj, _fbthrift_python_Enum) and
+        obj.__class__.__module__.endswith(".thrift_types")
+    )

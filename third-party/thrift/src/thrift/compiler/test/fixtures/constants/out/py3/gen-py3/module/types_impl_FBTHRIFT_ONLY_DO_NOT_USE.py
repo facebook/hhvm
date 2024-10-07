@@ -31,13 +31,19 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.EmptyEnum(self.value)
+        return python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -64,13 +70,19 @@ class City(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.City(self.value)
+        return python_types.City(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -97,13 +109,19 @@ class Company(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.Company(self.value)
+        return python_types.Company(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -117,6 +135,13 @@ class __union1Type(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __union2Type(thrift.py3.types.CompiledEnum):
     i = 1
@@ -127,4 +152,11 @@ class __union2Type(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 

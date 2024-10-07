@@ -31,13 +31,19 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enumstrict.module.thrift_types"
         )
-        return python_types.EmptyEnum(self.value)
+        return python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -62,13 +68,19 @@ class MyEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enumstrict.module.thrift_types"
         )
-        return python_types.MyEnum(self.value)
+        return python_types.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -94,13 +106,19 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enumstrict.module.thrift_types"
         )
-        return python_types.MyUseIntrinsicDefaultEnum(self.value)
+        return python_types.MyUseIntrinsicDefaultEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -143,13 +161,19 @@ class MyBigEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.enumstrict.module.thrift_types"
         )
-        return python_types.MyBigEnum(self.value)
+        return python_types.MyBigEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 

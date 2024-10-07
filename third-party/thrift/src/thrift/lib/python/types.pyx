@@ -47,11 +47,8 @@ def _is_py3_struct(obj):
         return False
 
 def _is_py3_enum(obj):
-    try: 
-        import thrift.py3.types
-        return isinstance(obj, thrift.py3.types.Enum)
-    except ImportError:
-        return False
+    # py3 enums now use thrift-python Enum base class
+    return isinstance(obj, Enum) and obj.__class__.__module__.endswith(".types")
 
 def _make_noncached_property(getter_function, struct_class, field_name):
     prop = property(getter_function)
@@ -778,7 +775,7 @@ cdef class StructTypeInfo(TypeInfoBase):
 
             value = value._to_python()
             if not isinstance(value, self._class):
-                raise TypeError(f"value {value} is a py3 struct of type {type(value)}, can not be converted to {self._class !r}.")
+                raise TypeError(f"value {value} is a py3 struct of type {type(value)}, cannot be converted to {self._class !r}.")
 
         if isinstance(value, Struct):
             return (<Struct>value)._fbthrift_data
@@ -841,7 +838,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
 
             value = value._to_python()
             if not isinstance(value, self._class):
-                raise TypeError(f"value {value} is a py3 enum of type {type(value)}, can not be converted to {self._class !r}.")
+                raise TypeError(f"value {value} is a py3 enum of type {type(value)}, cannot be converted to {self._class !r}.")
 
         return value._fbthrift_value_
 

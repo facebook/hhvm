@@ -33,13 +33,19 @@ class MyEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.basic.module.thrift_types"
         )
-        return python_types.MyEnum(self.value)
+        return python_types.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -64,13 +70,19 @@ class HackEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "test.fixtures.basic.module.thrift_types"
         )
-        return python_types.HackEnum(self.value)
+        return python_types.HackEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -86,6 +98,13 @@ class __MyUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
+
 
 class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
     reserved_field = 1
@@ -93,4 +112,11 @@ class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 

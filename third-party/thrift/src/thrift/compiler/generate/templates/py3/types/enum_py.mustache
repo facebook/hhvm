@@ -47,13 +47,20 @@ class {{enum:name}}(thrift.py3.types.{{!
         python_types = importlib.import_module(
             "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types"
         )
-        return python_types.{{enum:name}}(self.value)
+        return python_types.{{enum:name}}(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    {{! will move these to python.types.Enum base class when it's no longer int }}
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 {{/program:enums}}

@@ -36,13 +36,19 @@ class AnEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.AnEnum(self.value)
+        return python_types.AnEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -68,13 +74,19 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.AnEnumRenamed(self.value)
+        return python_types.AnEnumRenamed(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -101,13 +113,19 @@ class Flags(thrift.py3.types.Flag):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return python_types.Flags(self.value)
+        return python_types.Flags(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -119,4 +137,11 @@ class __BinaryUnionType(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
+
 

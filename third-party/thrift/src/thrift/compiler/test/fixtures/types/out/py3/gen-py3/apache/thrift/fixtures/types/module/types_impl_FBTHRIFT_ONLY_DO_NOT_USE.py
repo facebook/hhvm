@@ -36,13 +36,19 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "apache.thrift.fixtures.types.module.thrift_types"
         )
-        return python_types.has_bitwise_ops(self.value)
+        return python_types.has_bitwise_ops(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -67,13 +73,19 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "apache.thrift.fixtures.types.module.thrift_types"
         )
-        return python_types.is_unscoped(self.value)
+        return python_types.is_unscoped(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 
@@ -98,13 +110,19 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
         python_types = importlib.import_module(
             "apache.thrift.fixtures.types.module.thrift_types"
         )
-        return python_types.MyForwardRefEnum(self.value)
+        return python_types.MyForwardRefEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        return self.value
+        return self._fbthrift_value_
+
+    def __int__(self):
+        return self._fbthrift_value_
+
+    def __index__(self):
+        return self._fbthrift_value_
 
 
 

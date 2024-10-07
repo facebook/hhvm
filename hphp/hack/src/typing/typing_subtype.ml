@@ -4070,21 +4070,17 @@ end = struct
       and ty_name = lazy (Pretty.describe_ty_default env (LoclType ty_sub))
       and pos = Reason.to_pos (get_reason ty_sub) in
       let postprocess =
-        if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-          fun prop ->
-        prop
-        else
-          if_unsat
-            (invalid
-               ~fail:
-                 (Option.map
-                    subtype_env.Subtype_env.on_error
-                    ~f:
-                      Typing_error.(
-                        fun on_error ->
-                          apply_reasons ~on_error
-                          @@ Secondary.Not_sub_dynamic
-                               { pos; ty_name; dynamic_part })))
+        if_unsat
+          (invalid
+             ~fail:
+               (Option.map
+                  subtype_env.Subtype_env.on_error
+                  ~f:
+                    Typing_error.(
+                      fun on_error ->
+                        apply_reasons ~on_error
+                        @@ Secondary.Not_sub_dynamic
+                             { pos; ty_name; dynamic_part })))
       in
       postprocess
       @@

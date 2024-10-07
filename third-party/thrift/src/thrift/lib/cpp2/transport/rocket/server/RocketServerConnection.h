@@ -55,8 +55,7 @@
 
 THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2ConnContext;
 class RocketSinkClientCallback;
@@ -651,5 +650,4 @@ class RocketServerConnection final
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

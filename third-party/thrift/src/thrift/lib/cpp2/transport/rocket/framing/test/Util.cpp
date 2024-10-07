@@ -21,10 +21,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 folly::StringPiece getRange(folly::IOBuf& iobuf) {
   return folly::StringPiece(iobuf.coalesce());
@@ -54,7 +51,4 @@ splitMetadataAndData(const Payload& p) {
   return {std::move(metadata), std::move(data)};
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

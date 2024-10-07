@@ -28,8 +28,7 @@ FOLLY_GFLAGS_DEFINE_int32(
     0,
     "Limit on container size when deserializing thrift, 0 is no limit");
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 [[noreturn]] void BinaryProtocolReader::throwBadVersionIdentifier(int32_t sz) {
   throw TProtocolException(
@@ -46,5 +45,4 @@ namespace thrift {
           sz));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

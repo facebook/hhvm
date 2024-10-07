@@ -25,9 +25,7 @@
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
-namespace apache {
-namespace thrift {
-namespace adapt_detail {
+namespace apache::thrift::adapt_detail {
 
 // Identical to std::declval<const T&>.
 template <typename T>
@@ -526,6 +524,4 @@ uint32_t serializedSize(Protocol& prot, const AdaptedT& val, FallbackF f) {
       FallbackF>()(prot, val, f);
 }
 
-} // namespace adapt_detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::adapt_detail

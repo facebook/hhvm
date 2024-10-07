@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftServer;
 
@@ -71,5 +70,4 @@ class ThriftProcessor {
   ThriftServer& server_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

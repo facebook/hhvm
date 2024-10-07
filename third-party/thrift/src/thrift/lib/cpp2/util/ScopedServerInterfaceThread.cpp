@@ -25,8 +25,7 @@ using namespace std;
 using namespace folly;
 using namespace apache::thrift::concurrency;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 ScopedServerInterfaceThread::ScopedServerInterfaceThread(
     shared_ptr<AsyncProcessorFactory> apf,
@@ -152,5 +151,4 @@ void validateServiceName(AsyncProcessorFactory& apf, const char* serviceName) {
   }
 }
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

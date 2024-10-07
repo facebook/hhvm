@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::unique_ptr<folly::IOBuf> serializeErrorStruct(
     protocol::PROTOCOL_TYPES protId, const TApplicationException& obj) {
@@ -43,5 +42,4 @@ std::unique_ptr<folly::IOBuf> serializeErrorStruct(
   return nullptr;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

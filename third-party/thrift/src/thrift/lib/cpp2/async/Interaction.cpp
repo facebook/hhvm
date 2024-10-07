@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/async/Interaction.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 Tile::~Tile() {
   DCHECK_EQ(refCount_, 0);
@@ -228,5 +227,4 @@ void TilePromise::fulfill(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

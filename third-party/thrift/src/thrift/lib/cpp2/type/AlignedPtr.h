@@ -21,9 +21,7 @@
 #include <folly/ConstexprMath.h>
 #include <folly/lang/Bits.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 class Ref;
 namespace detail {
 
@@ -93,6 +91,4 @@ class AlignedPtr {
 };
 
 } // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

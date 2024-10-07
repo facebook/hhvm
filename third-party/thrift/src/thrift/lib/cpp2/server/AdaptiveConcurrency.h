@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using Clock = std::chrono::steady_clock;
 
@@ -188,5 +187,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

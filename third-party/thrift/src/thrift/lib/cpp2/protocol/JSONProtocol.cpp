@@ -18,11 +18,9 @@
 
 #include <folly/Conv.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
-namespace detail {
-namespace json {
+namespace detail::json {
 
 [[noreturn]] void throwNegativeSize(const int64_t size) {
   throw TProtocolException(
@@ -40,8 +38,7 @@ namespace json {
   throw TProtocolException(
       TProtocolException::NOT_IMPLEMENTED, "Unrecognized type");
 }
-} // namespace json
-} // namespace detail
+} // namespace detail::json
 
 [[noreturn]] void JSONProtocolReader::throwUnrecognizableAsBoolean(
     const int8_t byte) {
@@ -49,5 +46,4 @@ namespace json {
       TProtocolException::INVALID_DATA,
       folly::to<std::string>(byte, " is not a valid bool"));
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

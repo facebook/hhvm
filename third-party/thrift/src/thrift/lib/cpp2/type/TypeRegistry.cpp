@@ -20,9 +20,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/TypeRegistry.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 namespace detail {
 
 FOLLY_EXPORT TypeRegistry& getGeneratedTypeRegistry() {
@@ -113,6 +111,4 @@ const op::Serializer& TypeRegistry::TypeEntry::getSerializer(
   return *itr->second;
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

@@ -27,9 +27,7 @@
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class RocketSinkClientCallback final : public SinkClientCallback {
  public:
@@ -104,6 +102,4 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   PayloadSerializer& payloadSerializer_;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

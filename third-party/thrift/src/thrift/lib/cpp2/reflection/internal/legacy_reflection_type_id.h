@@ -21,16 +21,10 @@
 #include <folly/Range.h>
 #include <thrift/lib/thrift/gen-cpp2/reflection_types.h>
 
-namespace apache {
-namespace thrift {
-
-namespace legacy_reflection_detail {
+namespace apache::thrift::legacy_reflection_detail {
 
 using id_t = std::uint64_t;
 
 extern id_t get_type_id(reflection::Type type, folly::StringPiece name);
 
-} // namespace legacy_reflection_detail
-
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::legacy_reflection_detail

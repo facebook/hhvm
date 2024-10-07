@@ -38,8 +38,7 @@ using namespace cpp2;
 using facebook::thrift::dynamic_format;
 using facebook::thrift::format_adherence;
 
-namespace facebook {
-namespace thrift {
+namespace facebook::thrift {
 
 template <typename T, typename Tag = apache::thrift::type::infer_tag<T>>
 void test_to_from(T const& pod, const folly::dynamic& json) {
@@ -631,12 +630,7 @@ TEST(FollyDynamic, adapted_struct) {
   test_to_from<TypedefOfDirect, Tag>(pod, json);
 }
 
-} // namespace thrift
-} // namespace facebook
-
-namespace test_cpp1 {
-namespace cpp_compat {} // namespace cpp_compat
-} // namespace test_cpp1
+} // namespace facebook::thrift
 
 TEST(FollyDynamic, optional_string) {
   auto obj = from_dynamic<global_struct1>(

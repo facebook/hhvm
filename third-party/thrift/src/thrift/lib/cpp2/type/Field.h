@@ -23,9 +23,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Get.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // Helpers for detecting compatible optional field.
 template <typename T, typename Id>
@@ -54,6 +52,4 @@ inline constexpr bool is_terse_field_v =
     ::apache::thrift::detail::qualifier::
         is_cpp_ref_field_terse<T, op::get_field_id<T, Id>>::value;
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

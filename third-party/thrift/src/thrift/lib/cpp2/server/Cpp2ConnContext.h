@@ -42,8 +42,7 @@
 
 using apache::thrift::concurrency::PriorityThreadManager;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace rocket {
 class ThriftRocketServerHandler;
@@ -802,7 +801,6 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   size_t wiredRequestBytes_{0};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_ASYNC_CPP2CONNCONTEXT_H_

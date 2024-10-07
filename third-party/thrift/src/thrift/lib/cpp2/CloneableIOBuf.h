@@ -22,8 +22,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/Thrift.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 
@@ -85,7 +84,6 @@ void swap(
 
 typedef apache::thrift::detail::CloneableUniquePtr<folly::IOBuf> CloneableIOBuf;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_CLONEABLE_IOBUF_H_

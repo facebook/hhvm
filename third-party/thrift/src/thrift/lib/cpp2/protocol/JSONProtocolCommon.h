@@ -31,8 +31,7 @@
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 
@@ -316,7 +315,6 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   bool allowDecodeUTF8_{true};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/protocol/JSONProtocolCommon-inl.h>

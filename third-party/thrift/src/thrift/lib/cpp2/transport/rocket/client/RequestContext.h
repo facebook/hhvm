@@ -35,9 +35,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Serializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 class RocketClient;
 class RequestContextQueue;
 
@@ -258,6 +256,4 @@ class RequestContext {
   friend class RequestContextQueue;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

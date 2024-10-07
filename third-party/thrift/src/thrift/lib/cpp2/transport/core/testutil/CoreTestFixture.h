@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp2/transport/core/testutil/gen-cpp2/TestService.tcc>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2Worker;
 
@@ -80,5 +79,4 @@ class CoreTestFixture : public testing::Test {
   std::shared_ptr<Cpp2Worker> worker_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -21,10 +21,7 @@
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
-namespace detail {
+namespace apache::thrift::protocol::detail {
 
 using type::StandardProtocol;
 
@@ -55,7 +52,4 @@ template <typename T>
 inline constexpr StandardProtocol get_standard_protocol =
     StandardProtocolHelper<T>::value;
 
-} // namespace detail
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol::detail

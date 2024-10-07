@@ -21,9 +21,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 namespace {
 template <typename ServerCallback>
@@ -238,6 +236,4 @@ StreamChannelStatusResponse RocketSinkServerCallback::onSinkRequestN(
       folly::assume_unreachable();
   }
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

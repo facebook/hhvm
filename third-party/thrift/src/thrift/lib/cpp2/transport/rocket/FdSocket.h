@@ -20,9 +20,7 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/fdsock/SocketFds.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 // When this is called, `transport` is actually expected to be an
 // `AsyncFdSocket`, but we don't want to complicate the no-FDs, TCP-centric
@@ -52,6 +50,4 @@ folly::Try<folly::SocketFds> popReceivedFdsFromSocket(
     size_t expectedNumFds,
     folly::SocketFds::SeqNum expectedFdSeqNum);
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

@@ -23,10 +23,7 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
+namespace apache::thrift::detail::md {
 
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftType = ::apache::thrift::metadata::ThriftType;
@@ -254,7 +251,4 @@ ThriftConstValue cvStruct(
 
 ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value);
 
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail::md

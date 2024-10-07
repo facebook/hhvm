@@ -20,9 +20,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 std::atomic<bool> invoked{false};
 
@@ -77,6 +75,4 @@ TEST_F(RocketThriftRequestsTest, foo) {
   });
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

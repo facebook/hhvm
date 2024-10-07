@@ -63,14 +63,11 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace folly {
-namespace coro {
+namespace folly::coro {
 class CancellableAsyncScope;
 }
-} // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftServer;
 class ThriftServerStopController;
@@ -2195,5 +2192,4 @@ void RequestTask<ChildType>::run() {
   (childClass_->*executeFunc_)(std::move(req_));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

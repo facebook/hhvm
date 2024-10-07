@@ -25,9 +25,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class FOLLY_EXPORT RocketException : public std::exception {
  public:
@@ -62,6 +60,4 @@ class FOLLY_EXPORT RocketException : public std::exception {
   std::unique_ptr<folly::IOBuf> errorData_;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

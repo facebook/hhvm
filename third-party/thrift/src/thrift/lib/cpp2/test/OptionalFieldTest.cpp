@@ -21,8 +21,7 @@
 #include <algorithm>
 #include <type_traits>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 template <class T, class U>
 void heterogeneousComparisonsTest(T opt1, U opt2) {
   EXPECT_TRUE(opt1(4) == int64_t(4));
@@ -143,8 +142,7 @@ TEST(RequiredFieldRefTest, HeterogeneousComparisons) {
   };
   heterogeneousComparisonsTest(genRequiredFieldRef, genRequiredFieldRef);
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 struct Tag {};
 
@@ -168,8 +166,7 @@ struct hasher<Tag> {
 };
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 template <template <class...> class Hasher, template <class> class Optional>
 void StatelessHashTest() {
   Hasher<Optional<int&>> hash;
@@ -214,5 +211,4 @@ TEST(optionalFieldRefTest, Hash) {
   StatefulHashTest<folly::hasher, field_ref>();
   StatefulHashTest<folly::hasher, optional_field_ref>();
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

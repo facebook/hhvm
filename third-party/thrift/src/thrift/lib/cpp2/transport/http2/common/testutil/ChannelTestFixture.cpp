@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/transport/http2/common/SingleRpcChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using folly::EventBaseManager;
 using proxygen::HTTPMessage;
@@ -82,5 +81,4 @@ string ChannelTestFixture::toString(IOBuf* buf) {
   return buf->to<std::string>();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

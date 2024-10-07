@@ -34,8 +34,7 @@ class EventBase;
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace transport {
 class THeader;
@@ -179,5 +178,4 @@ class ReconnectingRequestChannel : public RequestChannel,
   bool isCreatingChannel_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

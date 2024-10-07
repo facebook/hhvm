@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/transport/http2/common/H2Channel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2Worker;
 
@@ -113,5 +112,4 @@ class SingleRpcChannel : public H2Channel {
   std::shared_ptr<void> activeRequestsGuard_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

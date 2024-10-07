@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 
 using apache::thrift::protocol::TProtocolException;
@@ -744,5 +743,4 @@ template void fromDebugString<class CompactProtocolWriter>(
 template void fromDebugString<class BinaryProtocolWriter>(
     folly::StringPiece text, BinaryProtocolWriter& outProtoWriter);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

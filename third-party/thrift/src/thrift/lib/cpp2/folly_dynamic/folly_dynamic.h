@@ -24,8 +24,7 @@
 
 #include <thrift/lib/cpp2/folly_dynamic/internal/folly_dynamic-inl-pre.h>
 
-namespace facebook {
-namespace thrift {
+namespace facebook::thrift {
 
 /**
  * Describes the format of the data contained in the `folly::dynamic`.
@@ -171,7 +170,6 @@ T from_dynamic(
     dynamic_format format,
     format_adherence adherence = format_adherence::STRICT) = delete;
 
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift
 
 #include <thrift/lib/cpp2/folly_dynamic/internal/folly_dynamic-inl-post.h>

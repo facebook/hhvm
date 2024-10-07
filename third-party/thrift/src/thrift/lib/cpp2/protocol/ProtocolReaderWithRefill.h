@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/VirtualProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename ProtocolT>
 class ProtocolReaderWithRefill;
@@ -441,5 +440,4 @@ inline bool canReadNElements(
   return true;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

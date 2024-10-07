@@ -37,9 +37,7 @@
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 namespace st {
 
@@ -409,9 +407,7 @@ bool pointer_less(const T& lhs, const T& rhs) {
   return lhs && rhs ? *lhs < *rhs : lhs < rhs;
 }
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 // __fbthrift_static_init_* are referenced using extern prototypes to keep them
 // private. This triggers the following warning, which is suppressed.

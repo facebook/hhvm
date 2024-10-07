@@ -29,8 +29,7 @@
 //   using apache::thrift::ThriftEq;
 //   EXPECT_CALL(mock_object, method(ThriftEq(expectedObject)));
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T>
 struct ThriftEqMatcher : testing::MatcherInterface<T> {
@@ -68,5 +67,4 @@ testing::Matcher<T> ThriftEq(T const& expected) {
   return testing::MakeMatcher(new ThriftEqMatcher<T>(&expected));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

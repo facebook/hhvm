@@ -16,12 +16,10 @@
 
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 const AttributeSource AttributeSource::BASELINE{1};
 const AttributeSource AttributeSource::OVERRIDE{2};
 const AttributeSource AttributeSource::OVERRIDE_INTERNAL{3};
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

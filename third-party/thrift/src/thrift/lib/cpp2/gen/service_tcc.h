@@ -39,11 +39,7 @@
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
-
-namespace ap {
+namespace apache::thrift::detail::ap {
 
 template <typename Prot>
 std::unique_ptr<folly::IOBuf> process_serialize_xform_app_exn(
@@ -172,8 +168,4 @@ void process_throw_wrapped_handler_error(
   sendExceptionHelper(std::move(req), std::move(buf));
 }
 
-} // namespace ap
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail::ap

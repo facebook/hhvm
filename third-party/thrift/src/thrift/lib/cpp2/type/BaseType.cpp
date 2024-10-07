@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp2/type/BaseType.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 const char* getBaseTypeName(BaseType type) noexcept {
   switch (type) {
@@ -63,6 +61,4 @@ const char* getBaseTypeName(BaseType type) noexcept {
   }
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

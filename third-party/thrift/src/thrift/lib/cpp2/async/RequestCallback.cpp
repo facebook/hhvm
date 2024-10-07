@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/core/EnvelopeUtil.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void ClientReceiveState::initFromLegacyFormat(
     std::unique_ptr<folly::IOBuf> buffer) {
@@ -57,5 +56,4 @@ void ClientReceiveState::initFromLegacyFormat(
   response_ = SerializedResponse(std::move(envelopeAndBody->second));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

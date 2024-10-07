@@ -16,10 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionPlugins.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace plugin {
+namespace apache::thrift::rocket::plugin {
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void,
@@ -29,7 +26,4 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   // nothing to do
 }
 
-} // namespace plugin
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::plugin

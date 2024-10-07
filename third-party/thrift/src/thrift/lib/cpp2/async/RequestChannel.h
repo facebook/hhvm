@@ -54,8 +54,7 @@ namespace folly {
 class IOBuf;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class StreamClientCallback;
 class SinkClientCallback;
@@ -423,7 +422,6 @@ void clientSendT(
       std::move(callback));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_ASYNC_REQUESTCHANNEL_H_

@@ -20,9 +20,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 namespace detail {
 /**
  * Helper method to uncompress the payload from remote endpoint.
@@ -59,6 +57,4 @@ void compressPayload(
 std::unique_ptr<folly::IOBuf> uncompressBuffer(
     std::unique_ptr<folly::IOBuf>&& buffer, CompressionAlgorithm compression);
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

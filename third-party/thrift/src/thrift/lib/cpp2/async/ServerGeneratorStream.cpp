@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp2/async/ServerGeneratorStream.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ServerGeneratorStream
 template class TwoWayBridge<
@@ -126,6 +124,4 @@ void ServerGeneratorStream::processPayloads() {
 void ServerGeneratorStream::close() {
   serverClose();
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

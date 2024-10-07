@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Get.h>
 
-namespace apache::thrift {
-
-namespace test::detail {
+namespace apache::thrift::test::detail {
 
 template <typename FieldTag>
 std::string_view getFieldName() {
@@ -196,5 +194,4 @@ class IsThriftUnionWithMatcher {
   const InnerMatcher matcher_;
 };
 
-} // namespace test::detail
-} // namespace apache::thrift
+} // namespace apache::thrift::test::detail

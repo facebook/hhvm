@@ -28,9 +28,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 RocketServerFrameContext::RocketServerFrameContext(
     RocketServerConnection& connection, StreamId streamId)
@@ -130,6 +128,4 @@ void RocketServerFrameContext::onFullFrame(RequestChannelFrame&& fullFrame) && {
   }
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

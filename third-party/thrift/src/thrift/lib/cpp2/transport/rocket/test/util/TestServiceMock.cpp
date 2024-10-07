@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestServiceMock.h>
 
-namespace testutil {
-namespace testservice {
+namespace testutil::testservice {
 
 using namespace apache::thrift;
 
@@ -304,5 +303,4 @@ TestStreamServiceMock::leakPublisherCheck() {
   return std::move(stream);
 }
 
-} // namespace testservice
-} // namespace testutil
+} // namespace testutil::testservice

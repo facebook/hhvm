@@ -22,9 +22,7 @@
 #include <utility>
 #include <folly/CPortability.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 template <typename IntegerSequence>
 struct foreach_;
@@ -63,6 +61,4 @@ FOLLY_ERASE void foreach_tuple(F&& f, Tuple&& t) {
   foreach_index<std::tuple_size_v<std::remove_reference_t<Tuple>>>(
       [&f, &t](auto i) { f(std::get<i>(t), i); });
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

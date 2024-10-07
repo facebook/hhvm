@@ -20,8 +20,7 @@
 
 #include <proxygen/lib/http/ProxygenErrorEnum.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using proxygen::HTTPException;
 using proxygen::HTTPMessage;
@@ -77,5 +76,4 @@ void ThriftTransactionHandler::lastByteFlushed() noexcept {
   channel_->onMessageFlushed();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

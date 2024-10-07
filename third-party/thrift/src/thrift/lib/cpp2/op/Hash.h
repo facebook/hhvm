@@ -19,9 +19,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/detail/Hash.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 template <typename Tag, typename Hasher = void>
 using Hash = detail::Hash<Tag, Hasher>;
@@ -37,6 +35,4 @@ using Hash = detail::Hash<Tag, Hasher>;
 template <typename Tag, typename Hasher = void>
 inline constexpr Hash<Tag, Hasher> hash{};
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

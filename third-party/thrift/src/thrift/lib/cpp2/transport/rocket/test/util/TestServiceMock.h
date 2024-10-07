@@ -21,8 +21,7 @@
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/StreamService.h>
 
-namespace testutil {
-namespace testservice {
+namespace testutil::testservice {
 
 class TestStreamServiceMock
     : public apache::thrift::ServiceHandler<StreamService> {
@@ -92,5 +91,4 @@ class TestStreamServiceMock
       publisher_;
 };
 
-} // namespace testservice
-} // namespace testutil
+} // namespace testutil::testservice

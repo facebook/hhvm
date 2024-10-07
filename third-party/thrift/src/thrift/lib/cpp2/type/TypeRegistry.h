@@ -31,9 +31,7 @@
 #include <thrift/lib/cpp2/type/Runtime.h>
 #include <thrift/lib/cpp2/type/detail/TypeRegistry.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // A registry of type information and functionality.
 //
@@ -186,6 +184,4 @@ AnyData TypeRegistry::storeImpl(T&& value, const Protocol& protocol) const {
   return AnyData{std::move(builder)};
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

@@ -25,8 +25,7 @@ namespace folly {
 class EventBase;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AsyncProcessor;
 class Cpp2Worker;
@@ -72,5 +71,4 @@ class SetupFrameHandler {
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

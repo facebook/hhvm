@@ -33,8 +33,7 @@
 
 #include <algorithm>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using apache::thrift::transport::TTransportException;
 using folly::EventBase;
@@ -238,5 +237,4 @@ void H2ClientConnection::onDestroy(const HTTPSessionBase&) {
   httpSession_ = nullptr;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -21,8 +21,7 @@
 #include <sys/utsname.h>
 #endif
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 ClientChannel::ClientChannel() {
   setChecksumSamplingRate(THRIFT_FLAG(thrift_client_checksum_sampling_rate));
@@ -51,5 +50,4 @@ ClientChannel::getHostMetadata() {
       *new std::optional<ClientHostMetadata>{detail::getClientHostMetadata()};
   return hostMetadata;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

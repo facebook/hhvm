@@ -23,8 +23,7 @@ static constexpr uint8_t kAlertRecordType = 21;
 static constexpr uint16_t kAlertFragmentLength = 2;
 static constexpr uint8_t kAlertFatalType = 2;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 bool TLSHelper::looksLikeTLS(const std::vector<uint8_t>& bytes) {
   CHECK_GE(bytes.size(), kTLSPeekBytes);
@@ -79,5 +78,4 @@ std::unique_ptr<folly::IOBuf> TLSHelper::getPlaintextAlert(
   appender.write<uint8_t>(static_cast<uint8_t>(alert));
   return alertBuf;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

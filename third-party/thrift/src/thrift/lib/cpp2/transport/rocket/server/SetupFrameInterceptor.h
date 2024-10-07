@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class RequestSetupMetadata;
 
@@ -46,5 +45,4 @@ class SetupFrameInterceptor {
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

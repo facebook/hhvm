@@ -28,8 +28,7 @@
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class VirtualReaderBase {
  public:
@@ -187,7 +186,6 @@ class VirtualReader : public VirtualReaderBase {
   ProtocolT protocol_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif

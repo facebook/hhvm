@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace ident {
 struct assign;
 }
@@ -32,8 +31,8 @@ class BinaryProtocolReader;
 class BinaryProtocolWriter;
 class CompactProtocolReader;
 class CompactProtocolWriter;
-namespace op {
-namespace detail {
+
+namespace op::detail {
 
 template <class Protocol>
 inline constexpr bool kProtocolSupportsDynamicPatch =
@@ -158,8 +157,8 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   friend struct protocol::detail::ProtocolValueToThriftValue;
 };
 
-} // namespace detail
-} // namespace op
+} // namespace op::detail
+
 namespace protocol::detail {
 
 // When converting protocol::Object to AssignPatch, we need special logic here
@@ -184,5 +183,4 @@ struct ProtocolValueToThriftValue<type::adapted<
   }
 };
 } // namespace protocol::detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

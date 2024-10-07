@@ -24,9 +24,7 @@
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 using ClientMessage = std::variant<folly::Try<StreamPayload>, uint64_t>;
 using ServerMessage = folly::Try<StreamPayload>;
@@ -50,6 +48,4 @@ class CoroConsumer final : public ClientSinkConsumer {
   folly::coro::Baton baton_;
 };
 #endif
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

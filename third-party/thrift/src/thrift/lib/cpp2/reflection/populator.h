@@ -32,9 +32,7 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-namespace apache {
-namespace thrift {
-namespace populator {
+namespace apache::thrift::populator {
 
 struct populator_opts {
   template <typename Int = std::size_t>
@@ -518,6 +516,4 @@ void populate(Type& out, const populator_opts& opts, Rng& rng) {
       rng, opts, out);
 }
 
-} // namespace populator
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::populator

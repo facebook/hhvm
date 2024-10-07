@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Class template (specialized for each type in generated code) that allows
@@ -59,7 +58,6 @@ class Cpp2Ops {
   //      static constexpr apache::thrift::protocol::TType thriftType();
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/protocol/Cpp2Ops-inl.h>

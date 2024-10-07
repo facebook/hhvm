@@ -26,8 +26,7 @@
 #include <wangle/acceptor/ManagedConnection.h>
 #include <wangle/acceptor/SocketPeeker.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * The number of bytes that will be read from the socket.
@@ -228,5 +227,4 @@ class TransportPeekingManager : public PeekingManagerBase,
   typename wangle::TransportPeeker::UniquePtr peeker_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -115,8 +115,7 @@ namespace wangle {
 class ConnectionManager;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Forward declaration of classes
 class Cpp2Connection;
@@ -3180,7 +3179,6 @@ inline ThriftServerConfig& getThriftServerConfig(ThriftServer& server) {
 
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_SERVER_H_

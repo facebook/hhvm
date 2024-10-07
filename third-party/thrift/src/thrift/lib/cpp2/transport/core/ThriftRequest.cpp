@@ -23,8 +23,7 @@
 THRIFT_FLAG_DEFINE_int64(queue_time_logging_threshold_ms, 5);
 THRIFT_FLAG_DEFINE_bool(enable_request_event_logging, true);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -380,5 +379,4 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
   return metadata;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

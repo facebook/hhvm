@@ -29,8 +29,7 @@
 
 using namespace proxygen;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 TEST(H2ClientConnectionTest, ServerCloseSocketImmediate) {
   folly::SocketAddress saddr;
@@ -217,5 +216,4 @@ TEST(H2ClientConnectionTest, H2GoAway) {
       "apache::thrift::transport::TTransportException: Bad status: 404 Not Found");
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

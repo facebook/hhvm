@@ -20,8 +20,7 @@
 #include <folly/Portability.h>
 #include <folly/Try.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T>
 FOLLY_NODISCARD folly::Try<T> collapseTry(
@@ -38,5 +37,4 @@ FOLLY_NODISCARD folly::Try<T> collapseTry(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

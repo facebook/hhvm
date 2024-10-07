@@ -24,8 +24,7 @@
 
 #include <folly/lang/Bits.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Compute a rate (in tick per second) with an algorithm based on buckets.
@@ -123,5 +122,4 @@ class BucketedRate {
   uint32_t lastIndex_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

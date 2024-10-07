@@ -23,9 +23,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class RequestContextQueue {
  public:
@@ -183,6 +181,4 @@ class RequestContextQueue {
   void growBuckets();
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

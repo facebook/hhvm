@@ -21,13 +21,11 @@
 #include <folly/synchronization/CallOnce.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 inline constexpr std::string_view kDefaultTLSConfigSource = "default";
 
 void logSetupConnectionEventsOnce(
     folly::once_flag& flag, const ConnectionLoggingContext& context);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

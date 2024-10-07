@@ -32,9 +32,7 @@
 
 using apache::thrift::transport::TTransportException;
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 folly::Try<void> RequestContext::waitForWriteToComplete() {
   baton_.wait();
@@ -147,6 +145,4 @@ void RequestContext::onWriteSuccess() noexcept {
   }
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

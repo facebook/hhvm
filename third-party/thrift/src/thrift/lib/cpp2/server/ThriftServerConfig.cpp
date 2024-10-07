@@ -23,8 +23,7 @@ THRIFT_FLAG_DEFINE_int64(
     server_ingress_memory_limit_enforcement_payload_size_min_bytes, 1024);
 THRIFT_FLAG_DEFINE_bool(server_reject_header_connections, false);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 const size_t ThriftServerConfig::T_ASYNC_DEFAULT_WORKER_THREADS =
     std::thread::hardware_concurrency();
@@ -557,5 +556,4 @@ void ThriftServerConfig::setPerConnectionSocketOptions(
   perConnectionSocketOptions_.set(std::move(options), source);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

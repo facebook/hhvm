@@ -28,8 +28,7 @@
 FOLLY_GFLAGS_DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 FOLLY_GFLAGS_DECLARE_int32(thrift_cpp2_protocol_reader_container_limit);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -371,8 +370,7 @@ struct ProtocolReaderStructReadState<BinaryProtocolReader>
     : BinaryProtocolReader::StructReadState {};
 
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol-inl.h>
 

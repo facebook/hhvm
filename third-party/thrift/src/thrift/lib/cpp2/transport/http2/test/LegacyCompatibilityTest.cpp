@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/transport/util/ConnectionThread.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
     ThriftServer* server) {
@@ -60,5 +59,4 @@ TEST_F(LegacyCompatibilityTest, RequestResponse_ResponseSizeTooBig) {
   compatibilityTest_->TestRequestResponse_ResponseSizeTooBig();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

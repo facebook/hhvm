@@ -25,9 +25,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/fdsock/SocketFds.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class StreamId {
  public:
@@ -189,9 +187,7 @@ class Payload {
   }
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket
 
 namespace std {
 template <>

@@ -26,8 +26,7 @@
 #include <folly/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /*
  * ServerAttribute provides a mechanism for setting values which have varying
@@ -300,5 +299,4 @@ struct ServerAttributeStatic {
   std::reference_wrapper<const T> merged_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

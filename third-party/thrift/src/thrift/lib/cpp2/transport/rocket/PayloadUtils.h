@@ -27,9 +27,7 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 namespace detail {
 template <class Metadata, class ProtocolWriter>
 Payload makePayload(
@@ -116,6 +114,4 @@ rocket::Payload pack(PayloadType&& payload, folly::AsyncTransport* transport) {
       std::forward<PayloadType>(payload).fds,
       transport);
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

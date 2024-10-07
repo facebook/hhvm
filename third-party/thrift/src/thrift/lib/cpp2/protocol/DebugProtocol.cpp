@@ -28,8 +28,7 @@ FOLLY_GFLAGS_DEFINE_int64(
     256,
     "Limit on string size when debug-printing thrift, 0 is no limit");
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 DebugProtocolWriter::DebugProtocolWriter(
     ExternalBufferSharing /*sharing*/, Options options)
@@ -461,5 +460,4 @@ void DebugProtocolWriter::writeByteRange(folly::ByteRange v) {
   writeItem("\"{}\"", printed);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

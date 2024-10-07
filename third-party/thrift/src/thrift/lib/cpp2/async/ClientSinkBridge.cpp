@@ -18,9 +18,7 @@
 
 #include <folly/Overload.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientSinkBridge
 template class TwoWayBridge<
@@ -254,6 +252,4 @@ bool ClientSinkBridge::hasServerCancelled() {
   return serverCancelSource_.isCancellationRequested();
 }
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

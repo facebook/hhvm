@@ -21,8 +21,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class FakeServerObserver : public apache::thrift::server::TServerObserver {
  public:
@@ -113,5 +112,4 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
   void tlsWithClientCert() override {}
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

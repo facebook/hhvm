@@ -27,8 +27,7 @@
 #include <atomic>
 #include <vector>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A TransportRoutingHandler implementation that handles Header transport,
@@ -64,5 +63,4 @@ class LegacyHeaderRoutingHandler : public TransportRoutingHandler {
   std::atomic<bool> listening_{true};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

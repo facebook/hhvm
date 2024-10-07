@@ -31,9 +31,7 @@
 #define THRIFT_CONSTEXPR_IF_NOT_MSVC constexpr
 #endif
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 // boxed_value_ptr will soon be replaced with boxed_value (defined below).
 template <typename T>
@@ -386,8 +384,6 @@ class boxed_value : public boost::totally_ordered<boxed_value<T>>,
   boxed_ptr<T> ptr_;
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 #undef THRIFT_CONSTEXPR_IF_NOT_MSVC

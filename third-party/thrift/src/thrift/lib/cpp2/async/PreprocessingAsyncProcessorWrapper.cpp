@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/async/PreprocessingAsyncProcessorWrapper.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 PreprocessingAsyncProcessorWrapper::PreprocessingAsyncProcessorWrapper(
     std::unique_ptr<AsyncProcessor> innerProcessor)
     : AsyncProcessor(IgnoreGlobalEventHandlers{}),
@@ -73,5 +72,4 @@ void PreprocessingAsyncProcessorWrapper::executeRequest(
   auto processedReq = executeRequestImpl(std::move(request), methodMetadata);
   inner()->executeRequest(std::move(processedReq), methodMetadata);
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

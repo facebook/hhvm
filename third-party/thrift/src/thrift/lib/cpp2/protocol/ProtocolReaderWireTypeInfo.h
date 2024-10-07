@@ -18,9 +18,7 @@
 
 #include <thrift/lib/cpp/protocol/TType.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 template <typename Protocol>
 struct ProtocolReaderWireTypeInfo {
@@ -32,6 +30,4 @@ struct ProtocolReaderWireTypeInfo {
   static WireType defaultValue() { return protocol::TType::T_STOP; }
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

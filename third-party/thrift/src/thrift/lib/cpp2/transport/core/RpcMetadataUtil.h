@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class RpcOptions;
 
@@ -74,5 +73,4 @@ folly::Optional<std::string> errorBlameToString(ErrorBlame);
 folly::Optional<std::string> errorSafetyToString(ErrorSafety);
 
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

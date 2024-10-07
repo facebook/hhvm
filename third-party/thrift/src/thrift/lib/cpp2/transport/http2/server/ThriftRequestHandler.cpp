@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/transport/http2/common/SingleRpcChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using proxygen::HTTPMessage;
 using proxygen::ProxygenError;
@@ -92,5 +91,4 @@ void ThriftRequestHandler::deliverChannelError(proxygen::ProxygenError error) {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

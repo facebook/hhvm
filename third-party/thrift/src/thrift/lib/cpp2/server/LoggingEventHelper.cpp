@@ -23,8 +23,7 @@
 
 using fizz::server::AsyncFizzServer;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 void logTlsNoPeerCertEvent(const ConnectionLoggingContext& context) {
@@ -117,5 +116,4 @@ void logSetupConnectionEventsOnce(
   }));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2Worker;
 namespace rocket {
@@ -81,5 +80,4 @@ class RocketRoutingHandler : public TransportRoutingHandler {
       setupFrameInterceptors_;
   StreamMetricCallback& streamMetricCallback_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

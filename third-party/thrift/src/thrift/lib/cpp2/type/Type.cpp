@@ -19,9 +19,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 bool Type::isFull(const TypeUri& typeUri, bool validate_uri) {
   if (typeUri.getType() != TypeUri::Type::uri) {
@@ -176,6 +174,4 @@ bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs) {
   }
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

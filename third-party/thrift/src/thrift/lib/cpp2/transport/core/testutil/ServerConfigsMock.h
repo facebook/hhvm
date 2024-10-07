@@ -27,9 +27,7 @@
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/transport/core/testutil/FakeServerObserver.h>
 
-namespace apache {
-namespace thrift {
-namespace server {
+namespace apache::thrift::server {
 
 // Use instance of this class, instead of ThriftServer, in the unit tests of
 // ThriftProcessor.
@@ -177,6 +175,4 @@ class ServerConfigsMock : public ServerConfigs {
       cConfig_.getObserver(), *this, thriftServerConfig_};
 };
 
-} // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::server

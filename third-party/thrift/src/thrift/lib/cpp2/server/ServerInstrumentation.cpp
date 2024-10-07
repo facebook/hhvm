@@ -24,9 +24,7 @@
 #include <folly/Synchronized.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 
-namespace apache {
-namespace thrift {
-namespace instrumentation {
+namespace apache::thrift::instrumentation {
 namespace {
 
 class TrackerCollection {
@@ -99,7 +97,4 @@ void forEachServer(
       });
 }
 
-} // namespace instrumentation
-
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::instrumentation

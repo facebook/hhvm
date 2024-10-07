@@ -24,8 +24,7 @@
 
 #include <type_traits>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 class shrink_to_fit_fn {
@@ -181,5 +180,4 @@ class shrink_to_fit_fn {
 // it will invalidate all iterators and references to the elements.
 inline constexpr detail::shrink_to_fit_fn shrink_to_fit{};
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

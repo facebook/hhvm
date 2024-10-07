@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A marker base class for a Thrift service intended for handling monitoring
@@ -36,5 +35,4 @@ namespace thrift {
  */
 class MonitoringServerInterface : public virtual AsyncProcessorFactory {};
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

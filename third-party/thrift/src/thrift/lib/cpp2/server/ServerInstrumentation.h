@@ -24,8 +24,7 @@
 #include <folly/Function.h>
 #include <folly/concurrency/memory/PrimaryPtr.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftServer;
 
@@ -82,5 +81,4 @@ void forEachServer(
     std::string_view key, folly::FunctionRef<void(ThriftServer&)>);
 
 } // namespace instrumentation
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

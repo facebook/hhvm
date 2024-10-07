@@ -22,8 +22,7 @@
 
 #include <folly/ExceptionWrapper.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 class ChannelKeepAlive : public RequestClientCallback {
@@ -367,5 +366,4 @@ void ReconnectingRequestChannel::sendQueuedRequests() {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

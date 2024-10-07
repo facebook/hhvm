@@ -26,8 +26,7 @@ namespace folly {
 class SocketAddress;
 }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftServer;
 
@@ -105,7 +104,6 @@ class ScopedServerThread {
 };
 
 } // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_UTIL_SCOPEDSERVERTHREAD_H_

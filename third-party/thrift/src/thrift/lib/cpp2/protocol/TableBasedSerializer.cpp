@@ -21,9 +21,7 @@
 #include <thrift/lib/cpp2/protocol/JSONProtocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 #define THRIFT_DEFINE_PRIMITIVE_TYPE_TO_INFO(                          \
     TypeClass, Type, ThriftType, TTypeValue)                           \
@@ -104,6 +102,4 @@ template size_t write<JSONProtocolWriter>(
     const StructInfo& structInfo,
     const void* object);
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

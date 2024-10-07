@@ -27,8 +27,7 @@
 #include <thrift/lib/cpp2/async/MessageChannel.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ChannelCallbacks {
  protected:
@@ -193,7 +192,6 @@ class ChannelCallbacks {
     RequestClientCallback::Ptr cb_;
   };
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_ASYNC_CHANNELCALLBACKS_H_

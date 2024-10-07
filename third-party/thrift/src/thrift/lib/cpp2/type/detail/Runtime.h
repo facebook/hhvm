@@ -28,9 +28,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/detail/TypeInfo.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 class Ref;
 template <typename RefT>
 class DynList;
@@ -926,6 +924,4 @@ inline const TypeInfo& voidTypeInfo() {
 // An un-owning pointer to a thrift value.
 using Ptr = detail::Ptr;
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

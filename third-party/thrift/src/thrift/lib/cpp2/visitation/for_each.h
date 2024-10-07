@@ -20,8 +20,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/visitation/metadata.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 template <class T>
 struct ForEachField {
@@ -68,5 +67,4 @@ void for_each_field(T1&& t1, T2&& t2, F f) {
       static_cast<T1&&>(t1),
       static_cast<T2&&>(t2));
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

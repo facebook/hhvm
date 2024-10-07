@@ -19,8 +19,7 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <thrift/lib/cpp2/transport/http2/common/H2Channel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftTransactionHandler
     : public proxygen::HTTPTransactionHandler,
@@ -98,5 +97,4 @@ class ThriftTransactionHandler
   proxygen::HTTPTransaction* txn_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

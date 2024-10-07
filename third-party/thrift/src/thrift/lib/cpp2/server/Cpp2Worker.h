@@ -41,8 +41,7 @@
 #include <wangle/acceptor/ConnectionManager.h>
 #include <wangle/acceptor/PeekingAcceptorHandshakeHelper.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Forward declaration of classes
 class Cpp2Connection;
@@ -441,5 +440,4 @@ class Cpp2Worker : public IOWorkerContext,
   friend class TestRoutingHandler;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

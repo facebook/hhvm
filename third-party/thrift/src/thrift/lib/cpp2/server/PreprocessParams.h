@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2ConnContext;
 
@@ -66,5 +65,4 @@ struct PreprocessParams {
 };
 
 } // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

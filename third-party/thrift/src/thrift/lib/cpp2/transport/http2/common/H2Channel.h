@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class H2ClientConnection;
 class ThriftProcessor;
@@ -109,5 +108,4 @@ class H2Channel : public ThriftChannelIf {
       const std::string& value) noexcept;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

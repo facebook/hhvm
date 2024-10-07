@@ -35,8 +35,7 @@ using namespace std;
 using namespace folly;
 using namespace apache::thrift::transport;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 
@@ -48,8 +47,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 
 } // namespace detail
 
-namespace detail {
-namespace ac {
+namespace detail::ac {
 
 [[noreturn]] void throw_app_exn(const char* const msg) {
   throw TApplicationException(msg);
@@ -86,11 +84,9 @@ folly::exception_wrapper try_extract_any_exception(
   return {};
 }
 
-} // namespace ac
-} // namespace detail
+} // namespace detail::ac
 
-namespace detail {
-namespace ap {
+namespace detail::ap {
 
 template <typename ProtocolReader, typename ProtocolWriter>
 std::unique_ptr<folly::IOBuf> helper<ProtocolReader, ProtocolWriter>::write_exn(
@@ -243,11 +239,9 @@ MessageBegin deserializeMessageBegin(
   }
   return msgBegin;
 }
-} // namespace ap
-} // namespace detail
+} // namespace detail::ap
 
-namespace detail {
-namespace si {
+namespace detail::si {
 namespace {
 TrustedServerException createUnimplementedMethodException(
     std::string_view methodName) {
@@ -264,8 +258,7 @@ folly::exception_wrapper create_app_exn_unimplemented(const char* name) {
 [[noreturn]] void throw_app_exn_unimplemented(const char* const name) {
   throw createUnimplementedMethodException(name);
 }
-} // namespace si
-} // namespace detail
+} // namespace detail::si
 
 namespace {
 
@@ -354,5 +347,4 @@ bool includeInRecentRequestsCount(const std::string_view methodName) {
 
 } // namespace util
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

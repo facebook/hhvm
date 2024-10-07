@@ -29,10 +29,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Type.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
-namespace detail {
+namespace apache::thrift::type::detail {
 class Dyn;
 class Ptr;
 
@@ -133,7 +130,4 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
   return kValue;
 }
 
-} // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type::detail

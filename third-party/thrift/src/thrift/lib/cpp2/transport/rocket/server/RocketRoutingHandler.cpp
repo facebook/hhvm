@@ -36,8 +36,7 @@
 
 THRIFT_FLAG_DEFINE_bool(rocket_set_idle_connection_timeout, true);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 #define THRIFT_DETAIL_REGISTER_SERVER_EXTENSION_DEFAULT(FUNC)     \
@@ -186,5 +185,4 @@ void RocketRoutingHandler::handleConnection(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

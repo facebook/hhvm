@@ -36,8 +36,7 @@ namespace {
 const uint32_t kMaxConcurrentIncomingStreams = 100000;
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using std::chrono::milliseconds;
 
@@ -226,5 +225,4 @@ void HTTP2RoutingHandler::handleConnection(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

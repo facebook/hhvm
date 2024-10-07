@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 #include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace type {
 
 // TODO(afuller): Add an 'Any' class that can be any of:
@@ -186,5 +185,4 @@ class Cpp2Ops<type::AnyData> {
   }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

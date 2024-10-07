@@ -22,13 +22,9 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 const size_t kHashValueForNonExistsOptionalField = -3333;
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail
 
 namespace folly {
 template <class T>

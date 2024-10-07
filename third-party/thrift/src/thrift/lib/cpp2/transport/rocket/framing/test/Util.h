@@ -18,10 +18,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 folly::StringPiece getRange(folly::IOBuf& iobuf);
 folly::StringPiece getRange(const folly::IOBuf& iobuf);
@@ -29,7 +26,4 @@ folly::StringPiece getRange(const folly::IOBuf& iobuf);
 std::pair<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>
 splitMetadataAndData(const Payload& p);
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

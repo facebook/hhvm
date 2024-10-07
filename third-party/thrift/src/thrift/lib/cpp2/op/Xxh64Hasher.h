@@ -26,9 +26,7 @@
 
 #include <xxhash.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 class Xxh64Hasher {
  public:
@@ -76,6 +74,4 @@ class Xxh64Hasher {
   std::unique_ptr<XXH3_state_t, decltype(&XXH3_freeState)> state_;
 };
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/NewVersion.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/gen-cpp2/OldVersion.h>
 
-namespace testutil {
-namespace testservice {
+namespace testutil::testservice {
 
 class OldServiceMock : public apache::thrift::ServiceHandler<OldVersion> {
  public:
@@ -133,5 +132,4 @@ class NewServiceMock : public apache::thrift::ServiceHandler<NewVersion> {
  protected:
   folly::ScopedEventBaseThread executor_;
 };
-} // namespace testservice
-} // namespace testutil
+} // namespace testutil::testservice

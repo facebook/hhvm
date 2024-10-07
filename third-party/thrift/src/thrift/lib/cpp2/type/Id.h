@@ -33,9 +33,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // Runtime and compile time representations for an ordinal.
 enum class Ordinal : uint32_t {};
@@ -133,6 +131,4 @@ inline constexpr size_t toPosition(Ordinal ordinal, size_t max = 0) {
   return val - 1;
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

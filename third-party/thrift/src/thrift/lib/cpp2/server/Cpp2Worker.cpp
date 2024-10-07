@@ -44,8 +44,7 @@
 // workloads that rely on passing FDs over Unix sockets + Thrift.
 THRIFT_FLAG_DEFINE_bool(enable_server_async_fd_socket, /* default = */ true);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 folly::LeakySingleton<folly::EventBaseLocal<RequestsRegistry>> registry;
@@ -660,5 +659,4 @@ const std::string& Cpp2Worker::errorCodeFromTapplicationException(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

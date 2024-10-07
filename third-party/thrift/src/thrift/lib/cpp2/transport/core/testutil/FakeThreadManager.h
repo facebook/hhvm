@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class FakeThreadManager : public apache::thrift::concurrency::ThreadManager {
  public:
@@ -165,5 +164,4 @@ class FakeThreadManager : public apache::thrift::concurrency::ThreadManager {
   apache::thrift::concurrency::PosixThreadFactory factory_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

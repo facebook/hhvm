@@ -18,9 +18,7 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 inline const auto& empty_thrift_field() noexcept {
   static const folly::Indestructible<metadata::ThriftField> t;
@@ -46,6 +44,4 @@ struct MetadataForwarder {
   }
 };
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

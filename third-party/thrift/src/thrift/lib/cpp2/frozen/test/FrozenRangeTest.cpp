@@ -20,8 +20,7 @@
 
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 using namespace frozen;
 
 template <class T>
@@ -184,5 +183,4 @@ typedef ::testing::Types<
     MyTypesNested;
 INSTANTIATE_TYPED_TEST_CASE_P(RangesNested, FrozenRangeNested, MyTypesNested);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

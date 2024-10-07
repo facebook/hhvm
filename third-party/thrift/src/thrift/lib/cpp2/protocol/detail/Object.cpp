@@ -16,10 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
-namespace detail {
+namespace apache::thrift::protocol::detail {
 
 type::Type toType(const protocol::Value& value) {
   switch (value.getType()) {
@@ -138,7 +135,4 @@ Value parseValueFromAnyObject(const Object& anyObject) {
   return parseValueFromAny(type::AnyData(std::move(any)));
 }
 
-} // namespace detail
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol::detail

@@ -24,8 +24,7 @@
 
 FOLLY_GFLAGS_DECLARE_uint32(thrift_server_request_debug_log_entries_max);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void appendRequestDebugLog(std::string&&);
 void appendRequestDebugLog(const std::string&);
@@ -34,5 +33,4 @@ std::vector<std::string> collectRequestDebugLog(
 std::vector<std::string> collectRequestDebugLog(
     const RequestsRegistry::DebugStub&);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

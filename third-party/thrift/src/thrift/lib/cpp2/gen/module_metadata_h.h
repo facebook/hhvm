@@ -21,14 +21,12 @@
 #include <folly/Indestructible.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class>
 class ServiceHandler;
 
-namespace detail {
-namespace md {
+namespace detail::md {
 
 using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
@@ -80,8 +78,7 @@ class ServiceMetadata {
       "invalid use of base template, you may need to include the <type>_metadata.h header");
 };
 
-} // namespace md
-} // namespace detail
+} // namespace detail::md
 
 /**
  * Get ThriftMetadata of given thrift structure. If no_metadata option is
@@ -100,5 +97,4 @@ const metadata::ThriftStruct& get_struct_metadata() {
   return *data;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

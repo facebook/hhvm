@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class FOLLY_EXPORT SinkThrew : public TApplicationException {
  public:
@@ -154,5 +153,4 @@ class ResponseAndSinkConsumer {
   SinkConsumer<SinkElement, FinalResponse> sinkConsumer;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

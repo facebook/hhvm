@@ -20,10 +20,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 class MockRocketServerConnectionObserver
     : public RocketServerConnection::ManagedObserver {
@@ -43,7 +40,4 @@ class MockRocketServerConnectionObserver
       (override));
 };
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

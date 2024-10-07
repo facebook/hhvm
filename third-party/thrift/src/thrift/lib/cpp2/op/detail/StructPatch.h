@@ -27,10 +27,7 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 struct FieldIdListToSetAdapter {
   using FieldIdSet = std::unordered_set<FieldId>;
@@ -699,7 +696,4 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   }
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

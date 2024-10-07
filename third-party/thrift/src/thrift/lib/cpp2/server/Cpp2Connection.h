@@ -39,8 +39,7 @@
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <wangle/acceptor/ManagedConnection.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Represents a connection that is handled via libevent. This connection
@@ -320,7 +319,6 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
   std::unique_ptr<MessageChannel::SendCallback> upgradeToRocketCallback_{};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_ASYNC_CPP2CONNECTION_H_

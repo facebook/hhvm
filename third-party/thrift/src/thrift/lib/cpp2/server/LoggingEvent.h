@@ -28,8 +28,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 #define THRIFT_LOGGING_EVENT(KEY, FETCH_FUNC)                      \
   ([]() -> auto& {                                                 \
@@ -220,5 +219,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 const LoggingEventRegistry& getLoggingEventRegistry();
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

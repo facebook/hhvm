@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 // Explicitly instantiate the base of ClientStreamBridge
 template class TwoWayBridge<
@@ -146,6 +144,4 @@ void ClientStreamBridge::serverCleanup() {
   Ptr(this);
 }
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

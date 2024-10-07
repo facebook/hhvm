@@ -36,8 +36,7 @@ class EventBase;
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ContextStack;
 class RequestCallback;
@@ -198,5 +197,4 @@ class RocketClientChannel final : public ClientChannel,
   class SingleRequestNoResponseCallback;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

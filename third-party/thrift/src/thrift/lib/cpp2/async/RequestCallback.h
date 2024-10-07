@@ -34,8 +34,7 @@
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct RpcTransportStats {
   RpcTransportStats() = default;
@@ -419,5 +418,4 @@ struct RpcResponseComplete {
   RpcResponseContext responseContext;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

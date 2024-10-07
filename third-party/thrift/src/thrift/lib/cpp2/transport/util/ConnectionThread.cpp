@@ -28,8 +28,7 @@
 DEFINE_string(transport, "http2", "The transport to use (http2)");
 DEFINE_bool(use_ssl, false, "Create an encrypted client connection");
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 ConnectionThread::~ConnectionThread() {
   getEventBase()->runInEventBaseThreadAndWait(
@@ -75,5 +74,4 @@ void ConnectionThread::maybeCreateConnection(
   });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

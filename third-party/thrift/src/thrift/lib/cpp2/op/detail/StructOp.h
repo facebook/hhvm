@@ -28,10 +28,7 @@
 #include <thrift/lib/cpp2/type/detail/Runtime.h>
 #include <thrift/lib/cpp2/type/detail/TypeInfo.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 template <typename T, typename Tag = type::infer_tag<T>>
 struct StructuredOp : BaseOp<Tag> {
@@ -180,7 +177,4 @@ struct StructuredOp : BaseOp<Tag> {
 template <typename T>
 struct AnyOp<type::struct_t<T>> : StructuredOp<T> {};
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

@@ -20,8 +20,7 @@
 
 #include <thrift/lib/cpp2/test/util/FakeClock.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 FakeClock::time_point FakeClock::now_us_;
 
@@ -80,5 +79,4 @@ TEST_F(EwmaTest, testHalfLife) {
   ASSERT_NEAR(ewma.estimate(), expectedValue, expectedValue * 0.1 / 100);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

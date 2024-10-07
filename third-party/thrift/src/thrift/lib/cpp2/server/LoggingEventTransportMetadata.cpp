@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/server/LoggingEventTransportMetadata.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 
@@ -54,5 +53,4 @@ void logTransportMetadata(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

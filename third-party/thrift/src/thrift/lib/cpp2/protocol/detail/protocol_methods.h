@@ -78,18 +78,14 @@
  * methods::read(struct_instance.fieldA, reader);
  */
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
-namespace type {
-namespace detail {
+namespace type::detail {
 template <typename, typename>
 class Wrap;
 }
-} // namespace type
 
-namespace detail {
-namespace pm {
+namespace detail::pm {
 
 template <typename C, typename... A>
 using detect_resize = decltype(FOLLY_DECLVAL(C).resize(FOLLY_DECLVAL(A)...));
@@ -971,7 +967,6 @@ template <typename Type>
 struct protocol_methods<type_class::variant, Type>
     : protocol_methods<type_class::structure, Type> {};
 
-} // namespace pm
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace detail::pm
+
+} // namespace apache::thrift

@@ -22,8 +22,7 @@
 DECLARE_int32(num_client_connections);
 DECLARE_string(transport); // ConnectionManager depends on this flag.
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::unique_ptr<ThriftServer> TestSetup::createServer(
     std::shared_ptr<AsyncProcessorFactory> processorFactory,
@@ -94,5 +93,4 @@ RequestChannel::Ptr TestSetup::connectToServer(
       });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

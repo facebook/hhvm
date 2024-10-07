@@ -18,13 +18,11 @@
 
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void logTransportMetadata(
     const ConnectionLoggingContext& context,
     std::optional<folly::F14NodeMap<std::string, std::string>>
         transportMetadata);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

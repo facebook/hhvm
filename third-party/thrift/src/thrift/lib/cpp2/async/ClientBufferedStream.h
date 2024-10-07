@@ -29,13 +29,11 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 
-namespace yarpl {
-namespace flowable {
+namespace yarpl::flowable {
 class ThriftStreamShim;
 }
-} // namespace yarpl
-namespace apache {
-namespace thrift {
+
+namespace apache::thrift {
 
 template <typename T>
 class ClientBufferedStream {
@@ -603,5 +601,4 @@ struct ResponseAndClientBufferedStream {
   Response response;
   ClientBufferedStream<StreamElement> stream;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

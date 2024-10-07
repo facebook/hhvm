@@ -18,8 +18,8 @@
 
 #include <memory>
 #include <folly/Traits.h>
-namespace apache {
-namespace thrift {
+
+namespace apache::thrift {
 
 template <class T>
 class field_ref;
@@ -92,5 +92,4 @@ inline constexpr bool is_optional_or_union_field_ref_v =
     is_union_field_ref_v<T>;
 
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

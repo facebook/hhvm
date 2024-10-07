@@ -27,8 +27,7 @@
 
 DECLARE_string(transport);
 
-namespace testutil {
-namespace testservice {
+namespace testutil::testservice {
 
 using namespace apache::thrift;
 
@@ -158,5 +157,4 @@ int32_t IntermHeaderService::callAdd(int32_t x) {
   return ret;
 }
 
-} // namespace testservice
-} // namespace testutil
+} // namespace testutil::testservice

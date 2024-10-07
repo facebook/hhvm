@@ -23,9 +23,7 @@
 
 using namespace fizz::test;
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 TEST_F(ExtensionsTest, TestEmptyThriftParameters) {
   NegotiationParameters params;
@@ -60,6 +58,4 @@ TEST_F(ExtensionsTest, TestThriftParameters) {
   EXPECT_TRUE(ext->params.useStopTLS_ref().value());
 }
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

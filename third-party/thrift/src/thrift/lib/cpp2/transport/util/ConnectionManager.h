@@ -26,8 +26,7 @@
 #include <thrift/lib/cpp2/transport/core/ClientConnectionIf.h>
 #include <thrift/lib/cpp2/transport/util/ConnectionThread.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Manages a pool of "ClientConnectionIf" objects, each one on its own
@@ -53,5 +52,4 @@ class ConnectionManager {
   std::atomic_int nextThreadToUse_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

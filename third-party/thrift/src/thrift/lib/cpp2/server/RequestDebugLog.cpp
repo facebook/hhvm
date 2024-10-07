@@ -92,8 +92,7 @@ void appendRequestDebugLogImpl(T&& msg) {
 }
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 void appendRequestDebugLog(std::string&& msg) {
   appendRequestDebugLogImpl(std::move(msg));
 }
@@ -121,5 +120,4 @@ std::vector<std::string> collectRequestDebugLog(
   return collectRequestDebugLog(rctx);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

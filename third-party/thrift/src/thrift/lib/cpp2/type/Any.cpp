@@ -22,9 +22,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 AnyData::AnyData(SemiAny semiAny) {
   if (semiAny.type() == void_t{}) {
@@ -53,6 +51,4 @@ SemiAny AnyData::moveToSemiAny() && {
   return semiAny;
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

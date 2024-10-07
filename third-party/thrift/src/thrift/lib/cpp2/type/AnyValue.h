@@ -20,9 +20,7 @@
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/cpp2/type/detail/AnyValue.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // A type-erased Thrift value.
 //
@@ -114,6 +112,4 @@ using AnyConstRef = detail::AnyRefBase<
     detail::AnyRefWrapper<const detail::IAnyData&>,
     detail::AnyRefWrapper<detail::IAnyData&>>;
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

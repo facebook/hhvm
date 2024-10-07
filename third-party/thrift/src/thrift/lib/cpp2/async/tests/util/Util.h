@@ -33,8 +33,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class Handler, class Client>
 class AsyncTestSetup : public TestSetup {
@@ -108,5 +107,4 @@ class DuplicateWriteSocket : public folly::AsyncSocket {
   bool firstWrite_{true};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

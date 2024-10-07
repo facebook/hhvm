@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/TypeClass.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename AdaptedT>
 struct IndirectionAdapter;
@@ -112,5 +111,4 @@ struct from_type_tag<type::adapted<Adapter, Tag>> {
 };
 
 } // namespace type_class
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

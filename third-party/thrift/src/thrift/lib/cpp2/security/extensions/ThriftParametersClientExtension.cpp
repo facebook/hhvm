@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::vector<fizz::Extension>
 ThriftParametersClientExtension::getClientHelloExtensions() const {
@@ -60,5 +59,4 @@ void ThriftParametersClientExtension::onEncryptedExtensions(
       serverParams->params.useStopTLS_ref().value_or(false);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

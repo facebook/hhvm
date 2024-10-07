@@ -29,10 +29,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 class FakeTransport final : public folly::AsyncTransport {
  public:
@@ -186,7 +183,4 @@ void testClientOneInput(const uint8_t* Data, size_t Size) {
   callback.waitUntilDone(&evb);
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

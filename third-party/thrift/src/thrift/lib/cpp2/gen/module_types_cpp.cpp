@@ -16,11 +16,7 @@
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
-
-namespace st {
+namespace apache::thrift::detail::st {
 
 template struct enum_find<int>;
 
@@ -53,8 +49,4 @@ FOLLY_NOINLINE void translate_field_name(
   }
 }
 
-} // namespace st
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail::st

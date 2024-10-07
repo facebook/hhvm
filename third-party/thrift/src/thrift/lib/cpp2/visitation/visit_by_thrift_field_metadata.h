@@ -23,8 +23,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/visitation/metadata.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 template <class T>
 struct VisitByFieldId {
@@ -62,5 +61,4 @@ void visit_by_thrift_field_metadata(
       *meta.id(),
       static_cast<T&&>(t));
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

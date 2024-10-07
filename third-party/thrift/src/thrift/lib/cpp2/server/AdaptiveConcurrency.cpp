@@ -28,8 +28,7 @@ using Clock = std::chrono::steady_clock;
 THRIFT_FLAG_DEFINE_bool(
     disable_adaptive_cc_affecting_server_max_requests, false);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 constexpr auto kZero = Clock::time_point{};
@@ -282,5 +281,4 @@ void AdaptiveConcurrencyController::setConfigUpdateCallback(
   configUpdateCallback_ = std::move(callback);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

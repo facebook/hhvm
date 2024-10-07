@@ -27,10 +27,7 @@
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 // Helpers for combining string or binary buffers.
 template <typename Accumulator, typename Buffer>
@@ -161,7 +158,4 @@ class HashProtocol {
   Accumulator& acc_;
 };
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

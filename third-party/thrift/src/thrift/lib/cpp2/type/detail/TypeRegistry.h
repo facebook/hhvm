@@ -18,9 +18,7 @@
 
 #include <folly/CPortability.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 class TypeRegistry;
 namespace detail {
 
@@ -29,6 +27,4 @@ namespace detail {
 FOLLY_EXPORT TypeRegistry& getGeneratedTypeRegistry();
 
 } // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

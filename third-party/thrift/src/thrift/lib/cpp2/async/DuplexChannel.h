@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class DuplexChannel {
  public:
@@ -198,5 +197,4 @@ class DuplexChannel {
   };
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

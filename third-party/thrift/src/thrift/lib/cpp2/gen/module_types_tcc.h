@@ -36,8 +36,7 @@
 #include <thrift/lib/cpp2/protocol/detail/index.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class BinaryProtocolReader;
 class BinaryProtocolWriter;
@@ -125,5 +124,4 @@ FOLLY_ERASE auto writeFieldBegin(ProtocolWriter& prot, const char* name, ...) {
 
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

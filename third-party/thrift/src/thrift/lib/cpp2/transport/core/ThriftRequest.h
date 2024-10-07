@@ -48,8 +48,7 @@
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -712,5 +711,4 @@ class ThriftRequest final
   std::unique_ptr<Cpp2ConnContext> connContext_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

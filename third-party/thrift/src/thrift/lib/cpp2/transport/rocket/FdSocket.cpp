@@ -19,9 +19,7 @@
 
 #include "FdSocket.h"
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 using TryFds = folly::Try<folly::SocketFds>;
 
@@ -93,6 +91,4 @@ folly::SocketFds::SeqNum injectFdSocketSeqNumIntoFdsToSend(
   return fdSocket->injectSocketSeqNumIntoFdsToSend(fds);
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

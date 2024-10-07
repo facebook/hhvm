@@ -27,8 +27,7 @@
 #include <folly/lang/Bits.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class CompactV1ProtocolReader;
 
@@ -139,7 +138,6 @@ class CompactV1ProtocolReader : protected CompactProtocolReader {
   using CompactProtocolReader::getCursorPosition;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/protocol/CompactV1Protocol-inl.h>

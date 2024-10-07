@@ -108,9 +108,7 @@ void validateMetadataAndData(const Payload& p) {
 }
 } // namespace
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 TEST(FrameSerialization, SetupSanity) {
   SetupFrame frame(Payload::makeFromMetadataAndData(kMetadata, kData), false);
@@ -698,6 +696,4 @@ TEST(FrameSerialization, ExtEmptyMetadataSanity) {
   }
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

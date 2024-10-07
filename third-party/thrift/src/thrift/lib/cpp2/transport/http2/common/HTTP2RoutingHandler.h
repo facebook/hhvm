@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2Worker;
 
@@ -67,5 +66,4 @@ class HTTP2RoutingHandler : public TransportRoutingHandler {
   bool listening_{true};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

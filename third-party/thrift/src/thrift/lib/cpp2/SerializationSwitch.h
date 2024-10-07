@@ -20,9 +20,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 template <typename Protocol, typename Args>
 uint32_t deserializeRequestBody(Protocol* prot, Args* args) {
@@ -55,6 +53,4 @@ template <typename Protocol, typename Args>
 uint32_t serializedExceptionBodySizeZC(Protocol* prot, const Args* args) {
   return args->serializedSizeZC(prot);
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 namespace detail {
 
@@ -183,6 +181,4 @@ op::safe_patch_type<Tag> toSafePatch(const op::patch_type<Tag>& patch) {
   return safePatch;
 }
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

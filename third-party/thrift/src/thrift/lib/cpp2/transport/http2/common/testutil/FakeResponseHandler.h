@@ -24,8 +24,7 @@
 #include <folly/io/async/EventBase.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A simple response handler that collects the response from the channel
@@ -57,5 +56,4 @@ class FakeResponseHandler {
   bool eomReceived_{false};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

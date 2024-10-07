@@ -18,8 +18,7 @@
 
 #include <folly/io/async/AsyncSocketException.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class RetryingRequestChannel::RequestCallbackBase {
  protected:
@@ -327,5 +326,4 @@ void RetryingRequestChannel::sendRequestResponse(
       std::move(header),
       std::move(cob));
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

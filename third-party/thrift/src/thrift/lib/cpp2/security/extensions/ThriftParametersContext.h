@@ -18,8 +18,7 @@
 
 #include <thrift/lib/cpp2/security/extensions/Types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftParametersContext {
  public:
@@ -40,5 +39,4 @@ class ThriftParametersContext {
       }};
   bool useStopTLS_{false};
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

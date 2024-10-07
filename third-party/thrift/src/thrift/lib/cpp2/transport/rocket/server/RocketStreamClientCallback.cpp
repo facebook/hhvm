@@ -38,9 +38,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class TimeoutCallback : public folly::HHWheelTimer::Callback {
  public:
@@ -291,6 +289,4 @@ void RocketStreamClientCallback::scheduleTimeout() {
 void RocketStreamClientCallback::cancelTimeout() {
   timeoutCallback_.reset();
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

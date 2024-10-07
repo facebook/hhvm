@@ -20,8 +20,7 @@
 
 #include <folly/io/IOBuf.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 constexpr uint8_t kTLSPeekBytes = 9;
 
@@ -46,5 +45,4 @@ class TLSHelper {
   static std::unique_ptr<folly::IOBuf> getPlaintextAlert(
       uint8_t major, uint8_t minor, Alert alert);
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

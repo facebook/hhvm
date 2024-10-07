@@ -21,9 +21,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/async/AsyncSocket.h>
 
-namespace apache {
-namespace thrift {
-namespace async {
+namespace apache::thrift::async {
 
 class TAsyncSocketIntercepted : public folly::AsyncSocket {
  public:
@@ -70,6 +68,4 @@ class TAsyncSocketIntercepted : public folly::AsyncSocket {
   int32_t totalBytesWritten_{0};
 };
 
-} // namespace async
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::async

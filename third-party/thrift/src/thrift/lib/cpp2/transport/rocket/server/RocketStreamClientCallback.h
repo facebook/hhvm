@@ -27,9 +27,7 @@ namespace folly {
 class EventBase;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class RocketStreamClientCallback final : public StreamClientCallback {
  public:
@@ -99,6 +97,4 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   void cancelTimeout();
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

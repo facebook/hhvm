@@ -18,8 +18,7 @@
 
 #include <folly/Conv.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 [[noreturn]] void CompactProtocolReader::throwBadProtocolIdentifier() {
   throw TProtocolException(
@@ -44,5 +43,4 @@ void CompactProtocolReader::readFieldBeginWithStateMediumSlow(
   readFieldBeginWithStateImpl(state, prevFieldId, byte);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

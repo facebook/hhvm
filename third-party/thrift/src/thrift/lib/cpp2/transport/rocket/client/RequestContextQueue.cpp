@@ -20,9 +20,7 @@
 
 #include <folly/Likely.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 void RequestContextQueue::enqueueScheduledWrite(RequestContext& req) noexcept {
   if (UNLIKELY(writeBufferQueue_ != nullptr)) {
@@ -147,6 +145,4 @@ void RequestContextQueue::growBuckets() {
   rrContextBuckets_.swap(newBuckets);
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

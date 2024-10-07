@@ -24,8 +24,7 @@
 
 DECLARE_string(transport); // ConnectionManager depends on this flag.
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace testutil::testservice;
 using namespace apache::thrift::transport;
@@ -268,5 +267,4 @@ TEST_P(TransportUpgradeCompatibilityTest, ClientIdentityHook) {
   compatibilityTest_->TestClientIdentityHook();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

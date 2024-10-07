@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/async/ServerStreamDetail.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T, bool WithHeader = false>
 class ServerStreamMultiPublisher {
@@ -233,5 +232,4 @@ class ServerStreamMultiPublisher {
   std::shared_ptr<EncodeToStreams> encodeToStreams_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

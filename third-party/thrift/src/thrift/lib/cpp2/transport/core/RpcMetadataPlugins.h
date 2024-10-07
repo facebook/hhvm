@@ -20,8 +20,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class RpcOptions;
 
@@ -44,5 +43,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     void, ingestFrameworkMetadataOnResponse, std::unique_ptr<folly::IOBuf>&&);
 
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

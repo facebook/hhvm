@@ -42,8 +42,7 @@ THRIFT_FLAG_DEFINE_int64(monitoring_over_header_logging_sample_rate, 1'000'000);
 
 THRIFT_FLAG_DECLARE_bool(enforce_header_transport_valid_protocol);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace std;
 
@@ -991,5 +990,4 @@ Cpp2Connection::Cpp2Sample::~Cpp2Sample() {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

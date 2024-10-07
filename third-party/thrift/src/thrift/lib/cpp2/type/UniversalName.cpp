@@ -29,9 +29,7 @@
 #include <folly/portability/OpenSSL.h>
 #include <folly/small_vector.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 namespace {
 
@@ -231,6 +229,4 @@ folly::fbstring maybeGetUniversalHashPrefix(
   return result;
 }
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

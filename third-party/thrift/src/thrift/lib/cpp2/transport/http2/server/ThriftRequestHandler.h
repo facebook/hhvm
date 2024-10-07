@@ -26,8 +26,7 @@
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/transport/http2/common/H2Channel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * The HTTPServer object inside H2ThriftServer creates a new object of
@@ -80,5 +79,4 @@ class ThriftRequestHandler : public proxygen::HTTPTransactionHandler {
   proxygen::HTTPTransaction* txn_{nullptr};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

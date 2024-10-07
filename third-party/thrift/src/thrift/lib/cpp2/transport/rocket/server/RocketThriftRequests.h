@@ -33,8 +33,7 @@ class EventBase;
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AsyncProcessor;
 class RocketSinkClientCallback;
@@ -294,5 +293,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 } // namespace detail
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

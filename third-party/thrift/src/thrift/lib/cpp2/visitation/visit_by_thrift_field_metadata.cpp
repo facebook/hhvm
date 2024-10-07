@@ -19,13 +19,9 @@
 #include <fmt/format.h>
 #include <folly/lang/Exception.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 [[noreturn]] void throwInvalidThriftId(size_t id, std::string_view type) {
   folly::throw_exception<InvalidThriftId>(
       fmt::format("{} is invalid thrift id in struct {}", id, type));
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

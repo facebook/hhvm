@@ -55,9 +55,7 @@ THRIFT_FLAG_DEFINE_bool(enable_rocket_connection_observers, false);
 THRIFT_FLAG_DEFINE_bool(enable_stream_graceful_shutdown, true);
 THRIFT_FLAG_DEFINE_bool(thrift_enable_stream_counters, true);
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 RocketServerConnection::RocketServerConnection(
     folly::AsyncTransport::UniquePtr socket,
@@ -1241,6 +1239,4 @@ bool RocketServerConnection::incMemoryUsage(uint32_t memSize) {
   return true;
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

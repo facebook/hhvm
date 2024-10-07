@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp2/transport/http2/common/H2Channel.h>
 #include <thrift/lib/cpp2/transport/http2/common/testutil/FakeResponseHandler.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * For testing of a single HTTP/2 stream of activity.  Mimics how a
@@ -71,5 +70,4 @@ class ChannelTestFixture : public testing::Test {
   std::string toString(folly::IOBuf* buf);
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

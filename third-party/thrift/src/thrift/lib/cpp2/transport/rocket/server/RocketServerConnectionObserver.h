@@ -21,9 +21,7 @@
 #include <sys/types.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class RocketServerConnection;
 
@@ -76,6 +74,4 @@ class RocketServerConnectionObserver {
       const WriteEventBatchContext& /* writeEventBatchContext */) {}
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

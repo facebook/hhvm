@@ -29,10 +29,7 @@
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Type.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
-namespace detail {
+namespace apache::thrift::type::detail {
 
 // The interface every data holder implements.
 struct IAnyData {
@@ -348,7 +345,4 @@ class AnyRefBase {
   friend class AnyRefBase;
 };
 
-} // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type::detail

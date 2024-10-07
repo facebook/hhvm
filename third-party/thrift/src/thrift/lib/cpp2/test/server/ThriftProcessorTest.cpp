@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp2/transport/core/testutil/FakeChannel.h>
 #include <thrift/lib/cpp2/transport/core/testutil/TestServiceMock.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 TEST_F(CoreTestFixture, SumTwoNumbers) {
   int32_t x = 5;
@@ -95,5 +94,4 @@ TEST_F(CoreTestFixture, BadMetadata) {
   EXPECT_EQ(TApplicationException::UNSUPPORTED_CLIENT_TYPE, tae.getType());
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -32,8 +32,7 @@
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * HTTPClientChannel
@@ -304,5 +303,4 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     void, setHTTPFrameworkMetadata, transport::THeader*, const RpcOptions&);
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

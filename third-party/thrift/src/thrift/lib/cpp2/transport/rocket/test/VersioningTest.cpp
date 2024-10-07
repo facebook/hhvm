@@ -19,8 +19,7 @@
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/VersionServicesMock.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Testing transport layers for resilience to changes in the service interface
 class VersioningTest : public TestSetup {
@@ -357,5 +356,4 @@ TEST_F(VersioningTest, DeletedResponseAndStreamMethod) {
   });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

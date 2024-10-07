@@ -36,8 +36,7 @@ namespace folly {
 class AsyncTransport;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AsyncProcessor;
 class Cpp2ConnContext;
@@ -161,5 +160,4 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

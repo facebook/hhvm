@@ -23,9 +23,7 @@
 
 #include <xxhash.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 void Xxh3Hasher::init() {
   state = static_cast<void*>(XXH3_createState());
@@ -60,6 +58,4 @@ void throwChecksumMismatch(int64_t expected, int64_t actual) {
       fmt::format("expected ({}) != actual ({})", expected, actual));
 }
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

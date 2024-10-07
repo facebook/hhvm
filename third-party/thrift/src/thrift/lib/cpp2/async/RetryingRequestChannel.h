@@ -20,8 +20,7 @@
 
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Simple RequestChannel wrapper, which automatically retries requests if they
 // fail with a TTransportException.
@@ -95,5 +94,4 @@ class RetryingRequestChannel : public apache::thrift::RequestChannel {
   int numRetries_;
   folly::EventBase& evb_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

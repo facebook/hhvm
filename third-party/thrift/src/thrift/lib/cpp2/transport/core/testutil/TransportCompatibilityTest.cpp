@@ -70,8 +70,7 @@ void pollSleep() {
   }                                                                  \
   EXPECT_EQ(actual_ref, expected)
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace async;
 using namespace testing;
@@ -1405,5 +1404,4 @@ void TransportCompatibilityTest::TestOnWriteQuiescence() {
   });
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

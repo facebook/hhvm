@@ -29,15 +29,12 @@
 FOLLY_GFLAGS_DECLARE_bool(thrift_cpp2_debug_skip_list_indices);
 FOLLY_GFLAGS_DECLARE_int64(thrift_cpp2_debug_string_limit);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
-namespace op {
-namespace detail {
+namespace op::detail {
 template <class T>
 struct Encode;
 }
-} // namespace op
 
 class DebugProtocolWriter {
  public:
@@ -214,7 +211,6 @@ std::string debugStringViaEncode(
   return ret;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif /* CPP2_PROTOCOL_DEBUGPROTOCOL_H_ */

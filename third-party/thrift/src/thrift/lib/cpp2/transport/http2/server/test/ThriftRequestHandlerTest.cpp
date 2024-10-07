@@ -39,8 +39,7 @@ proxygen::HTTPException makeHTTPException(proxygen::ProxygenError err) {
 }
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using folly::EventBaseManager;
 using proxygen::HTTPMessage;
@@ -223,5 +222,4 @@ TEST_F(ThriftRequestHandlerTest, SingleRpcChannelErrorAtBeginning) {
   EXPECT_EQ("", outputPayload);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

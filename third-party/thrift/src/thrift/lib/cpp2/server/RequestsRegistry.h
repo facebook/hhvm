@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2RequestContext;
 class ResponseChannelRequest;
@@ -388,5 +387,4 @@ class RequestsRegistry {
   RecentRequestCounter requestCounter_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -58,8 +58,7 @@ extern const std::string kUnimplementedMethodErrorCode;
 extern const std::string kTenantQuotaExceededErrorCode;
 extern const std::string kTenantBlocklistedErrorCode;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ResponseChannelRequest {
  public:
@@ -217,7 +216,6 @@ class ResponseChannel : virtual public folly::DelayedDestruction {
   ~ResponseChannel() override {}
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_ASYNC_RESPONSECHANNEL_H_

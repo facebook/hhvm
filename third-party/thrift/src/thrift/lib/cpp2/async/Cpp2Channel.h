@@ -33,8 +33,7 @@
 #include <wangle/channel/OutputBufferingHandler.h>
 #include <wangle/channel/StaticPipeline.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using apache::thrift::transport::THeader;
 
@@ -152,7 +151,6 @@ class Cpp2Channel
   TAsyncTransportHandler* transportHandler_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_ASYNC_CPP2CHANNEL_H_

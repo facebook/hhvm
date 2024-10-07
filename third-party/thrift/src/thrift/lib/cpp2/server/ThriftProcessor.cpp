@@ -32,8 +32,7 @@
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 ThriftProcessor::ThriftProcessor(ThriftServer& server) : server_(server) {}
 
@@ -112,5 +111,4 @@ void ThriftProcessor::onThriftRequest(
       server_.getThreadManager_deprecated().get(),
       &server_);
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

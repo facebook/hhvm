@@ -22,8 +22,7 @@
 
 #include <thrift/lib/cpp2/test/util/FakeClock.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 FakeClock::time_point FakeClock::now_us_;
 
@@ -65,5 +64,4 @@ TEST_F(EwmaRateTest, testNonConstantRate) {
   ASSERT_NEAR(rate.rate(), 2, 0.2);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

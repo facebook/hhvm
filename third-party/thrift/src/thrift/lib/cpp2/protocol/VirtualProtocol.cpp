@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 std::unique_ptr<VirtualReaderBase> makeVirtualReader(ProtocolType type) {
   switch (type) {
@@ -39,5 +38,4 @@ std::unique_ptr<VirtualReaderBase> makeVirtualReader(ProtocolType type) {
       folly::to<std::string>("Invalid protocol type ", type));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

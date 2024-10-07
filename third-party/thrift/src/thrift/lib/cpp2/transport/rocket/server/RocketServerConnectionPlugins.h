@@ -21,10 +21,7 @@
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace plugin {
+namespace apache::thrift::rocket::plugin {
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     void,
@@ -33,6 +30,3 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     const ::apache::thrift::RequestSetupMetadata&);
 
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache

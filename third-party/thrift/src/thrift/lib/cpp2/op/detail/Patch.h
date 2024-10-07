@@ -29,10 +29,7 @@
 #include <thrift/lib/cpp2/op/detail/ValuePatch.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_op_types.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift::op::detail {
 
 template <class>
 class AnyPatch;
@@ -153,7 +150,4 @@ int32_t calculateMinSafePatchVersion(const Patch& patch) {
   return visitor.version;
 }
 
-} // namespace detail
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op::detail

@@ -21,8 +21,7 @@
 
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 class StreamFaultInjectionCallback : public StreamClientCallback,
@@ -270,5 +269,4 @@ std::unique_ptr<Client<ServiceTag>> makeTestClient(
       prot);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -20,8 +20,7 @@
 
 THRIFT_FLAG_DEFINE_int64(thrift_client_checksum_sampling_rate, 0);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 RequestChannel::RequestChannel() {
   setChecksumSamplingRate(THRIFT_FLAG(thrift_client_checksum_sampling_rate));
@@ -243,5 +242,4 @@ template class ClientBatonCallback<true, false>;
 template class ClientBatonCallback<false, true>;
 template class ClientBatonCallback<false, false>;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

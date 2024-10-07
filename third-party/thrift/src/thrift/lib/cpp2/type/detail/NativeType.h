@@ -33,14 +33,12 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class T>
 struct InlineAdapter;
 
-namespace type {
-namespace detail {
+namespace type::detail {
 
 template <typename T, typename Tag>
 class Wrap;
@@ -293,7 +291,6 @@ struct InferTag<
   using type = adapted<InlineAdapter<T>, typename T::underlying_tag>;
 };
 
-} // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace type::detail
+
+} // namespace apache::thrift

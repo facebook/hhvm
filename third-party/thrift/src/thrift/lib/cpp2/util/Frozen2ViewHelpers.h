@@ -21,9 +21,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace apache {
-namespace thrift {
-namespace frozen {
+namespace apache::thrift::frozen {
 
 template <typename ViewT, typename = void>
 struct ViewHelper {
@@ -51,6 +49,4 @@ struct ViewHelper<folly::Range<const char*>> {
 
   static ObjectType thaw(ViewType v) { return std::string(v.begin(), v.end()); }
 };
-} // namespace frozen
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::frozen

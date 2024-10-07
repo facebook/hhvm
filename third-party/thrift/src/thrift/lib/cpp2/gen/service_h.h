@@ -36,10 +36,7 @@ class IOBufQueue;
 
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace si {
+namespace apache::thrift::detail::si {
 
 enum class InvocationType {
   AsyncTm,
@@ -51,6 +48,3 @@ enum class InvocationType {
 };
 
 }
-} // namespace detail
-} // namespace thrift
-} // namespace apache

@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp2/op/Hash.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
-namespace apache {
-namespace thrift {
-namespace hash {
+namespace apache::thrift::hash {
 
 /**
  * Utility to compute deterministic hash using custom Hasher implementation.
@@ -65,6 +63,4 @@ auto deterministic_hash(const Struct& data, HasherGenerator generator) {
   return std::move(acc.result()).getResult();
 }
 
-} // namespace hash
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::hash

@@ -19,8 +19,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/LegacyHeaderRoutingHandler.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 LegacyHeaderRoutingHandler::LegacyHeaderRoutingHandler(ThriftServer&) {}
 
@@ -106,5 +105,4 @@ void LegacyHeaderRoutingHandler::handleConnection(
   worker->handleHeader(std::move(sock), address, tinfo);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

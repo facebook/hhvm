@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchmark_types.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 constexpr size_t kElementCount = 10000;
 constexpr size_t kLargeElementCount = 10;
@@ -108,9 +106,7 @@ X(CompactProtocol)
 #undef X
 #undef X1
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

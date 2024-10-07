@@ -59,10 +59,7 @@ const int64_t kRocketServerMinVersion = 8;
 THRIFT_FLAG_DEFINE_bool(rocket_server_legacy_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_server_max_version, kRocketServerMaxVersion);
 
-namespace apache {
-namespace thrift {
-
-namespace rocket {
+namespace apache::thrift::rocket {
 
 thread_local uint32_t ThriftRocketServerHandler::sample_{0};
 
@@ -903,6 +900,4 @@ void ThriftRocketServerHandler::terminateInteraction(int64_t id) {
 void ThriftRocketServerHandler::onBeforeHandleFrame() {
   worker_->getServer()->touchRequestTimestamp();
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

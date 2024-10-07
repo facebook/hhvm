@@ -18,8 +18,7 @@
 
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftParametersClientExtensionTest : public testing::Test {
  public:
@@ -80,5 +79,4 @@ TEST_F(ThriftParametersClientExtensionTest, ServerMultipleCompressionAlgo) {
   EXPECT_EQ(
       extensions_->getThriftCompressionAlgorithm(), CompressionAlgorithm::ZSTD);
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

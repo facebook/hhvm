@@ -18,8 +18,7 @@
 
 #include <glog/logging.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void EchoProcessor::onThriftRequest(
     RequestRpcMetadata&& metadata,
@@ -51,5 +50,4 @@ void EchoProcessor::onThriftRequestHelper(
   channel->sendThriftResponse(std::move(responseMetadata), std::move(payload));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

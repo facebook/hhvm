@@ -66,8 +66,7 @@
     }                                                        \
   }
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 template <typename T>
@@ -440,8 +439,7 @@ template <class T>
 void __fbthrift_check_whether_type_is_ident_via_adl(T&&);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 namespace apache::thrift::detail::annotation {
 

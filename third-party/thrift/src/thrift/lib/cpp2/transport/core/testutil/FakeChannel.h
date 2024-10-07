@@ -22,8 +22,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A simple channel that collects the response and makes it available
@@ -63,5 +62,4 @@ class FakeChannel : public ThriftChannelIf {
   folly::Executor::KeepAlive<folly::EventBase> evb_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

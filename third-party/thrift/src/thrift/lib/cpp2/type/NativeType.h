@@ -19,9 +19,7 @@
 
 #include <thrift/lib/cpp2/type/detail/NativeType.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 // The default standard type associated with the given concrete ThriftType.
 //
@@ -45,6 +43,4 @@ template <typename T, bool GuessStringTag = false>
 using infer_tag =
     typename detail::InferTag<folly::remove_cvref_t<T>, GuessStringTag>::type;
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

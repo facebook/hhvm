@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 template <typename T, bool WithHeader = false>
 class ServerStreamPublisher;
 
@@ -480,5 +479,4 @@ class ServerStreamPublisher {
   friend class detail::test::TestStreamClientCallbackService;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

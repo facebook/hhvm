@@ -79,8 +79,7 @@ FlagsRegistry* getFlagsRegistry() {
 }
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 namespace {
 
@@ -152,5 +151,4 @@ std::vector<ThriftFlagInfo> getAllThriftFlags() {
   return getFlagsRegistry()->getAllThriftFlags();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

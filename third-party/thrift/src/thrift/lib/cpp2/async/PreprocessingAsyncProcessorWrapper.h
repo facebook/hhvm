@@ -20,8 +20,7 @@
 #include <folly/CppAttributes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * PreprocessingAsyncProcessorWrapper should be considered whenever you need to
@@ -93,5 +92,4 @@ class PreprocessingAsyncProcessorWrapper : public AsyncProcessor {
   std::unique_ptr<AsyncProcessor> innerProcessor_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

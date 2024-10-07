@@ -26,9 +26,7 @@
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 /// Resolves to the number of definitions contained in Thrift class
 template <typename T>
@@ -347,6 +345,4 @@ class InvokeByFieldId {
 template <typename T>
 inline constexpr detail::InvokeByFieldId<T> invoke_by_field_id{};
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

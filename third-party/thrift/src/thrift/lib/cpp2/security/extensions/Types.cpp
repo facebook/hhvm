@@ -21,8 +21,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 fizz::Extension encodeThriftExtension(const ThriftParametersExt& params) {
   fizz::Extension ext;
@@ -49,5 +48,4 @@ folly::Optional<ThriftParametersExt> getThriftExtension(
   params.params.read(&reader);
   return params;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

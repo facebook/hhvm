@@ -20,8 +20,7 @@
 
 FOLLY_GFLAGS_DECLARE_bool(thrift_enable_lazy_deserialization);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 extern folly::relaxed_atomic<bool>
@@ -36,5 +35,4 @@ inline bool isLazyDeserializationDisabled() {
 inline bool lazyDeserializationIsDisabledDueToChecksumMismatch() {
   return detail::gLazyDeserializationIsDisabledDueToChecksumMismatch;
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

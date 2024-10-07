@@ -18,10 +18,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/test/fuzz/FuzzUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 TEST(BadInputTests, ParitialRequest) {
   // clang-format off
@@ -170,7 +167,4 @@ TEST(BadInputTests, ErrorFollowingPartialPayload) {
   testClientOneInput(input, sizeof(input));
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

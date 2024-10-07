@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/async/HeaderChannel.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct ClientHostMetadata {
   std::optional<std::string> hostname;
@@ -103,5 +102,4 @@ class ClientChannel : public RequestChannel, public HeaderChannel {
  private:
   folly::Function<void()> onDetachable_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

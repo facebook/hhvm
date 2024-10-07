@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/TypeClass.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 
@@ -225,5 +224,4 @@ inline constexpr bool fixed_cost_skip_v =
     ::apache::thrift::detail::fixed_cost_skip_<
         TypeClass>::template apply<Protocol, Type>;
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

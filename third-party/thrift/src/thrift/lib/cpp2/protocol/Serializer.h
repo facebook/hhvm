@@ -29,8 +29,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename Reader, typename Writer>
 struct Serializer {
@@ -337,6 +336,6 @@ inline std::unique_ptr<folly::IOBuf> serializeErrorWithoutEnvelope(
 std::unique_ptr<folly::IOBuf> serializeErrorStruct(
     protocol::PROTOCOL_TYPES protId, const TApplicationException& obj);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
+
 #endif

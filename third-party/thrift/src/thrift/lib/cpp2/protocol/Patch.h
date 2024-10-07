@@ -21,18 +21,17 @@
 #include <thrift/lib/thrift/detail/protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
-namespace detail {
+namespace apache::thrift {
+
+namespace op::detail {
 
 // Latest Thrift Dynamic Patch version that the process is aware of. Note, this
 // may differ from `kThriftStaticPatchVersion` if we introduce new operations in
 // Thrift State Patch first.
 inline constexpr int32_t kThriftDynamicPatchVersion = 2;
 
-} // namespace detail
-} // namespace op
+} // namespace op::detail
+
 namespace protocol {
 namespace detail {
 
@@ -133,5 +132,4 @@ std::string toPatchUri(std::string s);
 std::string fromPatchUri(std::string s);
 
 } // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

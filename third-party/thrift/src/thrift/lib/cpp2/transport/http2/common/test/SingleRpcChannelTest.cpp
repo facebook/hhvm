@@ -31,8 +31,7 @@
 #include <thrift/lib/cpp2/transport/http2/common/testutil/ChannelTestFixture.h>
 #include <thrift/lib/cpp2/transport/http2/common/testutil/FakeProcessors.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using std::string;
 using std::unordered_map;
@@ -398,5 +397,4 @@ TEST(H2ChannelTest, decodeHeaders) {
       RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

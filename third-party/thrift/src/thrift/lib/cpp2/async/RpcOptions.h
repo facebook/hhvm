@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct SerializedAuthProofs {
   SerializedAuthProofs() = default;
@@ -218,5 +217,4 @@ class RpcOptions {
   Checksum checksum_{Checksum::NONE};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

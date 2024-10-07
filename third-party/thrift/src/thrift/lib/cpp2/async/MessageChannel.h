@@ -33,8 +33,7 @@ class IOBuf;
 
 using SamplingStatus = apache::thrift::server::TServerObserver::SamplingStatus;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * MessageChannel defines an asynchronous API for message-based I/O.
@@ -92,7 +91,6 @@ class MessageChannel : virtual public folly::DelayedDestruction {
   folly::AsyncTransport* getTransport() { return nullptr; }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef THRIFT_ASYNC_MESSAGECHANNEL_H_

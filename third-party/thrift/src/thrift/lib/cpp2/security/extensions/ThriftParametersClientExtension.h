@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/security/extensions/Types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftParametersClientExtension : public fizz::ClientExtensions {
  public:
@@ -49,5 +48,4 @@ class ThriftParametersClientExtension : public fizz::ClientExtensions {
   bool negotiatedStopTLS_{false};
   std::shared_ptr<ThriftParametersContext> context_;
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 #if FOLLY_HAS_COROUTINES
 template <bool WithHeader, typename T>
@@ -134,6 +132,4 @@ ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
 }
 #endif // FOLLY_HAS_COROUTINES
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

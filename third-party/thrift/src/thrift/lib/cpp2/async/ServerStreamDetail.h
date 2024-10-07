@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 
 struct ServerStreamFactory {
   template <typename F>
@@ -55,6 +53,4 @@ using ServerStreamFn = folly::Function<ServerStreamFactory(
     folly::Executor::KeepAlive<>,
     apache::thrift::detail::StreamElementEncoder<T>*)>;
 
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

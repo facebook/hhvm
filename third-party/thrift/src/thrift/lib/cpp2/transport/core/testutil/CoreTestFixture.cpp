@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace testutil::testservice;
 
@@ -123,5 +122,4 @@ bool CoreTestFixture::deserializeException(
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -20,9 +20,7 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 
-namespace apache {
-namespace thrift {
-namespace merge_into_detail {
+namespace apache::thrift::merge_into_detail {
 
 template <typename Tag>
 struct merge_impl;
@@ -181,12 +179,9 @@ struct merge_impl<type::map<KeyTag, MappedTag>> {
 template <typename T, typename Tag>
 struct merge_impl<type::cpp_type<T, Tag>> : merge_impl<Tag> {};
 
-} // namespace merge_into_detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::merge_into_detail
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T>
 void merge_into(T&& src, folly::remove_cvref_t<T>& dst) {
@@ -196,5 +191,4 @@ void merge_into(T&& src, folly::remove_cvref_t<T>& dst) {
   merge_into_detail::merge_impl<Tag>::go(std::forward<T>(src), dst);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

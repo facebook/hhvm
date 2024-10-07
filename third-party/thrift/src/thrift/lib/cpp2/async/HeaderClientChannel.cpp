@@ -40,8 +40,7 @@ using std::unique_ptr;
 using namespace apache::thrift::transport;
 using folly::EventBase;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 class ReleasableDestructor : public folly::DelayedDestruction::Destructor {
  public:
@@ -737,5 +736,4 @@ void HeaderClientChannel::RocketUpgradeChannel::BufferedRequest::fail(
   callback_.release()->onResponseError(std::move(ew));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

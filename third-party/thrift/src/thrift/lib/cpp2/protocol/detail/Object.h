@@ -39,9 +39,7 @@
 #include <thrift/lib/thrift/gen-cpp2/id_types.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
-namespace apache::thrift::protocol {
-
-namespace detail {
+namespace apache::thrift::protocol::detail {
 
 template <typename Tag>
 struct HasStructuredTag : std::false_type {};
@@ -1194,5 +1192,4 @@ template <typename T>
 struct ProtocolValueToThriftValue<type::exception_t<T>>
     : ProtocolValueToThriftValueStructure<T> {};
 
-} // namespace detail
-} // namespace apache::thrift::protocol
+} // namespace apache::thrift::protocol::detail

@@ -33,8 +33,7 @@
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestServiceMock.h>
 #include <thrift/lib/cpp2/transport/util/ConnectionManager.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using namespace apache::thrift;
 using namespace apache::thrift::async;
@@ -193,5 +192,4 @@ class SlowWritingSocket : public folly::AsyncSocket {
   size_t bytesRemainingBeforeDelayingWrites_{
       std::numeric_limits<size_t>::max()};
 };
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

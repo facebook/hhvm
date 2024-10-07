@@ -22,8 +22,7 @@
 
 #include <string_view>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 
 static InteractionId createInteraction(
@@ -126,5 +125,4 @@ void InteractionHandle::terminate() {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

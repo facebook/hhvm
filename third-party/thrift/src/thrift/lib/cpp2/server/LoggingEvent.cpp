@@ -22,8 +22,7 @@
 #include <folly/Synchronized.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace {
 
 class DefaultLoggingEventRegistry : public LoggingEventRegistry {
@@ -95,5 +94,4 @@ const LoggingEventRegistry& getLoggingEventRegistry() {
   return registryStorage.get()->getRegistry();
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

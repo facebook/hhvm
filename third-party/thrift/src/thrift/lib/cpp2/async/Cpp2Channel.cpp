@@ -27,8 +27,7 @@
 using namespace apache::thrift::transport;
 using folly::EventBase;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 Cpp2Channel::Cpp2Channel(
     const std::shared_ptr<folly::AsyncTransport>& transport,
@@ -234,5 +233,4 @@ void Cpp2Channel::setReceiveCallback(RecvCallback* callback) {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

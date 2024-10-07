@@ -21,11 +21,7 @@ FOLLY_GFLAGS_DEFINE_bool(
     true,
     "Whether to enable lazy deserialization");
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 folly::relaxed_atomic<bool> gLazyDeserializationIsDisabledDueToChecksumMismatch{
     false};
 }
-} // namespace thrift
-} // namespace apache

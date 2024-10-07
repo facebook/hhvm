@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <wangle/channel/Handler.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // This Handler may only be used in a single Pipeline
 class TAsyncTransportHandler : public wangle::BytesToBytesHandler,
@@ -170,5 +169,4 @@ class TAsyncTransportHandler : public wangle::BytesToBytesHandler,
   std::shared_ptr<folly::AsyncTransport> transport_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

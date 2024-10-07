@@ -16,8 +16,7 @@
 
 #include <thrift/lib/cpp2/security/AsyncStopTLS.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 void AsyncStopTLS::start(
     fizz::AsyncFizzBase* transport,
@@ -112,5 +111,4 @@ void AsyncStopTLS::readBufferAvailable(std::unique_ptr<folly::IOBuf>) noexcept {
 void AsyncStopTLS::readErr(const folly::AsyncSocketException& ex) noexcept {
   prepareForTerminalCallback()->stopTLSError(ex);
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

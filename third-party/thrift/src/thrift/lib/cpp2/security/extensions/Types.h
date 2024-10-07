@@ -19,8 +19,7 @@
 #include <fizz/record/Extensions.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 struct ThriftParametersExt {
   NegotiationParameters params;
@@ -31,5 +30,4 @@ fizz::Extension encodeThriftExtension(const ThriftParametersExt& params);
 folly::Optional<ThriftParametersExt> getThriftExtension(
     const std::vector<fizz::Extension>& extensions);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

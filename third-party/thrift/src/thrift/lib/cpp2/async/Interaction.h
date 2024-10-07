@@ -23,8 +23,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 enum class InternalPriority;
@@ -245,5 +244,4 @@ class InteractionTask {
   }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

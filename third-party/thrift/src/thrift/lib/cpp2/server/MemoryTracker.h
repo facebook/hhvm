@@ -22,8 +22,7 @@
 #include <folly/Utility.h>
 #include <folly/observer/Observer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Tracks memory consumption.
@@ -77,5 +76,4 @@ class MemoryTracker : folly::MoveOnly {
   AtomicObserver minObserver_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

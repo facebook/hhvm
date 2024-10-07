@@ -41,8 +41,8 @@ typename std::enable_if<(x <= 200), bool>::type isEncodeHeader(
       folly::StringPiece(key).startsWith("encode_"));
 }
 } // namespace
-namespace apache {
-namespace thrift {
+
+namespace apache::thrift {
 
 using proxygen::HTTPMessage;
 using std::string;
@@ -175,5 +175,4 @@ bool H2Channel::handleThriftMetadata(
   return false;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

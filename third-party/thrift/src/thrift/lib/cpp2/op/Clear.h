@@ -20,9 +20,7 @@
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/detail/Clear.h>
 
-namespace apache {
-namespace thrift {
-namespace op {
+namespace apache::thrift::op {
 
 /// Returns true iff the given value is 'empty', and not serialized in a
 /// 'terse' context.
@@ -85,6 +83,4 @@ inline constexpr detail::Clear<TagOrId, PTag> clear{};
 template <typename Tag>
 inline constexpr detail::ClearField<Tag> clear_field{};
 
-} // namespace op
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::op

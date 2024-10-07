@@ -19,9 +19,7 @@
 
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 namespace detail {
 folly::Expected<std::unique_ptr<folly::IOBuf>, std::string> uncompressPayload(
     CompressionAlgorithm compression, std::unique_ptr<folly::IOBuf> data) {
@@ -109,6 +107,4 @@ std::unique_ptr<folly::IOBuf> uncompressBuffer(
   }
   return std::move(result.value());
 }
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

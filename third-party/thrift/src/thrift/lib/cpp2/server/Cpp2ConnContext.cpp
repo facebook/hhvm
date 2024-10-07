@@ -38,8 +38,7 @@ uid_t errnoToUid(int no) {
 
 } // namespace
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 Cpp2ConnContext::PeerCred Cpp2ConnContext::PeerCred::queryFromSocket(
     folly::NetworkSocket socket) {
@@ -146,5 +145,4 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

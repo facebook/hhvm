@@ -25,9 +25,7 @@
 
 THRIFT_FLAG_DECLARE_int64(rocket_allocating_parser_min_buffer_size);
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 #if FOLLY_HAS_MEMORY_RESOURCE
 using ParserAllocatorType =
@@ -209,6 +207,4 @@ class AllocatingParserStrategy {
   }
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

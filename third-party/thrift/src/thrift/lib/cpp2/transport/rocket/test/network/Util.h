@@ -29,10 +29,7 @@ namespace folly {
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 std::string repeatPattern(folly::StringPiece pattern, size_t nbytes);
 
@@ -45,7 +42,4 @@ void expectRocketExceptionType(
 
 void expectEncodedError(folly::exception_wrapper ew);
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

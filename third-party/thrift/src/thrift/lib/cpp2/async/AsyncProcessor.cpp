@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp2/async/ReplyInfo.h>
 #include <thrift/lib/cpp2/server/IResourcePoolAcceptor.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 thread_local RequestParams ServerInterface::requestParams_;
 
@@ -1218,5 +1217,4 @@ folly::coro::Task<void> processServiceInterceptorsOnRequest(
 #endif // FOLLY_HAS_COROUTINES
 } // namespace detail
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -16,10 +16,7 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
 
-namespace apache {
-namespace thrift {
-namespace detail {
-namespace md {
+namespace apache::thrift::detail::md {
 
 ThriftConstValue cvBool(bool value) {
   ThriftConstValue ret;
@@ -74,7 +71,4 @@ ThriftConstValuePair cvPair(ThriftConstValue&& key, ThriftConstValue&& value) {
   return pair;
 }
 
-} // namespace md
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail::md

@@ -28,8 +28,7 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class AsyncProcessorFactory;
 class ThriftServer;
@@ -167,7 +166,6 @@ std::unique_ptr<AsyncClientT> makeTestClient(
     ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault =
         nullptr,
     protocol::PROTOCOL_TYPES prot = protocol::T_COMPACT_PROTOCOL);
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread-inl.h>

@@ -21,8 +21,7 @@
 
 #include <thrift/lib/cpp2/util/Ewma.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Compute a rate (in tick per second) based on an EWMA of the inter-arrival
@@ -73,5 +72,4 @@ class EwmaRate {
   std::chrono::time_point<Clock> lastArrivalTime_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

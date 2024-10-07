@@ -18,8 +18,7 @@
 
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftParametersServerExtensionTest : public testing::Test {
  public:
@@ -85,5 +84,4 @@ TEST_F(ThriftParametersServerExtensionTest, IncompatibleCompresionAlgorithms) {
           1ull << (int(CompressionAlgorithm::ZLIB) - 1));
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

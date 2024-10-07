@@ -30,10 +30,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
-namespace test {
+namespace apache::thrift::rocket::test {
 
 std::string repeatPattern(folly::StringPiece pattern, size_t nbytes) {
   std::string rv;
@@ -68,7 +65,4 @@ void expectEncodedError(folly::exception_wrapper ew) {
   ASSERT_NE(nullptr, rex);
 }
 
-} // namespace test
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket::test

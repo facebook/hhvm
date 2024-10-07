@@ -16,9 +16,7 @@
 
 #include <thrift/lib/cpp2/transport/core/testutil/TAsyncSocketIntercepted.h>
 
-namespace apache {
-namespace thrift {
-namespace async {
+namespace apache::thrift::async {
 
 folly::AsyncSocket::WriteResult TAsyncSocketIntercepted::performWrite(
     const iovec* vec,
@@ -73,6 +71,4 @@ folly::AsyncSocket::ReadResult TAsyncSocketIntercepted::performReadMsg(
   return res;
 }
 
-} // namespace async
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::async

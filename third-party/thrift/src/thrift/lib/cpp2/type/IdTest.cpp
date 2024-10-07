@@ -19,9 +19,7 @@
 
 using namespace ::testing;
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 TEST(OrdilaTest, Basic) {
   constexpr size_t npos = toPosition(Ordinal{});
   EXPECT_EQ(npos, std::string::npos);
@@ -33,6 +31,4 @@ TEST(OrdilaTest, Basic) {
   EXPECT_EQ(Ordinal(43), toOrdinal(42));
   EXPECT_EQ(42, toPosition(Ordinal(43)));
 }
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

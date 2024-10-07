@@ -19,8 +19,7 @@
 #include <string>
 #include <folly/Range.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // This module allows us to take an arbitrary serialized Protocol stream
 // and print it to human readable format, without needing the Thrift
@@ -81,5 +80,4 @@ std::string toDebugString(
 template <class ProtocolWriter>
 void fromDebugString(folly::StringPiece text, ProtocolWriter& outProtoWriter);
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

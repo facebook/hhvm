@@ -30,8 +30,7 @@
 
 #include <thrift/lib/cpp2/PluggableFunction.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 class FlagsBackend {
@@ -200,5 +199,4 @@ struct ThriftFlagInfo {
 };
 
 std::vector<ThriftFlagInfo> getAllThriftFlags();
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

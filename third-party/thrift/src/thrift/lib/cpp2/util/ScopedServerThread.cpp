@@ -33,9 +33,7 @@ using namespace apache::thrift::concurrency;
 using namespace apache::thrift::server;
 using namespace apache::thrift::transport;
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 /**
  * ScopedServerThread::Helper runs the server loop in the new server thread.
@@ -285,6 +283,4 @@ bool ScopedServerThread::setServeThreadName(const std::string& name) {
   return thread_->setName(name);
 }
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util

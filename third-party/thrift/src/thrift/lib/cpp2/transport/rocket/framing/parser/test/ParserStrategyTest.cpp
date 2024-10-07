@@ -21,9 +21,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 TEST(ParserTest, testAppendFrame) {
   FakeOwner owner;
@@ -66,6 +64,4 @@ TEST(ParserTest, testAppendLessThanFullFrame) {
   EXPECT_EQ(owner.frames_.size(), 0);
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

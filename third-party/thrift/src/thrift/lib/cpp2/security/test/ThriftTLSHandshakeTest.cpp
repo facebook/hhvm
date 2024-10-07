@@ -20,9 +20,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 class ThriftTLSHandshakeTest : public fizz::test::HandshakeTest {};
 
@@ -47,6 +45,4 @@ TEST_F(ThriftTLSHandshakeTest, TestExtensionsThriftParameters) {
       *serverThriftParams->getThriftCompressionAlgorithm(),
       apache::thrift::CompressionAlgorithm::ZSTD);
 }
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

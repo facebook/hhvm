@@ -29,8 +29,7 @@
 
 DECLARE_string(transport);
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * A connection thread that handles connections to servers - one
@@ -56,5 +55,4 @@ class ConnectionThread : public folly::ScopedEventBaseThread {
       connections_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

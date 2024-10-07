@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/async/ReplyInfo.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * IOWorkerContext provides access to worker functionality that should be
@@ -91,5 +90,4 @@ class IOWorkerContext {
       std::make_shared<folly::Synchronized<bool>>(true)};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

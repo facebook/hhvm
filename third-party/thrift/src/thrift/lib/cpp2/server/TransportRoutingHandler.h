@@ -23,8 +23,7 @@
 #include <wangle/acceptor/ConnectionManager.h>
 #include <wangle/acceptor/TransportInfo.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2Worker;
 
@@ -72,5 +71,4 @@ class TransportRoutingHandler {
       std::shared_ptr<Cpp2Worker> cpp2Worker) = 0;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

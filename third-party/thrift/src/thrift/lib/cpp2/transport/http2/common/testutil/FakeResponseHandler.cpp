@@ -19,8 +19,7 @@
 #include <glog/logging.h>
 #include <folly/portability/GTest.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 using folly::IOBuf;
 using proxygen::HTTPMessage;
@@ -85,5 +84,4 @@ bool FakeResponseHandler::eomReceived() {
   return eomReceived_;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -34,8 +34,7 @@ using folly::EventBase;
 using proxygen::WheelTimerInstance;
 using std::unique_ptr;
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -469,5 +468,4 @@ void HTTPClientChannel::HTTPTransactionCallback::lastByteFlushed() noexcept {
 
 // end proxygen::HTTPTransaction::TransportCallback methods
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

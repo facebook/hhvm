@@ -20,8 +20,7 @@
 #include <fmt/format.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace {
 // RequestId storage.
@@ -265,5 +264,4 @@ void RequestsRegistry::DebugStub::decRef() noexcept {
   }
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -19,9 +19,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 // C++20 concept
 // template <typename T>
@@ -49,6 +47,4 @@ class ParserStrategy : private Strategy<T, Args...> {
   }
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

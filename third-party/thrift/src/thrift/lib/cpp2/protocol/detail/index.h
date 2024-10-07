@@ -32,8 +32,7 @@
 #include <thrift/lib/cpp2/protocol/Traits.h>
 #include <thrift/lib/cpp2/protocol/detail/ReservedId.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class VirtualReaderBase;
 
@@ -405,5 +404,4 @@ using ProtocolReaderStructReadStateWithIndex = std::conditional_t<
     ProtocolReaderStructReadState<Protocol>>;
 
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

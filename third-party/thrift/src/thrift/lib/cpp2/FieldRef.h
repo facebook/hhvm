@@ -32,8 +32,7 @@
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 namespace detail {
 
 template <typename T>
@@ -2505,5 +2504,4 @@ bool operator>=(const T& lhs, terse_field_ref<U> rhs) {
   return lhs >= *rhs;
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

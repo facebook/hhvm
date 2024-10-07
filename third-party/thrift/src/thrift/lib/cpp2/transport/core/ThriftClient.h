@@ -28,8 +28,7 @@
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 #include <thrift/lib/cpp2/transport/core/ClientConnectionIf.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * This is the client side interface for Thrift RPCs.  You create an
@@ -195,5 +194,4 @@ class ThriftClient : public ClientChannel {
       std::unique_ptr<ThriftClientCallback> callback) noexcept;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

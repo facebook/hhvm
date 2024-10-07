@@ -18,9 +18,7 @@
 
 #include <ostream>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 void Payload::append(Payload&& other) {
   // append() reflects how data is received on the wire: all (possibly
@@ -40,6 +38,4 @@ std::ostream& operator<<(std::ostream& os, StreamId streamId) {
   return os << static_cast<uint32_t>(streamId);
 }
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

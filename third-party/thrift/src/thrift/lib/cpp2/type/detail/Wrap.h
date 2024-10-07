@@ -28,10 +28,7 @@
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 
-namespace apache {
-namespace thrift {
-namespace type {
-namespace detail {
+namespace apache::thrift::type::detail {
 
 // A base class the "curiously reoccurring template pattern" with helpers that
 // propagate const&-ness.
@@ -196,7 +193,4 @@ class CompareWrap : public EqWrap<Derived, T, Tag> {
   };                                                                 \
   } // namespace std
 
-} // namespace detail
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type::detail

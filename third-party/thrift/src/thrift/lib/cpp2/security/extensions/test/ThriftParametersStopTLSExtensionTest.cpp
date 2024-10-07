@@ -18,8 +18,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class ThriftParametersExtensionStopTLSTest
     : public testing::TestWithParam<std::tuple<bool, bool>> {};
@@ -80,5 +79,4 @@ INSTANTIATE_TEST_CASE_P(
     ThriftParametersExtensionStopTLSTest,
     testing::Combine(
         testing::Values(false, true), testing::Values(false, true)));
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

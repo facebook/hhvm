@@ -24,9 +24,7 @@
 
 #include <folly/executors/IOThreadPoolExecutor.h>
 
-namespace apache {
-namespace thrift {
-namespace io_uring_util {
+namespace apache::thrift::io_uring_util {
 
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringEventbaseBackendFunc();
 
@@ -38,8 +36,6 @@ std::shared_ptr<folly::IOThreadPoolExecutorBase> getDefaultIOUringExecutor(
 bool validateExecutorSupportsIOUring(
     const std::shared_ptr<folly::IOThreadPoolExecutorBase>& executor);
 
-} // namespace io_uring_util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::io_uring_util
 
 #endif

@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // A set of processors useful for testing.
 
@@ -75,5 +74,4 @@ class EchoProcessor : public ThriftProcessor {
       std::shared_ptr<ThriftChannelIf> channel) noexcept;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

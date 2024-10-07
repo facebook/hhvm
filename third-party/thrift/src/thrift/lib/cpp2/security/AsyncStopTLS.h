@@ -19,8 +19,7 @@
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <folly/io/async/DelayedDestruction.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 /**
  *
  * INTERNAL THRIFT DETAIL.
@@ -110,5 +109,4 @@ class AsyncStopTLS : public folly::DelayedDestruction,
   std::unique_ptr<folly::AsyncTimeout> transactionTimeout_{nullptr};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

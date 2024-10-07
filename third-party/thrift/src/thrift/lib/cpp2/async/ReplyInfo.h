@@ -20,8 +20,7 @@
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class QueueReplyInfo {
  public:
@@ -101,5 +100,4 @@ class ReplyInfoConsumer {
   }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

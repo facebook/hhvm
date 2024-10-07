@@ -48,8 +48,7 @@ namespace folly {
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
@@ -609,5 +608,4 @@ class RocketClient : public virtual folly::DelayedDestruction,
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

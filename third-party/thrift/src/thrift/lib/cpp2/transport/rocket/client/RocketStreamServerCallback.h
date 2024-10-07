@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 class RocketClient;
 
 enum class StreamChannelStatus { Alive, Complete, ContractViolation };
@@ -160,6 +158,4 @@ class RocketSinkServerCallback : public SinkServerCallback {
   std::unique_ptr<CompressionConfig> compressionConfig_;
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

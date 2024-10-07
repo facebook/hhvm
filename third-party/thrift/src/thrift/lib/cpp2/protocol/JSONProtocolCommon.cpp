@@ -59,8 +59,7 @@ struct IsSomeString<WrappedIOBufQueueAppender> : std::true_type {};
 
 } // namespace folly
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // This table describes the handling for the first 0x30 characters
 //  0 : escape using "\u00xx" notation
@@ -212,5 +211,4 @@ static std::string quote(folly::StringPiece str) {
       folly::to<std::string>(
           "Expected hex val ([0-9a-f]); got \'", escape(sp(ch)), "\'."));
 }
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

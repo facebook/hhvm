@@ -25,8 +25,7 @@
 #include <thrift/lib/cpp2/transport/core/testutil/FakeServerObserver.h>
 #include <thrift/lib/cpp2/transport/core/testutil/TestServiceMock.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename Service>
 class SampleServer {
@@ -149,5 +148,4 @@ class TransportCompatibilityTest {
   bool upgradeToRocketExpected_{true};
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

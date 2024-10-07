@@ -28,9 +28,7 @@ class EventBase;
 class IOBuf;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 class RocketException;
 class RocketServerConnection;
@@ -78,6 +76,4 @@ class RocketServerFrameContext {
   bool markRequestComplete_{true};
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

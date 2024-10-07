@@ -488,7 +488,7 @@ let call
           "annotate this typehint as a " ^ suggested_fty_str
         (* Otherwise, it's likely from a Rwitness, but we suggest declaring it as readonly *)
         else
-          "declaring this as a `readonly` function"
+          "declare this as a `readonly` function"
       in
       Typing_error_utils.add_typing_error
         ~env:(Tast_env.tast_env_as_typing_env env)

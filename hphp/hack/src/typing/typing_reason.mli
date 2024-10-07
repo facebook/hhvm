@@ -80,6 +80,8 @@ type decl_t = decl_phase t_
 
 val localize : decl_t -> t
 
+val reverse_flow : t -> t
+
 (** Translate a reason to a (pos, string) list, suitable for error_l. This
     previously returned a string, however the need to return multiple lines with
     multiple locations meant that it needed to more than convert to a string *)

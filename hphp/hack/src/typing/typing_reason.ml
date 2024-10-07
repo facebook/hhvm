@@ -2063,6 +2063,14 @@ let rec flow_contains_tyvar = function
   | Flow { into; _ } -> flow_contains_tyvar into
   | _ -> false
 
+let reverse_flow t =
+  let rec aux ~k = function
+    | Flow { from; into; kind } ->
+      aux into ~k:(fun into -> k @@ Flow { from = into; into = from; kind })
+    | t -> k t
+  in
+  aux ~k:(fun r -> r) t
+
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
  * multiple locations meant that it needed to more than convert to a string *)

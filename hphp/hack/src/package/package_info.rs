@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 

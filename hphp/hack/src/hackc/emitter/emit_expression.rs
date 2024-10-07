@@ -1860,7 +1860,7 @@ fn emit_call_default<'a, 'd>(
     scope::with_unnamed_locals(e, |em| {
         let FCallArgs { num_rets, .. } = &fcall_args;
         let num_uninit = num_rets - 1;
-        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
+        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, pos, expr, fcall_args, targs, None)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
         let uargs = match uarg {
             Some(uarg) => emit_expr(em, env, uarg)?,
@@ -1994,6 +1994,7 @@ fn emit_object_expr<'a, 'd>(
 fn emit_call_lhs_and_fcall<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
+    call_pos: &Pos,
     expr: &ast::Expr,
     mut fcall_args: FCallArgs,
     targs: &[ast::Targ],
@@ -2042,7 +2043,7 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
             // handle ObjGet and ClassGet prop call cases. Keep track of the position of the
             // outer readonly expression for use later.
             // TODO: use the fact that this is a readonly call in HHVM enforcement
-            emit_call_lhs_and_fcall(e, env, r, fcall_args, targs, Some(pos))
+            emit_call_lhs_and_fcall(e, env, call_pos, r, fcall_args, targs, Some(pos))
         }
         Expr_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsMethod => {
             // Case $x->foo(...).
@@ -2176,10 +2177,13 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
                         InstrSeq::gather(vec![
                             generics,
                             emit_expr(e, env, &expr)?,
-                            instr::f_call_cls_method_m(
-                                IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-                                fcall_args,
-                                method_name,
+                            emit_pos_then(
+                                call_pos,
+                                instr::f_call_cls_method_m(
+                                    IsLogAsDynamicCallOp::DontLogAsDynamicCall,
+                                    fcall_args,
+                                    method_name,
+                                ),
                             ),
                         ]),
                     )

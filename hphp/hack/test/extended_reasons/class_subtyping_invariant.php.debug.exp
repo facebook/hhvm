@@ -18,7 +18,25 @@ File "class_subtyping_invariant.php", line 13, character 43 - line 13, character
  14 |   takes_my_a($x);
  15 | }
 
+  via this generic `T2`
+
+File "class_subtyping_invariant.php", line 5, character 41 - line 5, character 42:
+
+ 5 | class MyB<-T1, T2> extends MyA<Sub, T1, »T2«> {}
+ 6 | 
+ 7 | class Super {}
+
 But got `Super`
+
+File "class_subtyping_invariant.php", line 11, character 37 - line 11, character 41:
+
+ 11 | function takes_my_a(MyA<Sub, Super, »Super«> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+This type argument to `MyA` must match exactly (it is invariant)
 
 File "class_subtyping_invariant.php", line 11, character 37 - line 11, character 41:
 
@@ -235,21 +253,40 @@ Derivation:
         ],
         "super":[
           {
-            "Def":[
-              {
-                "filename":"class_subtyping_invariant.php",
-                "line":9,
-                "char_start":7,
-                "char_end":9
-              },
+            "Instantiate":[
+              [
+                {
+                  "Def":[
+                    {
+                      "filename":"class_subtyping_invariant.php",
+                      "line":9,
+                      "char_start":7,
+                      "char_end":9
+                    },
+                    [
+                      {
+                        "Hint":[
+                          {
+                            "filename":"class_subtyping_invariant.php",
+                            "line":13,
+                            "char_start":43,
+                            "char_end":45
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "T2",
               [
                 {
                   "Hint":[
                     {
                       "filename":"class_subtyping_invariant.php",
-                      "line":13,
-                      "char_start":43,
-                      "char_end":45
+                      "line":5,
+                      "char_start":41,
+                      "char_end":42
                     }
                   ]
                 }
@@ -449,21 +486,40 @@ Reason:
     ],
     "super":[
       {
-        "Def":[
-          {
-            "filename":"class_subtyping_invariant.php",
-            "line":9,
-            "char_start":7,
-            "char_end":9
-          },
+        "Instantiate":[
+          [
+            {
+              "Def":[
+                {
+                  "filename":"class_subtyping_invariant.php",
+                  "line":9,
+                  "char_start":7,
+                  "char_end":9
+                },
+                [
+                  {
+                    "Hint":[
+                      {
+                        "filename":"class_subtyping_invariant.php",
+                        "line":13,
+                        "char_start":43,
+                        "char_end":45
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ],
+          "T2",
           [
             {
               "Hint":[
                 {
                   "filename":"class_subtyping_invariant.php",
-                  "line":13,
-                  "char_start":43,
-                  "char_end":45
+                  "line":5,
+                  "char_start":41,
+                  "char_end":42
                 }
               ]
             }

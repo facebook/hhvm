@@ -357,6 +357,14 @@ File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
  16 |     return foo::class;
  17 | }
 
+This type argument to `bar` must match exactly (it is invariant)
+
+File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
+
+ 15 | function getClass<Tu as num>(): classname<bar<»Tu«>> {
+ 16 |     return foo::class;
+ 17 | }
+
 Derivation:
 {
   "Derivation":[
@@ -653,6 +661,14 @@ File "workplace_invariant.php", line 15, character 47 - line 15, character 48:
  17 | }
 
 But got `int`
+
+File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
+
+ 8 | final class foo implements bar<»int«> {
+ 9 |   public function get(): int {
+10 |     return 1;
+
+This type argument to `bar` must match exactly (it is invariant)
 
 File "workplace_invariant.php", line 8, character 32 - line 8, character 34:
 

@@ -9,4 +9,4 @@ This function is readonly, so it must be marked readonly at declaration time to 
 ERROR: File "call.php", line 29, characters 4-12:
 This function is readonly, so it must be marked readonly at declaration time to be called. (Typing[4428])
   File "call.php", line 4, characters 10-27:
-  Did you mean to declaring this as a `readonly` function?
+  Did you mean to annotate this typehint as a (readonly function(): void)?

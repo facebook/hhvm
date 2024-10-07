@@ -30,7 +30,7 @@ File "workplace_contravariant.php", line 12, character 39 - line 12, character 4
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter `TB` of `TestServiceBase`.
+I checked the subtype constraint in [Main] because it was implied by the other constraints on the hint.
 
 Main
 

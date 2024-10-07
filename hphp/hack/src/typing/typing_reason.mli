@@ -586,11 +586,11 @@ module Predicates : sig
   val is_captured_like : t -> bool
 
   val unpack_expr_dep_type_opt :
-    'phase t_ -> ('phase t_ * Pos_or_decl.t * expr_dep_type_reason) option
+    t -> (t * Pos_or_decl.t * expr_dep_type_reason) option
 
   val unpack_unpack_param_opt : t -> (Pos.t * Pos_or_decl.t * int) option
 
-  val unpack_cstr_on_generics_opt : 'phase t_ -> (Pos_or_decl.t * pos_id) option
+  val unpack_cstr_on_generics_opt : t -> (Pos_or_decl.t * pos_id) option
 
   val unpack_shape_literal_opt : t -> Pos.t option
 end

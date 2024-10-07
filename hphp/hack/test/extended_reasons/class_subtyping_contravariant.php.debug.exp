@@ -18,7 +18,25 @@ File "class_subtyping_contravariant.php", line 14, character 40 - line 14, chara
  15 |   takes_my_a($x);
  16 | }
 
+  via this generic `T1`
+
+File "class_subtyping_contravariant.php", line 5, character 37 - line 5, character 38:
+
+ 5 | class MyB<-T1, T2> extends MyA<Sub, »T1«, T2> {}
+ 6 | 
+ 7 | class Super {}
+
 But got `Super`
+
+File "class_subtyping_contravariant.php", line 12, character 30 - line 12, character 34:
+
+ 12 | function takes_my_a(MyA<Sub, »Super«, Super> $_): void {}
+ 13 | 
+ 14 | function subtype_bad_contravariant(MyB<Sub, Super> $x): void {
+ 15 |   takes_my_a($x);
+ 16 | }
+
+This type argument to `MyA` only allows supertypes (it is contravariant)
 
 File "class_subtyping_contravariant.php", line 12, character 30 - line 12, character 34:
 
@@ -235,21 +253,40 @@ Derivation:
         ],
         "super":[
           {
-            "Def":[
-              {
-                "filename":"class_subtyping_contravariant.php",
-                "line":10,
-                "char_start":7,
-                "char_end":9
-              },
+            "Instantiate":[
+              [
+                {
+                  "Def":[
+                    {
+                      "filename":"class_subtyping_contravariant.php",
+                      "line":10,
+                      "char_start":7,
+                      "char_end":9
+                    },
+                    [
+                      {
+                        "Hint":[
+                          {
+                            "filename":"class_subtyping_contravariant.php",
+                            "line":14,
+                            "char_start":40,
+                            "char_end":42
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "T1",
               [
                 {
                   "Hint":[
                     {
                       "filename":"class_subtyping_contravariant.php",
-                      "line":14,
-                      "char_start":40,
-                      "char_end":42
+                      "line":5,
+                      "char_start":37,
+                      "char_end":38
                     }
                   ]
                 }
@@ -449,21 +486,40 @@ Reason:
     ],
     "super":[
       {
-        "Def":[
-          {
-            "filename":"class_subtyping_contravariant.php",
-            "line":10,
-            "char_start":7,
-            "char_end":9
-          },
+        "Instantiate":[
+          [
+            {
+              "Def":[
+                {
+                  "filename":"class_subtyping_contravariant.php",
+                  "line":10,
+                  "char_start":7,
+                  "char_end":9
+                },
+                [
+                  {
+                    "Hint":[
+                      {
+                        "filename":"class_subtyping_contravariant.php",
+                        "line":14,
+                        "char_start":40,
+                        "char_end":42
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+          ],
+          "T1",
           [
             {
               "Hint":[
                 {
                   "filename":"class_subtyping_contravariant.php",
-                  "line":14,
-                  "char_start":40,
-                  "char_end":42
+                  "line":5,
+                  "char_start":37,
+                  "char_end":38
                 }
               ]
             }

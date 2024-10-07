@@ -1,0 +1,308 @@
+error: Typing[4110] Invalid argument
+
+File "vector_invariant_2.php", line 6, character 6 - line 6, character 7:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar(»$x«);
+ 7 |  return $x;
+ 8 | }
+
+Expected `A`
+
+File "vector_invariant_2.php", line 3, character 21 - line 3, character 21:
+
+ 3 | function bar(Vector<»A«> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+But got `?A`
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+This type argument to `Vector` must match exactly (it is invariant)
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+Here's why:
+
+Step 1 of 3
+
+I started by checking this subtype relationship.
+
+The subtype comes from this function or method declaration
+
+File "vector_invariant_2.php", line 3, character 10 - line 3, character 12:
+
+ 3 | function »bar«(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+The supertype comes from this expression
+
+File "vector_invariant_2.php", line 6, character 2 - line 6, character 8:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  »bar($x)«;
+ 7 |  return $x;
+ 8 | }
+
+Step 2 of 3
+
+These are function types so next I checked the 1st function parameters.
+Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
+
+The subtype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 14 - line 5, character 23:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(»Vector<?A>« $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+which is defined here
+
+File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+
+ 47 |    */
+ 48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+and flows into this expression as the parameter hint
+
+File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> »$x«): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+which itself flows into this expression as the type of the local variable
+
+File "vector_invariant_2.php", line 6, character 6 - line 6, character 7:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar(»$x«);
+ 7 |  return $x;
+ 8 | }
+
+The supertype comes from this hint
+
+File "vector_invariant_2.php", line 3, character 14 - line 3, character 22:
+
+ 3 | function bar(»Vector<A>« $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+which is defined here
+
+File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+
+ 47 |    */
+ 48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+Step 3 of 3 (here is where the error occurred)
+
+`\HH\Vector` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
+
+The subtype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 3 | function bar(Vector<A> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+The supertype comes from this hint
+
+File "vector_invariant_2.php", line 3, character 21 - line 3, character 21:
+
+ 3 | function bar(Vector<»A«> $x): void {}
+ 4 | 
+ 5 | function foo(Vector<?A> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+
+which is defined here
+
+File "vector_invariant_2.php", line 10, character 7 - line 10, character 7:
+
+10 | class »A« {}
+
+error: Typing[4110] Invalid return type
+
+File "vector_invariant_2.php", line 7, character 9 - line 7, character 10:
+
+ 6 |  bar($x);
+ 7 |  return »$x«;
+ 8 | }
+ 9 | 
+10 | class A {}
+
+Expected `~A`
+
+File "vector_invariant_2.php", line 5, character 37 - line 5, character 37:
+
+ 5 | function foo(Vector<?A> $x): Vector<»A«> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+But got `?A`
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+This type argument to `Vector` must match exactly (it is invariant)
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+Here's why:
+
+Step 1 of 2
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 14 - line 5, character 23:
+
+ 5 | function foo(»Vector<?A>« $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+which is defined here
+
+File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+
+ 47 |    */
+ 48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+and flows into this expression as the parameter hint
+
+File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
+
+ 5 | function foo(Vector<?A> »$x«): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+which itself flows into this expression as the type of the local variable
+
+File "vector_invariant_2.php", line 7, character 9 - line 7, character 10:
+
+ 6 |  bar($x);
+ 7 |  return »$x«;
+ 8 | }
+ 9 | 
+10 | class A {}
+
+which itself flows into this expression because it is used in a return position
+
+File "vector_invariant_2.php", line 7, character 2 - line 7, character 11:
+
+ 6 |  bar($x);
+ 7 |  »return $x;«
+ 8 | }
+ 9 | 
+10 | class A {}
+
+The supertype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 30 - line 5, character 38:
+
+ 5 | function foo(Vector<?A> $x): »Vector<A>« {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+which is defined here
+
+File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+
+ 47 |    */
+ 48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
+ 49 |     /**
+ 50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
+Step 2 of 2 (here is where the error occurred)
+
+`\HH\Vector` is a class or interface so next I checked the 1st type arguments are subtypes.
+The type parameter is invariant so the subtype relationship must hold in both directions.
+Here I check the covariant case.
+
+The subtype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
+
+ 5 | function foo(Vector<»?A«> $x): Vector<A> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+The supertype comes from this hint
+
+File "vector_invariant_2.php", line 5, character 37 - line 5, character 37:
+
+ 5 | function foo(Vector<?A> $x): Vector<»A«> {
+ 6 |  bar($x);
+ 7 |  return $x;
+
+which is defined here
+
+File "vector_invariant_2.php", line 10, character 7 - line 10, character 7:
+
+ 6 |  bar($x);
+ 7 |  return $x;
+ 8 | }
+ 9 | 
+10 | class »A« {}
+
+2 errors found

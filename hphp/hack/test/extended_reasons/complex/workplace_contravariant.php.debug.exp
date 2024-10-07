@@ -117,16 +117,35 @@ Derivation:
             ],
             "super":[
               {
-                "Type_variable_generics":[
-                  {
-                    "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":5,
-                    "char_end":40
-                  },
+                "Instantiate":[
+                  [
+                    {
+                      "Type_variable_generics":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":13,
+                          "char_start":5,
+                          "char_end":40
+                        },
+                        "TB",
+                        "TestServiceBase",
+                        "1"
+                      ]
+                    }
+                  ],
                   "TB",
-                  "TestServiceBase",
-                  "1"
+                  [
+                    {
+                      "Hint":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":6,
+                          "char_start":15,
+                          "char_end":16
+                        }
+                      ]
+                    }
+                  ]
                 ]
               }
             ]
@@ -294,16 +313,35 @@ Derivation:
             "on_":"Subtype",
             "sub":[
               {
-                "Type_variable_generics":[
-                  {
-                    "filename":"workplace_contravariant.php",
-                    "line":13,
-                    "char_start":5,
-                    "char_end":40
-                  },
+                "Instantiate":[
+                  [
+                    {
+                      "Type_variable_generics":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":13,
+                          "char_start":5,
+                          "char_end":40
+                        },
+                        "TB",
+                        "TestServiceBase",
+                        "1"
+                      ]
+                    }
+                  ],
                   "TB",
-                  "TestServiceBase",
-                  "1"
+                  [
+                    {
+                      "Hint":[
+                        {
+                          "filename":"workplace_contravariant.php",
+                          "line":7,
+                          "char_start":18,
+                          "char_end":19
+                        }
+                      ]
+                    }
+                  ]
                 ]
               }
             ],
@@ -325,16 +363,35 @@ Derivation:
     },
     "on_":[
       {
-        "Type_variable_generics":[
-          {
-            "filename":"workplace_contravariant.php",
-            "line":13,
-            "char_start":5,
-            "char_end":40
-          },
+        "Instantiate":[
+          [
+            {
+              "Type_variable_generics":[
+                {
+                  "filename":"workplace_contravariant.php",
+                  "line":13,
+                  "char_start":5,
+                  "char_end":40
+                },
+                "TB",
+                "TestServiceBase",
+                "1"
+              ]
+            }
+          ],
           "TB",
-          "TestServiceBase",
-          "1"
+          [
+            {
+              "Hint":[
+                {
+                  "filename":"workplace_contravariant.php",
+                  "line":6,
+                  "char_start":15,
+                  "char_end":16
+                }
+              ]
+            }
+          ]
         ]
       }
     ],
@@ -536,16 +593,35 @@ Reason:
                 ],
                 "of":[
                   {
-                    "Type_variable_generics":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":13,
-                        "char_start":5,
-                        "char_end":40
-                      },
+                    "Instantiate":[
+                      [
+                        {
+                          "Type_variable_generics":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":13,
+                              "char_start":5,
+                              "char_end":40
+                            },
+                            "TB",
+                            "TestServiceBase",
+                            "1"
+                          ]
+                        }
+                      ],
                       "TB",
-                      "TestServiceBase",
-                      "1"
+                      [
+                        {
+                          "Hint":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":6,
+                              "char_start":15,
+                              "char_end":16
+                            }
+                          ]
+                        }
+                      ]
                     ]
                   }
                 ]
@@ -557,16 +633,35 @@ Reason:
               "Prj_one":{
                 "part":[
                   {
-                    "Type_variable_generics":[
-                      {
-                        "filename":"workplace_contravariant.php",
-                        "line":13,
-                        "char_start":5,
-                        "char_end":40
-                      },
+                    "Instantiate":[
+                      [
+                        {
+                          "Type_variable_generics":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":13,
+                              "char_start":5,
+                              "char_end":40
+                            },
+                            "TB",
+                            "TestServiceBase",
+                            "1"
+                          ]
+                        }
+                      ],
                       "TB",
-                      "TestServiceBase",
-                      "1"
+                      [
+                        {
+                          "Hint":[
+                            {
+                              "filename":"workplace_contravariant.php",
+                              "line":7,
+                              "char_start":18,
+                              "char_end":19
+                            }
+                          ]
+                        }
+                      ]
                     ]
                   }
                 ],

@@ -243,11 +243,21 @@ Derivation:
                 ],
                 "super":[
                   {
-                    "Type_variable_generics":[
-                      {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                    "Instantiate":[
+                      [
+                        {
+                          "Type_variable_generics":[
+                            {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                            "T",
+                            "chain",
+                            "11"
+                          ]
+                        }
+                      ],
                       "T",
-                      "chain",
-                      "11"
+                      [
+                        {"Hint":[{"filename":"metachain.php","line":27,"char_start":19,"char_end":19}]}
+                      ]
                     ]
                   }
                 ]
@@ -261,11 +271,31 @@ Derivation:
               "Begin":{
                 "sub":[
                   {
-                    "Type_variable_generics":[
-                      {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                    "Instantiate":[
+                      [
+                        {
+                          "Instantiate":[
+                            [
+                              {
+                                "Type_variable_generics":[
+                                  {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                                  "T",
+                                  "chain",
+                                  "11"
+                                ]
+                              }
+                            ],
+                            "T",
+                            [
+                              {"Hint":[{"filename":"metachain.php","line":27,"char_start":44,"char_end":44}]}
+                            ]
+                          ]
+                        }
+                      ],
                       "T",
-                      "chain",
-                      "11"
+                      [
+                        {"Hint":[{"filename":"metachain.php","line":34,"char_start":62,"char_end":62}]}
+                      ]
                     ]
                   }
                 ],
@@ -278,11 +308,21 @@ Derivation:
         },
         "on_":[
           {
-            "Type_variable_generics":[
-              {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+            "Instantiate":[
+              [
+                {
+                  "Type_variable_generics":[
+                    {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                    "T",
+                    "chain",
+                    "11"
+                  ]
+                }
+              ],
               "T",
-              "chain",
-              "11"
+              [
+                {"Hint":[{"filename":"metachain.php","line":27,"char_start":19,"char_end":19}]}
+              ]
             ]
           }
         ],
@@ -774,11 +814,21 @@ Reason:
                             ],
                             "of":[
                               {
-                                "Type_variable_generics":[
-                                  {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                                "Instantiate":[
+                                  [
+                                    {
+                                      "Type_variable_generics":[
+                                        {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                                        "T",
+                                        "chain",
+                                        "11"
+                                      ]
+                                    }
+                                  ],
                                   "T",
-                                  "chain",
-                                  "11"
+                                  [
+                                    {"Hint":[{"filename":"metachain.php","line":27,"char_start":19,"char_end":19}]}
+                                  ]
                                 ]
                               }
                             ]
@@ -787,11 +837,31 @@ Reason:
                       ],
                       "of":[
                         {
-                          "Type_variable_generics":[
-                            {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                          "Instantiate":[
+                            [
+                              {
+                                "Instantiate":[
+                                  [
+                                    {
+                                      "Type_variable_generics":[
+                                        {"filename":"metachain.php","line":16,"char_start":12,"char_end":16},
+                                        "T",
+                                        "chain",
+                                        "11"
+                                      ]
+                                    }
+                                  ],
+                                  "T",
+                                  [
+                                    {"Hint":[{"filename":"metachain.php","line":27,"char_start":44,"char_end":44}]}
+                                  ]
+                                ]
+                              }
+                            ],
                             "T",
-                            "chain",
-                            "11"
+                            [
+                              {"Hint":[{"filename":"metachain.php","line":34,"char_start":62,"char_end":62}]}
+                            ]
                           ]
                         }
                       ]

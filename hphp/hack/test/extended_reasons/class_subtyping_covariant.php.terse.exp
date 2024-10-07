@@ -28,6 +28,14 @@ File "class_subtyping_covariant.php", line 13, character 36 - line 13, character
  14 |   takes_my_a($x);
  15 | }
 
+  via this generic `T1`
+
+File "class_subtyping_covariant.php", line 5, character 32 - line 5, character 33:
+
+ 5 | class MyC<+T1, T2> extends MyA<»T1«, Super, T2> {}
+ 6 | 
+ 7 | class Super {}
+
 Here's why:
 
 Step 1 of 4
@@ -116,6 +124,14 @@ Step 4 of 4 (here is where the error occurred)
 `\MyA` is a class or interface so next I checked the 1st type arguments.
 
 The subtype comes from this hint
+
+File "class_subtyping_covariant.php", line 5, character 32 - line 5, character 33:
+
+ 5 | class MyC<+T1, T2> extends MyA<»T1«, Super, T2> {}
+ 6 | 
+ 7 | class Super {}
+
+and flows into this hint via the generic `T1`
 
 File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
 

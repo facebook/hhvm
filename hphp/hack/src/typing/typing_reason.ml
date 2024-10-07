@@ -2076,7 +2076,6 @@ let rec to_string_help :
   | Lower_bound { bound = r; _ }
   | Axiom { next = r; _ }
   | Def (_, r)
-  | Prj_both { sub_prj = r; _ }
   | Prj_one { part = r; _ } ->
     to_string_help prefix solutions r
   (* If we don't have a solution for a type variable use the origin of the flow *)
@@ -2095,6 +2094,29 @@ let rec to_string_help :
   | Solved { solution; of_; in_ = r } ->
     let solutions = Tvid.Map.add of_ solution solutions in
     to_string_help prefix solutions r
+  | Prj_both
+      {
+        sub_prj = r_orig;
+        prj = Prj_symm_ctor (_, class_name, _, Dir Contra);
+        _;
+      } ->
+    to_string_help prefix solutions r_orig
+    @ [
+        ( p,
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " only allows supertypes (it is contravariant)" );
+      ]
+  | Prj_both
+      { sub_prj = r_orig; prj = Prj_symm_ctor (_, class_name, _, Inv _); _ } ->
+    to_string_help prefix solutions r_orig
+    @ [
+        ( p,
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " must match exactly (it is invariant)" );
+      ]
+  | Prj_both { sub_prj = r; _ } -> to_string_help prefix solutions r
   | Idx (_, r2) ->
     [(p, prefix)]
     @ [
@@ -2718,50 +2740,100 @@ let force_lazy_values r =
 
 (* -- Predicates ------------------------------------------------------------ *)
 module Predicates = struct
+  let on_outermost t f =
+    let rec aux t ~solutions =
+      match t with
+      | Solved { solution; of_; in_ = t } ->
+        let solutions = Tvid.Map.add of_ solution solutions in
+        aux t ~solutions
+      | Flow { from = t; _ }
+      | Lower_bound { bound = t; _ }
+      | Axiom { next = t; _ }
+      | Prj_both { sub_prj = t; _ }
+      | Prj_one { part = t; _ }
+      | Def (_, t) ->
+        aux t ~solutions
+      | From_witness_locl
+          (Type_variable_generics (_, _, _, tvid) | Type_variable (_, tvid))
+        when Tvid.Map.mem tvid solutions ->
+        let t = Tvid.Map.find tvid solutions in
+        let solutions = Tvid.Map.remove tvid solutions in
+        aux t ~solutions
+      | _ -> f t
+    in
+    aux t ~solutions:Tvid.Map.empty
+
   let is_opaque_type_from_module r =
-    match r with
-    | Opaque_type_from_module _ -> true
-    | _ -> false
+    let p r =
+      match r with
+      | Opaque_type_from_module _ -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_none r =
-    match r with
-    | No_reason -> true
-    | _ -> false
+    let p r =
+      match r with
+      | No_reason -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_instantiate r =
-    match r with
-    | Instantiate _ -> true
-    | _ -> false
+    let p r =
+      match r with
+      | Instantiate _ -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_captured_like r =
-    match r with
-    | From_witness_locl (Captured_like _) -> true
-    | _ -> false
+    let p r =
+      match r with
+      | From_witness_locl (Captured_like _) -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let is_hint r =
-    match r with
-    | From_witness_decl (Hint _) -> true
-    | _ -> false
+    let p r =
+      match r with
+      | From_witness_decl (Hint _) -> true
+      | _ -> false
+    in
+    on_outermost r p
 
   let unpack_expr_dep_type_opt r =
-    match r with
-    | Expr_dep_type (r, p, e) -> Some (r, p, e)
-    | _ -> None
+    let f r =
+      match r with
+      | Expr_dep_type (r, p, e) -> Some (r, p, e)
+      | _ -> None
+    in
+    on_outermost r f
 
   let unpack_unpack_param_opt r =
-    match r with
-    | From_witness_locl (Unpack_param (p, p2, i)) -> Some (p, p2, i)
-    | _ -> None
+    let f r =
+      match r with
+      | From_witness_locl (Unpack_param (p, p2, i)) -> Some (p, p2, i)
+      | _ -> None
+    in
+    on_outermost r f
 
   let unpack_cstr_on_generics_opt r =
-    match r with
-    | From_witness_decl (Cstr_on_generics (p, sid)) -> Some (p, sid)
-    | _ -> None
+    let f r =
+      match r with
+      | From_witness_decl (Cstr_on_generics (p, sid)) -> Some (p, sid)
+      | _ -> None
+    in
+    on_outermost r f
 
   let unpack_shape_literal_opt r =
-    match r with
-    | From_witness_locl (Shape_literal p) -> Some p
-    | _ -> None
+    let f r =
+      match r with
+      | From_witness_locl (Shape_literal p) -> Some p
+      | _ -> None
+    in
+    on_outermost r f
 end
 
 (* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)

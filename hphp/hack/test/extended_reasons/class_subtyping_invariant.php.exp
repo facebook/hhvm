@@ -18,7 +18,27 @@ File "class_subtyping_invariant.php", line 13, character 43 - line 13, character
  14 |   takes_my_a($x);
  15 | }
 
+  via this generic `T2`
+
+File "class_subtyping_invariant.php", line 5, character 41 - line 5, character 42:
+
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends MyA<Sub, T1, »T2«> {}
+ 6 | 
+ 7 | class Super {}
+
 But got `Super`
+
+File "class_subtyping_invariant.php", line 11, character 37 - line 11, character 41:
+
+ 11 | function takes_my_a(MyA<Sub, Super, »Super«> $_): void {}
+ 12 | 
+ 13 | function subtype_bad_invariant(MyB<Super, Sub> $x): void {
+ 14 |   takes_my_a($x);
+ 15 | }
+
+This type argument to `MyA` must match exactly (it is invariant)
 
 File "class_subtyping_invariant.php", line 11, character 37 - line 11, character 41:
 
@@ -170,6 +190,16 @@ File "class_subtyping_invariant.php", line 7, character 7 - line 7, character 11
 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
 
 The supertype comes from this hint
+
+File "class_subtyping_invariant.php", line 5, character 41 - line 5, character 42:
+
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends MyA<Sub, T1, »T2«> {}
+ 6 | 
+ 7 | class Super {}
+
+and flows into this hint via the generic `T2`
 
 File "class_subtyping_invariant.php", line 13, character 43 - line 13, character 45:
 

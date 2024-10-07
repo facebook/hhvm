@@ -76,6 +76,15 @@ File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
  5 |   return $v;
  6 | }
 
+This type argument to `Vector` must match exactly (it is invariant)
+
+File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
+
+ 3 | function test(Vector<string> $v): Vector<»arraykey«> {
+ 4 |   $v[0] = 42;
+ 5 |   return $v;
+ 6 | }
+
 Here's why:
 
 Step 1 of 2

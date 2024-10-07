@@ -414,11 +414,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         let (env, x_ty) = Env.expand_type env x_ty in
         let r_inst =
           let rp = get_reason x_ty in
-          if not @@ TypecheckerOptions.using_extended_reasons env.genv.tcopt
-          then
-            Reason.instantiate (rp, x, r)
-          else
-            rp
+          Reason.instantiate (rp, x, r)
         in
         begin
           match (targs, get_node x_ty) with

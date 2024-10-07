@@ -28,6 +28,14 @@ File "class_subtyping_covariant.php", line 13, character 36 - line 13, character
  14 |   takes_my_a($x);
  15 | }
 
+  via this generic `T1`
+
+File "class_subtyping_covariant.php", line 5, character 32 - line 5, character 33:
+
+ 5 | class MyC<+T1, T2> extends MyA<»T1«, Super, T2> {}
+ 6 | 
+ 7 | class Super {}
+
 Derivation:
 {
   "Derivation":[
@@ -211,21 +219,40 @@ Derivation:
         "on_":"Both",
         "sub":[
           {
-            "Def":[
-              {
-                "filename":"class_subtyping_covariant.php",
-                "line":7,
-                "char_start":7,
-                "char_end":11
-              },
+            "Instantiate":[
+              [
+                {
+                  "Def":[
+                    {
+                      "filename":"class_subtyping_covariant.php",
+                      "line":7,
+                      "char_start":7,
+                      "char_end":11
+                    },
+                    [
+                      {
+                        "Hint":[
+                          {
+                            "filename":"class_subtyping_covariant.php",
+                            "line":13,
+                            "char_start":36,
+                            "char_end":40
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "T1",
               [
                 {
                   "Hint":[
                     {
                       "filename":"class_subtyping_covariant.php",
-                      "line":13,
-                      "char_start":36,
-                      "char_end":40
+                      "line":5,
+                      "char_start":32,
+                      "char_end":33
                     }
                   ]
                 }
@@ -273,21 +300,40 @@ Reason:
         "Prj_both":{
           "sub_prj":[
             {
-              "Def":[
-                {
-                  "filename":"class_subtyping_covariant.php",
-                  "line":7,
-                  "char_start":7,
-                  "char_end":11
-                },
+              "Instantiate":[
+                [
+                  {
+                    "Def":[
+                      {
+                        "filename":"class_subtyping_covariant.php",
+                        "line":7,
+                        "char_start":7,
+                        "char_end":11
+                      },
+                      [
+                        {
+                          "Hint":[
+                            {
+                              "filename":"class_subtyping_covariant.php",
+                              "line":13,
+                              "char_start":36,
+                              "char_end":40
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                "T1",
                 [
                   {
                     "Hint":[
                       {
                         "filename":"class_subtyping_covariant.php",
-                        "line":13,
-                        "char_start":36,
-                        "char_end":40
+                        "line":5,
+                        "char_start":32,
+                        "char_end":33
                       }
                     ]
                   }

@@ -30,7 +30,7 @@ File "ctor_generic.php", line 20, character 39 - line 20, character 44:
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter `TB` of `TestServiceBase`.
+I checked the subtype constraint in [Main] because it was implied by the other constraints on the hint.
 
 Main
 

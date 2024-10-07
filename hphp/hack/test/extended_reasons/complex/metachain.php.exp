@@ -259,7 +259,7 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
-I checked the subtype constraint in [Upper / Main] because it was implied by the other constraints on the generic parameter `T` of `chain`.
+I checked the subtype constraint in [Upper / Main] because it was implied by the other constraints on the hint.
 
 Upper / Main
 
@@ -489,7 +489,16 @@ File "metachain.php", line 16, character 18 - line 16, character 19:
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
 
-The supertype comes from this generic parameter `T` of `chain`
+The supertype comes from this hint
+
+File "metachain.php", line 27, character 19 - line 27, character 19:
+
+ 26 | <<__NoAutoLikes>>
+ 27 | function chain<T>(»T« $_): ReproGenesisChain<T> {
+ 28 |   return null as nonnull;
+ 29 | }
+
+and flows into this generic parameter `T` of `chain` via the generic `T`
 
 File "metachain.php", line 16, character 12 - line 16, character 16:
 
@@ -508,7 +517,25 @@ Upper / Upper
 
 I started by checking this subtype relationship.
 
-The subtype comes from this generic parameter `T` of `chain`
+The subtype comes from this hint
+
+File "metachain.php", line 34, character 62 - line 34, character 62:
+
+ 33 |   public function thenMPZ(
+ 34 |     classname<ReproIGenesisRunnable with { type TInput super »T«; }> $_,
+ 35 |   ): ReproGenesisChain<mixed> {
+ 36 |     return null as nonnull;
+
+and flows into this hint via the generic `T`
+
+File "metachain.php", line 27, character 44 - line 27, character 44:
+
+ 26 | <<__NoAutoLikes>>
+ 27 | function chain<T>(T $_): ReproGenesisChain<»T«> {
+ 28 |   return null as nonnull;
+ 29 | }
+
+which itself flows into this generic parameter `T` of `chain` via the generic `T`
 
 File "metachain.php", line 16, character 12 - line 16, character 16:
 

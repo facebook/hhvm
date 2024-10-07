@@ -364,7 +364,14 @@ fn param_hint_to_type_info(
 ) -> Result<TypeInfo> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
-        Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
+        Hlike(_)
+        | Hsoft(_)
+        | Hoption(_)
+        | Haccess(_, _)
+        | Hfun(_)
+        | Hdynamic
+        | Hnonnull
+        | Hmixed => false,
         Happly(Id(_, s), hs) => {
             hs.is_empty()
                 && s != "\\HH\\dynamic"
@@ -373,7 +380,19 @@ fn param_hint_to_type_info(
                 && !tparams.contains(&s.as_str())
         }
         Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
-        _ => true,
+        Hprim(_)
+        | Htuple(_)
+        | HclassArgs(_)
+        | Hshape(_)
+        | Hrefinement(_, _)
+        | Hwildcard
+        | HvecOrDict(_, _)
+        | Hthis
+        | Hnothing
+        | Hunion(_)
+        | Hintersection(_)
+        | HfunContext(_)
+        | Hvar(_) => true,
     };
     let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint)?;
     make_type_info(

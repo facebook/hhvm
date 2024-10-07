@@ -2108,7 +2108,9 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
   | Arith_ret_float (_, r, s) ->
     let rec find_last reason =
       match reason with
-      | Arith_ret_float (_, r, _) -> find_last r
+      | Flow { from = r; _ }
+      | Arith_ret_float (_, r, _) ->
+        find_last r
       | r -> r
     in
     let r_last = find_last r in
@@ -2125,7 +2127,9 @@ let rec to_string : type a. string -> a t_ -> (Pos_or_decl.t * string) list =
   | Arith_ret_num (_, r, s) ->
     let rec find_last reason =
       match reason with
-      | Arith_ret_num (_, r, _) -> find_last r
+      | Flow { from = r; _ }
+      | Arith_ret_num (_, r, _) ->
+        find_last r
       | r -> r
     in
     let r_last = find_last r in

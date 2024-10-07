@@ -2,9 +2,6 @@ error: Typing[4110] Invalid return type
 
 File "num.php", line 9, character 10 - line 9, character 15:
 
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
  8 |   $x = 5 + $x;
  9 |   return »5 + $x«;
 10 | }
@@ -16,72 +13,14 @@ File "num.php", line 3, character 23 - line 3, character 28:
  3 | function foo(num $n): »string« {
  4 |   $x = 5 + $n;
  5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 But got `float` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
 
 File "num.php", line 9, character 10 - line 9, character 15:
 
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
  8 |   $x = 5 + $x;
  9 |   return »5 + $x«;
 10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 8, character 8 - line 8, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
- 8 |   $x = »5 + $x«;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 7, character 8 - line 7, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = »5 + $x«;
- 8 |   $x = 5 + $x;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
-
-File "num.php", line 6, character 8 - line 6, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = »$x + 5«;
- 7 |   $x = 5 + $x;
- 8 |   $x = 5 + $x;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 5, character 8 - line 5, character 13:
-
- 3 | function foo(num $n): string {
- 4 |   $x = 5 + $n;
- 5 |   $x = »5 + $x«;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 4, character 8 - line 4, character 13:
-
- 3 | function foo(num $n): string {
- 4 |   $x = »5 + $n«;
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 Here is why I think the argument is a `num`: this is a `num`
 
@@ -90,8 +29,6 @@ File "num.php", line 3, character 14 - line 3, character 16:
  3 | function foo(»num« $n): string {
  4 |   $x = 5 + $n;
  5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 Derivation:
 {
@@ -747,9 +684,6 @@ error: Typing[4110] Invalid return type
 
 File "num.php", line 9, character 10 - line 9, character 15:
 
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
  8 |   $x = 5 + $x;
  9 |   return »5 + $x«;
 10 | }
@@ -761,72 +695,14 @@ File "num.php", line 3, character 23 - line 3, character 28:
  3 | function foo(num $n): »string« {
  4 |   $x = 5 + $n;
  5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 But got `int` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
 
 File "num.php", line 9, character 10 - line 9, character 15:
 
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
  8 |   $x = 5 + $x;
  9 |   return »5 + $x«;
 10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 8, character 8 - line 8, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
- 8 |   $x = »5 + $x«;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 7, character 8 - line 7, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = »5 + $x«;
- 8 |   $x = 5 + $x;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the first argument, and no `float`s.
-
-File "num.php", line 6, character 8 - line 6, character 13:
-
- 5 |   $x = 5 + $x;
- 6 |   $x = »$x + 5«;
- 7 |   $x = 5 + $x;
- 8 |   $x = 5 + $x;
- 9 |   return 5 + $x;
-10 | }
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 5, character 8 - line 5, character 13:
-
- 3 | function foo(num $n): string {
- 4 |   $x = 5 + $n;
- 5 |   $x = »5 + $x«;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
-
-Here is why I think the argument is a `num`: this is a `num` because this is the result of an arithmetic operation with a `num` as the second argument, and no `float`s.
-
-File "num.php", line 4, character 8 - line 4, character 13:
-
- 3 | function foo(num $n): string {
- 4 |   $x = »5 + $n«;
- 5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 Here is why I think the argument is a `num`: this is a `num`
 
@@ -835,8 +711,6 @@ File "num.php", line 3, character 14 - line 3, character 16:
  3 | function foo(»num« $n): string {
  4 |   $x = 5 + $n;
  5 |   $x = 5 + $x;
- 6 |   $x = $x + 5;
- 7 |   $x = 5 + $x;
 
 Derivation:
 {

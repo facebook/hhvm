@@ -45,8 +45,6 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests googletest
     - name: Fetch libsodium
       run: python build/fbcode_builder/getdeps.py fetch --no-tests libsodium
-    - name: Fetch python-six
-      run: python build/fbcode_builder/getdeps.py fetch --no-tests python-six
     - name: Fetch zstd
       run: python build/fbcode_builder/getdeps.py fetch --no-tests zstd
     - name: Fetch double-conversion
@@ -105,8 +103,6 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --no-tests googletest
     - name: Build libsodium
       run: python build/fbcode_builder/getdeps.py build --no-tests libsodium
-    - name: Build python-six
-      run: python build/fbcode_builder/getdeps.py build --no-tests python-six
     - name: Build zstd
       run: python build/fbcode_builder/getdeps.py build --no-tests zstd
     - name: Build double-conversion

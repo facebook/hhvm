@@ -50,9 +50,6 @@ set(FBThrift_cpp2_FOUND True)
 # the output from the thrift compiler's "py" generator.
 # (Note that this generator is deprecated in favor of the "py3" generator,)
 set(FBThrift_py_FOUND @thriftpy@)
-if(FBThrift_py_FOUND)
-  find_dependency(python-six)
-endif()
 
 set(FBThrift_FOUND True)
 check_required_components(FBThrift)

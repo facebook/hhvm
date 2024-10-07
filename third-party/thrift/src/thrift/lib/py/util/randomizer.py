@@ -22,12 +22,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import collections
 import random
+
+import struct
 import sys
 
-import six
-
-# pyre-fixme[21]: Could not find module `six.moves`.
-import six.moves as sm
 from thrift import Thrift
 from thrift.util.type_inspect import get_spec, ThriftPyTypeSpec
 
@@ -37,6 +35,21 @@ INFINITY = float("inf")
 if sys.version_info[0] >= 3:
     unicode = None
 
+_int2byte = struct.Struct(">B").pack
+
+
+def _ensure_binary(s, encoding="utf-8", errors="strict"):
+    """Coerce **s** to binary_type.
+    For Python 3:
+    - `str` -> encoded to `bytes`
+    - `bytes` -> `bytes`
+    """
+    if isinstance(s, bytes):
+        return s
+    if isinstance(s, str):
+        return s.encode(encoding, errors)
+    raise TypeError("not expecting type '%s'" % type(s))
+
 
 def deep_dict_update(base, update) -> None:
     """Similar to dict.update(base, update), but if any values in base are
@@ -44,7 +57,7 @@ def deep_dict_update(base, update) -> None:
 
     Destructive on base, but non-destructive on base's values.
     """
-    for key, val in six.iteritems(update):
+    for key, val in update.items():
         if key in base and isinstance(base[key], dict) and isinstance(val, dict):
             # Copy base[key] (non-destructive on base's values)
             updated = dict(base[key])
@@ -257,7 +270,7 @@ class BoolRandomizer(BaseRandomizer):
     def eval_seed(self, seed):
         if isinstance(seed, bool):
             return seed
-        elif isinstance(seed, six.integer_types):
+        elif isinstance(seed, int):
             return bool(seed)
         elif seed == "true":
             return True
@@ -293,7 +306,7 @@ class EnumRandomizer(ScalarTypeRandomizer):
 
     def _preprocess_constraints(self):
         self._whiteset = set()
-        for val in six.itervalues(self.type_spec.names_to_values()):
+        for val in self.type_spec.names_to_values().values():
             self._whiteset.add(val)
 
         self._whitelist = list(self._whiteset)
@@ -303,7 +316,7 @@ class EnumRandomizer(ScalarTypeRandomizer):
 
         val = super(EnumRandomizer, self)._randomize()
         if val is not None:
-            if isinstance(val, six.string_types):
+            if isinstance(val, str):
                 return self.type_spec.names_to_values()[val]
             else:
                 return self.type_spec.construct_instance(val)
@@ -318,7 +331,7 @@ class EnumRandomizer(ScalarTypeRandomizer):
             return self.type_spec.construct_instance(random.choice(self._whitelist))
 
     def eval_seed(self, seed):
-        if isinstance(seed, six.string_types):
+        if isinstance(seed, str):
             seed = self.type_spec.names_to_values()[seed]
         elif not isinstance(seed, int):
             # Assume the seed is given in its native type
@@ -383,9 +396,9 @@ def _integer_randomizer_factory(name, ttype, n_bits):
             return _universe_size
 
         def eval_seed(self, seed):
-            if isinstance(seed, six.string_types):
+            if isinstance(seed, str):
                 return int(seed)
-            elif isinstance(seed, six.integer_types):
+            elif isinstance(seed, int):
                 return seed
             else:
                 raise TypeError("Invalid %s seed: %s" % (_name, seed))
@@ -443,9 +456,9 @@ class FloatingPointRandomizer(ScalarTypeRandomizer):
         )
 
     def eval_seed(self, seed):
-        if isinstance(seed, six.string_types):
+        if isinstance(seed, str):
             return float(seed)
-        elif isinstance(seed, (float,) + six.integer_types):
+        elif isinstance(seed, (float, int)):
             return seed
         else:
             raise TypeError("Invalid %s seed: %s" % (self.__class__.name, seed))
@@ -503,15 +516,15 @@ class StringRandomizer(CollectionTypeRandomizer, ScalarTypeRandomizer):
         length = self._get_length()
         chars = []
 
-        for _ in sm.xrange(length):
+        for _ in range(length):
             chars.append(chr(random.randint(*cls.ascii_range)))
 
         return "".join(chars)
 
     def eval_seed(self, seed):
-        if isinstance(seed, six.string_types):
+        if isinstance(seed, str):
             return seed
-        elif isinstance(seed, six.binary_type):
+        elif isinstance(seed, bytes):
             return seed
         else:
             raise TypeError("Invalid string seed: %s" % seed)
@@ -533,15 +546,15 @@ class BinaryRandomizer(CollectionTypeRandomizer, ScalarTypeRandomizer):
         length = self._get_length()
         bs = []
 
-        for _ in sm.xrange(length):
-            bs.append(six.int2byte(random.randint(*self.byte_range)))
+        for _ in range(length):
+            bs.append(_int2byte(random.randint(*self.byte_range)))
 
-        return self.type_spec.construct_instance(six.ensure_binary("").join(bs))
+        return self.type_spec.construct_instance(_ensure_binary("").join(bs))
 
     def eval_seed(self, seed):
-        if isinstance(seed, six.string_types):
-            return self.type_spec.construct_instance(six.ensure_binary(seed))
-        elif isinstance(seed, six.binary_type):
+        if isinstance(seed, str):
+            return self.type_spec.construct_instance(_ensure_binary(seed))
+        elif isinstance(seed, bytes):
             return self.type_spec.construct_instance(seed)
         else:
             raise TypeError("Invalid binary seed: %s" % seed)
@@ -568,7 +581,7 @@ class ListRandomizer(NonAssociativeContainerRandomizer):
         length = self._get_length()
         elements = []
 
-        for _ in sm.xrange(length):
+        for _ in range(length):
             element = self._element_randomizer.generate()
             if element is not None:
                 elements.append(element)
@@ -708,7 +721,7 @@ class MapRandomizer(CollectionTypeRandomizer):
 
     def eval_seed(self, seed):
         res = {}
-        for key, val in six.iteritems(seed):
+        for key, val in seed.items():
             key = self._key_randomizer.eval_seed(key)
             val = self._val_randomizer.eval_seed(val)
             res[key] = val
@@ -732,7 +745,7 @@ class StructRandomizer(BaseRandomizer):
         requiredness = self.type_spec.get_subtype_requiredness()
 
         field_rules = {}
-        for name, field_spec in six.iteritems(subtypes):
+        for name, field_spec in subtypes.items():
             field_required = requiredness[name]
             field_constraints = self.constraints.get(name, {})
 
@@ -868,7 +881,7 @@ class StructRandomizer(BaseRandomizer):
                 # If that's the case just return none
                 return None
             # The seed should be a single key/value pair
-            field_name, seed_val = six.next(six.iteritems(seed))
+            field_name, seed_val = next(iter(seed.items()))
             field_randomizer = field_rules[field_name]["randomizer"]
             fuzzed_val = field_randomizer.generate(seed=seed_val)
             fields[field_name] = fuzzed_val
@@ -889,7 +902,7 @@ class StructRandomizer(BaseRandomizer):
             else:
                 fields[fuzz_field_name] = fuzzed_value
 
-            for field_name, seed_val in six.iteritems(seed):
+            for field_name, seed_val in seed.items():
                 if field_name == fuzz_field_name or field_name not in field_rules:
                     continue
                 field_randomizer = field_rules[field_name]["randomizer"]
@@ -900,7 +913,7 @@ class StructRandomizer(BaseRandomizer):
     def eval_seed(self, seed):
         fields = {}
         seed = self.type_spec.value_to_dict(seed)
-        for key, val in six.iteritems(seed):
+        for key, val in seed.items():
             if key not in self._field_rules:
                 continue
             field_randomizer = self._field_rules[key]["randomizer"]
@@ -1023,7 +1036,7 @@ class RandomizerState(object):
         """
 
         pushed = []
-        for key, val in six.iteritems(constraints):
+        for key, val in constraints.items():
             if key.startswith("|"):
                 # This is a type constraint
                 type_name = key[1:]

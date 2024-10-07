@@ -30,13 +30,7 @@ import pprint
 import sys
 import time
 
-import six
-
-# pyre-fixme[21]: Could not find module `six.moves`.
-import six.moves as sm
-
-# pyre-fixme[21]: Could not find module `six.moves.urllib.parse`.
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 try:
     # pyre-fixme[21]: Could not find module `ServiceRouter`.
@@ -46,22 +40,16 @@ try:
 except ImportError:
     SR_AVAILABLE = False
 
+from importlib.machinery import SourceFileLoader
+
 from thrift import Thrift
 from thrift.protocol import TBinaryProtocol, TCompactProtocol, THeaderProtocol
 from thrift.transport import THttpClient, TSocket, TSSLSocket, TTransport
 from thrift.util import randomizer
 
-if six.PY3:
-    from importlib.machinery import SourceFileLoader
 
-    def load_source(name, pathname):
-        return SourceFileLoader(name, pathname).load_module()
-
-else:
-    import imp
-
-    def load_source(name, pathname):
-        return imp.load_source(name, pathname)
+def load_source(name, pathname):
+    return SourceFileLoader(name, pathname).load_module()
 
 
 def positive_int(s) -> int:
@@ -229,7 +217,7 @@ class FuzzerConfiguration(object):
             "-?", "--help", action="help", help="Show this help message and exit."
         )
 
-        for name, arg in six.iteritems(cls.argspec):
+        for name, arg in cls.argspec.items():
             kwargs = arg.get("argparse_kwargs", {})
 
             if kwargs.get("action", None) != "store_const":
@@ -324,7 +312,7 @@ class FuzzerConfiguration(object):
         renamed_settings = {}
         if not isinstance(settings, dict):
             raise TypeError("Invalid config file. Top-level must be Object.")
-        for name, val in six.iteritems(settings):
+        for name, val in settings.items():
             if name not in cls.argspec:
                 raise ValueError(("Unrecognized configuration " "option: %s") % name)
             arg = cls.argspec[name]
@@ -337,7 +325,7 @@ class FuzzerConfiguration(object):
     def _args_settings(cls, args):
         """Read settings from the args namespace returned by argparse"""
         settings = {}
-        for name, arg in six.iteritems(cls.argspec):
+        for name, arg in cls.argspec.items():
             attr_name = arg.get("attr_name", name)
             if not hasattr(args, attr_name):
                 continue
@@ -460,7 +448,7 @@ class Service(object):
 
         exclude_ifaces = exclude_ifaces or []
 
-        pred = inspect.isfunction if six.PY3 else inspect.ismethod
+        pred = inspect.isfunction
 
         methods = {}
         exclude_methods = []
@@ -590,20 +578,20 @@ class FuzzerClient(object):
         serviceRouter = ServiceRouter()
 
         overrides = ConnConfigs()
-        for key, val in six.iteritems(config.conn_configs):
-            key = six.binary_type(key)
-            val = six.binary_type(val)
+        for key, val in config.conn_configs.items():
+            key = bytes(key)
+            val = bytes(val)
             overrides[key] = val
 
         sr_options = ServiceOptions()
-        for key, val in six.iteritems(config.service_options):
-            key = six.binary_type(key)
+        for key, val in config.service_options.items():
+            key = bytes(key)
             if not isinstance(val, list):
                 raise TypeError(
                     "Service option %s expected list; got %s (%s)"
                     % (key, val, type(val))
                 )
-            val = [six.binary_type(elem) for elem in val]
+            val = [bytes(elem) for elem in val]
             sr_options[key] = val
 
         service_name = config.tier
@@ -748,7 +736,7 @@ class FuzzTester(object):
         self.next_summary_time = time.time() + self.__class__.summary_interval
 
     def _call_string(self, method_name, kwargs):
-        kwarg_str = ", ".join("%s=%s" % (k, v) for k, v in six.iteritems(kwargs))
+        kwarg_str = ", ".join("%s=%s" % (k, v) for k, v in kwargs.items())
         return "%s(%s)" % (method_name, kwarg_str)
 
     def run_test(
@@ -839,7 +827,7 @@ class FuzzTester(object):
         # For now, just yield n random sets of args
         # In future versions, fuzz fields more methodically based
         # on feedback and seeds
-        for _ in sm.xrange(n_iterations):
+        for _ in range(n_iterations):
             with self.timer.time(method_name, "Randomizing"):
                 method_randomizer = self.method_randomizers[method_name]
                 args_struct = method_randomizer.generate()
@@ -935,7 +923,7 @@ class FuzzTester(object):
             walk_scope[scope_path[-1]] = rule
 
         def add_constraints_from_dict(d):
-            for key, rule in six.iteritems(d):
+            for key, rule in d.items():
                 key_components = self._split_key(key)
                 scope_path.extend(key_components)
                 if isinstance(rule, dict):
@@ -959,7 +947,7 @@ class FuzzTester(object):
     def log_result_summary(self, method_name):
         if time.time() >= self.next_summary_time:
             results = []
-            for name, val in six.iteritems(vars(FuzzTester.Result)):
+            for name, val in vars(FuzzTester.Result).items():
                 if name.startswith("_"):
                     continue
                 count = self.result_counters[method_name][val]
@@ -999,7 +987,7 @@ class FuzzTester(object):
         logging.info("Fuzzing methods: %s" % methods.keys())
 
         with FuzzerClient(self.config, client_class) as self.client:
-            for method_name, spec in six.iteritems(methods):
+            for method_name, spec in methods.items():
                 result_spec = spec.get("result_spec", None)
                 thrift_exceptions = spec["thrift_exceptions"]
                 is_oneway = result_spec is None

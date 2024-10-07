@@ -13,9 +13,6 @@ on:
 permissions:
   contents: read  #  to fetch code (actions/checkout)
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-22.04

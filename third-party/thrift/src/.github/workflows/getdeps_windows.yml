@@ -55,8 +55,6 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests lz4
     - name: Fetch snappy
       run: python build/fbcode_builder/getdeps.py fetch --no-tests snappy
-    - name: Fetch python-six
-      run: python build/fbcode_builder/getdeps.py fetch --no-tests python-six
     - name: Fetch perl
       run: python build/fbcode_builder/getdeps.py fetch --no-tests perl
     - name: Fetch openssl
@@ -103,8 +101,6 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests lz4
     - name: Build snappy
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests snappy
-    - name: Build python-six
-      run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests python-six
     - name: Build perl
       run: python build/fbcode_builder/getdeps.py build --free-up-disk --no-tests perl
     - name: Build openssl

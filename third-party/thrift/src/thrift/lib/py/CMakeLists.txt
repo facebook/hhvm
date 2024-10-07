@@ -44,14 +44,13 @@ set(
   "util/randomizer.py"
   "util/remote.py"
 )
-# thrift_py has external dependencies on the "six" and "future" python
-# packages.  It will use the "snappy" and "zstd" compression packages if they
+# thrift_py has external dependencies on "future" python
+# package.  It will use the "snappy" and "zstd" compression packages if they
 # are available, but does not require them.
 add_fb_python_library(
   thrift_py
   SOURCES ${THRIFT_PY_SRCS}
   NAMESPACE "thrift"
-  DEPENDS python-six::python-six
 )
 install_fb_python_library(
   thrift_py

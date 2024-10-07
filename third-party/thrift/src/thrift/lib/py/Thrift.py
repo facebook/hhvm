@@ -20,7 +20,6 @@ import logging
 import sys
 import threading
 
-import six
 
 UEXW_MAX_LENGTH = 1024
 
@@ -147,8 +146,7 @@ class TProcessor:
 
     def readMessageBegin(self, iprot):
         name, _, seqid = iprot.readMessageBegin()
-        if six.PY3:
-            name = name.decode("utf8")
+        name = name.decode("utf8")
         return name, seqid
 
     def skipMessageStruct(self, iprot):

@@ -32,7 +32,6 @@ import warnings
 from collections import defaultdict
 from io import BytesIO
 
-import six
 import thrift
 from thrift.protocol.THeaderProtocol import THeaderProtocolFactory
 from thrift.server.TServer import TConnectionContext
@@ -55,15 +54,6 @@ _default_thpfactory = THeaderProtocolFactory(client_types=THEADER_CLIENT_TYPES)
 THeaderProtocol = _default_thpfactory.getProtocol
 
 logger = logging.getLogger(__name__)
-
-
-if six.PY2:
-
-    class PermissionError(IOError):
-        pass
-
-    class ResourceWarning(RuntimeWarning):
-        pass
 
 
 class TReadOnlyBuffer(TTransportBase):

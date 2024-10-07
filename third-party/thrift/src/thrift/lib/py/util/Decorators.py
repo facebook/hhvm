@@ -22,8 +22,6 @@ import os
 from concurrent.futures import Future
 from functools import partial
 
-import six
-
 try:
     import resource
 except ImportError:

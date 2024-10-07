@@ -1,0 +1,36 @@
+--- control
+
++++ test
+
+@@ -20,20 +20,20 @@
+
+       7 | }
+ 
+ error: Typing[4110] Invalid argument to an inout parameter [1]
+--> Expected (int, int) [1]
+--> But got vec<int> [2]
++-> Expected (int, int) because the type of this inout parameter is implicitly a like-type [2]
++-> But got vec<int> [3]
+ 
+ hphp/hack/test/extended_reasons/bad_inout_lvalue9.php:6:11
+-    1 | <?hh
+-    2 | 
+-[2] 3 | function f(inout varray<int> $a): void {}
+-    4 | 
+-    5 | function test(int $x, int $y): void {
+-[1] 6 |   f(inout tuple($x, $y));
+-    7 | }
++      1 | <?hh
++      2 | 
++[2,3] 3 | function f(inout varray<int> $a): void {}
++      4 | 
++      5 | function test(int $x, int $y): void {
++[1]   6 |   f(inout tuple($x, $y));
++      7 | }
+ 
+ error: Typing[4110] Invalid argument to an inout parameter [1]
+--> Expected (int, int) [1]
++-> Expected (int, int) because the type of this inout parameter is implicitly a like-type [2]
+ -> But got dynamic because the type of this inout parameter is implicitly a like-type [2]
+ 
+ hphp/hack/test/extended_reasons/bad_inout_lvalue9.php:6:11

@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 passed to takes() must be an instance of int, null given in %s/test/slow/like_types/like_nullable.php on line 9

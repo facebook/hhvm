@@ -2073,7 +2073,6 @@ let rec to_string_help :
     to_string_help prefix solutions r
   | From_witness_locl witness -> [witness_locl_to_string prefix witness]
   | From_witness_decl witness -> [witness_decl_to_string prefix witness]
-  | Lower_bound { bound = r; _ }
   | Axiom { next = r; _ }
   | Def (_, r)
   | Prj_one { part = r; _ } ->
@@ -2093,7 +2092,33 @@ let rec to_string_help :
     | _ -> to_string_help prefix solutions into)
   | Solved { solution; of_; in_ = r } ->
     let solutions = Tvid.Map.add of_ solution solutions in
+
     to_string_help prefix solutions r
+  | Lower_bound
+      {
+        bound = r;
+        of_ = Prj_both { prj = Prj_symm_ctor (_, class_name, _, Dir Contra); _ };
+      } ->
+    to_string_help prefix solutions r
+    @ [
+        ( p,
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " only allows supertypes (it is contravariant)" );
+      ]
+  | Lower_bound
+      {
+        bound = r;
+        of_ = Prj_both { prj = Prj_symm_ctor (_, class_name, _, Inv _); _ };
+      } ->
+    to_string_help prefix solutions r
+    @ [
+        ( p,
+          "This type argument to "
+          ^ (strip_ns class_name |> Markdown_lite.md_codify)
+          ^ " must match exactly (it is invariant)" );
+      ]
+  | Lower_bound { bound = r; _ } -> to_string_help prefix solutions r
   | Prj_both
       {
         sub_prj = r_orig;

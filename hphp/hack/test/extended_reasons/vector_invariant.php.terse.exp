@@ -24,6 +24,15 @@ File "vector_invariant.php", line 4, character 22 - line 4, character 24:
  5 |   $y = $x;
  6 |   $z = $y;
 
+This type argument to `Vector` must match exactly (it is invariant)
+
+File "vector_invariant.php", line 4, character 22 - line 4, character 24:
+
+ 3 | function foo(): Vector<int> {
+ 4 |   $x =  Vector { 1 , »'2'« };
+ 5 |   $y = $x;
+ 6 |   $z = $y;
+
 Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter `T` of `HH\Vector`.

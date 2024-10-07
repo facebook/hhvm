@@ -20,6 +20,15 @@ from libcpp.memory cimport unique_ptr
 
 from thrift.python.protocol cimport Protocol
 
+# gcc's `serializeintrin.h` header defines a macro named `_serialize`, which
+# clobbers the `_serialize` method on IOBufs.  This should be fixed in more
+# recent versions, but add this to avoid compile errors on older ones
+# (see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100438).
+cdef extern from *:
+    """
+    #undef _serialize
+    """
+
 cdef extern from "<thrift/lib/cpp/protocol/TType.h>" namespace "::apache::thrift::protocol":
     cdef enum cTType "::apache::thrift::protocol::TType":
         pass

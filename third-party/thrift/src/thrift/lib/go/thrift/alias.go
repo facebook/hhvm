@@ -52,7 +52,7 @@ type IRequest = types.IRequest
 
 type IResponse = types.IResponse
 
-type ProtocolID = types.ProtocolID
+type FormatID = types.ProtocolID
 
 type Format = types.Format
 
@@ -75,12 +75,12 @@ var CALL types.MessageType = types.CALL
 var EXCEPTION types.MessageType = types.EXCEPTION
 var ONEWAY types.MessageType = types.ONEWAY
 
-var ProtocolIDBinary types.ProtocolID = types.ProtocolIDBinary
-var ProtocolIDCompact types.ProtocolID = types.ProtocolIDCompact
-var ProtocolIDJSON types.ProtocolID = types.ProtocolIDJSON
-var ProtocolIDDebug types.ProtocolID = types.ProtocolIDDebug
-var ProtocolIDVirtual types.ProtocolID = types.ProtocolIDVirtual
-var ProtocolIDSimpleJSON types.ProtocolID = types.ProtocolIDSimpleJSON
+var FormatIDBinary types.ProtocolID = types.ProtocolIDBinary
+var FormatIDCompact types.ProtocolID = types.ProtocolIDCompact
+var FormatIDJSON types.ProtocolID = types.ProtocolIDJSON
+var FormatIDDebug types.ProtocolID = types.ProtocolIDDebug
+var FormatIDVirtual types.ProtocolID = types.ProtocolIDVirtual
+var FormatIDSimpleJSON types.ProtocolID = types.ProtocolIDSimpleJSON
 
 var NewApplicationExceptionCause = types.NewApplicationExceptionCause
 var NewApplicationException = types.NewApplicationException

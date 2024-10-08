@@ -35,8 +35,11 @@ class SerializedCompressedRequest {
  public:
   explicit SerializedCompressedRequest(
       std::unique_ptr<folly::IOBuf> buffer,
-      CompressionAlgorithm compression = CompressionAlgorithm::NONE)
-      : buffer_(std::move(buffer)), compression_(compression) {}
+      CompressionAlgorithm compression = CompressionAlgorithm::NONE,
+      ChecksumAlgorithm checksum = ChecksumAlgorithm::NONE)
+      : buffer_(std::move(buffer)),
+        compression_(compression),
+        checksum_(checksum) {}
 
   explicit SerializedCompressedRequest(SerializedRequest&& request)
       : buffer_(std::move(request.buffer)),
@@ -48,11 +51,14 @@ class SerializedCompressedRequest {
 
   CompressionAlgorithm getCompressionAlgorithm() const { return compression_; }
 
+  ChecksumAlgorithm getChecksumAlgorithm() const { return checksum_; }
+
   const folly::IOBuf* compressedBuffer() const { return buffer_.get(); }
 
  private:
   std::unique_ptr<folly::IOBuf> buffer_;
   CompressionAlgorithm compression_;
+  ChecksumAlgorithm checksum_;
 };
 
 struct LegacySerializedRequest {

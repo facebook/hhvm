@@ -294,7 +294,8 @@ void ThriftRequestCore::sendReply(
     if (!isOneway()) {
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
       if (crc32c) {
         metadata.crc32c_ref() = *crc32c;
       }
@@ -328,7 +329,8 @@ void ThriftRequestCore::sendException(
     if (!isOneway()) {
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          std::nullopt);
       if (checkResponseSize(*response.buffer())) {
         sendThriftException(
             std::move(metadata),
@@ -349,7 +351,8 @@ void ThriftRequestCore::sendException(
 
 ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
     transport::THeader::StringToStringMap&& writeHeaders,
-    std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata) {
+    std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata,
+    std::optional<Checksum> checksum) {
   ResponseRpcMetadata metadata;
 
   if (auto tfmr = detail::makeThriftFrameworkMetadataOnResponse(writeHeaders)) {
@@ -375,6 +378,10 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
   }
 
   queueMetadata.queueTimeoutMs_ref() = queueTimeout_.value.count();
+
+  if (checksum) {
+    metadata.checksum() = *checksum;
+  }
 
   return metadata;
 }

@@ -396,7 +396,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
   ResponseRpcMetadata makeResponseRpcMetadata(
       transport::THeader::StringToStringMap&& writeHeaders,
-      std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata);
+      std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata,
+      std::optional<Checksum> checksum = std::nullopt);
 
   MessageChannel::SendCallbackPtr createRequestLoggingCallback(
       MessageChannel::SendCallbackPtr&& sendCallback,

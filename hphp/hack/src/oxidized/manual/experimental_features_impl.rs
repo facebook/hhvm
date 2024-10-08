@@ -45,6 +45,7 @@ impl FeatureName {
             AwaitInSplice => OngoingRelease,
             OpenTuples => Preview,
             TypeSplat => Preview,
+            ExpressionTreeNestedBindings => Unstable,
         }
     }
 

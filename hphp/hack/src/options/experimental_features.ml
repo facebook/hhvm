@@ -60,6 +60,7 @@ type feature_name =
   | AwaitInSplice
   | OpenTuples
   | TypeSplat
+  | ExpressionTreeNestedBindings
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -96,6 +97,7 @@ let feature_name_map =
       ("await_in_splice", AwaitInSplice);
       ("open_tuples", OpenTuples);
       ("type_splat", TypeSplat);
+      ("expression_tree_nested_bindings", ExpressionTreeNestedBindings);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

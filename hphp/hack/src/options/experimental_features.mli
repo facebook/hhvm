@@ -54,6 +54,7 @@ type feature_name =
   | AwaitInSplice
   | OpenTuples
   | TypeSplat
+  | ExpressionTreeNestedBindings
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

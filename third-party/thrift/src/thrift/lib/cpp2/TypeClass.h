@@ -16,8 +16,7 @@
 
 #pragma once
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * The type class of a type as declared in a .thrift file.
@@ -101,5 +100,4 @@ namespace detail {
 template <typename TypeClass, typename Indirection>
 struct indirection_tag;
 } // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

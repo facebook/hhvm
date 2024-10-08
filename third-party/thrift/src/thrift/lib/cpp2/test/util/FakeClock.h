@@ -18,8 +18,7 @@
 
 #include <chrono>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class FakeClock {
  public:
@@ -42,5 +41,4 @@ class FakeClock {
   static time_point now_us_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

@@ -16,13 +16,9 @@
 
 #pragma once
 
-namespace facebook {
-namespace thrift {
-namespace detail {
+namespace facebook::thrift::detail {
 
 template <typename>
 struct pretty_print_impl;
 
-} // namespace detail
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::detail

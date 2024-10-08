@@ -18,9 +18,7 @@
 
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
-namespace rocket {
+namespace apache::thrift::rocket {
 
 // Commented-out values are not currently used/needed in Thrift, but may be
 // in the future.
@@ -51,6 +49,4 @@ enum class ExtFrameType : uint32_t {
   // CUSTOM_ALLOC = 0xFB3,
 };
 
-} // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::rocket

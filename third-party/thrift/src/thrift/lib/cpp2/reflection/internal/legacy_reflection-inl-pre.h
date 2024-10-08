@@ -15,11 +15,3 @@
  */
 
 #pragma once
-
-namespace apache {
-namespace thrift {
-
-namespace legacy_reflection_detail {}
-
-} // namespace thrift
-} // namespace apache

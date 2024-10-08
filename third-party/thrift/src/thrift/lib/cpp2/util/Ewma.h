@@ -19,8 +19,7 @@
 #include <chrono>
 #include <cmath>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Compute the EWMA (Exponential Weighted Moving Average) of a
@@ -77,5 +76,4 @@ class Ewma {
   std::chrono::time_point<Clock> timestamp_;
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

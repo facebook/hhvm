@@ -23,8 +23,7 @@
 #include <utility>
 #include <vector>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 /**
  * Wraps a stream and provides facilities for automatically indenting output.
@@ -154,7 +153,6 @@ indenter<std::remove_reference_t<OutputStream>> make_indenter(
   return {out, std::forward<Indentation>(indentation), std::move(margin)};
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // THRIFT_FATAL_INDENTER_H_

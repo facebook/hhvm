@@ -16,13 +16,9 @@
 
 #pragma once
 
-namespace facebook {
-namespace thrift {
-namespace detail {
+namespace facebook::thrift::detail {
 
 template <typename, typename = void>
 struct dynamic_converter_impl;
 
-} // namespace detail
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::detail

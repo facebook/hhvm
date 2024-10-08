@@ -27,9 +27,7 @@
 
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 
 enum class FieldId : ::std::int16_t;
 
@@ -111,6 +109,4 @@ struct fields;
 template <typename Tag, typename Context>
 struct field : Tag {};
 
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

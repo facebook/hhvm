@@ -18,15 +18,11 @@
 
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
-namespace type {
+namespace apache::thrift::type {
 enum class UniversalHashAlgorithm {
   Sha2_256 = 2,
 };
 
 constexpr const int8_t kMinHashBytes = 8;
 constexpr const int8_t kDefaultHashBytes = 16;
-} // namespace type
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::type

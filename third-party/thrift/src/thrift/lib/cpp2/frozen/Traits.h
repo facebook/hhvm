@@ -17,8 +17,7 @@
 #pragma once
 #include <type_traits>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <class>
 struct IsString : std::false_type {};
@@ -40,8 +39,7 @@ template <class>
 struct IsExcluded : std::false_type {};
 } // namespace frozen
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #define THRIFT_DECLARE_TRAIT(Trait, ...)         \
   namespace apache {                             \

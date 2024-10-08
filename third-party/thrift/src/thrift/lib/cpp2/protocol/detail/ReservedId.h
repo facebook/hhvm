@@ -18,9 +18,7 @@
 
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
-namespace detail {
+namespace apache::thrift::detail {
 enum class ReservedId : int16_t {
   kOffset = -32768, // Lazy deserialization
   kIndex = -32767, // Lazy deserialization
@@ -30,6 +28,4 @@ enum class ReservedId : int16_t {
   kInjectMetadataFieldsLastId = -2000, // @internal.InjectMetadataFields
   kInjectMetadataFieldsStartId = -1000, // @internal.InjectMetadataFields
 };
-} // namespace detail
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::detail

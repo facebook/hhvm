@@ -17,8 +17,7 @@
 #pragma once
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 class Cpp2ConnContext;
 
@@ -72,5 +71,4 @@ class RocketServerHandler {
 };
 
 } // namespace rocket
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

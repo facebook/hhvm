@@ -18,13 +18,9 @@
 
 #include <string>
 
-namespace facebook {
-namespace thrift {
-namespace detail {
+namespace facebook::thrift::detail {
 
 template <typename Tag, typename T, typename Callback>
 bool debug_thrift_data_difference(std::string&, T const&, T const&, Callback&&);
 
-} // namespace detail
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::detail

@@ -18,8 +18,7 @@
 
 #include <stdexcept>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 // Base exception type for field access errors
 class bad_field_access : public std::runtime_error {
@@ -43,5 +42,4 @@ class bad_union_field_access : public bad_field_access {
       : bad_field_access("accessing unset or mismatched type union value") {}
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

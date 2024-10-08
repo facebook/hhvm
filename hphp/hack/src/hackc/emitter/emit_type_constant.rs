@@ -465,11 +465,10 @@ pub(crate) fn typedef_to_type_structure(
     tparams: &[&str],
     typedef: &ast::Typedef,
 ) -> Result<TypedValue> {
-    let is_case_type = typedef.vis.is_case_type();
-
+    let is_case_type = matches!(typedef.assignment, ast::TypedefAssignment::CaseType(_, _));
     // For a case type we always want to ensure that it's wrapped in a Hunion.
     let tmp;
-    let kind = match (is_case_type, &typedef.kind) {
+    let kind = match (is_case_type, &typedef.runtime_type) {
         (false, kind) => kind,
         (true, kind @ Hint(_, box Hint_::Hunion(_))) => kind,
         (true, hint @ Hint(pos, _)) => {
@@ -477,7 +476,6 @@ pub(crate) fn typedef_to_type_structure(
             &tmp
         }
     };
-
     let mut tconsts = hint_to_type_constant_list(
         opts,
         tparams,
@@ -486,8 +484,10 @@ pub(crate) fn typedef_to_type_structure(
         kind,
     )?;
     tconsts.append(&mut get_typevars(tparams));
-    if typedef.vis.is_opaque() || typedef.vis.is_opaque_module() {
-        tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
+    if let aast::TypedefAssignment::SimpleTypeDef(vis_hint) = &typedef.assignment {
+        if vis_hint.vis.is_opaque() || vis_hint.vis.is_opaque_module() {
+            tconsts.push(encode_entry("opaque", TypedValue::Bool(true)));
+        }
     };
     let mangled_name = hhbc_string_utils::mangle(typedef.name.1.clone());
     let name = hhbc_string_utils::strip_global_ns(&mangled_name);

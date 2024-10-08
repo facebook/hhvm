@@ -218,14 +218,21 @@ type enum_type = {
 }
 [@@deriving eq, show]
 
+type typedef_case_type_variant = decl_ty * decl_where_constraint list
+[@@deriving eq, show]
+
+type typedef_type_assignment =
+  | SimpleTypeDef of Ast_defs.typedef_visibility * decl_ty
+  | CaseType of typedef_case_type_variant * typedef_case_type_variant list
+[@@deriving eq, show]
+
 type typedef_type = {
   td_module: Ast_defs.id option;
   td_pos: Pos_or_decl.t;
-  td_vis: Ast_defs.typedef_visibility;
   td_tparams: decl_tparam list;
   td_as_constraint: decl_ty option;
   td_super_constraint: decl_ty option;
-  td_type: decl_ty;
+  td_type_assignment: typedef_type_assignment;
   td_is_ctx: bool;
   td_attributes: user_attribute list;
   td_internal: bool;

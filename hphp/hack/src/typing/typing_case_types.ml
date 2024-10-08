@@ -680,7 +680,8 @@ module DataType = struct
        * we expand. *)
       match Env.get_typedef env name with
       | Decl_entry.Found
-          { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+          { td_type_assignment = CaseType (variant, variants); td_tparams; _ }
+        ->
         (* Here we should expand the case type instead of looking at the upper bound.
          * If we do not expand, then we will over approximate the datatype.
          * Consider:
@@ -704,11 +705,8 @@ module DataType = struct
             env
             ty
         in
-        let tyl =
-          match get_node variants with
-          | Tunion tyl -> tyl
-          | _ -> [variants]
-        in
+        (* TODO T201569125 - do I need to do something with the where constraints here? *)
+        let tyl = List.map (variant :: variants) ~f:fst in
         List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) variant ->
             let ((env, _ty_err_opt), variant) = localize env variant in
             let trail =
@@ -841,7 +839,15 @@ let get_variant_tys env name ty_args :
     Typing_env_types.env * locl_ty list option =
   match Env.get_typedef env name with
   | Decl_entry.Found
-      { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+      { td_type_assignment = CaseType (variant, variants); td_tparams; _ } ->
+    (* TODO T201569125 - do I need to do something with the where constraints here? *)
+    let single_or_union =
+      match (variant, variants) with
+      | ((hint, _where_constraints), []) -> hint
+      (* we're just going to take this union apart so the reason is irrelevant here *)
+      | ((hint, _where_constraints), rest) ->
+        Typing_make_type.union Reason.none @@ (hint :: List.map rest ~f:fst)
+    in
     let ((env, _ty_err_opt), variants) =
       Typing_utils.localize_disjoint_union
         ~ety_env:
@@ -854,7 +860,7 @@ let get_variant_tys env name ty_args :
                 Decl_subst.make_locl td_tparams ty_args);
           }
         env
-        variants
+        single_or_union
     in
     let tyl =
       match get_node variants with

@@ -81,7 +81,9 @@ use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
 use oxidized_by_ref::typing_defs::TypeOrigin;
 use oxidized_by_ref::typing_defs::Typeconst;
+use oxidized_by_ref::typing_defs::TypedefCaseTypeVariant;
 use oxidized_by_ref::typing_defs::TypedefType;
+use oxidized_by_ref::typing_defs::TypedefTypeAssignment;
 use oxidized_by_ref::typing_defs::WhereConstraint;
 use oxidized_by_ref::typing_defs_flags::FunParamFlags;
 use oxidized_by_ref::typing_defs_flags::FunTypeFlags;
@@ -1024,6 +1026,7 @@ pub enum Node<'a> {
     RefinedConst(&'a (&'a str, RefinedConst<'a>)),
     EnumClassLabel(&'a str),
     TupleComponent(&'a TupleComponentNode<'a>),
+    CaseTypeVariantWithWhereClause(&'a (&'a Node<'a>, &'a [&'a WhereConstraint<'a>])),
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
@@ -3681,21 +3684,19 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .iter()
             .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
         let is_module_newtype = module_kw_opt.is_ignored_token_with_kind(TokenKind::Module);
+        let vis = match keyword.token_kind() {
+            Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+            Some(TokenKind::Newtype) if is_module_newtype => aast::TypedefVisibility::OpaqueModule,
+            Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
+            _ => aast::TypedefVisibility::Transparent,
+        };
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
-            vis: match keyword.token_kind() {
-                Some(TokenKind::Type) => aast::TypedefVisibility::Transparent,
-                Some(TokenKind::Newtype) if is_module_newtype => {
-                    aast::TypedefVisibility::OpaqueModule
-                }
-                Some(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
-                _ => aast::TypedefVisibility::Transparent,
-            },
             tparams,
             as_constraint,
             super_constraint,
-            type_: ty,
+            type_assignment: TypedefTypeAssignment::SimpleTypeDef(self.alloc((vis, ty))),
             is_ctx: false,
             attributes: user_attributes,
             internal,
@@ -3764,11 +3765,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
-            vis: aast::TypedefVisibility::Opaque,
             tparams,
             as_constraint,
             super_constraint,
-            type_: ty,
+            type_assignment: TypedefTypeAssignment::SimpleTypeDef(
+                self.alloc((aast::TypedefVisibility::Opaque, ty)),
+            ),
             is_ctx: true,
             attributes: user_attributes,
             internal: false,
@@ -3819,24 +3821,22 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 )))
             }
         };
-
-        let ty = match variants.len() {
-            0 => None,
-            1 => self.node_to_ty(*variants.iter().next().unwrap()),
-            _ => {
-                let pos = self.get_pos(variants);
-                let tys = self.slice(variants.iter().filter_map(|x| self.node_to_ty(*x)));
-                Some(self.alloc(Ty(
-                    self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
-                    Ty_::Tunion(tys),
-                )))
-            }
-        };
-
-        let type_ = match ty {
-            Some(x) => x,
-            None => return Node::Ignored(SK::CaseTypeDeclaration),
-        };
+        let mut variants = variants.iter().filter_map(|x| match x {
+            Node::CaseTypeVariantWithWhereClause((ty, constraints)) => self
+                .node_to_ty(**ty)
+                .map(|ty| self.alloc(TypedefCaseTypeVariant(ty, constraints))),
+            _ => self
+                .node_to_ty(*x)
+                .map(|ty| self.alloc(TypedefCaseTypeVariant(ty, self.alloc([])))),
+        });
+        let variant;
+        if let Some(v) = variants.next() {
+            variant = v;
+        } else {
+            return Node::Ignored(SK::CaseTypeDeclaration);
+        }
+        let type_assignment =
+            TypedefTypeAssignment::CaseType(self.alloc((variant, self.slice(variants))));
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_parameter);
@@ -3875,11 +3875,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
-            vis: aast::TypedefVisibility::CaseType,
             tparams,
             as_constraint,
             super_constraint: None,
-            type_,
+            type_assignment,
             is_ctx: false,
             attributes: user_attributes,
             internal,
@@ -3897,12 +3896,22 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         &mut self,
         _bar: Self::Output,
         type_: Self::Output,
-        _where: Self::Output,
+        where_: Self::Output,
     ) -> Self::Output {
         if type_.is_ignored() {
             Node::Ignored(SK::CaseTypeVariant)
         } else {
-            type_
+            let where_constraints = self.slice(where_.iter().filter_map(|&x| match x {
+                Node::WhereConstraint(x) => Some(x),
+                _ => None,
+            }));
+            if where_constraints.is_empty() {
+                type_
+            } else {
+                Node::CaseTypeVariantWithWhereClause(
+                    self.alloc((self.alloc(type_), where_constraints)),
+                )
+            }
         }
     }
 

@@ -233,8 +233,8 @@ let on_typedef t ~ctx =
         | Some _ -> t.t_as_constraint
         | None -> begin
           (* If this isn't just a type alias then we need to add supportdyn<mixed> as upper bound *)
-          match t.t_vis with
-          | Transparent -> None
+          match t.t_assignment with
+          | SimpleTypeDef { tvh_vis = Transparent; tvh_hint = _ } -> None
           | _ -> Some (pos, wrap_supportdyn pos Aast.Hmixed)
         end
       else

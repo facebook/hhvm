@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ee638d4fad5c87cb8e20e2ff970bb9be>>
+// @generated SignedSource<<e5e5cd4d67a6951d4684d8deaa2c5920>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1066,6 +1066,32 @@ impl<'a> Node<'a> for EnumType<'a> {
         }
     }
 }
+impl<'a> Node<'a> for TypedefCaseTypeVariant<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_typedef_case_type_variant(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypedefCaseTypeVariant(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
+impl<'a> Node<'a> for TypedefTypeAssignment<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_typedef_type_assignment(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypedefTypeAssignment::SimpleTypeDef(ref __binding_0) => __binding_0.accept(v),
+            TypedefTypeAssignment::CaseType(ref __binding_0) => __binding_0.accept(v),
+        }
+    }
+}
 impl<'a> Node<'a> for TypedefType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_typedef_type(self)
@@ -1075,16 +1101,15 @@ impl<'a> Node<'a> for TypedefType<'a> {
             TypedefType {
                 module: ref __binding_0,
                 pos: ref __binding_1,
-                vis: ref __binding_2,
-                tparams: ref __binding_3,
-                as_constraint: ref __binding_4,
-                super_constraint: ref __binding_5,
-                type_: ref __binding_6,
-                is_ctx: ref __binding_7,
-                attributes: ref __binding_8,
-                internal: ref __binding_9,
-                docs_url: ref __binding_10,
-                package_override: ref __binding_11,
+                tparams: ref __binding_2,
+                as_constraint: ref __binding_3,
+                super_constraint: ref __binding_4,
+                type_assignment: ref __binding_5,
+                is_ctx: ref __binding_6,
+                attributes: ref __binding_7,
+                internal: ref __binding_8,
+                docs_url: ref __binding_9,
+                package_override: ref __binding_10,
             } => {
                 {
                     __binding_0.accept(v)
@@ -1116,10 +1141,7 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 {
                     __binding_9.accept(v)
                 }
-                {
-                    __binding_10.accept(v)
-                }
-                { __binding_11.accept(v) }
+                { __binding_10.accept(v) }
             }
         }
     }
@@ -1528,7 +1550,6 @@ impl<'a> Node<'a> for TypedefVisibility {
             TypedefVisibility::Transparent => {}
             TypedefVisibility::Opaque => {}
             TypedefVisibility::OpaqueModule => {}
-            TypedefVisibility::CaseType => {}
         }
     }
 }

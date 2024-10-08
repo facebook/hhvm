@@ -1,78 +1,88 @@
 [("\\MyNamespace\\MyString",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [5:8-16]; td_vis = Transparent;
-       td_tparams = []; td_as_constraint = None; td_super_constraint = None;
-       td_type = (Rhint ([5:19-25]), (Tprim Tstring)); td_is_ctx = false;
-       td_attributes = []; td_internal = false; td_docs_url = None;
-       td_package_override = None }));
+     { Typing_defs.td_module = None; td_pos = [5:8-16]; td_tparams = [];
+       td_as_constraint = None; td_super_constraint = None;
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([5:19-25]), (Tprim Tstring))));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyInt",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [6:8-13];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([6:16-19]), (Tprim Tint)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [6:8-13]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([6:16-19]), (Tprim Tint))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyFloat",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [7:8-15];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([7:18-23]), (Tprim Tfloat)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [7:8-15]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([7:18-23]), (Tprim Tfloat))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyNum",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [8:8-13];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([8:16-19]), (Tprim Tnum)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [8:8-13]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([8:16-19]), (Tprim Tnum))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyBool",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [9:8-14];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([9:17-21]), (Tprim Tbool)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [9:8-14]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([9:17-21]), (Tprim Tbool))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [11:8-24];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([11:27-48]),
-         (Tapply (([11:27-48], "\\MyNamespace\\MyString"), [])));
+      { Typing_defs.td_module = None; td_pos = [11:8-24]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([11:27-48]),
+            (Tapply (([11:27-48], "\\MyNamespace\\MyString"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\InnerNamespace\\MyInnerType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [14:10-21];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([14:24-30]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [14:10-21]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([14:24-30]), (Tprim Tstring))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\InnerNamespace\\MyDoubleNamespacedType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [15:10-32];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([15:35-64]),
-         (Tapply (([15:35-64], "\\MyNamespace\\MyNamespacedType"), [])));
+      { Typing_defs.td_module = None; td_pos = [15:10-32]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([15:35-64]),
+            (Tapply (([15:35-64], "\\MyNamespace\\MyNamespacedType"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\Very\\Inner\\Namespace\\MyVeryInnerNamespaceType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [19:10-34];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([19:37-43]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [19:10-34]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([19:37-43]), (Tprim Tstring))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\Very\\Inner\\Namespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -91,15 +101,16 @@
         sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
   ("\\MyNamespace\\MyVeryInnerNamespaceType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [23:8-32];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([23:35-80]),
-         (Tapply (
-            ([23:35-80],
-             "\\MyNamespace\\Very\\Inner\\Namespace\\MyVeryInnerNamespaceType"),
-            [])));
+      { Typing_defs.td_module = None; td_pos = [23:8-32]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([23:35-80]),
+            (Tapply (
+               ([23:35-80],
+                "\\MyNamespace\\Very\\Inner\\Namespace\\MyVeryInnerNamespaceType"),
+               [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\hello",

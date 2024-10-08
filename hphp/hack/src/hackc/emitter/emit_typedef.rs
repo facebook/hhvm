@@ -32,12 +32,13 @@ fn emit_typedef(emitter: &mut Emitter<'_>, typedef: &ast::Typedef) -> Result<Typ
     let name = ClassName::from_ast_name_and_mangle(&typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
+    let kind = &typedef.runtime_type;
     let type_info_union_res = emit_type_hint::hint_to_type_info_union(
         &emit_type_hint::Kind::TypeDef,
         false,
-        typedef.kind.1.is_hoption(),
+        kind.1.is_hoption(),
         &tparams,
-        &typedef.kind,
+        kind,
     );
     let type_structure_res =
         emit_type_constant::typedef_to_type_structure(emitter.options(), &tparams, typedef);
@@ -55,7 +56,7 @@ fn emit_typedef(emitter: &mut Emitter<'_>, typedef: &ast::Typedef) -> Result<Typ
                 type_structure,
                 span,
                 attrs,
-                case_type: typedef.vis.is_case_type(),
+                case_type: matches!(typedef.assignment, ast::TypedefAssignment::CaseType(_, _)),
             })
         })
     })

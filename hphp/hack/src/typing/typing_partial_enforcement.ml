@@ -44,10 +44,15 @@ let rec get_enforced_type env class_def_opt ty =
       (* Generic types are not enforced at their type arguments *)
       else
         default ()
-    | Decl_entry.Found (Env.TypedefResult typedef_info) ->
+    | Decl_entry.Found (Env.TypedefResult typedef_info) -> begin
       (* Enforcement "sees through" type aliases and newtype, but does not instantiate generic arguments *)
       (* The same is true of newtypes *)
-      get_enforced_type env None typedef_info.td_type
+      match typedef_info.td_type_assignment with
+      | SimpleTypeDef (_, td_type)
+      | CaseType ((td_type, _), []) ->
+        get_enforced_type env None td_type
+      | CaseType _ -> default ()
+    end
     | Decl_entry.DoesNotExist
     | Decl_entry.NotYetAvailable ->
       default ()

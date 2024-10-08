@@ -36,6 +36,8 @@ aast_defs::Sid
 aast_defs::Stmt_
 aast_defs::TupleExtra
 aast_defs::TypeconstAbstractKind
+aast_defs::TypedefAssignment
+aast_defs::TypedefVisibilityAndHint
 aast_defs::XhpAttribute
 ast_defs::Abstraction
 ast_defs::Bop
@@ -244,6 +246,7 @@ typing_defs::ClassTypeRefinementBounds
 typing_defs::ShapeKind
 typing_defs::Ty_
 typing_defs::Typeconst
+typing_defs::TypedefTypeAssignment
 typing_defs::TypeOrigin
 typing_defs::ValKind
 typing_defs::XhpAttr

@@ -46,7 +46,6 @@ type typedef_visibility = Ast_defs.typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
-  | CaseType
 [@@deriving eq, hash, ord, show { with_path = false }] [@@transform.opaque]
 
 type reify_kind = Ast_defs.reify_kind =
@@ -1080,18 +1079,33 @@ and ('ex, 'en) method_ = {
 
 and nsenv = (Namespace_env.env[@visitors.opaque]) [@@transform.opaque]
 
+and typedef_visibility_and_hint = {
+  tvh_vis: typedef_visibility; [@transform.opaque]
+  tvh_hint: hint; [@transform.explicit]
+}
+
+and typedef_case_type_variant = {
+  tctv_hint: hint;
+  tctv_where_constraints: where_constraint_hint list;
+}
+
+and typedef_assignment =
+  | SimpleTypeDef of typedef_visibility_and_hint
+  | CaseType of typedef_case_type_variant * typedef_case_type_variant list
+
 and ('ex, 'en) typedef = {
   t_annotation: 'en;
   t_name: sid;
   t_tparams: ('ex, 'en) tparam list;
   t_as_constraint: hint option;
   t_super_constraint: hint option;
-  t_kind: hint; [@transform.explicit]
-      (** The RHS of `=` in the type definition. *)
+  t_assignment: typedef_assignment;
+      (** The visibility and RHS of `=` in the type definition. *)
+  t_runtime_type: hint;
+      (** Always a single type -- excludes where clauses for case types *)
   t_user_attributes: ('ex, 'en) user_attributes;
   t_file_attributes: ('ex, 'en) file_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
-  t_vis: typedef_visibility; [@transform.opaque]
   t_namespace: nsenv;
   t_span: pos; [@transform.opaque]
   t_emit_id: emit_id option;

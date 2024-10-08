@@ -820,3 +820,18 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn_mixed r)
+
+let get_case_type_variants_as_type
+    ((first_ty, _where_constraints) : typedef_case_type_variant)
+    (variants : typedef_case_type_variant list) =
+  (* TODO T201569125 audit callers to see if they need to account for where clauses *)
+  match List.last variants with
+  | None -> first_ty
+  | Some (last_ty, _where_constraints) ->
+    let pos =
+      Pos_or_decl.btw
+        (Typing_reason.to_pos @@ get_reason first_ty)
+        (Typing_reason.to_pos @@ get_reason last_ty)
+    in
+    let tyl = first_ty :: List.map variants ~f:fst in
+    Typing_make_type.union (Typing_reason.hint pos) tyl

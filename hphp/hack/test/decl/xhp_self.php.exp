@@ -1,13 +1,15 @@
 [("\\REACT_XHP_FIX",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [3:6-19]; td_vis = Transparent;
+     { Typing_defs.td_module = None; td_pos = [3:6-19];
        td_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
           tp_name = ([3:21-22], "T"); tp_tparams = []; tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_as_constraint = None; td_super_constraint = None;
-       td_type = (Rhint ([3:26-27]), (Tgeneric ("T", [])));
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([3:26-27]), (Tgeneric ("T", [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package_override = None }));
   ("\\:Foo",

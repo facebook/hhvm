@@ -215,7 +215,13 @@ end = struct
           match ContextAccess.get_class_or_typedef ctx name with
           | Some
               (TypedefResult
-                { td_vis = Aast.(CaseType | Transparent); td_type; _ }) ->
+                { td_type_assignment = CaseType ((td_type, _), []); _ })
+          | Some
+              (TypedefResult
+                {
+                  td_type_assignment = SimpleTypeDef (Aast.Transparent, td_type);
+                  _;
+                }) ->
             (* Expand type definition one step and compute its enforcement.
              * While case types are Tnewtype in the type system, at runtime
              * they are enforced transparently. TODO(dreeves) Case types
@@ -225,12 +231,13 @@ end = struct
               ctx
               (SSet.add name visited)
               td_type
+          | Some (TypedefResult { td_type_assignment = CaseType _; _ }) ->
+            Unenforced None
           | Some
               (TypedefResult
                 {
-                  td_vis = Aast.Opaque;
+                  td_type_assignment = SimpleTypeDef (Aast.Opaque, td_type);
                   td_pos;
-                  td_type;
                   td_as_constraint;
                   td_tparams;
                   _;
@@ -283,7 +290,10 @@ end = struct
                   (Some (Typing_make_type.union (get_reason cstr) [cstr; ty]))
               | _ -> Unenforced None
             )
-          | Some (TypedefResult { td_vis = Aast.OpaqueModule; _ }) ->
+          | Some
+              (TypedefResult
+                { td_type_assignment = SimpleTypeDef (Aast.OpaqueModule, _); _ })
+            ->
             Unenforced None
           | Some (ClassResult cls) ->
             (match ContextAccess.get_enum_type cls with

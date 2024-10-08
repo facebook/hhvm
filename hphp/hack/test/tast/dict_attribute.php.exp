@@ -502,7 +502,8 @@
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([36:6-8], "\\tt"); t_tparams = []; 
-       t_as_constraint = None; t_super_constraint = None; t_kind = ([36:11-14], (Hprim Tint));
+       t_as_constraint = None; t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Transparent; tvh_hint = ([36:11-14], (Hprim Tint)) }); 
+       t_runtime_type = ([36:11-14], (Hprim Tint));
        t_user_attributes =
        [{ ua_name = ([35:3-9], "\\TAlias");
           ua_params =
@@ -528,7 +529,7 @@
             ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = Transparent;
+       t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

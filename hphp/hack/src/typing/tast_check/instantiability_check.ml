@@ -172,7 +172,14 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_typedef env t =
-      check_hint env t.t_kind;
+      let hints =
+        match t.t_assignment with
+        | SimpleTypeDef { tvh_vis = _; tvh_hint } -> [tvh_hint]
+        | CaseType (variant, variants) ->
+          List.map (variant :: variants) ~f:(fun v -> v.tctv_hint)
+        (* TODO T201569125 - do we need to check the where clauses at all? *)
+      in
+      List.iter hints ~f:(check_hint env);
       Option.iter t.t_as_constraint ~f:(check_hint env);
       Option.iter t.t_super_constraint ~f:(check_hint env)
 

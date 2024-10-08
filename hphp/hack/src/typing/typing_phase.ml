@@ -540,8 +540,23 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               argl
               (Some typedef_info)
         in
+
         let shp_def_pos =
-          Reason.to_pos @@ Typing_defs.get_reason typedef_info.td_type
+          match typedef_info.td_type_assignment with
+          | SimpleTypeDef (_, hint)
+          | CaseType ((hint, _), []) ->
+            Reason.to_pos @@ Typing_defs.get_reason hint
+          | CaseType ((first_hint, _wcs), rest) ->
+            (match List.last rest with
+            | None -> Reason.to_pos @@ Typing_defs.get_reason first_hint
+            | Some (last_hint, _wcs) ->
+              let first_pos =
+                Reason.to_pos @@ Typing_defs.get_reason first_hint
+              in
+              let last_pos =
+                Reason.to_pos @@ Typing_defs.get_reason last_hint
+              in
+              Pos_or_decl.btw first_pos last_pos)
         in
         let lty =
           set_origin_and_cache origin_opt env ty_err_opt lty (Some shp_def_pos)

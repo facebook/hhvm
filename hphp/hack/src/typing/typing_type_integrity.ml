@@ -250,7 +250,10 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
       method! on_tapply _ r name args = check_tapply r name args
     end
   in
-  visitor#on_type () typedef_info.td_type;
+  (match typedef_info.td_type_assignment with
+  | SimpleTypeDef (_vis, td_type) -> visitor#on_type () td_type
+  | CaseType (variant, variants) ->
+    List.iter (List.map (variant :: variants) ~f:fst) ~f:(visitor#on_type ()));
   maybe visitor#on_type () typedef_info.td_as_constraint;
   maybe visitor#on_type () typedef_info.td_super_constraint
 

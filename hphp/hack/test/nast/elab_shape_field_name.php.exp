@@ -38,13 +38,21 @@ Errors:
   (Typedef
      { t_annotation = (); t_name = ([11:6-25], "\\with_class_constant"); 
        t_tparams = []; t_as_constraint = None; t_super_constraint = None;
-       t_kind =
+       t_assignment =
+       (SimpleTypeDef
+          { tvh_vis = Transparent;
+            tvh_hint =
+            ([11:28-64],
+             (Hshape
+                { nsi_allows_unknown_fields = false;
+                  nsi_field_map = [{ sfi_optional = false; sfi_hint = ([11:60-63], (Hprim Tint)); sfi_name = (SFclass_const (([11:34-50], "\\WithConstantName"), ([11:52-56], "FLD1"))) }] }))
+            });
+       t_runtime_type =
        ([11:28-64],
         (Hshape
            { nsi_allows_unknown_fields = false;
              nsi_field_map = [{ sfi_optional = false; sfi_hint = ([11:60-63], (Hprim Tint)); sfi_name = (SFclass_const (([11:34-50], "\\WithConstantName"), ([11:52-56], "FLD1"))) }] }));
-       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
-       t_vis = Transparent;
+       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -54,13 +62,21 @@ Errors:
   (Typedef
      { t_annotation = (); t_name = ([13:6-29], "\\with_self_outside_class"); 
        t_tparams = []; t_as_constraint = None; t_super_constraint = None;
-       t_kind =
+       t_assignment =
+       (SimpleTypeDef
+          { tvh_vis = Transparent;
+            tvh_hint =
+            ([13:32-56],
+             (Hshape
+                { nsi_allows_unknown_fields = false;
+                  nsi_field_map = [{ sfi_optional = false; sfi_hint = ([13:52-55], (Hprim Tint)); sfi_name = (SFclass_const (([13:38-42], "\\*Unknown*"), ([13:44-48], "FLD1"))) }] }))
+            });
+       t_runtime_type =
        ([13:32-56],
         (Hshape
            { nsi_allows_unknown_fields = false;
              nsi_field_map = [{ sfi_optional = false; sfi_hint = ([13:52-55], (Hprim Tint)); sfi_name = (SFclass_const (([13:38-42], "\\*Unknown*"), ([13:44-48], "FLD1"))) }] }));
-       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
-       t_vis = Transparent;
+       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -70,10 +86,16 @@ Errors:
   (Typedef
      { t_annotation = (); t_name = ([15:6-22], "\\with_string_name"); 
        t_tparams = []; t_as_constraint = None; t_super_constraint = None;
-       t_kind =
+       t_assignment =
+       (SimpleTypeDef
+          { tvh_vis = Transparent;
+            tvh_hint =
+            ([15:25-47],
+             (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([15:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([15:31-39], "field1")) }] }))
+            });
+       t_runtime_type =
        ([15:25-47], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([15:43-46], (Hprim Tint)); sfi_name = (SFlit_str ([15:31-39], "field1")) }] }));
-       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
-       t_vis = Transparent;
+       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -83,10 +105,14 @@ Errors:
   (Typedef
      { t_annotation = (); t_name = ([18:6-19], "\\with_int_name"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None;
-       t_kind =
+       t_assignment =
+       (SimpleTypeDef
+          { tvh_vis = Transparent;
+            tvh_hint =
+            ([18:22-37], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([18:33-36], (Hprim Tint)); sfi_name = (SFlit_str ([18:28-29], "1")) }] })) });
+       t_runtime_type =
        ([18:22-37], (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = false; sfi_hint = ([18:33-36], (Hprim Tint)); sfi_name = (SFlit_str ([18:28-29], "1")) }] }));
-       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
-       t_vis = Transparent;
+       t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

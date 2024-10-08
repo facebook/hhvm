@@ -52,9 +52,9 @@ let casetype_def env typedef =
     t_tparams = _;
     t_as_constraint = _;
     t_super_constraint = _;
-    t_kind = varaints;
+    t_assignment;
+    t_runtime_type = _;
     t_user_attributes = _;
-    t_vis;
     t_mode = _;
     t_namespace = _;
     t_span = _;
@@ -68,8 +68,14 @@ let casetype_def env typedef =
   } =
     typedef
   in
-  match (t_vis, varaints) with
-  | (Aast.CaseType, (_, Hunion hints)) ->
+  let hints =
+    match t_assignment with
+    | CaseType (variant, (_ :: _ as variants)) ->
+      Some (List.map (variant :: variants) ~f:(fun v -> v.tctv_hint))
+    | _ -> None
+  in
+  match hints with
+  | Some hints ->
     (* Given two types with their associated data types, check if
        the data types overlap. If they do report an error *)
     let check data_type1 acc data_type2 =
@@ -98,19 +104,7 @@ let casetype_def env typedef =
     let err = errs |> pairwise_check [] |> Typing_error.multiple_opt in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err;
     env
-  | _ -> env
-
-let do_report_cycles env (vis : typedef_visibility) =
-  match vis with
-  | Transparent
-  | Opaque
-  | OpaqueModule ->
-    true
-  | CaseType ->
-    let recursive_case_types env =
-      (Env.get_tcopt env).GlobalOptions.recursive_case_types
-    in
-    not (recursive_case_types env)
+  | None -> env
 
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
@@ -120,9 +114,9 @@ let typedef_def ctx typedef =
     t_tparams;
     t_as_constraint;
     t_super_constraint;
-    t_kind;
+    t_assignment;
+    t_runtime_type;
     t_user_attributes;
-    t_vis;
     t_mode;
     t_namespace;
     t_span;
@@ -135,6 +129,18 @@ let typedef_def ctx typedef =
     t_doc_comment;
   } =
     typedef
+  in
+  let (do_report_cycles, hints) =
+    match t_assignment with
+    | SimpleTypeDef { tvh_vis = _; tvh_hint } -> ((fun _env -> true), [tvh_hint])
+    (* TODO T201569125 - do I need to do something with the where constraints here? *)
+    | CaseType (variant, variants) ->
+      ( (fun env ->
+          let recursive_case_types env =
+            (Env.get_tcopt env).GlobalOptions.recursive_case_types
+          in
+          not (recursive_case_types env)),
+        List.map (variant :: variants) ~f:(fun v -> v.tctv_hint) )
   in
   let (t_pos, t_name_) = t_name in
   let env = Env.set_current_module env t_module in
@@ -156,25 +162,42 @@ let typedef_def ctx typedef =
   Typing_variance.typedef env typedef;
 
   let env =
-    let ((env, ty_err_opt2, cycles), ty) =
-      (* This also detects cyclic definitions *)
-      Phase.localize_hint_no_subst_report_cycles
-        env
-        ~ignore_errors:false
-        ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name_)
-        t_kind
+    let (env, ty_err_opt2, cycles, tys) =
+      List.fold_left
+        hints
+        ~init:(env, None, [], [])
+        ~f:(fun (env, ty_err_opt2, cycles, tys) hint ->
+          let ((env, new_ty_err_opt2, new_cycles), ty) =
+            (* This also detects cyclic definitions *)
+            Phase.localize_hint_no_subst_report_cycles
+              env
+              ~ignore_errors:false
+              ~report_cycle:
+                (t_pos, Type_expansions.Expandable.Type_alias t_name_)
+              hint
+          in
+          ( env,
+            Option.merge ~f:Typing_error.both new_ty_err_opt2 ty_err_opt2,
+            new_cycles @ cycles,
+            ty :: tys ))
     in
-    if do_report_cycles env t_vis then
+    if do_report_cycles env then
       Type_expansions.report cycles
       |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
     let env = casetype_def env typedef in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 
     let (env, ty_err_opt3) =
-      get_cnstr_errs env t_as_constraint false t_pos ty
+      List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
+          let (env, err) = get_cnstr_errs env t_as_constraint false t_pos ty in
+          (env, Option.merge ~f:Typing_error.both acc_err err))
     in
     let (env, ty_err_opt4) =
-      get_cnstr_errs env t_super_constraint true t_pos ty
+      List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
+          let (env, err) =
+            get_cnstr_errs env t_super_constraint true t_pos ty
+          in
+          (env, Option.merge ~f:Typing_error.both acc_err err))
     in
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
@@ -183,13 +206,14 @@ let typedef_def ctx typedef =
   in
 
   let env =
-    match t_kind with
-    | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
-      let get_name sfi = sfi.sfi_name in
-      Typing_shapes.check_shape_keys_validity
-        env
-        (List.map ~f:get_name nsi_field_map)
-    | _ -> env
+    List.fold_left hints ~init:env ~f:(fun env hint ->
+        match hint with
+        | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
+          let get_name sfi = sfi.sfi_name in
+          Typing_shapes.check_shape_keys_validity
+            env
+            (List.map ~f:get_name nsi_field_map)
+        | _ -> env)
   in
   let (env, user_attributes) =
     Typing.attributes_check_def
@@ -203,11 +227,11 @@ let typedef_def ctx typedef =
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     Aast.t_name;
     Aast.t_mode;
-    Aast.t_vis;
     Aast.t_user_attributes = user_attributes;
     Aast.t_as_constraint;
     Aast.t_super_constraint;
-    Aast.t_kind;
+    Aast.t_assignment;
+    Aast.t_runtime_type;
     Aast.t_tparams = tparams;
     Aast.t_namespace;
     Aast.t_span;

@@ -1,35 +1,42 @@
 [("\\RxException",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [3:6-17]; td_vis = Transparent;
-       td_tparams = []; td_as_constraint = None; td_super_constraint = None;
-       td_type =
-       (Rhint ([3:20-32]), (Tapply (([3:20-32], "\\HH\\Rx\\Exception"), [])));
+     { Typing_defs.td_module = None; td_pos = [3:6-17]; td_tparams = [];
+       td_as_constraint = None; td_super_constraint = None;
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([3:20-32]),
+           (Tapply (([3:20-32], "\\HH\\Rx\\Exception"), [])))
+          ));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package_override = None }));
   ("\\BackslashRxException",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [5:6-26];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([5:29-42]), (Tapply (([5:29-42], "\\Rx\\Exception"), [])));
+      { Typing_defs.td_module = None; td_pos = [5:6-26]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([5:29-42]), (Tapply (([5:29-42], "\\Rx\\Exception"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\RxRxException",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [7:6-19];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type =
-        (Rhint ([7:22-36]), (Tapply (([7:22-36], "\\RxRx\\Exception"), [])));
+      { Typing_defs.td_module = None; td_pos = [7:6-19]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([7:22-36]),
+            (Tapply (([7:22-36], "\\RxRx\\Exception"), [])))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\MyRx",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [9:6-10];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([9:13-15]), (Tapply (([9:13-15], "\\Rx"), [])));
+      { Typing_defs.td_module = None; td_pos = [9:6-10]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([9:13-15]), (Tapply (([9:13-15], "\\Rx"), [])))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }))
   ]

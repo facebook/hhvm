@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<372ec79097ea6d8be0d4cfbbc4b3d235>>
+// @generated SignedSource<<4c3bf7fe8e085140d6eb786e2a9989fb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2926,6 +2926,69 @@ impl ClassTypeconst {
     pub fn as_tcconcrete_into(self) -> Option<ClassConcreteTypeconst> {
         match self {
             ClassTypeconst::TCConcrete(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl TypedefAssignment {
+    pub fn mk_simple_type_def(p0: TypedefVisibilityAndHint) -> Self {
+        TypedefAssignment::SimpleTypeDef(p0)
+    }
+    pub fn mk_case_type(p0: TypedefCaseTypeVariant, p1: Vec<TypedefCaseTypeVariant>) -> Self {
+        TypedefAssignment::CaseType(p0, p1)
+    }
+    pub fn is_simple_type_def(&self) -> bool {
+        match self {
+            TypedefAssignment::SimpleTypeDef(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_case_type(&self) -> bool {
+        match self {
+            TypedefAssignment::CaseType(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_simple_type_def(&self) -> Option<&TypedefVisibilityAndHint> {
+        match self {
+            TypedefAssignment::SimpleTypeDef(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_case_type(&self) -> Option<(&TypedefCaseTypeVariant, &Vec<TypedefCaseTypeVariant>)> {
+        match self {
+            TypedefAssignment::CaseType(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_simple_type_def_mut(&mut self) -> Option<&mut TypedefVisibilityAndHint> {
+        match self {
+            TypedefAssignment::SimpleTypeDef(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_case_type_mut(
+        &mut self,
+    ) -> Option<(
+        &mut TypedefCaseTypeVariant,
+        &mut Vec<TypedefCaseTypeVariant>,
+    )> {
+        match self {
+            TypedefAssignment::CaseType(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_simple_type_def_into(self) -> Option<TypedefVisibilityAndHint> {
+        match self {
+            TypedefAssignment::SimpleTypeDef(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_case_type_into(
+        self,
+    ) -> Option<(TypedefCaseTypeVariant, Vec<TypedefCaseTypeVariant>)> {
+        match self {
+            TypedefAssignment::CaseType(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

@@ -1,19 +1,20 @@
 [("\\ID",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [3:6-8]; td_vis = Transparent;
+     { Typing_defs.td_module = None; td_pos = [3:6-8];
        td_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:9-10], "T"); tp_tparams = []; tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_as_constraint = None; td_super_constraint = None;
-       td_type = (Rhint ([3:14-15]), (Tgeneric ("T", [])));
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([3:14-15]), (Tgeneric ("T", [])))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package_override = None }));
   ("\\Test1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:6-11];
-        td_vis = Transparent;
         td_tparams =
         [{ Typing_defs_core.tp_variance = Invariant;
            tp_name = ([5:12-14], "TC");
@@ -37,12 +38,14 @@
            }
           ];
         td_as_constraint = None; td_super_constraint = None;
-        td_type =
-        (Rhint ([5:33-44]),
-         (Tgeneric ("TC",
-            [(Rhint ([5:36-39]), (Tprim Tint));
-              (Rhint ([5:41-43]), (Tapply (([5:41-43], "\\ID"), [])))]
-            )));
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([5:33-44]),
+            (Tgeneric ("TC",
+               [(Rhint ([5:36-39]), (Tprim Tint));
+                 (Rhint ([5:41-43]), (Tapply (([5:41-43], "\\ID"), [])))]
+               )))
+           ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None; td_package_override = None }));
   ("\\filter",

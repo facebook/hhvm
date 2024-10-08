@@ -493,3 +493,8 @@ val no_upper_bound :
   Typing_env_types.env ->
   Typing_defs.locl_ty list ->
   Typing_env_types.env * bool
+
+val get_case_type_variants_as_type :
+  Typing_defs.typedef_case_type_variant ->
+  Typing_defs.typedef_case_type_variant list ->
+  Typing_defs.decl_ty

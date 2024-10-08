@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7698a362c7109ced64f8e23362b1cfb6>>
+// @generated SignedSource<<009856d129682434e7247f613f09e0b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -485,16 +485,56 @@ pub struct EnumType {
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C)]
+pub struct TypedefCaseTypeVariant(pub Ty, pub Vec<WhereConstraint>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum TypedefTypeAssignment {
+    SimpleTypeDef(ast_defs::TypedefVisibility, Ty),
+    CaseType(TypedefCaseTypeVariant, Vec<TypedefCaseTypeVariant>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType {
     pub module: Option<ast_defs::Id>,
     pub pos: pos_or_decl::PosOrDecl,
-    pub vis: ast_defs::TypedefVisibility,
     pub tparams: Vec<Tparam>,
     pub as_constraint: Option<Ty>,
     pub super_constraint: Option<Ty>,
-    pub type_: Ty,
+    pub type_assignment: TypedefTypeAssignment,
     pub is_ctx: bool,
     pub attributes: Vec<UserAttribute>,
     pub internal: bool,

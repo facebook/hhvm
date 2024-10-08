@@ -1,0 +1,24 @@
+ERROR: File "simple_variance.php", line 13, characters 15-15:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "simple_variance.php", line 12, characters 41-41:
+  This is where the parameter was declared as covariant `+`
+  File "simple_variance.php", line 13, characters 15-15:
+  `case type where _ as _` constraints are covariant on the left, contravariant on the right
+ERROR: File "simple_variance.php", line 15, characters 20-22:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "simple_variance.php", line 12, characters 41-41:
+  This is where the parameter was declared as covariant `+`
+  File "simple_variance.php", line 15, characters 20-22:
+  `case type where _ = _` constraints are invariant on the left and right
+ERROR: File "simple_variance.php", line 19, characters 18-18:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "simple_variance.php", line 17, characters 45-45:
+  This is where the parameter was declared as contravariant `-`
+  File "simple_variance.php", line 19, characters 18-18:
+  `case type where _ super _` constraints are contravariant on the left, covariant on the right
+ERROR: File "simple_variance.php", line 20, characters 16-16:
+Illegal usage of a contravariant type parameter (Typing[4121])
+  File "simple_variance.php", line 17, characters 45-45:
+  This is where the parameter was declared as contravariant `-`
+  File "simple_variance.php", line 20, characters 16-16:
+  `case type where _ = _` constraints are invariant on the left and right

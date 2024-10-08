@@ -829,11 +829,10 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
         let Self {
             module,
             pos,
-            vis,
             tparams,
             as_constraint,
             super_constraint,
-            ty,
+            type_assignment,
             is_ctx,
             attributes,
             internal,
@@ -846,17 +845,47 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
                 obr::ast_defs::Id(pos, id)
             }),
             pos: pos.to_oxidized(arena),
-            vis: *vis,
             tparams: tparams.to_oxidized(arena),
             as_constraint: as_constraint.as_ref().map(|t| t.to_oxidized(arena)),
             super_constraint: super_constraint.as_ref().map(|t| t.to_oxidized(arena)),
-            type_: ty.to_oxidized(arena),
+            type_assignment: *type_assignment.to_oxidized(arena),
             is_ctx: *is_ctx,
             attributes: attributes.to_oxidized(arena),
             internal: *internal,
             docs_url: docs_url.as_deref().to_oxidized(arena),
             package_override: package_override.as_deref().to_oxidized(arena),
         })
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TypedefTypeAssignment<R> {
+    type Output = &'a obr::typing_defs::TypedefTypeAssignment<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::decl_defs::TypedefTypeAssignment as Obr;
+        match self {
+            TypedefTypeAssignment::SimpleTypeDef(vis, ty) => arena.alloc(Obr::SimpleTypeDef(
+                arena.alloc((*vis, ty.to_oxidized(arena))),
+            )),
+            TypedefTypeAssignment::CaseType(variant, variants) => arena.alloc(Obr::CaseType(
+                arena.alloc((variant.to_oxidized(arena), variants.to_oxidized(arena))),
+            )),
+        }
+    }
+}
+
+impl<'a, R: Reason> ToOxidized<'a> for TypedefCaseTypeVariant<R> {
+    type Output = &'a obr::typing_defs::TypedefCaseTypeVariant<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Self {
+            hint,
+            where_constraints,
+        } = self;
+        arena.alloc(obr::typing_defs::TypedefCaseTypeVariant(
+            hint.to_oxidized(arena),
+            where_constraints.to_oxidized(arena),
+        ))
     }
 }
 

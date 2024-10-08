@@ -1,10 +1,12 @@
 [("\\MyAnonymousNamespaceType",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [4:8-32]; td_vis = Transparent;
-       td_tparams = []; td_as_constraint = None; td_super_constraint = None;
-       td_type = (Rhint ([4:35-41]), (Tprim Tstring)); td_is_ctx = false;
-       td_attributes = []; td_internal = false; td_docs_url = None;
-       td_package_override = None }));
+     { Typing_defs.td_module = None; td_pos = [4:8-32]; td_tparams = [];
+       td_as_constraint = None; td_super_constraint = None;
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([4:35-41]), (Tprim Tstring))));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None; td_package_override = None }));
   ("\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -21,12 +23,13 @@
         sc_package_override = None }));
   ("\\MyNamespace\\MyNamespaceType",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [9:8-23];
-        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
-        td_super_constraint = None;
-        td_type = (Rhint ([9:26-32]), (Tprim Tstring)); td_is_ctx = false;
-        td_attributes = []; td_internal = false; td_docs_url = None;
-        td_package_override = None }));
+      { Typing_defs.td_module = None; td_pos = [9:8-23]; td_tparams = [];
+        td_as_constraint = None; td_super_constraint = None;
+        td_type_assignment =
+        (Typing_defs.SimpleTypeDef (Transparent,
+           (Rhint ([9:26-32]), (Tprim Tstring))));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None; td_package_override = None }));
   ("\\MyNamespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

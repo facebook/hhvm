@@ -1208,7 +1208,16 @@ module Visitor_DEPRECATED = struct
 
       method on_typedef acc t =
         let acc = this#on_id acc t.t_name in
-        let acc = this#on_hint acc t.t_kind in
+        let acc =
+          match t.t_assignment with
+          | SimpleTypeDef { tvh_vis = _; tvh_hint } -> this#on_hint acc tvh_hint
+          (* TODO T201569125 - visit the where constraints here? *)
+          | CaseType (variant, variants) ->
+            List.fold_left
+              (variant :: variants)
+              ~init:acc
+              ~f:(fun acc variant -> this#on_hint acc variant.tctv_hint)
+        in
         let acc =
           match t.t_as_constraint with
           | Some c -> this#on_hint acc c

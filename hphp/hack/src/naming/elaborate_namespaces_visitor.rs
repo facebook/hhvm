@@ -279,7 +279,17 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             if let Some(super_constraint) = &mut td.super_constraint {
                 self.on_ctx_hint_ns(ctx_ns, env, super_constraint)?;
             }
-            self.on_ctx_hint_ns(ctx_ns, env, &mut td.kind)?;
+            match td.assignment {
+                TypedefAssignment::SimpleTypeDef(TypedefVisibilityAndHint {
+                    vis: _,
+                    ref mut hint,
+                }) => {
+                    self.on_ctx_hint_ns(ctx_ns, env, hint)?;
+                }
+                // case types don't support contexts
+                TypedefAssignment::CaseType(_, _) => {}
+            }
+            self.on_ctx_hint_ns(ctx_ns, env, &mut td.runtime_type)?;
         }
         td.recurse(env, self.object())
     }

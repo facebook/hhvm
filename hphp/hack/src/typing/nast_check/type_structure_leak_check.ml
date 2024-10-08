@@ -58,5 +58,10 @@ let handler =
           | _ -> ())
 
     method! at_typedef env td =
-      visitor#on_hint (env, Some "a type alias") td.t_kind
+      match td.t_assignment with
+      | SimpleTypeDef { tvh_vis = _; tvh_hint = hint } ->
+        visitor#on_hint (env, Some "a type alias") hint
+      | CaseType (variant, variants) ->
+        List.iter (variant :: variants) ~f:(fun variant ->
+            visitor#on_hint (env, Some "a case type") variant.Aast.tctv_hint)
   end

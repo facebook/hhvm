@@ -96,7 +96,12 @@ let class_env ?origin ctx c =
   env
 
 let typedef_env ?origin ctx t =
-  let file = Pos.filename (fst t.t_kind) in
+  let t_kind =
+    match t.t_assignment with
+    | SimpleTypeDef { tvh_vis = _; tvh_hint } -> tvh_hint
+    | CaseType (variant, _rest) -> variant.tctv_hint
+  in
+  let file = Pos.filename (fst t_kind) in
   let droot = Some (Typing_deps.Dep.Type (snd t.t_name)) in
   let env = Typing_env_types.empty ?origin ctx file ~mode:t.t_mode ~droot in
   env

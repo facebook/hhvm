@@ -1,6 +1,7 @@
 [(Typedef
     { t_annotation = (); t_name = ([4:8-9], "\\X"); t_tparams = []; t_as_constraint = (Some ([4:13-15], (Hintersection []))); 
-      t_super_constraint = None; t_kind = ([4:18-28], (Hintersection [([4:19-27], (Happly (([4:19-27], "\\HH\\Contexts\\defaults"), [])))])); 
+      t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Opaque; tvh_hint = ([4:18-28], (Hintersection [([4:19-27], (Happly (([4:19-27], "\\HH\\Contexts\\defaults"), [])))])) });
+      t_runtime_type = ([4:18-28], (Hintersection [([4:19-27], (Happly (([4:19-27], "\\HH\\Contexts\\defaults"), [])))])); 
       t_user_attributes = [];
       t_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-60], (String "context_alias_declaration"))] }];
@@ -10,7 +11,7 @@
            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
          }
         ];
-      t_mode = Mstrict; t_vis = Opaque;
+      t_mode = Mstrict;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

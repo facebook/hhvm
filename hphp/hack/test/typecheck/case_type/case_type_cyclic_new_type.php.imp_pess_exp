@@ -10,8 +10,8 @@ ERROR: File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12
 Invalid constraint on `newtype` (Typing[4110])
   File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12:
   Expected `dynamic`
-  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-33:
-  Type `(string | Recursive)` is not a subtype of `dynamic` under dynamic-aware subtyping
+  File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-24:
+  Type `Recursive` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "case_type_cyclic_new_type.php--file2.php", line 10, characters 5-20:
 hh_expect type mismatch (Typing[4453])
   File "case_type_cyclic_new_type.php--file2.php", line 10, characters 15-16:

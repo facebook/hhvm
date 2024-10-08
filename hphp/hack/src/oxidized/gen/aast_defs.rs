@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ea7eed8e573ab4af3fd1a39e5ba7242>>
+// @generated SignedSource<<246c9a0a03c9af934f72620470fed7b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2144,6 +2144,73 @@ pub type Nsenv = std::sync::Arc<namespace_env::Env>;
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "tvh_")]
+#[repr(C)]
+pub struct TypedefVisibilityAndHint {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub vis: TypedefVisibility,
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub hint: Hint,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "tctv_")]
+#[repr(C)]
+pub struct TypedefCaseTypeVariant {
+    pub hint: Hint,
+    pub where_constraints: Vec<WhereConstraintHint>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C, u8)]
+pub enum TypedefAssignment {
+    SimpleTypeDef(TypedefVisibilityAndHint),
+    CaseType(TypedefCaseTypeVariant, Vec<TypedefCaseTypeVariant>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "t_")]
 #[repr(C)]
 pub struct Typedef<Ex, En> {
@@ -2152,16 +2219,15 @@ pub struct Typedef<Ex, En> {
     pub tparams: Vec<Tparam<Ex, En>>,
     pub as_constraint: Option<Hint>,
     pub super_constraint: Option<Hint>,
-    /// The RHS of `=` in the type definition.
-    #[rust_to_ocaml(attr = "transform.explicit")]
-    pub kind: Hint,
+    /// The visibility and RHS of `=` in the type definition.
+    pub assignment: TypedefAssignment,
+    /// Always a single type -- excludes where clauses for case types
+    pub runtime_type: Hint,
     pub user_attributes: UserAttributes<Ex, En>,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "visitors.opaque")]
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
-    #[rust_to_ocaml(attr = "transform.opaque")]
-    pub vis: TypedefVisibility,
     pub namespace: Nsenv,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,

@@ -294,7 +294,8 @@ and split_ty
       begin
         match Env.get_typedef env name with
         | Decl_entry.Found
-            { td_type = variants; td_vis = Aast.CaseType; td_tparams; _ } ->
+            { td_type_assignment = CaseType (variant, variants); td_tparams; _ }
+          ->
           (* The this_ty does not need to be set because case types cannot
            * appear within classes thus cannot us the this type.
            * If we ever change that this could needs to be changed *)
@@ -310,11 +311,8 @@ and split_ty
                       Decl_subst.make_locl td_tparams tyl);
                 }
           in
-          let tyl =
-            match get_node variants with
-            | Tunion tyl -> tyl
-            | _ -> [variants]
-          in
+          (* TODO T201569125 - do I need to do something with the where constraints here? *)
+          let tyl = List.map (variant :: variants) ~f:fst in
           let (env, tyl) =
             List.fold_map tyl ~init:env ~f:(fun env variant ->
                 let ((env, _ty_err_opt), variant) = localize env variant in

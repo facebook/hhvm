@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a12f13d04a897c88a17ca85c59f7ccee>>
+// @generated SignedSource<<420f3decd9895beeb94d4eb1dec7b354>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -175,6 +175,12 @@ pub trait Visitor<'a> {
         p.recurse(self.object())
     }
     fn visit_enum_type(&mut self, p: &'a EnumType<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_typedef_case_type_variant(&mut self, p: &'a TypedefCaseTypeVariant<'a>) {
+        p.recurse(self.object())
+    }
+    fn visit_typedef_type_assignment(&mut self, p: &'a TypedefTypeAssignment<'a>) {
         p.recurse(self.object())
     }
     fn visit_typedef_type(&mut self, p: &'a TypedefType<'a>) {

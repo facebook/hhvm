@@ -180,7 +180,6 @@ and typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
-  | CaseType
 [@@transform.opaque]
 
 and reify_kind =

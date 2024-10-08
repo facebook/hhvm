@@ -106,10 +106,9 @@ class virtual type_validator =
         | Decl_entry.Found (Env.TypedefResult td) ->
           let {
             td_pos = _;
-            td_vis = _;
             td_module = _;
             td_tparams;
-            td_type;
+            td_type_assignment;
             td_as_constraint;
             td_super_constraint;
             td_is_ctx = _;
@@ -119,6 +118,12 @@ class virtual type_validator =
             td_package_override = _;
           } =
             td
+          in
+          let td_type =
+            match td_type_assignment with
+            | SimpleTypeDef (_, td_type) -> td_type
+            | CaseType (variant, variants) ->
+              Typing_utils.get_case_type_variants_as_type variant variants
           in
           if SSet.mem name acc.expanded_typedefs then
             acc

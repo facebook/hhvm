@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad1e858ab5aacad070f838e016f4c7ab>>
+// @generated SignedSource<<f157f0f0b7086773dda89d5ec330c72a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -686,10 +686,31 @@ pub trait Visitor<'node> {
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_typedef_assignment(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node TypedefAssignment,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_typedef_case_type_variant(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node TypedefCaseTypeVariant,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_typedef_visibility(
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node TypedefVisibility,
+    ) -> Result<(), <Self::Params as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_typedef_visibility_and_hint(
+        &mut self,
+        c: &mut <Self::Params as Params>::Context,
+        p: &'node TypedefVisibilityAndHint,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

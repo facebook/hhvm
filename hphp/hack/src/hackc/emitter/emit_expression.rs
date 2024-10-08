@@ -82,6 +82,7 @@ use oxidized::ast_defs;
 use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use oxidized::pos::Pos;
+use oxidized_by_ref::typing_defs;
 use regex::Regex;
 use serde_json::json;
 use string_utils::reified::ReifiedTparam;
@@ -2837,11 +2838,13 @@ fn emit_special_function<'a, 'd>(
                         })
                         .to_string(),
                         Ok(decl_provider::TypeDecl::Typedef(td)) => json!({
-                            "kind": (match td.vis {
-                                aast_defs::TypedefVisibility::Transparent => "type",
-                                aast_defs::TypedefVisibility::Opaque => "newtype",
-                                aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
-                                aast_defs::TypedefVisibility::CaseType => "case type",
+                            "kind": (match td.type_assignment {
+                                typing_defs::TypedefTypeAssignment::SimpleTypeDef((vis, _hint)) => match vis {
+                                    aast_defs::TypedefVisibility::Transparent => "type",
+                                    aast_defs::TypedefVisibility::Opaque => "newtype",
+                                    aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
+                                },
+                                typing_defs::TypedefTypeAssignment::CaseType(_) => "case type",
                             })
                         })
                         .to_string(),

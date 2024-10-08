@@ -180,10 +180,29 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             ~f:(self#on_ctx_hint_ns contexts_ns env)
             td.t_super_constraint
         in
-        let t_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
+        let t_assignment =
+          match td.t_assignment with
+          | SimpleTypeDef { tvh_vis; tvh_hint } ->
+            SimpleTypeDef
+              {
+                tvh_vis;
+                tvh_hint = self#on_ctx_hint_ns contexts_ns env tvh_hint;
+              }
+          | CaseType (variant, variants) ->
+            (* Case types don't support contexts *) CaseType (variant, variants)
+        in
+        let t_runtime_type =
+          self#on_ctx_hint_ns contexts_ns env td.t_runtime_type
+        in
         super#on_typedef
           env
-          { td with t_as_constraint; t_super_constraint; t_kind }
+          {
+            td with
+            t_as_constraint;
+            t_super_constraint;
+            t_assignment;
+            t_runtime_type;
+          }
       else
         super#on_typedef env td
 

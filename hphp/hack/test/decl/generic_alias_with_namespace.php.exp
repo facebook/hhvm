@@ -1,16 +1,18 @@
 [("\\Foo",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [3:6-9]; td_vis = Transparent;
+     { Typing_defs.td_module = None; td_pos = [3:6-9];
        td_tparams =
        [{ Typing_defs_core.tp_variance = Invariant;
           tp_name = ([3:10-11], "T"); tp_tparams = []; tp_constraints = [];
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_as_constraint = None; td_super_constraint = None;
-       td_type =
-       (Rhint ([3:15-23]),
-        (Tapply (([3:15-20], "\\Bar\\X"),
-           [(Rhint ([3:21-22]), (Tgeneric ("T", [])))])));
+       td_type_assignment =
+       (Typing_defs.SimpleTypeDef (Transparent,
+          (Rhint ([3:15-23]),
+           (Tapply (([3:15-20], "\\Bar\\X"),
+              [(Rhint ([3:21-22]), (Tgeneric ("T", [])))])))
+          ));
        td_is_ctx = false; td_attributes = []; td_internal = false;
        td_docs_url = None; td_package_override = None }))
   ]

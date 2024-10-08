@@ -193,6 +193,29 @@ walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
 #[serde(bound = "R: Reason")]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R>>);
 
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub struct TypedefCaseTypeVariant<R: Reason> {
+    pub hint: Ty<R>,
+    pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
+}
+
+walkable!(TypedefCaseTypeVariant<R> => [hint, where_constraints]);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub enum TypedefTypeAssignment<R: Reason> {
+    SimpleTypeDef(aast::TypedefVisibility, Ty<R>),
+    CaseType(TypedefCaseTypeVariant<R>, Box<[TypedefCaseTypeVariant<R>]>),
+}
+
+walkable!(impl<R: Reason> for TypedefTypeAssignment<R> => {
+    Self::SimpleTypeDef(_, ty) => [ty],
+    Self::CaseType(variant, variants) => [variant, variants],
+});
+
 walkable!(Ty<R> as visit_decl_ty => [0, 1]);
 
 impl<R: Reason> Ty<R> {
@@ -706,11 +729,10 @@ walkable!(EnumType<R> => [base, constraint, includes]);
 pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub pos: R::Pos,
-    pub vis: aast::TypedefVisibility,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
     pub as_constraint: Option<Ty<R>>,
     pub super_constraint: Option<Ty<R>>,
-    pub ty: Ty<R>,
+    pub type_assignment: TypedefTypeAssignment<R>,
     pub is_ctx: bool,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub internal: bool,
@@ -718,7 +740,7 @@ pub struct TypedefType<R: Reason> {
     pub package_override: Option<String>,
 }
 
-walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, ty]);
+walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, type_assignment]);
 
 walkable!(ast_defs::ConstraintKind);
 

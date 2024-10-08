@@ -6,10 +6,12 @@
 use oxidized_by_ref as obr;
 use pos::Pos;
 
+use super::ty::TypedefCaseTypeVariant;
 use crate::decl;
 use crate::decl::folded;
 use crate::decl::shallow;
 use crate::decl::ty;
+use crate::decl::ty::TypedefTypeAssignment;
 use crate::decl::Ty;
 use crate::decl::Ty_;
 use crate::reason::Reason;
@@ -503,16 +505,42 @@ impl<R: Reason> From<&obr::shallow_decl_defs::TypedefDecl<'_>> for shallow::Type
         Self {
             module: x.module.map(Into::into),
             pos: x.pos.into(),
-            vis: x.vis,
             tparams: slice(x.tparams),
             as_constraint: x.as_constraint.map(Into::into),
             super_constraint: x.super_constraint.map(Into::into),
-            ty: x.type_.into(),
+            type_assignment: (x.type_assignment).into(),
             is_ctx: x.is_ctx,
             attributes: slice(x.attributes),
             internal: x.internal,
             docs_url: x.docs_url.map(Into::into),
             package_override: x.package_override.map(Into::into),
+        }
+    }
+}
+
+impl<R: Reason> From<obr::decl_defs::TypedefTypeAssignment<'_>> for TypedefTypeAssignment<R> {
+    fn from(x: obr::decl_defs::TypedefTypeAssignment<'_>) -> Self {
+        use obr::decl_defs::TypedefTypeAssignment as Obr;
+        match x {
+            Obr::SimpleTypeDef((vis, ty)) => {
+                TypedefTypeAssignment::SimpleTypeDef(*vis, (*ty).into())
+            }
+            Obr::CaseType((variant, variants)) => {
+                TypedefTypeAssignment::CaseType((*variant).into(), slice(variants))
+            }
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::decl_defs::TypedefCaseTypeVariant<'_>> for TypedefCaseTypeVariant<R> {
+    fn from(
+        obr::decl_defs::TypedefCaseTypeVariant(ty, wcs): &obr::decl_defs::TypedefCaseTypeVariant<
+            '_,
+        >,
+    ) -> Self {
+        TypedefCaseTypeVariant {
+            hint: (*ty).into(),
+            where_constraints: slice(wcs),
         }
     }
 }

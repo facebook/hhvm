@@ -109,7 +109,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     match get_node ty with
     | Tnewtype (name, _, _) ->
       (match Typing_env.get_typedef env name with
-      | Decl_entry.Found { td_vis = Aast.CaseType; td_pos; _ } ->
+      | Decl_entry.Found { td_type_assignment = CaseType _; td_pos; _ } ->
         Typing_error_utils.add_typing_error ~env
         @@ Typing_error.(
              enum

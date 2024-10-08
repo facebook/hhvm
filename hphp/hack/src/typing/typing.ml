@@ -8069,7 +8069,8 @@ end = struct
         List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
       | Tnewtype (name, _, _) -> begin
         match Env.get_typedef env name with
-        | Decl_entry.Found { td_vis = Aast.CaseType; _ } -> (env, acc)
+        (* TODO T201569125 - do I need to do something with the where constraints here? *)
+        | Decl_entry.Found { td_type_assignment = CaseType _; _ } -> (env, acc)
         | _ -> (env, ty :: acc)
       end
       | _ -> (env, ty :: acc)

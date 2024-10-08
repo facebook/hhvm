@@ -2725,55 +2725,65 @@ module PrintClass = struct
 end
 
 module PrintTypedef = struct
-  let typedef ~fuel = function
-    | {
+  let typedef
+      ~fuel
+      {
         td_pos;
         td_module = _;
-        td_vis = _;
         td_attributes = _;
         td_tparams;
         td_as_constraint;
         td_super_constraint;
-        td_type;
+        td_type_assignment;
         td_is_ctx;
         td_internal = _;
         td_docs_url = _;
         td_package_override = _;
-      } ->
-      let (fuel, tparaml_s) = PrintClass.tparam_list ~fuel td_tparams in
-      let constr_s fuel cnstr str =
-        match cnstr with
-        | None -> (fuel, str ^ " [None]")
-        | Some constr ->
-          let (fuel, res) = Full.to_string_decl ~fuel constr in
-          (fuel, str ^ " " ^ res)
-      in
-      let (fuel, as_constr_s) = constr_s fuel td_as_constraint "as" in
-      let (fuel, super_constr_s) = constr_s fuel td_super_constraint "super" in
-      let (fuel, ty_s) = Full.to_string_decl ~fuel td_type in
-      let pos_s = PrintClass.pos_or_decl td_pos in
-      let is_ctx_s = Bool.to_string td_is_ctx in
-      let typedef_str =
-        "ty: "
-        ^ ty_s
-        ^ "\n"
-        ^ "tparaml: "
-        ^ tparaml_s
-        ^ "\n"
-        ^ "constraints: "
-        ^ as_constr_s
-        ^ " "
-        ^ super_constr_s
-        ^ "\n"
-        ^ "pos: "
-        ^ pos_s
-        ^ "\n"
-        ^ "is_ctx: "
-        ^ is_ctx_s
-        ^ "\n"
-        ^ ""
-      in
-      (fuel, typedef_str)
+      } =
+    let (fuel, tparaml_s) = PrintClass.tparam_list ~fuel td_tparams in
+    let constr_s fuel cnstr str =
+      match cnstr with
+      | None -> (fuel, str ^ " [None]")
+      | Some constr ->
+        let (fuel, res) = Full.to_string_decl ~fuel constr in
+        (fuel, str ^ " " ^ res)
+    in
+    let (fuel, as_constr_s) = constr_s fuel td_as_constraint "as" in
+    let (fuel, super_constr_s) = constr_s fuel td_super_constraint "super" in
+    (* TODO T201569125 - print where constraints here? *)
+    let td_type =
+      match td_type_assignment with
+      | SimpleTypeDef (_, td_type)
+      | CaseType ((td_type, _), []) ->
+        td_type
+      | CaseType (variant, variants) ->
+        Typing_make_type.union Reason.none
+        @@ List.map (variant :: variants) ~f:fst
+    in
+    let (fuel, ty_s) = Full.to_string_decl ~fuel td_type in
+    let pos_s = PrintClass.pos_or_decl td_pos in
+    let is_ctx_s = Bool.to_string td_is_ctx in
+    let typedef_str =
+      "ty: "
+      ^ ty_s
+      ^ "\n"
+      ^ "tparaml: "
+      ^ tparaml_s
+      ^ "\n"
+      ^ "constraints: "
+      ^ as_constr_s
+      ^ " "
+      ^ super_constr_s
+      ^ "\n"
+      ^ "pos: "
+      ^ pos_s
+      ^ "\n"
+      ^ "is_ctx: "
+      ^ is_ctx_s
+      ^ "\n"
+      ^ ""
+    in
+    (fuel, typedef_str)
 end
 
 let supply_fuel ?(msg = true) tcopt printer =

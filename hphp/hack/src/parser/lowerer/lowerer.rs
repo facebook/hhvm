@@ -4338,7 +4338,12 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
                 }
             };
             let contexts = p_contexts(contexts, env, None);
-            let mut constrs = p_where_constraint(false, node, where_clause, env)?;
+            let mut constrs = p_where_constraint(
+                WhereConstraintSource::FunctionHeader,
+                node,
+                where_clause,
+                env,
+            )?;
             rewrite_effect_polymorphism(
                 env,
                 &mut parameters,
@@ -5402,8 +5407,22 @@ fn contains_class_body<'a>(
     matches!(&c.body.children, ClassishBody(_))
 }
 
+enum WhereConstraintSource {
+    CaseTypeVariant,
+    FunctionHeader,
+}
+
+impl WhereConstraintSource {
+    fn as_str(&self) -> &'static str {
+        match self {
+            WhereConstraintSource::CaseTypeVariant => "case type variant",
+            WhereConstraintSource::FunctionHeader => "function header",
+        }
+    }
+}
+
 fn p_where_constraint<'a>(
-    is_class: bool,
+    parent_kind: WhereConstraintSource,
     parent: S<'a>,
     node: S<'a>,
     env: &mut Env<'a>,
@@ -5433,13 +5452,11 @@ fn p_where_constraint<'a>(
                 .map(|n| f(n, env))
                 .collect()
         }
-        _ => {
-            if is_class {
-                missing_syntax("classish declaration constraints", parent, env)
-            } else {
-                missing_syntax("function header constraints", parent, env)
-            }
-        }
+        _ => missing_syntax(
+            format!("{} constraints", parent_kind.as_str()).as_str(),
+            parent,
+            env,
+        ),
     }
 }
 
@@ -5926,6 +5943,14 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             };
             let as_constraint = require_one("as", as_constraints);
             let super_constraint = require_one("super", super_constraints);
+            let vis = match token_kind(&c.keyword) {
+                Some(TK::Type) => ast::TypedefVisibility::Transparent,
+                Some(TK::Newtype) if is_module_newtype => ast::TypedefVisibility::OpaqueModule,
+                Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
+                _ => missing_syntax("kind", &c.keyword, env)?,
+            };
+            let hint = p_hint(&c.type_, env)?;
+            let runtime_type = hint.clone();
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
@@ -5936,13 +5961,10 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
-                vis: match token_kind(&c.keyword) {
-                    Some(TK::Type) => ast::TypedefVisibility::Transparent,
-                    Some(TK::Newtype) if is_module_newtype => ast::TypedefVisibility::OpaqueModule,
-                    Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
-                    _ => missing_syntax("kind", &c.keyword, env)?,
-                },
-                kind: p_hint(&c.type_, env)?,
+                assignment: oxidized::aast::TypedefAssignment::SimpleTypeDef(
+                    oxidized::aast::TypedefVisibilityAndHint { vis, hint },
+                ),
+                runtime_type,
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: false,
@@ -5984,60 +6006,94 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 .filter_map(|bound| expect_hint(bound, env))
                 .collect::<Vec<_>>();
 
-            let variants = c
+            // lower the nodes into variants (hints and optionally where clauses)
+            let mut variants = c
                 .variants
                 .syntax_node_to_list()
                 .filter_map(|variant| {
                     if let CaseTypeVariant(ctv) = &variant.children {
-                        expect_hint(&ctv.type_, env)
+                        match expect_hint(&ctv.type_, env) {
+                            Some(hint) => {
+                                match p_where_constraint(
+                                    WhereConstraintSource::CaseTypeVariant,
+                                    node,
+                                    &ctv.where_clause,
+                                    env,
+                                ) {
+                                    Ok(where_constraints) => {
+                                        Some(oxidized::aast::TypedefCaseTypeVariant {
+                                            hint,
+                                            where_constraints,
+                                        })
+                                    }
+                                    Err(e) => {
+                                        emit_error(e, env);
+                                        None
+                                    }
+                                }
+                            }
+                            None => None,
+                        }
                     } else {
                         None
                     }
                 })
                 .collect::<Vec<_>>();
+            // because we want to be able to structurally know that the variant
+            // list is never empty in the AST, we store the variants as a head
+            // and tail instead of a single list
+            // assuming `variants` is non empty (else it's a parse error):
+            // we pop off the front of the list to use as the head (`variant`)
+            let variant;
+            if !variants.is_empty() {
+                variant = variants.remove(0);
+                let assignment =
+                    oxidized::aast::TypedefAssignment::CaseType(variant.clone(), variants.to_vec());
+                let runtime_type = if variants.is_empty() {
+                    variant.hint
+                } else {
+                    let mut hints = variants
+                        .into_iter()
+                        .map(|v| v.hint.clone())
+                        .collect::<Vec<_>>();
+                    hints.insert(0, variant.hint);
+                    let hint_ = ast::Hint_::Hunion(hints);
+                    let pos = p_pos(&c.variants, env);
+                    ast::Hint::new(pos, hint_)
+                };
 
-            // If there are more than one constraints create an intersection
-            let as_constraint = if as_constraints.len() > 1 {
-                let hint_ = ast::Hint_::Hintersection(as_constraints);
-                let pos = p_pos(&c.bounds, env);
-                Some(ast::Hint::new(pos, hint_))
+                // If there are more than one constraints create an intersection
+                let as_constraint = if as_constraints.len() > 1 {
+                    let hint_ = ast::Hint_::Hintersection(as_constraints);
+                    let pos = p_pos(&c.bounds, env);
+                    Some(ast::Hint::new(pos, hint_))
+                } else {
+                    as_constraints.into_iter().next()
+                };
+
+                Ok(vec![ast::Def::mk_typedef(ast::Typedef {
+                    annotation: (),
+                    name: pos_name(&c.name, env)?,
+                    tparams,
+                    as_constraint,
+                    super_constraint: None,
+                    user_attributes,
+                    file_attributes: vec![],
+                    namespace: mk_empty_ns_env(env),
+                    mode: env.file_mode(),
+                    assignment,
+                    runtime_type,
+                    span: p_pos(node, env),
+                    emit_id: None,
+                    is_ctx: false,
+                    internal: kinds.has(modifier::INTERNAL),
+                    module: None,
+                    docs_url,
+                    doc_comment: doc_comment_opt,
+                })])
             } else {
-                as_constraints.into_iter().next()
-            };
-
-            // If there are more than one variants create an union
-            let kind = if variants.len() > 1 {
-                let hint_ = ast::Hint_::Hunion(variants);
-                let pos = p_pos(&c.variants, env);
-                ast::Hint::new(pos, hint_)
-            } else {
-                match variants.into_iter().next() {
-                    Some(hint) => hint,
-                    // If there less than one variant it is an ill-defined case type
-                    None => return missing_syntax("case type variant", node, env),
-                }
-            };
-
-            Ok(vec![ast::Def::mk_typedef(ast::Typedef {
-                annotation: (),
-                name: pos_name(&c.name, env)?,
-                tparams,
-                as_constraint,
-                super_constraint: None,
-                user_attributes,
-                file_attributes: vec![],
-                namespace: mk_empty_ns_env(env),
-                mode: env.file_mode(),
-                vis: ast::TypedefVisibility::CaseType,
-                kind,
-                span: p_pos(node, env),
-                emit_id: None,
-                is_ctx: false,
-                internal: kinds.has(modifier::INTERNAL),
-                module: None,
-                docs_url,
-                doc_comment: doc_comment_opt,
-            })])
+                missing_syntax("case type variant", node, env)
+            }
         }
         ContextAliasDeclaration(c) => {
             let (super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
@@ -6072,6 +6128,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     ast::Hint::new(pos, hint_)
                 }
             };
+            let runtime_type = kind.clone();
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name,
@@ -6087,8 +6144,13 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
                 file_attributes: vec![],
-                vis: ast::TypedefVisibility::Opaque,
-                kind,
+                assignment: oxidized::aast::TypedefAssignment::SimpleTypeDef(
+                    oxidized::aast::TypedefVisibilityAndHint {
+                        vis: ast::TypedefVisibility::Opaque,
+                        hint: kind,
+                    },
+                ),
+                runtime_type,
                 span: p_pos(node, env),
                 emit_id: None,
                 is_ctx: true,

@@ -38,9 +38,8 @@ let expand_typedef_decl
   let {
     td_pos;
     td_module = _;
-    td_vis = _;
     td_tparams;
-    td_type;
+    td_type_assignment;
     td_as_constraint;
     td_super_constraint = _;
     td_is_ctx = _;
@@ -57,6 +56,13 @@ let expand_typedef_decl
   in
   let expansion =
     if should_expand then
+      let td_type =
+        match td_type_assignment with
+        | SimpleTypeDef (_vis, td_type) -> td_type
+        (* TODO T201569125 - should we not expand in the case that there are where constraints? *)
+        | CaseType (variant, variants) ->
+          Typing_utils.get_case_type_variants_as_type variant variants
+      in
       Rhs td_type
     else
       Opaque

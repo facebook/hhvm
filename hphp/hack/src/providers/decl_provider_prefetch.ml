@@ -153,7 +153,23 @@ let next_missing_types
       match find_type_name ~local_memory ~accept_folded:false name with
       | Folded _ -> failwith "didn't ask for folded"
       | Shallow _ -> (acc, visited)
-      | Typedef td -> do_ty d `Ty (acc, visited) td.Typing_defs.td_type
+      | Typedef
+          {
+            Typing_defs.td_type_assignment =
+              Typing_defs.SimpleTypeDef (_, td_type);
+            _;
+          }
+      | Typedef
+          {
+            Typing_defs.td_type_assignment =
+              Typing_defs.CaseType ((td_type, _), []);
+            _;
+          } ->
+        do_ty d `Ty (acc, visited) td_type
+      (* TODO T201569125 - do I need to do something with the where constraints here? *)
+      | Typedef { Typing_defs.td_type_assignment = Typing_defs.CaseType _; _ }
+        ->
+        (acc, visited)
       | Absent -> ({ acc with next_to_ty = name :: acc.next_to_ty }, visited)
     end
     | `Fold -> begin
@@ -166,7 +182,23 @@ let next_missing_types
       match find_type_name ~local_memory name with
       | Folded _ -> (acc, visited)
       | Shallow sc -> do_sc d `Fold sc (acc, visited)
-      | Typedef td -> do_ty d `Fold (acc, visited) td.Typing_defs.td_type
+      | Typedef
+          {
+            Typing_defs.td_type_assignment =
+              Typing_defs.SimpleTypeDef (_, td_type);
+            _;
+          }
+      | Typedef
+          {
+            Typing_defs.td_type_assignment =
+              Typing_defs.CaseType ((td_type, _), []);
+            _;
+          } ->
+        do_ty d `Fold (acc, visited) td_type
+      (* TODO T201569125 - do I need to do something with the where constraints here? *)
+      | Typedef { Typing_defs.td_type_assignment = Typing_defs.CaseType _; _ }
+        ->
+        (acc, visited)
       | Absent -> ({ acc with next_to_fold = name :: acc.next_to_fold }, visited)
     end
   and do_sc d (_goal : [ `Fold ]) sc (acc, visited) =

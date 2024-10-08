@@ -51,6 +51,9 @@ type position_descr =
   | Rwhere_as
   | Rwhere_super
   | Rwhere_eq
+  | Rcase_type_where_as
+  | Rcase_type_where_super
+  | Rcase_type_where_eq
   | Rfun_inout_parameter
 
 type position_variance =
@@ -152,6 +155,12 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rwhere_eq -> "`where _ = _` constraints are invariant on the left and right"
   | Rwhere_super ->
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
+  | Rcase_type_where_as ->
+    "`case type where _ as _` constraints are covariant on the left, contravariant on the right"
+  | Rcase_type_where_eq ->
+    "`case type where _ = _` constraints are invariant on the left and right"
+  | Rcase_type_where_super ->
+    "`case type where _ super _` constraints are contravariant on the left, covariant on the right"
   | Rfun_inout_parameter ->
     "Inout/ref function parameters are both covariant and contravariant"
   | Rrefinement_eq -> "exact refinements are invariant"
@@ -1072,6 +1081,34 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
   List.iter c_methods ~f:(class_method env class_);
   ()
 
+(* in case type where clauses:
+   `as` constraints are contravariant on the left and covariant on the right
+   `super` constraints are covariant on the left and contravariant on the right
+*)
+let case_type_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =
+ fun env (h1, ck, h2) ->
+  let pos1 = Ast_defs.get_pos h1 in
+  let pos2 = Ast_defs.get_pos h2 in
+  match ck with
+  | Ast_defs.Constraint_super ->
+    let var1 = Vcovariant [(pos1, Rcase_type_where_super, Pcovariant)] in
+    let var2 =
+      Vcontravariant [(pos2, Rcase_type_where_super, Pcontravariant)]
+    in
+    hint env var1 h1;
+    hint env var2 h2
+  | Ast_defs.Constraint_eq ->
+    let reason1 = [(pos1, Rcase_type_where_eq, Pinvariant)] in
+    let reason2 = [(pos2, Rcase_type_where_eq, Pinvariant)] in
+    let var = Vinvariant (reason1, reason2) in
+    hint env var h1;
+    hint env var h2
+  | Ast_defs.Constraint_as ->
+    let var1 = Vcontravariant [(pos1, Rcase_type_where_as, Pcontravariant)] in
+    let var2 = Vcovariant [(pos2, Rcase_type_where_as, Pcovariant)] in
+    hint env var1 h1;
+    hint env var2 h2
+
 (*****************************************************************************)
 (* The entry point (for typedefs). *)
 (*****************************************************************************)
@@ -1079,14 +1116,14 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
  fun env typedef ->
   let {
     Aast.t_tparams;
-    t_kind;
+    t_assignment;
+    t_runtime_type = _;
     t_annotation = _;
     t_name = _;
     t_as_constraint = _;
     t_super_constraint = _;
     t_user_attributes = _;
     t_mode = _;
-    t_vis = _;
     t_namespace = _;
     t_span = _;
     t_emit_id = _;
@@ -1099,6 +1136,17 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
   } =
     typedef
   in
+  let (hints, where_constraints) =
+    match t_assignment with
+    | Aast.SimpleTypeDef { Aast.tvh_vis = _; Aast.tvh_hint } -> ([tvh_hint], [])
+    | Aast.CaseType (variant, variants) ->
+      let variants = variant :: variants in
+      let hints = List.map variants ~f:(fun v -> v.Aast.tctv_hint) in
+      let where_constraints =
+        List.map variants ~f:(fun v -> v.Aast.tctv_where_constraints)
+      in
+      (hints, List.concat where_constraints)
+  in
   let env =
     {
       Env.tpenv =
@@ -1108,5 +1156,9 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
       env;
     }
   in
-  let reason_covariant = [(Ast_defs.get_pos t_kind, Rtypedef, Pcovariant)] in
-  hint env (Vcovariant reason_covariant) t_kind
+  List.iter hints ~f:(fun t_kind ->
+      let reason_covariant =
+        [(Ast_defs.get_pos t_kind, Rtypedef, Pcovariant)]
+      in
+      hint env (Vcovariant reason_covariant) t_kind);
+  List.iter where_constraints ~f:(case_type_where_constraint env)

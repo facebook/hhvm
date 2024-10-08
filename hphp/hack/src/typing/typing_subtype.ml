@@ -4911,51 +4911,48 @@ end = struct
           env
       | _ ->
         (* x <: case_type *)
-        (match Env.get_typedef env name_super with
-        | Decl_entry.Found
-            { td_type = lower; td_vis = Aast.CaseType as td_vis; td_tparams; _ }
-        | Decl_entry.Found
-            { td_super_constraint = Some lower; td_tparams; td_vis; _ } ->
-          let try_lower_bound subtype_env env =
-            match
-              Subtype_env.check_infinite_recursion
-                subtype_env
-                { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
-            with
-            | Error _ -> invalid env ~fail
-            | Ok subtype_env ->
-              let ((env, _err), lower_bound) =
-                let ety_env =
-                  (* The this_ty cannot does not need to be set because newtypes
+        let try_lower_bound subtype_env td_tparams localize lower env =
+          match
+            Subtype_env.check_infinite_recursion
+              subtype_env
+              { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
+          with
+          | Error _ -> invalid env ~fail
+          | Ok subtype_env ->
+            let ((env, _err), lower_bound) =
+              let ety_env =
+                (* The this_ty cannot does not need to be set because newtypes
                    * & case types cannot appear within classes thus cannot us
                    * the this type. If we ever change that this could needs to
                    * be changed *)
-                  {
-                    empty_expand_env with
-                    substs =
-                      (if List.is_empty lty_supers then
-                        SMap.empty
-                      else
-                        Decl_subst.make_locl td_tparams lty_supers);
-                  }
-                in
-                match td_vis with
-                | Aast.CaseType ->
-                  Phase.localize_disjoint_union ~ety_env env lower
-                | _ -> Phase.localize ~ety_env env lower
+                {
+                  empty_expand_env with
+                  substs =
+                    (if List.is_empty lty_supers then
+                      SMap.empty
+                    else
+                      Decl_subst.make_locl td_tparams lty_supers);
+                }
               in
-              simplify
-                ~subtype_env
-                ~this_ty:None
-                ~lhs:{ sub_supportdyn = None; ty_sub }
-                ~rhs:
-                  {
-                    super_like;
-                    super_supportdyn = false;
-                    ty_super = lower_bound;
-                  }
-                env
-          in
+              localize ~ety_env env lower
+            in
+            simplify
+              ~subtype_env
+              ~this_ty:None
+              ~lhs:{ sub_supportdyn = None; ty_sub }
+              ~rhs:
+                { super_like; super_supportdyn = false; ty_super = lower_bound }
+              env
+        in
+        (match Env.get_typedef env name_super with
+        | Decl_entry.Found
+            {
+              (* TODO T201569125 - Consider where constraints *)
+              td_type_assignment = CaseType (variant, variants);
+              td_tparams;
+              _;
+            } ->
+          let lower = TUtils.get_case_type_variants_as_type variant variants in
           let ( ||| ) = ( ||| ) ~fail in
           default_subtype
             ~subtype_env
@@ -4964,7 +4961,27 @@ end = struct
             ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ super_like; super_supportdyn = false; ty_super }
             env
-          ||| try_lower_bound subtype_env
+          ||| try_lower_bound
+                subtype_env
+                td_tparams
+                Phase.localize_disjoint_union
+                lower
+        | Decl_entry.Found
+            {
+              td_super_constraint = Some lower;
+              td_tparams;
+              td_type_assignment = SimpleTypeDef _;
+              _;
+            } ->
+          let ( ||| ) = ( ||| ) ~fail in
+          default_subtype
+            ~subtype_env
+            ~this_ty
+            ~fail
+            ~lhs:{ sub_supportdyn; ty_sub }
+            ~rhs:{ super_like; super_supportdyn = false; ty_super }
+            env
+          ||| try_lower_bound subtype_env td_tparams Phase.localize lower
         | _ ->
           default_subtype
             ~subtype_env

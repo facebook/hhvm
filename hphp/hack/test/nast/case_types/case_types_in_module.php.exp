@@ -2,8 +2,8 @@
   (Typedef
      { t_annotation = (); t_name = ([6:20-23], "\\CT1"); t_tparams = []; 
        t_as_constraint = (Some ([6:20-23], (Happly (([6:20-23], "\\HH\\supportdyn"), [([6:20-23], Hmixed)])))); 
-       t_super_constraint = None; t_kind = ([6:26-29], (Hprim Tint)); 
-       t_user_attributes = [];
+       t_super_constraint = None; t_assignment = (CaseType ({ tctv_hint = ([6:26-29], (Hprim Tint)); tctv_where_constraints = [] }, [])); 
+       t_runtime_type = ([6:26-29], (Hprim Tint)); t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-45], (String "case_types"))] }];
           fa_namespace =
@@ -12,7 +12,7 @@
             ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = CaseType;
+       t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -22,8 +22,8 @@
   (Typedef
      { t_annotation = (); t_name = ([8:18-21], "\\CT2"); t_tparams = []; 
        t_as_constraint = (Some ([8:18-21], (Happly (([8:18-21], "\\HH\\supportdyn"), [([8:18-21], Hmixed)])))); 
-       t_super_constraint = None; t_kind = ([8:24-27], (Hprim Tint)); 
-       t_user_attributes = [];
+       t_super_constraint = None; t_assignment = (CaseType ({ tctv_hint = ([8:24-27], (Hprim Tint)); tctv_where_constraints = [] }, [])); 
+       t_runtime_type = ([8:24-27], (Hprim Tint)); t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-45], (String "case_types"))] }];
           fa_namespace =
@@ -32,7 +32,7 @@
             ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = CaseType;
+       t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -42,8 +42,8 @@
   (Typedef
      { t_annotation = (); t_name = ([11:11-14], "\\CT3"); t_tparams = []; 
        t_as_constraint = (Some ([11:11-14], (Happly (([11:11-14], "\\HH\\supportdyn"), [([11:11-14], Hmixed)])))); 
-       t_super_constraint = None; t_kind = ([11:17-20], (Hprim Tint)); 
-       t_user_attributes = [{ ua_name = ([10:3-11], "\\SomeAttr"); ua_params = [] }];
+       t_super_constraint = None; t_assignment = (CaseType ({ tctv_hint = ([11:17-20], (Hprim Tint)); tctv_where_constraints = [] }, [])); 
+       t_runtime_type = ([11:17-20], (Hprim Tint)); t_user_attributes = [{ ua_name = ([10:3-11], "\\SomeAttr"); ua_params = [] }];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-45], (String "case_types"))] }];
           fa_namespace =
@@ -52,7 +52,7 @@
             ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = CaseType;
+       t_mode = Mstrict;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

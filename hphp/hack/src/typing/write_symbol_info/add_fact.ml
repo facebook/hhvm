@@ -566,11 +566,11 @@ let typedef_decl name fa =
 let typedef_defn source_text elem decl_id fa =
   let fa = namespace_decl_opt elem.t_namespace fa in
   let is_transparent =
-    match elem.t_vis with
-    | Transparent -> true
-    | CaseType
-    | Opaque
-    | OpaqueModule ->
+    match elem.t_assignment with
+    | SimpleTypeDef { tvh_vis = Transparent; tvh_hint = _ } -> true
+    | SimpleTypeDef { tvh_vis = Opaque; tvh_hint = _ }
+    | SimpleTypeDef { tvh_vis = OpaqueModule; tvh_hint = _ }
+    | CaseType _ ->
       false
   in
   let (type_params, fa) = type_params source_text elem.t_tparams fa in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0417eed290ce53e190d367fd94b83935>>
+// @generated SignedSource<<3fcfef86b8f0cd47b90b0a2939309f88>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2325,11 +2325,11 @@ impl<P: Params> Node<P> for Typedef<P::Ex, P::En> {
         self.tparams.accept(c, v)?;
         self.as_constraint.accept(c, v)?;
         self.super_constraint.accept(c, v)?;
-        self.kind.accept(c, v)?;
+        self.assignment.accept(c, v)?;
+        self.runtime_type.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
         self.file_attributes.accept(c, v)?;
         self.mode.accept(c, v)?;
-        self.vis.accept(c, v)?;
         self.namespace.accept(c, v)?;
         self.span.accept(c, v)?;
         self.emit_id.accept(c, v)?;
@@ -2338,6 +2338,45 @@ impl<P: Params> Node<P> for Typedef<P::Ex, P::En> {
         self.module.accept(c, v)?;
         self.docs_url.accept(c, v)?;
         self.doc_comment.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for TypedefAssignment {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_typedef_assignment(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            TypedefAssignment::SimpleTypeDef(a0) => a0.accept(c, v),
+            TypedefAssignment::CaseType(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
+        }
+    }
+}
+impl<P: Params> Node<P> for TypedefCaseTypeVariant {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_typedef_case_type_variant(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.hint.accept(c, v)?;
+        self.where_constraints.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for TypedefVisibility {
@@ -2357,8 +2396,24 @@ impl<P: Params> Node<P> for TypedefVisibility {
             TypedefVisibility::Transparent => Ok(()),
             TypedefVisibility::Opaque => Ok(()),
             TypedefVisibility::OpaqueModule => Ok(()),
-            TypedefVisibility::CaseType => Ok(()),
         }
+    }
+}
+impl<P: Params> Node<P> for TypedefVisibilityAndHint {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_typedef_visibility_and_hint(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.vis.accept(c, v)?;
+        self.hint.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Uop {

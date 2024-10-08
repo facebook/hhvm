@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7fdd9f10513daaeb9e6368aadf7ab9a1>>
+// @generated SignedSource<<fb3e303d4ab0d48be26225ee1888951a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -545,6 +545,65 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C)]
+pub struct TypedefCaseTypeVariant<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub  &'a [&'a WhereConstraint<'a>],
+);
+impl<'a> TrivialDrop for TypedefCaseTypeVariant<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypedefCaseTypeVariant<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum TypedefTypeAssignment<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    SimpleTypeDef(&'a (oxidized::ast_defs::TypedefVisibility, &'a Ty<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    CaseType(
+        &'a (
+            &'a TypedefCaseTypeVariant<'a>,
+            &'a [&'a TypedefCaseTypeVariant<'a>],
+        ),
+    ),
+}
+impl<'a> TrivialDrop for TypedefTypeAssignment<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypedefTypeAssignment<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "td_")]
 #[repr(C)]
 pub struct TypedefType<'a> {
@@ -552,7 +611,6 @@ pub struct TypedefType<'a> {
     pub module: Option<ast_defs::Id<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-    pub vis: oxidized::ast_defs::TypedefVisibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -560,7 +618,7 @@ pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub super_constraint: Option<&'a Ty<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a Ty<'a>,
+    pub type_assignment: TypedefTypeAssignment<'a>,
     pub is_ctx: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub attributes: &'a [&'a UserAttribute<'a>],

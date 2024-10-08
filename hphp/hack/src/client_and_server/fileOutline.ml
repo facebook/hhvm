@@ -424,8 +424,8 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
   let pos = fst tdef.t_name in
-  let kind_pos = fst tdef.t_kind in
-  let span = Pos.btw pos kind_pos in
+  let hint_for_end_pos = tdef.t_runtime_type in
+  let span = Pos.btw pos (fst hint_for_end_pos) in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         Pos.get_text_from_pos ~content:source_text span)

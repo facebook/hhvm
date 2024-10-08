@@ -181,377 +181,196 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
 trait PubSubStreamingServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   returnstream(1: i32 i32_from,
+   *                2: i32 i32_to);
+   */
+  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_returnstream_args::fromShape(shape(
+      'i32_from' => $i32_from,
+      'i32_to' => $i32_to,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
+    $currentseqid = $this->sendImplHelper($args, "returnstream", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32, throws (1: FooStreamEx e)>
+   *   streamthrows(1: i32 foo);
+   */
+  public async function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_streamthrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "streamthrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public async function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_servicethrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "servicethrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public async function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_servicethrows2_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
+    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32, throws (1: FooStreamEx e)>
+   *   boththrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public async function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_boththrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "boththrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32, throws (1: FooStreamEx e)>
+   *   responseandstreamstreamthrows(1: i32 foo);
+   */
+  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_responseandstreamstreamthrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32>
+   *   responseandstreamservicethrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_responseandstreamservicethrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * i32, stream<i32, throws (1: FooStreamEx e)>
+   *   responseandstreamboththrows(1: i32 foo)
+   *   throws (1: FooEx e);
+   */
+  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_responseandstreamboththrows_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   returnstreamFast(1: i32 i32_from,
+   *                    2: i32 i32_to);
+   */
+  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_returnstreamFast_args::fromShape(shape(
+      'i32_from' => $i32_from,
+      'i32_to' => $i32_to,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
+    $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false, "PubSubStreamingService" );
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements PubSubStreamingServiceAsyncClientIf {
   use PubSubStreamingServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstream(1: i32 i32_from,
-   *                2: i32 i32_to);
-   */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_returnstream_args::fromShape(shape(
-      'i32_from' => $i32_from,
-      'i32_to' => $i32_to,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstream", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   streamthrows(1: i32 foo);
-   */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_streamthrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "streamthrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_servicethrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows2(1: i32 foo)
-   *   throws (1: FooEx e1,
-   *           2: FooEx2 e2);
-   */
-  public async function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_servicethrows2_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   boththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_boththrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "boththrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamstreamthrows(1: i32 foo);
-   */
-  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamstreamthrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32>
-   *   responseandstreamservicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamservicethrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamboththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamboththrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstreamFast(1: i32 i32_from,
-   *                    2: i32 i32_to);
-   */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_returnstreamFast_args::fromShape(shape(
-      'i32_from' => $i32_from,
-      'i32_to' => $i32_to,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubStreamingServiceClientIf {
   use PubSubStreamingServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstream(1: i32 i32_from,
-   *                2: i32 i32_to);
-   */
-  public async function returnstream(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_returnstream_args::fromShape(shape(
-      'i32_from' => $i32_from,
-      'i32_to' => $i32_to,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstream", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   streamthrows(1: i32 foo);
-   */
-  public async function streamthrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_streamthrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "streamthrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function servicethrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_servicethrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   servicethrows2(1: i32 foo)
-   *   throws (1: FooEx e1,
-   *           2: FooEx2 e2);
-   */
-  public async function servicethrows2(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_servicethrows2_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32, throws (1: FooStreamEx e)>
-   *   boththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function boththrows(int $foo): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_boththrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "boththrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamstreamthrows(1: i32 foo);
-   */
-  public async function responseandstreamstreamthrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamstreamthrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32>
-   *   responseandstreamservicethrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function responseandstreamservicethrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamservicethrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * i32, stream<i32, throws (1: FooStreamEx e)>
-   *   responseandstreamboththrows(1: i32 foo)
-   *   throws (1: FooEx e);
-   */
-  public async function responseandstreamboththrows(int $foo): Awaitable<\ResponseAndStream<int, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_responseandstreamboththrows_args::fromShape(shape(
-      'foo' => $foo,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i32>
-   *   returnstreamFast(1: i32 i32_from,
-   *                    2: i32 i32_to);
-   */
-  public async function returnstreamFast(int $i32_from, int $i32_to): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PubSubStreamingService_returnstreamFast_args::fromShape(shape(
-      'i32_from' => $i32_from,
-      'i32_to' => $i32_to,
-    ));
-    await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false, "PubSubStreamingService" );
-    return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
 }

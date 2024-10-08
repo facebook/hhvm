@@ -71,73 +71,44 @@ interface BarClientIf extends \IThriftSyncIf {
 trait BarClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * string
+   *   baz(1: set<i32> a,
+   *       2: list<map<i32, set<string>>> b,
+   *       3: i64 c,
+   *       4: Foo d,
+   *       5: i64 e);
+   */
+  public async function baz(\ConstSet<int> $a, KeyedContainer<int, KeyedContainer<int, \ConstSet<string>>> $b, int $c, ?Foo $d, int $e): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = Bar_baz_args::fromShape(shape(
+      'a' => $a,
+      'b' => (new Vector($b))->map(
+        $_val0 ==> new Map($_val0)
+      ),
+      'c' => $c,
+      'd' => $d,
+      'e' => $e,
+    ));
+    await $this->asyncHandler_->genBefore("Bar", "baz", $args);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
+    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
-  /**
-   * Original thrift definition:-
-   * string
-   *   baz(1: set<i32> a,
-   *       2: list<map<i32, set<string>>> b,
-   *       3: i64 c,
-   *       4: Foo d,
-   *       5: i64 e);
-   */
-  public async function baz(\ConstSet<int> $a, KeyedContainer<int, KeyedContainer<int, \ConstSet<string>>> $b, int $c, ?Foo $d, int $e): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Bar_baz_args::fromShape(shape(
-      'a' => $a,
-      'b' => (new Vector($b))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-      'c' => $c,
-      'd' => $d,
-      'e' => $e,
-    ));
-    await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
-    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   baz(1: set<i32> a,
-   *       2: list<map<i32, set<string>>> b,
-   *       3: i64 c,
-   *       4: Foo d,
-   *       5: i64 e);
-   */
-  public async function baz(\ConstSet<int> $a, KeyedContainer<int, KeyedContainer<int, \ConstSet<string>>> $b, int $c, ?Foo $d, int $e): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Bar_baz_args::fromShape(shape(
-      'a' => $a,
-      'b' => (new Vector($b))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-      'c' => $c,
-      'd' => $d,
-      'e' => $e,
-    ));
-    await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
-    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_baz(\ConstSet<int> $a, KeyedContainer<int, KeyedContainer<int, \ConstSet<string>>> $b, int $c, ?Foo $d, int $e): int {

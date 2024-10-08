@@ -6835,6 +6835,11 @@ void t_hack_generator::_generate_service_client(
   generate_php_docstring(out, tservice);
 
   std::string long_name = php_servicename_mangle(mangle, tservice);
+
+  const std::string module = program_->get_namespace("hack.module");
+  if (!module.empty()) {
+    out << "internal ";
+  }
   out << "trait " << long_name << "ClientBase {\n"
       << "  require extends \\ThriftClientBase;\n\n";
   indent_up();
@@ -6861,6 +6866,21 @@ void t_hack_generator::_generate_service_client(
 
       indent_down();
       out << indent() << "}\n\n";
+    }
+  }
+
+  // Generate functions as necessary.
+  for (const auto* function : get_supported_client_functions(tservice)) {
+    if (skip_codegen(function)) {
+      continue;
+    }
+    _generate_service_client_child_fn(out, tservice, function);
+    if (no_use_hack_collections_) {
+      _generate_service_client_child_fn(
+          out,
+          tservice,
+          function,
+          /*legacy_arrays*/ true);
     }
   }
 
@@ -7096,21 +7116,6 @@ void t_hack_generator::_generate_service_client_children(
       << " implements " << long_name << interface_suffix << "If {\n"
       << "  use " << long_name << "ClientBase;\n\n";
   indent_up();
-
-  // Generate functions as necessary.
-  for (const auto* function : get_supported_client_functions(tservice)) {
-    if (skip_codegen(function)) {
-      continue;
-    }
-    _generate_service_client_child_fn(out, tservice, function);
-    if (no_use_hack_collections_) {
-      _generate_service_client_child_fn(
-          out,
-          tservice,
-          function,
-          /*legacy_arrays*/ true);
-    }
-  }
 
   if (!async) {
     out << indent() << "/* send and recv functions */\n";

@@ -78,49 +78,32 @@ trait MyServiceClientBase {
     return $interaction;
   }
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   foo();
+   */
+  public async function foo(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyService_foo_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyService", "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "MyService" );
+    await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "MyService" );
-    await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "MyService" );
-    await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_foo(): int {

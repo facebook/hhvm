@@ -80,86 +80,52 @@ interface TestServiceWithServiceAnnotationClientIf extends \IThriftSyncIf {
  * Original thrift service:-
  * TestServiceWithServiceAnnotation
  */
-trait TestServiceWithServiceAnnotationClientBase {
+internal trait TestServiceWithServiceAnnotationClientBase {
   require extends \ThriftClientBase;
+
+  /**
+   * Original thrift definition:-
+   * i32
+   *   testMethodWithServiceAnnotation();
+   */
+  internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, "TestServiceWithServiceAnnotation" );
+    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   testMethodWithServiceAnnotation2();
+   */
+  internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation2", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, "TestServiceWithServiceAnnotation" );
+    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
+  }
 
 }
 
 class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase implements TestServiceWithServiceAnnotationAsyncClientIf {
   use TestServiceWithServiceAnnotationClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i32
-   *   testMethodWithServiceAnnotation();
-   */
-  internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, "TestServiceWithServiceAnnotation" );
-    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   testMethodWithServiceAnnotation2();
-   */
-  internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation2", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, "TestServiceWithServiceAnnotation" );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implements TestServiceWithServiceAnnotationClientIf {
   use TestServiceWithServiceAnnotationClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i32
-   *   testMethodWithServiceAnnotation();
-   */
-  internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, "TestServiceWithServiceAnnotation" );
-    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   testMethodWithServiceAnnotation2();
-   */
-  internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation2", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, "TestServiceWithServiceAnnotation" );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   internal function send_testMethodWithServiceAnnotation(): int {

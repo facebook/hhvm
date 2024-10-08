@@ -84,94 +84,56 @@ interface DbMixedStackArgumentsClientIf extends \IThriftSyncIf {
  * Original thrift service:-
  * DbMixedStackArguments
  */
-trait DbMixedStackArgumentsClientBase {
+internal trait DbMixedStackArgumentsClientBase {
   require extends \ThriftClientBase;
+
+  /**
+   * Original thrift definition:-
+   * binary
+   *   getDataByKey0(1: string key);
+   */
+  public async function getDataByKey0(string $key): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
+      'key' => $key,
+    ));
+    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * binary
+   *   getDataByKey1(1: string key);
+   */
+  public async function getDataByKey1(string $key): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
+      'key' => $key,
+    ));
+    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
+    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
+  }
 
 }
 
 class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMixedStackArgumentsAsyncClientIf {
   use DbMixedStackArgumentsClientBase;
 
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey0(1: string key);
-   */
-  public async function getDataByKey0(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
-      'key' => $key,
-    ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey1(1: string key);
-   */
-  public async function getDataByKey1(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
-      'key' => $key,
-    ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedStackArgumentsClientIf {
   use DbMixedStackArgumentsClientBase;
-
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey0(1: string key);
-   */
-  public async function getDataByKey0(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
-      'key' => $key,
-    ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * binary
-   *   getDataByKey1(1: string key);
-   */
-  public async function getDataByKey1(string $key): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
-      'key' => $key,
-    ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_getDataByKey0(string $key): int {

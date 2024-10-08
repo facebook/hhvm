@@ -101,117 +101,66 @@ interface FooBarBazServiceClientIf extends \IThriftSyncIf {
 trait FooBarBazServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   foo();
+   */
+  public async function foo(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = FooBarBazService_foo_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
+    await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   bar();
+   */
+  public async function bar(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = FooBarBazService_bar_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
+    await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   baz();
+   */
+  public async function baz(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = FooBarBazService_baz_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
+    await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBazServiceAsyncClientIf {
   use FooBarBazServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   bar();
-   */
-  public async function bar(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   baz();
-   */
-  public async function baz(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_baz_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServiceClientIf {
   use FooBarBazServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   bar();
-   */
-  public async function bar(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   baz();
-   */
-  public async function baz(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = FooBarBazService_baz_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
-    await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_foo(): int {

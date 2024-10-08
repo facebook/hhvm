@@ -107,131 +107,73 @@ interface PrimitivesServiceClientIf extends \IThriftSyncIf {
 trait PrimitivesServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * i64
+   *   init(1: i64 param0,
+   *        2: i64 param1);
+   */
+  public async function init(int $param0, int $param1): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PrimitivesService_init_args::fromShape(shape(
+      'param0' => $param0,
+      'param1' => $param1,
+    ));
+    await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
+    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
+    return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * Result
+   *   method_that_throws()
+   *   throws (1: CustomException e);
+   */
+  public async function method_that_throws(): Awaitable<Result> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
+    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
+    return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   return_void_method(1: i64 id);
+   */
+  public async function return_void_method(int $id): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PrimitivesService_return_void_method_args::fromShape(shape(
+      'id' => $id,
+    ));
+    await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
+    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
+    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class PrimitivesServiceAsyncClient extends \ThriftClientBase implements PrimitivesServiceAsyncClientIf {
   use PrimitivesServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i64
-   *   init(1: i64 param0,
-   *        2: i64 param1);
-   */
-  public async function init(int $param0, int $param1): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_init_args::fromShape(shape(
-      'param0' => $param0,
-      'param1' => $param1,
-    ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
-    return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * Result
-   *   method_that_throws()
-   *   throws (1: CustomException e);
-   */
-  public async function method_that_throws(): Awaitable<Result> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
-    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
-    return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   return_void_method(1: i64 id);
-   */
-  public async function return_void_method(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_return_void_method_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
-    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
-    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesServiceClientIf {
   use PrimitivesServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i64
-   *   init(1: i64 param0,
-   *        2: i64 param1);
-   */
-  public async function init(int $param0, int $param1): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_init_args::fromShape(shape(
-      'param0' => $param0,
-      'param1' => $param1,
-    ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
-    return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * Result
-   *   method_that_throws()
-   *   throws (1: CustomException e);
-   */
-  public async function method_that_throws(): Awaitable<Result> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
-    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
-    return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   return_void_method(1: i64 id);
-   */
-  public async function return_void_method(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = PrimitivesService_return_void_method_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
-    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
-    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_init(int $param0, int $param1): int {

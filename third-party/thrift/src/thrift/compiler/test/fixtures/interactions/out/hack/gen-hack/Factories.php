@@ -59,49 +59,32 @@ interface FactoriesClientIf extends \IThriftSyncIf {
 trait FactoriesClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   foo();
+   */
+  public async function foo(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = Factories_foo_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("Factories", "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
+    await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncClientIf {
   use FactoriesClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Factories_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Factories", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
-    await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
   use FactoriesClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Factories_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Factories", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
-    await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_foo(): int {

@@ -72,49 +72,32 @@ trait InteractWithSharedClientBase {
     return $interaction;
   }
 
+  /**
+   * Original thrift definition:-
+   * shared.DoSomethingResult
+   *   do_some_similar_things();
+   */
+  public async function do_some_similar_things(): Awaitable<DoSomethingResult> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
+    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
+    return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class InteractWithSharedAsyncClient extends \ThriftClientBase implements InteractWithSharedAsyncClientIf {
   use InteractWithSharedClientBase;
 
-  /**
-   * Original thrift definition:-
-   * shared.DoSomethingResult
-   *   do_some_similar_things();
-   */
-  public async function do_some_similar_things(): Awaitable<DoSomethingResult> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
-    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
-    return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class InteractWithSharedClient extends \ThriftClientBase implements InteractWithSharedClientIf {
   use InteractWithSharedClientBase;
-
-  /**
-   * Original thrift definition:-
-   * shared.DoSomethingResult
-   *   do_some_similar_things();
-   */
-  public async function do_some_similar_things(): Awaitable<DoSomethingResult> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
-    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
-    return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_do_some_similar_things(): int {

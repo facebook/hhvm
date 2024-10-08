@@ -66,49 +66,32 @@ trait BadServiceClientBase {
     return $interaction;
   }
 
+  /**
+   * Original thrift definition:-
+   * i32
+   *   bar();
+   */
+  public async function bar(): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = BadService_bar_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("BadService", "bar", $args);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
+    return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsyncClientIf {
   use BadServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i32
-   *   bar();
-   */
-  public async function bar(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = BadService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("BadService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
-    return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
   use BadServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i32
-   *   bar();
-   */
-  public async function bar(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = BadService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("BadService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
-    return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_bar(): int {

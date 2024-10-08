@@ -125,141 +125,78 @@ interface CClientIf extends \IThriftSyncIf {
 trait CClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Function doctext.
+   * 
+   * Original thrift definition:-
+   * void
+   *   f();
+   */
+  public async function f(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = C_f_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("C", "f", $args);
+    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
+    await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Streaming function
+   * 
+   * Original thrift definition:-
+   * void, stream<number>
+   *   numbers();
+   */
+  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = C_numbers_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("C", "numbers", $args);
+    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
+    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * 
+   * Original thrift definition:-
+   * string
+   *   thing(1: i32 a,
+   *         2: string b,
+   *         3: set<i32> c)
+   *   throws (1: Bang bang);
+   */
+  public async function thing(int $a, string $b, Set<int> $c): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = C_thing_args::fromShape(shape(
+      'a' => $a,
+      'b' => $b,
+      'c' => $c,
+    ));
+    await $this->asyncHandler_->genBefore("C", "thing", $args);
+    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
+    return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
   use CClientBase;
 
-  /**
-   * Function doctext.
-   * 
-   * Original thrift definition:-
-   * void
-   *   f();
-   */
-  public async function f(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_f_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "f", $args);
-    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
-    await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Streaming function
-   * 
-   * Original thrift definition:-
-   * void, stream<number>
-   *   numbers();
-   */
-  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_numbers_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
-    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * 
-   * Original thrift definition:-
-   * string
-   *   thing(1: i32 a,
-   *         2: string b,
-   *         3: set<i32> c)
-   *   throws (1: Bang bang);
-   */
-  public async function thing(int $a, string $b, Set<int> $c): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_thing_args::fromShape(shape(
-      'a' => $a,
-      'b' => $b,
-      'c' => $c,
-    ));
-    await $this->asyncHandler_->genBefore("C", "thing", $args);
-    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
-    return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class CClient extends \ThriftClientBase implements CClientIf {
   use CClientBase;
-
-  /**
-   * Function doctext.
-   * 
-   * Original thrift definition:-
-   * void
-   *   f();
-   */
-  public async function f(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_f_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "f", $args);
-    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
-    await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Streaming function
-   * 
-   * Original thrift definition:-
-   * void, stream<number>
-   *   numbers();
-   */
-  public async function numbers(): Awaitable<\ResponseAndStream<null, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_numbers_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
-    return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * 
-   * Original thrift definition:-
-   * string
-   *   thing(1: i32 a,
-   *         2: string b,
-   *         3: set<i32> c)
-   *   throws (1: Bang bang);
-   */
-  public async function thing(int $a, string $b, Set<int> $c): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = C_thing_args::fromShape(shape(
-      'a' => $a,
-      'b' => $b,
-      'c' => $c,
-    ));
-    await $this->asyncHandler_->genBefore("C", "thing", $args);
-    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
-    return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_f(): int {

@@ -61,55 +61,36 @@ interface FooServiceClientIf extends \IThriftSyncIf {
 trait FooServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * i32
+   *   ping(1: string str_arg);
+   */
+  public async function ping(string $str_arg): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\jsenum\FooService_ping_args::fromShape(shape(
+      'str_arg' => $str_arg,
+    ));
+    await $this->asyncHandler_->genBefore("FooService", "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService" );
+    return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 <<Oncalls('thrift')>>
 class FooServiceAsyncClient extends \ThriftClientBase implements FooServiceAsyncClientIf {
   use FooServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
-   */
-  public async function ping(string $str_arg): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\jsenum\FooService_ping_args::fromShape(shape(
-      'str_arg' => $str_arg,
-    ));
-    await $this->asyncHandler_->genBefore("FooService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService" );
-    return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 <<Oncalls('thrift')>>
 class FooServiceClient extends \ThriftClientBase implements FooServiceClientIf {
   use FooServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
-   */
-  public async function ping(string $str_arg): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\jsenum\FooService_ping_args::fromShape(shape(
-      'str_arg' => $str_arg,
-    ));
-    await $this->asyncHandler_->genBefore("FooService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService" );
-    return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_ping(string $str_arg): int {

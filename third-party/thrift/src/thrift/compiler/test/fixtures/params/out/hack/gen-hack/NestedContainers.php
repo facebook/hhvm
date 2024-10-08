@@ -143,225 +143,120 @@ interface NestedContainersClientIf extends \IThriftSyncIf {
 trait NestedContainersClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   mapList(1: map<i32, list<i32>> foo);
+   */
+  public async function mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = NestedContainers_mapList_args::fromShape(shape(
+      'foo' => (new Map($foo))->map(
+        $_val0 ==> new Vector($_val0)
+      ),
+    ));
+    await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
+    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
+    await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   mapSet(1: map<i32, set<i32>> foo);
+   */
+  public async function mapSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = NestedContainers_mapSet_args::fromShape(shape(
+      'foo' => new Map($foo),
+    ));
+    await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
+    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
+    await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   listMap(1: list<map<i32, i32>> foo);
+   */
+  public async function listMap(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = NestedContainers_listMap_args::fromShape(shape(
+      'foo' => (new Vector($foo))->map(
+        $_val0 ==> new Map($_val0)
+      ),
+    ));
+    await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
+    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
+    await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   listSet(1: list<set<i32>> foo);
+   */
+  public async function listSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = NestedContainers_listSet_args::fromShape(shape(
+      'foo' => new Vector($foo),
+    ));
+    await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
+    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
+    await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   turtles(1: list<list<map<i32, map<i32, set<i32>>>>> foo);
+   */
+  public async function turtles(KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, Set<int>>>>> $foo): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = NestedContainers_turtles_args::fromShape(shape(
+      'foo' => (new Vector($foo))->map(
+        $_val0 ==> (new Vector($_val0))->map(
+          $_val1 ==> (new Map($_val1))->map(
+            $_val2 ==> new Map($_val2)
+          )
+        )
+      ),
+    ));
+    await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
+    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
+    await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class NestedContainersAsyncClient extends \ThriftClientBase implements NestedContainersAsyncClientIf {
   use NestedContainersClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   mapList(1: map<i32, list<i32>> foo);
-   */
-  public async function mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_mapList_args::fromShape(shape(
-      'foo' => (new Map($foo))->map(
-        $_val0 ==> new Vector($_val0)
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   mapSet(1: map<i32, set<i32>> foo);
-   */
-  public async function mapSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_mapSet_args::fromShape(shape(
-      'foo' => new Map($foo),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   listMap(1: list<map<i32, i32>> foo);
-   */
-  public async function listMap(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_listMap_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
-    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   listSet(1: list<set<i32>> foo);
-   */
-  public async function listSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_listSet_args::fromShape(shape(
-      'foo' => new Vector($foo),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   turtles(1: list<list<map<i32, map<i32, set<i32>>>>> foo);
-   */
-  public async function turtles(KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, Set<int>>>>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_turtles_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> (new Vector($_val0))->map(
-          $_val1 ==> (new Map($_val1))->map(
-            $_val2 ==> new Map($_val2)
-          )
-        )
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
-    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class NestedContainersClient extends \ThriftClientBase implements NestedContainersClientIf {
   use NestedContainersClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   mapList(1: map<i32, list<i32>> foo);
-   */
-  public async function mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_mapList_args::fromShape(shape(
-      'foo' => (new Map($foo))->map(
-        $_val0 ==> new Vector($_val0)
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   mapSet(1: map<i32, set<i32>> foo);
-   */
-  public async function mapSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_mapSet_args::fromShape(shape(
-      'foo' => new Map($foo),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   listMap(1: list<map<i32, i32>> foo);
-   */
-  public async function listMap(KeyedContainer<int, KeyedContainer<int, int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_listMap_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
-    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   listSet(1: list<set<i32>> foo);
-   */
-  public async function listSet(KeyedContainer<int, Set<int>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_listSet_args::fromShape(shape(
-      'foo' => new Vector($foo),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   turtles(1: list<list<map<i32, map<i32, set<i32>>>>> foo);
-   */
-  public async function turtles(KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, Set<int>>>>> $foo): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = NestedContainers_turtles_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> (new Vector($_val0))->map(
-          $_val1 ==> (new Map($_val1))->map(
-            $_val2 ==> new Map($_val2)
-          )
-        )
-      ),
-    ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
-    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
-    await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): int {

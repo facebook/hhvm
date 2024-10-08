@@ -86,87 +86,51 @@ interface AdapterServiceClientIf extends \IThriftSyncIf {
 trait AdapterServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * CountingStruct
+   *   count();
+   */
+  public async function count(): Awaitable<\facebook\thrift\test\CountingStruct> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("AdapterService", "count", $args);
+    $currentseqid = $this->sendImplHelper($args, "count", false, "AdapterService" );
+    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * HeapAllocated
+   *   adaptedTypes(1: HeapAllocated arg);
+   */
+  public async function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
+      'arg' => $arg,
+    ));
+    await $this->asyncHandler_->genBefore("AdapterService", "adaptedTypes", $args);
+    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, "AdapterService" );
+    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class AdapterServiceAsyncClient extends \ThriftClientBase implements AdapterServiceAsyncClientIf {
   use AdapterServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * CountingStruct
-   *   count();
-   */
-  public async function count(): Awaitable<\facebook\thrift\test\CountingStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("AdapterService", "count", $args);
-    $currentseqid = $this->sendImplHelper($args, "count", false, "AdapterService" );
-    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public async function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
-      'arg' => $arg,
-    ));
-    await $this->asyncHandler_->genBefore("AdapterService", "adaptedTypes", $args);
-    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, "AdapterService" );
-    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceClientIf {
   use AdapterServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * CountingStruct
-   *   count();
-   */
-  public async function count(): Awaitable<\facebook\thrift\test\CountingStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("AdapterService", "count", $args);
-    $currentseqid = $this->sendImplHelper($args, "count", false, "AdapterService" );
-    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * HeapAllocated
-   *   adaptedTypes(1: HeapAllocated arg);
-   */
-  public async function adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): Awaitable<\facebook\thrift\test\HeapAllocated> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
-      'arg' => $arg,
-    ));
-    await $this->asyncHandler_->genBefore("AdapterService", "adaptedTypes", $args);
-    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, "AdapterService" );
-    return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_count(): int {

@@ -78,49 +78,32 @@ trait PerformClientBase {
     return $interaction;
   }
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   foo();
+   */
+  public async function foo(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = Perform_foo_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("Perform", "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, "Perform" );
+    await $this->genAwaitResponse(Perform_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class PerformAsyncClient extends \ThriftClientBase implements PerformAsyncClientIf {
   use PerformClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Perform_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Perform", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Perform" );
-    await $this->genAwaitResponse(Perform_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class PerformClient extends \ThriftClientBase implements PerformClientIf {
   use PerformClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   foo();
-   */
-  public async function foo(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Perform_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Perform", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Perform" );
-    await $this->genAwaitResponse(Perform_foo_result::class, "foo", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_foo(): int {

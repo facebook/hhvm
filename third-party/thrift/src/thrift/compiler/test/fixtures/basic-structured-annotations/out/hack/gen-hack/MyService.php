@@ -86,87 +86,51 @@ interface MyServiceClientIf extends \IThriftSyncIf {
 trait MyServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * annotated_inline_string
+   *   first();
+   */
+  public async function first(): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyService", "first", $args);
+    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * bool
+   *   second(1: i64 count);
+   */
+  public async function second(int $count): Awaitable<bool> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
+      'count' => $count,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "second", $args);
+    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
+    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * annotated_inline_string
-   *   first();
-   */
-  public async function first(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "first", $args);
-    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * bool
-   *   second(1: i64 count);
-   */
-  public async function second(int $count): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
-      'count' => $count,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * annotated_inline_string
-   *   first();
-   */
-  public async function first(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "first", $args);
-    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * bool
-   *   second(1: i64 count);
-   */
-  public async function second(int $count): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
-      'count' => $count,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_first(): int {

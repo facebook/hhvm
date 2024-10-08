@@ -86,99 +86,57 @@ interface MyServiceClientIf extends \IThriftSyncIf {
 trait MyServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * MyStruct
+   *   func(1: string arg1,
+   *        2: MyStruct arg2);
+   */
+  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyService_func_args::fromShape(shape(
+      'arg1' => $arg1,
+      'arg2' => $arg2,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "func", $args);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "MyService" );
+    return await $this->genAwaitResponse(MyService_func_result::class, "func", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * MyStruct
+   *   func1(1: string arg1,
+   *         2: MyStruct arg2);
+   */
+  public async function func1(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyService_func1_args::fromShape(shape(
+      'arg1' => $arg1,
+      'arg2' => $arg2,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "func1", $args);
+    $currentseqid = $this->sendImplHelper($args, "func1", false, "MyService" );
+    return await $this->genAwaitResponse(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func(1: string arg1,
-   *        2: MyStruct arg2);
-   */
-  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "MyService" );
-    return await $this->genAwaitResponse(MyService_func_result::class, "func", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func1(1: string arg1,
-   *         2: MyStruct arg2);
-   */
-  public async function func1(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_func1_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "func1", $args);
-    $currentseqid = $this->sendImplHelper($args, "func1", false, "MyService" );
-    return await $this->genAwaitResponse(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func(1: string arg1,
-   *        2: MyStruct arg2);
-   */
-  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "MyService" );
-    return await $this->genAwaitResponse(MyService_func_result::class, "func", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * MyStruct
-   *   func1(1: string arg1,
-   *         2: MyStruct arg2);
-   */
-  public async function func1(string $arg1, ?MyStruct $arg2): Awaitable<MyStruct> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyService_func1_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "func1", $args);
-    $currentseqid = $this->sendImplHelper($args, "func1", false, "MyService" );
-    return await $this->genAwaitResponse(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_func(string $arg1, ?MyStruct $arg2): int {

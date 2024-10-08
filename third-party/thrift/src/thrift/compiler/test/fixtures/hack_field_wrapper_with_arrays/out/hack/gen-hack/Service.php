@@ -62,57 +62,36 @@ interface ServiceClientIf extends \IThriftSyncIf {
 trait ServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * i32
+   *   func(1: string arg1,
+   *        2: include.MyStruct arg2);
+   */
+  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = Service_func_args::fromShape(shape(
+      'arg1' => $arg1,
+      'arg2' => $arg2,
+    ));
+    await $this->asyncHandler_->genBefore("Service", "func", $args);
+    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
+    return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClientIf {
   use ServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i32
-   *   func(1: string arg1,
-   *        2: include.MyStruct arg2);
-   */
-  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Service_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
-    return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
   use ServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i32
-   *   func(1: string arg1,
-   *        2: include.MyStruct arg2);
-   */
-  public async function func(string $arg1, ?MyStruct $arg2): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = Service_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
-    return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_func(string $arg1, ?MyStruct $arg2): int {

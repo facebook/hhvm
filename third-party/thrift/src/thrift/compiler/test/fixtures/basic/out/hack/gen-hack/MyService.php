@@ -216,322 +216,170 @@ interface MyServiceClientIf extends \IThriftSyncIf {
  * Original thrift service:-
  * MyService
  */
-trait MyServiceClientBase {
+internal trait MyServiceClientBase {
   require extends \ThriftClientBase;
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   ping();
+   */
+  public async function ping(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyService", "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyService" );
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * string
+   *   getRandomData();
+   */
+  public async function getRandomData(): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
+    $currentseqid = $this->sendImplHelper($args, "getRandomData", false, "MyService" );
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   sink(1: i64 sink);
+   */
+  public async function sink(int $sink): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
+      'sink' => $sink,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "sink", $args);
+    $currentseqid = $this->sendImplHelper($args, "sink", false, "MyService" );
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   putDataById(1: i64 id,
+   *               2: string data);
+   */
+  public async function putDataById(int $id, string $data): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
+      'id' => $id,
+      'data' => $data,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "putDataById", false, "MyService" );
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * bool
+   *   hasDataById(1: i64 id);
+   */
+  public async function hasDataById(int $id): Awaitable<bool> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
+      'id' => $id,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "hasDataById", false, "MyService" );
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * string
+   *   getDataById(1: i64 id);
+   */
+  public async function getDataById(int $id): Awaitable<string> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
+      'id' => $id,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataById", false, "MyService" );
+    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   deleteDataById(1: i64 id);
+   */
+  public async function deleteDataById(int $id): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
+      'id' => $id,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, "MyService" );
+    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * oneway void
+   *   lobDataById(1: i64 id,
+   *               2: string data);
+   */
+  public async function lobDataById(int $id, string $data): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
+      'id' => $id,
+      'data' => $data,
+    ));
+    await $this->asyncHandler_->genBefore("MyService", "lobDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "lobDataById", true, "MyService" );
+    await $this->genAwaitNoResponse($rpc_options);
+  }
 
 }
 
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   ping();
-   */
-  public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   getRandomData();
-   */
-  public async function getRandomData(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
-    $currentseqid = $this->sendImplHelper($args, "getRandomData", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   sink(1: i64 sink);
-   */
-  public async function sink(int $sink): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
-      'sink' => $sink,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "sink", $args);
-    $currentseqid = $this->sendImplHelper($args, "sink", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   putDataById(1: i64 id,
-   *               2: string data);
-   */
-  public async function putDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "putDataById", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * bool
-   *   hasDataById(1: i64 id);
-   */
-  public async function hasDataById(int $id): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "hasDataById", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   getDataById(1: i64 id);
-   */
-  public async function getDataById(int $id): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataById", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   deleteDataById(1: i64 id);
-   */
-  public async function deleteDataById(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * oneway void
-   *   lobDataById(1: i64 id,
-   *               2: string data);
-   */
-  public async function lobDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "lobDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "lobDataById", true, "MyService" );
-    await $this->genAwaitNoResponse($rpc_options);
-  }
-
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   ping();
-   */
-  public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   getRandomData();
-   */
-  public async function getRandomData(): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
-    $currentseqid = $this->sendImplHelper($args, "getRandomData", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   sink(1: i64 sink);
-   */
-  public async function sink(int $sink): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
-      'sink' => $sink,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "sink", $args);
-    $currentseqid = $this->sendImplHelper($args, "sink", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   putDataById(1: i64 id,
-   *               2: string data);
-   */
-  public async function putDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "putDataById", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * bool
-   *   hasDataById(1: i64 id);
-   */
-  public async function hasDataById(int $id): Awaitable<bool> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "hasDataById", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * string
-   *   getDataById(1: i64 id);
-   */
-  public async function getDataById(int $id): Awaitable<string> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataById", false, "MyService" );
-    return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   deleteDataById(1: i64 id);
-   */
-  public async function deleteDataById(int $id): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, "MyService" );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * oneway void
-   *   lobDataById(1: i64 id,
-   *               2: string data);
-   */
-  public async function lobDataById(int $id, string $data): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    await $this->asyncHandler_->genBefore("MyService", "lobDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "lobDataById", true, "MyService" );
-    await $this->genAwaitNoResponse($rpc_options);
-  }
 
   /* send and recv functions */
   public function send_ping(): int {

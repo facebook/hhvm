@@ -80,86 +80,52 @@ interface TestServiceWithMethodAnnotationClientIf extends \IThriftSyncIf {
  * Original thrift service:-
  * TestServiceWithMethodAnnotation
  */
-trait TestServiceWithMethodAnnotationClientBase {
+internal trait TestServiceWithMethodAnnotationClientBase {
   require extends \ThriftClientBase;
+
+  /**
+   * Original thrift definition:-
+   * i32
+   *   testMethodWithAnnotation();
+   */
+  internal async function testMethodWithAnnotation(): Awaitable<int> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
+    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   testMethodWithoutAnnotation();
+   */
+  public async function testMethodWithoutAnnotation(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
+    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
+  }
 
 }
 
 class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase implements TestServiceWithMethodAnnotationAsyncClientIf {
   use TestServiceWithMethodAnnotationClientBase;
 
-  /**
-   * Original thrift definition:-
-   * i32
-   *   testMethodWithAnnotation();
-   */
-  internal async function testMethodWithAnnotation(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
-    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   testMethodWithoutAnnotation();
-   */
-  public async function testMethodWithoutAnnotation(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements TestServiceWithMethodAnnotationClientIf {
   use TestServiceWithMethodAnnotationClientBase;
-
-  /**
-   * Original thrift definition:-
-   * i32
-   *   testMethodWithAnnotation();
-   */
-  internal async function testMethodWithAnnotation(): Awaitable<int> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
-    return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   testMethodWithoutAnnotation();
-   */
-  public async function testMethodWithoutAnnotation(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   internal function send_testMethodWithAnnotation(): int {

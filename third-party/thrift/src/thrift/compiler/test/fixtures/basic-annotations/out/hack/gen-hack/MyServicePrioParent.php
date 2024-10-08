@@ -80,83 +80,49 @@ interface MyServicePrioParentClientIf extends \IThriftSyncIf {
 trait MyServicePrioParentClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   ping();
+   */
+  public async function ping(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyServicePrioParent_ping_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyServicePrioParent", "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyServicePrioParent" );
+    await $this->genAwaitResponse(MyServicePrioParent_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   pong();
+   */
+  public async function pong(): Awaitable<void> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = MyServicePrioParent_pong_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore("MyServicePrioParent", "pong", $args);
+    $currentseqid = $this->sendImplHelper($args, "pong", false, "MyServicePrioParent" );
+    await $this->genAwaitResponse(MyServicePrioParent_pong_result::class, "pong", true, $currentseqid, $rpc_options);
+  }
+
 }
 
 class MyServicePrioParentAsyncClient extends \ThriftClientBase implements MyServicePrioParentAsyncClientIf {
   use MyServicePrioParentClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   ping();
-   */
-  public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyServicePrioParent_ping_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyServicePrioParent", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyServicePrioParent" );
-    await $this->genAwaitResponse(MyServicePrioParent_ping_result::class, "ping", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   pong();
-   */
-  public async function pong(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyServicePrioParent_pong_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyServicePrioParent", "pong", $args);
-    $currentseqid = $this->sendImplHelper($args, "pong", false, "MyServicePrioParent" );
-    await $this->genAwaitResponse(MyServicePrioParent_pong_result::class, "pong", true, $currentseqid, $rpc_options);
-  }
-
 }
 
 class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePrioParentClientIf {
   use MyServicePrioParentClientBase;
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   ping();
-   */
-  public async function ping(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyServicePrioParent_ping_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyServicePrioParent", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyServicePrioParent" );
-    await $this->genAwaitResponse(MyServicePrioParent_ping_result::class, "ping", true, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * void
-   *   pong();
-   */
-  public async function pong(): Awaitable<void> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = MyServicePrioParent_pong_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyServicePrioParent", "pong", $args);
-    $currentseqid = $this->sendImplHelper($args, "pong", false, "MyServicePrioParent" );
-    await $this->genAwaitResponse(MyServicePrioParent_pong_result::class, "pong", true, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_ping(): int {

@@ -86,91 +86,53 @@ interface SomeServiceClientIf extends \IThriftSyncIf {
 trait SomeServiceClientBase {
   require extends \ThriftClientBase;
 
+  /**
+   * Original thrift definition:-
+   * included.SomeMap
+   *   bounce_map(1: included.SomeMap m);
+   */
+  public async function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
+      'm' => $m,
+    ));
+    await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
+    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * map<TBinary, i64>
+   *   binary_keyed_map(1: list<i64> r);
+   */
+  public async function binary_keyed_map(KeyedContainer<int, int> $r): Awaitable<Map<string, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
+      'r' => new Vector($r),
+    ));
+    await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
+    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
+    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
+  }
+
 }
 
 class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsyncClientIf {
   use SomeServiceClientBase;
 
-  /**
-   * Original thrift definition:-
-   * included.SomeMap
-   *   bounce_map(1: included.SomeMap m);
-   */
-  public async function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
-      'm' => $m,
-    ));
-    await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
-    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * map<TBinary, i64>
-   *   binary_keyed_map(1: list<i64> r);
-   */
-  public async function binary_keyed_map(KeyedContainer<int, int> $r): Awaitable<Map<string, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
-      'r' => new Vector($r),
-    ));
-    await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
-    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
-  }
-
 }
 
 class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf {
   use SomeServiceClientBase;
-
-  /**
-   * Original thrift definition:-
-   * included.SomeMap
-   *   bounce_map(1: included.SomeMap m);
-   */
-  public async function bounce_map(Map<int, string> $m): Awaitable<Map<int, string>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
-      'm' => $m,
-    ));
-    await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
-    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
-  }
-
-  /**
-   * Original thrift definition:-
-   * map<TBinary, i64>
-   *   binary_keyed_map(1: list<i64> r);
-   */
-  public async function binary_keyed_map(KeyedContainer<int, int> $r): Awaitable<Map<string, int>> {
-    $hh_frame_metadata = $this->getHHFrameMetadata();
-    if ($hh_frame_metadata !== null) {
-      \HH\set_frame_metadata($hh_frame_metadata);
-    }
-    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
-      'r' => new Vector($r),
-    ));
-    await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
-    return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
-  }
 
   /* send and recv functions */
   public function send_bounce_map(Map<int, string> $m): int {

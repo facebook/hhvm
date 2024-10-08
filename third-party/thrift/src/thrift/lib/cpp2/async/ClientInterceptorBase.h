@@ -68,6 +68,9 @@ class ClientInterceptorBase {
     const char* methodName = nullptr;
   };
   virtual void internal_onResponse(ResponseInfo) = 0;
+
+  static constexpr std::size_t kMaxRequestStateSize =
+      detail::ClientInterceptorOnRequestStorage::max_size();
 };
 
 class ClientInterceptorException : public std::runtime_error {

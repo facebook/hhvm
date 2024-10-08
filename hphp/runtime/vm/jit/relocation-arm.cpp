@@ -377,8 +377,12 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
     });
   }
 
-  env.literalsToRemove.insert(
-    src->NextInstruction()->ImmPCOffsetTarget(srcFrom->NextInstruction()));
+  auto const litAddr =
+    src->NextInstruction()->ImmPCOffsetTarget(srcFrom->NextInstruction());
+  always_assert_flog(TCA(litAddr) >= env.start && TCA(litAddr) < env.end,
+                     "litAddr = {}  start = {}  end = {}\n",
+                     litAddr, env.start, env.end);
+  env.literalsToRemove.insert(litAddr);
 
   vixl::MacroAssembler a { env.destBlock };
   env.destBlock.setFrontier(destAddr);
@@ -463,7 +467,13 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
 
   assertx(((uint64_t)target & 3) == 0);
   assertx(src->Mask(LoadLiteralMask) == LDR_w_lit);
-  env.literalsToRemove.insert(src->ImmPCOffsetTarget(srcFrom));
+
+  auto const litAddr = src->ImmPCOffsetTarget(srcFrom);
+  always_assert_flog(TCA(litAddr) >= env.start && TCA(litAddr) < env.end,
+                     "litAddr = {}  start = {}  end = {}\n",
+                     litAddr, env.start, env.end);
+
+  env.literalsToRemove.insert(litAddr);
 
   // If adjusted is not found, the target may point forward in the range, and
   // not have a known destination address yet.  We will make the jmp point back
@@ -965,7 +975,7 @@ size_t relocateImpl(Env& env) {
         relocateImmediate(env, srcAddr, destAddr, srcCount, destCount);
       }
 
-      if (!preserveAlignment && env.literalsToRemove.erase(srcFrom)) {
+      if (env.literalsToRemove.erase(srcFrom)) {
         destCount = 0;
         env.updateInternalRefs = true;
       }
@@ -1059,11 +1069,8 @@ size_t relocateImpl(Env& env) {
                         env.destBlock.frontier());
 
     /*
-     * We know literals to remove will be empty because during relocation any
-     * literal that is removed should be able to be skipped over.  An LDR
-     * loading a literal that is under an alignment constraint must also be
-     * under an alignment constraint.  This means the instruction sequence
-     * cannot be optimized, and the literal will never be removed.
+     * literalsToRemove must be empty because any literal that is removed during
+     * relocation should be able to be skipped over.
      */
     always_assert_flog(env.literalsToRemove.empty(), "first address: {}",
                        *env.literalsToRemove.begin());

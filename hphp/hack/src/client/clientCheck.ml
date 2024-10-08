@@ -634,6 +634,9 @@ let main_internal
     in
     ClientMethodJumps.go results false args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_NOTEBOOK_TO_HACK notebook_name ->
+    let exit_status = Notebook_convert.notebook_to_hack ~notebook_name in
+    Lwt.return (exit_status, Telemetry.create ())
   | ClientEnv.MODE_IN_MEMORY_DEP_TABLE_SIZE ->
     let%lwt (result, telemetry) =
       rpc args @@ ServerCommandTypes.IN_MEMORY_DEP_TABLE_SIZE

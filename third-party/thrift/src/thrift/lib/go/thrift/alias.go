@@ -66,7 +66,7 @@ type ResponseHeaderGetter = types.ResponseHeaderGetter
 
 type RequestHeaders = types.RequestHeaders
 
-type ProtocolException = types.ProtocolException
+type FormatException = types.ProtocolException
 
 var ZERO types.Numeric = types.ZERO
 
@@ -140,7 +140,7 @@ func NewTransportException(t int, msg string) types.TransportException {
 	return types.NewTransportException(t, msg)
 }
 
-func NewProtocolException(err error) types.ProtocolException {
+func NewFormatException(err error) FormatException {
 	return types.NewProtocolException(err)
 }
 

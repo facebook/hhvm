@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import test.fixtures.basic.module.thrift_metadata
 
@@ -88,7 +88,7 @@ class HackEnum(thrift.py3.types.CompiledEnum):
 
 
 
-class __MyUnionType(thrift.py3.types.CompiledEnum):
+class __MyUnionType(enum.Enum):
     myEnum = 1
     myStruct = 2
     myDataItem = 3
@@ -98,25 +98,11 @@ class __MyUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __UnionToBeRenamedType(thrift.py3.types.CompiledEnum):
+class __UnionToBeRenamedType(enum.Enum):
     reserved_field = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 

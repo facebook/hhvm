@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import service.thrift_metadata
 

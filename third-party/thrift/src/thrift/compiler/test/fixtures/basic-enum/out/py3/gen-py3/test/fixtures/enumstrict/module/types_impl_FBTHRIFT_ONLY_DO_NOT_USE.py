@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import test.fixtures.enumstrict.module.thrift_metadata
 

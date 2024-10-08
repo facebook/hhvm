@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -127,7 +127,7 @@ class Company(thrift.py3.types.CompiledEnum):
 
 
 
-class __union1Type(thrift.py3.types.CompiledEnum):
+class __union1Type(enum.Enum):
     i = 1
     d = 2
     EMPTY = 0
@@ -135,15 +135,8 @@ class __union1Type(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __union2Type(thrift.py3.types.CompiledEnum):
+class __union2Type(enum.Enum):
     i = 1
     d = 2
     s = 3
@@ -152,11 +145,4 @@ class __union2Type(thrift.py3.types.CompiledEnum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 

@@ -5,6 +5,7 @@
 #  @generated
 #
 
+import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
@@ -276,7 +277,7 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types.
     def __le__(self, other: 'BinaryUnion') -> bool: ...
     def __ge__(self, other: 'BinaryUnion') -> bool: ...
 
-    class Type(thrift.py3.types.Enum):
+    class Type(_python_std_enum.Enum):
         EMPTY: BinaryUnion.Type = ...
         iobuf_val: BinaryUnion.Type = ...
 

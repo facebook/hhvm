@@ -15,7 +15,7 @@
 
 # pyre-strict
 
-import sys
+import enum
 import unittest
 
 from folly.iobuf import IOBuf
@@ -60,11 +60,11 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(expected, dir(Integers))
 
     def test_union_enum_dir(self) -> None:
-        # TODO: fixme(T188685508)
-        if not issubclass(Integers, Union) and sys.version_info.minor > 10:
-            return
         contents = dir(Integers.Type)
-        self.assertEqual(len(contents), 4 + len(Integers.Type), contents)
+        # 7 variants + EMPTY
+        self.assertEqual(len(Integers.Type), 8, list(Integers.Type))
+        for arm in Integers.Type:
+            self.assertTrue(arm.name in contents)
         self.assertIn("__module__", contents)
         self.assertIn("__class__", contents)
         self.assertIn("__doc__", contents)
@@ -79,6 +79,10 @@ class UnionTests(unittest.TestCase):
         for type in Integers.Type:
             self.assertIn(type.name, members)
             self.assertIs(type, members[type.name])
+
+    def test_union_subclass(self) -> None:
+        self.assertIsInstance(Integers(tiny=2).type, enum.Enum)
+        self.assertTrue(issubclass(Integers.Type, enum.Enum))
 
     def test_deserialize_empty(self) -> None:
         x = deserialize(Integers, b"{}", Protocol.JSON)

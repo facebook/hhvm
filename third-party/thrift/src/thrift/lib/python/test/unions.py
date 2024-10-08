@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+import enum
+
 import sys
 
 import types
@@ -187,6 +189,17 @@ class UnionTests(unittest.TestCase):
         self.assertIn("__members__", contents)
         for itype in iter(self.get_enum(self.Integers)):
             self.assertTrue(itype.name in contents)
+
+    def test_union_subclass(self) -> None:
+        if self.is_mutable_run:
+            self.assertIsInstance(
+                self.Integers(tiny=2).fbthrift_current_field, enum.Enum
+            )
+            # pyre-ignore[16]
+            self.assertTrue(issubclass(self.Integers.FbThriftUnionFieldEnum, enum.Enum))
+        else:
+            self.assertIsInstance(self.Integers(tiny=2).type, enum.Enum)
+            self.assertTrue(issubclass(self.Integers.Type, enum.Enum))
 
     def test_no_dict(self) -> None:
         with self.assertRaises(AttributeError):

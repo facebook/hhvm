@@ -23,7 +23,7 @@ This is a template for creating compiled Enum and Flag pyx information
 {{#program:filtered_structs}}
 {{#struct:union?}}
 
-class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
+class __{{struct:name}}Type(enum.Enum):
     {{#struct:fields}}
     {{field:py_name}} = {{field:key}}
     {{/struct:fields}}
@@ -33,14 +33,6 @@ class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     {{! prevent accidental treatment as py-deprecated }}
     __slots__ = ()
-
-    {{! will move these to python.types.Enum base class when it's no longer int }}
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 
 {{/struct:union?}}
 {{/program:filtered_structs}}

@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import test.namespace_from_package_without_module_name.module.thrift_metadata
 

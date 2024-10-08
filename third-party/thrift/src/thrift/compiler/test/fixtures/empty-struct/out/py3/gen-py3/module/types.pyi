@@ -5,6 +5,7 @@
 #  @generated
 #
 
+import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
@@ -61,7 +62,7 @@ class Nada(thrift.py3.types.Union, _typing.Hashable):
     def __le__(self, other: 'Nada') -> bool: ...
     def __ge__(self, other: 'Nada') -> bool: ...
 
-    class Type(thrift.py3.types.Enum):
+    class Type(_python_std_enum.Enum):
         EMPTY: Nada.Type = ...
 
     @staticmethod

@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -88,7 +88,7 @@ class TypedEnum(thrift.py3.types.CompiledEnum):
 
 
 
-class __MyUnionType(thrift.py3.types.CompiledEnum):
+class __MyUnionType(enum.Enum):
     anInteger = 1
     aString = 2
     EMPTY = 0
@@ -96,25 +96,11 @@ class __MyUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __NonTriviallyDestructibleUnionType(thrift.py3.types.CompiledEnum):
+class __NonTriviallyDestructibleUnionType(enum.Enum):
     int_field = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 

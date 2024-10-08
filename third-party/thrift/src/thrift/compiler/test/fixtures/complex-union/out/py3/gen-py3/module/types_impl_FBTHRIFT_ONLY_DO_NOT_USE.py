@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -14,7 +14,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class __ComplexUnionType(thrift.py3.types.CompiledEnum):
+class __ComplexUnionType(enum.Enum):
     intValue = 1
     stringValue = 5
     intListValue = 2
@@ -26,15 +26,8 @@ class __ComplexUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __ListUnionType(thrift.py3.types.CompiledEnum):
+class __ListUnionType(enum.Enum):
     intListValue = 2
     stringListValue = 3
     EMPTY = 0
@@ -42,15 +35,8 @@ class __ListUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __DataUnionType(thrift.py3.types.CompiledEnum):
+class __DataUnionType(enum.Enum):
     binaryData = 1
     stringData = 2
     EMPTY = 0
@@ -58,15 +44,8 @@ class __DataUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __ValUnionType(thrift.py3.types.CompiledEnum):
+class __ValUnionType(enum.Enum):
     v1 = 1
     v2 = 2
     EMPTY = 0
@@ -74,15 +53,8 @@ class __ValUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
+class __VirtualComplexUnionType(enum.Enum):
     thingOne = 1
     thingTwo = 2
     EMPTY = 0
@@ -90,25 +62,11 @@ class __VirtualComplexUnionType(thrift.py3.types.CompiledEnum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-    def __int__(self):
-        return self._fbthrift_value_
 
-    def __index__(self):
-        return self._fbthrift_value_
-
-
-
-class __NonCopyableUnionType(thrift.py3.types.CompiledEnum):
+class __NonCopyableUnionType(enum.Enum):
     s = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 

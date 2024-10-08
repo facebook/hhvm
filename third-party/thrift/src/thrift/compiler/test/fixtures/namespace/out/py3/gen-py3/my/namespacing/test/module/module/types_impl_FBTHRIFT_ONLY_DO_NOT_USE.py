@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import my.namespacing.test.module.module.thrift_metadata
 

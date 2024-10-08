@@ -5,7 +5,7 @@
 #  @generated
 #
 
-
+import enum
 import thrift.py3.types
 import module.thrift_metadata
 
@@ -131,17 +131,10 @@ class Flags(thrift.py3.types.Flag):
 
 
 
-class __BinaryUnionType(thrift.py3.types.CompiledEnum):
+class __BinaryUnionType(enum.Enum):
     iobuf_val = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
-    def __int__(self):
-        return self._fbthrift_value_
-
-    def __index__(self):
-        return self._fbthrift_value_
-
 

@@ -129,8 +129,8 @@ target_link_libraries(
 add_library(
   compiler
 
-  gen/cpp/reference_type.cc
-  gen/cpp/name_resolver.cc
+  generate/cpp/reference_type.cc
+  generate/cpp/name_resolver.cc
 
   lib/cpp2/util.cc
   lib/go/util.cc

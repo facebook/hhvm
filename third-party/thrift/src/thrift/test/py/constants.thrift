@@ -15,6 +15,7 @@
  */
 
 namespace py thrift.test.py.constants
+namespace py3 thrift.test.py
 
 include "thrift/test/py/constants_include.thrift"
 
@@ -30,9 +31,21 @@ const map<string, string> escapeChars = {
   "quotationMark": '"',
   "backslash": "\\",
   "escaped_a": "\x61",
+  "newline": "\n",
+  // watch out for trigraphs! the generated C++ code can escape this to '\?',
+  // but this sequence is not valid in Python, and will be interpreted as
+  // if it were '\\?'
+  "questionMark": "?",
 };
 
-const map<string, i32> char2ascii = {"'": 39, '"': 34, "\\": 92, "\x61": 97};
+const map<string, i32> char2ascii = {
+  "'": 39,
+  '"': 34,
+  "\\": 92,
+  "\x61": 97,
+  "\n": 10,
+  "?": 63,
+};
 
 const map<string, constants_include.Foo> str2struct = {
   "foo": {"bar": {"baz": "qux"}},

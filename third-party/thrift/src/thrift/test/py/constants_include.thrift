@@ -15,6 +15,7 @@
  */
 
 namespace py thrift.test.py.constants_include
+namespace py3 thrift.test.py
 
 struct Foo {
   1: map<string, string> bar;

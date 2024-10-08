@@ -18,7 +18,7 @@
 
 #include <stdexcept>
 
-#include <fmt/core.h>
+#include <fmt/ranges.h>
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>

@@ -66,7 +66,9 @@ inline std::string get_escaped_string(std::string_view str) {
         escaped.append("\\n");
         break;
       case '?':
-        escaped.append("\\?");
+        // We need to use octal escape code since the question mark escape
+        // sequence is not universal across languages.
+        escaped.append("\\077");
         break;
       default:
         if (c < 0x20 || c >= 0x7F) {

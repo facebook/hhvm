@@ -38,8 +38,8 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/gen/cpp/name_resolver.h>
-#include <thrift/compiler/gen/cpp/reference_type.h>
+#include <thrift/compiler/generate/cpp/name_resolver.h>
+#include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/reserved_identifier.h>
 #include <thrift/compiler/lib/uri.h>

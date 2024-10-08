@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/gen/cpp/reference_type.h>
+#include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 #include <folly/portability/GTest.h>

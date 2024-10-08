@@ -26,7 +26,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/reference_type.h>
+#include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
 template <>

@@ -33,8 +33,8 @@
 #include <thrift/compiler/ast/t_stream.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/gen/cpp/name_resolver.h>
-#include <thrift/compiler/gen/cpp/reference_type.h>
+#include <thrift/compiler/generate/cpp/name_resolver.h>
+#include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
 #include <fmt/ranges.h>

@@ -29,8 +29,8 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_field.h>
-#include <thrift/compiler/gen/cpp/name_resolver.h>
 #include <thrift/compiler/generate/common.h>
+#include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/cpp2/util.h>

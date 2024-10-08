@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/gen/cpp/name_resolver.h>
+#include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/test/gen_testing.h>
 
 #include <memory>
@@ -27,7 +27,6 @@
 
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/gen/cpp/name_resolver.h>
 
 using namespace apache::thrift::compiler;
 

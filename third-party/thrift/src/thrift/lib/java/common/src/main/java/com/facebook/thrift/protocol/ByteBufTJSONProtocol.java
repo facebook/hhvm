@@ -18,13 +18,13 @@ package com.facebook.thrift.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
+import java.util.Base64;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TList;
@@ -428,28 +428,6 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
     }
   }
 
-  // Write out contents of byte array b as a JSON string with base-64 encoded
-  // data
-  private void writeJSONBase64(byte[] b, int offset, int length) throws TException {
-    if (length == 0) {
-      return;
-    }
-
-    ByteBuf destination = null;
-    try {
-      context_.write();
-      getByteBuf().writeBytes(QUOTE);
-      ByteBuf source = Unpooled.wrappedBuffer(b, offset, length);
-      destination = Base64.encode(source);
-      getByteBuf().writeBytes(destination);
-      getByteBuf().writeBytes(QUOTE);
-    } finally {
-      if (destination != null) {
-        ReferenceCountUtil.safeRelease(destination);
-      }
-    }
-  }
-
   private void writeJSONObjectStart() throws TException {
     context_.write();
     getByteBuf().writeBytes(LBRACE);
@@ -602,10 +580,17 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
 
   @Override
   public void writeBinary(ByteBuffer bin) throws TException {
-    writeJSONBase64(
-        bin.array(),
-        bin.position() + bin.arrayOffset(),
-        bin.limit() - bin.position() - bin.arrayOffset());
+    if (bin.remaining() == 0) {
+      return;
+    }
+
+    context_.write();
+    getByteBuf().writeBytes(QUOTE);
+
+    ByteBuffer destination = Base64.getEncoder().withoutPadding().encode(bin);
+    getByteBuf().writeBytes(destination);
+
+    getByteBuf().writeBytes(QUOTE);
   }
 
   // Read in a JSON string, unescaping as appropriate.. Skip reading from the
@@ -770,20 +755,12 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
   // Read in a JSON string containing base-64 encoded data and decode it.
   private byte[] readJSONBase64() throws TException {
     ByteBuf arr = null;
-    ByteBuf decode = null;
     try {
       arr = readJSONString(false);
-      decode = Base64.decode(arr);
-      byte[] b = new byte[decode.readableBytes()];
-      decode.readBytes(b);
-      return b;
+      return Base64.getDecoder().decode(ByteBufUtil.getBytes(arr));
     } finally {
       if (arr != null) {
         ReferenceCountUtil.safeRelease(arr);
-      }
-
-      if (decode != null) {
-        ReferenceCountUtil.safeRelease(decode);
       }
     }
   }

@@ -59,6 +59,18 @@ public final class SerializerUtil {
   }
 
   /**
+   * De-serializing a type from a JSON String using the TJSON protocol. Binary data fields will be
+   * read using Base64 encoding. This is the preferred method.
+   *
+   * @param <T>
+   */
+  public static <T> T fromTJsonString(Reader<T> reader, String t) {
+    byte[] bytes = t.getBytes(StandardCharsets.UTF_8);
+    SerializationProtocol protocol = SerializationProtocol.TJSON;
+    return fromByteArray(reader, bytes, protocol);
+  }
+
+  /**
    * De-serializing a type T from a ByteBuffer. Thrift Java Structs have a static method read0 on
    * them. This method is used as follows: <code>
    * ByteBuffer src = ...

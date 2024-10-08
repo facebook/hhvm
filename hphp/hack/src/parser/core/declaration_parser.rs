@@ -1869,7 +1869,7 @@ where
 
     fn parse_where_constraint_list_item(&mut self) -> Option<S::Output> {
         match self.peek_token_kind() {
-            TokenKind::Semicolon | TokenKind::LeftBrace => None,
+            TokenKind::Semicolon | TokenKind::LeftBrace | TokenKind::Bar => None,
             _ => {
                 let where_constraint = self.parse_where_constraint();
                 let comma = self.optional_token(TokenKind::Comma);
@@ -2467,7 +2467,8 @@ where
                         let pos = this.pos();
                         this.sc_mut().make_missing(pos)
                     } else {
-                        this.sc_mut().make_case_type_variant(bar, typ)
+                        let where_clause = this.parse_where_clause_opt();
+                        this.sc_mut().make_case_type_variant(bar, typ, where_clause)
                     }
                 },
                 TokenKind::Semicolon,

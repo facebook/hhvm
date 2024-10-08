@@ -142,8 +142,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_case_type_declaration(self, attribute_spec, modifiers, case_keyword, type_keyword, name, generic_parameter, as_, bounds, equal, variants, semicolon)
     }
 
-    fn make_case_type_variant(&mut self, bar: Self::Output, type_: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_case_type_variant(self, bar, type_)
+    fn make_case_type_variant(&mut self, bar: Self::Output, type_: Self::Output, where_clause: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_case_type_variant(self, bar, type_, where_clause)
     }
 
     fn make_property_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, type_: Self::Output, declarators: Self::Output, semicolon: Self::Output) -> Self::Output {

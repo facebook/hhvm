@@ -277,6 +277,7 @@ struct
     | CaseTypeVariant of {
         case_type_variant_bar: t;
         case_type_variant_type: t;
+        case_type_variant_where_clause: t;
       }
     | PropertyDeclaration of {
         property_attribute_spec: t;

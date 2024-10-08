@@ -157,8 +157,8 @@ where
         Node(self.0.make_case_type_declaration(attribute_spec.0, modifiers.0, case_keyword.0, type_keyword.0, name.0, generic_parameter.0, as_.0, bounds.0, equal.0, variants.0, semicolon.0), self.1.make_case_type_declaration(attribute_spec.1, modifiers.1, case_keyword.1, type_keyword.1, name.1, generic_parameter.1, as_.1, bounds.1, equal.1, variants.1, semicolon.1))
     }
 
-    fn make_case_type_variant(&mut self, bar: Self::Output, type_: Self::Output) -> Self::Output {
-        Node(self.0.make_case_type_variant(bar.0, type_.0), self.1.make_case_type_variant(bar.1, type_.1))
+    fn make_case_type_variant(&mut self, bar: Self::Output, type_: Self::Output, where_clause: Self::Output) -> Self::Output {
+        Node(self.0.make_case_type_variant(bar.0, type_.0, where_clause.0), self.1.make_case_type_variant(bar.1, type_.1, where_clause.1))
     }
 
     fn make_property_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, type_: Self::Output, declarators: Self::Output, semicolon: Self::Output) -> Self::Output {

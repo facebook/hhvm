@@ -146,6 +146,7 @@ module type Syntax_S = sig
     | CaseTypeVariant of {
         case_type_variant_bar: t;
         case_type_variant_type: t;
+        case_type_variant_where_clause: t;
       }
     | PropertyDeclaration of {
         property_attribute_spec: t;
@@ -1203,7 +1204,7 @@ module type Syntax_S = sig
   val make_case_type_declaration :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
-  val make_case_type_variant : t -> t -> t
+  val make_case_type_variant : t -> t -> t -> t
 
   val make_property_declaration : t -> t -> t -> t -> t -> t
 

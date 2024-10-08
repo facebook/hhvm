@@ -40,6 +40,7 @@ type feature_name =
   | NewtypeSuperBounds
   | Package
   | CaseTypes
+  | CaseTypeWhereClauses
   | ModuleLevelTraits
   | ModuleLevelTraitsExtensions
   | TypedLocalVariables

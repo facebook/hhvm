@@ -3893,7 +3893,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         Node::Ignored(SK::CaseTypeDeclaration)
     }
 
-    fn make_case_type_variant(&mut self, _bar: Self::Output, type_: Self::Output) -> Self::Output {
+    fn make_case_type_variant(
+        &mut self,
+        _bar: Self::Output,
+        type_: Self::Output,
+        _where: Self::Output,
+    ) -> Self::Output {
         if type_.is_ignored() {
             Node::Ignored(SK::CaseTypeVariant)
         } else {

@@ -4269,6 +4269,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     ))
                 }
             }
+            if !ctv.where_clause.is_missing() {
+                self.check_can_use_feature(&ctv.where_clause, &FeatureName::CaseTypeWhereClauses);
+            }
         }
     }
 

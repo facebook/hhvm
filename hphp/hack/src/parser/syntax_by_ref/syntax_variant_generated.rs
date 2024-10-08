@@ -375,6 +375,7 @@ pub struct CaseTypeDeclarationChildren<'a, T, V> {
 pub struct CaseTypeVariantChildren<'a, T, V> {
     pub bar: Syntax<'a, T, V>,
     pub type_: Syntax<'a, T, V>,
+    pub where_clause: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

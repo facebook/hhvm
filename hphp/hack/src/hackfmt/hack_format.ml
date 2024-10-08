@@ -387,8 +387,19 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Newline;
         ]
     | Syntax.CaseTypeVariant
-        { case_type_variant_bar = bar; case_type_variant_type = ty } ->
-      Span [t env bar; when_present bar space; t env ty]
+        {
+          case_type_variant_bar = bar;
+          case_type_variant_type = ty;
+          case_type_variant_where_clause = where;
+        } ->
+      Span
+        [
+          t env bar;
+          when_present bar space;
+          t env ty;
+          when_present where space;
+          t env where;
+        ]
     | Syntax.PropertyDeclaration
         {
           property_attribute_spec = attr;

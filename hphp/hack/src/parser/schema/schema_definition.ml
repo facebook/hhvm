@@ -318,7 +318,12 @@ let schema : schema_node list =
       description = "case_type_variant";
       prefix = "case_type_variant";
       aggregates = [];
-      fields = [("bar", ZeroOrOne Token); ("type", Aggregate Specifier)];
+      fields =
+        [
+          ("bar", ZeroOrOne Token);
+          ("type", Aggregate Specifier);
+          ("where_clause", ZeroOrOne (Just "WhereClause"));
+        ];
     };
     {
       kind_name = "PropertyDeclaration";

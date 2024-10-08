@@ -221,11 +221,12 @@ ss.serialize_field("case_type_variants", &self.with(variants))?;
 ss.serialize_field("case_type_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::CaseTypeVariant (CaseTypeVariantChildren{bar,type_} ) => {
-      let mut ss = s.serialize_struct("", 3)?;
+SyntaxVariant::CaseTypeVariant (CaseTypeVariantChildren{bar,type_,where_clause} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "case_type_variant")?;
       ss.serialize_field("case_type_variant_bar", &self.with(bar))?;
 ss.serialize_field("case_type_variant_type", &self.with(type_))?;
+ss.serialize_field("case_type_variant_where_clause", &self.with(where_clause))?;
       ss.end()
 } 
 SyntaxVariant::PropertyDeclaration (PropertyDeclarationChildren{attribute_spec,modifiers,type_,declarators,semicolon} ) => {

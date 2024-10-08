@@ -243,9 +243,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             CaseTypeVariant(x) => {
-                get_index(2).and_then(|index| { match index {
+                get_index(3).and_then(|index| { match index {
                         0 => Some(&x.bar),
                     1 => Some(&x.type_),
+                    2 => Some(&x.where_clause),
                         _ => None,
                     }
                 })

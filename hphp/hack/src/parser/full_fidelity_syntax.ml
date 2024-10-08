@@ -974,9 +974,15 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc case_type_variants in
         let acc = f acc case_type_semicolon in
         acc
-      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
         let acc = f acc case_type_variant_bar in
         let acc = f acc case_type_variant_type in
+        let acc = f acc case_type_variant_where_clause in
         acc
       | PropertyDeclaration
           {
@@ -2855,8 +2861,17 @@ module WithToken (Token : TokenType) = struct
           case_type_variants;
           case_type_semicolon;
         ]
-      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
-        [case_type_variant_bar; case_type_variant_type]
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
+        [
+          case_type_variant_bar;
+          case_type_variant_type;
+          case_type_variant_where_clause;
+        ]
       | PropertyDeclaration
           {
             property_attribute_spec;
@@ -4637,8 +4652,17 @@ module WithToken (Token : TokenType) = struct
           "case_type_variants";
           "case_type_semicolon";
         ]
-      | CaseTypeVariant { case_type_variant_bar; case_type_variant_type } ->
-        ["case_type_variant_bar"; "case_type_variant_type"]
+      | CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          } ->
+        [
+          "case_type_variant_bar";
+          "case_type_variant_type";
+          "case_type_variant_where_clause";
+        ]
       | PropertyDeclaration
           {
             property_attribute_spec;
@@ -6552,8 +6576,17 @@ module WithToken (Token : TokenType) = struct
             case_type_semicolon;
           }
       | ( SyntaxKind.CaseTypeVariant,
-          [case_type_variant_bar; case_type_variant_type] ) ->
-        CaseTypeVariant { case_type_variant_bar; case_type_variant_type }
+          [
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          ] ) ->
+        CaseTypeVariant
+          {
+            case_type_variant_bar;
+            case_type_variant_type;
+            case_type_variant_where_clause;
+          }
       | ( SyntaxKind.PropertyDeclaration,
           [
             property_attribute_spec;
@@ -8610,9 +8643,17 @@ module WithToken (Token : TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_case_type_variant case_type_variant_bar case_type_variant_type =
+      let make_case_type_variant
+          case_type_variant_bar
+          case_type_variant_type
+          case_type_variant_where_clause =
         let syntax =
-          CaseTypeVariant { case_type_variant_bar; case_type_variant_type }
+          CaseTypeVariant
+            {
+              case_type_variant_bar;
+              case_type_variant_type;
+              case_type_variant_where_clause;
+            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -250,10 +250,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_case_type_variant(ctx: &C, bar: Self, type_: Self) -> Self {
+    fn make_case_type_variant(ctx: &C, bar: Self, type_: Self, where_clause: Self) -> Self {
         let syntax = SyntaxVariant::CaseTypeVariant(ctx.get_arena().alloc(CaseTypeVariantChildren {
             bar,
             type_,
+            where_clause,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

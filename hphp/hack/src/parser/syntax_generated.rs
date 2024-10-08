@@ -244,10 +244,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_case_type_variant(_: &C, case_type_variant_bar: Self, case_type_variant_type: Self) -> Self {
+    fn make_case_type_variant(_: &C, case_type_variant_bar: Self, case_type_variant_type: Self, case_type_variant_where_clause: Self) -> Self {
         let syntax = SyntaxVariant::CaseTypeVariant(Box::new(CaseTypeVariantChildren {
             case_type_variant_bar,
             case_type_variant_type,
+            case_type_variant_where_clause,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)
@@ -2226,9 +2227,10 @@ where
                 acc
             },
             SyntaxVariant::CaseTypeVariant(x) => {
-                let CaseTypeVariantChildren { case_type_variant_bar, case_type_variant_type } = *x;
+                let CaseTypeVariantChildren { case_type_variant_bar, case_type_variant_type, case_type_variant_where_clause } = *x;
                 let acc = f(case_type_variant_bar, acc);
                 let acc = f(case_type_variant_type, acc);
+                let acc = f(case_type_variant_where_clause, acc);
                 acc
             },
             SyntaxVariant::PropertyDeclaration(x) => {
@@ -3868,7 +3870,8 @@ where
                  case_type_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::CaseTypeVariant, 2) => SyntaxVariant::CaseTypeVariant(Box::new(CaseTypeVariantChildren {
+             (SyntaxKind::CaseTypeVariant, 3) => SyntaxVariant::CaseTypeVariant(Box::new(CaseTypeVariantChildren {
+                 case_type_variant_where_clause: ts.pop().unwrap(),
                  case_type_variant_type: ts.pop().unwrap(),
                  case_type_variant_bar: ts.pop().unwrap(),
                  
@@ -5034,7 +5037,7 @@ where
             SyntaxVariant::AliasDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.alias_attribute_spec, 10) },
             SyntaxVariant::ContextAliasDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.ctx_alias_attribute_spec, 8) },
             SyntaxVariant::CaseTypeDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.case_type_attribute_spec, 11) },
-            SyntaxVariant::CaseTypeVariant(x) => unsafe { std::slice::from_raw_parts(&x.case_type_variant_bar, 2) },
+            SyntaxVariant::CaseTypeVariant(x) => unsafe { std::slice::from_raw_parts(&x.case_type_variant_bar, 3) },
             SyntaxVariant::PropertyDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.property_attribute_spec, 5) },
             SyntaxVariant::PropertyDeclarator(x) => unsafe { std::slice::from_raw_parts(&x.property_name, 2) },
             SyntaxVariant::NamespaceDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.namespace_header, 2) },
@@ -5226,7 +5229,7 @@ where
             SyntaxVariant::AliasDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.alias_attribute_spec, 10) },
             SyntaxVariant::ContextAliasDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_alias_attribute_spec, 8) },
             SyntaxVariant::CaseTypeDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.case_type_attribute_spec, 11) },
-            SyntaxVariant::CaseTypeVariant(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.case_type_variant_bar, 2) },
+            SyntaxVariant::CaseTypeVariant(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.case_type_variant_bar, 3) },
             SyntaxVariant::PropertyDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.property_attribute_spec, 5) },
             SyntaxVariant::PropertyDeclarator(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.property_name, 2) },
             SyntaxVariant::NamespaceDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_header, 2) },
@@ -5578,6 +5581,7 @@ pub struct CaseTypeDeclarationChildren<T, V> {
 pub struct CaseTypeVariantChildren<T, V> {
     pub case_type_variant_bar: Syntax<T, V>,
     pub case_type_variant_type: Syntax<T, V>,
+    pub case_type_variant_where_clause: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -7454,9 +7458,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             CaseTypeVariant(x) => {
-                get_index(2).and_then(|index| { match index {
+                get_index(3).and_then(|index| { match index {
                         0 => Some(&x.case_type_variant_bar),
                     1 => Some(&x.case_type_variant_type),
+                    2 => Some(&x.case_type_variant_where_clause),
                         _ => None,
                     }
                 })

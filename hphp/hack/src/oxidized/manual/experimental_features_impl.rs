@@ -31,6 +31,7 @@ impl FeatureName {
             NewtypeSuperBounds => Unstable,
             Package => OngoingRelease,
             CaseTypes => Preview,
+            CaseTypeWhereClauses => Unstable,
             ModuleLevelTraits => OngoingRelease,
             ModuleLevelTraitsExtensions => OngoingRelease,
             TypedLocalVariables => Preview,

@@ -48,13 +48,3 @@ func DialHostPort(hostPort string) (net.Conn, error) {
 	}
 	return conn, nil
 }
-
-// Deprecated: this function does nothing, it just returns your input parameter.
-func SocketConn(conn net.Conn) net.Conn {
-	return conn
-}
-
-// Deprecated: this function does nothing, it just returns your input parameter and a nil error.
-func NewSocket(conn net.Conn) (net.Conn, error) {
-	return conn, nil
-}

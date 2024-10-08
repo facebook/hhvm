@@ -18,4 +18,4 @@
 val notebook_to_hack : notebook_name:string -> Exit_status.t
 
 (* TODO: convert a Hack (.php) file back to a notebook *)
-(* val hack_to_notebook : unit -> Exit_status.t *)
+(* val hack_to_notebook: unit -> Exit_status.t *)

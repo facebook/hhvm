@@ -13,6 +13,7 @@
 #include <folly/SingletonThreadLocal.h>
 #include <folly/io/Cursor.h>
 #include <proxygen/lib/http/HTTP3ErrorCode.h>
+#include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
@@ -406,6 +407,19 @@ size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
 
   if (res.hasError()) {
     LOG(ERROR) << __func__ << ": failed to write trailers: " << res.error();
+    return 0;
+  }
+  return *res;
+}
+
+size_t HQStreamCodec::generatePadding(folly::IOBufQueue& writeBuf,
+                                      StreamID stream,
+                                      uint16_t padding) {
+  DCHECK_EQ(stream, streamId_);
+  auto buf = CodecUtil::zeroedBuffer(padding);
+  auto res = hq::writePadding(writeBuf, std::move(buf));
+  if (res.hasError()) {
+    LOG(ERROR) << __func__ << ": failed to write padding: " << res.error();
     return 0;
   }
   return *res;

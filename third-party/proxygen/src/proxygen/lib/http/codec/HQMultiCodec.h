@@ -214,6 +214,12 @@ class HQMultiCodec : public HQControlCodec {
     return getCodec(stream).generateTrailers(writeBuf, stream, trailers);
   }
 
+  size_t generatePadding(folly::IOBufQueue& writeBuf,
+                         StreamID stream,
+                         uint16_t bytes) override {
+    return getCodec(stream).generatePadding(writeBuf, stream, bytes);
+  }
+
   size_t generateEOM(folly::IOBufQueue& writeBuf, StreamID stream) override {
     return getCodec(stream).generateEOM(writeBuf, stream);
   }

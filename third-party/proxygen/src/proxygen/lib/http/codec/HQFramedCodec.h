@@ -172,6 +172,13 @@ class HQFramedCodec : public HTTPCodec {
     folly::assume_unreachable();
   }
 
+  size_t generatePadding(folly::IOBufQueue& /*writeBuf*/,
+                         StreamID /*stream*/,
+                         uint16_t /*bytes*/) override {
+    LOG(FATAL) << __func__ << " not supported on this codec";
+    folly::assume_unreachable();
+  }
+
   // Only valid for the Stream Codec
   size_t generateEOM(folly::IOBufQueue& /*writeBuf*/,
                      StreamID /*stream*/) override {

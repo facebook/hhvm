@@ -81,6 +81,9 @@ class MockHTTPCodec : public HTTPCodec {
   MOCK_METHOD(size_t,
               generateTrailers,
               (folly::IOBufQueue&, HTTPCodec::StreamID, const HTTPHeaders&));
+  MOCK_METHOD(size_t,
+              generatePadding,
+              (folly::IOBufQueue&, HTTPCodec::StreamID, uint16_t));
   MOCK_METHOD(size_t, generateEOM, (folly::IOBufQueue&, HTTPCodec::StreamID));
   MOCK_METHOD(size_t,
               generateRstStream,

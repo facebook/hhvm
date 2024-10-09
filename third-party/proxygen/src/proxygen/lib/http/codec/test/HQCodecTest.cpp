@@ -853,6 +853,32 @@ TEST_F(HQCodecTest, WebTransportProtocol) {
   EXPECT_EQ("webtransport", *callbacks_.msg->getUpgradeProtocol());
 }
 
+TEST_F(HQCodecTest, PaddingIgnored) {
+  std::string data("abcde");
+  auto buf = folly::IOBuf::copyBuffer(data.data(), data.length());
+  HTTPMessage req = getPostRequest(data.length());
+
+  upstreamCodec_->generateHeader(queue_, streamId_, req, false);
+  upstreamCodec_->generatePadding(queue_, streamId_, 123);
+  upstreamCodec_->generateBody(
+      queue_, streamId_, std::move(buf), HTTPCodec::NoPadding, false);
+  upstreamCodec_->generatePadding(
+      queue_, streamId_, std::numeric_limits<uint16_t>::max());
+  upstreamCodec_->generateEOM(queue_, streamId_);
+  parse();
+  downstreamCodec_->onIngressEOF();
+
+  EXPECT_EQ(callbacks_.messageBegin, 1);
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(callbacks_.messageComplete, 1);
+  EXPECT_EQ(callbacks_.bodyCalls, 1);
+  EXPECT_EQ(callbacks_.bodyLength, data.length());
+  EXPECT_EQ(callbacks_.trailers, 0);
+  EXPECT_EQ(callbacks_.streamErrors, 0);
+  EXPECT_EQ(callbacks_.sessionErrors, 0);
+  EXPECT_EQ(callbacks_.lastParseError, nullptr);
+}
+
 struct FrameAllowedParams {
   CodecType codecType;
   FrameType frameType;

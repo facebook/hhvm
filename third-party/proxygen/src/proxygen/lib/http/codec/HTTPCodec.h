@@ -634,6 +634,17 @@ class HTTPCodec {
                                   const HTTPHeaders& trailers) = 0;
 
   /**
+   * Write padding bytes, if the protocol supports it. This is separate from
+   * generateBody() because its padding is limited to 2^8 bytes, which would
+   * lead to inefficiencies with large padding.
+   *
+   * @return number of bytes written
+   */
+  virtual size_t generatePadding(folly::IOBufQueue& /* writeBuf */,
+                                 StreamID /* stream */,
+                                 uint16_t /* bytes */) = 0;
+
+  /**
    * Generate any protocol framing needed to finalize an egress
    * message. This method must be called to complete a stream.
    *

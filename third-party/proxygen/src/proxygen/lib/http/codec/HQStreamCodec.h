@@ -126,6 +126,10 @@ class HQStreamCodec
                           StreamID /*stream*/,
                           const HTTPHeaders& /*trailers*/) override;
 
+  size_t generatePadding(folly::IOBufQueue& writeBuf,
+                         StreamID stream,
+                         uint16_t bytes) override;
+
   size_t generateEOM(folly::IOBufQueue& writeBuf, StreamID stream) override;
 
   uint32_t getDefaultWindowSize() const override {

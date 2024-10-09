@@ -107,6 +107,9 @@ class HTTPBinaryCodec : public HTTPCodec {
   size_t generateTrailers(folly::IOBufQueue& writeBuf,
                           StreamID txn,
                           const HTTPHeaders& trailers) override;
+  size_t generatePadding(folly::IOBufQueue& writeBuf,
+                         StreamID stream,
+                         uint16_t bytes) override;
   size_t generateEOM(folly::IOBufQueue& writeBuf, StreamID txn) override;
 
  protected:

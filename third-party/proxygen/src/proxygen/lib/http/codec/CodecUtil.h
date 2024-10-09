@@ -205,6 +205,12 @@ class CodecUtil {
                                               std::string debugStr,
                                               const HTTPHeaders& fields,
                                               uint8_t debugLevel);
+
+  /**
+   * Clones and returns a lazily-initialized IOBuf of all zeroes, up to
+   * 64KiB (2^16 bytes).
+   */
+  static std::unique_ptr<folly::IOBuf> zeroedBuffer(uint16_t size);
 };
 
 } // namespace proxygen

@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/codec/HTTP2Framer.h>
 
 #include <folly/tracing/ScopedTraceSection.h>
+#include <proxygen/lib/http/codec/CodecUtil.h>
 
 using namespace folly::io;
 using namespace folly;
@@ -288,7 +289,8 @@ ErrorCode skipPadding(Cursor& cursor, uint8_t length, bool verify) {
 bool isValidFrameType(FrameType type) {
   auto val = static_cast<uint8_t>(type);
   if (val < kMinExperimentalFrameType) {
-    return val <= static_cast<uint8_t>(FrameType::ALTSVC);
+    return val <= static_cast<uint8_t>(FrameType::ALTSVC) ||
+           type == FrameType::PADDING;
   } else {
     switch (type) {
       case FrameType::EX_HEADERS:
@@ -679,6 +681,27 @@ size_t writeData(IOBufQueue& queue,
                                          std::move(data),
                                          reuseIOBufHeadroom);
   writePadding(queue, padding);
+  return kFrameHeaderSize + frameLen;
+}
+
+size_t writePadding(IOBufQueue& queue,
+                    uint32_t stream,
+                    uint16_t padding) noexcept {
+  uint16_t padBodyLen =
+      padding > kFrameHeaderSize ? padding - kFrameHeaderSize : 0;
+
+  // Set up the padding body
+  auto body = CodecUtil::zeroedBuffer(padBodyLen);
+
+  // Write the frame
+  const auto frameLen = writeFrameHeader(queue,
+                                         padBodyLen,
+                                         FrameType::PADDING,
+                                         0,
+                                         stream,
+                                         folly::none,
+                                         folly::none,
+                                         std::move(body));
   return kFrameHeaderSize + frameLen;
 }
 

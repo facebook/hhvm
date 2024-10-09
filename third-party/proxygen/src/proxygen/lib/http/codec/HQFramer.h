@@ -71,8 +71,19 @@ enum class FrameType : uint64_t {
   FB_PRIORITY_UPDATE = 0xF700,
   FB_PUSH_PRIORITY_UPDATE = 0xF701,
 
+  // https://datatracker.ietf.org/doc/html/rfc9114#frame-reserved
+  // "Frame types of the format 0x1f * N + 0x21 for non-negative integer values
+  // of N are reserved to exercise the requirement that unknown types be
+  // ignored" "Endpoints MUST NOT consider these frames to have any meaning upon
+  // receipt."
+  //
+  // Therefore, we can use the unregistered frame type (0x1f + 0x21) = 0x40 for
+  // padding. The recipient will ignore it, per the spec.
+  PADDING = 0x40,
+
   // THIS IS NOT A FRAME TYPE, but we treat it like one
   WEBTRANSPORT_BIDI = 0x41,
+
 };
 
 std::ostream& operator<<(std::ostream& os, FrameType type);
@@ -249,6 +260,19 @@ WriteResult writeFrameHeader(folly::IOBufQueue& queue,
  */
 WriteResult writeData(folly::IOBufQueue& writeBuf,
                       std::unique_ptr<folly::IOBuf> data) noexcept;
+
+/**
+ * Generate an entire (unofficial) PADDING frame, including the common frame
+ * header.
+ *
+ * @param writeBuf The output queue to write to. It may grow or add
+ *                 underlying buffers inside this function.
+ * @param data The padding data to write out, cannot be nullptr
+ * @return The number of bytes written to writeBuf if successful, a quic error
+ * otherwise
+ */
+WriteResult writePadding(folly::IOBufQueue& writeBuf,
+                         std::unique_ptr<folly::IOBuf> data) noexcept;
 
 /**
  * Generate an entire HEADER frame, including the common frame header.

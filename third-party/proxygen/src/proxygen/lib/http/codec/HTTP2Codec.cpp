@@ -1517,6 +1517,31 @@ size_t HTTP2Codec::generateTrailers(folly::IOBufQueue& writeBuf,
   return size.compressed;
 }
 
+size_t HTTP2Codec::generatePadding(folly::IOBufQueue& writeBuf,
+                                   StreamID stream,
+                                   uint16_t padding) {
+  // https://datatracker.ietf.org/doc/html/rfc7540#section-4.1 states:
+  // "Implementations MUST ignore and discard any frame that has a type that is
+  // unknown."
+  //
+  // Therefore, we can use the unregistered frame type 0xbb, from the reserved
+  // range. We will have plenty of heads up before this frame type is used.
+  // HTTP/2 frame types aren't added very frequently.
+  size_t written = 0;
+  VLOG(4) << "generating padding=" << padding << " for stream=" << stream;
+  auto maxFrameSizeFull = maxSendFrameSize();
+  auto maxFrameSize = static_cast<uint16_t>(std::min<std::size_t>(
+      maxFrameSizeFull, (std::numeric_limits<uint16_t>::max)()));
+  while (written < padding) {
+    auto cur = std::min(maxFrameSize, padding);
+    written += generateHeaderCallbackWrapper(
+        stream,
+        http2::FrameType::PADDING,
+        http2::writePadding(writeBuf, stream, cur));
+  }
+  return written;
+}
+
 size_t HTTP2Codec::generateEOM(folly::IOBufQueue& writeBuf, StreamID stream) {
   VLOG(4) << "sending EOM for stream=" << stream;
   upgradedStreams_.erase(stream);

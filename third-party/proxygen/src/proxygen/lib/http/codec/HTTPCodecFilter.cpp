@@ -298,6 +298,12 @@ size_t PassThroughHTTPCodecFilter::generateTrailers(
   return call_->generateTrailers(writeBuf, stream, trailers);
 }
 
+size_t PassThroughHTTPCodecFilter::generatePadding(folly::IOBufQueue& writeBuf,
+                                                   StreamID stream,
+                                                   uint16_t bytes) {
+  return call_->generatePadding(writeBuf, stream, bytes);
+}
+
 size_t PassThroughHTTPCodecFilter::generateEOM(folly::IOBufQueue& writeBuf,
                                                StreamID stream) {
   return call_->generateEOM(writeBuf, stream);

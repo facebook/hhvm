@@ -228,6 +228,11 @@ WriteResult writeData(IOBufQueue& queue,
   return writeSimpleFrame(queue, FrameType::DATA, std::move(data));
 }
 
+WriteResult writePadding(IOBufQueue& queue,
+                         std::unique_ptr<folly::IOBuf> data) noexcept {
+  return writeSimpleFrame(queue, FrameType::PADDING, std::move(data));
+}
+
 WriteResult writeHeaders(IOBufQueue& queue,
                          std::unique_ptr<folly::IOBuf> data) noexcept {
   return writeSimpleFrame(queue, FrameType::HEADERS, std::move(data));

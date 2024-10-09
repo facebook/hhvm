@@ -42,7 +42,9 @@ enum class FrameType : uint8_t {
   GOAWAY = 7,
   WINDOW_UPDATE = 8,
   CONTINUATION = 9,
-  ALTSVC = 10, // not in current draft so frame type has not been assigned
+  ALTSVC = 10,    // not in current draft so frame type has not been assigned
+  PADDING = 0xbb, // not in current draft, nor likely to ever be used, so will
+                  // be ignored
 
   // experimental use
   EX_HEADERS = 0xfb,
@@ -636,6 +638,19 @@ size_t writeCertificate(folly::IOBufQueue& writeBuf,
                         uint16_t certId,
                         std::unique_ptr<folly::IOBuf> authenticator,
                         bool toBeContinued);
+
+/**
+ * Generate a padding frame, using an unused reserved frame type, which the
+ * recipient MUST ignore.
+ *
+ * @param writeBuf The output queue to write to. It may grow or add
+ *                 underlying buffers inside this function.
+ * @param padding The requested number of bytes to write in total to writeBuf
+ * @return The actual number of bytes written to writeBuf.
+ */
+size_t writePadding(folly::IOBufQueue& writeBuf,
+                    uint32_t stream,
+                    uint16_t padding) noexcept;
 
 /**
  * Get the string representation of the given FrameType

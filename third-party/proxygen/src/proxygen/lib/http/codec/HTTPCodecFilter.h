@@ -199,6 +199,10 @@ class PassThroughHTTPCodecFilter : public HTTPCodecFilter {
                           StreamID stream,
                           const HTTPHeaders& trailers) override;
 
+  size_t generatePadding(folly::IOBufQueue& writeBuf,
+                         StreamID stream,
+                         uint16_t bytes) override;
+
   size_t generateEOM(folly::IOBufQueue& writeBuf, StreamID stream) override;
 
   size_t generateRstStream(folly::IOBufQueue& writeBuf,

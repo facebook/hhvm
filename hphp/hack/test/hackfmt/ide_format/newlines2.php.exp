@@ -1,0 +1,28 @@
+> lines and columns in ranges are 1-indexed
+received code:
+1 <?hh
+2 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+3 final class ExampleFormatBreak {
+4   public static function formatBreak(): void {
+5   }
+6 
+7   public static function formatBreak2(): void {
+8   }
+9 }
+
+New text at range 1:1-1:1 (1-indexed) is
+''
+
+Code after applying language server edits:
+'<?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+final class ExampleFormatBreak {
+  public static function formatBreak(): void {
+  }
+
+  public static function formatBreak2(): void {
+  }
+}
+'
+
+Matched Hackfmt result

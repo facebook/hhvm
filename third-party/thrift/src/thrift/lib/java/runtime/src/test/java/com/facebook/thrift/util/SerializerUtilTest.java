@@ -132,6 +132,15 @@ public class SerializerUtilTest {
   }
 
   @Test
+  public void testFromsTJsonString() {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    SerializerUtil.toOutStream(everyLayout, bos, SerializationProtocol.TJSON);
+    String json = new String(bos.toByteArray(), StandardCharsets.UTF_8);
+    EveryLayout everyLayout = SerializerUtil.fromTJsonString(EveryLayout.asReader(), json);
+    Assert.assertEquals(this.everyLayout, everyLayout);
+  }
+
+  @Test
   public void testToAndFromBinaryBase64() {
     String base64 = SerializerUtil.toBase64(everyLayout, false, SerializationProtocol.TBinary);
     EveryLayout everyLayout =

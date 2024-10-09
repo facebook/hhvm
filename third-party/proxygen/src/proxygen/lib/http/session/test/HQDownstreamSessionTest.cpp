@@ -580,6 +580,30 @@ TEST_P(HQDownstreamSessionTest, SimplePost) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQDownstreamSessionTest, SimplePostWithPadding) {
+  auto id = sendRequest(getPostRequest(10), false);
+  auto& request = getStream(id);
+  // Include padding on the request
+  request.codec->generatePadding(request.buf, request.id, 10'000);
+  request.codec->generateBody(
+      request.buf, request.id, makeBuf(10), HTTPCodec::NoPadding, true);
+  request.readEOF = true;
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectBody([](uint64_t, std::shared_ptr<folly::IOBuf> body) {
+    EXPECT_EQ(body->computeChainDataLength(), 10);
+  });
+  handler->expectEOM([&handler] {
+    // Include padding on the reply too
+    handler->sendReplyWithBody(200, 100, true, true, false, 200);
+  });
+  handler->expectDetachTransaction();
+  flushRequestsAndLoop();
+  EXPECT_GT(socketDriver_->streams_[id].writeBuf.chainLength(), 315);
+  EXPECT_TRUE(socketDriver_->streams_[id].writeEOF);
+  hqSession_->closeWhenIdle();
+}
+
 TEST_P(HQDownstreamSessionTest, SimpleGetEofDelay) {
   auto idh = checkRequest();
   flushRequestsAndLoop(false, std::chrono::milliseconds(10));

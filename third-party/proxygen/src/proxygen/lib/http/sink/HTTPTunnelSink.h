@@ -115,6 +115,9 @@ class HTTPTunnelSink
   void sendTrailers(const HTTPHeaders&) override {
   }
 
+  void sendPadding(uint16_t) override {
+  }
+
   void sendEOM() override;
 
   bool isEgressEOMSeen() override;

@@ -1111,6 +1111,28 @@ TEST_F(HTTPDownstreamSessionTest, BadContentLength) {
   flushRequestsAndLoop();
 }
 
+TEST_F(HTTP2DownstreamSessionTest, FrameBasedPadding) {
+  // Send a request with padding. Padding should not affect anything.
+  auto handler = addSimpleStrictHandler();
+  auto id = sendHeader();
+  clientCodec_->generatePadding(requests_, id, 123);
+  clientCodec_->generateEOM(requests_, id);
+  handler->expectHeaders();
+  handler->expectEOM([&handler] { handler->sendReplyWithBody(200, 100); });
+  handler->expectGoaway();
+  flushRequestsAndLoopN(1);
+  handler->expectDetachTransaction();
+  HTTPSession::DestructorGuard g(httpSession_);
+  gracefulShutdown();
+
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  clientCodec_->setCallback(&callbacks);
+
+  InSequence enforceOrder;
+  EXPECT_CALL(callbacks, onHeadersComplete(_, _));
+  parseOutput(*clientCodec_);
+}
+
 TEST_F(HTTPDownstreamSessionTest, Connect) {
   InSequence enforceOrder;
 

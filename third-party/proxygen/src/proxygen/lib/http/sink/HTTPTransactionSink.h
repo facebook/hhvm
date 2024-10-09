@@ -103,6 +103,9 @@ class HTTPTransactionSink : public HTTPSink {
   void sendTrailers(const HTTPHeaders& trailers) override {
     httpTransaction_->sendTrailers(trailers);
   }
+  void sendPadding(uint16_t bytes) override {
+    httpTransaction_->sendPadding(bytes);
+  }
   void sendEOM() override {
     httpTransaction_->sendEOM();
   }

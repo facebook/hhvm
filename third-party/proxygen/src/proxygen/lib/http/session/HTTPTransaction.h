@@ -546,6 +546,9 @@ class HTTPTransaction
 
     virtual size_t sendChunkTerminator(HTTPTransaction* txn) noexcept = 0;
 
+    virtual size_t sendPadding(HTTPTransaction* txn,
+                               uint16_t bytes) noexcept = 0;
+
     virtual size_t sendEOM(HTTPTransaction* txn,
                            const HTTPHeaders* trailers) noexcept = 0;
 
@@ -1210,6 +1213,20 @@ class HTTPTransaction
    *             chunk headers.
    */
   virtual void sendBody(std::unique_ptr<folly::IOBuf> body);
+
+  /**
+   * Send padding bytes that the receiving application layer will ignore. This
+   * is currently implemented only for HTTP/2 and HTTP/3 and will do nothing on
+   * HTTP/1 connections.
+   *
+   * sendPadding() may be called only when sendBody() is also valid to call.
+   *
+   * @param bytes The number of bytes of padding to send on this transaction.
+   * The actual serialized size of the padding will be greater than this number
+   * by some O(1) amount, depending on the exact framing and later transport
+   *              encryption.
+   */
+  virtual void sendPadding(uint16_t bytes);
 
   /**
    * Returns the cumulative size of body passed to sendBody so far

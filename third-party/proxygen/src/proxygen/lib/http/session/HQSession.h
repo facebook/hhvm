@@ -1339,6 +1339,8 @@ class HQSession
 
     size_t sendChunkTerminator(HTTPTransaction* txn) noexcept override;
 
+    size_t sendPadding(HTTPTransaction* txn, uint16_t bytes) noexcept override;
+
     size_t sendEOM(HTTPTransaction* txn,
                    const HTTPHeaders* trailers) noexcept override;
 

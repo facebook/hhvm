@@ -123,10 +123,12 @@ std::unique_ptr<folly::IOBuf> getResponseBuf(CodecProtocol protocol,
   }
   HTTPMessage resp = getResponse(code, bodyLen);
   egressCodec->generateHeader(respBufQ, id, resp);
+  egressCodec->generatePadding(respBufQ, id, 123);
   if (bodyLen > 0) {
     auto buf = makeBuf(bodyLen);
     egressCodec->generateBody(
         respBufQ, id, std::move(buf), HTTPCodec::NoPadding, true /* eom */);
+    egressCodec->generatePadding(respBufQ, id, 42);
   }
   return respBufQ.move();
 }

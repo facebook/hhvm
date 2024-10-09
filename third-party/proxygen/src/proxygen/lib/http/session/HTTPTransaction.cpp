@@ -1477,6 +1477,16 @@ size_t HTTPTransaction::maybeSendDeferredNoError() {
   return bytes;
 }
 
+void HTTPTransaction::sendPadding(uint16_t bytes) {
+  VLOG(4) << "egress padding=" << bytes << " on " << *this;
+  if (!validateEgressStateTransition(
+          // Sending padding is valid only when you can send body
+          HTTPTransactionEgressSM::Event::sendBody)) {
+    return;
+  }
+  transport_.sendPadding(this, bytes);
+}
+
 size_t HTTPTransaction::sendEOMNow() {
   DestructorGuard g(this);
   VLOG(4) << "egress EOM on " << *this;

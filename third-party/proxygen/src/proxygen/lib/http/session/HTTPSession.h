@@ -507,6 +507,7 @@ class HTTPSession
   }
   size_t sendChunkHeader(HTTPTransaction* txn, size_t length) noexcept override;
   size_t sendChunkTerminator(HTTPTransaction* txn) noexcept override;
+  size_t sendPadding(HTTPTransaction* txn, uint16_t bytes) noexcept override;
   size_t sendEOM(HTTPTransaction* txn,
                  const HTTPHeaders* trailers) noexcept override;
   size_t sendAbort(HTTPTransaction* txn,

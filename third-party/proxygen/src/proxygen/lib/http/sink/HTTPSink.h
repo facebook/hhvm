@@ -66,6 +66,7 @@ class HTTPSink {
   virtual void sendChunkHeader(size_t length) = 0;
   virtual void sendChunkTerminator() = 0;
   virtual void sendTrailers(const HTTPHeaders& trailers) = 0;
+  virtual void sendPadding(uint16_t bytes) = 0;
   virtual void sendEOM() = 0;
   virtual bool isEgressEOMSeen() = 0;
   virtual void sendAbort() = 0;

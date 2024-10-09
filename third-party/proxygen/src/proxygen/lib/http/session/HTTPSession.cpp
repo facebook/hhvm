@@ -1826,6 +1826,17 @@ void HTTPSession::ShutdownTransportCallback::runLoopCallback() noexcept {
   delete dg;
 }
 
+size_t HTTPSession::sendPadding(HTTPTransaction* txn, uint16_t bytes) noexcept {
+  auto encodedSize = codec_->generatePadding(writeBuf_, txn->getID(), bytes);
+  LOG(ERROR) << *this << " sending " << bytes
+             << " bytes of padding, encodedSize=" << encodedSize
+             << " for streamID=" << txn->getID();
+  if (encodedSize > 0) {
+    scheduleWrite();
+  }
+  return encodedSize;
+}
+
 size_t HTTPSession::sendEOM(HTTPTransaction* txn,
                             const HTTPHeaders* trailers) noexcept {
 

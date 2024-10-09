@@ -97,13 +97,17 @@ class HTTPHandlerBase {
                          uint32_t content_length,
                          bool keepalive = true,
                          bool sendEOM = true,
-                         bool hasTrailers = false) {
+                         bool hasTrailers = false,
+                         uint16_t padding = 0) {
     sendHeaders(code, content_length, keepalive);
     sendBody(content_length);
     if (hasTrailers) {
       HTTPHeaders trailers;
       trailers.add("X-Trailer1", "Foo");
       txn_->sendTrailers(trailers);
+    }
+    if (padding) {
+      txn_->sendPadding(padding);
     }
     if (sendEOM) {
       txn_->sendEOM();

@@ -225,6 +225,7 @@ using HQUpstreamSessionTestDatagram = HQUpstreamSessionTest;
 TEST_P(HQUpstreamSessionTest, SimpleGet) {
   auto handler = openTransaction();
   handler->txn_->sendHeaders(getGetRequest());
+  handler->txn_->sendPadding(123); // ignored by peer
   handler->txn_->sendEOM();
   handler->expectHeaders();
   handler->expectBody();

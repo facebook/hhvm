@@ -3298,6 +3298,21 @@ size_t HQSession::HQStreamTransportBase::sendChunkTerminator(
   return encodedSize;
 }
 
+size_t HQSession::HQStreamTransportBase::sendPadding(
+    HTTPTransaction* txn, uint16_t padding) noexcept {
+  VLOG(4) << __func__ << " txn=" << txn_ << " padding=" << padding;
+  CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
+  DCHECK(txn == &txn_);
+  auto g = folly::makeGuard(setActiveCodec(__func__));
+  CHECK(codecStreamId_);
+  size_t encodedSize =
+      codecFilterChain->generatePadding(writeBuf_, *codecStreamId_, padding);
+  if (encodedSize > 0) {
+    notifyPendingEgress();
+  }
+  return encodedSize;
+}
+
 void HQSession::HQStreamTransportBase::onMessageBegin(
     HTTPCodec::StreamID streamID, HTTPMessage* /* msg */) {
   VLOG(4) << __func__ << " txn=" << txn_ << " streamID=" << streamID

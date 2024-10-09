@@ -67,6 +67,7 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               (HTTPTransaction*, size_t),
               (noexcept));
   MOCK_METHOD((size_t), sendChunkTerminator, (HTTPTransaction*), (noexcept));
+  MOCK_METHOD((size_t), sendPadding, (HTTPTransaction*, uint16_t), (noexcept));
   MOCK_METHOD((size_t),
               sendEOM,
               (HTTPTransaction*, const HTTPHeaders*),
@@ -390,6 +391,7 @@ class MockHTTPTransaction : public HTTPTransaction {
     return HTTPTransaction::sendAbort();
   }
 
+  MOCK_METHOD(void, sendPadding, (uint16_t));
   MOCK_METHOD(void, sendChunkHeader, (size_t));
   MOCK_METHOD(void, sendChunkTerminator, ());
   MOCK_METHOD(void, sendTrailers, (const HTTPHeaders& trailers));

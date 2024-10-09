@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
@@ -77,6 +78,25 @@ class DefaultPayloadSerializerStrategy final
   template <typename T>
   size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
     CompactProtocolReader reader;
+    reader.setInput(cursor);
+    output.read(&reader);
+    return reader.getCursorPosition();
+  }
+
+  template <typename T>
+  size_t unpackBinary(T& output, const folly::IOBuf* buffer) {
+    if (FOLLY_UNLIKELY(!buffer)) {
+      folly::throw_exception<std::runtime_error>("Underflow");
+    }
+    BinaryProtocolReader reader;
+    reader.setInput(buffer);
+    output.read(&reader);
+    return reader.getCursorPosition();
+  }
+
+  template <typename T>
+  size_t unpackBinary(T& output, const folly::io::Cursor& cursor) {
+    BinaryProtocolReader reader;
     reader.setInput(cursor);
     output.read(&reader);
     return reader.getCursorPosition();

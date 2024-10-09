@@ -74,6 +74,18 @@ class PayloadSerializerStrategy {
     return child_.unpackCompact(output, cursor);
   }
 
+  template <typename T>
+  FOLLY_ALWAYS_INLINE size_t
+  unpackBinary(T& output, const folly::IOBuf* buffer) {
+    return child_.unpackBinary(output, buffer);
+  }
+
+  template <typename T>
+  FOLLY_ALWAYS_INLINE size_t
+  unpackBinary(T& output, folly::io::Cursor& cursor) {
+    return child_.unpackBinary(output, cursor);
+  }
+
   virtual ~PayloadSerializerStrategy() = default;
 
  protected:

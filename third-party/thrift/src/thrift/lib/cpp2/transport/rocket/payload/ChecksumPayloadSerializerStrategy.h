@@ -109,6 +109,16 @@ class ChecksumPayloadSerializerStrategy final
     return delegate_.unpackCompact(output, cursor);
   }
 
+  template <typename T>
+  FOLLY_ERASE size_t unpackBinary(T& output, const folly::IOBuf* buffer) {
+    return delegate_.unpackBinary(output, buffer);
+  }
+
+  template <typename T>
+  FOLLY_ERASE size_t unpackBinary(T& output, const folly::io::Cursor& cursor) {
+    return delegate_.unpackBinary(output, cursor);
+  }
+
  private:
   DelegateStrategy delegate_;
 

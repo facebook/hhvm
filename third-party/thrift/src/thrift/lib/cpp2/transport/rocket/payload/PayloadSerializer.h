@@ -121,6 +121,20 @@ class PayloadSerializer {
     });
   }
 
+  template <typename T>
+  size_t unpackBinary(T& output, const folly::IOBuf* buffer) {
+    return visit([&](auto& strategy) {
+      return strategy.template unpackBinary<T>(output, buffer);
+    });
+  }
+
+  template <typename T>
+  size_t unpackBinary(T& output, const folly::io::Cursor& cursor) {
+    return visit([&](auto& strategy) {
+      return strategy.template unpackBinary<T>(output, cursor);
+    });
+  }
+
   template <typename Metadata>
   rocket::Payload packWithFds(
       Metadata* metadata,

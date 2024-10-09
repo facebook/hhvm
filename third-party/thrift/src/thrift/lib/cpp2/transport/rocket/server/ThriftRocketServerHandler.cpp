@@ -199,21 +199,15 @@ void ThriftRocketServerHandler::handleSetupFrame(
   RequestSetupMetadata meta;
   try {
     if (frame.encodeMetadataUsingBinary()) {
-      BinaryProtocolReader reader;
-      reader.setInput(cursor);
-      // Throws on read error
-      meta.read(&reader);
-      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
+      if (PayloadSerializer::getInstance().unpackBinary(meta, cursor) !=
+          frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));
       }
     } else {
-      CompactProtocolReader reader;
-      reader.setInput(cursor);
-      // Throws on read error
-      meta.read(&reader);
-      if (reader.getCursorPosition() != frame.payload().metadataSize()) {
+      if (PayloadSerializer::getInstance().unpackCompact(meta, cursor) !=
+          frame.payload().metadataSize()) {
         return connection.close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID_SETUP,
             "Error deserializing SETUP payload: underflow"));
@@ -320,7 +314,6 @@ void ThriftRocketServerHandler::handleSetupFrame(
     compactProtocolWriter.setOutput(&queue);
     serverMeta.write(&compactProtocolWriter);
     connection.sendMetadataPush(std::move(queue).move());
-
   } catch (const std::exception& e) {
     return connection.close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID_SETUP,

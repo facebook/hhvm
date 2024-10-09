@@ -34,6 +34,7 @@ Payload makePayload(
     const Metadata& metadata, std::unique_ptr<folly::IOBuf> data);
 } // namespace detail
 
+// TODO(yuhanhao): hide the following methods behind PayloadSerializer.
 template <typename T>
 size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
   if (!buffer) {
@@ -48,6 +49,25 @@ size_t unpackCompact(T& output, const folly::IOBuf* buffer) {
 template <typename T>
 size_t unpackCompact(T& output, const folly::io::Cursor& cursor) {
   CompactProtocolReader reader;
+  reader.setInput(cursor);
+  output.read(&reader);
+  return reader.getCursorPosition();
+}
+
+template <typename T>
+size_t unpackBinary(T& output, const folly::IOBuf* buffer) {
+  if (!buffer) {
+    folly::throw_exception<std::runtime_error>("Underflow");
+  }
+  BinaryProtocolReader reader;
+  reader.setInput(buffer);
+  output.read(&reader);
+  return reader.getCursorPosition();
+}
+
+template <typename T>
+size_t unpackBinary(T& output, const folly::io::Cursor& cursor) {
+  BinaryProtocolReader reader;
   reader.setInput(cursor);
   output.read(&reader);
   return reader.getCursorPosition();

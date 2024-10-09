@@ -14,12 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-prologue.h"
 #include "hphp/runtime/vm/jit/tc-region.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/job-queue.h"
@@ -57,6 +60,58 @@ struct AsyncPrologueContext {
   int nPassed;
 };
 
+namespace {
+std::atomic<size_t> s_successTrans;
+std::atomic<size_t> s_failTrans;
+std::atomic<size_t> s_failSrcRec;
+std::atomic<size_t> s_permFailTrans;
+std::atomic<size_t> s_rejectTrans;
+std::atomic<size_t> s_activeTrans;
+
+std::atomic<size_t> s_successPrologue;
+std::atomic<size_t> s_failPrologue;
+std::atomic<size_t> s_permFailPrologue;
+std::atomic<size_t> s_rejectPrologue;
+std::atomic<size_t> s_activePrologue;
+
+InitFiniNode s_logJitStats([]{
+  if (!RO::EvalEnableAsyncJIT ||
+      !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
+  StructuredLogEntry ent;
+
+  constexpr auto MO = std::memory_order_relaxed;
+  ent.setInt("succeeded_trans", s_successTrans.load(MO));
+  ent.setInt("failed_src_rec", s_failSrcRec.load(MO));
+  ent.setInt("failed_trans", s_failTrans.load(MO));
+  ent.setInt("permanent_failed_trans", s_permFailTrans.load(MO));
+  ent.setInt("rejected_trans", s_rejectTrans.load(MO));
+  ent.setInt("active_trans", s_activeTrans.load(MO));
+
+  ent.setInt("succeeded_prologue", s_successPrologue.load(MO));
+  ent.setInt("failed_prologue", s_failPrologue.load(MO));
+  ent.setInt("permanent_failed_prologue", s_permFailPrologue.load(MO));
+  ent.setInt("rejected_prologue", s_rejectPrologue.load(MO));
+  ent.setInt("active_prologue", s_activePrologue.load(MO));
+
+  ent.setInt("main_used_bytes", tc::code().main().used());
+  ent.setInt("cold_used_bytes", tc::code().cold().used());
+  ent.setInt("frozen_used_bytes", tc::code().frozen().used());
+  ent.setInt("data_used_bytes", tc::code().data().used());
+
+  ent.setInt("main_max_bytes", CodeCache::AMaxUsage);
+  ent.setInt("cold_max_bytes", CodeCache::AColdMaxUsage);
+  ent.setInt("frozen_max_bytes", CodeCache::AFrozenMaxUsage);
+  ent.setInt("data_max_bytes", CodeCache::GlobalDataSize);
+
+  ent.setInt("request_index", requestCount());
+  ent.setInt("reached_limit", tc::canTranslate() ? 0 : 1);
+
+  ent.setInt("sample_rate", Cfg::Eval::AsyncJitLogStatsRate);
+
+  StructuredLog::log("hhvm_async_jit_stats", ent);
+}, InitFiniNode::When::RequestFini, "logJitStats");
+}
+
 using AsyncTranslationContext =
   std::variant<AsyncRegionTranslationContext, AsyncPrologueContext>;
 
@@ -71,9 +126,11 @@ struct AsyncTranslationWorker
 
     auto const ctx = rctx.ctx;
 
+    s_activeTrans++;
     SCOPE_EXIT {
       FTRACE(2, "Finished background jit attempt for sk {}\n", show(ctx.sk));
       s_enqueuedSKs.assign(ctx.sk, false);
+      s_activeTrans--;
     };
 
     FTRACE(2, "Background jit attempt started for sk {}\n", show(ctx.sk));
@@ -81,7 +138,8 @@ struct AsyncTranslationWorker
     auto const srcRec = tc::createSrcRec(ctx.sk, ctx.spOffset);
     if (!srcRec) {
       FTRACE(2, "createSrcRec failed for sk {}\n", show(ctx.sk));
-       return;
+      s_failSrcRec++;
+      return;
     }
     auto const numTrans = srcRec->numTrans();
     // If new translations were created since this request was enqueued,
@@ -101,9 +159,11 @@ struct AsyncTranslationWorker
 
     if (auto const s = translator.shouldTranslate();
       s != TranslationResult::Scope::Success) {
+      s_rejectTrans++;
       FTRACE(2, "shouldTranslate failed for sk {}\n", show(ctx.sk));
       if (s == TranslationResult::Scope::Process) {
         translator.setCachedForProcessFail();
+        s_permFailTrans++;
       }
       return;
     }
@@ -120,19 +180,23 @@ struct AsyncTranslationWorker
         FTRACE(2, "start: {} | end: {}\n",
                show(translator.region->start()),
                show(translator.region->lastSrcKey()));
+        s_successTrans++;
       }
       FTRACE(2, "Successfully generated translation for sk {}\n", show(ctx.sk));
     } else {
       FTRACE(2, "Background jitting failed for sk {}\n", show(ctx.sk));
+      s_failTrans++;
     }
   }
 
   void doAsyncPrologueGen(AsyncPrologueContext& ctx) {
 
+    s_activePrologue++;
     SCOPE_EXIT {
       FTRACE(2, "Finished prologue generation attempt for func {}\n",
              ctx.func->name());
       ctx.func->atomicFlags().unset(Func::Flags::LockedForPrologueGen);
+      s_activePrologue--;
     };
 
     FTRACE(2, "Background prologue generation attempt started for func {}\n",
@@ -155,8 +219,10 @@ struct AsyncTranslationWorker
         s != TranslationResult::Scope::Success) {
       FTRACE(2, "shouldTranslate failed for func prologue {}\n",
              ctx.func->name());
+      s_rejectPrologue++;
       if (s == TranslationResult::Scope::Process) {
         translator.setCachedForProcessFail();
+        s_permFailPrologue++;
       }
       return;
     }
@@ -171,9 +237,11 @@ struct AsyncTranslationWorker
     if (result.scope() == TranslationResult::Scope::Success) {
       FTRACE(2, "Successfully generated prologue for func {}\n",
              ctx.func->name());
+      s_successPrologue++;
     } else {
       FTRACE(2, "Background prologue generation failed for func {}\n",
              ctx.func->name());
+      s_failPrologue++;
     }
   }
 

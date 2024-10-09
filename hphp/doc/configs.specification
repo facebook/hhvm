@@ -258,6 +258,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
   Remove locking from Func::def()
 
+- int Eval.AsyncJitLogStatsRate = 0, paulbiss
+
+  Log stats about the async JIT to hhvm_async_jit_stats using StructuredLog
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

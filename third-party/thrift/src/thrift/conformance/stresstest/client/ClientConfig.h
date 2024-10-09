@@ -68,6 +68,7 @@ struct ClientConfig {
   uint32_t targetQps;
   std::chrono::duration<int64_t, std::milli> gen_load_interval;
   ClientConnectionConfig connConfig;
+  bool enableChecksum{false};
 
   static ClientConfig createFromFlags();
 };

@@ -120,6 +120,8 @@ ThriftRequestCore::ThriftRequestCore(
     compressionConfig_ = *compressionConfig;
   }
 
+  header_.setChecksum(metadata.checksum().to_optional());
+
   if (auto* observer = serverConfigs_.getObserver()) {
     observer->receivedRequest(&reqContext_.getMethodName());
   }

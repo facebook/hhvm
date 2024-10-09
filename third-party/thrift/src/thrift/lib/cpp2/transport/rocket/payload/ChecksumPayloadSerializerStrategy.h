@@ -83,7 +83,6 @@ class ChecksumPayloadSerializerStrategy final
       folly::AsyncTransport* transport) {
     if (auto checksumOpt = calculateChecksum(*payload, metadata->checksum())) {
       metadata->checksum() = *checksumOpt;
-      recordChecksumCalculated_();
     }
     return delegate_.packWithFds(
         metadata, std::move(payload), std::move(fds), transport);
@@ -130,6 +129,7 @@ class ChecksumPayloadSerializerStrategy final
     checksum.algorithm() = ChecksumAlgo;
     checksum.checksum() = ret.checksum;
     checksum.salt() = ret.salt;
+    recordChecksumCalculated_();
     return checksum;
   }
 
@@ -158,8 +158,14 @@ class ChecksumPayloadSerializerStrategy final
   template <typename Algo>
   bool validateChecksumImpl(folly::IOBuf& buf, Checksum checksum) {
     ChecksumGenerator<Algo> generator;
-    return generator.validateChecksumFromIOBuf(
+    bool ret = generator.validateChecksumFromIOBuf(
         *checksum.checksum(), *checksum.salt(), buf);
+    if (FOLLY_LIKELY(ret)) {
+      recordChecksumSuccess_();
+    } else {
+      recordChecksumFailure_();
+    }
+    return ret;
   }
 
   bool validateChecksum(
@@ -191,10 +197,8 @@ class ChecksumPayloadSerializerStrategy final
       folly::Try<T> t = func(std::move(payload));
       folly::IOBuf& buf = *t->payload.get();
       if (t.hasException() || validateChecksum(buf, t->metadata.checksum())) {
-        recordChecksumSuccess_();
         return t;
       } else {
-        recordChecksumFailure_();
         return folly::Try<T>(std::runtime_error("Checksum mismatch"));
       }
     } else {

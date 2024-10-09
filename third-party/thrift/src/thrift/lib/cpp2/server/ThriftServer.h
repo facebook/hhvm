@@ -16,7 +16,6 @@
 
 #ifndef THRIFT_SERVER_H_
 #define THRIFT_SERVER_H_ 1
-
 #include <array>
 #include <atomic>
 #include <chrono>

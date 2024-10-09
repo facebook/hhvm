@@ -87,6 +87,16 @@ RequestRpcMetadata makeRequestRpcMetadata(
     }
   }
 
+  if (rpcOptions.getChecksum() == RpcOptions::Checksum::CRC32) {
+    Checksum checksum;
+    checksum.algorithm() = ChecksumAlgorithm::CRC32;
+    metadata.checksum() = checksum;
+  } else if (rpcOptions.getChecksum() == RpcOptions::Checksum::XXH3_64) {
+    Checksum checksum;
+    checksum.algorithm() = ChecksumAlgorithm::XXH3_64;
+    metadata.checksum() = checksum;
+  }
+
   auto writeHeaders = header.releaseWriteHeaders();
   if (auto* eh = header.getExtraWriteHeaders()) {
     // Extra write headers always take precedence over write headers (see
@@ -159,6 +169,11 @@ void fillTHeaderFromResponseRpcMetadata(
   if (auto crc32c = responseMetadata.crc32c()) {
     header.setCrc32c(*crc32c);
   }
+
+  if (auto checksum = responseMetadata.checksum()) {
+    header.setChecksum(*checksum);
+  }
+
   if (auto compression = responseMetadata.compression()) {
     // for fb internal logging purpose only; does not actually do transformation
     // based on THeader
@@ -201,6 +216,9 @@ void fillResponseRpcMetadataFromTHeader(
     responseMetadata.crc32c() = *crc32c;
   }
   responseMetadata.otherMetadata() = std::move(otherMetadata);
+  if (auto checksum = responseMetadata.checksum()) {
+    header.setChecksum(*checksum);
+  }
 }
 
 std::string serializeErrorClassification(ErrorClassification ec) {

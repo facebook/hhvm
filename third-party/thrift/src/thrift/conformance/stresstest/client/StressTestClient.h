@@ -66,8 +66,12 @@ class StressTestClient {
 class ThriftStressTestClient : public StressTestClient {
  public:
   explicit ThriftStressTestClient(
-      std::shared_ptr<StressTestAsyncClient> client, ClientRpcStats& stats)
-      : StressTestClient(stats), client_(std::move(client)) {}
+      std::shared_ptr<StressTestAsyncClient> client,
+      ClientRpcStats& stats,
+      bool enableChecksum = false)
+      : StressTestClient(stats),
+        client_(std::move(client)),
+        enableChecksum_(enableChecksum) {}
 
   folly::coro::Task<void> co_ping() override;
 
@@ -90,6 +94,8 @@ class ThriftStressTestClient : public StressTestClient {
   folly::coro::Task<void> timedExecute(Fn&& fn);
 
   std::shared_ptr<StressTestAsyncClient> client_;
+
+  const bool enableChecksum_;
 };
 
 } // namespace stress

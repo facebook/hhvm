@@ -257,8 +257,8 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::shared_ptr<StressTestAsyncClient> connection =
         ClientFactory::createRocketClient(evb, cfg.connConfig);
     for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
-      clients.emplace_back(
-          std::make_unique<ThriftStressTestClient>(connection, stats));
+      clients.emplace_back(std::make_unique<ThriftStressTestClient>(
+          connection, stats, cfg.enableChecksum));
     }
   }
   return clients;

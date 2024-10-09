@@ -47,8 +47,13 @@ folly::coro::Task<void> ThriftStressTestClient::co_ping() {
 folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
     const std::string& x) {
   std::string ret;
-  co_await timedExecute(
-      [&]() -> folly::coro::Task<void> { ret = co_await client_->co_echo(x); });
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    RpcOptions rpcOptions;
+    if (enableChecksum_) {
+      rpcOptions.setChecksum(RpcOptions::Checksum::XXH3_64);
+    }
+    ret = co_await client_->co_echo(rpcOptions, x);
+  });
   co_return ret;
 }
 

@@ -479,6 +479,11 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto& data = requestPayloadTry->payload;
   auto& metadata = requestPayloadTry->metadata;
 
+  ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm::NONE;
+  if (auto checksum = metadata.checksum()) {
+    checksumAlgorithm = *checksum->algorithm();
+  }
+
   // Extract FDs as early as possible to avoid holding them open if the
   // request fails.
   //
@@ -724,7 +729,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto serializedCompressedRequest = SerializedCompressedRequest(
       std::move(data),
       crc32Opt ? CompressionAlgorithm::NONE
-               : compressionOpt.value_or(CompressionAlgorithm::NONE));
+               : compressionOpt.value_or(CompressionAlgorithm::NONE),
+      checksumAlgorithm);
 
   const auto protocolId = request->getProtoId();
   Cpp2Worker::dispatchRequest(

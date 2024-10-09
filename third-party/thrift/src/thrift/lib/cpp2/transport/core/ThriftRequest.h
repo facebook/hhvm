@@ -156,7 +156,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
       if (crc32c) {
         metadata.crc32c() = *crc32c;
       }
@@ -179,7 +180,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
       if (crc32c) {
         metadata.crc32c() = *crc32c;
       }
@@ -201,7 +203,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
       if (crc32c) {
         metadata.crc32c() = *crc32c;
       }
@@ -224,7 +227,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
-          header_.extractProxiedPayloadMetadata());
+          header_.extractProxiedPayloadMetadata(),
+          header_.getChecksum());
       if (crc32c) {
         metadata.crc32c() = *crc32c;
       }
@@ -397,7 +401,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   ResponseRpcMetadata makeResponseRpcMetadata(
       transport::THeader::StringToStringMap&& writeHeaders,
       std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata,
-      std::optional<Checksum> checksum = std::nullopt);
+      std::optional<Checksum> checksum);
 
   MessageChannel::SendCallbackPtr createRequestLoggingCallback(
       MessageChannel::SendCallbackPtr&& sendCallback,
@@ -507,7 +511,9 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
       sendSerializedError(
           makeResponseRpcMetadata(
-              std::move(writeHeaders), proxiedPayloadMetadata),
+              std::move(writeHeaders),
+              proxiedPayloadMetadata,
+              std::nullopt /*checksum*/),
           std::move(exbuf));
     });
   }

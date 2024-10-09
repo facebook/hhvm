@@ -58,6 +58,7 @@ DEFINE_uint64(
     gen_load_interval,
     5,
     "interval in milliseconds used by the generated load");
+DEFINE_bool(enable_checksum, false, "Enable checksum validation using XXH3");
 
 namespace apache::thrift::stress {
 
@@ -106,6 +107,8 @@ namespace apache::thrift::stress {
   config.numClientsPerConnection =
       static_cast<uint64_t>(FLAGS_clients_per_connection);
   config.connConfig = std::move(connCfg);
+
+  config.enableChecksum = FLAGS_enable_checksum;
 
   return config;
 }

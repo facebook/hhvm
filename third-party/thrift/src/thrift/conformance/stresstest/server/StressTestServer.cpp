@@ -65,10 +65,13 @@ DEFINE_bool(enable_overload_checker, false, "Enable overload checker");
 DEFINE_bool(enable_resource_pools, false, "Enable resource pools");
 DEFINE_bool(
     disable_active_request_tracking, false, "Disabled Active Request Tracking");
+DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
 
 namespace apache {
 namespace thrift {
 namespace stress {
+
+using namespace apache::thrift::rocket;
 
 namespace {
 
@@ -152,6 +155,24 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setIOThreadPool(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
   server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
+
+  LOG(INFO) << "Enable Checksum Support: " << FLAGS_enable_checksum;
+  if (FLAGS_enable_checksum) {
+    PayloadSerializer::initialize(
+        ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
+            ChecksumPayloadSerializerStrategyOptions{
+                .recordChecksumFailure =
+                    [] { LOG(FATAL) << "Checksum failure detected"; },
+                .recordChecksumSuccess =
+                    [] {
+                      LOG_EVERY_N(INFO, 1'000'000)
+                          << "Checksum success detected";
+                    },
+                .recordChecksumCalculated =
+                    [] {
+                      LOG_EVERY_N(INFO, 1'000'000) << "Checksum calculated";
+                    }}));
+  }
 
   LOG(INFO) << "Active Request Tracking Disabled: "
             << FLAGS_disable_active_request_tracking;

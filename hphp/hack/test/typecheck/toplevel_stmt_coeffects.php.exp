@@ -1,0 +1,4 @@
+ERROR: File "toplevel_stmt_coeffects.php", line 7, characters 3-15:
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
+ERROR: File "toplevel_stmt_coeffects.php", line 5, characters 1-51:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])

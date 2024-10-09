@@ -330,7 +330,7 @@ void ThriftRequestCore::sendException(
       auto metadata = makeResponseRpcMetadata(
           header_.extractAllWriteHeaders(),
           header_.extractProxiedPayloadMetadata(),
-          std::nullopt);
+          std::nullopt /*checksum*/);
       if (checkResponseSize(*response.buffer())) {
         sendThriftException(
             std::move(metadata),

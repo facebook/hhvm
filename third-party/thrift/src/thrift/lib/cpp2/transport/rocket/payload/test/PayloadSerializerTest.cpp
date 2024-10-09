@@ -48,4 +48,18 @@ TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy) {
   testPackAndUnpackWithCompactProtocol(serializer);
 }
 
+TEST(PayloadSerializerTest, TestPackWithoutChecksumUsingFacade) {
+  PayloadSerializer::reset();
+  PayloadSerializer::initialize(
+      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>());
+  auto& serializer = PayloadSerializer::getInstance();
+  RequestRpcMetadata metadata;
+  metadata.protocol() = ProtocolId::COMPACT;
+  auto payload = serializer.packWithFds(
+      &metadata, folly::IOBuf::copyBuffer("test"), folly::SocketFds(), nullptr);
+
+  auto other = serializer.unpack<RequestPayload>(std::move(payload));
+  EXPECT_EQ(other.hasException(), false);
+}
+
 } // namespace apache::thrift::rocket

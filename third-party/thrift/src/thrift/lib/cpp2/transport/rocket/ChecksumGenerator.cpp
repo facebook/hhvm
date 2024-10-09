@@ -45,10 +45,8 @@ int64_t XXH3Logic::xxh3(folly::IOBuf& buffer, int64_t salt) {
     throw std::runtime_error("XXH64_reset failed");
   }
 
-  size_t count = 0;
   folly::io::Cursor cursor(&buffer);
   while (!cursor.isAtEnd()) {
-    ++count;
     auto bytes = cursor.peekBytes();
     auto ret = XXH3_64bits_update(state, bytes.data(), bytes.size());
     if (ret == XXH_ERROR) {
@@ -57,7 +55,6 @@ int64_t XXH3Logic::xxh3(folly::IOBuf& buffer, int64_t salt) {
     cursor.skip(bytes.size());
   }
 
-  FOLLY_SAFE_DCHECK(count == buffer.countChainElements());
   auto ret = XXH3_64bits_digest(state);
   if (ret == XXH_ERROR) {
     throw std::runtime_error("XXH64_digest failed");

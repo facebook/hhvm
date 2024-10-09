@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <folly/Function.h>
 #include <folly/Try.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
 

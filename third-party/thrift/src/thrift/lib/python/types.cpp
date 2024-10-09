@@ -1278,12 +1278,12 @@ void resetFieldToStandardDefault(
     PyList_SET_ITEM(
         structList,
         index + 1,
-        deepcopy(getDefaultValueForField(
-                     fieldInfo.typeInfo,
-                     defaultValues,
-                     index,
-                     getStandardMutableDefaultValueForType)
-                     .release()));
+        ListContainer::deepCopy(getDefaultValueForField(
+                                    fieldInfo.typeInfo,
+                                    defaultValues,
+                                    index,
+                                    getStandardMutableDefaultValueForType)
+                                    .release()));
   }
   Py_DECREF(oldValue);
 }

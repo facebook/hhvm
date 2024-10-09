@@ -25,10 +25,18 @@ from multiprocessing import Event, Process, synchronize
 
 from thrift.lib.python.client.test.http2_helper import install_http2_routing_handler
 
-from thrift.py3.server import get_context, SocketAddress, ThriftServer
-from thrift.python.leaf.services import LeafServiceInterface
-from thrift.python.test.services import EchoServiceInterface, TestServiceInterface
-from thrift.python.test.types import ArithmeticException, EmptyException, SimpleResponse
+from thrift.py3.server import get_context, SocketAddress
+from thrift.python.leaf.thrift_services import LeafServiceInterface
+from thrift.python.server import ThriftServer
+from thrift.python.test.thrift_services import (
+    EchoServiceInterface,
+    TestServiceInterface,
+)
+from thrift.python.test.thrift_types import (
+    ArithmeticException,
+    EmptyException,
+    SimpleResponse,
+)
 
 
 class TestServiceHandler(TestServiceInterface):

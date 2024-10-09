@@ -14,7 +14,7 @@ The following scenarios get considered when defining compatibility. Note that no
 
 The following outlines the compatibility for changes to data:
 
-|Change    |Wire compatible  [^1] |Code compatible  [^2] |Notes    |
+|Change    |Wire compatible[^1] |Code compatible[^2] |Notes    |
 |---    |---    |---    |---    |
 |Add a field    |yes    |yes    |Dropped by old    |
 |Remove a field    |yes    |no    |Dropped by new    |
@@ -22,6 +22,7 @@ The following outlines the compatibility for changes to data:
 |Change field type    |rarely    |no    |1. Changes between utf-8 encoded string and binary are wire compatible for Binary/Compact protocol. <br/>2. Changes between i32 and enum are wire compatible.    |
 |Add enum value    |yes    |yes    |Preserved by old    |
 |Remove enum value    |yes    |no    |Preserved by new    |
+|Change enum value   |no    |no    |    |
 |New enum field with no 0 value    |yes    |yes    |    |
 |Default on new non-optional field    |yes    |yes    |Gets new default    |
 |Default on new optional field    |yes    |yes    |Stays unset    |

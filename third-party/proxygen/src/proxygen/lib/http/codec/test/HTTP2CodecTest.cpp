@@ -2900,7 +2900,7 @@ TEST_F(HTTP2CodecTest, MaxPadding) {
   string data("abcde");
   auto buf = folly::IOBuf::copyBuffer(data.data(), data.length());
   const auto padding = numeric_limits<uint16_t>::max();
-  const auto paddingFrames =
+  [[maybe_unused]] const auto paddingFrames =
       padding / http2::kMaxFramePayloadLengthMin +
       (padding % http2::kMaxFramePayloadLengthMin == 0 ? 0 : 1);
 

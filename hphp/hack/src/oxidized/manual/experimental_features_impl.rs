@@ -47,6 +47,7 @@ impl FeatureName {
             OpenTuples => Preview,
             TypeSplat => Preview,
             ExpressionTreeNestedBindings => Unstable,
+            LikeTypeHints => Unstable,
         }
     }
 

@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 class C {
   const type T = ~int;

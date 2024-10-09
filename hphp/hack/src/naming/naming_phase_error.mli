@@ -18,8 +18,6 @@ val parsing : Parsing_error.t -> t
 
 val nast_check : Nast_check_error.t -> t
 
-val like_type : Pos.t -> t
-
 val unexpected_hint : Pos.t -> t
 
 val malformed_access : Pos.t -> t

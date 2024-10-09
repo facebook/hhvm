@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 function f<reify T>(<<__Soft>> T $t): void {
   echo "\$t: $t [reified]\n";

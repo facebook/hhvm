@@ -1,29 +1,29 @@
 int(1)
 
-Warning: Value returned from function f() must be of type @MyAlias, float given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, float given in %s/test/slow/like_types/return_alias.php on line 5
 float(1.5)
 
-Warning: Value returned from function f() must be of type @MyAlias, string given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, string given in %s/test/slow/like_types/return_alias.php on line 5
 string(3) "foo"
 
-Warning: Value returned from function f() must be of type @MyAlias, bool given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, bool given in %s/test/slow/like_types/return_alias.php on line 5
 bool(false)
 
-Warning: Value returned from function f() must be of type @MyAlias, File given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, File given in %s/test/slow/like_types/return_alias.php on line 5
 resource(4) of type (stream)
 
-Warning: Value returned from function f() must be of type @MyAlias, stdClass given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, stdClass given in %s/test/slow/like_types/return_alias.php on line 5
 object(stdClass) (0) {
 }
 
-Warning: Value returned from function f() must be of type @MyAlias, HH\vec given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, HH\vec given in %s/test/slow/like_types/return_alias.php on line 5
 vec(3) {
   int(1)
   int(2)
   int(3)
 }
 
-Warning: Value returned from function f() must be of type @MyAlias, HH\dict given in %s/test/slow/like_types/return_alias.php on line 4
+Warning: Value returned from function f() must be of type @MyAlias, HH\dict given in %s/test/slow/like_types/return_alias.php on line 5
 dict(2) {
   ["a"]=>
   int(1)

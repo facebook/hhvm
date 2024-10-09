@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 final class C {
   <<__Soft>> private ~int $x = 1;

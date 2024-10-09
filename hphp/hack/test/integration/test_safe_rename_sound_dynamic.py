@@ -18,7 +18,7 @@ class TestSafeRenameSoundDynamic(common_tests.CommonTestDriver):
         with open(os.path.join(self.repo_dir, ".hhconfig"), "w") as f:
             f.write(
                 """
-like_type_hints = true
+enable_experimental_stx_features = {"like_type_hints": "Unstable"}
 enable_sound_dynamic_type = true
 union_intersection_type_hints = true
 everything_sdt = true

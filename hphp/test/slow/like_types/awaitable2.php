@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 /**
  * Like-types are enforced at their inner type, so this enforces as Awaitable<int>

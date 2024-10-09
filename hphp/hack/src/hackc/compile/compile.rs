@@ -572,7 +572,6 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
 
 fn emit_fatal_experimental_feature_error(err: &ExperimentalFeature) -> Result<Unit, Error> {
     match err {
-        ExperimentalFeature::LikeType(_) => todo!(),
         ExperimentalFeature::Supportdyn(_) => todo!(),
         ExperimentalFeature::ConstAttr(_) => todo!(),
         ExperimentalFeature::ConstStaticProp(_) => todo!(),

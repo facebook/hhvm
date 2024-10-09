@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 /**
  * For non-async functions, a like-Awaitable acts like any other like type, enforced at the inner type.

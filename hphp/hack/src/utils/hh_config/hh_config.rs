@@ -325,7 +325,6 @@ impl HhConfig {
             tco_populate_member_heaps: default.tco_populate_member_heaps,
             tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,
             tco_skip_tast_checks: default.tco_skip_tast_checks,
-            tco_like_type_hints: hhconfig.get_bool_or("like_type_hints", default.tco_like_type_hints)?,
             tco_coeffects: default.tco_coeffects,
             tco_coeffects_local: default.tco_coeffects_local,
             tco_strict_contexts: default.tco_strict_contexts,

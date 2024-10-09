@@ -1,0 +1,22 @@
+ERROR: File "disabled.php", line 3, characters 13-16:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 3, characters 23-27:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 7, characters 17-20:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 7, characters 32-36:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 16, characters 7-10:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 17, characters 10-13:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 18, characters 9-12:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 19, characters 7-10:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 23, characters 9-12:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 24, characters 9-12:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])
+ERROR: File "disabled.php", line 27, characters 15-18:
+Cannot use unstable feature: `like_type_hints` (Parsing[1002])

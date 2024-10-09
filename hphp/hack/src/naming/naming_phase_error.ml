@@ -10,7 +10,6 @@ open Hh_prelude
 exception UnexpectedExpr of Pos.t
 
 type experimental_feature =
-  | Like_type of Pos.t
   | Supportdyn of Pos.t
   (* We use these constructors in Rust elaboration *)
   | Const_attr of Pos.t [@warning "-37"]
@@ -33,8 +32,6 @@ let naming err = Naming err
 let parsing err = Parsing err
 
 let nast_check err = Nast_check err
-
-let like_type pos = Experimental_feature (Like_type pos)
 
 let unexpected_hint pos = Unexpected_hint pos
 
@@ -79,7 +76,6 @@ let add t = function
   | Parsing err -> { t with parsing = err :: t.parsing }
 
 let emit_experimental_feature = function
-  | Like_type pos -> Errors.experimental_feature pos "like-types"
   | Supportdyn pos -> Errors.experimental_feature pos "supportdyn type hint"
   | Const_attr pos ->
     Errors.experimental_feature pos "The __Const attribute is not supported."

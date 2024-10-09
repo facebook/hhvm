@@ -120,7 +120,6 @@ type t = {
   tco_skip_tast_checks: bool;
       (** Skip checks implemented with TAST visitors.
         Set to true only for debugging purposes! *)
-  tco_like_type_hints: bool;  (** Enables like type hints *)
   tco_coeffects: bool;  (** Enables checking of coeffects *)
   tco_coeffects_local: bool;
       (** Enables checking of coeffects for local operations (not calls) *)
@@ -312,7 +311,6 @@ val set :
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?tco_skip_tast_checks:bool ->
-  ?tco_like_type_hints:bool ->
   ?tco_coeffects:bool ->
   ?tco_coeffects_local:bool ->
   ?tco_strict_contexts:bool ->

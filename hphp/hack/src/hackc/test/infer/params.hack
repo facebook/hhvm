@@ -1,4 +1,5 @@
 // RUN: %hackc compile-infer --fail-fast --keep-going %s | FileCheck %s
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 class Internal {}
 

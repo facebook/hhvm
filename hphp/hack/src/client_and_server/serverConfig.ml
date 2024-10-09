@@ -381,7 +381,6 @@ let load_config config options =
       (prepare_iset config "allowed_fixme_codes_strict")
     ?tco_experimental_features:(config_experimental_tc_features config)
     ?tco_migration_flags:(config_tc_migration_flags config)
-    ?tco_like_type_hints:(bool_opt "like_type_hints" config)
     ?tco_coeffects:(bool_opt "call_coeffects" config)
     ?tco_coeffects_local:(bool_opt "local_coeffects" config)
     ?tco_like_casts:(bool_opt "like_casts" config)

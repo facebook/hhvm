@@ -12,6 +12,7 @@ class TypeErrorAtPosDriver(CommonTestDriver):
 
     error_file_ext = ".err"
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
+    enable_experimental_stx_features = '{"like_type_hints": "Unstable"}'
     repo_dir = "hphp/hack/test/integration/data/holes"
 
     def write_load_config(
@@ -26,9 +27,9 @@ allowed_decl_fixme_codes = 4101,4323
 disable_xhp_element_mangling = false
 enable_sound_dynamic_type = true
 everything_sdt = true
-like_type_hints = true
+enable_experimental_stx_features = {}
 """.format(
-                    self.auto_namespace_map
+                    self.auto_namespace_map, self.enable_experimental_stx_features
                 )
             )
 

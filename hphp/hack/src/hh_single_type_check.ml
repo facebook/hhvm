@@ -881,7 +881,6 @@ let parse_options () =
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_skip_hierarchy_checks:!skip_hierarchy_checks
       ~tco_skip_tast_checks:!skip_tast_checks
-      ~tco_like_type_hints:true
       ~tco_strict_contexts:!strict_contexts
       ~tco_coeffects:!call_coeffects
       ~tco_coeffects_local:!local_coeffects

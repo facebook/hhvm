@@ -56,6 +56,7 @@ type feature_name =
   | OpenTuples
   | TypeSplat
   | ExpressionTreeNestedBindings
+  | LikeTypeHints
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

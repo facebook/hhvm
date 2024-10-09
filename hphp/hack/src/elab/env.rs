@@ -23,7 +23,6 @@ bitflags! {
         const HKT_ENABLED = 1 << 1;
         const IS_HHI = 1 << 2;
         const IS_SYSTEMLIB = 1 << 3;
-        const LIKE_TYPE_HINTS_ENABLED = 1 << 4;
         const CONST_ATTRIBUTE = 1 << 5;
         const CONST_STATIC_PROPS = 1 << 6;
         const ALLOW_MODULE_DECLARATIONS = 1 << 7;
@@ -47,7 +46,6 @@ impl Flags {
 
         flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.po.is_systemlib);
-        flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
         flags.set(
             Self::NO_AUTO_DYNAMIC_ENABLED,
             tco.tco_enable_no_auto_dynamic,
@@ -138,10 +136,6 @@ impl Env {
 
     pub fn is_systemlib(&self) -> bool {
         self.flags.contains(Flags::IS_SYSTEMLIB)
-    }
-
-    pub fn like_type_hints_enabled(&self) -> bool {
-        self.flags.contains(Flags::LIKE_TYPE_HINTS_ENABLED)
     }
 
     pub fn supportdynamic_type_hint_enabled(&self) -> bool {

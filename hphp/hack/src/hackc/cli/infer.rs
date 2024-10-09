@@ -151,6 +151,8 @@ fn build_ir<'a>(path: &'a Path, content: &[u8], opts: &'a Opts) -> Result<ir::Un
     // the code in some of the tests
     env.hhbc_flags.optimize_is_type_checks = false;
 
+    env.hhvm.parser_options.allow_unstable_features = true;
+
     let decl_provider = SelfProvider::wrap_existing_provider(
         None,
         env.to_decl_parser_options(),

@@ -113,7 +113,6 @@ type t = {
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
   tco_skip_tast_checks: bool;
-  tco_like_type_hints: bool;
   tco_coeffects: bool;
   tco_coeffects_local: bool;
   tco_strict_contexts: bool;
@@ -224,7 +223,6 @@ let default =
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
     tco_skip_tast_checks = false;
-    tco_like_type_hints = false;
     tco_coeffects = true;
     tco_coeffects_local = true;
     tco_strict_contexts = true;
@@ -333,7 +331,6 @@ let set
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
     ?tco_skip_tast_checks
-    ?tco_like_type_hints
     ?tco_coeffects
     ?tco_coeffects_local
     ?tco_strict_contexts
@@ -486,8 +483,6 @@ let set
       setting tco_skip_hierarchy_checks options.tco_skip_hierarchy_checks;
     tco_skip_tast_checks =
       setting tco_skip_tast_checks options.tco_skip_tast_checks;
-    tco_like_type_hints =
-      setting tco_like_type_hints options.tco_like_type_hints;
     tco_coeffects = setting tco_coeffects options.tco_coeffects;
     tco_coeffects_local =
       setting tco_coeffects_local options.tco_coeffects_local;

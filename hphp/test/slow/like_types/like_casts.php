@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('like_type_hints')>>
 
 class C {
   public function f(int $w = 6 as ~int): void {

@@ -5562,6 +5562,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::UnionIntersectionTypeHints)
             }
+            LikeTypeSpecifier(_) if !self.env.hhi_mode => {
+                self.check_can_use_feature(node, &FeatureName::LikeTypeHints)
+            }
             DeclareLocalStatement(_) => {
                 self.check_can_use_feature(node, &FeatureName::TypedLocalVariables)
             }

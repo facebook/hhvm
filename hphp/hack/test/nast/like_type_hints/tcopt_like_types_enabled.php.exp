@@ -4,7 +4,7 @@
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       fd_file_attributes =
-      [{ fa_user_attributes = [{ ua_name = ([2:8-36], "__EnableExperimentalFeatures"); ua_params = [((), [2:37-54], (String "like_type_hints"))] }];
+      [{ fa_user_attributes = [{ ua_name = ([2:8-32], "__EnableUnstableFeatures"); ua_params = [((), [2:33-50], (String "like_type_hints"))] }];
          fa_namespace =
          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

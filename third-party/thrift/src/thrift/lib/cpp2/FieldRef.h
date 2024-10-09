@@ -27,6 +27,7 @@
 #include <folly/Function.h>
 #include <folly/Portability.h>
 #include <folly/Traits.h>
+#include <folly/Utility.h>
 #include <folly/synchronization/AtomicUtil.h>
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>

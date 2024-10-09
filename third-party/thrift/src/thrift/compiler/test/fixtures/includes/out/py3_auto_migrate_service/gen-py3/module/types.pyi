@@ -27,10 +27,9 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyIncludedInt: bool
         pass
 
+    type: Final["MyStruct.Type"]
     MyIncludedField: Final[_includes_types.Included] = ...
-
     MyOtherIncludedField: Final[_includes_types.Included] = ...
-
     MyIncludedInt: Final[int] = ...
 
     def __init__(

@@ -27,12 +27,10 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
         myNumbers: bool
         pass
 
+    type: Final["Foo.Type"]
     myInteger: Final[int] = ...
-
     myString: Final[_typing.Optional[str]] = ...
-
     myBools: Final[_typing.Sequence[bool]] = ...
-
     myNumbers: Final[_typing.Sequence[int]] = ...
 
     def __init__(

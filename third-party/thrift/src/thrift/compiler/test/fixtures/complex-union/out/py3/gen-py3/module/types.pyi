@@ -30,16 +30,12 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         typedefValue: bool
         pass
 
+    type: Final["ComplexUnion.Type"]
     intValue: Final[int] = ...
-
     stringValue: Final[str] = ...
-
     intListValue: Final[_typing.Sequence[int]] = ...
-
     stringListValue: Final[_typing.Sequence[str]] = ...
-
     typedefValue: Final[_typing.Mapping[int, str]] = ...
-
     stringRef: Final[_typing.Optional[str]] = ...
 
     def __init__(
@@ -88,8 +84,8 @@ class ListUnion(thrift.py3.types.Union, _typing.Hashable):
         stringListValue: bool
         pass
 
+    type: Final["ListUnion.Type"]
     intListValue: Final[_typing.Sequence[int]] = ...
-
     stringListValue: Final[_typing.Sequence[str]] = ...
 
     def __init__(
@@ -130,8 +126,8 @@ class DataUnion(thrift.py3.types.Union, _typing.Hashable):
         stringData: bool
         pass
 
+    type: Final["DataUnion.Type"]
     binaryData: Final[bytes] = ...
-
     stringData: Final[str] = ...
 
     def __init__(
@@ -171,10 +167,9 @@ class Val(thrift.py3.types.Struct, _typing.Hashable):
         typedefValue: bool
         pass
 
+    type: Final["Val.Type"]
     strVal: Final[str] = ...
-
     intVal: Final[int] = ...
-
     typedefValue: Final[_typing.Mapping[int, str]] = ...
 
     def __init__(
@@ -212,8 +207,8 @@ class ValUnion(thrift.py3.types.Union, _typing.Hashable):
         v2: bool
         pass
 
+    type: Final["ValUnion.Type"]
     v1: Final[Val] = ...
-
     v2: Final[Val] = ...
 
     def __init__(
@@ -254,8 +249,8 @@ class VirtualComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         thingTwo: bool
         pass
 
+    type: Final["VirtualComplexUnion.Type"]
     thingOne: Final[str] = ...
-
     thingTwo: Final[str] = ...
 
     def __init__(
@@ -293,6 +288,7 @@ class NonCopyableStruct(thrift.py3.types.Struct, _typing.Hashable):
         num: bool
         pass
 
+    type: Final["NonCopyableStruct.Type"]
     num: Final[int] = ...
 
     def __init__(
@@ -325,6 +321,7 @@ class NonCopyableUnion(thrift.py3.types.Union, _typing.Hashable):
         s: bool
         pass
 
+    type: Final["NonCopyableUnion.Type"]
     s: Final[NonCopyableStruct] = ...
 
     def __init__(

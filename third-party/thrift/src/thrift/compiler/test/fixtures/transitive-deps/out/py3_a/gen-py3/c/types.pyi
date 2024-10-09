@@ -24,6 +24,7 @@ class C(thrift.py3.types.Struct, _typing.Hashable):
         i: bool
         pass
 
+    type: Final["C.Type"]
     i: Final[int] = ...
 
     def __init__(
@@ -52,6 +53,8 @@ class C(thrift.py3.types.Struct, _typing.Hashable):
 class E(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
+
+    type: Final["E.Type"]
 
     def __init__(
         self, 

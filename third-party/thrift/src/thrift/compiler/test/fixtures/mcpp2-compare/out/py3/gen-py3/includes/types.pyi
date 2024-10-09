@@ -32,6 +32,7 @@ class AStruct(thrift.py3.types.Struct, _typing.Hashable):
         FieldA: bool
         pass
 
+    type: Final["AStruct.Type"]
     FieldA: Final[int] = ...
 
     def __init__(
@@ -61,6 +62,7 @@ class AStructB(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["AStructB.Type"]
     FieldA: Final[_typing.Optional[AStruct]] = ...
 
     def __init__(

@@ -24,6 +24,8 @@ class FooStreamEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["FooStreamEx.Type"]
+
     def __init__(
         self, 
     ) -> None: ...
@@ -44,6 +46,8 @@ class FooEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["FooEx.Type"]
+
     def __init__(
         self, 
     ) -> None: ...
@@ -63,6 +67,8 @@ class FooEx(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
 class FooEx2(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
+
+    type: Final["FooEx2.Type"]
 
     def __init__(
         self, 

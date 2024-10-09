@@ -33,8 +33,8 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyStringField: bool
         pass
 
+    type: Final["MyStruct.Type"]
     MyIntField: Final[int] = ...
-
     MyStringField: Final[str] = ...
 
     def __init__(

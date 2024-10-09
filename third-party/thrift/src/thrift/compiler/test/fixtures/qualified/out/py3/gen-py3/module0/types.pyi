@@ -34,8 +34,8 @@ class Struct(thrift.py3.types.Struct, _typing.Hashable):
         second: bool
         pass
 
+    type: Final["Struct.Type"]
     first: Final[int] = ...
-
     second: Final[str] = ...
 
     def __init__(

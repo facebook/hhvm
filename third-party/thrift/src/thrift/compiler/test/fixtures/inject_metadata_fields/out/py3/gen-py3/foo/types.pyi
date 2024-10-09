@@ -26,10 +26,9 @@ class Fields(thrift.py3.types.Struct, _typing.Hashable):
         injected_unstructured_annotation_field: bool
         pass
 
+    type: Final["Fields.Type"]
     injected_field: Final[str] = ...
-
     injected_structured_annotation_field: Final[_typing.Optional[str]] = ...
-
     injected_unstructured_annotation_field: Final[_typing.Optional[str]] = ...
 
     def __init__(

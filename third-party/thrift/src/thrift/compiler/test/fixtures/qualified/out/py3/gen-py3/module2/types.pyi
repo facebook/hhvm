@@ -27,8 +27,8 @@ class Struct(thrift.py3.types.Struct, _typing.Hashable):
         second: bool
         pass
 
+    type: Final["Struct.Type"]
     first: Final[_module0_types.Struct] = ...
-
     second: Final[_module1_types.Struct] = ...
 
     def __init__(
@@ -62,8 +62,8 @@ class BigStruct(thrift.py3.types.Struct, _typing.Hashable):
         id: bool
         pass
 
+    type: Final["BigStruct.Type"]
     s: Final[Struct] = ...
-
     id: Final[int] = ...
 
     def __init__(

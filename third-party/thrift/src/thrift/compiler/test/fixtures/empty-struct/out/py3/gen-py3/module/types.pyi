@@ -23,6 +23,8 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["Empty.Type"]
+
     def __init__(
         self, 
     ) -> None: ...
@@ -49,6 +51,8 @@ _NadaValueType = _typing.Union[None, ]
 class Nada(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
+
+    type: Final["Nada.Type"]
 
     def __init__(
         self, 

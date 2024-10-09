@@ -54,14 +54,11 @@ class Internship(thrift.py3.types.Struct, _typing.Hashable):
         school: bool
         pass
 
+    type: Final["Internship.Type"]
     weeks: Final[int] = ...
-
     title: Final[str] = ...
-
     employer: Final[_typing.Optional[Company]] = ...
-
     compensation: Final[_typing.Optional[float]] = ...
-
     school: Final[_typing.Optional[str]] = ...
 
     def __init__(
@@ -101,8 +98,8 @@ class Range(thrift.py3.types.Struct, _typing.Hashable):
         max: bool
         pass
 
+    type: Final["Range.Type"]
     min: Final[int] = ...
-
     max: Final[int] = ...
 
     def __init__(
@@ -136,8 +133,8 @@ class struct1(thrift.py3.types.Struct, _typing.Hashable):
         b: bool
         pass
 
+    type: Final["struct1.Type"]
     a: Final[int] = ...
-
     b: Final[str] = ...
 
     def __init__(
@@ -173,12 +170,10 @@ class struct2(thrift.py3.types.Struct, _typing.Hashable):
         d: bool
         pass
 
+    type: Final["struct2.Type"]
     a: Final[int] = ...
-
     b: Final[str] = ...
-
     c: Final[struct1] = ...
-
     d: Final[_typing.Sequence[int]] = ...
 
     def __init__(
@@ -217,10 +212,9 @@ class struct3(thrift.py3.types.Struct, _typing.Hashable):
         c: bool
         pass
 
+    type: Final["struct3.Type"]
     a: Final[str] = ...
-
     b: Final[int] = ...
-
     c: Final[struct2] = ...
 
     def __init__(
@@ -257,10 +251,9 @@ class struct4(thrift.py3.types.Struct, _typing.Hashable):
         c: bool
         pass
 
+    type: Final["struct4.Type"]
     a: Final[int] = ...
-
     b: Final[_typing.Optional[float]] = ...
-
     c: Final[_typing.Optional[int]] = ...
 
     def __init__(
@@ -298,8 +291,8 @@ class union1(thrift.py3.types.Union, _typing.Hashable):
         d: bool
         pass
 
+    type: Final["union1.Type"]
     i: Final[int] = ...
-
     d: Final[float] = ...
 
     def __init__(
@@ -342,12 +335,10 @@ class union2(thrift.py3.types.Union, _typing.Hashable):
         u: bool
         pass
 
+    type: Final["union2.Type"]
     i: Final[int] = ...
-
     d: Final[float] = ...
-
     s: Final[struct1] = ...
-
     u: Final[union1] = ...
 
     def __init__(

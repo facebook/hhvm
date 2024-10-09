@@ -76,12 +76,13 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
     {{/struct:py3_fields}}
         pass
 
+    type: Final["{{struct:name}}.Type"]
     {{#struct:fields_and_mixin_fields}}
     {{field:py_name}}: Final[{{#field:PEP484Optional?}}_typing.Optional[{{/field:PEP484Optional?}}{{!
             }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
             }}{{#field:PEP484Optional?}}]{{/field:PEP484Optional?}}] = ...
-
     {{/struct:fields_and_mixin_fields}}
+
     def __init__(
         self, {{#struct:py3_fields?}}*{{/struct:py3_fields?}}{{#struct:py3_fields}},
         {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/compatible_pep484_type}}{{/field:type}}]=None{{/struct:py3_fields}}

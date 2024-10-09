@@ -24,6 +24,7 @@ class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         message: bool
         pass
 
+    type: Final["Fiery.Type"]
     message: Final[str] = ...
 
     def __init__(
@@ -48,6 +49,7 @@ class Serious(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         not_sonnet: bool
         pass
 
+    type: Final["Serious.Type"]
     not_sonnet: Final[_typing.Optional[str]] = ...
 
     def __init__(
@@ -73,8 +75,8 @@ class ComplexFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         internal_error_message: bool
         pass
 
+    type: Final["ComplexFieldNames.Type"]
     error_message: Final[str] = ...
-
     internal_error_message: Final[str] = ...
 
     def __init__(
@@ -101,8 +103,8 @@ class CustomFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         internal_error_message: bool
         pass
 
+    type: Final["CustomFieldNames.Type"]
     error_message: Final[str] = ...
-
     internal_error_message: Final[str] = ...
 
     def __init__(
@@ -129,8 +131,8 @@ class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError, _typing.
         error_code: bool
         pass
 
+    type: Final["ExceptionWithPrimitiveField.Type"]
     message: Final[str] = ...
-
     error_code: Final[int] = ...
 
     def __init__(
@@ -157,8 +159,8 @@ class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError, _t
         error_code: bool
         pass
 
+    type: Final["ExceptionWithStructuredAnnotation.Type"]
     message_field: Final[str] = ...
-
     error_code: Final[int] = ...
 
     def __init__(
@@ -182,6 +184,8 @@ class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError, _t
 class Banal(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
+
+    type: Final["Banal.Type"]
 
     def __init__(
         self, 

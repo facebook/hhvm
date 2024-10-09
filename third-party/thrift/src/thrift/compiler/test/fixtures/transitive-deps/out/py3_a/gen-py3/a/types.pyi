@@ -27,8 +27,8 @@ class A(thrift.py3.types.Struct, _typing.Hashable):
         other: bool
         pass
 
+    type: Final["A.Type"]
     b: Final[_typing.Sequence[_typing.Sequence[_c_types.C]]] = ...
-
     other: Final[_typing.Sequence[_c_types.C]] = ...
 
     def __init__(

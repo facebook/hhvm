@@ -25,8 +25,8 @@ class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
         i_res: bool
         pass
 
+    type: Final["DoSomethingResult.Type"]
     s_res: Final[str] = ...
-
     i_res: Final[int] = ...
 
     def __init__(

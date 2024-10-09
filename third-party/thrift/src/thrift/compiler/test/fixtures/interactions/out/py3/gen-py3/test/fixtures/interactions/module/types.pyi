@@ -26,6 +26,7 @@ class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         message: bool
         pass
 
+    type: Final["CustomException.Type"]
     message: Final[str] = ...
 
     def __init__(

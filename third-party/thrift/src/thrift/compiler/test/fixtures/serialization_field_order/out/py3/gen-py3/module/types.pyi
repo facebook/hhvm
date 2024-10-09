@@ -26,10 +26,9 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
         field3: bool
         pass
 
+    type: Final["Foo.Type"]
     field1: Final[int] = ...
-
     field2: Final[int] = ...
-
     field3: Final[int] = ...
 
     def __init__(
@@ -66,10 +65,9 @@ class Foo2(thrift.py3.types.Struct, _typing.Hashable):
         field3: bool
         pass
 
+    type: Final["Foo2.Type"]
     field1: Final[int] = ...
-
     field2: Final[int] = ...
-
     field3: Final[int] = ...
 
     def __init__(

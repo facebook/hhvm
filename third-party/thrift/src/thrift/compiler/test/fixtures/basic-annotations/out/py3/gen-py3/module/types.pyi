@@ -33,6 +33,7 @@ class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
         name: bool
         pass
 
+    type: Final["MyStructNestedAnnotation.Type"]
     name: Final[str] = ...
 
     def __init__(
@@ -64,8 +65,8 @@ class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
         password: bool
         pass
 
+    type: Final["SecretStruct.Type"]
     id: Final[int] = ...
-
     password: Final[str] = ...
 
     def __init__(

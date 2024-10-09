@@ -24,6 +24,7 @@ class InitialResponse(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
+    type: Final["InitialResponse.Type"]
     content: Final[str] = ...
 
     def __init__(
@@ -54,6 +55,7 @@ class FinalResponse(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
+    type: Final["FinalResponse.Type"]
     content: Final[str] = ...
 
     def __init__(
@@ -84,6 +86,7 @@ class SinkPayload(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
+    type: Final["SinkPayload.Type"]
     content: Final[str] = ...
 
     def __init__(
@@ -114,6 +117,7 @@ class CompatibleWithKeywordSink(thrift.py3.types.Struct, _typing.Hashable):
         sink: bool
         pass
 
+    type: Final["CompatibleWithKeywordSink.Type"]
     sink: Final[str] = ...
 
     def __init__(
@@ -144,6 +148,7 @@ class InitialException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
+    type: Final["InitialException.Type"]
     reason: Final[str] = ...
 
     def __init__(
@@ -168,6 +173,7 @@ class SinkException1(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
+    type: Final["SinkException1.Type"]
     reason: Final[str] = ...
 
     def __init__(
@@ -192,6 +198,7 @@ class SinkException2(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
+    type: Final["SinkException2.Type"]
     reason: Final[int] = ...
 
     def __init__(

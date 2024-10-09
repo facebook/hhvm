@@ -74,8 +74,8 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         myBigEnum: bool
         pass
 
+    type: Final["MyStruct.Type"]
     myEnum: Final[MyEnum] = ...
-
     myBigEnum: Final[MyBigEnum] = ...
 
     def __init__(

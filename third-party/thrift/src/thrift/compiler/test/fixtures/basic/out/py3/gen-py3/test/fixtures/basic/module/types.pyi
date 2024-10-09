@@ -48,22 +48,15 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         no_hack_codegen_field: bool
         pass
 
+    type: Final["MyStruct.Type"]
     MyIntField: Final[int] = ...
-
     MyStringField: Final[str] = ...
-
     MyDataField: Final[MyDataItem] = ...
-
     myEnum: Final[MyEnum] = ...
-
     oneway: Final[bool] = ...
-
     readonly: Final[bool] = ...
-
     idempotent: Final[bool] = ...
-
     floatSet: Final[_typing.AbstractSet[float]] = ...
-
     no_hack_codegen_field: Final[str] = ...
 
     def __init__(
@@ -112,10 +105,9 @@ class Containers(thrift.py3.types.Struct, _typing.Hashable):
         StringToI64Map: bool
         pass
 
+    type: Final["Containers.Type"]
     I32List: Final[_typing.Sequence[int]] = ...
-
     StringSet: Final[_typing.AbstractSet[str]] = ...
-
     StringToI64Map: Final[_typing.Mapping[str, int]] = ...
 
     def __init__(
@@ -149,6 +141,8 @@ class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["MyDataItem.Type"]
+
     def __init__(
         self, 
     ) -> None: ...
@@ -180,12 +174,10 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
         floatSet: bool
         pass
 
+    type: Final["MyUnion.Type"]
     myEnum: Final[MyEnum] = ...
-
     myStruct: Final[MyStruct] = ...
-
     myDataItem: Final[MyDataItem] = ...
-
     floatSet: Final[_typing.AbstractSet[float]] = ...
 
     def __init__(
@@ -230,12 +222,10 @@ class MyException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         myUnion: bool
         pass
 
+    type: Final["MyException.Type"]
     MyIntField: Final[int] = ...
-
     MyStringField: Final[str] = ...
-
     myStruct: Final[MyStruct] = ...
-
     myUnion: Final[MyUnion] = ...
 
     def __init__(
@@ -266,12 +256,10 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError, _typing.Hasha
         myUnion: bool
         pass
 
+    type: Final["MyExceptionWithMessage.Type"]
     MyIntField: Final[int] = ...
-
     MyStringField: Final[str] = ...
-
     myStruct: Final[MyStruct] = ...
-
     myUnion: Final[MyUnion] = ...
 
     def __init__(
@@ -299,6 +287,7 @@ class ReservedKeyword(thrift.py3.types.Struct, _typing.Hashable):
         reserved_field: bool
         pass
 
+    type: Final["ReservedKeyword.Type"]
     reserved_field: Final[int] = ...
 
     def __init__(
@@ -331,6 +320,7 @@ class UnionToBeRenamed(thrift.py3.types.Union, _typing.Hashable):
         reserved_field: bool
         pass
 
+    type: Final["UnionToBeRenamed.Type"]
     reserved_field: Final[int] = ...
 
     def __init__(

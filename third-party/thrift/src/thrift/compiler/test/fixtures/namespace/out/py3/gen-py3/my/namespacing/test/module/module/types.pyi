@@ -24,6 +24,7 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
         MyInt: bool
         pass
 
+    type: Final["Foo.Type"]
     MyInt: Final[int] = ...
 
     def __init__(

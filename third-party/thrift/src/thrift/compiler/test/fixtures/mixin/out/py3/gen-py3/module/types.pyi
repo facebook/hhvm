@@ -24,6 +24,7 @@ class Mixin1(thrift.py3.types.Struct, _typing.Hashable):
         field1: bool
         pass
 
+    type: Final["Mixin1.Type"]
     field1: Final[str] = ...
 
     def __init__(
@@ -55,10 +56,9 @@ class Mixin2(thrift.py3.types.Struct, _typing.Hashable):
         field2: bool
         pass
 
+    type: Final["Mixin2.Type"]
     m1: Final[Mixin1] = ...
-
     field2: Final[_typing.Optional[str]] = ...
-
     field1: Final[str] = ...
 
     def __init__(
@@ -91,6 +91,7 @@ class Mixin3Base(thrift.py3.types.Struct, _typing.Hashable):
         field3: bool
         pass
 
+    type: Final["Mixin3Base.Type"]
     field3: Final[str] = ...
 
     def __init__(
@@ -123,18 +124,13 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
         m3: bool
         pass
 
+    type: Final["Foo.Type"]
     field4: Final[str] = ...
-
     m2: Final[Mixin2] = ...
-
     m3: Final[Mixin3Base] = ...
-
     m1: Final[Mixin1] = ...
-
     field2: Final[_typing.Optional[str]] = ...
-
     field1: Final[str] = ...
-
     field3: Final[str] = ...
 
     def __init__(

@@ -98,12 +98,10 @@ class SomeStruct(thrift.py3.types.Struct, _typing.Hashable):
         tags: bool
         pass
 
+    type: Final["SomeStruct.Type"]
     reasonable: Final[Metasyntactic] = ...
-
     fine: Final[Metasyntactic] = ...
-
     questionable: Final[Metasyntactic] = ...
-
     tags: Final[_typing.AbstractSet[int]] = ...
 
     def __init__(
@@ -143,12 +141,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         me1_t2: bool
         pass
 
+    type: Final["MyStruct.Type"]
     me2_3: Final[MyEnum2] = ...
-
     me3_n3: Final[MyEnum3] = ...
-
     me1_t1: Final[MyEnum1] = ...
-
     me1_t2: Final[MyEnum1] = ...
 
     def __init__(

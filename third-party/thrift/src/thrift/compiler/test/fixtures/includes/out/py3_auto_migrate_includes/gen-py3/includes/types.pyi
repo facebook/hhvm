@@ -26,8 +26,8 @@ class Included(thrift.py3.types.Struct, _typing.Hashable):
         MyTransitiveField: bool
         pass
 
+    type: Final["Included.Type"]
     MyIntField: Final[int] = ...
-
     MyTransitiveField: Final[_transitive_types.Foo] = ...
 
     def __init__(

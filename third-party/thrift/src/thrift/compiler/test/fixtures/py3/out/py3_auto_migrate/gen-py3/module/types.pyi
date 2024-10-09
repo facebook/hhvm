@@ -54,6 +54,7 @@ class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         err_code: bool
         pass
 
+    type: Final["SimpleException.Type"]
     err_code: Final[int] = ...
 
     def __init__(
@@ -78,6 +79,7 @@ class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable):
         optional_blob: bool
         pass
 
+    type: Final["OptionalRefStruct.Type"]
     optional_blob: Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     def __init__(
@@ -114,18 +116,13 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
         smaller_real: bool
         pass
 
+    type: Final["SimpleStruct.Type"]
     is_on: Final[bool] = ...
-
     tiny_int: Final[int] = ...
-
     small_int: Final[int] = ...
-
     nice_sized_int: Final[int] = ...
-
     big_int: Final[int] = ...
-
     real: Final[float] = ...
-
     smaller_real: Final[float] = ...
 
     def __init__(
@@ -167,6 +164,8 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
+    type: Final["HiddenTypeFieldsStruct.Type"]
+
     def __init__(
         self, 
     ) -> None: ...
@@ -197,22 +196,15 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
         bytes_with_cpp_type: bool
         pass
 
+    type: Final["ComplexStruct.Type"]
     structOne: Final[SimpleStruct] = ...
-
     structTwo: Final[SimpleStruct] = ...
-
     an_integer: Final[int] = ...
-
     name: Final[str] = ...
-
     an_enum: Final[AnEnum] = ...
-
     some_bytes: Final[bytes] = ...
-
     sender: Final[str] = ...
-
     cdef_: Final[str] = ...
-
     bytes_with_cpp_type: Final[bytes] = ...
 
     def __init__(
@@ -261,6 +253,7 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable):
         iobuf_val: bool
         pass
 
+    type: Final["BinaryUnion.Type"]
     iobuf_val: Final[_fbthrift_iobuf.IOBuf] = ...
 
     def __init__(
@@ -296,6 +289,7 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable):
         u: bool
         pass
 
+    type: Final["BinaryUnionStruct.Type"]
     u: Final[BinaryUnion] = ...
 
     def __init__(

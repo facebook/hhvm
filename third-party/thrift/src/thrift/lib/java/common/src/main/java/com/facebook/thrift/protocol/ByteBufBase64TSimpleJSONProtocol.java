@@ -28,7 +28,7 @@ public class ByteBufBase64TSimpleJSONProtocol extends ByteBufAbstractTSimpleJSON
 
   @Override
   public void writeBinary(ByteBuffer bin) throws TException {
-    ByteBuffer encode = Base64.getEncoder().withoutPadding().encode(bin);
+    ByteBuffer encode = Base64.getEncoder().encode(bin);
     CharBuffer decode = StandardCharsets.UTF_8.decode(encode);
     writeString(decode.toString());
   }

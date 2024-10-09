@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
@@ -481,6 +482,56 @@ std::string ResumeFlags::show() const {
   return folly::join(", ", flags);
 }
 
+namespace {
+void logResume(SrcKey sk, ResumeFlags flags) {
+  if (!StructuredLog::coinflip(Cfg::Eval::HandleResumeStatsRate)) return;
+
+  StructuredLogEntry ent;
+
+  std::set<folly::StringPiece> flgs;
+  if (flags.m_noTranslate) flgs.emplace("noTranslate");
+  if (flags.m_interpFirst) flgs.emplace("interpFirst");
+  if (flags.m_funcEntry)   flgs.emplace("funcEntry");
+  if (!flgs.empty())       ent.setSet("flags", flgs);
+
+  // Canonicalize path
+  std::filesystem::path fpath = sk.unit()->filepath()->toCppString();
+  auto const dir = RepoOptions::forFile(fpath.c_str()).dir();
+  auto const rel = std::filesystem::proximate(fpath, dir);
+
+  ent.setInt("sample_rate", Cfg::Eval::HandleResumeStatsRate);
+  ent.setStr("file", rel.native());
+  ent.setInt("line", sk.lineNumber());
+  ent.setInt("offset", sk.offset());
+  ent.setStr("func", sk.func()->name()->slice());
+  if (sk.func()->isMethod()) {
+    if (auto c = sk.func()->cls()) ent.setStr("class", c->name()->slice());
+    else ent.setStr("class", sk.func()->preClass()->name()->slice());
+  }
+  ent.setStr("unit_sha1", sk.unit()->sha1().toString());
+  ent.setStr("full_func_name", sk.func()->fullName()->slice());
+  ent.setInt("prologue", sk.prologue() ? 1 : 0);
+  ent.setInt("funcEntry", sk.funcEntry() ? 1 : 0);
+  ent.setInt("hasThis", sk.hasThis() ? 1 : 0);
+  switch (sk.resumeMode()) {
+  case ResumeMode::None: ent.setStr("resume_mode", "None");       break;
+  case ResumeMode::Async: ent.setStr("resume_mode", "Async");     break;
+  case ResumeMode::GenIter: ent.setStr("resume_mode", "GenIter"); break;
+  }
+  if (sk.prologue() || sk.funcEntry()) {
+    ent.setInt("num_entry_args", sk.numEntryArgs());
+  }
+  ent.setStr("inst", sk.showInst());
+
+  ent.setInt("main_used_bytes", tc::code().main().used());
+  ent.setInt("cold_used_bytes", tc::code().cold().used());
+  ent.setInt("frozen_used_bytes", tc::code().frozen().used());
+  ent.setInt("data_used_bytes", tc::code().data().used());
+
+  StructuredLog::log("hhvm_resume_locations", ent);
+}
+}
+
 JitResumeAddr handleResume(ResumeFlags flags) {
   assert_native_stack_aligned();
   FTRACE(1, "handleResume({})\n", flags.show());
@@ -545,6 +596,9 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   if (!start) {
     WorkloadStats guard(WorkloadStats::InInterp);
     tracing::BlockNoTrace _{"dispatch-bb"};
+
+    // Log the resume event to scuba
+    logResume(sk, flags);
 
     if (sk.funcEntry()) {
       auto const savedRip = vmfp()->m_savedRip;

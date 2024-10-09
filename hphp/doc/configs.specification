@@ -262,6 +262,11 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
   Log stats about the async JIT to hhvm_async_jit_stats using StructuredLog
 
+- int Eval.HandleResumeStatsRate = 0, paulbiss
+
+  Log stats about calls to handleResume to hhvm_resume_locations using
+  StructuredLog
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

@@ -1,0 +1,9 @@
+(library
+ (name notebook_to_hack)
+ (libraries
+  hh_json
+  full_fidelity
+  relative_path
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))

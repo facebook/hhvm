@@ -23,6 +23,7 @@
   lwt.unix
   lwt_utils
   messages
+  notebook_convert
   nuclide_rpc_message_printer
   pos
   rage

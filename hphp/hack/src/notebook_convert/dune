@@ -1,0 +1,7 @@
+(library
+ (name notebook_convert)
+ (libraries
+  hh_json
+  notebook_to_hack
+  sys_utils
+  utils_core))

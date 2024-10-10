@@ -76,6 +76,7 @@ module rec Environment : sig
     for_option: bool;
     for_reified: bool;
     for_alias: bool;
+    for_enum: bool;
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
   }
@@ -94,6 +95,7 @@ end = struct
     for_option: bool;
     for_reified: bool;
     for_alias: bool;
+    for_enum: bool;
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
   }
@@ -103,6 +105,7 @@ end = struct
       for_option = false;
       for_reified = false;
       for_alias = false;
+      for_enum = false;
       definitions = [];
       subtypes = TypeMap.empty;
     }
@@ -433,8 +436,8 @@ end = struct
       false
 
   (** Picks an inhabited subfield of a given field *)
-  let rec subfield_of env { key; ty; optional } =
-    let ty = subtype_of env ty in
+  let rec subfield_of ~pick_immediately_inhabited env { key; ty; optional } =
+    let ty = subtype_of ~pick_immediately_inhabited env ty in
     let optional =
       if optional then
         select [true; false]
@@ -447,8 +450,13 @@ end = struct
 
       Termination of this function crucially relies on the invariant that EVERY
       type has an inhabitant subtype. There are quite few denotable types where
-      this invariant does not hold, most trivially the `nothing` type. *)
-  and subtype_of env ty =
+      this invariant does not hold, most trivially the `nothing` type.
+
+      If `pick_immediately_inhabited` is set, we're looking for a subtype that
+      can be immediately turned into an expression, e.g., an `arraykey` is
+      eventually inhabited whereas `int` and `string` are immediately inhabited.
+      *)
+  and subtype_of ~pick_immediately_inhabited env ty =
     let rec step ty =
       ty
       :: begin
@@ -501,7 +509,9 @@ end = struct
              in
              [Tuple { conjuncts; open_ }]
            | Shape { fields; open_ } ->
-             let fields = List.map ~f:(subfield_of env) fields in
+             let fields =
+               List.map ~f:(subfield_of ~pick_immediately_inhabited env) fields
+             in
              let open_ =
                if open_ then
                  (* Here we should be adding new fields, but with the current setup
@@ -529,7 +539,31 @@ end = struct
       if Random.bool () then
         (* We decide to go on a stochastic walk and explore further subtypes. *)
         driver @@ select tys
-      else
+      else if not pick_immediately_inhabited then begin
+        let filtered_tys = tys in
+        let filtered_tys =
+          if env.Environment.for_alias then
+            List.filter filtered_tys ~f:(function
+                | TypeConst _ -> false
+                | _ -> true)
+          else
+            filtered_tys
+        in
+        let filtered_tys =
+          if env.Environment.for_enum then
+            List.filter filtered_tys ~f:(function
+                | Case _ -> false
+                | _ -> true)
+          else
+            filtered_tys
+        in
+        if List.is_empty filtered_tys then
+          (* We don't have any choices left filtering, so we keep looking based
+             off of the initial set of types. *)
+          driver @@ select tys
+        else
+          select filtered_tys
+      end else
         (* We would like to terminate with an immediately inhabited type. *)
         let (immediately_inhabited, latent_inhabited) =
           List.partition_tf ~f:is_immediately_inhabited tys
@@ -795,7 +829,7 @@ end = struct
       None
 
   let inhabitant_of env ty =
-    let subtype = subtype_of env ty in
+    let subtype = subtype_of ~pick_immediately_inhabited:true env ty in
     let inhabitant = expr_of subtype in
     match inhabitant with
     | Some inhabitant -> inhabitant
@@ -806,7 +840,11 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  let mk_arraykey env = subtype_of env (Primitive Primitive.Arraykey)
+  let mk_arraykey env =
+    subtype_of
+      ~pick_immediately_inhabited:false
+      env
+      (Primitive Primitive.Arraykey)
 
   let rec mk_classish
       env
@@ -892,6 +930,11 @@ end = struct
     let mk ?(for_alias = false) env =
       mk Environment.{ env with for_alias } ~depth:(Some depth)
     in
+    let subtype_of ?(for_alias = false) env =
+      subtype_of
+        Environment.{ env with for_alias }
+        ~pick_immediately_inhabited:false
+    in
     match Kind.pick env with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
@@ -919,14 +962,13 @@ end = struct
       (env, Alias { name; aliased })
     | Kind.Newtype ->
       let name = fresh "N" in
-      let mk = mk ~for_alias:true in
       let (env, aliased, bound) =
         if Random.bool () then
           let (env, bound) = mk env in
-          let aliased = subtype_of env bound in
+          let aliased = subtype_of ~for_alias:true env bound in
           (env, aliased, Some bound)
         else
-          let (env, aliased) = mk env in
+          let (env, aliased) = mk ~for_alias:true env in
           (env, aliased, None)
       in
       let env =
@@ -963,7 +1005,7 @@ end = struct
       let mk env =
         match bound with
         | Some bound ->
-          let ty = subtype_of env bound in
+          let ty = subtype_of ~for_alias:true env bound in
           (env, ty)
         | None -> mk env ~for_alias:true
       in
@@ -998,13 +1040,17 @@ end = struct
       let ty = Enum { name } in
       let (env, bound, underlying_ty, value) =
         if Random.bool () then
-          let bound = mk_arraykey env in
-          let underlying_ty = subtype_of env bound in
+          let bound = mk_arraykey Environment.{ env with for_enum = true } in
+          let underlying_ty =
+            subtype_of Environment.{ env with for_enum = true } bound
+          in
           let value = inhabitant_of env underlying_ty in
           let env = Environment.record_subtype env ~super:bound ~sub:ty in
           (env, Some bound, underlying_ty, value)
         else
-          let underlying_ty = mk_arraykey env in
+          let underlying_ty =
+            mk_arraykey Environment.{ env with for_enum = true }
+          in
           let value = inhabitant_of env underlying_ty in
           let env = Environment.record_subtype env ~super:Mixed ~sub:ty in
           (env, None, underlying_ty, value)

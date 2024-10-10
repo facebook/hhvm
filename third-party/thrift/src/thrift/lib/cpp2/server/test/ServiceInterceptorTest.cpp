@@ -1116,4 +1116,19 @@ INSTANTIATE_TEST_SUITE_P(
     ServiceInterceptorTestP,
     ServiceInterceptorTestP,
     ::testing::Values(
-        TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2));
+        TransportType::HEADER, TransportType::ROCKET, TransportType::HTTP2),
+    [](const TestParamInfo<ServiceInterceptorTestP::ParamType>& info) {
+      const auto transportType = [](TransportType value) -> std::string_view {
+        switch (value) {
+          case TransportType::HEADER:
+            return "HEADER";
+          case TransportType::ROCKET:
+            return "ROCKET";
+          case TransportType::HTTP2:
+            return "HTTP2";
+          default:
+            throw std::logic_error{"Unreachable!"};
+        }
+      };
+      return fmt::format("{}", transportType(info.param));
+    });

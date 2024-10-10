@@ -147,6 +147,7 @@ void McGetReply::serialize(Writer&& writer) const {
   writer.writeField(3 /* field id */, flags_ref());
   writer.writeField(4 /* field id */, message_ref());
   writer.writeField(5 /* field id */, appSpecificErrorCode_ref());
+  writer.writeField(6 /* field id */, exptime_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -174,6 +175,9 @@ void McGetReply::visitFields(V&& v) {
   if (!v.visitField(5, "appSpecificErrorCode", *this->appSpecificErrorCode_ref())) {
     return;
   }
+  if (!v.visitField(6, "exptime", this->exptime_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -197,6 +201,9 @@ void McGetReply::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(5, "appSpecificErrorCode", *this->appSpecificErrorCode_ref())) {
+    return;
+  }
+  if (!v.visitField(6, "exptime", this->exptime_ref())) {
     return;
   }
 }
@@ -498,6 +505,7 @@ void McLeaseGetReply::serialize(Writer&& writer) const {
   writer.writeField(4 /* field id */, flags_ref());
   writer.writeField(5 /* field id */, message_ref());
   writer.writeField(6 /* field id */, appSpecificErrorCode_ref());
+  writer.writeField(7 /* field id */, exptime_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -528,6 +536,9 @@ void McLeaseGetReply::visitFields(V&& v) {
   if (!v.visitField(6, "appSpecificErrorCode", *this->appSpecificErrorCode_ref())) {
     return;
   }
+  if (!v.visitField(7, "exptime", this->exptime_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -554,6 +565,9 @@ void McLeaseGetReply::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(6, "appSpecificErrorCode", *this->appSpecificErrorCode_ref())) {
+    return;
+  }
+  if (!v.visitField(7, "exptime", this->exptime_ref())) {
     return;
   }
 }
@@ -1305,6 +1319,7 @@ void McMetagetRequest::serialize(Writer&& writer) const {
   writer.writeStructBegin();
   writer.writeField(-1 /* field id */, memcacheRequestCommon_ref());
   writer.writeField(1 /* field id */, key_ref());
+  writer.writeField(2 /* field id */, flags_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -1320,6 +1335,9 @@ void McMetagetRequest::visitFields(V&& v) {
   if (!v.visitField(1, "key", *this->key_ref())) {
     return;
   }
+  if (!v.visitField(2, "flags", *this->flags_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -1331,6 +1349,9 @@ void McMetagetRequest::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(1, "key", *this->key_ref())) {
+    return;
+  }
+  if (!v.visitField(2, "flags", *this->flags_ref())) {
     return;
   }
 }

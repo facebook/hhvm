@@ -52,6 +52,7 @@ reply McGetReply with 1: MemcacheReplyCommon {
   3: uint64_t flags;
   4: std::string message;
   5: int16_t appSpecificErrorCode;
+  6: optional int32_t exptime;
 };
 
 request McSetRequest with 1: MemcacheRequestCommon {
@@ -127,6 +128,7 @@ reply McLeaseGetReply with 1: MemcacheReplyCommon {
   4: uint64_t flags;
   5: std::string message;
   6: int16_t appSpecificErrorCode;
+  7: optional int32_t exptime;
 };
 
 request McLeaseSetRequest with 1: MemcacheRequestCommon {
@@ -298,6 +300,7 @@ request McMetagetRequest with 1: MemcacheRequestCommon {
   reply: McMetagetReply;
 
   1: carbon::Keys<folly::IOBuf> key;
+  2: uint64_t flags;
 };
 
 reply McMetagetReply with 1: MemcacheReplyCommon {

@@ -79,6 +79,7 @@ struct McGetReply {
   3: i64_8073 flags
   4: string message
   5: i16 appSpecificErrorCode
+  6: optional i32 exptime
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -202,6 +203,7 @@ struct McLeaseGetReply {
   4: i64_8073 flags
   5: string message
   6: i16 appSpecificErrorCode
+  7: optional i32 exptime
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -493,6 +495,7 @@ cpp.virtual
 struct McMetagetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
+  2: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

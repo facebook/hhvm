@@ -159,6 +159,10 @@ void McGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
         reader.readField(appSpecificErrorCode_ref(), fieldType);
         break;
       }
+      case 6: {
+        reader.readField(exptime_ref(), fieldType);
+        break;
+      }
       default: {
         reader.skip(fieldType);
         break;
@@ -415,6 +419,10 @@ void McLeaseGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
       }
       case 6: {
         reader.readField(appSpecificErrorCode_ref(), fieldType);
+        break;
+      }
+      case 7: {
+        reader.readField(exptime_ref(), fieldType);
         break;
       }
       default: {
@@ -994,6 +1002,10 @@ void McMetagetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
       }
       case 1: {
         reader.readField(key_ref(), fieldType);
+        break;
+      }
+      case 2: {
+        reader.readField(flags_ref(), fieldType);
         break;
       }
       default: {

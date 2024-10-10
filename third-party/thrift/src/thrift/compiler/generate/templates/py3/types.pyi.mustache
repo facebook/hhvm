@@ -43,9 +43,6 @@ import {{> common/thrift_types_module_path}}
 {{/program:intercompatible?}}
 
 
-__property__ = property
-
-
 {{#program:enums}}
 class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
 }}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
@@ -76,7 +73,6 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
     {{/struct:py3_fields}}
         pass
 
-    type: Final["{{struct:name}}.Type"]
     {{#struct:fields_and_mixin_fields}}
     {{field:py_name}}: Final[{{#field:PEP484Optional?}}_typing.Optional[{{/field:PEP484Optional?}}{{!
             }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
@@ -115,10 +111,8 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
 
     @staticmethod
     def fromValue(value: _{{struct:name}}ValueType) -> {{struct:name}}: ...
-    @__property__
-    def value(self) -> _{{struct:name}}ValueType: ...
-    @__property__
-    def type(self) -> "{{struct:name}}.Type": ...
+    type: Final[{{struct:name}}.Type]
+    value: Final[_{{struct:name}}ValueType]
     {{/struct:union?}}
 
     {{#program:python_capi_converter?}}

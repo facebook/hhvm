@@ -17,6 +17,3 @@ import itertools
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
 
-__property__ = property
-
-

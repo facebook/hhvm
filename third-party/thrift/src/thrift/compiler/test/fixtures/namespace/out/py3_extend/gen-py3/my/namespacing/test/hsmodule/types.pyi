@@ -16,15 +16,11 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class HsFoo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         MyInt: bool
         pass
 
-    type: Final["HsFoo.Type"]
     MyInt: Final[int] = ...
 
     def __init__(

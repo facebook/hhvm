@@ -17,16 +17,12 @@ import itertools
 import transitive.types as _transitive_types
 
 
-__property__ = property
-
-
 class Included(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         MyIntField: bool
         MyTransitiveField: bool
         pass
 
-    type: Final["Included.Type"]
     MyIntField: Final[int] = ...
     MyTransitiveField: Final[_transitive_types.Foo] = ...
 

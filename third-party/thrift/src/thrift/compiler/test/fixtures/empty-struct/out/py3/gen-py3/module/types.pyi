@@ -16,14 +16,10 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class Empty(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["Empty.Type"]
 
     def __init__(
         self, 
@@ -52,7 +48,6 @@ class Nada(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["Nada.Type"]
 
     def __init__(
         self, 
@@ -71,10 +66,8 @@ class Nada(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _NadaValueType) -> Nada: ...
-    @__property__
-    def value(self) -> _NadaValueType: ...
-    @__property__
-    def type(self) -> "Nada.Type": ...
+    type: Final[Nada.Type]
+    value: Final[_NadaValueType]
 
     def _to_python(self) -> "module.thrift_types.Nada": ...   # type: ignore
     def _to_py3(self) -> Nada: ...

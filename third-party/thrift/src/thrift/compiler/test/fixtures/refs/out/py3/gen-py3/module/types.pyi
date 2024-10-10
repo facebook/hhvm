@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class MyEnum(thrift.py3.types.Enum):
     Zero: MyEnum = ...
     One: MyEnum = ...
@@ -41,7 +38,6 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MyUnion.Type"]
     anInteger: Final[_typing.Optional[int]] = ...
     aString: Final[_typing.Optional[str]] = ...
 
@@ -66,10 +62,8 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _MyUnionValueType) -> MyUnion: ...
-    @__property__
-    def value(self) -> _MyUnionValueType: ...
-    @__property__
-    def type(self) -> "MyUnion.Type": ...
+    type: Final[MyUnion.Type]
+    value: Final[_MyUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.MyUnion": ...   # type: ignore
     def _to_py3(self) -> MyUnion: ...
@@ -81,7 +75,6 @@ class NonTriviallyDestructibleUnion(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["NonTriviallyDestructibleUnion.Type"]
     int_field: Final[_typing.Optional[int]] = ...
 
     def __init__(
@@ -103,10 +96,8 @@ class NonTriviallyDestructibleUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _NonTriviallyDestructibleUnionValueType) -> NonTriviallyDestructibleUnion: ...
-    @__property__
-    def value(self) -> _NonTriviallyDestructibleUnionValueType: ...
-    @__property__
-    def type(self) -> "NonTriviallyDestructibleUnion.Type": ...
+    type: Final[NonTriviallyDestructibleUnion.Type]
+    value: Final[_NonTriviallyDestructibleUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.NonTriviallyDestructibleUnion": ...   # type: ignore
     def _to_py3(self) -> NonTriviallyDestructibleUnion: ...
@@ -116,7 +107,6 @@ class MyField(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MyField.Type"]
     opt_value: Final[_typing.Optional[int]] = ...
     value: Final[_typing.Optional[int]] = ...
     req_value: Final[_typing.Optional[int]] = ...
@@ -170,7 +160,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MyStruct.Type"]
     opt_ref: Final[_typing.Optional[MyField]] = ...
     ref: Final[_typing.Optional[MyField]] = ...
     req_ref: Final[_typing.Optional[MyField]] = ...
@@ -207,7 +196,6 @@ class StructWithUnion(thrift.py3.types.Struct, _typing.Hashable):
         f: bool
         pass
 
-    type: Final["StructWithUnion.Type"]
     u: Final[_typing.Optional[MyUnion]] = ...
     aDouble: Final[_typing.Optional[float]] = ...
     f: Final[MyField] = ...
@@ -244,7 +232,6 @@ class RecursiveStruct(thrift.py3.types.Struct, _typing.Hashable):
         mes: bool
         pass
 
-    type: Final["RecursiveStruct.Type"]
     mes: Final[_typing.Optional[_typing.Sequence[RecursiveStruct]]] = ...
 
     def __init__(
@@ -274,7 +261,6 @@ class StructWithContainers(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithContainers.Type"]
     list_ref: Final[_typing.Optional[_typing.Sequence[int]]] = ...
     set_ref: Final[_typing.Optional[_typing.AbstractSet[int]]] = ...
     map_ref: Final[_typing.Optional[_typing.Mapping[int, int]]] = ...
@@ -319,7 +305,6 @@ class StructWithSharedConst(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithSharedConst.Type"]
     opt_shared_const: Final[_typing.Optional[MyField]] = ...
     shared_const: Final[_typing.Optional[MyField]] = ...
     req_shared_const: Final[_typing.Optional[MyField]] = ...
@@ -355,7 +340,6 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["Empty.Type"]
 
     def __init__(
         self, 
@@ -382,7 +366,6 @@ class StructWithRef(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithRef.Type"]
     def_field: Final[_typing.Optional[Empty]] = ...
     opt_field: Final[_typing.Optional[Empty]] = ...
     req_field: Final[_typing.Optional[Empty]] = ...
@@ -421,7 +404,6 @@ class StructWithBox(thrift.py3.types.Struct, _typing.Hashable):
         c: bool
         pass
 
-    type: Final["StructWithBox.Type"]
     a: Final[_typing.Optional[str]] = ...
     b: Final[_typing.Optional[_typing.Sequence[int]]] = ...
     c: Final[_typing.Optional[StructWithRef]] = ...
@@ -459,7 +441,6 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
         field2: bool
         pass
 
-    type: Final["StructWithInternBox.Type"]
     field1: Final[Empty] = ...
     field2: Final[MyField] = ...
 
@@ -492,7 +473,6 @@ class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithTerseInternBox.Type"]
     field1: Final[Empty] = ...
     field2: Final[MyField] = ...
 
@@ -527,7 +507,6 @@ class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
         field2: bool
         pass
 
-    type: Final["AdaptedStructWithInternBox.Type"]
     field1: Final[Empty] = ...
     field2: Final[MyField] = ...
 
@@ -560,7 +539,6 @@ class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable)
     class __fbthrift_IsSet:
         pass
 
-    type: Final["AdaptedStructWithTerseInternBox.Type"]
     field1: Final[Empty] = ...
     field2: Final[MyField] = ...
 
@@ -593,7 +571,6 @@ class StructWithRefTypeUnique(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithRefTypeUnique.Type"]
     def_field: Final[_typing.Optional[Empty]] = ...
     opt_field: Final[_typing.Optional[Empty]] = ...
     req_field: Final[_typing.Optional[Empty]] = ...
@@ -629,7 +606,6 @@ class StructWithRefTypeShared(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithRefTypeShared.Type"]
     def_field: Final[_typing.Optional[Empty]] = ...
     opt_field: Final[_typing.Optional[Empty]] = ...
     req_field: Final[_typing.Optional[Empty]] = ...
@@ -665,7 +641,6 @@ class StructWithRefTypeSharedConst(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithRefTypeSharedConst.Type"]
     def_field: Final[_typing.Optional[Empty]] = ...
     opt_field: Final[_typing.Optional[Empty]] = ...
     req_field: Final[_typing.Optional[Empty]] = ...
@@ -701,7 +676,6 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct, _typing.
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithRefAndAnnotCppNoexceptMoveCtor.Type"]
     def_field: Final[_typing.Optional[Empty]] = ...
 
     def __init__(
@@ -731,7 +705,6 @@ class StructWithString(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["StructWithString.Type"]
     def_unique_string_ref: Final[_typing.Optional[str]] = ...
     def_shared_string_ref: Final[_typing.Optional[str]] = ...
     def_shared_string_const_ref: Final[_typing.Optional[str]] = ...

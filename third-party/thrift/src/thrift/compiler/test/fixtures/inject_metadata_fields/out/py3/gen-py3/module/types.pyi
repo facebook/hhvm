@@ -17,15 +17,11 @@ import itertools
 import foo.types as _foo_types
 
 
-__property__ = property
-
-
 class Fields(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         injected_field: bool
         pass
 
-    type: Final["Fields.Type"]
     injected_field: Final[str] = ...
 
     def __init__(
@@ -56,7 +52,6 @@ class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct, _typing.Hashable):
         injected_field: bool
         pass
 
-    type: Final["FieldsInjectedToEmptyStruct.Type"]
     injected_field: Final[str] = ...
 
     def __init__(
@@ -88,7 +83,6 @@ class FieldsInjectedToStruct(thrift.py3.types.Struct, _typing.Hashable):
         injected_field: bool
         pass
 
-    type: Final["FieldsInjectedToStruct.Type"]
     string_field: Final[str] = ...
     injected_field: Final[str] = ...
 
@@ -125,7 +119,6 @@ class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct, _typing.Hashable
         injected_unstructured_annotation_field: bool
         pass
 
-    type: Final["FieldsInjectedWithIncludedStruct.Type"]
     string_field: Final[str] = ...
     injected_field: Final[str] = ...
     injected_structured_annotation_field: Final[_typing.Optional[str]] = ...

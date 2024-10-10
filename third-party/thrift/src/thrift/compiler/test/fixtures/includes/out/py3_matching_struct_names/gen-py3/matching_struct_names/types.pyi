@@ -17,15 +17,11 @@ import itertools
 import module.types as _module_types
 
 
-__property__ = property
-
-
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         field: bool
         pass
 
-    type: Final["MyStruct.Type"]
     field: Final[str] = ...
 
     def __init__(
@@ -59,7 +55,6 @@ class Combo(thrift.py3.types.Struct, _typing.Hashable):
         listOfTheirMyStructList: bool
         pass
 
-    type: Final["Combo.Type"]
     listOfOurMyStructLists: Final[_typing.Sequence[_typing.Sequence[MyStruct]]] = ...
     theirMyStructList: Final[_typing.Sequence[_module_types.MyStruct]] = ...
     ourMyStructList: Final[_typing.Sequence[MyStruct]] = ...

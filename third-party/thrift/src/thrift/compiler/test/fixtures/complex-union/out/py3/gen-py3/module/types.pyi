@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 _ComplexUnionValueType = _typing.Union[None, int, str, _typing.Sequence[int], _typing.Sequence[str], _typing.Mapping[int, str], str]
 
 class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
@@ -30,7 +27,6 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         typedefValue: bool
         pass
 
-    type: Final["ComplexUnion.Type"]
     intValue: Final[int] = ...
     stringValue: Final[str] = ...
     intListValue: Final[_typing.Sequence[int]] = ...
@@ -67,10 +63,8 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _ComplexUnionValueType) -> ComplexUnion: ...
-    @__property__
-    def value(self) -> _ComplexUnionValueType: ...
-    @__property__
-    def type(self) -> "ComplexUnion.Type": ...
+    type: Final[ComplexUnion.Type]
+    value: Final[_ComplexUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.ComplexUnion": ...   # type: ignore
     def _to_py3(self) -> ComplexUnion: ...
@@ -84,7 +78,6 @@ class ListUnion(thrift.py3.types.Union, _typing.Hashable):
         stringListValue: bool
         pass
 
-    type: Final["ListUnion.Type"]
     intListValue: Final[_typing.Sequence[int]] = ...
     stringListValue: Final[_typing.Sequence[str]] = ...
 
@@ -109,10 +102,8 @@ class ListUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _ListUnionValueType) -> ListUnion: ...
-    @__property__
-    def value(self) -> _ListUnionValueType: ...
-    @__property__
-    def type(self) -> "ListUnion.Type": ...
+    type: Final[ListUnion.Type]
+    value: Final[_ListUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.ListUnion": ...   # type: ignore
     def _to_py3(self) -> ListUnion: ...
@@ -126,7 +117,6 @@ class DataUnion(thrift.py3.types.Union, _typing.Hashable):
         stringData: bool
         pass
 
-    type: Final["DataUnion.Type"]
     binaryData: Final[bytes] = ...
     stringData: Final[str] = ...
 
@@ -151,10 +141,8 @@ class DataUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _DataUnionValueType) -> DataUnion: ...
-    @__property__
-    def value(self) -> _DataUnionValueType: ...
-    @__property__
-    def type(self) -> "DataUnion.Type": ...
+    type: Final[DataUnion.Type]
+    value: Final[_DataUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.DataUnion": ...   # type: ignore
     def _to_py3(self) -> DataUnion: ...
@@ -167,7 +155,6 @@ class Val(thrift.py3.types.Struct, _typing.Hashable):
         typedefValue: bool
         pass
 
-    type: Final["Val.Type"]
     strVal: Final[str] = ...
     intVal: Final[int] = ...
     typedefValue: Final[_typing.Mapping[int, str]] = ...
@@ -207,7 +194,6 @@ class ValUnion(thrift.py3.types.Union, _typing.Hashable):
         v2: bool
         pass
 
-    type: Final["ValUnion.Type"]
     v1: Final[Val] = ...
     v2: Final[Val] = ...
 
@@ -232,10 +218,8 @@ class ValUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _ValUnionValueType) -> ValUnion: ...
-    @__property__
-    def value(self) -> _ValUnionValueType: ...
-    @__property__
-    def type(self) -> "ValUnion.Type": ...
+    type: Final[ValUnion.Type]
+    value: Final[_ValUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.ValUnion": ...   # type: ignore
     def _to_py3(self) -> ValUnion: ...
@@ -249,7 +233,6 @@ class VirtualComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         thingTwo: bool
         pass
 
-    type: Final["VirtualComplexUnion.Type"]
     thingOne: Final[str] = ...
     thingTwo: Final[str] = ...
 
@@ -274,10 +257,8 @@ class VirtualComplexUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _VirtualComplexUnionValueType) -> VirtualComplexUnion: ...
-    @__property__
-    def value(self) -> _VirtualComplexUnionValueType: ...
-    @__property__
-    def type(self) -> "VirtualComplexUnion.Type": ...
+    type: Final[VirtualComplexUnion.Type]
+    value: Final[_VirtualComplexUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.VirtualComplexUnion": ...   # type: ignore
     def _to_py3(self) -> VirtualComplexUnion: ...
@@ -288,7 +269,6 @@ class NonCopyableStruct(thrift.py3.types.Struct, _typing.Hashable):
         num: bool
         pass
 
-    type: Final["NonCopyableStruct.Type"]
     num: Final[int] = ...
 
     def __init__(
@@ -321,7 +301,6 @@ class NonCopyableUnion(thrift.py3.types.Union, _typing.Hashable):
         s: bool
         pass
 
-    type: Final["NonCopyableUnion.Type"]
     s: Final[NonCopyableStruct] = ...
 
     def __init__(
@@ -343,10 +322,8 @@ class NonCopyableUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _NonCopyableUnionValueType) -> NonCopyableUnion: ...
-    @__property__
-    def value(self) -> _NonCopyableUnionValueType: ...
-    @__property__
-    def type(self) -> "NonCopyableUnion.Type": ...
+    type: Final[NonCopyableUnion.Type]
+    value: Final[_NonCopyableUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.NonCopyableUnion": ...   # type: ignore
     def _to_py3(self) -> NonCopyableUnion: ...

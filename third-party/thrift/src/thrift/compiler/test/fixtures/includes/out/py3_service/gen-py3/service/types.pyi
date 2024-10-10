@@ -19,8 +19,5 @@ import module.types as _module_types
 import transitive.types as _transitive_types
 
 
-__property__ = property
-
-
 IncludesIncluded = _includes_types.Included
 IncludesTransitiveFoo = _transitive_types.Foo

@@ -17,9 +17,6 @@ import itertools
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 
-__property__ = property
-
-
 class has_bitwise_ops(thrift.py3.types.Enum):
     none: has_bitwise_ops = ...
     zero: has_bitwise_ops = ...
@@ -51,7 +48,6 @@ class empty_struct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["empty_struct.Type"]
 
     def __init__(
         self, 
@@ -79,7 +75,6 @@ class decorated_struct(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["decorated_struct.Type"]
     field: Final[str] = ...
 
     def __init__(
@@ -117,7 +112,6 @@ class ContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
         fieldH: bool
         pass
 
-    type: Final["ContainerStruct.Type"]
     fieldA: Final[_typing.Sequence[int]] = ...
     fieldB: Final[_typing.Sequence[int]] = ...
     fieldC: Final[_typing.Sequence[int]] = ...
@@ -169,7 +163,6 @@ class CppTypeStruct(thrift.py3.types.Struct, _typing.Hashable):
         fieldA: bool
         pass
 
-    type: Final["CppTypeStruct.Type"]
     fieldA: Final[_typing.Sequence[int]] = ...
 
     def __init__(
@@ -200,7 +193,6 @@ class VirtualStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyIntField: bool
         pass
 
-    type: Final["VirtualStruct.Type"]
     MyIntField: Final[int] = ...
 
     def __init__(
@@ -232,7 +224,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct, _typing.Hashable):
         b: bool
         pass
 
-    type: Final["MyStructWithForwardRefEnum.Type"]
     a: Final[MyForwardRefEnum] = ...
     b: Final[MyForwardRefEnum] = ...
 
@@ -267,7 +258,6 @@ class TrivialNumeric(thrift.py3.types.Struct, _typing.Hashable):
         b: bool
         pass
 
-    type: Final["TrivialNumeric.Type"]
     a: Final[int] = ...
     b: Final[bool] = ...
 
@@ -302,7 +292,6 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
         n: bool
         pass
 
-    type: Final["TrivialNestedWithDefault.Type"]
     z: Final[int] = ...
     n: Final[TrivialNumeric] = ...
 
@@ -337,7 +326,6 @@ class ComplexString(thrift.py3.types.Struct, _typing.Hashable):
         b: bool
         pass
 
-    type: Final["ComplexString.Type"]
     a: Final[str] = ...
     b: Final[_typing.Mapping[str, int]] = ...
 
@@ -372,7 +360,6 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct, _typing.Hashable):
         n: bool
         pass
 
-    type: Final["ComplexNestedWithDefault.Type"]
     z: Final[str] = ...
     n: Final[ComplexString] = ...
 
@@ -410,7 +397,6 @@ class MinPadding(thrift.py3.types.Struct, _typing.Hashable):
         tiny: bool
         pass
 
-    type: Final["MinPadding.Type"]
     small: Final[int] = ...
     big: Final[int] = ...
     medium: Final[int] = ...
@@ -452,7 +438,6 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MinPaddingWithCustomType.Type"]
     small: Final[int] = ...
     big: Final[int] = ...
     medium: Final[int] = ...
@@ -498,7 +483,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         data: bool
         pass
 
-    type: Final["MyStruct.Type"]
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
     majorVer: Final[int] = ...
@@ -537,7 +521,6 @@ class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MyDataItem.Type"]
 
     def __init__(
         self, 
@@ -565,7 +548,6 @@ class Renaming(thrift.py3.types.Struct, _typing.Hashable):
         foo: bool
         pass
 
-    type: Final["Renaming.Type"]
     foo: Final[int] = ...
 
     def __init__(
@@ -597,7 +579,6 @@ class AnnotatedTypes(thrift.py3.types.Struct, _typing.Hashable):
         list_field: bool
         pass
 
-    type: Final["AnnotatedTypes.Type"]
     binary_field: Final[bytes] = ...
     list_field: Final[_typing.Sequence[_typing.Mapping[int, str]]] = ...
 
@@ -631,7 +612,6 @@ class ForwardUsageRoot(thrift.py3.types.Struct, _typing.Hashable):
         ForwardUsageStruct: bool
         pass
 
-    type: Final["ForwardUsageRoot.Type"]
     ForwardUsageStruct: Final[_typing.Optional[ForwardUsageStruct]] = ...
     ForwardUsageByRef: Final[_typing.Optional[ForwardUsageByRef]] = ...
 
@@ -664,7 +644,6 @@ class ForwardUsageStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["ForwardUsageStruct.Type"]
     foo: Final[_typing.Optional[ForwardUsageRoot]] = ...
 
     def __init__(
@@ -694,7 +673,6 @@ class ForwardUsageByRef(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["ForwardUsageByRef.Type"]
     foo: Final[_typing.Optional[ForwardUsageRoot]] = ...
 
     def __init__(
@@ -725,7 +703,6 @@ class IncompleteMap(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["IncompleteMap.Type"]
     field: Final[_typing.Optional[_typing.Mapping[int, IncompleteMapDep]]] = ...
 
     def __init__(
@@ -755,7 +732,6 @@ class IncompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["IncompleteMapDep.Type"]
 
     def __init__(
         self, 
@@ -783,7 +759,6 @@ class CompleteMap(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["CompleteMap.Type"]
     field: Final[_typing.Optional[_typing.Mapping[int, CompleteMapDep]]] = ...
 
     def __init__(
@@ -813,7 +788,6 @@ class CompleteMapDep(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["CompleteMapDep.Type"]
 
     def __init__(
         self, 
@@ -841,7 +815,6 @@ class IncompleteList(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["IncompleteList.Type"]
     field: Final[_typing.Optional[_typing.Sequence[IncompleteListDep]]] = ...
 
     def __init__(
@@ -871,7 +844,6 @@ class IncompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["IncompleteListDep.Type"]
 
     def __init__(
         self, 
@@ -899,7 +871,6 @@ class CompleteList(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["CompleteList.Type"]
     field: Final[_typing.Optional[_typing.Sequence[CompleteListDep]]] = ...
 
     def __init__(
@@ -929,7 +900,6 @@ class CompleteListDep(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["CompleteListDep.Type"]
 
     def __init__(
         self, 
@@ -957,7 +927,6 @@ class AdaptedList(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["AdaptedList.Type"]
     field: Final[_typing.Optional[_typing.Sequence[AdaptedListDep]]] = ...
 
     def __init__(
@@ -988,7 +957,6 @@ class DependentAdaptedList(thrift.py3.types.Struct, _typing.Hashable):
         field: bool
         pass
 
-    type: Final["DependentAdaptedList.Type"]
     field: Final[_typing.Optional[_typing.Sequence[DependentAdaptedListDep]]] = ...
 
     def __init__(
@@ -1023,7 +991,6 @@ class AllocatorAware(thrift.py3.types.Struct, _typing.Hashable):
         not_a_container: bool
         pass
 
-    type: Final["AllocatorAware.Type"]
     aa_list: Final[_typing.Sequence[int]] = ...
     aa_set: Final[_typing.AbstractSet[int]] = ...
     aa_map: Final[_typing.Mapping[int, int]] = ...
@@ -1073,7 +1040,6 @@ class AllocatorAware2(thrift.py3.types.Struct, _typing.Hashable):
         box_field: bool
         pass
 
-    type: Final["AllocatorAware2.Type"]
     not_a_container: Final[int] = ...
     box_field: Final[_typing.Optional[int]] = ...
 
@@ -1109,7 +1075,6 @@ class TypedefStruct(thrift.py3.types.Struct, _typing.Hashable):
         UintTypedef_field: bool
         pass
 
-    type: Final["TypedefStruct.Type"]
     i32_field: Final[int] = ...
     IntTypedef_field: Final[int] = ...
     UintTypedef_field: Final[int] = ...
@@ -1146,7 +1111,6 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct, _typing.Hashable):
         __field: bool
         pass
 
-    type: Final["StructWithDoubleUnderscores.Type"]
     __field: Final[int] = ...
 
     def __init__(

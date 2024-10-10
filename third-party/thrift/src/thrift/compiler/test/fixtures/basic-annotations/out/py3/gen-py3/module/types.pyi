@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class MyEnum(thrift.py3.types.Enum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
@@ -33,7 +30,6 @@ class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
         name: bool
         pass
 
-    type: Final["MyStructNestedAnnotation.Type"]
     name: Final[str] = ...
 
     def __init__(
@@ -65,7 +61,6 @@ class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
         password: bool
         pass
 
-    type: Final["SecretStruct.Type"]
     id: Final[int] = ...
     password: Final[str] = ...
 

@@ -18,15 +18,11 @@ import thrift.py3.stream
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 
-__property__ = property
-
-
 class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         message: bool
         pass
 
-    type: Final["CustomException.Type"]
     message: Final[str] = ...
 
     def __init__(

@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class EmptyEnum(thrift.py3.types.Enum):
     def _to_python(self) -> "module.thrift_types.EmptyEnum": ...   # type: ignore
     def _to_py3(self) -> EmptyEnum: ...
@@ -54,7 +51,6 @@ class Internship(thrift.py3.types.Struct, _typing.Hashable):
         school: bool
         pass
 
-    type: Final["Internship.Type"]
     weeks: Final[int] = ...
     title: Final[str] = ...
     employer: Final[_typing.Optional[Company]] = ...
@@ -98,7 +94,6 @@ class Range(thrift.py3.types.Struct, _typing.Hashable):
         max: bool
         pass
 
-    type: Final["Range.Type"]
     min: Final[int] = ...
     max: Final[int] = ...
 
@@ -133,7 +128,6 @@ class struct1(thrift.py3.types.Struct, _typing.Hashable):
         b: bool
         pass
 
-    type: Final["struct1.Type"]
     a: Final[int] = ...
     b: Final[str] = ...
 
@@ -170,7 +164,6 @@ class struct2(thrift.py3.types.Struct, _typing.Hashable):
         d: bool
         pass
 
-    type: Final["struct2.Type"]
     a: Final[int] = ...
     b: Final[str] = ...
     c: Final[struct1] = ...
@@ -212,7 +205,6 @@ class struct3(thrift.py3.types.Struct, _typing.Hashable):
         c: bool
         pass
 
-    type: Final["struct3.Type"]
     a: Final[str] = ...
     b: Final[int] = ...
     c: Final[struct2] = ...
@@ -251,7 +243,6 @@ class struct4(thrift.py3.types.Struct, _typing.Hashable):
         c: bool
         pass
 
-    type: Final["struct4.Type"]
     a: Final[int] = ...
     b: Final[_typing.Optional[float]] = ...
     c: Final[_typing.Optional[int]] = ...
@@ -291,7 +282,6 @@ class union1(thrift.py3.types.Union, _typing.Hashable):
         d: bool
         pass
 
-    type: Final["union1.Type"]
     i: Final[int] = ...
     d: Final[float] = ...
 
@@ -316,10 +306,8 @@ class union1(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _union1ValueType) -> union1: ...
-    @__property__
-    def value(self) -> _union1ValueType: ...
-    @__property__
-    def type(self) -> "union1.Type": ...
+    type: Final[union1.Type]
+    value: Final[_union1ValueType]
 
     def _to_python(self) -> "module.thrift_types.union1": ...   # type: ignore
     def _to_py3(self) -> union1: ...
@@ -335,7 +323,6 @@ class union2(thrift.py3.types.Union, _typing.Hashable):
         u: bool
         pass
 
-    type: Final["union2.Type"]
     i: Final[int] = ...
     d: Final[float] = ...
     s: Final[struct1] = ...
@@ -366,10 +353,8 @@ class union2(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _union2ValueType) -> union2: ...
-    @__property__
-    def value(self) -> _union2ValueType: ...
-    @__property__
-    def type(self) -> "union2.Type": ...
+    type: Final[union2.Type]
+    value: Final[_union2ValueType]
 
     def _to_python(self) -> "module.thrift_types.union2": ...   # type: ignore
     def _to_py3(self) -> union2: ...

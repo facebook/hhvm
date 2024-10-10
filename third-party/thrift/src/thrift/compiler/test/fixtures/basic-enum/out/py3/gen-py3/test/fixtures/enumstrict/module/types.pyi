@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class EmptyEnum(thrift.py3.types.Enum):
     def _to_python(self) -> "test.fixtures.enumstrict.module.thrift_types.EmptyEnum": ...   # type: ignore
     def _to_py3(self) -> EmptyEnum: ...
@@ -74,7 +71,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         myBigEnum: bool
         pass
 
-    type: Final["MyStruct.Type"]
     myEnum: Final[MyEnum] = ...
     myBigEnum: Final[MyBigEnum] = ...
 

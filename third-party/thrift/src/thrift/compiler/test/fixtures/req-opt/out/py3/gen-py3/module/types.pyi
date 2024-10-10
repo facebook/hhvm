@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         myInteger: bool
@@ -27,7 +24,6 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
         myNumbers: bool
         pass
 
-    type: Final["Foo.Type"]
     myInteger: Final[int] = ...
     myString: Final[_typing.Optional[str]] = ...
     myBools: Final[_typing.Sequence[bool]] = ...

@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 _List__stringT = _typing.TypeVar('_List__stringT', bound=_typing.Sequence[str])
 
 

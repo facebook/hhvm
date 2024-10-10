@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class MyEnum(thrift.py3.types.Enum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
@@ -33,7 +30,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyStringField: bool
         pass
 
-    type: Final["MyStruct.Type"]
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
 

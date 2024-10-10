@@ -16,15 +16,11 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class C(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         i: bool
         pass
 
-    type: Final["C.Type"]
     i: Final[int] = ...
 
     def __init__(
@@ -54,7 +50,6 @@ class E(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["E.Type"]
 
     def __init__(
         self, 

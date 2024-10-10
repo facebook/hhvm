@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 _List__i32T = _typing.TypeVar('_List__i32T', bound=_typing.Sequence[int])
 
 

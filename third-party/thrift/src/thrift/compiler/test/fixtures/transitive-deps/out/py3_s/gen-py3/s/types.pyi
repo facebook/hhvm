@@ -18,6 +18,3 @@ import b.types as _b_types
 import c.types as _c_types
 
 
-__property__ = property
-
-

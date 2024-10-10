@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class MyEnum(thrift.py3.types.Enum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
@@ -48,7 +45,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         no_hack_codegen_field: bool
         pass
 
-    type: Final["MyStruct.Type"]
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
     MyDataField: Final[MyDataItem] = ...
@@ -105,7 +101,6 @@ class Containers(thrift.py3.types.Struct, _typing.Hashable):
         StringToI64Map: bool
         pass
 
-    type: Final["Containers.Type"]
     I32List: Final[_typing.Sequence[int]] = ...
     StringSet: Final[_typing.AbstractSet[str]] = ...
     StringToI64Map: Final[_typing.Mapping[str, int]] = ...
@@ -141,7 +136,6 @@ class MyDataItem(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["MyDataItem.Type"]
 
     def __init__(
         self, 
@@ -174,7 +168,6 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
         floatSet: bool
         pass
 
-    type: Final["MyUnion.Type"]
     myEnum: Final[MyEnum] = ...
     myStruct: Final[MyStruct] = ...
     myDataItem: Final[MyDataItem] = ...
@@ -205,10 +198,8 @@ class MyUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _MyUnionValueType) -> MyUnion: ...
-    @__property__
-    def value(self) -> _MyUnionValueType: ...
-    @__property__
-    def type(self) -> "MyUnion.Type": ...
+    type: Final[MyUnion.Type]
+    value: Final[_MyUnionValueType]
 
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyUnion": ...   # type: ignore
     def _to_py3(self) -> MyUnion: ...
@@ -222,7 +213,6 @@ class MyException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         myUnion: bool
         pass
 
-    type: Final["MyException.Type"]
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
     myStruct: Final[MyStruct] = ...
@@ -256,7 +246,6 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError, _typing.Hasha
         myUnion: bool
         pass
 
-    type: Final["MyExceptionWithMessage.Type"]
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
     myStruct: Final[MyStruct] = ...
@@ -287,7 +276,6 @@ class ReservedKeyword(thrift.py3.types.Struct, _typing.Hashable):
         reserved_field: bool
         pass
 
-    type: Final["ReservedKeyword.Type"]
     reserved_field: Final[int] = ...
 
     def __init__(
@@ -320,7 +308,6 @@ class UnionToBeRenamed(thrift.py3.types.Union, _typing.Hashable):
         reserved_field: bool
         pass
 
-    type: Final["UnionToBeRenamed.Type"]
     reserved_field: Final[int] = ...
 
     def __init__(
@@ -342,10 +329,8 @@ class UnionToBeRenamed(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _UnionToBeRenamedValueType) -> UnionToBeRenamed: ...
-    @__property__
-    def value(self) -> _UnionToBeRenamedValueType: ...
-    @__property__
-    def type(self) -> "UnionToBeRenamed.Type": ...
+    type: Final[UnionToBeRenamed.Type]
+    value: Final[_UnionToBeRenamedValueType]
 
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.UnionToBeRenamed": ...   # type: ignore
     def _to_py3(self) -> UnionToBeRenamed: ...

@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class MyEnumA(thrift.py3.types.Enum):
     fieldA: MyEnumA = ...
     fieldB: MyEnumA = ...
@@ -34,7 +31,6 @@ class SmallStruct(thrift.py3.types.Struct, _typing.Hashable):
         small_B: bool
         pass
 
-    type: Final["SmallStruct.Type"]
     small_A: Final[bool] = ...
     small_B: Final[int] = ...
 
@@ -84,7 +80,6 @@ class containerStruct(thrift.py3.types.Struct, _typing.Hashable):
         fieldQ: bool
         pass
 
-    type: Final["containerStruct.Type"]
     fieldA: Final[bool] = ...
     fieldB: Final[_typing.Mapping[str, bool]] = ...
     fieldC: Final[_typing.AbstractSet[int]] = ...

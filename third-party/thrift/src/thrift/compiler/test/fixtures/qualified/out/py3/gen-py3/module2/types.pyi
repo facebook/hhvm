@@ -18,16 +18,12 @@ import module0.types as _module0_types
 import module1.types as _module1_types
 
 
-__property__ = property
-
-
 class Struct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         first: bool
         second: bool
         pass
 
-    type: Final["Struct.Type"]
     first: Final[_module0_types.Struct] = ...
     second: Final[_module1_types.Struct] = ...
 
@@ -62,7 +58,6 @@ class BigStruct(thrift.py3.types.Struct, _typing.Hashable):
         id: bool
         pass
 
-    type: Final["BigStruct.Type"]
     s: Final[Struct] = ...
     id: Final[int] = ...
 

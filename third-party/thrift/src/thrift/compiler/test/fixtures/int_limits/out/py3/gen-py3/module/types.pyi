@@ -16,9 +16,6 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class Limits(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         max_i64_field: bool
@@ -31,7 +28,6 @@ class Limits(thrift.py3.types.Struct, _typing.Hashable):
         min_byte_field: bool
         pass
 
-    type: Final["Limits.Type"]
     max_i64_field: Final[int] = ...
     min_i64_field: Final[int] = ...
     max_i32_field: Final[int] = ...

@@ -17,9 +17,6 @@ import itertools
 import module.thrift_types
 
 
-__property__ = property
-
-
 class AnEnum(thrift.py3.types.Enum, module.thrift_types._fbthrift_compatible_with_AnEnum):
     NOTSET: AnEnum = ...
     ONE: AnEnum = ...
@@ -55,7 +52,6 @@ class SimpleException(thrift.py3.exceptions.GeneratedError, _typing.Hashable, mo
         err_code: bool
         pass
 
-    type: Final["SimpleException.Type"]
     err_code: Final[int] = ...
 
     def __init__(
@@ -80,7 +76,6 @@ class OptionalRefStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift
         optional_blob: bool
         pass
 
-    type: Final["OptionalRefStruct.Type"]
     optional_blob: Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     def __init__(
@@ -117,7 +112,6 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_type
         smaller_real: bool
         pass
 
-    type: Final["SimpleStruct.Type"]
     is_on: Final[bool] = ...
     tiny_int: Final[int] = ...
     small_int: Final[int] = ...
@@ -165,7 +159,6 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct, _typing.Hashable, module.t
     class __fbthrift_IsSet:
         pass
 
-    type: Final["HiddenTypeFieldsStruct.Type"]
 
     def __init__(
         self, 
@@ -197,7 +190,6 @@ class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift_typ
         bytes_with_cpp_type: bool
         pass
 
-    type: Final["ComplexStruct.Type"]
     structOne: Final[SimpleStruct] = ...
     structTwo: Final[SimpleStruct] = ...
     an_integer: Final[int] = ...
@@ -254,7 +246,6 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types.
         iobuf_val: bool
         pass
 
-    type: Final["BinaryUnion.Type"]
     iobuf_val: Final[_fbthrift_iobuf.IOBuf] = ...
 
     def __init__(
@@ -276,10 +267,8 @@ class BinaryUnion(thrift.py3.types.Union, _typing.Hashable, module.thrift_types.
 
     @staticmethod
     def fromValue(value: _BinaryUnionValueType) -> BinaryUnion: ...
-    @__property__
-    def value(self) -> _BinaryUnionValueType: ...
-    @__property__
-    def type(self) -> "BinaryUnion.Type": ...
+    type: Final[BinaryUnion.Type]
+    value: Final[_BinaryUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.BinaryUnion": ...   # type: ignore
     def _to_py3(self) -> BinaryUnion: ...
@@ -290,7 +279,6 @@ class BinaryUnionStruct(thrift.py3.types.Struct, _typing.Hashable, module.thrift
         u: bool
         pass
 
-    type: Final["BinaryUnionStruct.Type"]
     u: Final[BinaryUnion] = ...
 
     def __init__(

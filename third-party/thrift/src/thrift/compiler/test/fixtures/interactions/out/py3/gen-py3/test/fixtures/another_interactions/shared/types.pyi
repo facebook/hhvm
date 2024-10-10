@@ -16,16 +16,12 @@ import sys
 import itertools
 
 
-__property__ = property
-
-
 class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         s_res: bool
         i_res: bool
         pass
 
-    type: Final["DoSomethingResult.Type"]
     s_res: Final[str] = ...
     i_res: Final[int] = ...
 

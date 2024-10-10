@@ -17,9 +17,6 @@ import itertools
 import includes.types as _includes_types
 
 
-__property__ = property
-
-
 class MyEnumA(thrift.py3.types.Enum):
     fieldA: MyEnumA = ...
     fieldB: MyEnumA = ...
@@ -58,7 +55,6 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    type: Final["Empty.Type"]
 
     def __init__(
         self, 
@@ -86,7 +82,6 @@ class ASimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
         boolField: bool
         pass
 
-    type: Final["ASimpleStruct.Type"]
     boolField: Final[int] = ...
 
     def __init__(
@@ -113,7 +108,6 @@ class ASimpleStructNoexcept(thrift.py3.types.Struct, _typing.Hashable):
         boolField: bool
         pass
 
-    type: Final["ASimpleStructNoexcept.Type"]
     boolField: Final[int] = ...
 
     def __init__(
@@ -154,7 +148,6 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         MyOptCustomField: bool
         pass
 
-    type: Final["MyStruct.Type"]
     MyBoolField: Final[bool] = ...
     MyIntField: Final[int] = ...
     MyStringField: Final[str] = ...
@@ -218,7 +211,6 @@ class SimpleUnion(thrift.py3.types.Union, _typing.Hashable):
         stringValue: bool
         pass
 
-    type: Final["SimpleUnion.Type"]
     intValue: Final[int] = ...
     stringValue: Final[str] = ...
 
@@ -243,10 +235,8 @@ class SimpleUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _SimpleUnionValueType) -> SimpleUnion: ...
-    @__property__
-    def value(self) -> _SimpleUnionValueType: ...
-    @__property__
-    def type(self) -> "SimpleUnion.Type": ...
+    type: Final[SimpleUnion.Type]
+    value: Final[_SimpleUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.SimpleUnion": ...   # type: ignore
     def _to_py3(self) -> SimpleUnion: ...
@@ -284,7 +274,6 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
         MyCustomField: bool
         pass
 
-    type: Final["ComplexUnion.Type"]
     intValue: Final[int] = ...
     opt_intValue: Final[int] = ...
     stringValue: Final[str] = ...
@@ -387,10 +376,8 @@ class ComplexUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _ComplexUnionValueType) -> ComplexUnion: ...
-    @__property__
-    def value(self) -> _ComplexUnionValueType: ...
-    @__property__
-    def type(self) -> "ComplexUnion.Type": ...
+    type: Final[ComplexUnion.Type]
+    value: Final[_ComplexUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.ComplexUnion": ...   # type: ignore
     def _to_py3(self) -> ComplexUnion: ...
@@ -417,7 +404,6 @@ class AnException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         MyOptCustomField: bool
         pass
 
-    type: Final["AnException.Type"]
     code: Final[int] = ...
     req_code: Final[int] = ...
     message2: Final[str] = ...
@@ -476,7 +462,6 @@ class AnotherException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         message: bool
         pass
 
-    type: Final["AnotherException.Type"]
     code: Final[int] = ...
     req_code: Final[int] = ...
     message: Final[str] = ...
@@ -550,7 +535,6 @@ class containerStruct(thrift.py3.types.Struct, _typing.Hashable):
         fieldSD: bool
         pass
 
-    type: Final["containerStruct.Type"]
     fieldA: Final[bool] = ...
     req_fieldA: Final[bool] = ...
     opt_fieldA: Final[_typing.Optional[bool]] = ...
@@ -718,7 +702,6 @@ class MyIncludedStruct(thrift.py3.types.Struct, _typing.Hashable):
         ARequiredField: bool
         pass
 
-    type: Final["MyIncludedStruct.Type"]
     MyIncludedInt: Final[int] = ...
     MyIncludedStruct: Final[_includes_types.AStruct] = ...
     ARefField: Final[_typing.Optional[_includes_types.AStruct]] = ...
@@ -779,7 +762,6 @@ class AnnotatedStruct(thrift.py3.types.Struct, _typing.Hashable):
         struct_struct: bool
         pass
 
-    type: Final["AnnotatedStruct.Type"]
     no_annotation: Final[containerStruct] = ...
     cpp_unique_ref: Final[_typing.Optional[containerStruct]] = ...
     cpp2_unique_ref: Final[_typing.Optional[containerStruct]] = ...
@@ -924,7 +906,6 @@ class ComplexContainerStruct(thrift.py3.types.Struct, _typing.Hashable):
         map_of_iobuf_ptrs: bool
         pass
 
-    type: Final["ComplexContainerStruct.Type"]
     map_of_iobufs: Final[_typing.Mapping[str, _fbthrift_iobuf.IOBuf]] = ...
     map_of_iobuf_ptrs: Final[_typing.Mapping[str, _fbthrift_iobuf.IOBuf]] = ...
 
@@ -959,7 +940,6 @@ class FloatStruct(thrift.py3.types.Struct, _typing.Hashable):
         doubleField: bool
         pass
 
-    type: Final["FloatStruct.Type"]
     floatField: Final[float] = ...
     doubleField: Final[float] = ...
 
@@ -996,7 +976,6 @@ class FloatUnion(thrift.py3.types.Union, _typing.Hashable):
         doubleSide: bool
         pass
 
-    type: Final["FloatUnion.Type"]
     floatSide: Final[float] = ...
     doubleSide: Final[float] = ...
 
@@ -1021,10 +1000,8 @@ class FloatUnion(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _FloatUnionValueType) -> FloatUnion: ...
-    @__property__
-    def value(self) -> _FloatUnionValueType: ...
-    @__property__
-    def type(self) -> "FloatUnion.Type": ...
+    type: Final[FloatUnion.Type]
+    value: Final[_FloatUnionValueType]
 
     def _to_python(self) -> "module.thrift_types.FloatUnion": ...   # type: ignore
     def _to_py3(self) -> FloatUnion: ...
@@ -1035,7 +1012,6 @@ class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct, _typing.Hashable
         intField: bool
         pass
 
-    type: Final["AllRequiredNoExceptMoveCtrStruct.Type"]
     intField: Final[int] = ...
 
     def __init__(

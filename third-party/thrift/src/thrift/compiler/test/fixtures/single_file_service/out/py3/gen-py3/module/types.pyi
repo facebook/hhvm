@@ -17,15 +17,11 @@ import itertools
 import thrift.py3.stream
 
 
-__property__ = property
-
-
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         value: bool
         pass
 
-    type: Final["Foo.Type"]
     value: Final[_typing.Optional[int]] = ...
 
     def __init__(

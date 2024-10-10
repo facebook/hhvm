@@ -28,7 +28,8 @@ class WatchmanStructuredLogger : public ScubaStructuredLogger {
   virtual ~WatchmanStructuredLogger() override = default;
 
  protected:
-  virtual DynamicEvent populateDefaultFields(const char* type) override;
+  virtual DynamicEvent populateDefaultFields(
+      std::optional<const char*> type) override;
 };
 
 std::shared_ptr<StructuredLogger> getLogger();

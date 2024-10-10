@@ -33,7 +33,8 @@ std::shared_ptr<StructuredLogger> getLogger() {
   return logger;
 }
 
-DynamicEvent WatchmanStructuredLogger::populateDefaultFields(const char* type) {
+DynamicEvent WatchmanStructuredLogger::populateDefaultFields(
+    std::optional<const char*> type) {
   DynamicEvent event = StructuredLogger::populateDefaultFields(type);
   if (sessionInfo_.ciInstanceId.has_value()) {
     event.addInt("sandcastle_instance_id", *sessionInfo_.ciInstanceId);

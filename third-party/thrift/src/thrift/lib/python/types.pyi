@@ -124,17 +124,13 @@ class Union(
     StructOrUnion,
     metaclass=UnionMeta,
 ):
-    # pyre-ignore[4]: it can be anything
-    type: typing.Any
-    # pyre-ignore[4]: it can be anything
-    value: typing.Any
+    # these types are made more specific in gencode, so can't be `Final` here
+    type: enum.Enum
+    value: object
+    # these are added to avoid naming collisions with `type` and `value` arms
+    fbthrift_current_value: object
+    fbthrift_current_field: enum.Enum
     def __bool__(self) -> bool: ...
-    @property
-    # pyre-ignore[3]: it can be anything
-    def fbthrift_current_value(self) -> typing.Any: ...
-    @property
-    # pyre-ignore[3]: it can be anything
-    def fbthrift_current_field(self) -> typing.Any: ...
 
 class StructMeta(type, typing.Iterable[typing.Tuple[str, typing.Any]]): ...
 class UnionMeta(type): ...

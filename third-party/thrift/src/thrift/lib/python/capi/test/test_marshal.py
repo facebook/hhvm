@@ -330,11 +330,8 @@ class TestMarshalMap(MarshalFixture):
         # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
         # and speed, thereby reversing the ordering
         self.assertEqual(
-            # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
-            #  but got `object`.
             make_dict(),
             # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
-            #  but got `object`.
             tuple(reversed(fixture.roundtrip_bytes_key_map(make_dict()))),
         )
         self.assertEqual((), fixture.roundtrip_bytes_key_map(()))
@@ -392,11 +389,8 @@ class TestMarshalMap(MarshalFixture):
         # provide extract(). F14FastMap iter uses LIFO order for better erase semantics
         # and speed, thereby reversing the ordering
         self.assertEqual(
-            # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
-            #  but got `object`.
             make_dict(),
             # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
-            #  but got `object`.
             tuple(reversed(fixture.roundtrip_unicode_val_map(make_dict()))),
         )
         self.assertEqual((), fixture.roundtrip_unicode_val_map(()))

@@ -120,12 +120,12 @@ class {{> structs/unadapted_name}}({{!
     @classmethod
     def fromValue(cls, value: {{ > types/field_value_pep484_union_type}}) -> {{> structs/unadapted_name}}: ...
     value: _typing.Final[{{ > types/field_value_pep484_union_type}}]
-    type: Type
+    type: _typing.Final[Type]
     def get_type(self) -> Type:...
 {{/program:generate_mutable_types}}
 {{#program:generate_mutable_types}}
     fbthrift_current_value: _typing.Final[{{ > types/field_value_pep484_union_type}}]
-    fbthrift_current_field: FbThriftUnionFieldEnum
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum:...
 {{/program:generate_mutable_types}}
     {{/struct:union?}}

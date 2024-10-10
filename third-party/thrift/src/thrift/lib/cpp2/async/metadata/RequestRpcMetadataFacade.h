@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <type_traits>
 #include <variant>
 #include <folly/Overload.h>
 #include <thrift/lib/cpp2/async/metadata/CursorBasedRequestRpcMetadataAdapter.h>
@@ -31,232 +32,119 @@ class RequestRpcMetadataFacade {
       std::unique_ptr<folly::IOBuf>&& serializedMetadata);
 
   FOLLY_ERASE std::optional<std::reference_wrapper<ProtocolId>> protocolId() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .protocolId();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).protocolId();
-    }
+    return visit([](auto& adapter) { return adapter.protocolId(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<ManagedStringViewField>>
   name() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_).name();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).name();
-    }
+    return visit([](auto& adapter) { return adapter.name(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<RpcKind>> kind() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_).kind();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).kind();
-    }
+    return visit([](auto& adapter) { return adapter.kind(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<int32_t>> clientTimeoutMs() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .clientTimeoutMs();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .clientTimeoutMs();
-    }
+    return visit([](auto& adapter) { return adapter.clientTimeoutMs(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<int32_t>> queueTimeoutMs() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .queueTimeoutMs();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .queueTimeoutMs();
-    }
+    return visit([](auto& adapter) { return adapter.queueTimeoutMs(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<RpcPriority>> priority() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .priority();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).priority();
-    }
+    return visit([](auto& adapter) { return adapter.priority(); });
   }
   FOLLY_ERASE std::optional<folly::F14NodeMap<std::string, std::string>*>
   otherMetadata() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .otherMetadata();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .otherMetadata();
-    }
+    return visit([](auto& adapter) { return adapter.otherMetadata(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<uint32_t>> crc32c() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_).crc32c();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).crc32c();
-    }
+    return visit([](auto& adapter) { return adapter.crc32c(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<std::string>> loadMetric() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .loadMetric();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).loadMetric();
-    }
+    return visit([](auto& adapter) { return adapter.loadMetric(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<CompressionAlgorithm>>
   compression() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .compression();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .compression();
-    }
+    return visit([](auto& adapter) { return adapter.compression(); });
   }
+
   FOLLY_ERASE std::optional<std::reference_wrapper<CompressionConfig>>
   compressionConfig() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .compressionConfig();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .compressionConfig();
-    }
+    return visit([](auto& adapter) { return adapter.compressionConfig(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<int64_t>> interactionId() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .interactionId();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .interactionId();
-    }
+    return visit([](auto& adapter) { return adapter.interactionId(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<InteractionCreate>>
   interactionCreate() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .interactionCreate();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .interactionCreate();
-    }
+    return visit([](auto& adapter) { return adapter.interactionCreate(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<std::string>> clientId() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .clientId();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).clientId();
-    }
+    return visit([](auto& adapter) { return adapter.clientId(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<std::string>>
   serviceTraceMeta() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .serviceTraceMeta();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .serviceTraceMeta();
-    }
+    return visit([](auto& adapter) { return adapter.serviceTraceMeta(); });
   }
   FOLLY_ERASE
   std::optional<std::reference_wrapper<std::unique_ptr<folly::IOBuf>>>
   frameworkMetadata() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .frameworkMetadata();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .frameworkMetadata();
-    }
+    return visit([](auto& adapter) { return adapter.frameworkMetadata(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<FdMetadata>> fdMetadata() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .fdMetadata();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).fdMetadata();
-    }
+    return visit([](auto& adapter) { return adapter.fdMetadata(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<LoggingContext>>
   loggingContext() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .loggingContext();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .loggingContext();
-    }
+    return visit([](auto& adapter) { return adapter.loggingContext(); });
   }
+
   FOLLY_ERASE std::optional<std::reference_wrapper<std::string>> tenantId() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .tenantId();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).tenantId();
-    }
+    return visit([](auto& adapter) { return adapter.tenantId(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<Checksum>> checksum() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .checksum();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_).checksum();
-    }
+    return visit([](auto& adapter) { return adapter.checksum(); });
   }
   FOLLY_ERASE std::optional<std::reference_wrapper<bool>> checksumResponse() {
-    if (std::holds_alternative<CursorBasedRequestRpcMetadataAdapter>(
-            adapter_)) {
-      return std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_)
-          .checksumResponse();
-    } else {
-      return std::get<TCompactRequestRpcMetadataAdapter>(adapter_)
-          .checksumResponse();
-    }
+    return visit([](auto& adapter) { return adapter.checksumResponse(); });
   }
 
  private:
   std::variant<
-      CursorBasedRequestRpcMetadataAdapter,
-      TCompactRequestRpcMetadataAdapter>
+      TCompactRequestRpcMetadataAdapter,
+      CursorBasedRequestRpcMetadataAdapter>
       adapter_;
+
+  template <typename DelegateFunc>
+  using DelegateReturn = std::common_type_t<
+      std::invoke_result_t<DelegateFunc, TCompactRequestRpcMetadataAdapter&>,
+      std::
+          invoke_result_t<DelegateFunc, CursorBasedRequestRpcMetadataAdapter&>>;
+
+  template <
+      typename DelegateFunc,
+      typename ReturnType = DelegateReturn<DelegateFunc&>>
+  FOLLY_ALWAYS_INLINE ReturnType visit(DelegateFunc&& delegate) {
+    if (std::holds_alternative<TCompactRequestRpcMetadataAdapter>(adapter_)) {
+      auto& adapter = std::get<TCompactRequestRpcMetadataAdapter>(adapter_);
+      return delegate(adapter);
+    } else {
+      auto& adapter = std::get<CursorBasedRequestRpcMetadataAdapter>(adapter_);
+      return delegate(adapter);
+    }
+  }
 };
 
 FOLLY_ERASE RequestRpcMetadataFacade::RequestRpcMetadataFacade(
     std::unique_ptr<folly::IOBuf>&& serializedMetadata)
     : adapter_(std::variant<
-               CursorBasedRequestRpcMetadataAdapter,
-               TCompactRequestRpcMetadataAdapter>(
+               TCompactRequestRpcMetadataAdapter,
+               CursorBasedRequestRpcMetadataAdapter>(
           std::in_place_type<TCompactRequestRpcMetadataAdapter>,
           std::move(serializedMetadata))) {}
 
 FOLLY_ERASE RequestRpcMetadataFacade::RequestRpcMetadataFacade(
     folly::IOBuf& serializedMetadata)
     : adapter_(std::variant<
-               CursorBasedRequestRpcMetadataAdapter,
-               TCompactRequestRpcMetadataAdapter>(
+               TCompactRequestRpcMetadataAdapter,
+               CursorBasedRequestRpcMetadataAdapter>(
           std::in_place_type<TCompactRequestRpcMetadataAdapter>,
           serializedMetadata)) {}
 

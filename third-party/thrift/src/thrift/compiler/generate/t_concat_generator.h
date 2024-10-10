@@ -150,7 +150,7 @@ class t_concat_generator : public t_generator {
    * Creates a unique temporary variable name, which is just "name" with a
    * number appended to it (i.e. name35)
    */
-  std::string tmp(std::string name) {
+  std::string tmp(const std::string& name) {
     std::ostringstream out;
     out << name << tmp_++;
     return out.str();

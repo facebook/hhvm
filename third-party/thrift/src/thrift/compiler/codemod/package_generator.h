@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 
 #include <boost/algorithm/string.hpp>
 #include <fmt/core.h>
@@ -191,7 +192,7 @@ class package_name_generator {
   }
 
   void create_path_and_domain(std::vector<std::string> identifiers) {
-    path_ = identifiers;
+    path_ = std::move(identifiers);
     // Convert all characters to lowercase
     for (auto& identifier : path_) {
       identifier = to_snake_case(identifier);

@@ -1,0 +1,5 @@
+function from(string $_): ~ExprTree<
+  ExampleDsl,
+  string,
+  ExampleString
+>

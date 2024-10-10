@@ -311,9 +311,17 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
       | None -> super#on_If env cond then_block else_block
 
     method! on_expression_tree env et =
-      match Aast_utils.get_virtual_expr_from_et et with
-      | Some e -> self#on_expr env e
-      | None -> self#on_expr env et.Aast_defs.et_runtime_expr
+      (* If the answer is in a splice, just use the result from the splice,
+         since the contents of a splice are just plain hack and don't need
+         special treatment. If it isn't, use the virtualized expression to
+         get the client type focussed view of the expression tree. *)
+      let sp = self#on_block env (Aast_utils.get_splices_from_et et) in
+      if List.for_all ~f:Option.is_none sp then
+        match Aast_utils.get_virtual_expr_from_et et with
+        | Some e -> self#on_expr env e
+        | _ -> self#on_expr env et.Aast_defs.et_runtime_expr
+      else
+        sp
   end
 
 (** Return the type of the node associated with exactly the given range.

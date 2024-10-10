@@ -26,8 +26,9 @@ using IdentityCertBase = Cert;
 
 #else
 namespace fizz {
-struct Cert {
-  virtual ~Cert();
+class Cert {
+ public:
+  virtual ~Cert() = default;
   virtual std::string getIdentity() const = 0;
 };
 

@@ -15,6 +15,7 @@
  */
 
 #include <memory>
+#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/server_api.h> // @manual
 
@@ -165,6 +166,17 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
     }
   }
 
+  if (!(protocol ==
+            apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL ||
+        protocol ==
+            apache::thrift::protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL)) {
+    req->sendErrorWrapped(
+        apache::thrift::TApplicationException(
+            "Thrift Python server only supports Binary and Compact Protocols."),
+        kConnectionClosingErrorCode);
+    return;
+  }
+
   if (!setUpRequestProcessing(
           req,
           context,
@@ -254,9 +266,22 @@ void PythonAsyncProcessor::executeRequest(
 
   auto protocol =
       apache::thrift::detail::ServerRequestHelper::protocol(request);
+
   auto* ctx = request.requestContext();
   auto req =
       apache::thrift::detail::ServerRequestHelper::request(std::move(request));
+
+  if (!(protocol ==
+            apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL ||
+        protocol ==
+            apache::thrift::protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL)) {
+    req->sendErrorWrapped(
+        apache::thrift::TApplicationException(
+            "Thrift Python server only supports Binary and Compact Protocols."),
+        kConnectionClosingErrorCode);
+    return;
+  }
+
   const char* serviceName = serviceName_.c_str();
   auto ctxStack = apache::thrift::ContextStack::create(
       this->getEventHandlersSharedPtr(),

@@ -435,17 +435,6 @@ end = struct
     | Like _ ->
       false
 
-  (** Picks an inhabited subfield of a given field *)
-  let rec subfield_of ~pick_immediately_inhabited env { key; ty; optional } =
-    let ty = subtype_of ~pick_immediately_inhabited env ty in
-    let optional =
-      if optional then
-        select [true; false]
-      else
-        false
-    in
-    { key; ty; optional }
-
   (** Goes on a stochastic walk to pick an inhabited subtype of the given type.
 
       Termination of this function crucially relies on the invariant that EVERY
@@ -457,7 +446,16 @@ end = struct
       eventually inhabited whereas `int` and `string` are immediately inhabited.
       *)
   and subtype_of ~pick_immediately_inhabited env ty =
-    let rec step ty =
+    let rec subfield_of { key; ty; optional } =
+      let ty = select @@ step ty in
+      let optional =
+        if optional then
+          select [true; false]
+        else
+          false
+      in
+      { key; ty; optional }
+    and step ty =
       ty
       :: begin
            Environment.get_subtypes env ty
@@ -509,9 +507,7 @@ end = struct
              in
              [Tuple { conjuncts; open_ }]
            | Shape { fields; open_ } ->
-             let fields =
-               List.map ~f:(subfield_of ~pick_immediately_inhabited env) fields
-             in
+             let fields = List.map ~f:subfield_of fields in
              let open_ =
                if open_ then
                  (* Here we should be adding new fields, but with the current setup

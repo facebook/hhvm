@@ -97,6 +97,15 @@ var DefaultConfig = TimingConfig{
 	Interval:  time.Second,
 }
 
+// NewTimingConfig returns a new TimingConfig given a stats period.
+func NewTimingConfig(statsPeriod time.Duration) *TimingConfig {
+	return &TimingConfig{
+		History:   2 * statsPeriod,
+		Precision: time.Microsecond,
+		Interval:  time.Second,
+	}
+}
+
 // noDuration is a special duration value that will cause the timing series to
 // record counts and status, but not timing data
 const noDuration = time.Duration(-1)

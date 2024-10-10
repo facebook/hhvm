@@ -28,7 +28,7 @@ type exampleProcessor struct {
 	hit *bool
 }
 
-func (ep *exampleProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
+func (ep *exampleProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	*ep.hit = true
 	return nil // happens in "no such method" case
 }
@@ -38,7 +38,7 @@ func TestInterceptorWrapperNilFunctionContext(t *testing.T) {
 	proc := &exampleProcessor{nil, &hit}
 
 	derivedProc := WrapInterceptor(emptyInterceptor, proc)
-	pFunc := derivedProc.GetProcessorFunction("blah")
+	pFunc := derivedProc.ProcessorFunctionMap()["blah"]
 	if hit != true {
 		t.Fatalf("interceptor should have called underlying processor function handler.")
 	}

@@ -29,11 +29,8 @@ type headerServerTestProcessor struct {
 	requests chan<- *MyTestStruct
 }
 
-func (t *headerServerTestProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	if name == "test" {
-		return &headerServerTestProcessorFunction{&testProcessorFunction{}, t.requests}
-	}
-	return nil
+func (t *headerServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
+	return map[string]types.ProcessorFunction{"test": &headerServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
 }
 
 type headerServerTestProcessorFunction struct {

@@ -30,11 +30,8 @@ type rocketServerTestProcessor struct {
 	requests chan<- *MyTestStruct
 }
 
-func (t *rocketServerTestProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	if name == "test" {
-		return &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}
-	}
-	return nil
+func (t *rocketServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
+	return map[string]types.ProcessorFunction{"test": &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
 }
 
 type rocketServerTestProcessorFunction struct {

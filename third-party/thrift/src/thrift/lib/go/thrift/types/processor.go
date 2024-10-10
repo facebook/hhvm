@@ -24,15 +24,15 @@ import (
 // manage I/O and processing of a input message for a specific
 // server function
 type Processor interface {
-	// GetProcessorFunction is given the name of a thrift function and
-	// the type of the inbound thrift message.  It is expected to return
+	// GetProcessorFunctionMap is given the name of a thrift function
+	// of the inbound thrift message.  It is expected to return
 	// a non-nil GetProcessorFunction when the function can be successfully
 	// found.
 	//
-	// If ProcessorFunction is nil, a generic error will be
+	// If GetProcessorFunctionMap is nil or a value in the map is nil, a generic error will be
 	// sent which explains that no processor function exists with the specified
 	// name on this server.
-	GetProcessorFunction(name string) ProcessorFunction
+	ProcessorFunctionMap() map[string]ProcessorFunction
 }
 
 // ProcessorFunction is the interface that must be implemented in

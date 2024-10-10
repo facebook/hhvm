@@ -62,11 +62,8 @@ func TestSimpleServer(t *testing.T) {
 type testProcessor struct {
 }
 
-func (t *testProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	if name == "test" {
-		return &testProcessorFunction{}
-	}
-	return nil
+func (t *testProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
+	return map[string]types.ProcessorFunction{"test": &testProcessorFunction{}}
 }
 
 type testProcessorFunction struct{}

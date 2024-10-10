@@ -36,8 +36,11 @@ func getProcessorFunction(processor types.Processor, messageType types.MessageTy
 		// case one: invalid message type
 		return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
 	}
-	if pf := processor.GetProcessorFunction(name); pf != nil {
-		return pf, nil
+	pmap := processor.ProcessorFunctionMap()
+	if pmap != nil {
+		if pf := pmap[name]; pf != nil {
+			return pf, nil
+		}
 	}
 	return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
 }

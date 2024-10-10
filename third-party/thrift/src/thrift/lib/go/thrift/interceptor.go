@@ -47,16 +47,17 @@ func WrapInterceptor(interceptor Interceptor, p types.Processor) types.Processor
 	}
 }
 
-func (p *interceptorProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
-	pf := p.Processor.GetProcessorFunction(name)
-	if pf == nil {
-		return nil // see ProcessContext, this semantic means 'no such function'.
+func (p *interceptorProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
+	m := p.Processor.ProcessorFunctionMap()
+	mi := make(map[string]types.ProcessorFunction)
+	for name, pf := range m {
+		mi[name] = &interceptorProcessorFunction{
+			interceptor:       p.interceptor,
+			methodName:        name,
+			ProcessorFunction: pf,
+		}
 	}
-	return &interceptorProcessorFunction{
-		interceptor:       p.interceptor,
-		methodName:        name,
-		ProcessorFunction: pf,
-	}
+	return mi
 }
 
 type interceptorProcessorFunction struct {

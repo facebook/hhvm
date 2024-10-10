@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"maps"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -31,19 +32,20 @@ func newRocketUpgradeProcessor(processor types.Processor) *rocketUpgradeProcesso
 	return &rocketUpgradeProcessor{processor: processor}
 }
 
-func (r *rocketUpgradeProcessor) GetProcessorFunction(name string) types.ProcessorFunction {
+func (r *rocketUpgradeProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
+	m := r.processor.ProcessorFunctionMap()
 	// The upgradeToRocket function in thrift/lib/thrift/RocketUpgrade.thrift
 	// asks the server to upgrade to using the rocket protocol.
 	// If the server does not respond with an error,
 	// it is assumed that the server has upgraded to rocket.
-	if name == "upgradeToRocket" {
-		r.upgraded = true
-		return &rocketUpgradeProcessorFunction{}
-	}
-	return r.processor.GetProcessorFunction(name)
+	mr := map[string]types.ProcessorFunction{"upgradeToRocket": &rocketUpgradeProcessorFunction{&r.upgraded}}
+	maps.Copy(mr, m)
+	return mr
 }
 
-type rocketUpgradeProcessorFunction struct{}
+type rocketUpgradeProcessorFunction struct {
+	upgraded *bool
+}
 
 func (r *rocketUpgradeProcessorFunction) Read(prot types.Decoder) (types.Struct, types.Exception) {
 	args := &reqServiceUpgradeToRocket{}
@@ -77,5 +79,6 @@ func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result types.Writabl
 	if err2 = prot.Flush(); err == nil && err2 != nil {
 		err = err2
 	}
+	*r.upgraded = true
 	return err
 }

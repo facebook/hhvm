@@ -17,6 +17,7 @@
 
 import unittest
 
+# pyre-fixme[21]: Could not find module `testing.metadata`.
 import testing.metadata
 from apache.thrift.metadata.types import ThriftPrimitiveType
 from testing.clients import TestingService, TestingServiceChild
@@ -28,6 +29,7 @@ from thrift.py3.metadata import gen_metadata, ThriftKind
 
 class MetadataTests(unittest.TestCase):
     def test_metadata_enums(self) -> None:
+        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
         meta = gen_metadata(testing.metadata)
         enumName = "testing.Perm"
         self.assertIsNotNone(meta)
@@ -42,6 +44,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(permEnum, gen_metadata(Perm(1)))
 
     def test_metadata_structs(self) -> None:
+        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
         meta = gen_metadata(testing.metadata)
         structName = "testing.hard"
         self.assertIsNotNone(meta)
@@ -133,6 +136,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(other_integers.is_union, integers.is_union)
 
     def test_metadata_exceptions(self) -> None:
+        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
         meta = gen_metadata(testing.metadata)
         errorName = "testing.HardError"
         self.assertIsNotNone(meta)
@@ -155,6 +159,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.type.value, ThriftPrimitiveType.THRIFT_I32_TYPE)
 
     def test_metadata_services(self) -> None:
+        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
         meta = gen_metadata(testing.metadata)
         serviceName = "testing.TestingService"
         self.assertIsNotNone(meta)

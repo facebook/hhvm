@@ -16,6 +16,7 @@
 
 from typing import Dict
 
+# pyre-fixme[21]: Could not find module `thrift.test.py.adapter_bar.ttypes`.
 from .adapter_bar.ttypes import Bar
 
 
@@ -32,4 +33,5 @@ class AdapterTestStructToDict:
     # pyre-fixme[3]: Return type must be annotated.
     # pyre-fixme[2]: Parameter must be annotated.
     def to_thrift(py_value):
+        # pyre-fixme[16]: Module `py` has no attribute `adapter_bar`.
         return Bar(**py_value)

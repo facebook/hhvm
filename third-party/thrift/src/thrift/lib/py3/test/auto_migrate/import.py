@@ -19,6 +19,7 @@ import unittest
 # deliberately importing .containers before .types
 # this validates we can handle some unfortunate pickling behavior
 # please always import containers from .types
+# pyre-fixme[21]: Could not find module `testing.containers_FBTHRIFT_ONLY_DO_NOT_USE`.
 from testing.containers_FBTHRIFT_ONLY_DO_NOT_USE import List__i32
 
 from testing.types import I32List
@@ -27,4 +28,6 @@ from testing.types import I32List
 class Import(unittest.TestCase):
     def test_direct_import(self) -> None:
         self.assertEqual(I32List(list(range(3))), list(range(3)))
+        # pyre-fixme[16]: Module `testing` has no attribute
+        #  `containers_FBTHRIFT_ONLY_DO_NOT_USE`.
         self.assertEqual(List__i32(list(range(3))), list(range(3)))

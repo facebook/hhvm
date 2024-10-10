@@ -38,6 +38,7 @@ class TestEvolution(unittest.TestCase):
     def test_evolution(self) -> None:
         params = {field_name: field_name for field_name, _ in Old}
         old_struct = Old(**params)
+        # pyre-fixme[16]: `TestEvolution` has no attribute `protocol`.
         serialized = serialize(old_struct, protocol=self.protocol)
         new_struct = deserialize(New, serialized, protocol=self.protocol)
 
@@ -112,6 +113,7 @@ class TestSchemaCompatibility(unittest.TestCase):
     def test_union_compatibility_sanity_test(self) -> None:
         # Just a sanity check to ensure that each type can be serialized and
         # deserialized correctly
+        # pyre-fixme[16]: `TestSchemaCompatibility` has no attribute `protocol`.
         self.serialize_deserialize_round_trip(MyUnion_V1(), self.protocol)
         self.serialize_deserialize_round_trip(MyUnion_V2(), self.protocol)
         self.serialize_deserialize_round_trip(MyStruct_V1(), self.protocol)
@@ -119,6 +121,7 @@ class TestSchemaCompatibility(unittest.TestCase):
 
     def test_union_compatibility(self) -> None:
         u_v2 = MyUnion_V2(string_field="Hello world!")
+        # pyre-fixme[16]: `TestSchemaCompatibility` has no attribute `protocol`.
         serialized = serialize(u_v2, protocol=self.protocol)
 
         # We should be able to deserialize the v2 union to v1 union, even if the
@@ -131,6 +134,7 @@ class TestSchemaCompatibility(unittest.TestCase):
         s_v2 = MyStruct_V2(
             i32_field=11, union_field=MyUnion_V2(string_field="Hello world!")
         )
+        # pyre-fixme[16]: `TestSchemaCompatibility` has no attribute `protocol`.
         serialized = serialize(s_v2, protocol=self.protocol)
 
         # We should be able to deserialize the v2 struct to v1 struct, even if

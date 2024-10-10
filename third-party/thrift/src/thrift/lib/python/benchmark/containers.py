@@ -83,6 +83,7 @@ inst = MyStruct(
 """
 
 
+# pyre-fixme[7]: Expected `str` but got implicit return value of `None`.
 def import_serializer_statement(flavor: Flavor) -> str:
     if flavor == Flavor.PYTHON:
         return "from thrift.python.serializer import deserialize, serialize"
@@ -183,6 +184,8 @@ def benchmark_steps(ctx, *statements: typing.List[str]) -> typing.List[str]:
     setup = ""
     for stmt in statements:
         timer = timeit.Timer(
+            # pyre-fixme[6]: For 1st argument expected `Union[typing.Callable[[],
+            #  object], str]` but got `List[str]`.
             stmt=stmt,
             setup=setup,
         )

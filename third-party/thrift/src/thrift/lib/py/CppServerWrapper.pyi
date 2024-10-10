@@ -20,9 +20,11 @@ class CallbackWrapper:
     def call(self, obj: object) -> None: ...
 
 class CppServerWrapper:
+    # pyre-fixme[11]: Annotation `Union` is not defined as a type.
     def setAddress(self, ip: __typing.Union[bytes, str], port: int) -> None: ...
     def getAddress(
         self,
+        # pyre-fixme[11]: Annotation `Tuple` is not defined as a type.
     ) -> __typing.Union[
         __typing.Tuple[str, int], __typing.Tuple[str, int, int, int], str
     ]: ...
@@ -39,14 +41,17 @@ class CppServerWrapper:
 class CallTimestamps: ...
 
 class SSLPolicy(int):
+    # pyre-fixme[11]: Annotation `ClassVar` is not defined as a type.
     DISABLED: __typing.ClassVar[SSLPolicy]
     PERMITTED: __typing.ClassVar[SSLPolicy]
     REQUIRED: __typing.ClassVar[SSLPolicy]
 
 class VerifyClientCertificate(int):
+    # pyre-fixme[11]: Annotation `ClassVar` is not defined as a type.
     IF_PRESENTED: __typing.ClassVar[VerifyClientCertificate]
     ALWAYS_VERIFY: __typing.ClassVar[VerifyClientCertificate]
     NONE_DO_NOT_REQUEST: __typing.ClassVar[VerifyClientCertificate]
 
 class SSLVersion(int):
+    # pyre-fixme[11]: Annotation `ClassVar` is not defined as a type.
     TLSv1_2: __typing.ClassVar[SSLVersion]

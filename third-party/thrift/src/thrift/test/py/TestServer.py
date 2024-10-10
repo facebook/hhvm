@@ -43,6 +43,7 @@ class SecondHandler(SecondService.Iface):
         print("blahBlah()")
 
 
+# pyre-fixme[11]: Annotation `ContextIface` is not defined as a type.
 class SecondContextHandler(SecondService.ContextIface):
     def __init__(self):
         self.th = SecondHandler()
@@ -124,6 +125,7 @@ class TestHandler(ThriftTest.Iface):
         return thing
 
 
+# pyre-fixme[11]: Annotation `ContextIface` is not defined as a type.
 class TestContextHandler(ThriftTest.ContextIface):
     def __init__(self, server_port):
         self.th = TestHandler()
@@ -278,6 +280,7 @@ def main() -> None:
         pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
     if options.context:
+        # pyre-fixme[16]: Module `ThriftTest` has no attribute `ContextProcessor`.
         processor = ThriftTest.ContextProcessor(TestContextHandler(options.port))
     else:
         processor = ThriftTest.Processor(TestHandler())
@@ -287,10 +290,17 @@ def main() -> None:
         if options.context:
             processor.registerProcessor(
                 "ThriftTest",
+                # pyre-fixme[16]: Module `ThriftTest` has no attribute
+                #  `ContextProcessor`.
                 ThriftTest.ContextProcessor(TestContextHandler(options.port)),
             )
             processor.registerProcessor(
-                "SecondService", SecondService.ContextProcessor(SecondContextHandler())
+                # pyre-fixme[16]: Module `SecondService` has no attribute
+                #  `ContextProcessor`.
+                "SecondService",
+                # pyre-fixme[16]: Module `SecondService` has no attribute
+                #  `ContextProcessor`.
+                SecondService.ContextProcessor(SecondContextHandler()),
             )
         else:
             processor.registerProcessor(

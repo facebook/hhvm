@@ -13,20 +13,24 @@
 # limitations under the License.
 
 try:
+    # pyre-fixme[21]: Could not find module `thrift.python.types`.
     import thrift.python.types as types  # noqa: 401
 except ModuleNotFoundError:
     pass
 try:
+    # pyre-fixme[21]: Could not find module `thrift.python.exceptions`.
     import thrift.python.exceptions as exceptions  # noqa: 401
 except ModuleNotFoundError:
     pass
 
 try:
+    # pyre-fixme[21]: Could not find module `thrift.python.serializer`.
     import thrift.python.serializer as serializer  # noqa: 401
 except ModuleNotFoundError:
     pass
 
 try:
+    # pyre-fixme[21]: Could not find module `thrift.python.common`.
     import thrift.python.common as common  # noqa: 401
 except ModuleNotFoundError:
     pass

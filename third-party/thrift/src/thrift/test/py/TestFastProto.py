@@ -25,6 +25,8 @@ from FastProto.ttypes import (
     StructWithUnion,
     TestUnion,
 )
+
+# pyre-fixme[21]: Could not find name `fastproto` in `thrift.protocol`.
 from thrift.protocol import fastproto, TBinaryProtocol, TCompactProtocol
 from thrift.protocol.exceptions import ThriftUnicodeDecodeError
 from thrift.transport.TTransport import TMemoryBuffer

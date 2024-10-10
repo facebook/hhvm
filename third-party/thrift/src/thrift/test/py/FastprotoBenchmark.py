@@ -20,6 +20,8 @@ import timeit
 from multiprocessing import Process, Queue
 
 import psutil
+
+# pyre-fixme[21]: Could not find name `fastproto` in `thrift.protocol`.
 from thrift.protocol import fastproto, TBinaryProtocol, TCompactProtocol
 from thrift.transport import TTransport
 
@@ -50,6 +52,7 @@ ooe.write(proto)
 binary_buf = trans.getvalue()
 
 trans = TTransport.TMemoryBuffer()
+# pyre-fixme[9]: proto has type `TBinaryProtocol`; used as `TCompactProtocol`.
 proto = TCompactProtocol.TCompactProtocol(trans)
 ooe.write(proto)
 compact_buf = trans.getvalue()

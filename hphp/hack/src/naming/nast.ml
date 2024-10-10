@@ -1211,7 +1211,6 @@ module Visitor_DEPRECATED = struct
         let acc =
           match t.t_assignment with
           | SimpleTypeDef { tvh_vis = _; tvh_hint } -> this#on_hint acc tvh_hint
-          (* TODO T201569125 - visit the where constraints here? *)
           | CaseType (variant, variants) ->
             List.fold_left
               (variant :: variants)

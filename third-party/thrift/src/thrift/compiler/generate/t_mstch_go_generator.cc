@@ -26,9 +26,7 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/go/util.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -873,6 +871,4 @@ void t_mstch_go_generator::set_mstch_factories() {
 
 THRIFT_REGISTER_GENERATOR(mstch_go, "Go", "");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

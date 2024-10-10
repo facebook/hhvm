@@ -16,9 +16,7 @@
 
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_mstch_html_generator : public t_mstch_generator {
  public:
@@ -35,6 +33,4 @@ class t_mstch_html_generator : public t_mstch_generator {
 
 THRIFT_REGISTER_GENERATOR(mstch_html, "HTML", "");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

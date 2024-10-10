@@ -28,9 +28,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 std::string upcase_string(std::string original) {
   std::transform(original.begin(), original.end(), original.begin(), ::toupper);
@@ -4192,6 +4190,4 @@ bool t_java_deprecated_generator::has_bit_vector(const t_structured* tstruct) {
 
 THRIFT_REGISTER_GENERATOR(java_deprecated, "Java Deprecated", "");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

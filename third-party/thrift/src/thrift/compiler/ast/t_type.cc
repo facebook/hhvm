@@ -26,9 +26,7 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_typedef.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 const std::string& t_type::type_name(type t) {
   static const auto& kTypeNames =
@@ -128,6 +126,4 @@ const t_type_ref& t_type_ref::none() {
   return empty;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

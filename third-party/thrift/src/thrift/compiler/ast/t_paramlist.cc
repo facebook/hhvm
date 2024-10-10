@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_paramlist.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 t_paramlist* t_paramlist::clone_DO_NOT_USE() const {
   auto clone = std::make_unique<t_paramlist>(program_);
@@ -31,6 +29,4 @@ t_paramlist* t_paramlist::clone_DO_NOT_USE() const {
   return clone.release();
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

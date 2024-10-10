@@ -16,10 +16,7 @@
 
 #pragma once
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace rust {
+namespace apache::thrift::compiler::rust {
 constexpr auto kRustOrdUri = "facebook.com/thrift/annotation/rust/Ord";
 constexpr auto kRustBoxUri = "facebook.com/thrift/annotation/rust/Box";
 constexpr auto kRustTypeUri = "facebook.com/thrift/annotation/rust/Type";
@@ -38,7 +35,4 @@ constexpr auto kRustNameUri = "facebook.com/thrift/annotation/rust/Name";
 constexpr auto kRustModUri = "facebook.com/thrift/annotation/rust/Mod";
 constexpr auto kRustSerdeUri = "facebook.com/thrift/annotation/rust/Serde";
 
-} // namespace rust
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::rust

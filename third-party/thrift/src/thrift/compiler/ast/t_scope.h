@@ -28,9 +28,7 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * This represents a scope used for looking up types, services and other
@@ -125,6 +123,4 @@ class t_scope {
   std::unordered_map<std::string, std::unordered_set<std::string>> enum_values_;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

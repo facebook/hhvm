@@ -46,9 +46,7 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Top level class representing an entire thrift program.
@@ -331,6 +329,4 @@ class t_program : public t_named {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

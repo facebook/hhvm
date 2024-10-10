@@ -30,9 +30,7 @@ SOFTWARE.
 
 #include <thrift/compiler/detail/mustache/mstch.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class has_token {
  public:
@@ -53,6 +51,4 @@ class has_token {
   const std::string& m_token;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_container : public t_type {
  public:
@@ -55,6 +53,4 @@ class t_container : public t_type {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

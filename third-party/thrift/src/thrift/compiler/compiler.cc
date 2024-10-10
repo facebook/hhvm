@@ -48,9 +48,7 @@
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 /**
@@ -864,6 +862,4 @@ compile_result compile(
   return result;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

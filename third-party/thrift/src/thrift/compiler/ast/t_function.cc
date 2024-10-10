@@ -19,9 +19,7 @@
 #include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 t_function::t_function(
     t_program* program,
@@ -45,6 +43,4 @@ t_function::t_function(
   }
   assert(!sink_or_stream_ || sink() || stream());
 }
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

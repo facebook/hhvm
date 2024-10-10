@@ -23,9 +23,7 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_scope.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 std::string join_strings_by_commas(
@@ -117,6 +115,4 @@ std::string t_scope::get_fully_qualified_enum_value_names(
   return join_strings_by_commas(enum_values_.at(name_split.back()));
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

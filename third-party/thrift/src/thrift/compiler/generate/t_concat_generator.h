@@ -21,9 +21,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * String concatenation based generator.
@@ -370,7 +368,6 @@ class t_concat_generator : public t_generator {
   int tmp_ = 0;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler
+
 #endif // T_CONCAT_GENERATOR_H

@@ -31,9 +31,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/detail/mustache/visitor/has_token.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class get_token {
  public:
@@ -56,6 +54,4 @@ class get_token {
   const node& m_node;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

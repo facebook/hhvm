@@ -23,9 +23,7 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/parse_ast.h> // parsing_params
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program_bundle;
 
@@ -78,6 +76,4 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
 compile_result compile(
     const std::vector<std::string>& arguments, source_manager& sm);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

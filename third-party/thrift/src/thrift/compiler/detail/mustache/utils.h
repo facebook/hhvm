@@ -30,9 +30,7 @@ SOFTWARE.
 
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 using citer = std::string::const_iterator;
 using criter = std::string::const_reverse_iterator;
@@ -41,6 +39,4 @@ citer first_not_ws(citer begin, citer end);
 citer first_not_ws(criter begin, criter end);
 criter reverse(citer it);
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

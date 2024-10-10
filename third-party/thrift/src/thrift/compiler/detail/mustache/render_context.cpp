@@ -30,9 +30,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/state/outside_section.h>
 #include <thrift/compiler/detail/mustache/visitor/get_token.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 const node render_context::null_node;
 
@@ -100,6 +98,4 @@ void render_context::render_partial(
   }
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

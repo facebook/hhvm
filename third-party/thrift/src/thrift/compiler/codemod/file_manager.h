@@ -25,10 +25,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace codemod {
+namespace apache::thrift::compiler::codemod {
 
 struct replacement {
   // TODO(urielrivas): Revisit this whether we want to consider using a
@@ -113,7 +110,4 @@ class file_manager {
   std::unordered_set<std::string> includes_;
 };
 
-} // namespace codemod
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::codemod

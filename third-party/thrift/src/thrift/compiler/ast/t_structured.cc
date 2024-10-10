@@ -19,9 +19,7 @@
 
 #include <thrift/compiler/ast/t_structured.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -91,6 +89,4 @@ void t_structured::append(std::unique_ptr<t_field> field) {
   fields_.push_back(std::move(field));
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

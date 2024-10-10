@@ -22,9 +22,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 struct token_kind_info {
@@ -148,6 +146,4 @@ void token::throw_invalid_kind(const char* expected) {
   throw std::runtime_error(fmt::format("token value is not {}", expected));
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

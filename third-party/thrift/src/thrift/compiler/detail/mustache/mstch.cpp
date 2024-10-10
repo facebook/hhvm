@@ -34,9 +34,7 @@ SOFTWARE.
 #include <fmt/core.h>
 #include <thrift/compiler/detail/mustache/render_context.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 node::node(std::size_t i) : base(static_cast<int>(i)) {
   if (i > static_cast<unsigned int>(std::numeric_limits<int>::max())) {
@@ -59,6 +57,4 @@ std::string render(
   return std::move(ctx.out);
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

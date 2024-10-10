@@ -28,9 +28,7 @@
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 class schematizer {
  public:
   using InternFunc = std::function<t_program::value_id(
@@ -142,6 +140,4 @@ struct GetSchemaTag {
     return {};
   }
 };
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

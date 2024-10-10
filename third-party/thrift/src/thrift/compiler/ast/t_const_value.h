@@ -31,9 +31,7 @@
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_const;
 class t_enum;
@@ -333,8 +331,6 @@ class t_const_value {
   const t_type* get_ttype() const { return ttype_.get_type(); }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler
 
 #endif

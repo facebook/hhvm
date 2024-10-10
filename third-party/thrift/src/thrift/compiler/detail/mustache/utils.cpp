@@ -29,9 +29,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/detail/mustache/utils.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 citer first_not_ws(citer begin, citer end) {
   for (auto it = begin; it != end; ++it) {
@@ -55,6 +53,4 @@ criter reverse(citer it) {
   return std::reverse_iterator<citer>(it);
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

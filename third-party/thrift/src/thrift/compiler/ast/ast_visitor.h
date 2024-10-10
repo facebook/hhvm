@@ -43,9 +43,7 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace ast_detail {
 
 // Visitation and registration functions for concrete AST nodes.
@@ -434,6 +432,4 @@ class basic_visitor_context {
 using visitor_context = basic_visitor_context<false>;
 using const_visitor_context = basic_visitor_context<true>;
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

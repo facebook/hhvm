@@ -20,9 +20,7 @@
 
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // Token kind constants.
 enum class tok {
@@ -281,6 +279,4 @@ class token {
   [[noreturn]] static void throw_invalid_kind(const char* expected);
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

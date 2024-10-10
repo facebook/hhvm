@@ -28,9 +28,7 @@
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Represents an enum definition.
@@ -94,6 +92,4 @@ class t_enum : public t_type {
   type get_type_value() const override { return type::t_enum; }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

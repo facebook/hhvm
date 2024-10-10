@@ -32,9 +32,7 @@ SOFTWARE.
 
 #include <thrift/compiler/detail/mustache/token.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class render_context;
 
@@ -44,6 +42,4 @@ class render_state {
   virtual void render(render_context& context, const token& token) = 0;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

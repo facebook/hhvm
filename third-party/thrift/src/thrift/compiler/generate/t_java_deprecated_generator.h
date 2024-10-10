@@ -27,9 +27,7 @@
 
 #include <thrift/compiler/generate/t_concat_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 struct StructGenParams {
   bool is_exception = false;
@@ -321,8 +319,6 @@ class t_java_deprecated_generator : public t_concat_generator {
       std::ofstream& out, std::string contents);
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler
 
 #endif

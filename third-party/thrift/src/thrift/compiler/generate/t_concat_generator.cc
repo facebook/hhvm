@@ -27,9 +27,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Top level program generation function. Calls the generator subclass methods
@@ -164,6 +162,4 @@ std::string t_concat_generator::generate_structural_id(
   return structural_id;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

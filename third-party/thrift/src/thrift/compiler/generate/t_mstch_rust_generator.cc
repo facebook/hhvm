@@ -39,11 +39,7 @@
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/sema_context.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-
-namespace rust {
+namespace apache::thrift::compiler::rust {
 
 struct rust_codegen_options {
   // Crate names used for referring to sibling crates within the same Thrift
@@ -2587,7 +2583,4 @@ THRIFT_REGISTER_GENERATOR(
     "    include_docs=:   Markdown to include in front of crate-level documentation.\n"
     "    cratemap=map:    Mapping file from services to crate names\n"
     "    types_crate=:    Name that the main crate uses to refer to its dependency on the types crate\n");
-} // namespace rust
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::rust

@@ -28,9 +28,7 @@
 
 #include <thrift/compiler/diagnostic.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -592,6 +590,4 @@ token lexer::get_next_token() {
                             : unexpected_token();
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

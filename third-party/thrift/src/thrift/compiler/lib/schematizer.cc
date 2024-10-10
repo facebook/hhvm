@@ -31,9 +31,7 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/lib/schematizer.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
@@ -802,6 +800,4 @@ std::string schematizer::name_schema(
       "_fbthrift_schema_{:x}", static_cast<uint64_t>(s.identify_program(node)));
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

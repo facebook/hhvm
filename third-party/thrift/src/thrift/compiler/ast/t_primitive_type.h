@@ -21,9 +21,7 @@
 
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * A thrift primitive type, which must be one of the defined enumerated types
@@ -135,6 +133,4 @@ class t_primitive_type : public t_type {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

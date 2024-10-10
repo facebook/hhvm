@@ -24,9 +24,7 @@
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_program.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Used to encapsulate a root t_program along with all included dependencies.
@@ -86,6 +84,4 @@ class t_program_bundle {
   t_program* get_root_program() const { return programs_raw_[0]; }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

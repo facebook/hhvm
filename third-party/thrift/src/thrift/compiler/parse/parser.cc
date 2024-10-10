@@ -24,9 +24,7 @@
 #include <thrift/compiler/parse/lexer.h>
 #include <thrift/compiler/parse/parser.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 parser_actions::~parser_actions() = default;
 
@@ -1085,6 +1083,4 @@ bool parse(lexer& lex, parser_actions& actions, diagnostics_engine& diags) {
   return parser(lex, actions, diags).parse();
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

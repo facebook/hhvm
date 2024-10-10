@@ -18,9 +18,7 @@
 
 #include <cstddef>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 extern const std::size_t templates_size;
 extern const std::size_t templates_name_sizes[];
@@ -28,6 +26,4 @@ extern const char* const templates_name_datas[];
 extern const std::size_t templates_content_sizes[];
 extern const char* const templates_content_datas[];
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

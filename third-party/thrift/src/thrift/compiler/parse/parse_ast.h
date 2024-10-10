@@ -24,9 +24,7 @@
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 struct sema_params;
 
@@ -94,6 +92,4 @@ std::unique_ptr<t_program_bundle> parse_ast(
     const sema_params* sparams = nullptr,
     t_program_bundle* already_parsed = nullptr);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

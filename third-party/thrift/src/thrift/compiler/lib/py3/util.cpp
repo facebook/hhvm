@@ -19,9 +19,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/lib/py3/util.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 std::vector<std::string> get_py3_namespace(const t_program* prog) {
   t_program::namespace_config conf;
@@ -130,6 +128,4 @@ void CachedProperties::set_flat_name(
 }
 
 } // namespace py3
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

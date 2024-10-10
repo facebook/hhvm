@@ -22,9 +22,7 @@
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Represents a typedef definition.
@@ -138,6 +136,4 @@ class t_placeholder_typedef final : public t_typedef {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

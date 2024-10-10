@@ -39,9 +39,7 @@ SOFTWARE.
 #include <variant>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 namespace internal {
 
@@ -179,6 +177,4 @@ std::string render(
     const std::map<std::string, std::string>& partials =
         std::map<std::string, std::string>());
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

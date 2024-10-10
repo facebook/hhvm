@@ -20,9 +20,7 @@
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_const_value.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 const t_const_value& t_const::get_value_from_structured_annotation(
     const char* key) const {
@@ -45,6 +43,4 @@ const t_const_value* t_const::get_value_from_structured_annotation_or_null(
   return (it != annotations.end()) ? it->second : nullptr;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

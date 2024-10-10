@@ -25,10 +25,7 @@
 #include <fmt/format.h>
 #include <re2/re2.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace codemod {
+namespace apache::thrift::compiler::codemod {
 
 inline constexpr auto kDefaultDomain = "meta.com";
 
@@ -405,7 +402,4 @@ class package_name_generator_util {
     return ordered_identifiers;
   }
 };
-} // namespace codemod
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::codemod

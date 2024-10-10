@@ -21,9 +21,7 @@
 
 #include <fmt/core.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 void t_generator::process_options(
     const std::map<std::string, std::string>& options,
@@ -70,6 +68,4 @@ generator_registry::generator_map& generator_registry::get_generators() {
   return *map;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

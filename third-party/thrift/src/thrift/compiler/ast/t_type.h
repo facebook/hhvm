@@ -24,9 +24,7 @@
 
 #include <thrift/compiler/ast/t_named.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 class t_placeholder_typedef;
@@ -258,6 +256,4 @@ class t_type_ref final {
   t_placeholder_typedef* get_unresolved_type() { return unresolved_type_; }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

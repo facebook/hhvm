@@ -26,9 +26,7 @@
 
 #include <thrift/compiler/generate/t_concat_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // static const std::string std::endl = "\n";  // avoid std::ostream <<
 // std::endl flushes
@@ -3100,6 +3098,4 @@ THRIFT_REGISTER_GENERATOR(
     "                     Throws exception if any required field is not "
     "set.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -16,9 +16,7 @@
 
 #include "thrift/compiler/ast/t_primitive_type.h"
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 const t_primitive_type& t_primitive_type::t_void() {
   static t_primitive_type type{"void", type::t_void};
@@ -70,6 +68,4 @@ const t_primitive_type& t_primitive_type::t_float() {
   return type;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -39,10 +39,7 @@
 
 #include <fmt/ranges.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace cpp2 {
+namespace apache::thrift::compiler::cpp2 {
 
 // Internal negative id range for metadata injection defined in
 // `fbcode/thrift/lib/cpp2/protocol/detail/ReservedId.h`.
@@ -352,7 +349,4 @@ t_field_id get_internal_injected_field_id(t_field_id id);
 const t_const* get_transitive_annotation_of_adapter_or_null(
     const t_named& node);
 
-} // namespace cpp2
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::cpp2

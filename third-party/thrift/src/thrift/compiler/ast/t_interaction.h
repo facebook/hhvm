@@ -21,9 +21,7 @@
 
 #include <thrift/compiler/ast/t_service.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 
@@ -38,6 +36,4 @@ class t_interaction : public t_service {
   using t_service::t_service;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

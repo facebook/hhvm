@@ -24,9 +24,7 @@
 #include <ostream>
 #include <sstream>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 // Trim all white spaces and commas from end (in place).
@@ -119,6 +117,4 @@ std::ostream& json_quote_ascii(std::ostream& o, const std::string& s) {
   return o;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

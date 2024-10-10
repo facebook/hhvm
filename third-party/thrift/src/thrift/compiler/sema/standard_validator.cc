@@ -45,9 +45,7 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 const t_structured* get_mixin_type(const t_field& field) {
@@ -1432,6 +1430,4 @@ ast_validator standard_validator() {
   return validator;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

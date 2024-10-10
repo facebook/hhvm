@@ -19,9 +19,7 @@
 #include <iosfwd>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_const_value;
 
@@ -49,6 +47,4 @@ std::ostream& json_quote_ascii(std::ostream& o, const std::string& s);
  */
 std::string to_json(const t_const_value* value);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

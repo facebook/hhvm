@@ -25,10 +25,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace rust {
+namespace apache::thrift::compiler::rust {
 
 struct rust_crate {
   std::vector<std::string> dependency_path;
@@ -86,7 +83,4 @@ inline std::string struct_rust_name(const t_structured* struct_) {
 
 std::string multifile_module_name(const t_program* program);
 
-} // namespace rust
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::rust

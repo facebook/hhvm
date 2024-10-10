@@ -59,9 +59,7 @@ fmt::format_context::iterator fmt::formatter<diagnostic>::format(
   return out;
 }
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 std::string diagnostic::str() const {
   return fmt::format("{}", *this);
@@ -115,6 +113,4 @@ std::ostream& operator<<(std::ostream& out, const diagnostic& diag) {
   return out << diag.str();
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

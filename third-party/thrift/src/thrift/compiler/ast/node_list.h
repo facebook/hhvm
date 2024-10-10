@@ -20,9 +20,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // A list of AST nodes.
 template <typename T>
@@ -171,6 +169,4 @@ class node_list_view {
   size_t size_ = 0;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

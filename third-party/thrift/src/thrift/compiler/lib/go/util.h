@@ -21,10 +21,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace go {
+namespace apache::thrift::compiler::go {
 
 class codegen_data {
  public:
@@ -163,7 +160,4 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
 const std::string* get_go_name_annotation(const t_named* node);
 const std::string* get_go_tag_annotation(const t_named* node);
 
-} // namespace go
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::go

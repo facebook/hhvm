@@ -23,9 +23,7 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 struct json_codegen_data {
@@ -468,6 +466,4 @@ void t_json_experimental_generator::set_mstch_factories() {
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");
 
 } // namespace
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

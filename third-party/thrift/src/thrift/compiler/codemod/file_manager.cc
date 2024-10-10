@@ -20,10 +20,7 @@
 
 #include <thrift/compiler/codemod/file_manager.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace codemod {
+namespace apache::thrift::compiler::codemod {
 
 void file_manager::apply_replacements() {
   size_t prev_end = 0;
@@ -191,7 +188,4 @@ void file_manager::remove_namespace(std::string language) {
     add({begin_offset, end_offset, ""});
   }
 }
-} // namespace codemod
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::codemod

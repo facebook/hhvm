@@ -28,9 +28,7 @@ SOFTWARE.
 */
 #include <thrift/compiler/detail/mustache/template_type.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 template_type::template_type(const std::string& str) {
   tokenize(str);
@@ -131,6 +129,4 @@ void template_type::store_prefixes(std::vector<token>::iterator beg) {
   }
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

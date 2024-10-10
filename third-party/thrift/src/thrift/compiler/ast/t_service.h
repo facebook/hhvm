@@ -22,9 +22,7 @@
 
 #include <thrift/compiler/ast/t_interface.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 
@@ -56,6 +54,4 @@ class t_service : public t_interface {
   bool is_service() const override { return true; }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -35,9 +35,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/token.h>
 #include <thrift/compiler/detail/mustache/utils.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class template_type {
  public:
@@ -58,6 +56,4 @@ class template_type {
   void store_prefixes(std::vector<token>::iterator beg);
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

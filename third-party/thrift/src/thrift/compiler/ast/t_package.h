@@ -22,9 +22,7 @@
 
 #include <thrift/compiler/ast/t_node.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // The Thrift package that scopes IDL definitions.
 class t_package : public t_node {
@@ -66,6 +64,4 @@ class t_package : public t_node {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -27,9 +27,7 @@
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // Forward declare that puppy
 class t_program;
@@ -59,6 +57,4 @@ class t_struct : public t_structured {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

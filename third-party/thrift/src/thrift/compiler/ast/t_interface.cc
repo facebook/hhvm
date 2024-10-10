@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_interaction.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 void t_interface::set_functions(node_list<t_function> functions) {
   functions_ = std::move(functions);
@@ -49,6 +47,4 @@ bool t_interface::is_serial_interaction() const {
   return false;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

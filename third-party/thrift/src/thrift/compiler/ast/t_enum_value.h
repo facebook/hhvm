@@ -21,9 +21,7 @@
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_named.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * class t_enum_value
@@ -66,6 +64,4 @@ class t_enum_value : public t_named {
 
 using t_enum_value_list = node_list<t_enum_value>;
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

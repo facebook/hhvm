@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_struct.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 
@@ -53,6 +51,4 @@ inline node_list_view<const t_field> get_elems(const t_throws* t) {
   return t ? t->fields() : node_list_view<const t_field>();
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

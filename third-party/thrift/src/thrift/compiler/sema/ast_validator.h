@@ -19,13 +19,9 @@
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/sema/sema_context.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // An AST validator is a const ast_visitor that collects diagnostics.
 using ast_validator = basic_ast_visitor<true, sema_context&>;
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

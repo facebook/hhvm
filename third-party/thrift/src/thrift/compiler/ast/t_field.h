@@ -27,9 +27,7 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_struct;
 
@@ -184,6 +182,4 @@ class t_field final : public t_named {
 
 using t_field_list = node_list<t_field>;
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

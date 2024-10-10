@@ -24,9 +24,7 @@
 #include <utility>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 void t_program::add_definition(std::unique_ptr<t_named> definition) {
   assert(definition != nullptr);
@@ -146,6 +144,4 @@ std::string t_program::compute_name_from_file_path(std::string path) {
   return path;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

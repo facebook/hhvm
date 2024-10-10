@@ -26,9 +26,7 @@
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_const;
 class t_program;
@@ -114,6 +112,4 @@ class t_named : public t_node {
 // i.e. it has the @scope.Transitive annotation itself.
 bool is_transitive_annotation(const t_named& node);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

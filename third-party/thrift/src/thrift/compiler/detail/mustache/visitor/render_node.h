@@ -35,9 +35,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/render_context.h>
 #include <thrift/compiler/detail/mustache/utils.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class render_node {
  public:
@@ -64,6 +62,4 @@ class render_node {
   render_context& m_ctx;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

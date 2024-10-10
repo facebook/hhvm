@@ -34,9 +34,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -1450,6 +1448,4 @@ void t_mstch_java_generator::set_mstch_factories() {
 
 THRIFT_REGISTER_GENERATOR(mstch_java, "Java", "");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

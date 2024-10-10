@@ -97,9 +97,7 @@ std::vector<std::string> parseDomain(const std::string& domain) {
 
 } // namespace
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 t_package::t_package(std::string name) : uriPrefix_(std::move(name)) {
   boost::algorithm::split(
@@ -126,6 +124,4 @@ t_package::t_package(
   uriPrefix_ = genPrefix(domain_, path_);
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

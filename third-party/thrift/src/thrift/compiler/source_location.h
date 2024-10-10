@@ -26,9 +26,7 @@
 #include <variant>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class source_manager;
 
@@ -157,6 +155,4 @@ class source_manager {
       const std::string& filename) const;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

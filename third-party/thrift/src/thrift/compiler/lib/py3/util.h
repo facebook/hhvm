@@ -23,9 +23,7 @@
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 std::vector<std::string> get_py3_namespace(const t_program* prog);
 
@@ -115,6 +113,4 @@ std::string get_py3_name(const T& node) {
 }
 
 } // namespace py3
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

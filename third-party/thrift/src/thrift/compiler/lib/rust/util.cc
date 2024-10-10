@@ -25,10 +25,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace rust {
+namespace apache::thrift::compiler::rust {
 
 namespace {
 struct CrateInfo {
@@ -447,7 +444,4 @@ std::string multifile_module_name(const t_program* program) {
   return mangle(program->name());
 }
 
-} // namespace rust
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::rust

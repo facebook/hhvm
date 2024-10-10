@@ -24,9 +24,7 @@
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/diagnostic.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_node;
 
@@ -139,6 +137,4 @@ class sema_context : public diagnostics_engine, public const_visitor_context {
   sema_params params_;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

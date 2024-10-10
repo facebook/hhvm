@@ -21,9 +21,7 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 t_named::t_named(const t_program* program, std::string name)
     : name_(std::move(name)), program_(program) {}
@@ -74,6 +72,4 @@ bool is_transitive_annotation(const t_named& node) {
   return false;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

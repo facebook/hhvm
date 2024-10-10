@@ -18,9 +18,7 @@
 
 #include <stdexcept>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 void t_enum::set_values(t_enum_value_list values) {
   values_.clear();
@@ -81,6 +79,4 @@ void t_enum::update_unused(int32_t val) {
   }
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

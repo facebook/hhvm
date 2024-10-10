@@ -21,11 +21,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_node.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
+namespace apache::thrift::compiler::gen::cpp {
 
 enum class reference_type {
   none = 0, // Not a reference.
@@ -38,8 +34,4 @@ enum class reference_type {
 
 reference_type find_ref_type(const t_field& node);
 
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::gen::cpp

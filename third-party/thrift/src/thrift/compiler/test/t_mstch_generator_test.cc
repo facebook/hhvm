@@ -21,9 +21,7 @@
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 TEST(MstchGeneratorTest, cache_leaks) {
   class leaky_program : public mstch_program {
@@ -72,6 +70,4 @@ TEST(MstchGeneratorTest, cache_leaks) {
   EXPECT_EQ(object_count, 0);
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

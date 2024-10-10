@@ -29,9 +29,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/token.h>
 #include <thrift/compiler/detail/mustache/utils.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 token::type token::token_info(char c) {
   switch (c) {
@@ -66,6 +64,4 @@ token::token(const std::string& str, std::size_t left, std::size_t right)
   }
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

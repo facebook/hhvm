@@ -20,9 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 /**
@@ -77,6 +75,4 @@ void t_android_generator::init_generator() {
 THRIFT_REGISTER_GENERATOR(android, "Android Java", "");
 
 } // namespace
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

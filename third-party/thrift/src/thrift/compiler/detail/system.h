@@ -20,10 +20,7 @@
 #include <string>
 #include <string_view>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace detail {
+namespace apache::thrift::compiler::detail {
 
 // Returns true on a Windows platform, false elsewhere.
 constexpr bool platform_is_windows() {
@@ -53,7 +50,4 @@ std::filesystem::path make_abs_path(
  */
 std::filesystem::path format_abs_path(std::string_view path);
 
-} // namespace detail
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::detail

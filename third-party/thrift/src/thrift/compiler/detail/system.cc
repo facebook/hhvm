@@ -21,10 +21,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace detail {
+namespace apache::thrift::compiler::detail {
 
 std::filesystem::path make_abs_path(
     const std::filesystem::path& base_path, const std::filesystem::path& path) {
@@ -63,7 +60,4 @@ std::filesystem::path format_abs_path(std::string_view path) {
   return abs_path;
 }
 
-} // namespace detail
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::detail

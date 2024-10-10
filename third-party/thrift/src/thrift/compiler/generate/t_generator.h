@@ -24,9 +24,7 @@
 
 #include <thrift/compiler/sema/ast_validator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 class t_program_bundle;
@@ -174,6 +172,4 @@ generator_map& get_generators();
   static detail::generator_factory_impl<t_##name##_generator> registerer( \
       #name, long_name, doc)
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

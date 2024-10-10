@@ -20,10 +20,7 @@
 #include <cctype>
 #include <boost/algorithm/string.hpp>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace java {
+namespace apache::thrift::compiler::java {
 
 std::string mangle_java_name(const std::string& ref, bool capitalize) {
   std::ostringstream res;
@@ -118,7 +115,4 @@ std::string package_to_path(std::string package) {
   return package;
 }
 
-} // namespace java
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::java

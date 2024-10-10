@@ -31,9 +31,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/visitor/is_node_empty.h>
 #include <thrift/compiler/detail/mustache/visitor/render_section.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 in_section::in_section(type type, const token& start_token)
     : m_type(type), m_start_token(start_token), m_skipped_openings(0) {}
@@ -63,6 +61,4 @@ void in_section::render(render_context& ctx, const token& token) {
   m_section << token;
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

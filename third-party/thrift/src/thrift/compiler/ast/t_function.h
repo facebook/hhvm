@@ -27,9 +27,7 @@
 #include <thrift/compiler/ast/t_throws.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_interaction;
 
@@ -108,6 +106,4 @@ class t_function final : public t_named {
   bool is_interaction_constructor_ = false;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

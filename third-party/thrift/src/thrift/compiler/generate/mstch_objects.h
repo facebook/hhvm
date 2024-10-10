@@ -31,9 +31,7 @@
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/sema_context.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class mstch_base;
 struct mstch_context;
@@ -1529,6 +1527,4 @@ class mstch_deprecated_annotation : public mstch_base {
   const deprecated_annotation_value val_;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

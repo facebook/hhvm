@@ -30,15 +30,11 @@ SOFTWARE.
 
 #include <thrift/compiler/detail/mustache/state/render_state.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class outside_section : public render_state {
  public:
   void render(render_context& context, const token& token) override;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

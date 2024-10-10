@@ -38,9 +38,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/state/render_state.h>
 #include <thrift/compiler/detail/mustache/template_type.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class render_context {
  public:
@@ -79,6 +77,4 @@ class render_context {
   std::string out;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

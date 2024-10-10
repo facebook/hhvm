@@ -37,9 +37,7 @@
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types_custom_protocol.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 enum class ast_protocol {
@@ -547,6 +545,4 @@ static bool register_schema_generation = []() {
 }();
 } // namespace
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

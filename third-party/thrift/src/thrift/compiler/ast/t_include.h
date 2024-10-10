@@ -19,9 +19,7 @@
 #include <fmt/core.h>
 #include <thrift/compiler/ast/t_node.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class t_program;
 
@@ -46,6 +44,4 @@ class t_include : public t_node {
   source_range range_;
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

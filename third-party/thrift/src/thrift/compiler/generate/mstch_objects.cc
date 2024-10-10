@@ -19,9 +19,7 @@
 
 #include <fmt/core.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 std::shared_ptr<mstch_base> make_mstch_program_cached(
     const t_program* program, mstch_context& ctx, mstch_element_position pos) {
@@ -700,6 +698,4 @@ mstch_context& mstch_context::set_or_erase_option(
   return *this;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

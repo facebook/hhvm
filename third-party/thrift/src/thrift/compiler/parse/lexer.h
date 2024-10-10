@@ -24,9 +24,7 @@
 #include <thrift/compiler/parse/token.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class diagnostics_engine;
 
@@ -99,6 +97,4 @@ class lexer {
   token get_next_token();
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -28,9 +28,7 @@
 #include <fmt/core.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // A diagnostic level.
 enum class diagnostic_level {
@@ -361,9 +359,7 @@ class diagnostics_engine {
 
 std::ostream& operator<<(std::ostream& out, const diagnostic&);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler
 
 template <>
 struct fmt::formatter<apache::thrift::compiler::diagnostic> {

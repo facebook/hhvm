@@ -22,9 +22,7 @@
 
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 struct deprecated_annotation_value {
   source_range src_range;
@@ -121,6 +119,4 @@ class t_node {
 
 using t_annotation = deprecated_annotation_map::value_type;
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

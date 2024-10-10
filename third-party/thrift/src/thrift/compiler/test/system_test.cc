@@ -23,9 +23,7 @@
 
 #include <thrift/compiler/detail/system.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 struct TestCase {
   TestCase(std::string base_path, std::string path, std::string expected_path)
@@ -73,6 +71,4 @@ TEST(SystemTest, MakeAbsPath) {
   }
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

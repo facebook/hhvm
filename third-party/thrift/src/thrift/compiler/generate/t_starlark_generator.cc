@@ -19,9 +19,7 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 class t_starlark_generator : public t_mstch_generator {
@@ -99,6 +97,4 @@ void t_starlark_generator::set_mstch_factories() {
 THRIFT_REGISTER_GENERATOR(starlark, "Starlark", "Starlark generator");
 
 } // namespace
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

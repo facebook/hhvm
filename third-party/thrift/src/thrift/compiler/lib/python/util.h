@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * Currently just a string match for cpp.Type override matches folly::IOBuf or
@@ -34,6 +32,4 @@ bool is_type_iobuf(std::string_view name);
 
 bool is_type_iobuf(const t_type* type);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

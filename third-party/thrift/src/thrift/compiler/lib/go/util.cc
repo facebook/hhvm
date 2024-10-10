@@ -19,10 +19,7 @@
 #include <fmt/core.h>
 #include <thrift/compiler/lib/go/util.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace go {
+namespace apache::thrift::compiler::go {
 
 // Name of the field of the response helper struct where
 // the return value is stored (if function call is not void).
@@ -665,7 +662,4 @@ const std::string* get_go_tag_annotation(const t_named* node) {
   return nullptr;
 }
 
-} // namespace go
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::go

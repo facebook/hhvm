@@ -29,9 +29,7 @@
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // Assigns a t_const_value to a concrete Thrift type.
 
@@ -270,6 +268,4 @@ inline protocol::Value const_to_value(const t_const_value& val) {
   return ret;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

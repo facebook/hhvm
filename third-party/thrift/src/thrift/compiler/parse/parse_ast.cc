@@ -39,9 +39,7 @@
 #include <thrift/compiler/sema/sema.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 namespace {
 
 // Cleans up text commonly found in doxygen-like comments.
@@ -1109,6 +1107,4 @@ std::unique_ptr<t_program_bundle> parse_ast(
   return programs;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

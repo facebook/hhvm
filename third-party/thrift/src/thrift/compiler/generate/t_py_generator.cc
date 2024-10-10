@@ -38,9 +38,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -3947,6 +3945,4 @@ THRIFT_REGISTER_GENERATOR(
     "    utf8strings:     Encode/decode strings using utf8 in the generated "
     "code.\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

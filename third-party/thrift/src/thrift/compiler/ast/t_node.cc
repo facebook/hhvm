@@ -16,9 +16,7 @@
 
 #include <thrift/compiler/ast/t_node.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 const std::string t_node::kEmptyString;
 
@@ -33,6 +31,4 @@ const std::string* t_node::find_annotation_or_null(
   return nullptr;
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

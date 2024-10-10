@@ -19,11 +19,7 @@
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace gen {
-namespace cpp {
+namespace apache::thrift::compiler::gen::cpp {
 
 namespace {
 
@@ -103,8 +99,4 @@ reference_type find_ref_type(const t_field& node) {
   return reference_type::none;
 }
 
-} // namespace cpp
-} // namespace gen
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::gen::cpp

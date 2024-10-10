@@ -34,9 +34,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/state/render_state.h>
 #include <thrift/compiler/detail/mustache/template_type.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class in_section : public render_state {
  public:
@@ -51,6 +49,4 @@ class in_section : public render_state {
   int m_skipped_openings;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

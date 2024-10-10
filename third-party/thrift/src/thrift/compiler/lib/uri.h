@@ -16,9 +16,7 @@
 
 #pragma once
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 // thrift
 inline constexpr auto kBitmaskEnumUri =
@@ -171,6 +169,4 @@ inline constexpr auto kGeneratePatchUri =
 inline constexpr auto kAssignOnlyPatchUri =
     "facebook.com/thrift/op/AssignOnlyPatch";
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

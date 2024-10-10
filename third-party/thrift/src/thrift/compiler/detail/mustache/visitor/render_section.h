@@ -33,9 +33,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/utils.h>
 #include <thrift/compiler/detail/mustache/visitor/render_node.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class render_section {
  public:
@@ -65,6 +63,4 @@ class render_section {
   flag m_flag;
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

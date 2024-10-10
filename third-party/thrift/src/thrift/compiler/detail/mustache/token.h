@@ -30,9 +30,7 @@ SOFTWARE.
 
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class token {
  public:
@@ -68,6 +66,4 @@ class token {
   type token_info(char c);
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

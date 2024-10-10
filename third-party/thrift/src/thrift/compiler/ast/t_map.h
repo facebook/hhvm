@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_container.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * A map is a lightweight container type that just wraps another two data
@@ -57,6 +55,4 @@ class t_map final : public t_container {
   const t_type* get_val_type() const { return val_type().get_type(); }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

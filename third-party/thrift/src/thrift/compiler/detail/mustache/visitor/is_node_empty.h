@@ -30,9 +30,7 @@ SOFTWARE.
 
 #include <thrift/compiler/detail/mustache/mstch.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 class is_node_empty {
  public:
@@ -54,6 +52,4 @@ class is_node_empty {
   bool operator()(const array& array) const { return array.size() == 0; }
 };
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

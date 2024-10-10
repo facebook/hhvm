@@ -38,10 +38,7 @@
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace cpp2 {
+namespace apache::thrift::compiler::cpp2 {
 namespace {
 
 bool contains(std::string_view s, std::string_view what) {
@@ -656,7 +653,4 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   return nullptr;
 }
 
-} // namespace cpp2
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::cpp2

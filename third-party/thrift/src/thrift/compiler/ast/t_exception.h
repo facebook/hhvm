@@ -18,9 +18,7 @@
 
 #include <thrift/compiler/ast/t_struct.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 enum class t_error_kind {
   unspecified = 0, // The kind of error was not specified and the associated RPC
@@ -95,6 +93,4 @@ class t_exception : public t_struct {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

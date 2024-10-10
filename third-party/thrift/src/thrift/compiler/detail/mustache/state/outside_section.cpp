@@ -31,9 +31,7 @@ SOFTWARE.
 #include <thrift/compiler/detail/mustache/state/outside_section.h>
 #include <thrift/compiler/detail/mustache/visitor/render_node.h>
 
-namespace apache {
-namespace thrift {
-namespace mstch {
+namespace apache::thrift::mstch {
 
 void outside_section::render(render_context& ctx, const token& token) {
   switch (token.token_type()) {
@@ -57,6 +55,4 @@ void outside_section::render(render_context& ctx, const token& token) {
   }
 }
 
-} // namespace mstch
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::mstch

@@ -27,9 +27,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -249,6 +247,4 @@ std::optional<std::string> source_manager::found_include_file(
   return {};
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

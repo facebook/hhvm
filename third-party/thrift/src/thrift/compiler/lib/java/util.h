@@ -21,10 +21,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
-namespace java {
+namespace apache::thrift::compiler::java {
 
 /**
  * Mangles an identifier for use in generated Java. Ported from
@@ -58,7 +55,4 @@ std::string quote_java_string(const std::string& unescaped);
  */
 std::string package_to_path(std::string package);
 
-} // namespace java
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler::java

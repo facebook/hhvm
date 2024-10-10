@@ -25,9 +25,7 @@
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 class diagnostics_engine;
 class lexer;
@@ -239,6 +237,4 @@ class parser_actions {
 // syntactic constructs and reports parse errors if any via diags.
 bool parse(lexer& lex, parser_actions& actions, diagnostics_engine& diags);
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

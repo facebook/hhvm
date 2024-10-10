@@ -30,9 +30,7 @@
 
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * JSON code generator.
@@ -852,6 +850,4 @@ THRIFT_REGISTER_GENERATOR(
     "JSON",
     "    annotate:        Generate annotations in json representation\n");
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

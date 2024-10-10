@@ -16,9 +16,7 @@
 
 #include <thrift/compiler/lib/cpp2/util.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 bool is_type_iobuf(std::string_view name) {
   return name == "folly::IOBuf" || name == "std::unique_ptr<folly::IOBuf>";
@@ -28,6 +26,4 @@ bool is_type_iobuf(const t_type* type) {
   return is_type_iobuf(cpp2::get_type(type));
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

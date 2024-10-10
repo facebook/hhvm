@@ -22,9 +22,7 @@
 #include <thrift/compiler/ast/t_throws.h>
 #include <thrift/compiler/ast/t_type.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 /**
  * A sink contains the types for stream of responses and a final response.
@@ -92,6 +90,4 @@ class t_sink : public t_node {
   }
 };
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

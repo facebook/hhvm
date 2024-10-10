@@ -28,9 +28,7 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/lib/uri.h>
 
-namespace apache {
-namespace thrift {
-namespace compiler {
+namespace apache::thrift::compiler {
 
 namespace {
 
@@ -112,6 +110,4 @@ void detail::validate_annotation_scopes(
   }
 }
 
-} // namespace compiler
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::compiler

@@ -2233,25 +2233,30 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             // we must also. Looks like int literal keys have become a parse
             // error--perhaps that's why.
             Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr(self.alloc((pos, s.into()))),
-            Node::Expr(aast::Expr(
-                _,
-                _,
+            Node::Expr(aast::Expr(_, _, expr_)) => match expr_ {
                 aast::Expr_::ClassConst(&(
                     aast::ClassId(_, _, aast::ClassId_::CI(&class_name)),
                     const_name,
-                )),
-            )) => ShapeFieldName::SFclassConst(self.alloc((class_name, const_name))),
-            Node::Expr(aast::Expr(
-                _,
-                _,
+                )) => ShapeFieldName::SFclassConst(self.alloc((class_name, const_name))),
+                aast::Expr_::Nameof(&aast::ClassId(_, _, aast::ClassId_::CI(&class_name))) => {
+                    ShapeFieldName::SFclassname(self.alloc(class_name))
+                }
+                // TODO(T199272576) I believe these two cases should be dead by parse error
                 aast::Expr_::ClassConst(&(
-                    aast::ClassId(_, pos, aast::ClassId_::CIself),
+                    aast::ClassId(_, self_pos, aast::ClassId_::CIself),
                     const_name,
-                )),
-            )) => {
-                let (classish_name, _) = self.get_current_classish_name()?;
-                ShapeFieldName::SFclassConst(self.alloc((Id(pos, classish_name), const_name)))
-            }
+                )) => {
+                    let (classish_name, _) = self.get_current_classish_name()?;
+                    ShapeFieldName::SFclassConst(
+                        self.alloc((Id(self_pos, classish_name), const_name)),
+                    )
+                }
+                aast::Expr_::Nameof(&aast::ClassId(_, self_pos, aast::ClassId_::CIself)) => {
+                    let (classish_name, _) = self.get_current_classish_name()?;
+                    ShapeFieldName::SFclassname(self.alloc(Id(self_pos, classish_name)))
+                }
+                _ => return None,
+            },
             _ => return None,
         })
     }

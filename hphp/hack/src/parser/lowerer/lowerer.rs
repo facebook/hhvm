@@ -935,9 +935,23 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             let field_map = could_map(&c.fields, env, p_shape_field)?;
             let mut set = HashSet::default();
             for f in field_map.iter() {
-                if !set.insert(f.name.get_name()) {
-                    // This check is sketchy. It considers only the const names in class const cases
-                    raise_hh_error(env, Naming::fd_name_already_bound(f.name.get_pos().clone()));
+                use ast::ShapeFieldName::*;
+                use bstr::BStr;
+                // This check is sketchy. It considers only the const names in class const case
+                // i.e. shape(B::class => int, C::class => string) is not allowed because const
+                // "class" has already been bound, ditto for B::X and C::X. There is a separate
+                // check that errors when B::X and C::Y are from different classes.
+                // TODO(T199272576) just combine with the Shape_name_check in OCaml
+                let (field_pos, field_name): (&Pos, &BStr) = match &f.name {
+                    SFclassname(Id(p, _name)) => (p, "class".into()), // TODO(T199272576) sketchy check, needs to be post-namespacing and model runtime names
+                    SFregexGroup((p, name)) | SFclassConst(_, (p, name)) => {
+                        (p, name.as_bytes().into())
+                    }
+                    SFlitStr((p, name)) => (p, name.as_ref()),
+                };
+
+                if !set.insert(field_name) {
+                    raise_hh_error(env, Naming::fd_name_already_bound(field_pos.clone()));
                 }
             }
 

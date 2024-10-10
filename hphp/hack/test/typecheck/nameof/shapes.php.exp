@@ -1,0 +1,26 @@
+File "shapes.php", line 11, characters 3-14:
+  shape(C::class => float)
+ERROR: File "shapes.php", line 15, characters 14-26:
+Invalid argument (Typing[4110])
+  File "shapes.php", line 8, characters 21-23:
+  Expected `int`
+  File "shapes.php", line 4, characters 29-33:
+  But got `float`
+ERROR: File "shapes.php", line 16, characters 14-26:
+Invalid argument (Typing[4110])
+  File "shapes.php", line 8, characters 21-23:
+  Expected `int`
+  File "shapes.php", line 4, characters 29-33:
+  But got `float`
+ERROR: File "shapes.php", line 20, characters 14-26:
+Invalid argument (Typing[4110])
+  File "shapes.php", line 8, characters 21-23:
+  Expected `int`
+  File "shapes.php", line 5, characters 29-33:
+  But got `float`
+ERROR: File "shapes.php", line 21, characters 14-26:
+Invalid argument (Typing[4110])
+  File "shapes.php", line 8, characters 21-23:
+  Expected `int`
+  File "shapes.php", line 5, characters 29-33:
+  But got `float`

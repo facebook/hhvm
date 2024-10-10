@@ -47,8 +47,17 @@ impl Pass for ElabShapeFieldNamePass {
     }
 }
 
+// TODO(T199272576) I believe all of this code should be dead by parse error,
+// check and eliminate.
 fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: Option<&String>) {
     match (nm, current_class) {
+        (ShapeFieldName::SFclassname(id, _), Some(cls_nm)) if id.name() == sn::classes::SELF => {
+            id.1 = cls_nm.to_string();
+        }
+        (ShapeFieldName::SFclassname(id, _), _) if id.name() == sn::classes::SELF => {
+            env.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
+            id.1 = sn::classes::UNKNOWN.to_string();
+        }
         (ShapeFieldName::SFclassConst(id, _), Some(cls_nm)) if id.name() == sn::classes::SELF => {
             id.1 = cls_nm.to_string();
         }

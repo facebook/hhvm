@@ -1,0 +1,40 @@
+ERROR: File "shapes_collide.php", line 7, characters 48-52:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 8, characters 52-52:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 9, characters 48-52:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 10, characters 52-52:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 13, characters 47-51:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 14, characters 51-51:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 15, characters 47-51:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 16, characters 51-51:
+Field name already bound (Naming[2015])
+ERROR: File "shapes_collide.php", line 3, characters 37-39:
+Shape uses literal string as field name (Typing[4050])
+  File "shapes_collide.php", line 3, characters 18-25:
+  But expected a class constant. Shape fields cannot be a mix of literals and constants.
+ERROR: File "shapes_collide.php", line 4, characters 37-39:
+Shape uses literal string as field name (Typing[4050])
+  File "shapes_collide.php", line 4, characters 25-25:
+  But expected a class constant. Shape fields cannot be a mix of literals and constants.
+ERROR: File "shapes_collide.php", line 13, characters 44-51:
+Shape field name is class constant from `C` (Typing[4085])
+  File "shapes_collide.php", line 13, characters 25-32:
+  But expected constant from `B`
+ERROR: File "shapes_collide.php", line 14, characters 51-51:
+Shape field name is class constant from `C` (Typing[4085])
+  File "shapes_collide.php", line 14, characters 25-32:
+  But expected constant from `B`
+ERROR: File "shapes_collide.php", line 15, characters 44-51:
+Shape field name is class constant from `C` (Typing[4085])
+  File "shapes_collide.php", line 15, characters 32-32:
+  But expected constant from `B`
+ERROR: File "shapes_collide.php", line 16, characters 51-51:
+Shape field name is class constant from `C` (Typing[4085])
+  File "shapes_collide.php", line 16, characters 32-32:
+  But expected constant from `B`

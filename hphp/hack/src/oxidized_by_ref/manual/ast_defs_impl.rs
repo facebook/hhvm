@@ -3,32 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bstr::BStr;
-
 use crate::ast_defs::*;
 use crate::pos::Pos;
-
-impl<'a> ShapeFieldName<'a> {
-    pub fn get_name(&self) -> &'a BStr {
-        use ShapeFieldName::*;
-        match self {
-            SFregexGroup((_, name)) | SFclassname(Id(_, name)) | SFclassConst((_, (_, name))) => {
-                name.as_bytes().into()
-            }
-            SFlitStr((_, name)) => name,
-        }
-    }
-
-    pub fn get_pos(&self) -> &'a Pos<'_> {
-        use ShapeFieldName::*;
-        match self {
-            SFregexGroup((p, _))
-            | SFlitStr((p, _))
-            | SFclassname(Id(p, _))
-            | SFclassConst((_, (p, _))) => p,
-        }
-    }
-}
 
 impl<'a> Id<'a> {
     pub fn pos(&self) -> &'a Pos<'_> {

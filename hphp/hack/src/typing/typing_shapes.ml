@@ -509,7 +509,25 @@ let check_shape_keys_validity env keys =
              @@ Primary.Shape.Invalid_shape_field_name
                   { pos = key_pos; is_empty = true }));
       (env, key_pos, None)
-    | Ast_defs.SFclassname (_, _cls) -> (env, key_pos, None)
+    | Ast_defs.SFclassname (p, cls) -> begin
+      match Env.get_class env cls with
+      | Decl_entry.DoesNotExist
+      | Decl_entry.NotYetAvailable ->
+        let (env, ty) = Env.fresh_type_error env p in
+        (env, key_pos, Some (cls, ty))
+      | Decl_entry.Found cd ->
+        (* Match the sketchy Tany logic of C::class keys *)
+        (match Env.get_const env cd "class" with
+        | None ->
+          let (env, ty) = Env.fresh_type_error env p in
+          (env, key_pos, Some (cls, ty))
+        | Some { cc_type; _ } ->
+          let ((env, ty_err_opt), ty) =
+            Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
+          in
+          Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+          (env, key_pos, Some (cls, ty)))
+    end
     | Ast_defs.SFclass_const ((_p, cls), (p, y)) -> begin
       match Env.get_class env cls with
       | Decl_entry.DoesNotExist

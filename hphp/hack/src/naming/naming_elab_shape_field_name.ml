@@ -29,8 +29,21 @@ let on_class_ c ~ctx = (Env.in_class ctx c, Ok c)
 (* We permit class constants to be used as shape field names. Here we replace
     uses of `self` with the class to which they refer or `unknown` if the shape
    is not defined within the context of a class *)
+
+(* TODO(T199272576) I believe all of this code should be dead by parse error,
+ * check and eliminate. *)
 let canonical_shape_name current_class sfld =
   match sfld with
+  | Ast_defs.SFclassname (class_pos, class_name)
+    when String.equal class_name SN.Classes.cSelf ->
+    (match current_class with
+    | Some ((_, class_name), _, _) ->
+      Ok (Ast_defs.SFclassname (class_pos, class_name))
+    | None ->
+      let err =
+        Naming_phase_error.naming @@ Naming_error.Self_outside_class class_pos
+      in
+      Error (Ast_defs.SFclassname (class_pos, SN.Classes.cUnknown), err))
   | Ast_defs.SFclass_const ((class_pos, class_name), cst)
     when String.equal class_name SN.Classes.cSelf ->
     (match current_class with

@@ -2590,8 +2590,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         .push(make_error_from_node(node, errors::invalid_shape_field_name))
                 }
             }
-            NameofExpression(_) if !self.env.is_typechecker() => {}
-            ScopeResolutionExpression(_) => {}
+            NameofExpression(_) | ScopeResolutionExpression(_) => {}
             QualifiedName(_) => {
                 if self.env.is_typechecker() {
                     self.errors

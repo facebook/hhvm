@@ -1,14 +1,12 @@
 [packages]
 
 [packages.foo]
-uses = ["x.*"]
 include_paths=[
     "//doesnotexist.php",
     "//doesnotexist/",
 ] # well-formed but nonexistent paths
 
 [packages.bar]
-uses = ["y.*"]
 include_paths=[
     "bar",
     "//bar",

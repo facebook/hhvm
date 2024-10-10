@@ -12,6 +12,7 @@ use toml::Spanned;
 use crate::error::Error;
 use crate::types::DeploymentMap;
 use crate::types::NameSet;
+pub use crate::types::Package;
 pub use crate::types::PackageMap;
 
 #[derive(Debug, Deserialize)]
@@ -20,7 +21,18 @@ pub struct Config {
     pub deployments: Option<DeploymentMap>,
 }
 impl Config {
-    pub fn check_config(&self, errors: &mut Vec<Error>) {
+    pub fn check_config(&self, package_v2: bool, errors: &mut Vec<Error>) {
+        let check_package_v2_fields =
+            |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
+                if !package_v2 {
+                    if package.include_paths.is_some() {
+                        errors.push(Error::include_path_in_package_v1(package_name));
+                    }
+                } else if package.uses.is_some() {
+                    errors.push(Error::uses_in_package_v2(package_name));
+                }
+            };
+
         let check_packages_are_defined =
             |errors: &mut Vec<Error>, pkgs: &Option<NameSet>, soft_pkgs: &Option<NameSet>| {
                 if let Some(packages) = pkgs {
@@ -74,9 +86,10 @@ impl Config {
                     ));
                 }
             };
-        for (_, package) in self.packages.iter() {
+        for (package_name, package) in self.packages.iter() {
             check_packages_are_defined(errors, &package.includes, &package.soft_includes);
             check_each_glob_is_used_once(errors, &package.uses);
+            check_package_v2_fields(errors, package_name, package);
         }
         if let Some(deployments) = &self.deployments {
             for (positioned_name, deployment) in deployments.iter() {

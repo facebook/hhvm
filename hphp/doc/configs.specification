@@ -166,6 +166,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
   Constants from traits behave like constants from interfaces (error on conflict)
 
+- bool Eval.PackageV2 = false, UNKNOWN, globaldata|compileroption(PackageV2)
+
+  Enable support for the PackageV2 package specification.
+
 - std::string Eval.ActiveDeployment = "", UNKNOWN, globaldata|compileroption(ActiveDeployment)
 
   Describes the active deployment for selecting the set of packages

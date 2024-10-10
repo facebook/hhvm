@@ -34,6 +34,14 @@ pub enum Error {
         include_path: String,
         span: (usize, usize),
     },
+    IncludePathInPackageV1 {
+        package_name: String,
+        span: (usize, usize),
+    },
+    UsesInPackageV2 {
+        package_name: String,
+        span: (usize, usize),
+    },
 }
 
 impl Error {
@@ -83,13 +91,31 @@ impl Error {
         }
     }
 
+    pub fn include_path_in_package_v1(package_name: &Spanned<String>) -> Self {
+        let Range { start, end } = package_name.span();
+        Self::IncludePathInPackageV1 {
+            package_name: package_name.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
+    pub fn uses_in_package_v2(package_name: &Spanned<String>) -> Self {
+        let Range { start, end } = package_name.span();
+        Self::UsesInPackageV2 {
+            package_name: package_name.get_ref().into(),
+            span: (start, end),
+        }
+    }
+
     pub fn span(&self) -> (usize, usize) {
         match self {
             Self::DuplicateUse { span, .. }
             | Self::UndefinedInclude { span, .. }
             | Self::IncompleteDeployment { span, .. }
             | Self::InvalidIncludePath { span, .. }
-            | Self::MalformedIncludePath { span, .. } => *span,
+            | Self::MalformedIncludePath { span, .. }
+            | Self::IncludePathInPackageV1 { span, .. }
+            | Self::UsesInPackageV2 { span, .. } => *span,
         }
     }
 
@@ -141,6 +167,16 @@ impl Display for Error {
                     include_path
                 )?;
             }
+            Self::IncludePathInPackageV1 { package_name, .. } => write!(
+                f,
+                "The `include_paths` field is not supported by PackageV1 in package {}",
+                package_name
+            )?,
+            Self::UsesInPackageV2 { package_name, .. } => write!(
+                f,
+                "The `uses` field is not supported by PackageV2 in package {}",
+                package_name
+            )?,
         };
         Ok(())
     }

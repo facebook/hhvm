@@ -10,7 +10,7 @@ open Hh_prelude
 type errors = (Pos.t * string * (Pos.t * string) list) list
 
 external extract_packages_from_text :
-  bool -> string -> string -> string -> (Package.t list, errors) result
+  bool -> bool -> string -> string -> string -> (Package.t list, errors) result
   = "extract_packages_from_text_ffi"
 
 let pkgs_config_path_relative_to_repo_root = "PACKAGES.toml"
@@ -21,10 +21,10 @@ let repo_config_path =
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
 
-let parse (strict : bool) (path : string) =
+let parse (package_v2 : bool) (strict : bool) (path : string) =
   let contents = Sys_utils.cat path in
   let root = Relative_path.(path_of_prefix Root) in
-  match extract_packages_from_text strict root path contents with
+  match extract_packages_from_text package_v2 strict root path contents with
   | Error errors ->
     let error_list =
       List.map errors ~f:(fun (pos, msg, reasons) ->
@@ -37,7 +37,8 @@ let parse (strict : bool) (path : string) =
     (Errors.from_error_list error_list, PackageInfo.empty)
   | Ok packages -> (Errors.empty, PackageInfo.from_packages packages)
 
-let load_and_parse ?(strict = true) ?(pkgs_config_abs_path = None) () :
+let load_and_parse
+    ~(package_v2 : bool) ?(strict = true) ?(pkgs_config_abs_path = None) () :
     Errors.t * PackageInfo.t =
   let pkgs_config_abs_path =
     match pkgs_config_abs_path with
@@ -47,6 +48,6 @@ let load_and_parse ?(strict = true) ?(pkgs_config_abs_path = None) () :
   if not @@ Sys.file_exists pkgs_config_abs_path then
     (Errors.empty, PackageInfo.empty)
   else
-    let result = parse strict pkgs_config_abs_path in
+    let result = parse package_v2 strict pkgs_config_abs_path in
     log_debug "Parsed %s" pkgs_config_abs_path;
     result

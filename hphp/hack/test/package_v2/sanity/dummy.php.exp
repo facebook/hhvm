@@ -1,0 +1,9 @@
+error: Parsing[1009] The uses field is not supported by PackageV2 in package pkg1 [1]
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[1] 3 | [packages.pkg1]
+4 | uses=["a.*"]
+
+1 error found

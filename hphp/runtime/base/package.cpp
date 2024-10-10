@@ -71,7 +71,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   PackageMap packages;
   DeploymentMap deployments;
 
-  auto info = package::package_info(path.string());
+  auto info = package::package_info(Cfg::Eval::PackageV2, path.string());
 
   auto const convert = [&] (auto const& v) {
     hphp_vector_string_set result;

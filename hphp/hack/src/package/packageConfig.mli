@@ -11,6 +11,7 @@
   * does not exist in the filesystem.
   *)
 val load_and_parse :
+  package_v2:bool ->
   ?strict:bool ->
   ?pkgs_config_abs_path:string option ->
   unit ->

@@ -1306,7 +1306,10 @@ let setup_server
       config
       local_config
   in
-  let (errorl, package_info) = PackageConfig.load_and_parse () in
+  let package_v2 =
+    (ServerConfig.typechecker_options config).GlobalOptions.tco_package_v2
+  in
+  let (errorl, package_info) = PackageConfig.load_and_parse ~package_v2 () in
   let env =
     ServerEnvBuild.make_env
       config

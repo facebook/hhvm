@@ -357,8 +357,10 @@ let initialize1
   (* Ignore package loading errors for now TODO(jjwu) *)
   let open GlobalOptions in
   log "Loading package configuration";
-  let (_, package_info) = PackageConfig.load_and_parse () in
   let tco = ServerConfig.typechecker_options config in
+  let (_, package_info) =
+    PackageConfig.load_and_parse ~package_v2:tco.tco_package_v2 ()
+  in
   let config =
     ServerConfig.set_tc_options
       config

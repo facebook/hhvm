@@ -2492,6 +2492,7 @@ let decl_and_run_mode
     | Some _ ->
       let (errors, info) =
         PackageConfig.load_and_parse
+          ~package_v2:tcopt.GlobalOptions.tco_package_v2
           ~strict:false
           ~pkgs_config_abs_path:packages_config_path
           ()

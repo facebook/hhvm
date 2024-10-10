@@ -25,6 +25,7 @@ mod ffi {
         uses: Vec<String>,
         includes: Vec<String>,
         soft_includes: Vec<String>,
+        include_paths: Vec<String>,
     }
     struct DeploymentMapEntry {
         name: String,
@@ -36,12 +37,12 @@ mod ffi {
         domains: Vec<String>,
     }
     extern "Rust" {
-        pub fn package_info(filename: &CxxString) -> PackageInfo;
+        pub fn package_info(package_v2: bool, filename: &CxxString) -> PackageInfo;
     }
 }
 
-pub fn package_info(filename: &CxxString) -> ffi::PackageInfo {
-    let s = package::PackageInfo::from_text_strict("", &filename.to_string());
+pub fn package_info(package_v2: bool, filename: &CxxString) -> ffi::PackageInfo {
+    let s = package::PackageInfo::from_text_strict(package_v2, "", &filename.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {
@@ -56,6 +57,7 @@ pub fn package_info(filename: &CxxString) -> ffi::PackageInfo {
                         uses: convert(package.uses.as_ref()),
                         includes: convert(package.includes.as_ref()),
                         soft_includes: convert(package.soft_includes.as_ref()),
+                        include_paths: convert(package.include_paths.as_ref()),
                     };
                     ffi::PackageMapEntry {
                         name: name.get_ref().to_string(),

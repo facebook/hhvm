@@ -83,6 +83,16 @@ impl HhConfig {
         packages_path
     }
 
+    pub fn package_v2_enabled(hhconfig: &ConfigFile, overrides: &ConfigFile) -> bool {
+        let package_v2_config: bool = hhconfig
+            .get_bool_or("package_v2", GlobalOptions::default().tco_package_v2)
+            .unwrap_or(GlobalOptions::default().tco_package_v2);
+        let package_v2: bool = overrides
+            .get_bool_or("package_v2", package_v2_config)
+            .unwrap_or(package_v2_config);
+        package_v2
+    }
+
     pub fn from_files(
         root: impl AsRef<Path>,
         hhconfig_path: impl AsRef<Path>,
@@ -104,6 +114,7 @@ impl HhConfig {
             String::new()
         };
         let package_info: PackageInfo = PackageInfo::from_text_strict(
+            Self::package_v2_enabled(&hhconfig, overrides),
             root.as_ref().to_str().unwrap_or_default(),
             package_config_pathbuf.to_str().unwrap_or_default(),
         )
@@ -159,6 +170,10 @@ impl HhConfig {
         let package_config_pathbuf = Self::create_packages_path(hhconfig_path.as_path());
         let package_config_path = package_config_pathbuf.as_path();
         let package_info: PackageInfo = PackageInfo::from_text_strict(
+            // FIXME
+            hh_config_file
+                .get_bool_or("package_v2", GlobalOptions::default().tco_package_v2)
+                .unwrap_or(GlobalOptions::default().tco_package_v2),
             root.as_ref().to_str().unwrap_or_default(),
             package_config_path.to_str().unwrap_or_default(),
         )

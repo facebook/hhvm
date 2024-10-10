@@ -469,9 +469,11 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   assertx(src->Mask(LoadLiteralMask) == LDR_w_lit);
 
   auto const litAddr = src->ImmPCOffsetTarget(srcFrom);
-  always_assert_flog(TCA(litAddr) >= env.start && TCA(litAddr) < env.end,
-                     "litAddr = {}  start = {}  end = {}\n",
-                     litAddr, env.start, env.end);
+
+  // If the apparent literal address is outside of the current code block, then
+  // this cannot be a far jmp (the literal is emitted in the same block as the
+  // ldr+br sequence, cf. Vgen::emit(const jmpi&) in vasm-arm.cpp).
+  if (TCA(litAddr) < env.start || TCA(litAddr) >= env.end) return false;
 
   env.literalsToRemove.insert(litAddr);
 

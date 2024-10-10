@@ -367,10 +367,7 @@ end = struct
         name: string;
         aliased: t;
       }
-    | Case of {
-        name: string;
-        disjuncts: t list;
-      }
+    | Case of { name: string }
     | Enum of { name: string }
     | Vec of t
     | Dict of {
@@ -478,8 +475,9 @@ end = struct
             | Alias info -> [subtype_of info.aliased]
             | TypeConst info -> [subtype_of info.aliased]
             | Newtype info -> [subtype_of info.aliased]
-            | Case info -> List.map ~f:subtype_of info.disjuncts
-            | Enum _ -> []
+            | Case _
+            | Enum _ ->
+              []
             | Vec ty ->
               let ty = subtype_of ty in
               [Vec ty]
@@ -628,8 +626,10 @@ end = struct
       | Alias info -> weaken_for_disjointness info.aliased
       | TypeConst info -> weaken_for_disjointness info.aliased
       | Newtype info -> weaken_for_disjointness info.aliased
-      | Case { disjuncts; _ } ->
-        List.concat_map ~f:weaken_for_disjointness disjuncts
+      | Case _ ->
+        List.concat_map
+          ~f:weaken_for_disjointness
+          (Environment.get_subtypes env ty)
       | Enum _ -> Primitive.[Primitive Int; Primitive String]
       | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
       | Dict _ ->
@@ -953,7 +953,12 @@ end = struct
         Environment.add_definition env
         @@ Definition.case_type ~name ~bound disjuncts
       in
-      (env, Case { name; disjuncts })
+      let ty = Case { name } in
+      let env =
+        List.fold disjuncts ~init:env ~f:(fun env disjunct ->
+            Environment.record_subtype env ~super:ty ~sub:disjunct)
+      in
+      (env, ty)
     | Kind.Enum ->
       let name = fresh "E" in
       let ty = Enum { name } in

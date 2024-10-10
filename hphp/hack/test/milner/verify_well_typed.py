@@ -49,6 +49,7 @@ def milner_and_type_check(
         result = subprocess.run(
             [milner_exe, os.path.abspath(template_file), "--seed", str(seed)],
             stdout=out,
+            timeout=10,
         )
 
     if result.returncode != 0:
@@ -62,7 +63,11 @@ def milner_and_type_check(
         )
 
     # Run the verifier on the temporary file
-    result = subprocess.run([hhstc_exe, temp_file], capture_output=True)
+    result = subprocess.run(
+        [hhstc_exe, temp_file],
+        capture_output=True,
+        timeout=30,
+    )
 
     # Check if the verifier found any errors
     stdout = result.stdout.decode()

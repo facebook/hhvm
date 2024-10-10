@@ -16,10 +16,10 @@ fn main() {
     fs::write(cratemap_path, CRATEMAP).expect("Failed to write cratemap");
     Config::from_env(GenContext::Types)
         .expect("Failed to instantiate thrift_compiler::Config")
-        .base_path("../../../../..")
+        .base_path("../../../../../..")
         .types_crate("test_deprecated_optional_with_default_is_some_if__types")
         .clients_crate("test_deprecated_optional_with_default_is_some_if__clients")
         .options("deprecated_optional_with_default_is_some")
-        .run(["test_deprecated_optional_with_default_is_some.thrift"])
+        .run(["../test_deprecated_optional_with_default_is_some.thrift"])
         .expect("Failed while running thrift compilation");
 }

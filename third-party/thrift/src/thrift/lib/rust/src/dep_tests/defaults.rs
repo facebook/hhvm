@@ -34,3 +34,15 @@ fn test_deprecated_defaults() {
 
     assert_eq!(sub.optDef.as_deref(), Some("IAMOPTWITHDEF"));
 }
+
+#[test]
+fn test_competing_defaults() {
+    let test: test_competing_defaults_if::Outer =
+        fbthrift::simplejson_protocol::deserialize("{\"inner\":{}}")
+            .expect("Failed to deserialize JSON");
+
+    // Note: in C++ this would be "default_override_in_outer"
+    // Historically, Rust behavior is different. This might change in the future,
+    // but having this test here documents the current behavior.
+    assert_eq!(test.inner.value, "default_in_inner");
+}

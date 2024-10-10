@@ -15,6 +15,7 @@
 import enum
 from typing import (
     Any,
+    Final,
     Iterable,
     Iterator,
     Mapping,
@@ -83,8 +84,8 @@ class EnumMeta(type):
     def __members__(self: Type[_T]) -> Mapping[str, _T]: ...
 
 class Enum(metaclass=EnumMeta):
-    name: str
-    value: int
+    name: Final[str]
+    value: Final[int]
     def __getattr__(self: eT, name: str) -> eT: ...
     def __init__(self: eT, value: tUnion[eT, int]) -> None: ...  # __call__ for meta
     def __repr__(self) -> str: ...

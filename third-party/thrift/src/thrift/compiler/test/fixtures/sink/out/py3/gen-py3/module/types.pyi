@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -21,7 +20,7 @@ class InitialResponse(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
-    content: Final[str] = ...
+    content: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -51,7 +50,7 @@ class FinalResponse(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
-    content: Final[str] = ...
+    content: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -81,7 +80,7 @@ class SinkPayload(thrift.py3.types.Struct, _typing.Hashable):
         content: bool
         pass
 
-    content: Final[str] = ...
+    content: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -111,7 +110,7 @@ class CompatibleWithKeywordSink(thrift.py3.types.Struct, _typing.Hashable):
         sink: bool
         pass
 
-    sink: Final[str] = ...
+    sink: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -141,7 +140,7 @@ class InitialException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
-    reason: Final[str] = ...
+    reason: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -165,7 +164,7 @@ class SinkException1(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
-    reason: Final[str] = ...
+    reason: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -189,7 +188,7 @@ class SinkException2(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         reason: bool
         pass
 
-    reason: Final[int] = ...
+    reason: _typing.Final[int] = ...
 
     def __init__(
         self, *,

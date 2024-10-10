@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -29,7 +28,7 @@ class AStruct(thrift.py3.types.Struct, _typing.Hashable):
         FieldA: bool
         pass
 
-    FieldA: Final[int] = ...
+    FieldA: _typing.Final[int] = ...
 
     def __init__(
         self, *,
@@ -58,7 +57,7 @@ class AStructB(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    FieldA: Final[_typing.Optional[AStruct]] = ...
+    FieldA: _typing.Final[_typing.Optional[AStruct]] = ...
 
     def __init__(
         self, *,

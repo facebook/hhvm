@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -22,8 +21,8 @@ class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
         i_res: bool
         pass
 
-    s_res: Final[str] = ...
-    i_res: Final[int] = ...
+    s_res: _typing.Final[str] = ...
+    i_res: _typing.Final[int] = ...
 
     def __init__(
         self, *,

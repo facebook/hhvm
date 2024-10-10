@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -23,9 +22,9 @@ class Fields(thrift.py3.types.Struct, _typing.Hashable):
         injected_unstructured_annotation_field: bool
         pass
 
-    injected_field: Final[str] = ...
-    injected_structured_annotation_field: Final[_typing.Optional[str]] = ...
-    injected_unstructured_annotation_field: Final[_typing.Optional[str]] = ...
+    injected_field: _typing.Final[str] = ...
+    injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
+    injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
 
     def __init__(
         self, *,

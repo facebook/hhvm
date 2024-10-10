@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -24,8 +23,8 @@ class Struct(thrift.py3.types.Struct, _typing.Hashable):
         second: bool
         pass
 
-    first: Final[_module0_types.Struct] = ...
-    second: Final[_module1_types.Struct] = ...
+    first: _typing.Final[_module0_types.Struct] = ...
+    second: _typing.Final[_module1_types.Struct] = ...
 
     def __init__(
         self, *,
@@ -58,8 +57,8 @@ class BigStruct(thrift.py3.types.Struct, _typing.Hashable):
         id: bool
         pass
 
-    s: Final[Struct] = ...
-    id: Final[int] = ...
+    s: _typing.Final[Struct] = ...
+    id: _typing.Final[int] = ...
 
     def __init__(
         self, *,

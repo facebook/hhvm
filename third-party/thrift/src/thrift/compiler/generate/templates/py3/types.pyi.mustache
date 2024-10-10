@@ -26,7 +26,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -74,7 +73,7 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
         pass
 
     {{#struct:fields_and_mixin_fields}}
-    {{field:py_name}}: Final[{{#field:PEP484Optional?}}_typing.Optional[{{/field:PEP484Optional?}}{{!
+    {{field:py_name}}: _typing.Final[{{#field:PEP484Optional?}}_typing.Optional[{{/field:PEP484Optional?}}{{!
             }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
             }}{{#field:PEP484Optional?}}]{{/field:PEP484Optional?}}] = ...
     {{/struct:fields_and_mixin_fields}}
@@ -111,8 +110,9 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable{{!
 
     @staticmethod
     def fromValue(value: _{{struct:name}}ValueType) -> {{struct:name}}: ...
-    type: Final[{{struct:name}}.Type]
-    value: Final[_{{struct:name}}ValueType]
+    type: _typing.Final[{{struct:name}}.Type]
+    value: _typing.Final[_{{struct:name}}ValueType]
+    def get_type(self) -> {{struct:name}}.Type: ...
     {{/struct:union?}}
 
     {{#program:python_capi_converter?}}

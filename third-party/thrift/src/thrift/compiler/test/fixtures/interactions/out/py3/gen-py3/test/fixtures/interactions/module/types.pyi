@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -23,7 +22,7 @@ class CustomException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         message: bool
         pass
 
-    message: Final[str] = ...
+    message: _typing.Final[str] = ...
 
     def __init__(
         self, *,

@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -21,7 +20,7 @@ class Fiery(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         message: bool
         pass
 
-    message: Final[str] = ...
+    message: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -45,7 +44,7 @@ class Serious(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         not_sonnet: bool
         pass
 
-    not_sonnet: Final[_typing.Optional[str]] = ...
+    not_sonnet: _typing.Final[_typing.Optional[str]] = ...
 
     def __init__(
         self, *,
@@ -70,8 +69,8 @@ class ComplexFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         internal_error_message: bool
         pass
 
-    error_message: Final[str] = ...
-    internal_error_message: Final[str] = ...
+    error_message: _typing.Final[str] = ...
+    internal_error_message: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -97,8 +96,8 @@ class CustomFieldNames(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
         internal_error_message: bool
         pass
 
-    error_message: Final[str] = ...
-    internal_error_message: Final[str] = ...
+    error_message: _typing.Final[str] = ...
+    internal_error_message: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -124,8 +123,8 @@ class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError, _typing.
         error_code: bool
         pass
 
-    message: Final[str] = ...
-    error_code: Final[int] = ...
+    message: _typing.Final[str] = ...
+    error_code: _typing.Final[int] = ...
 
     def __init__(
         self, *,
@@ -151,8 +150,8 @@ class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError, _t
         error_code: bool
         pass
 
-    message_field: Final[str] = ...
-    error_code: Final[int] = ...
+    message_field: _typing.Final[str] = ...
+    error_code: _typing.Final[int] = ...
 
     def __init__(
         self, *,

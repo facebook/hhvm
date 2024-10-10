@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -66,8 +65,9 @@ class Nada(thrift.py3.types.Union, _typing.Hashable):
 
     @staticmethod
     def fromValue(value: _NadaValueType) -> Nada: ...
-    type: Final[Nada.Type]
-    value: Final[_NadaValueType]
+    type: _typing.Final[Nada.Type]
+    value: _typing.Final[_NadaValueType]
+    def get_type(self) -> Nada.Type: ...
 
     def _to_python(self) -> "module.thrift_types.Nada": ...   # type: ignore
     def _to_py3(self) -> Nada: ...

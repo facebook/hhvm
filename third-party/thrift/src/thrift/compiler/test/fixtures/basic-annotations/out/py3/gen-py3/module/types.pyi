@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -30,7 +29,7 @@ class MyStructNestedAnnotation(thrift.py3.types.Struct, _typing.Hashable):
         name: bool
         pass
 
-    name: Final[str] = ...
+    name: _typing.Final[str] = ...
 
     def __init__(
         self, *,
@@ -61,8 +60,8 @@ class SecretStruct(thrift.py3.types.Struct, _typing.Hashable):
         password: bool
         pass
 
-    id: Final[int] = ...
-    password: Final[str] = ...
+    id: _typing.Final[int] = ...
+    password: _typing.Final[str] = ...
 
     def __init__(
         self, *,

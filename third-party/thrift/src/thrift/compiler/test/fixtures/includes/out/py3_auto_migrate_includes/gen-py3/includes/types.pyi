@@ -10,7 +10,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import typing as _typing
-from typing_extensions import Final
 
 import sys
 import itertools
@@ -23,8 +22,8 @@ class Included(thrift.py3.types.Struct, _typing.Hashable):
         MyTransitiveField: bool
         pass
 
-    MyIntField: Final[int] = ...
-    MyTransitiveField: Final[_transitive_types.Foo] = ...
+    MyIntField: _typing.Final[int] = ...
+    MyTransitiveField: _typing.Final[_transitive_types.Foo] = ...
 
     def __init__(
         self, *,

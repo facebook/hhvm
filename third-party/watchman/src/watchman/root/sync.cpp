@@ -44,17 +44,16 @@ CookieSync::SyncResult Root::syncToNow(
         getLogEventCounters(LogEventType::SyncToNowType);
     // Log if override set, or if we have hit the sample rate
     if (sample.will_log || eventCount == samplingRate) {
-      syncToNow.meta.client_pid = client_info.clientPid;
-      syncToNow.meta.client_name = client_info.clientInfo.has_value()
+      syncToNow.client_pid = client_info.clientPid;
+      syncToNow.client_name = client_info.clientInfo.has_value()
           ? facebook::eden::ProcessInfoCache::cleanProcessCommandline(
                 std::move(client_info.clientInfo.value().get().name))
           : "";
-      syncToNow.meta.base.root = root_metadata.root_path.string();
-      syncToNow.meta.base.event_count =
-          eventCount != samplingRate ? 0 : eventCount;
-      syncToNow.meta.recrawl = root_metadata.recrawl_count;
-      syncToNow.meta.case_sensitive = root_metadata.case_sensitive;
-      syncToNow.meta.watcher = root_metadata.watcher.string();
+      syncToNow.root = root_metadata.root_path.string();
+      syncToNow.event_count = eventCount != samplingRate ? 0 : eventCount;
+      syncToNow.recrawl = root_metadata.recrawl_count;
+      syncToNow.case_sensitive = root_metadata.case_sensitive;
+      syncToNow.watcher = root_metadata.watcher.string();
       syncToNow.timeoutms = timeout.count();
       getLogger()->logEvent(syncToNow);
     }
@@ -74,13 +73,12 @@ CookieSync::SyncResult Root::syncToNow(
 
     const auto& [samplingRate, eventCount] =
         getLogEventCounters(LogEventType::SyncToNowType);
-    syncToNow.meta.base.root = root_metadata.root_path.string();
-    syncToNow.meta.base.error = exc.what();
-    syncToNow.meta.base.event_count =
-        eventCount != samplingRate ? 0 : eventCount;
-    syncToNow.meta.recrawl = root_metadata.recrawl_count;
-    syncToNow.meta.case_sensitive = root_metadata.case_sensitive;
-    syncToNow.meta.watcher = root_metadata.watcher.string();
+    syncToNow.root = root_metadata.root_path.string();
+    syncToNow.error = exc.what();
+    syncToNow.event_count = eventCount != samplingRate ? 0 : eventCount;
+    syncToNow.recrawl = root_metadata.recrawl_count;
+    syncToNow.case_sensitive = root_metadata.case_sensitive;
+    syncToNow.watcher = root_metadata.watcher.string();
     syncToNow.success = false;
     syncToNow.timeoutms = timeout.count();
     getLogger()->logEvent(syncToNow);

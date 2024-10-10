@@ -256,8 +256,7 @@ static void execute_common(
     // Log if override set, or if we have hit the sample rate
     if (sample->will_log || eventCount == samplingRate) {
       addRootMetadataToEvent(root_metadata, *queryExecute);
-      queryExecute->meta.base.event_count =
-          eventCount != samplingRate ? 0 : eventCount;
+      queryExecute->event_count = eventCount != samplingRate ? 0 : eventCount;
       queryExecute->fresh_instance = res->isFreshInstance;
       queryExecute->deduped = ctx->num_deduped;
       queryExecute->results = ctx->resultsArray.size();
@@ -272,8 +271,8 @@ static void execute_common(
       if (ctx->query->query_spec) {
         queryExecute->query = ctx->query->query_spec->toString();
       }
-      queryExecute->meta.client_pid = clientInfo.clientPid;
-      queryExecute->meta.client_name = clientInfo.clientInfo.has_value()
+      queryExecute->client_pid = clientInfo.clientPid;
+      queryExecute->client_name = clientInfo.clientInfo.has_value()
           ? facebook::eden::ProcessInfoCache::cleanProcessCommandline(
                 std::move(clientInfo.clientInfo.value().get().name))
           : "";

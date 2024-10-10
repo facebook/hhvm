@@ -24,10 +24,60 @@ namespace watchman {
 using DynamicEvent = facebook::eden::DynamicEvent;
 using TypedEvent = facebook::eden::TypedEvent;
 
-struct WatchmanEvent : public TypedEvent {
-  // Keep populate() and getType() pure virtual to force subclasses
-  // to implement them
-  virtual void populate(DynamicEvent&) const override = 0;
+struct WatchmanBaseEvent : public TypedEvent {
+  // TODO: add system and user time for Unix systems
+  std::chrono::time_point<std::chrono::system_clock> start_time =
+      std::chrono::system_clock::now();
+  std::string root;
+  std::string error;
+  int64_t event_count = 1;
+
+  void populate(DynamicEvent& event) const override {
+    std::chrono::duration<int64_t, std::nano> elapsed_time =
+        std::chrono::system_clock::now() - start_time;
+    event.addInt(
+        "start_time", std::chrono::system_clock::to_time_t(start_time));
+    event.addInt(
+        "elapsed_time",
+        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time)
+            .count());
+    if (!root.empty()) {
+      event.addString("root", root);
+    }
+    if (!error.empty()) {
+      event.addString("error", error);
+    }
+    event.addInt("event_count", event_count);
+  }
+
+  // Keep getType() pure virtual to force subclasses to implement it
+  virtual const char* getType() const override = 0;
+};
+
+struct WatchmanEvent : public WatchmanBaseEvent {
+  int64_t recrawl = 0;
+  bool case_sensitive = false;
+  std::string watcher;
+  pid_t client_pid = 0;
+  std::string client_name;
+
+  void populate(DynamicEvent& event) const override {
+    WatchmanBaseEvent::populate(event);
+    event.addInt("recrawl", recrawl);
+    event.addBool("case_sensitive", case_sensitive);
+    if (!watcher.empty()) {
+      event.addString("watcher", watcher);
+    }
+
+    if (client_pid != 0) {
+      event.addInt("client_pid", client_pid);
+    }
+    if (!client_name.empty()) {
+      event.addString("client", client_name);
+    }
+  }
+
+  // Keep getType() pure virtual to force subclasses to implement it
   virtual const char* getType() const override = 0;
 };
 
@@ -45,68 +95,12 @@ enum LogEventType : uint8_t {
 // Returns samplingRate and eventCount
 std::pair<int64_t, int64_t> getLogEventCounters(const LogEventType& type);
 
-struct BaseEventData {
-  // TODO: add system and user time for Unix systems
-  std::chrono::time_point<std::chrono::system_clock> start_time =
-      std::chrono::system_clock::now();
-  std::string root;
-  std::string error;
-  int64_t event_count = 1;
-
-  void populate(DynamicEvent& event) const {
-    std::chrono::duration<int64_t, std::nano> elapsed_time =
-        std::chrono::system_clock::now() - start_time;
-    event.addInt(
-        "start_time", std::chrono::system_clock::to_time_t(start_time));
-    event.addInt(
-        "elapsed_time",
-        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time)
-            .count());
-    if (!root.empty()) {
-      event.addString("root", root);
-    }
-    if (!error.empty()) {
-      event.addString("error", error);
-    }
-    event.addInt("event_count", event_count);
-  }
-};
-
-struct MetadataEventData {
-  BaseEventData base;
-  int64_t recrawl = 0;
-  bool case_sensitive = false;
-  std::string watcher;
-  pid_t client_pid = 0;
-  std::string client_name;
-
-  void populate(DynamicEvent& event) const {
-    base.populate(event);
-    event.addInt("recrawl", recrawl);
-    event.addBool("case_sensitive", case_sensitive);
-    if (!watcher.empty()) {
-      event.addString("watcher", watcher);
-    }
-
-    if (client_pid != 0) {
-      event.addInt("client_pid", client_pid);
-    }
-    if (!client_name.empty()) {
-      event.addString("client", client_name);
-    }
-  }
-};
-
-// TODO: add a WatchmanTypedEvent which just contains MetadataEventData and have
-// all of these structs inherit from WatchmanTypedEvent rather than TypedEvent
-
 struct DispatchCommand : public WatchmanEvent {
-  MetadataEventData meta;
   std::string command;
   std::string args;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     event.addString("command", command);
     if (!args.empty()) {
       event.addString("args", args);
@@ -118,11 +112,9 @@ struct DispatchCommand : public WatchmanEvent {
   }
 };
 
-struct ClockTest : public WatchmanEvent {
-  BaseEventData base;
-
+struct ClockTest : public WatchmanBaseEvent {
   void populate(DynamicEvent& event) const override {
-    base.populate(event);
+    WatchmanBaseEvent::populate(event);
   }
 
   const char* getType() const override {
@@ -131,13 +123,12 @@ struct ClockTest : public WatchmanEvent {
 };
 
 struct AgeOut : public WatchmanEvent {
-  MetadataEventData meta;
   int64_t walked = 0;
   int64_t files = 0;
   int64_t dirs = 0;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     event.addInt("walked", walked);
     event.addInt("files", files);
     event.addInt("dirs", dirs);
@@ -149,12 +140,11 @@ struct AgeOut : public WatchmanEvent {
 };
 
 struct SyncToNow : public WatchmanEvent {
-  MetadataEventData meta;
   bool success = true;
   int64_t timeoutms = 0;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     event.addBool("success", success);
     event.addInt("timeoutms", timeoutms);
   }
@@ -168,7 +158,6 @@ struct SavedState : public WatchmanEvent {
   enum Target { Manifold = 1, Xdb = 2 };
   enum Action { GetProperties = 1, Connect = 2, Query = 3 };
 
-  MetadataEventData meta;
   Target target = Manifold;
   Action action = GetProperties;
   std::string project;
@@ -179,7 +168,7 @@ struct SavedState : public WatchmanEvent {
   bool success = false;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     event.addInt("target", target);
     event.addInt("action", action);
     event.addString("project", project);
@@ -202,7 +191,6 @@ struct SavedState : public WatchmanEvent {
 };
 
 struct QueryExecute : public WatchmanEvent {
-  MetadataEventData meta;
   std::string request_id;
   int64_t num_special_files = 0;
   std::string special_files;
@@ -216,7 +204,7 @@ struct QueryExecute : public WatchmanEvent {
   int64_t eden_file_properties_duration_us = 0;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     if (!request_id.empty()) {
       event.addString("request_id", request_id);
     }
@@ -250,10 +238,8 @@ struct QueryExecute : public WatchmanEvent {
 };
 
 struct FullCrawl : public WatchmanEvent {
-  MetadataEventData meta;
-
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
   }
 
   const char* getType() const override {
@@ -262,11 +248,10 @@ struct FullCrawl : public WatchmanEvent {
 };
 
 struct Dropped : public WatchmanEvent {
-  MetadataEventData meta;
   bool isKernel = false;
 
   void populate(DynamicEvent& event) const override {
-    meta.populate(event);
+    WatchmanEvent::populate(event);
     event.addBool("isKernel", isKernel);
   }
 

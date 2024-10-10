@@ -83,7 +83,7 @@ void Client::sendErrorResponse(std::string_view formatted) {
   resp.set("error", typed_string_to_json(formatted));
 
   if (dispatch_command) {
-    dispatch_command->meta.base.error = formatted;
+    dispatch_command->error = formatted;
   }
 
   if (perf_sample) {
@@ -165,7 +165,7 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
         enqueueResponse(def->handler(this, rendered));
       } catch (const ErrorResponse& e) {
         sendErrorResponse(e.what());
-        dispatchCommand.meta.base.error = e.what();
+        dispatchCommand.error = e.what();
       } catch (const ResponseWasHandledManually&) {
       }
 
@@ -180,11 +180,11 @@ bool Client::dispatchCommand(const Command& command, CommandFlags mode) {
           getLogEventCounters(LogEventType::DispatchCommandType);
       // Log if override set, or if we have hit the sample rate
       if (sample.will_log || eventCount == samplingRate) {
-        dispatchCommand.meta.base.event_count =
+        dispatchCommand.event_count =
             eventCount != samplingRate ? 0 : eventCount;
         dispatchCommand.args = renderedString;
-        dispatchCommand.meta.client_pid = peerPid_;
-        dispatchCommand.meta.client_name =
+        dispatchCommand.client_pid = peerPid_;
+        dispatchCommand.client_name =
             facebook::eden::ProcessInfoCache::cleanProcessCommandline(
                 std::move(peerInfo_.get().name));
 

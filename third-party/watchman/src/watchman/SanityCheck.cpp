@@ -158,14 +158,14 @@ void do_clock_check(watchman_stream* client) {
     auto roots = get_watch_list(client);
     for (auto& r : roots.array()) {
       ClockTest clockTest;
-      clockTest.base.root = r.toString();
+      clockTest.root = r.toString();
       PerfSample sample("clock-test");
       sample.add_meta("root", json_object({{"path", r}}));
       try {
         check_clock_command(client, r);
       } catch (const std::exception& ex) {
         log(watchman::ERR, "Failed do_clock_check : ", ex.what(), "\n");
-        clockTest.base.error = ex.what();
+        clockTest.error = ex.what();
         sample.add_meta("error", w_string_to_json(ex.what()));
         sample.force_log();
       }
@@ -178,8 +178,7 @@ void do_clock_check(watchman_stream* client) {
           getLogEventCounters(LogEventType::ClockTestType);
       // Log if override set, or if we have hit the sample rate
       if (sample.will_log || eventCount == samplingRate) {
-        clockTest.base.event_count =
-            eventCount != samplingRate ? 0 : eventCount;
+        clockTest.event_count = eventCount != samplingRate ? 0 : eventCount;
         getLogger()->logEvent(clockTest);
       }
     }

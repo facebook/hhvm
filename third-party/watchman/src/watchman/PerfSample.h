@@ -29,10 +29,10 @@ struct RootMetadata {
 
 template <typename T>
 void addRootMetadataToEvent(const RootMetadata& root_metadata, T& event) {
-  event.meta.base.root = root_metadata.root_path.string();
-  event.meta.recrawl = root_metadata.recrawl_count;
-  event.meta.case_sensitive = root_metadata.case_sensitive;
-  event.meta.watcher = root_metadata.watcher.string();
+  event.root = root_metadata.root_path.string();
+  event.recrawl = root_metadata.recrawl_count;
+  event.case_sensitive = root_metadata.case_sensitive;
+  event.watcher = root_metadata.watcher.string();
 }
 
 class PerfSample {

@@ -139,10 +139,10 @@ std::shared_ptr<FSEventsWatcher> watcherFromRoot(
 static void log_drop_event(const std::shared_ptr<Root>& root, bool isKernel) {
   auto root_metadata = root->getRootMetadata();
   Dropped dropped;
-  dropped.meta.base.root = root_metadata.root_path.string();
-  dropped.meta.recrawl = root_metadata.recrawl_count;
-  dropped.meta.case_sensitive = root_metadata.case_sensitive;
-  dropped.meta.watcher = root_metadata.watcher.string();
+  dropped.root = root_metadata.root_path.string();
+  dropped.recrawl = root_metadata.recrawl_count;
+  dropped.case_sensitive = root_metadata.case_sensitive;
+  dropped.watcher = root_metadata.watcher.string();
   dropped.isKernel = isKernel;
   getLogger()->logEvent(dropped);
 

@@ -243,6 +243,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_funcId = {FuncId::Invalid};
 #endif
   f->setNewFuncId();
+  f->atomicFlags().unset(Func::Flags::Zombie);
   return f;
 }
 

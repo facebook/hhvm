@@ -174,6 +174,8 @@ public:
   void* operator new(size_t sz);
   void operator delete(void* p, size_t sz);
 
+  void destroy();
+
   /////////////////////////////////////////////////////////////////////////////
   // Basic accessors.                                                   [const]
 

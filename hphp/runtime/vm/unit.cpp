@@ -158,6 +158,32 @@ void Unit::operator delete(void* p, size_t /*sz*/) {
   low_free(p);
 }
 
+void Unit::destroy() {
+  for (auto const func : funcs()) func->atomicFlags().set(Func::Flags::Zombie);
+  for (auto const& pcls : m_preClasses) {
+    Class* cls = pcls->namedType()->clsList();
+    while (cls) {
+      Class* cur = cls;
+      cls = cls->m_next;
+      if (cur->preClass() == pcls.get()) {
+      	for (size_t i = 0; i < cur->numMethods(); i++) {
+    			if (auto meth = cur->getMethod(i)) {
+      			if (meth->cls() == cur) {
+							meth->atomicFlags().set(Func::Flags::Zombie);
+            }
+    			}
+  			}
+      }
+    }
+  }
+  Treadmill::enqueue(
+    [this] {
+      delete this;
+    }
+  );
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Code locations.
 

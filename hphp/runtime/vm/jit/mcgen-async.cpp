@@ -51,12 +51,12 @@ struct AsyncRegionTranslationContext {
 };
 
 struct AsyncPrologueContext {
-  AsyncPrologueContext(Func* func, int nPassed)
-    : func(func)
+  AsyncPrologueContext(FuncId funcId, int nPassed)
+    : funcId(funcId)
     , nPassed(nPassed)
   {}
 
-  Func* func;
+  FuncId funcId;
   int nPassed;
 };
 
@@ -128,12 +128,23 @@ struct AsyncTranslationWorker
 
     s_activeTrans++;
     SCOPE_EXIT {
-      FTRACE(2, "Finished background jit attempt for sk {}\n", show(ctx.sk));
       s_enqueuedSKs.assign(ctx.sk, false);
       s_activeTrans--;
     };
 
-    FTRACE(2, "Background jit attempt started for sk {}\n", show(ctx.sk));
+    ProfileNonVMThread nonVM;
+    HphpSession hps{Treadmill::SessionKind::TranslateWorker};
+    VMProtect _;
+
+    if (!Func::isFuncIdValid(ctx.sk.funcID())) {
+      FTRACE(2, "Invalid func id {}\n", ctx.sk.funcID().toInt());
+      return;
+    }
+
+    if (ctx.sk.func()->atomicFlags().check(Func::Flags::Zombie)) {
+      FTRACE(2, "Zombie function {}\n", ctx.sk.func()->fullName());
+      return;
+    }
 
     auto const srcRec = tc::createSrcRec(ctx.sk, ctx.spOffset);
     if (!srcRec) {
@@ -148,10 +159,6 @@ struct AsyncTranslationWorker
       FTRACE(2, "New translation found for sk {}\n", show(ctx.sk));
       return;
     }
-
-    ProfileNonVMThread nonVM;
-    HphpSession hps{Treadmill::SessionKind::TranslateWorker};
-    VMProtect _;
 
     tc::RegionTranslator translator(ctx.sk, TransKind::Live);
     translator.spOff = ctx.spOffset;
@@ -190,35 +197,42 @@ struct AsyncTranslationWorker
   }
 
   void doAsyncPrologueGen(AsyncPrologueContext& ctx) {
-
-    s_activePrologue++;
-    SCOPE_EXIT {
-      FTRACE(2, "Finished prologue generation attempt for func {}\n",
-             ctx.func->name());
-      ctx.func->atomicFlags().unset(Func::Flags::LockedForPrologueGen);
-      s_activePrologue--;
-    };
-
-    FTRACE(2, "Background prologue generation attempt started for func {}\n",
-           ctx.func->name());
-
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
 
-    tc::PrologueTranslator translator(ctx.func, ctx.nPassed);
+    if (!Func::isFuncIdValid(ctx.funcId)) {
+      FTRACE(2, "Invalid func id {}\n", ctx.funcId.toInt());
+      return;
+    }
+
+    auto const func = const_cast<Func*>(Func::fromFuncId(ctx.funcId));
+
+    SCOPE_EXIT {
+      func->atomicFlags().unset(Func::Flags::LockedForPrologueGen);
+      s_activePrologue--;
+    };
+
+    s_activePrologue++;
+
+    if (func->atomicFlags().check(Func::Flags::Zombie)) {
+      FTRACE(2, "Zombie function {}\n", func->fullName());
+      return;
+    }
+
+    tc::PrologueTranslator translator(func, ctx.nPassed);
 
     auto const tcAddr = translator.getCached();
     if (tcAddr) {
       FTRACE(2, "getCached returned true for prologue of func {}\n",
-             ctx.func->name());
+             func->name());
       return;
     }
 
  		if (auto const s = translator.shouldTranslate();
         s != TranslationResult::Scope::Success) {
       FTRACE(2, "shouldTranslate failed for func prologue {}\n",
-             ctx.func->name());
+             func->name());
       s_rejectPrologue++;
       if (s == TranslationResult::Scope::Process) {
         translator.setCachedForProcessFail();
@@ -236,11 +250,11 @@ struct AsyncTranslationWorker
     }();
     if (result.scope() == TranslationResult::Scope::Success) {
       FTRACE(2, "Successfully generated prologue for func {}\n",
-             ctx.func->name());
+             func->name());
       s_successPrologue++;
     } else {
       FTRACE(2, "Background prologue generation failed for func {}\n",
-             ctx.func->name());
+             func->name());
       s_failPrologue++;
     }
   }
@@ -318,9 +332,8 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
 
 void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
   if (!func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
-    auto const p = std::make_shared<AsyncPrologueContext>(func, nPassed);
     auto& dispatcher = asyncTranslationDispatcher();
-    dispatcher.enqueue(AsyncPrologueContext {func, nPassed});
+    dispatcher.enqueue(AsyncPrologueContext {func->getFuncId(), nPassed});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,

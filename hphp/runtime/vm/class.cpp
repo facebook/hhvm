@@ -484,6 +484,12 @@ void Class::destroy() {
 
   releaseSProps();
 
+  for (size_t i = 0; i < numMethods(); i++) {
+    if (auto meth = getMethod(i)) {
+      if (meth->cls() == this) meth->atomicFlags().set(Func::Flags::Zombie);
+    }
+  }
+
   Treadmill::enqueue(
     [this] {
       releaseRefs();

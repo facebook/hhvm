@@ -1652,6 +1652,9 @@ public:
     Locked           = 1 << 1,
     MaybeIntercepted = 1 << 2,
     LockedForPrologueGen = 1 << 3,
+    // A function is marked zombie before the unit or the class of the function
+    // is treadmilled for destruction.
+    Zombie = 1 << 4,
   };
 
  /*

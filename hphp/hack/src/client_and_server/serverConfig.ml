@@ -483,6 +483,7 @@ let load_config config options =
     ?tco_package_v2_bypass_package_check_for_class_const:
       (bool_opt "package_v2_bypass_package_check_for_class_const" config)
     ?tco_extended_reasons:(reasons_config_opt config)
+    ?tco_disable_physical_equality:(bool_opt "disable_physical_equality" config)
     ?re_no_cache:(bool_opt "re_no_cache" config)
     ?hh_distc_should_disable_trace_store:
       (bool_opt "hh_distc_should_disable_trace_store" config)

@@ -258,6 +258,8 @@ type t = {
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
+  tco_disable_physical_equality: bool;
+      (** If set to true, this disables the use of physical equality in subtyping *)
   hack_warnings: int none_or_all_except;  (** turn on hack warnings *)
   warnings_default_all: bool;
   tco_strict_switch: bool;
@@ -379,6 +381,7 @@ val set :
   ?tco_lsp_invalidation:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
+  ?tco_disable_physical_equality:bool ->
   ?hack_warnings:int none_or_all_except ->
   ?warnings_default_all:bool ->
   ?tco_strict_switch:bool ->

@@ -979,7 +979,10 @@ end = struct
       null_not_subtype bound
 
   let simplify_subtype_by_physical_equality env ty_sub ty_super simplify =
-    if phys_equal ty_sub ty_super then
+    if
+      (not (TypecheckerOptions.disable_physical_equality env.genv.tcopt))
+      && phys_equal ty_sub ty_super
+    then
       (env, TL.valid)
     else
       simplify ()

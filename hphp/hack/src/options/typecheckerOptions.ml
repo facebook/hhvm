@@ -316,6 +316,8 @@ let using_extended_reasons t = Option.is_some @@ tco_extended_reasons t
 let enable_abstract_method_optional_parameters t =
   t.GlobalOptions.tco_enable_abstract_method_optional_parameters
 
+let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality
+
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let package_v2 t = t.GlobalOptions.tco_package_v2

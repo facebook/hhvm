@@ -133,6 +133,7 @@ impl Default for GlobalOptions {
             tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,
             tco_extended_reasons: None,
+            tco_disable_physical_equality: false,
             hack_warnings: NoneOrAllExcept::AllExcept(vec![]),
             warnings_default_all: false,
             tco_strict_switch: false,

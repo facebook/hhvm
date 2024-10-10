@@ -448,6 +448,7 @@ impl HhConfig {
                     else { None }
                 }
             }),
+            tco_disable_physical_equality: hh_conf.get_bool_or("disable_physical_equality", default.tco_disable_physical_equality)?,
             hack_warnings: {
                 let is_on = hh_conf.get_bool_or("hack_warnings", true)?;
                 if is_on {

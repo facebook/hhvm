@@ -181,6 +181,7 @@ type t = {
   tco_lsp_invalidation: bool;
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
+  tco_disable_physical_equality: bool;
   hack_warnings: int none_or_all_except;
   warnings_default_all: bool;
   tco_strict_switch: bool;
@@ -291,6 +292,7 @@ let default =
     tco_lsp_invalidation = false;
     tco_autocomplete_sort_text = false;
     tco_extended_reasons = None;
+    tco_disable_physical_equality = false;
     hack_warnings = All_except [];
     warnings_default_all = false;
     tco_strict_switch = false;
@@ -399,6 +401,7 @@ let set
     ?tco_lsp_invalidation
     ?tco_autocomplete_sort_text
     ?tco_extended_reasons
+    ?tco_disable_physical_equality
     ?hack_warnings
     ?warnings_default_all
     ?tco_strict_switch
@@ -663,6 +666,10 @@ let set
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     tco_extended_reasons =
       setting_opt tco_extended_reasons options.tco_extended_reasons;
+    tco_disable_physical_equality =
+      setting
+        tco_disable_physical_equality
+        options.tco_disable_physical_equality;
     hack_warnings = setting hack_warnings options.hack_warnings;
     warnings_default_all =
       setting warnings_default_all options.warnings_default_all;

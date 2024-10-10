@@ -443,85 +443,104 @@ end = struct
     in
     { key; ty; optional }
 
-  (** Picks an inhabited subtype of the given type. *)
+  (** Goes on a stochastic walk to pick an inhabited subtype of the given type.
+
+      Termination of this function crucially relies on the invariant that EVERY
+      type has an inhabitant subtype. There are quite few denotable types where
+      this invariant does not hold, most trivially the `nothing` type. *)
   and subtype_of env ty =
-    let subtype_of = subtype_of env in
-    let subfield_of = subfield_of env in
-    select
-    @@ List.filter ~f:is_immediately_inhabited
-    @@ ty
-       :: begin
-            List.map ~f:subtype_of (Environment.get_subtypes env ty)
-            @
-            match ty with
-            | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
-            | Primitive prim -> begin
-              let open Primitive in
-              match prim with
-              | Null
-              | Int
-              | String
-              | Float
-              | Bool ->
-                []
-              | Arraykey -> [Primitive Int; Primitive String]
-              | Num -> [Primitive Int; Primitive Float]
-            end
-            | Option ty -> [Primitive Primitive.Null; subtype_of ty]
-            | Awaitable ty ->
-              let ty = subtype_of ty in
-              [Awaitable ty]
-            | Classish _ -> []
-            | Alias info -> [subtype_of info.aliased]
-            | TypeConst info -> [subtype_of info.aliased]
-            | Newtype info -> [subtype_of info.aliased]
-            | Case _
-            | Enum _ ->
-              []
-            | Vec ty ->
-              let ty = subtype_of ty in
-              [Vec ty]
-            | Dict { key; value } ->
-              let key = subtype_of key in
-              let value = subtype_of value in
-              [Dict { key; value }]
-            | Keyset ty ->
-              let ty = subtype_of ty in
-              [Keyset ty]
-            | Tuple { conjuncts; open_ } ->
-              let conjuncts = List.map ~f:subtype_of conjuncts in
-              let open_ =
-                if open_ then
-                  (* Here we should be adding new conjuncts, but with the current setup
-                     that's too expensive. Need memoization to make it more affordable. *)
-                  select [true; false]
-                else
-                  false
-              in
-              [Tuple { conjuncts; open_ }]
-            | Shape { fields; open_ } ->
-              let fields = List.map ~f:subfield_of fields in
-              let open_ =
-                if open_ then
-                  (* Here we should be adding new fields, but with the current setup
-                     that's too expensive. Need memoization to make it more affordable. *)
-                  select [true; false]
-                else
-                  false
-              in
-              [Shape { fields; open_ }]
-            | Function { parameters; variadic; return_ } ->
-              let return_ = subtype_of return_ in
-              let variadic =
-                match variadic with
-                | None -> select [None; Some (subtype_of Mixed)]
-                | Some ty -> Some ty
-              in
-              [Function { parameters; variadic; return_ }]
-            | Like ty ->
-              (* TODO: dynamic here when it is supported *)
-              [subtype_of ty]
-          end
+    let rec step ty =
+      ty
+      :: begin
+           Environment.get_subtypes env ty
+           @
+           match ty with
+           | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+           | Primitive prim -> begin
+             let open Primitive in
+             match prim with
+             | Null
+             | Int
+             | String
+             | Float
+             | Bool ->
+               []
+             | Arraykey -> [Primitive Int; Primitive String]
+             | Num -> [Primitive Int; Primitive Float]
+           end
+           | Option ty -> [Primitive Primitive.Null; ty]
+           | Awaitable ty ->
+             let ty = select @@ step ty in
+             [Awaitable ty]
+           | Alias info -> [info.aliased]
+           | TypeConst info -> [info.aliased]
+           | Newtype info -> [info.aliased]
+           | Classish _
+           | Case _
+           | Enum _ ->
+             []
+           | Vec ty ->
+             let ty = select @@ step ty in
+             [Vec ty]
+           | Dict { key; value } ->
+             let key = select @@ step key in
+             let value = select @@ step value in
+             [Dict { key; value }]
+           | Keyset ty ->
+             let ty = select @@ step ty in
+             [Keyset ty]
+           | Tuple { conjuncts; open_ } ->
+             let conjuncts = List.map ~f:(Fn.compose select step) conjuncts in
+             let open_ =
+               if open_ then
+                 (* Here we should be adding new conjuncts, but with the current setup
+                    that's too expensive. Need memoization to make it more affordable. *)
+                 select [true; false]
+               else
+                 false
+             in
+             [Tuple { conjuncts; open_ }]
+           | Shape { fields; open_ } ->
+             let fields = List.map ~f:(subfield_of env) fields in
+             let open_ =
+               if open_ then
+                 (* Here we should be adding new fields, but with the current setup
+                    that's too expensive. Need memoization to make it more affordable. *)
+                 select [true; false]
+               else
+                 false
+             in
+             [Shape { fields; open_ }]
+           | Function { parameters; variadic; return_ } ->
+             let return_ = select @@ step return_ in
+             let variadic =
+               match variadic with
+               | None -> select [None; Some (select @@ step Mixed)]
+               | Some ty -> Some ty
+             in
+             [Function { parameters; variadic; return_ }]
+           | Like ty ->
+             (* TODO: dynamic here when it is supported *)
+             step ty
+         end
+    in
+    let rec driver ty =
+      let tys = step ty in
+      if Random.bool () then
+        (* We decide to go on a stochastic walk and explore further subtypes. *)
+        driver @@ select tys
+      else
+        (* We would like to terminate with an immediately inhabited type. *)
+        let (immediately_inhabited, latent_inhabited) =
+          List.partition_tf ~f:is_immediately_inhabited tys
+        in
+        if List.is_empty immediately_inhabited then
+          (* There are no immediately inhabited type, so we must keep exploring. *)
+          driver @@ select latent_inhabited
+        else
+          select immediately_inhabited
+    in
+    driver ty
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -613,48 +632,60 @@ end = struct
        weakening to establish disjointness. For example, 2-tuples are not
        disjoint from 3-tuples. So we weaken all tuples to (mixed),
        (mixed,mixed), and (mixed,mixed,mixed) (because we only generate 1/2/3 tuples).
+
+       Although we don't have to keep the non-weakened types for disjointness
+       checking, it makes termination of `weaken_for_disjointness` trivial, so
+       we pay the price.
     *)
-    let rec weaken_for_disjointness ty : t list =
-      match ty with
-      | Classish info when Kind.equal_classish info.kind Kind.Interface ->
-        (* This can be improved on if we introduce an internal Object type which
-           is still disjoint to non classish types. *)
-        [Mixed]
-      | Option ty -> Primitive Primitive.Null :: weaken_for_disjointness ty
-      | Awaitable _ -> [Awaitable Mixed]
-      | Alias info -> weaken_for_disjointness info.aliased
-      | TypeConst info -> weaken_for_disjointness info.aliased
-      | Newtype info -> weaken_for_disjointness info.aliased
-      | Case _ ->
-        List.concat_map
-          ~f:weaken_for_disjointness
-          (Environment.get_subtypes env ty)
-      | Enum _ -> Primitive.[Primitive Int; Primitive String]
-      | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
-      | Dict _ ->
-        [
-          Dict { key = Primitive Primitive.Arraykey; value = Mixed };
-          Shape { fields = []; open_ = true };
-        ]
-      | Keyset _ -> [Keyset (Primitive Primitive.Arraykey)]
-      | Tuple _ -> [Tuple { conjuncts = []; open_ = true }; Vec Mixed]
-      | Shape _ ->
-        [
-          Shape { fields = []; open_ = true };
-          Dict { key = Primitive Primitive.Arraykey; value = Mixed };
-        ]
-      | Function _ ->
-        [Classish { kind = Kind.Class; name = "Closure"; generic = None }]
-      | Mixed -> [ty]
-      | Primitive Primitive.Arraykey ->
-        Primitive.[Primitive Int; Primitive String]
-      | Primitive Primitive.Num -> Primitive.[Primitive Int; Primitive Float]
-      | Primitive _ -> [ty]
-      | Classish _ ->
-        ty
-        :: (Environment.get_subtypes env ty
-           |> List.concat_map ~f:weaken_for_disjointness)
-      | Like _ -> [Mixed]
+    let weaken_for_disjointness ty : t list =
+      let rec step ty =
+        match ty with
+        | Classish info when Kind.equal_classish info.kind Kind.Interface ->
+          (* This can be improved on if we introduce an internal Object type which
+             is still disjoint to non classish types. *)
+          [Mixed]
+        | Option ty -> [Primitive Primitive.Null; ty]
+        | Awaitable _ -> [Awaitable Mixed]
+        | Alias info -> [info.aliased]
+        | TypeConst info -> [info.aliased]
+        | Newtype info -> [info.aliased]
+        | Case _ -> Environment.get_subtypes env ty
+        | Enum _ -> Primitive.[Primitive Int; Primitive String]
+        | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
+        | Dict _ ->
+          [
+            Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+            Shape { fields = []; open_ = true };
+          ]
+        | Keyset _ -> [Keyset (Primitive Primitive.Arraykey)]
+        | Tuple _ -> [Tuple { conjuncts = []; open_ = true }; Vec Mixed]
+        | Shape _ ->
+          [
+            Shape { fields = []; open_ = true };
+            Dict { key = Primitive Primitive.Arraykey; value = Mixed };
+          ]
+        | Function _ ->
+          [Classish { kind = Kind.Class; name = "Closure"; generic = None }]
+        | Mixed -> [ty]
+        | Primitive Primitive.Arraykey ->
+          Primitive.[Primitive Int; Primitive String]
+        | Primitive Primitive.Num -> Primitive.[Primitive Int; Primitive Float]
+        | Primitive _ -> [ty]
+        | Classish _ -> Environment.get_subtypes env ty
+        | Like _ -> [Mixed]
+      and driver acc =
+        let acc' =
+          TypeSet.to_list acc
+          |> List.concat_map ~f:step
+          |> TypeSet.of_list
+          |> TypeSet.union acc
+        in
+        if TypeSet.cardinal acc = TypeSet.cardinal acc' then
+          acc
+        else
+          driver acc'
+      in
+      driver (TypeSet.singleton ty) |> TypeSet.to_list
     in
     let ordered_subtypes ty =
       weaken_for_disjointness ty |> List.sort ~compare
@@ -954,6 +985,10 @@ end = struct
       in
       let ty = Case { name } in
       let env =
+        Option.fold bound ~init:env ~f:(fun env bound ->
+            Environment.record_subtype env ~super:bound ~sub:ty)
+      in
+      let env =
         List.fold disjuncts ~init:env ~f:(fun env disjunct ->
             Environment.record_subtype env ~super:ty ~sub:disjunct)
       in
@@ -1034,3 +1069,4 @@ end = struct
 end
 
 and TypeMap : (WrappedMap.S with type key = Type.t) = WrappedMap.Make (Type)
+and TypeSet : (Stdlib.Set.S with type elt = Type.t) = Stdlib.Set.Make (Type)

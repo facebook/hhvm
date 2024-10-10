@@ -1,8 +1,8 @@
+WARN: File "test_or.php", line 19, characters 14-20:
+Invalid condition: a value of type `C` will always be truthy (Warn[12006])
 ERROR: File "test_or.php", line 19, characters 7-21:
 Invalid argument (Typing[4110])
   File "test_or.php", line 12, characters 14-14:
   Expected `C`
   File "test_or.php", line 19, characters 7-21:
   But got `bool` because this is the result of a logical operation
-WARN: File "test_or.php", line 19, characters 14-20:
-Invalid condition: a value of type `C` will always be truthy (Warn[12006])

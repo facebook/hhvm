@@ -1,3 +1,7 @@
+WARN: File "soft_reified_within_function.php", line 12, characters 3-12:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Thard`. (Warn[12012])
+WARN: File "soft_reified_within_function.php", line 13, characters 3-12:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Tsoft`. (Warn[12012])
 ERROR: File "soft_reified_within_function.php", line 13, characters 8-12:
 Invalid `as` expression hint (Typing[4195])
   File "soft_reified_within_function.php", line 13, characters 8-12:
@@ -6,7 +10,3 @@ ERROR: File "soft_reified_within_function.php", line 16, characters 7-11:
 Soft reified generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
 ERROR: File "soft_reified_within_function.php", line 19, characters 3-7:
 Soft reified generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
-WARN: File "soft_reified_within_function.php", line 12, characters 3-12:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Thard`. (Warn[12012])
-WARN: File "soft_reified_within_function.php", line 13, characters 3-12:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Tsoft`. (Warn[12012])

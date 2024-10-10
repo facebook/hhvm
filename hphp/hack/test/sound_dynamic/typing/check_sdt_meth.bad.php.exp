@@ -1,6 +1,6 @@
+WARN: File "check_sdt_meth.bad.php", line 10, characters 9-20:
+This `is` check is always `true`. The expression on the left has type `vec<int>` which is a subtype of `vec<int>`. (Warn[12009])
 ERROR: File "check_sdt_meth.bad.php", line 15, characters 14-32:
 Too many arguments (expected 1 but got 2) (Typing[4105])
   File "check_sdt_meth.bad.php", line 5, characters 19-19:
   Definition is here
-WARN: File "check_sdt_meth.bad.php", line 10, characters 9-20:
-This `is` check is always `true`. The expression on the left has type `vec<int>` which is a subtype of `vec<int>`. (Warn[12009])

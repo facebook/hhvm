@@ -1,6 +1,6 @@
+WARN: File "noreturn_default.php", line 7, characters 9-20:
+This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
 ERROR: File "noreturn_default.php", line 8, characters 15-16:
 All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
   File "noreturn_default.php", line 9, characters 9-16:
   default declared here
-WARN: File "noreturn_default.php", line 7, characters 9-20:
-This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])

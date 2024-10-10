@@ -1,9 +1,9 @@
+WARN: File "union_polyvariant.php", line 17, characters 27-41:
+Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `int` (Warn[12007])
 ERROR: File "union_polyvariant.php", line 17, characters 27-41:
 This expression is always `false` (Typing[4118])
   File "union_polyvariant.php", line 8, characters 25-30:
   This is a string
   File "union_polyvariant.php", line 17, characters 41-41:
   This is an int
-WARN: File "union_polyvariant.php", line 17, characters 27-41:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `int` (Warn[12007])

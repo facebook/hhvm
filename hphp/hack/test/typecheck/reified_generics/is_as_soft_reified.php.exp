@@ -1,8 +1,8 @@
-ERROR: File "is_as_soft_reified.php", line 8, characters 8-13:
-Invalid `as` expression hint (Typing[4195])
-  File "is_as_soft_reified.php", line 8, characters 8-13:
-  The `as` operator cannot be used with a type with an erased generic type argument
 WARN: File "is_as_soft_reified.php", line 7, characters 3-11:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<nothing>`. (Warn[12012])
 WARN: File "is_as_soft_reified.php", line 8, characters 3-13:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<int>`. (Warn[12012])
+ERROR: File "is_as_soft_reified.php", line 8, characters 8-13:
+Invalid `as` expression hint (Typing[4195])
+  File "is_as_soft_reified.php", line 8, characters 8-13:
+  The `as` operator cannot be used with a type with an erased generic type argument

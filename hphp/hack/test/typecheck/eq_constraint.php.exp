@@ -1,11 +1,11 @@
+WARN: File "eq_constraint.php", line 17, characters 12-24:
+This is a sketchy null check on an expression of type Tclass.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x ?? $default` instead of `$x ?: $default` (Warn[12003])
 ERROR: File "eq_constraint.php", line 34, characters 20-30:
 You are trying to access the method `assertIsFoo` but this object can be null. (Typing[4064])
   File "eq_constraint.php", line 31, characters 40-43:
   This can be null
   File "eq_constraint.php", line 27, characters 30-35:
     via this generic `Tclass`
-WARN: File "eq_constraint.php", line 17, characters 12-24:
-This is a sketchy null check on an expression of type Tclass.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x ?? $default` instead of `$x ?: $default` (Warn[12003])

@@ -1,3 +1,6 @@
+WARN: File "scope_bug.php", line 18, characters 9-19:
+Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `null` (Warn[12007])
 ERROR: File "scope_bug.php", line 11, characters 19-20:
 Invalid argument (Typing[4110])
   File "scope_bug.php", line 4, characters 25-30:
@@ -10,6 +13,3 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "scope_bug.php", line 19, characters 12-12:
   But got `int`
-WARN: File "scope_bug.php", line 18, characters 9-19:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `null` (Warn[12007])

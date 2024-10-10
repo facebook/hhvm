@@ -1,3 +1,7 @@
+WARN: File "any.php", line 12, characters 17-25:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. (Warn[12012])
+WARN: File "any.php", line 16, characters 19-27:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `resource` which shares no values with `int`. (Warn[12012])
 ERROR: File "any.php", line 7, characters 13-14:
 Was expecting a type hint (Typing[4032])
 ERROR: File "any.php", line 11, characters 13-14:
@@ -6,7 +10,3 @@ ERROR: File "any.php", line 15, characters 13-14:
 Was expecting a type hint (Typing[4032])
 ERROR: File "any.php", line 19, characters 12-13:
 Was expecting a type hint (Typing[4032])
-WARN: File "any.php", line 12, characters 17-25:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `int`. (Warn[12012])
-WARN: File "any.php", line 16, characters 19-27:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `resource` which shares no values with `int`. (Warn[12012])

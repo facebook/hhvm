@@ -1,3 +1,5 @@
+WARN: File "instance_of_refinement.php", line 50, characters 7-16:
+This `is` check is always `true`. The expression on the left has type `A<string>` which is a subtype of `A<string>`. (Warn[12009])
 ERROR: File "instance_of_refinement.php", line 25, characters 16-17:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
@@ -58,5 +60,3 @@ Invalid argument (Typing[4110])
   But got `T#2` from this `is` expression test
   File "instance_of_refinement.php", line 7, characters 26-26:
     via this generic `T`
-WARN: File "instance_of_refinement.php", line 50, characters 7-16:
-This `is` check is always `true`. The expression on the left has type `A<string>` which is a subtype of `A<string>`. (Warn[12009])

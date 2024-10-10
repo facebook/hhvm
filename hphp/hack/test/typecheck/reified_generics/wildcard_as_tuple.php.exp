@@ -1,3 +1,11 @@
+WARN: File "wildcard_as_tuple.php", line 5, characters 3-13:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(_, _)`. (Warn[12012])
+WARN: File "wildcard_as_tuple.php", line 6, characters 3-13:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(T, _)`. (Warn[12012])
+WARN: File "wildcard_as_tuple.php", line 7, characters 3-13:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(_, T)`. (Warn[12012])
+WARN: File "wildcard_as_tuple.php", line 8, characters 3-13:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(T, T)`. (Warn[12012])
 ERROR: File "wildcard_as_tuple.php", line 5, characters 8-13:
 Invalid `as` expression hint (Typing[4195])
   File "wildcard_as_tuple.php", line 5, characters 9-9:
@@ -12,11 +20,3 @@ ERROR: File "wildcard_as_tuple.php", line 7, characters 8-13:
 Invalid `as` expression hint (Typing[4195])
   File "wildcard_as_tuple.php", line 7, characters 9-9:
   The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
-WARN: File "wildcard_as_tuple.php", line 5, characters 3-13:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(_, _)`. (Warn[12012])
-WARN: File "wildcard_as_tuple.php", line 6, characters 3-13:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(T, _)`. (Warn[12012])
-WARN: File "wildcard_as_tuple.php", line 7, characters 3-13:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(_, T)`. (Warn[12012])
-WARN: File "wildcard_as_tuple.php", line 8, characters 3-13:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `(T, T)`. (Warn[12012])

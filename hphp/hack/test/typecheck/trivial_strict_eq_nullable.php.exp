@@ -1,9 +1,9 @@
+WARN: File "trivial_strict_eq_nullable.php", line 13, characters 10-18:
+Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `?int` (Warn[12007])
 ERROR: File "trivial_strict_eq_nullable.php", line 13, characters 10-18:
 This expression is always `false` (Typing[4118])
   File "trivial_strict_eq_nullable.php", line 13, characters 10-11:
   This is a string
   File "trivial_strict_eq_nullable.php", line 12, characters 16-18:
   This is an int
-WARN: File "trivial_strict_eq_nullable.php", line 13, characters 10-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `?int` (Warn[12007])

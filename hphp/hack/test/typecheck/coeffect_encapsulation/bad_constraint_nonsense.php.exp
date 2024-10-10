@@ -1,7 +1,7 @@
 ERROR: File "bad_constraint_nonsense.php", line 5, characters 14-18:
-Contexts cannot be bounded by polymorphic contexts (Parsing[1002])
-ERROR: File "bad_constraint_nonsense.php", line 5, characters 14-18:
 Internal error: Unexpected context hint (Other[0000])
+ERROR: File "bad_constraint_nonsense.php", line 5, characters 14-18:
+Contexts cannot be bounded by polymorphic contexts (Parsing[1002])
 ERROR: File "bad_constraint_nonsense.php", line 5, characters 13-19:
 Invalid type hint (Typing[4062])
   File "bad_constraint_nonsense.php", line 5, characters 18-18:

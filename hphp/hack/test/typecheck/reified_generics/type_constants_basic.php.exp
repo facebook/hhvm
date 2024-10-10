@@ -1,3 +1,9 @@
+WARN: File "type_constants_basic.php", line 10, characters 5-17:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta`. (Warn[12012])
+WARN: File "type_constants_basic.php", line 11, characters 5-17:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B`. (Warn[12012])
+WARN: File "type_constants_basic.php", line 12, characters 5-17:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<int>`. (Warn[12012])
 ERROR: File "type_constants_basic.php", line 10, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_basic.php", line 5, characters 23-24:
@@ -6,9 +12,3 @@ ERROR: File "type_constants_basic.php", line 12, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_basic.php", line 7, characters 19-24:
   The `as` operator cannot be used with a type with an erased generic type argument
-WARN: File "type_constants_basic.php", line 10, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta`. (Warn[12012])
-WARN: File "type_constants_basic.php", line 11, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `B`. (Warn[12012])
-WARN: File "type_constants_basic.php", line 12, characters 5-17:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<int>`. (Warn[12012])

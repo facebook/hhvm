@@ -1,3 +1,12 @@
+warning: Warn[12009] This is check is always true. The expression on the left has type bool which is a subtype of bool. [1]
+
+cross_package_with_package_syntax_invalid_conds.php--pkg3.php:8:11
+6 |         pkg1_call(); // error; comparison binops don't register package info
+7 |       }
+[1] 8 |       if (package pkg1 is bool) {
+9 |         pkg1_call(); // error; type ops don't register package info
+10 |       }
+
 error: Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
 
 cross_package_with_package_syntax_invalid_conds.php--pkg3.php:14:11
@@ -116,14 +125,5 @@ PACKAGES.toml:13:11
 [3] 13 | [packages.pkg3]
 14 | includes = ["pkg2"]
 15 |
-
-warning: Warn[12009] This is check is always true. The expression on the left has type bool which is a subtype of bool. [1]
-
-cross_package_with_package_syntax_invalid_conds.php--pkg3.php:8:11
-6 |         pkg1_call(); // error; comparison binops don't register package info
-7 |       }
-[1] 8 |       if (package pkg1 is bool) {
-9 |         pkg1_call(); // error; type ops don't register package info
-10 |       }
 
 7 errors found

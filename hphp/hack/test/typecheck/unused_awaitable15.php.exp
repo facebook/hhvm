@@ -1,3 +1,7 @@
+WARN: File "unused_awaitable15.php", line 8, characters 8-17:
+Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "unused_awaitable15.php", line 9, characters 8-17:
+Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
 ERROR: File "unused_awaitable15.php", line 8, characters 15-17:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable15.php", line 3, characters 21-37:
@@ -6,7 +10,3 @@ ERROR: File "unused_awaitable15.php", line 9, characters 15-17:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable15.php", line 3, characters 21-37:
   This is why I think it is `Awaitable`
-WARN: File "unused_awaitable15.php", line 8, characters 8-17:
-Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "unused_awaitable15.php", line 9, characters 8-17:
-Casting Awaitable<?float> to float: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])

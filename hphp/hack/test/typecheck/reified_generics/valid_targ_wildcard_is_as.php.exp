@@ -1,8 +1,8 @@
-ERROR: File "valid_targ_wildcard_is_as.php", line 8, characters 8-14:
-Invalid `as` expression hint (Typing[4195])
-  File "valid_targ_wildcard_is_as.php", line 8, characters 10-13:
-  The `as` operator cannot be used with a reified type containing a wildcard (`_`)
 WARN: File "valid_targ_wildcard_is_as.php", line 7, characters 3-11:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<nothing>`. (Warn[12012])
 WARN: File "valid_targ_wildcard_is_as.php", line 8, characters 3-14:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `C<C<Tc#1>>`. (Warn[12012])
+ERROR: File "valid_targ_wildcard_is_as.php", line 8, characters 8-14:
+Invalid `as` expression hint (Typing[4195])
+  File "valid_targ_wildcard_is_as.php", line 8, characters 10-13:
+  The `as` operator cannot be used with a reified type containing a wildcard (`_`)

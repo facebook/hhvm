@@ -1,3 +1,5 @@
+WARN: File "trait_matching1.php", line 23, characters 7-7:
+Duplicated property `x` in `C` (defined in `C` and `MyTrait`): all instances will be aliased at runtime (Warn[12008])
 ERROR: File "trait_matching1.php", line 25, characters 13-18:
 The property `x` has the wrong type (Typing[4341])
   File "trait_matching1.php", line 25, characters 13-18:
@@ -14,5 +16,3 @@ The property `x` has the wrong type (Typing[4341])
   Expected `string`
   File "trait_matching1.php", line 13, characters 13-16:
   But got `?int`
-WARN: File "trait_matching1.php", line 23, characters 7-7:
-Duplicated property `x` in `C` (defined in `C` and `MyTrait`): all instances will be aliased at runtime (Warn[12008])

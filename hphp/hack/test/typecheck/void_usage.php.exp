@@ -1,3 +1,6 @@
+WARN: File "void_usage.php", line 6, characters 10-18:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `void` (Warn[12007])
 ERROR: File "void_usage.php", line 6, characters 10-18:
 You are using the return value of a `void` function (Typing[4119])
   File "void_usage.php", line 3, characters 15-18:
@@ -6,6 +9,3 @@ ERROR: File "void_usage.php", line 6, characters 16-18:
 You are using the return value of a `void` function (Typing[4119])
   File "void_usage.php", line 3, characters 15-18:
   A `void` function doesn't return a value.
-WARN: File "void_usage.php", line 6, characters 10-18:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `void` (Warn[12007])

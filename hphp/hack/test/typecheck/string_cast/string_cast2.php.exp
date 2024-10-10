@@ -1,3 +1,15 @@
+WARN: File "string_cast2.php", line 66, characters 3-16:
+Casting CNonStringish to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "string_cast2.php", line 68, characters 3-16:
+Casting CExplicit to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "string_cast2.php", line 69, characters 3-16:
+Casting CImplicit to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "string_cast2.php", line 70, characters 3-20:
+Casting CImplicitIntf to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "string_cast2.php", line 71, characters 3-20:
+Casting CImplicitTuse to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
+WARN: File "string_cast2.php", line 72, characters 3-20:
+Casting CImplicitTreq to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
 ERROR: File "string_cast2.php", line 33, characters 12-25:
 Cannot cast a value of type `this` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
 ERROR: File "string_cast2.php", line 45, characters 12-25:
@@ -14,15 +26,3 @@ ERROR: File "string_cast2.php", line 71, characters 3-20:
 Cannot cast a value of type `CImplicitTuse` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
 ERROR: File "string_cast2.php", line 72, characters 3-20:
 Cannot cast a value of type `CImplicitTreq` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
-WARN: File "string_cast2.php", line 66, characters 3-16:
-Casting CNonStringish to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "string_cast2.php", line 68, characters 3-16:
-Casting CExplicit to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "string_cast2.php", line 69, characters 3-16:
-Casting CImplicit to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "string_cast2.php", line 70, characters 3-20:
-Casting CImplicitIntf to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "string_cast2.php", line 71, characters 3-20:
-Casting CImplicitTuse to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])
-WARN: File "string_cast2.php", line 72, characters 3-20:
-Casting CImplicitTreq to string: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (Warn[12005])

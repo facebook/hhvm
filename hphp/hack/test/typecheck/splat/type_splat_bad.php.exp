@@ -10,6 +10,8 @@ ERROR: File "type_splat_bad.php", line 14, characters 46-53:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
 ERROR: File "type_splat_bad.php", line 14, characters 80-96:
 A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 18, characters 36-74:
+Optional parameter cannot precede non-optional parameter (Parsing[1002])
 ERROR: File "type_splat_bad.php", line 22, characters 46-51:
 A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
 ERROR: File "type_splat_bad.php", line 22, characters 74-85:
@@ -32,8 +34,6 @@ ERROR: File "type_splat_bad.php", line 40, characters 52-68:
 Splat parameters cannot be marked readonly (Parsing[1002])
 ERROR: File "type_splat_bad.php", line 40, characters 81-103:
 Splat parameters cannot be marked readonly (Parsing[1002])
-ERROR: File "type_splat_bad.php", line 18, characters 36-74:
-Optional parameter cannot precede non-optional parameter (Parsing[1002])
 ERROR: File "type_splat_bad.php", line 18, characters 104-110:
 A previous parameter has a default value.
 Remove all the default values for the preceding parameters,

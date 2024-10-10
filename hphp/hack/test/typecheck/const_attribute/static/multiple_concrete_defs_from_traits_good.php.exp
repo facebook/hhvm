@@ -1,3 +1,5 @@
+WARN: File "multiple_concrete_defs_from_traits_good.php", line 16, characters 7-7:
+Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime (Warn[12008])
 ERROR: File "multiple_concrete_defs_from_traits_good.php", line 17, characters 7-8:
 Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
   File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
@@ -22,5 +24,3 @@ Some members in class `C` are incompatible with those declared in type `T2` (Typ
   `T2`'s definition is here.
   File "multiple_concrete_defs_from_traits_good.php", line 13, characters 29-31:
   Redeclare `$p` in `C` with a compatible signature.
-WARN: File "multiple_concrete_defs_from_traits_good.php", line 16, characters 7-7:
-Duplicated property `p` in `C` (defined in `T1`, `T2` and `T3`): all instances will be aliased at runtime (Warn[12008])

@@ -1,3 +1,19 @@
+WARN: File "like_casts2.php", line 8, characters 3-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Cov<int>`. (Warn[12011])
+WARN: File "like_casts2.php", line 9, characters 3-20:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Contra<int>`. (Warn[12011])
+WARN: File "like_casts2.php", line 10, characters 3-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Inv<int>`. (Warn[12011])
+WARN: File "like_casts2.php", line 12, characters 3-26:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => int)`. (Warn[12011])
+WARN: File "like_casts2.php", line 13, characters 3-19:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~(int, int)`. (Warn[12011])
+WARN: File "like_casts2.php", line 15, characters 3-33:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~(function(int): string)`. (Warn[12011])
+WARN: File "like_casts2.php", line 19, characters 3-31:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => vec<int>)`. (Warn[12011])
+WARN: File "like_casts2.php", line 21, characters 3-34:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => Vector<int>)`. (Warn[12011])
 ERROR: File "like_casts2.php", line 8, characters 9-17:
 Invalid `as` expression hint (Typing[4195])
   File "like_casts2.php", line 8, characters 10-17:
@@ -22,19 +38,3 @@ ERROR: File "like_casts2.php", line 21, characters 9-34:
 Invalid `as` expression hint (Typing[4195])
   File "like_casts2.php", line 21, characters 23-33:
   The `as` operator cannot be used with a type with an erased generic type argument
-WARN: File "like_casts2.php", line 8, characters 3-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Cov<int>`. (Warn[12011])
-WARN: File "like_casts2.php", line 9, characters 3-20:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Contra<int>`. (Warn[12011])
-WARN: File "like_casts2.php", line 10, characters 3-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~Inv<int>`. (Warn[12011])
-WARN: File "like_casts2.php", line 12, characters 3-26:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => int)`. (Warn[12011])
-WARN: File "like_casts2.php", line 13, characters 3-19:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~(int, int)`. (Warn[12011])
-WARN: File "like_casts2.php", line 15, characters 3-33:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~(function(int): string)`. (Warn[12011])
-WARN: File "like_casts2.php", line 19, characters 3-31:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => vec<int>)`. (Warn[12011])
-WARN: File "like_casts2.php", line 21, characters 3-34:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `dynamic` which is a subtype of `~shape('a' => Vector<int>)`. (Warn[12011])

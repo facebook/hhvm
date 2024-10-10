@@ -1,3 +1,6 @@
+WARN: File "case_type_equality_check.php", line 9, characters 12-20:
+Invalid comparison: This expression will always return `false`.
+A value of type `MyInt` can never be equal to a value of type `MyBool` (Warn[12007])
 ERROR: File "case_type_equality_check.php", line 9, characters 12-20:
 This expression is always `false` (Typing[4118])
   File "case_type_equality_check.php", line 8, characters 12-16:
@@ -8,6 +11,3 @@ This expression is always `false` (Typing[4118])
   This is a value of type MyBool
   File "case_type_equality_check.php", line 6, characters 11-16:
   Typedef definition comes from here
-WARN: File "case_type_equality_check.php", line 9, characters 12-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `MyInt` can never be equal to a value of type `MyBool` (Warn[12007])

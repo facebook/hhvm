@@ -1,3 +1,5 @@
+WARN: File "abstract_inherits_from_traits.php", line 12, characters 16-16:
+Duplicated property `p` in `C` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])
 ERROR: File "abstract_inherits_from_traits.php", line 13, characters 7-7:
 Some members in class `C` are incompatible with those declared in type `A` (Typing[4341])
   File "abstract_inherits_from_traits.php", line 9, characters 38-40:
@@ -6,5 +8,3 @@ Some members in class `C` are incompatible with those declared in type `A` (Typi
   Expected `int`
   File "abstract_inherits_from_traits.php", line 9, characters 38-40:
   But got `num`
-WARN: File "abstract_inherits_from_traits.php", line 12, characters 16-16:
-Duplicated property `p` in `C` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])

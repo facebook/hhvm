@@ -1,8 +1,8 @@
+WARN: File "refine-error.php", line 6, characters 7-20:
+This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `arraykey`. (Warn[12009])
 ERROR: File "refine-error.php", line 7, characters 5-11:
 Typing error (Typing[4110])
   File "refine-error.php", line 5, characters 11-13:
   Expected `int`
   File "refine-error.php", line 7, characters 10-11:
   But got `string`
-WARN: File "refine-error.php", line 6, characters 7-20:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `arraykey`. (Warn[12009])

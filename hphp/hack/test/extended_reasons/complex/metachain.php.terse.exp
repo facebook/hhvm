@@ -1,3 +1,46 @@
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+
+File "metachain.php", line 28, character 10 - line 28, character 24:
+
+ 27 | function chain<T>(T $_): ReproGenesisChain<T> {
+ 28 |   return »null as nonnull«;
+ 29 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+
+File "metachain.php", line 36, character 12 - line 36, character 26:
+
+ 35 |   ): ReproGenesisChain<mixed> {
+ 36 |     return »null as nonnull«;
+ 37 |   }
+ 38 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+
+File "metachain.php", line 50, character 12 - line 50, character 26:
+
+ 49 |   public static function fromValue(TOut $_): ReproMetaChain<TIn, TOut> {
+ 50 |     return »null as nonnull«;
+ 51 |   }
+ 52 |   public function then<TNextOut>(
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+
+File "metachain.php", line 55, character 12 - line 55, character 26:
+
+ 54 |   ): ReproMetaChain<TIn, TNextOut> {
+ 55 |     return »null as nonnull«;
+ 56 |   }
+ 57 | }
+
+warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+
+File "metachain.php", line 64, character 10 - line 64, character 24:
+
+ 63 | ): Awaitable<TOut> {
+ 64 |   return »null as nonnull«;
+ 65 | }
+
 error: Typing[4110] Invalid argument
 
 File "metachain.php", line 17, character 19 - line 17, character 50:
@@ -103,48 +146,5 @@ File "metachain.php", line 22, character 17 - line 22, character 22:
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
-
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
-
-File "metachain.php", line 28, character 10 - line 28, character 24:
-
- 27 | function chain<T>(T $_): ReproGenesisChain<T> {
- 28 |   return »null as nonnull«;
- 29 | }
-
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
-
-File "metachain.php", line 36, character 12 - line 36, character 26:
-
- 35 |   ): ReproGenesisChain<mixed> {
- 36 |     return »null as nonnull«;
- 37 |   }
- 38 | }
-
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
-
-File "metachain.php", line 50, character 12 - line 50, character 26:
-
- 49 |   public static function fromValue(TOut $_): ReproMetaChain<TIn, TOut> {
- 50 |     return »null as nonnull«;
- 51 |   }
- 52 |   public function then<TNextOut>(
-
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
-
-File "metachain.php", line 55, character 12 - line 55, character 26:
-
- 54 |   ): ReproMetaChain<TIn, TNextOut> {
- 55 |     return »null as nonnull«;
- 56 |   }
- 57 | }
-
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
-
-File "metachain.php", line 64, character 10 - line 64, character 24:
-
- 63 | ): Awaitable<TOut> {
- 64 |   return »null as nonnull«;
- 65 | }
 
 6 errors found

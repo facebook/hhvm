@@ -140,7 +140,8 @@ let print_error format ?(oc = stderr) l =
   let absolute_errors = User_error.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
 
-let write_error_list format errors oc max_errors =
+let write_error_list format (errors : Errors.t) oc max_errors =
+  let errors = Errors.get_sorted_error_list errors in
   let (shown_errors, dropped_errors) =
     match max_errors with
     | Some max_errors -> List.split_n errors max_errors
@@ -162,7 +163,8 @@ let write_error_list format errors oc max_errors =
     Out_channel.output_string oc "No errors\n";
   Out_channel.close oc
 
-let print_error_list format errors max_errors =
+let print_error_list format (errors : Errors.t) max_errors =
+  let errors = Errors.get_sorted_error_list errors in
   let (shown_errors, dropped_errors) =
     match max_errors with
     | Some max_errors -> List.split_n errors max_errors
@@ -184,11 +186,13 @@ let print_error_list format errors max_errors =
     Printf.printf "No errors\n"
 
 let print_errors format (errors : Errors.t) max_errors : unit =
-  print_error_list format (Errors.get_sorted_error_list errors) max_errors
+  print_error_list format errors max_errors
 
-let print_errors_if_present (errors : Errors.error list) =
-  if not (List.is_empty errors) then (
-    let errors_output = Errors.convert_errors_to_string errors in
+let print_errors_if_present (errors : Errors.t) =
+  if not (Errors.is_empty errors) then (
+    let errors_output =
+      Errors.convert_errors_to_string @@ Errors.get_sorted_error_list errors
+    in
     Printf.printf "Errors:\n";
     List.iter errors_output ~f:(fun err_output ->
         Printf.printf "  %s\n" err_output)
@@ -1023,7 +1027,9 @@ let print_elapsed fn desc ~start_time =
     desc
     elapsed_ms
 
-let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
+let check_file
+    ctx (errors : Errors.t) files_info ~profile_type_check_multi ~memtrace :
+    Errors.t =
   let profiling = Option.is_some profile_type_check_multi in
   if profiling then
     Relative_path.Map.iter files_info ~f:(fun fn (_fileinfo : FileInfo.t) ->
@@ -1049,7 +1055,7 @@ let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
     let timings = Relative_path.Map.update fn add_sample timings in
     (result, timings)
   in
-  let rec go n timings =
+  let rec go n timings : Errors.t * _ =
     let (errors, timings) =
       Relative_path.Map.fold
         files_info
@@ -1059,7 +1065,7 @@ let check_file ctx errors files_info ~profile_type_check_multi ~memtrace =
             add_timing fn timings
             @@ lazy (Typing_check_job.calc_errors_and_tast ctx fn ~full_ast)
           in
-          (errors @ Errors.get_sorted_error_list new_errors, timings))
+          (Errors.merge errors new_errors, timings))
         ~init:(errors, timings)
     in
     if n > 1 then
@@ -1322,12 +1328,11 @@ let compute_tasts_expand_types ctx files_info interesting_files =
 
 let decl_parse_typecheck_and_then ctx files_contents f =
   let (parse_errors, files_info) = parse_name_and_decl ctx files_contents in
-  let parse_errors = Errors.get_sorted_error_list parse_errors in
   let (errors, _tasts) =
     compute_tasts_expand_types ctx files_info files_contents
   in
-  let errors = parse_errors @ Errors.get_sorted_error_list errors in
-  if List.is_empty errors then
+  let errors = Errors.merge parse_errors errors in
+  if Errors.is_empty errors then
     f files_info
   else
     print_errors_if_present errors
@@ -1415,7 +1420,11 @@ let handle_constraint_mode
          files to analyse *)
       ()
   in
-  let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+  let print_errors errors =
+    List.iter
+      (Errors.get_sorted_error_list errors)
+      ~f:(print_error ~oc:stdout error_format)
+  in
   (* Process a multifile that is not typechecked *)
   let process_multifile filename =
     Printf.printf
@@ -1424,11 +1433,10 @@ let handle_constraint_mode
       (Relative_path.to_absolute filename);
     let files_contents = Multifile.file_to_files filename in
     let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
-    let error_list = Errors.get_sorted_error_list parse_errors in
     let check_errors =
-      check_file ctx error_list file_info ~profile_type_check_multi ~memtrace
+      check_file ctx parse_errors file_info ~profile_type_check_multi ~memtrace
     in
-    if not (List.is_empty check_errors) then
+    if not (Errors.is_empty check_errors) then
       print_errors check_errors
     else
       Relative_path.Map.iter file_info ~f:process_file
@@ -1762,7 +1770,7 @@ let handle_mode
     builtins
     files_contents
     files_info
-    parse_errors
+    (parse_errors : Errors.t)
     max_errors
     error_format
     batch_mode
@@ -2005,7 +2013,7 @@ let handle_mode
         FileOutline.print ~short_pos:true results)
   | Dump_nast ->
     let (errors, nasts) = Errors.do_ (fun () -> create_nasts ctx files_info) in
-    print_errors_if_present (Errors.get_sorted_error_list errors);
+    print_errors_if_present errors;
 
     print_nasts
       ~should_print_position
@@ -2015,7 +2023,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types ctx files_info files_contents
     in
-    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
+    print_errors_if_present (Errors.merge parse_errors errors);
     print_tasts ~should_print_position tasts ctx
   | Dump_stripped_tast ->
     iter_over_files (fun filename ->
@@ -2132,7 +2140,7 @@ let handle_mode
           Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
         in
         (* This means builtins had errors, so lets just print those if we see them *)
-        if not (List.is_empty parse_errors) then
+        if not (Errors.is_empty parse_errors) then
           (* This closes the out channel *)
           write_error_list error_format parse_errors oc max_errors
         else (
@@ -2149,7 +2157,7 @@ let handle_mode
               let errors =
                 check_file
                   ctx
-                  (Errors.get_sorted_error_list parse_errors)
+                  parse_errors
                   individual_file_info
                   ~profile_type_check_multi
                   ~memtrace
@@ -2162,7 +2170,7 @@ let handle_mode
       check_file ctx parse_errors files_info ~profile_type_check_multi ~memtrace
     in
     print_error_list error_format errors max_errors;
-    if not (List.is_empty errors) then exit 2
+    if not (Errors.is_empty errors) then exit 2
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
     let filename = expect_single_file () in
@@ -2340,7 +2348,7 @@ let handle_mode
       Printf.printf "%s" (Hh_json.json_to_string json)
   | Map_reduce_mode ->
     let (errors, tasts) = compute_tasts_by_name ctx files_info files_contents in
-    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
+    print_errors_if_present (Errors.merge parse_errors errors);
     let mapped =
       Relative_path.Map.elements tasts
       |> List.map ~f:(fun (fn, tasts) -> Map_reduce.map ctx fn tasts errors)
@@ -2562,7 +2570,7 @@ let decl_and_run_mode
     builtins
     files_contents
     files_info
-    (Errors.get_sorted_error_list errors)
+    errors
     max_errors
     error_format
     batch_mode

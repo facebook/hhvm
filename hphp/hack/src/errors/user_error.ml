@@ -7,10 +7,12 @@
  *)
 open Hh_prelude
 
+(* The order matters here, as it will determine which errors/warnings will
+   be output first. *)
 type severity =
-  | Err
   | Warning
-[@@deriving eq, hash, ord, show]
+  | Err
+[@@deriving eq, hash, show, ord]
 
 module Severity = struct
   let to_string = function

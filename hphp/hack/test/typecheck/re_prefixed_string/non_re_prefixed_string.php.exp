@@ -1,4 +1,4 @@
 ERROR: File "non_re_prefixed_string.php", line 4, characters 8-20:
-Only `re`-prefixed strings allowed. (Parsing[1002])
-ERROR: File "non_re_prefixed_string.php", line 4, characters 8-20:
 Cannot use experimental feature: String prefixes other than `re` are not yet supported. (Other[0000])
+ERROR: File "non_re_prefixed_string.php", line 4, characters 8-20:
+Only `re`-prefixed strings allowed. (Parsing[1002])

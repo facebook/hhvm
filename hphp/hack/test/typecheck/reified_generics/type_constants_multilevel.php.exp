@@ -1,3 +1,15 @@
+WARN: File "type_constants_multilevel.php", line 9, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta::Tx`. (Warn[12012])
+WARN: File "type_constants_multilevel.php", line 10, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
+WARN: File "type_constants_multilevel.php", line 11, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
+WARN: File "type_constants_multilevel.php", line 17, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
+WARN: File "type_constants_multilevel.php", line 18, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
+WARN: File "type_constants_multilevel.php", line 19, characters 5-21:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
 ERROR: File "type_constants_multilevel.php", line 9, characters 10-21:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_multilevel.php", line 24, characters 23-24:
@@ -14,15 +26,3 @@ ERROR: File "type_constants_multilevel.php", line 19, characters 10-21:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_multilevel.php", line 26, characters 19-24:
   The `as` operator cannot be used with a type with an erased generic type argument
-WARN: File "type_constants_multilevel.php", line 9, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `this::Ta::Tx`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 10, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 11, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 17, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 18, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Y`. (Warn[12012])
-WARN: File "type_constants_multilevel.php", line 19, characters 5-21:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `Z<int>`. (Warn[12012])

@@ -1,9 +1,9 @@
-ERROR: File "fake_members11.php", line 22, characters 7-23:
-This is not an object of type `KeyedContainer`, this is a nullable type (Typing[4370])
-  File "fake_members11.php", line 13, characters 11-22:
-  Definition is here
 WARN: File "fake_members11.php", line 20, characters 9-18:
 This is a sketchy null check on an expression of type ?Vector<int>.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+ERROR: File "fake_members11.php", line 22, characters 7-23:
+This is not an object of type `KeyedContainer`, this is a nullable type (Typing[4370])
+  File "fake_members11.php", line 13, characters 11-22:
+  Definition is here

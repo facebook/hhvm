@@ -1,3 +1,5 @@
+WARN: File "type_refinement_should_not_typecheck.php", line 28, characters 13-22:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `D1` which shares no values with `D0`. (Warn[12012])
 ERROR: File "type_refinement_should_not_typecheck.php", line 25, characters 13-22:
 Invalid argument (Typing[4110])
   File "type_refinement_should_not_typecheck.php", line 10, characters 39-40:
@@ -8,5 +10,3 @@ Invalid argument (Typing[4110])
     on an object of type A0
   File "type_refinement_should_not_typecheck.php", line 25, characters 21-22:
   But got `D1`
-WARN: File "type_refinement_should_not_typecheck.php", line 28, characters 13-22:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `D1` which shares no values with `D0`. (Warn[12012])

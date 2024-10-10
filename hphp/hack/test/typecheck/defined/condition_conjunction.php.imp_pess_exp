@@ -1,3 +1,38 @@
+WARN: File "condition_conjunction.php", line 4, characters 8-14:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 4, characters 34-40:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 8, characters 14-20:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 23, characters 10-16:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 23, characters 23-29:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 23, characters 36-42:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
+WARN: File "condition_conjunction.php", line 27, characters 14-20:
+This is a sketchy null check on an expression of type ?int.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
 ERROR: File "condition_conjunction.php", line 4, characters 8-9:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 ERROR: File "condition_conjunction.php", line 4, characters 21-22:
@@ -66,38 +101,3 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "condition_conjunction.php", line 3, characters 19-22:
   But got `?int`
-WARN: File "condition_conjunction.php", line 4, characters 8-14:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 4, characters 34-40:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 8, characters 14-20:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 23, characters 10-16:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 23, characters 23-29:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 23, characters 36-42:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
-WARN: File "condition_conjunction.php", line 27, characters 14-20:
-This is a sketchy null check on an expression of type ?int.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])

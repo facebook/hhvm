@@ -1,12 +1,3 @@
-error: Parsing[1002] __Const properties may not also be __LateInit [1]
-
-const_late_init_property.php:4:3
-    2 | 
-    3 | class C {
-[1] 4 |   <<__Const, __LateInit>>
-[1] 5 |   public int $x = 0;
-    6 | }
-
 error: Other[0000] Cannot use experimental feature: The __Const attribute is not supported. [1]
 
 const_late_init_property.php:3:7
@@ -15,6 +6,15 @@ const_late_init_property.php:3:7
 [1] 3 | class C {
     4 |   <<__Const, __LateInit>>
     5 |   public int $x = 0;
+
+error: Parsing[1002] __Const properties may not also be __LateInit [1]
+
+const_late_init_property.php:4:3
+    2 | 
+    3 | class C {
+[1] 4 |   <<__Const, __LateInit>>
+[1] 5 |   public int $x = 0;
+    6 | }
 
 error: Typing[4277] A late-initialized property cannot have a default value [1]
 

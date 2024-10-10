@@ -1,3 +1,5 @@
+WARN: File "multi_class_bad1.php", line 20, characters 7-13:
+This `is` check is always `true`. The expression on the left has type `D` which is a subtype of `D`. (Warn[12009])
 ERROR: File "multi_class_bad1.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `MultiClass` could contain values with the same runtime tag (Typing[4475])
   File "multi_class_bad1.php", line 4, characters 24-24:
@@ -6,5 +8,3 @@ Invalid case type declaration. More than one variant of `MultiClass` could conta
   It overlaps with `E`, which includes **instances of the class E**
   File "multi_class_bad1.php", line 4, characters 11-20:
   Because **instances of the class C** contains **instances of the class E**, `C` and `E` cannot be in the same case type
-WARN: File "multi_class_bad1.php", line 20, characters 7-13:
-This `is` check is always `true`. The expression on the left has type `D` which is a subtype of `D`. (Warn[12009])

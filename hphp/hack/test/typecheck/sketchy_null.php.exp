@@ -1,11 +1,11 @@
+WARN: File "sketchy_null.php", line 4, characters 7-8:
+This is a sketchy null check on an expression of type mixed.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$m is nonnull` instead (Warn[12003])
 ERROR: File "sketchy_null.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
   File "sketchy_null.php", line 3, characters 23-26:
   Expected `null`
   File "sketchy_null.php", line 3, characters 12-16:
   But got `nonnull`
-WARN: File "sketchy_null.php", line 4, characters 7-8:
-This is a sketchy null check on an expression of type mixed.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$m is nonnull` instead (Warn[12003])

@@ -1,3 +1,15 @@
+WARN: File "trivial_compare_int_enum_to_string_bad.php", line 8, characters 10-20:
+Invalid comparison: This expression will always return `false`.
+A value of type `A` can never be equal to a value of type `string` (Warn[12007])
+WARN: File "trivial_compare_int_enum_to_string_bad.php", line 12, characters 10-20:
+Invalid comparison: This expression will always return `false`.
+A value of type `string` can never be equal to a value of type `A` (Warn[12007])
+WARN: File "trivial_compare_int_enum_to_string_bad.php", line 16, characters 10-20:
+Invalid comparison: This expression will always return `true`.
+A value of type `A` can never be equal to a value of type `string` (Warn[12007])
+WARN: File "trivial_compare_int_enum_to_string_bad.php", line 20, characters 10-20:
+Invalid comparison: This expression will always return `true`.
+A value of type `string` can never be equal to a value of type `A` (Warn[12007])
 ERROR: File "trivial_compare_int_enum_to_string_bad.php", line 8, characters 10-20:
 This expression is always `false` (Typing[4118])
   File "trivial_compare_int_enum_to_string_bad.php", line 3, characters 16-18:
@@ -22,15 +34,3 @@ This expression is always `true` (Typing[4118])
   This is a string
   File "trivial_compare_int_enum_to_string_bad.php", line 3, characters 16-18:
   This is an int
-WARN: File "trivial_compare_int_enum_to_string_bad.php", line 8, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `A` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "trivial_compare_int_enum_to_string_bad.php", line 12, characters 10-20:
-Invalid comparison: This expression will always return `false`.
-A value of type `string` can never be equal to a value of type `A` (Warn[12007])
-WARN: File "trivial_compare_int_enum_to_string_bad.php", line 16, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `A` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "trivial_compare_int_enum_to_string_bad.php", line 20, characters 10-20:
-Invalid comparison: This expression will always return `true`.
-A value of type `string` can never be equal to a value of type `A` (Warn[12007])

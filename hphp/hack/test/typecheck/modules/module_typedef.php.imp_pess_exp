@@ -1,3 +1,7 @@
+WARN: File "module_typedef.php--A.php", line 26, characters 8-14:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
+WARN: File "module_typedef.php--A.php", line 30, characters 8-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
 ERROR: File "module_typedef.php--A.php", line 14, characters 21-22:
 You cannot use this type in a public declaration. (Typing[4446])
   File "module_typedef.php--A.php", line 7, characters 15-16:
@@ -6,10 +10,6 @@ ERROR: File "module_typedef.php--A.php", line 18, characters 21-25:
 You cannot use this type in a public declaration. (Typing[4446])
   File "module_typedef.php--A.php", line 9, characters 18-22:
   It is declared as `internal` here
-WARN: File "module_typedef.php--A.php", line 26, characters 8-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
-WARN: File "module_typedef.php--A.php", line 30, characters 8-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
 ERROR: File "module_typedef.php--B.php", line 7, characters 12-13:
 Cannot access an internal element from module `A` in module `B` (Typing[4444])
   File "module_typedef.php--A.php", line 7, characters 15-16:

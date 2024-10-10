@@ -1,7 +1,7 @@
+WARN: File "unused_awaitable17.php", line 9, characters 7-14:
+Invalid comparison: This expression will always return `false`.
+A value of type `Awaitable<?int>` can never be equal to a value of type `int` (Warn[12007])
 ERROR: File "unused_awaitable17.php", line 9, characters 7-8:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable17.php", line 3, characters 21-35:
   This is why I think it is `Awaitable`
-WARN: File "unused_awaitable17.php", line 9, characters 7-14:
-Invalid comparison: This expression will always return `false`.
-A value of type `Awaitable<?int>` can never be equal to a value of type `int` (Warn[12007])

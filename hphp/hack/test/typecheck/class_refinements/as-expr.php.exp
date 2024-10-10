@@ -1,6 +1,6 @@
+WARN: File "as-expr.php", line 9, characters 8-45:
+This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Box` which shares no values with `(Box with { type T = int }, int)`. (Warn[12012])
 ERROR: File "as-expr.php", line 8, characters 14-41:
 Type refinements cannot appear on the right-hand side of an as-expression. (NastCheck[3101])
 ERROR: File "as-expr.php", line 9, characters 15-39:
 Type refinements cannot appear on the right-hand side of an as-expression. (NastCheck[3101])
-WARN: File "as-expr.php", line 9, characters 8-45:
-This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Box` which shares no values with `(Box with { type T = int }, int)`. (Warn[12012])

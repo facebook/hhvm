@@ -1,6 +1,6 @@
+WARN: File "async_lambda3.php", line 15, characters 7-14:
+Invalid condition: a value of type `Awaitable<bool>` will always be truthy (Warn[12006])
 ERROR: File "async_lambda3.php", line 15, characters 7-14:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "async_lambda3.php", line 13, characters 8-22:
   This is why I think it is `Awaitable`
-WARN: File "async_lambda3.php", line 15, characters 7-14:
-Invalid condition: a value of type `Awaitable<bool>` will always be truthy (Warn[12006])

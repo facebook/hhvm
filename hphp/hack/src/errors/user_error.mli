@@ -7,8 +7,8 @@
  *)
 
 type severity =
-  | Err
   | Warning
+  | Err
 [@@deriving ord]
 
 module Severity : sig

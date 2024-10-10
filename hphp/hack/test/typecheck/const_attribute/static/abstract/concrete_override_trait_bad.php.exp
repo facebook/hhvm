@@ -1,8 +1,8 @@
+WARN: File "concrete_override_trait_bad.php", line 8, characters 7-7:
+Duplicated property `p` in `B` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])
 ERROR: File "concrete_override_trait_bad.php", line 10, characters 29-36:
 The property `$p` has the wrong type (Typing[4341])
   File "concrete_override_trait_bad.php", line 5, characters 38-40:
   Expected `int`
   File "concrete_override_trait_bad.php", line 10, characters 29-36:
   But got `arraykey`
-WARN: File "concrete_override_trait_bad.php", line 8, characters 7-7:
-Duplicated property `p` in `B` (defined in `A` and `B`): all instances will be aliased at runtime (Warn[12008])

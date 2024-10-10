@@ -1,6 +1,6 @@
+WARN: File "invalid_is_nothing.php", line 5, characters 7-19:
+This `is` check is always `false`. The expression on the left has type `mixed` which shares no values with `nothing`. (Warn[12010])
 ERROR: File "invalid_is_nothing.php", line 5, characters 13-19:
 Invalid `is` expression hint (Typing[4195])
   File "invalid_is_nothing.php", line 5, characters 13-19:
   The `is` operator cannot be used with the `nothing` type
-WARN: File "invalid_is_nothing.php", line 5, characters 7-19:
-This `is` check is always `false`. The expression on the left has type `mixed` which shares no values with `nothing`. (Warn[12010])

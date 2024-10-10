@@ -1,3 +1,6 @@
+WARN: File "akempty_promotion_7.php", line 9, characters 7-18:
+Sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty`. (Warn[12006])
 ERROR: File "akempty_promotion_7.php", line 9, characters 7-10:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 ERROR: File "akempty_promotion_7.php", line 12, characters 5-6:
@@ -6,6 +9,3 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "akempty_promotion_7.php", line 8, characters 8-12:
   But got `vec<string>`
-WARN: File "akempty_promotion_7.php", line 9, characters 7-18:
-Sketchy condition: testing the truthiness of a string may not behave as expected.
-The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty`. (Warn[12006])

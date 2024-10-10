@@ -1,3 +1,5 @@
+WARN: File "inferred_variadic_type.php", line 27, characters 11-19:
+This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])
 ERROR: File "inferred_variadic_type.php", line 37, characters 14-18:
 Typing error (Typing[4429])
   File "inferred_variadic_type.php", line 37, characters 14-26:
@@ -44,5 +46,3 @@ Invalid argument (Typing[4110])
   Expected `C` (variadic argument)
   File "inferred_variadic_type.php", line 15, characters 42-44:
   But got `int`
-WARN: File "inferred_variadic_type.php", line 27, characters 11-19:
-This `is` check is always `true`. The expression on the left has type `int` which is a subtype of `int`. (Warn[12009])

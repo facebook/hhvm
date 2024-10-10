@@ -1,3 +1,18 @@
+WARN: File "bad_prims.php", line 17, characters 3-24:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `float` (Warn[12007])
+WARN: File "bad_prims.php", line 18, characters 3-25:
+Invalid comparison: This expression will always return `false`.
+A value of type `bool` can never be equal to a value of type `float` (Warn[12007])
+WARN: File "bad_prims.php", line 19, characters 3-26:
+Invalid comparison: This expression will always return `false`.
+A value of type `null` can never be equal to a value of type `string` (Warn[12007])
+WARN: File "bad_prims.php", line 20, characters 3-25:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `string` (Warn[12007])
+WARN: File "bad_prims.php", line 21, characters 3-33:
+Invalid comparison: This expression will always return `false`.
+A value of type `int` can never be equal to a value of type `float` (Warn[12007])
 ERROR: File "bad_prims.php", line 16, characters 3-22:
 The arguments to this value equality test are not the same types or are not the allowed types (int, bool, float, string, vec, keyset, dict). The behavior for this test is changing and will soon either be universally false or throw an exception. (Typing[4443])
   File "bad_prims.php", line 10, characters 3-5:
@@ -40,18 +55,3 @@ The arguments to this value equality test are not the same types or are not the 
   This is a num (int | float)
   File "bad_prims.php", line 14, characters 3-10:
   This is an array key (int | string)
-WARN: File "bad_prims.php", line 17, characters 3-24:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `float` (Warn[12007])
-WARN: File "bad_prims.php", line 18, characters 3-25:
-Invalid comparison: This expression will always return `false`.
-A value of type `bool` can never be equal to a value of type `float` (Warn[12007])
-WARN: File "bad_prims.php", line 19, characters 3-26:
-Invalid comparison: This expression will always return `false`.
-A value of type `null` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "bad_prims.php", line 20, characters 3-25:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `string` (Warn[12007])
-WARN: File "bad_prims.php", line 21, characters 3-33:
-Invalid comparison: This expression will always return `false`.
-A value of type `int` can never be equal to a value of type `float` (Warn[12007])

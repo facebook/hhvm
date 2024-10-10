@@ -1,3 +1,5 @@
+WARN: File "type_constants_self_referential.php", line 15, characters 5-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])
 ERROR: File "type_constants_self_referential.php", line 14, characters 10-17:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_self_referential.php", line 5, characters 23-24:
@@ -6,5 +8,3 @@ ERROR: File "type_constants_self_referential.php", line 16, characters 10-20:
 Invalid `as` expression hint (Typing[4195])
   File "type_constants_self_referential.php", line 21, characters 23-24:
   The `as` operator cannot be used with the abstract type constant Tc because it is not marked `<<__Enforceable>>`
-WARN: File "type_constants_self_referential.php", line 15, characters 5-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `int` which is a subtype of `int`. (Warn[12011])

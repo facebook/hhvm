@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ce37713cee7d44f2c9aa8d15be595308>>
+// @generated SignedSource<<9399fd0dc8affc183c4080ce93cb903b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,11 +37,11 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, hash, ord, show)")]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show, ord)")]
 #[repr(u8)]
 pub enum Severity {
-    Err,
     Warning,
+    Err,
 }
 impl TrivialDrop for Severity {}
 arena_deserializer::impl_deserialize_in_arena!(Severity);

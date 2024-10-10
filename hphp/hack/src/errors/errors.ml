@@ -339,16 +339,21 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
         } =
     y
   in
-  (* The primary sort order is by file *)
-  let comparison =
-    Relative_path.compare
-      (fst x_claim |> Pos.filename)
-      (fst y_claim |> Pos.filename)
-  in
-  (* Then sort by severity *)
+  (* /!\ KEEP THIS IN SYNC WITH errors_impl.rs, `fn cmp_impl` *)
+  let comparison = 0 in
+  (* order by severity *)
   let comparison =
     if comparison = 0 then
       User_error.compare_severity x_severity y_severity
+    else
+      comparison
+  in
+  (* order by file *)
+  let comparison =
+    if comparison = 0 then
+      Relative_path.compare
+        (fst x_claim |> Pos.filename)
+        (fst y_claim |> Pos.filename)
     else
       comparison
   in

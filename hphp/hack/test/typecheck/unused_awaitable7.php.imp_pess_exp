@@ -1,8 +1,8 @@
-ERROR: File "unused_awaitable7.php", line 27, characters 7-8:
-This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-  File "unused_awaitable7.php", line 11, characters 16-29:
-  This is why I think it is `Awaitable`
 WARN: File "unused_awaitable7.php", line 20, characters 7-24:
 This `is` check is always `true`. The expression on the left has type `Awaitable<int>` which is a subtype of `Awaitable<int>`. (Warn[12009])
 WARN: File "unused_awaitable7.php", line 22, characters 7-24:
 This `is` check is always `true`. The expression on the left has type `Awaitable<?int>` which is a subtype of `Awaitable<?int>`. (Warn[12009])
+ERROR: File "unused_awaitable7.php", line 27, characters 7-8:
+This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+  File "unused_awaitable7.php", line 11, characters 16-29:
+  This is why I think it is `Awaitable`

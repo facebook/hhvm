@@ -1,3 +1,8 @@
+WARN: File "test_superglobals.php", line 33, characters 10-37:
+This is a sketchy null check on an expression of type mixed.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
 ERROR: File "test_superglobals.php", line 27, characters 10-23:
 [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 ERROR: File "test_superglobals.php", line 28, characters 5-18:
@@ -14,8 +19,3 @@ ERROR: File "test_superglobals.php", line 36, characters 10-29:
 [Test::test_method_call]{$_}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 ERROR: File "test_superglobals.php", line 37, characters 5-24:
 [Test::test_method_call]{$_}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
-WARN: File "test_superglobals.php", line 33, characters 10-37:
-This is a sketchy null check on an expression of type mixed.
-It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
-If you want to test for them, please consider doing so explicitly.
-If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])

@@ -1,3 +1,7 @@
+WARN: File "obj_get_lvar.php", line 13, characters 10-21:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?Bar`. (Warn[12011])
+WARN: File "obj_get_lvar.php", line 15, characters 6-17:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?Bar`. (Warn[12011])
 ERROR: File "obj_get_lvar.php", line 8, characters 18-19:
 Dynamic access of properties and methods is only permitted on values of type `dynamic`. (Naming[2011])
   File "obj_get_lvar.php", line 8, characters 18-19:
@@ -56,7 +60,3 @@ Dynamic access of property (Typing[4110])
   Expected `dynamic`
   File "obj_get_lvar.php", line 12, characters 5-9:
   Type `this` is not a subtype of `dynamic` under dynamic-aware subtyping
-WARN: File "obj_get_lvar.php", line 13, characters 10-21:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?Bar`. (Warn[12011])
-WARN: File "obj_get_lvar.php", line 15, characters 6-17:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `null` which is a subtype of `?Bar`. (Warn[12011])

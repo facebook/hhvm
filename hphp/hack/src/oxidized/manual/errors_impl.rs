@@ -53,7 +53,7 @@ impl<PP, P> UserError<PP, P> {
 
 impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
     // Intended to match the implementation of `compare` in `Errors.sort` in OCaml.
-    pub fn cmp_impl(&self, other: &Self, by_phase: bool) -> Ordering {
+    pub fn cmp_impl(&self, other: &Self, ignore_codes: bool) -> Ordering {
         let Self {
             severity: self_severity,
             code: self_code,
@@ -74,19 +74,15 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             is_fixmed: _,
             flags: _,
         } = other;
-        let compare_code = |self_code: ErrorCode, other_code: ErrorCode| {
-            if by_phase {
-                (self_code / 1000).cmp(&{ other_code / 1000 })
-            } else {
-                self_code.cmp(&other_code)
-            }
-        };
+        let self_phase = self_code / 1000;
+        let other_phase = other_code / 1000;
+        // /!\ KEEP IN SYNC WITH `Errors.compare_internal` IN OCaml. /!\
         // The primary sort order is by file of the claim (main message).
-        self_pos
-            .cmp_file(other_pos)
-            .then(self_severity.cmp(other_severity))
-            // If the files are the same, sort by error code or phase, depending on parameter.
-            .then(compare_code(*self_code, *other_code))
+        self_severity
+            .cmp(other_severity)
+            .then(self_pos.cmp_file(other_pos))
+            // If the files are the same, sort by phase.
+            .then(self_phase.cmp(&other_phase))
             // If the phases are the same, sort by position.
             .then(self_pos.cmp(other_pos))
             // If the positions are the same, sort by claim message text.
@@ -95,6 +91,13 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             // messages (which contain further explanation for the error
             // reported in the claim message).
             .then(self_reasons.iter().cmp(other_reasons.iter()))
+            // Sometimes with have the same errors with different codes. For
+            // sorting stability, sort by code at the end.
+            .then(if ignore_codes {
+                Ordering::Equal
+            } else {
+                self_code.cmp(other_code)
+            })
     }
 }
 

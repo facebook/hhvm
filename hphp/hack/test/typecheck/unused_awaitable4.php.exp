@@ -1,6 +1,6 @@
+WARN: File "unused_awaitable4.php", line 18, characters 7-9:
+Invalid condition: a value of type `Awaitable<int>` will always be truthy (Warn[12006])
 ERROR: File "unused_awaitable4.php", line 18, characters 7-9:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
   File "unused_awaitable4.php", line 12, characters 21-34:
   This is why I think it is `Awaitable`
-WARN: File "unused_awaitable4.php", line 18, characters 7-9:
-Invalid condition: a value of type `Awaitable<int>` will always be truthy (Warn[12006])

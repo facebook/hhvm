@@ -1,11 +1,3 @@
-ERROR: File "is_as_shallow_checks.php", line 10, characters 13-23:
-Invalid `as` expression hint (Typing[4195])
-  File "is_as_shallow_checks.php", line 10, characters 13-23:
-  The `as` operator cannot be used with a type with an erased generic type argument
-ERROR: File "is_as_shallow_checks.php", line 23, characters 13-24:
-Invalid `as` expression hint (Typing[4195])
-  File "is_as_shallow_checks.php", line 23, characters 13-24:
-  The `as` operator cannot be used with a type with an erased generic type argument
 WARN: File "is_as_shallow_checks.php", line 9, characters 3-21:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Erased<nothing>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 10, characters 3-23:
@@ -28,3 +20,11 @@ WARN: File "is_as_shallow_checks.php", line 24, characters 3-33:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, Reified<int>>`. (Warn[12012])
 WARN: File "is_as_shallow_checks.php", line 25, characters 3-32:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `string` which shares no values with `Both<nothing, Erased<int>>`. (Warn[12012])
+ERROR: File "is_as_shallow_checks.php", line 10, characters 13-23:
+Invalid `as` expression hint (Typing[4195])
+  File "is_as_shallow_checks.php", line 10, characters 13-23:
+  The `as` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_as_shallow_checks.php", line 23, characters 13-24:
+Invalid `as` expression hint (Typing[4195])
+  File "is_as_shallow_checks.php", line 23, characters 13-24:
+  The `as` operator cannot be used with a type with an erased generic type argument

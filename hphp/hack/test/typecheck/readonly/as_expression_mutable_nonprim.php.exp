@@ -1,4 +1,4 @@
-ERROR: File "as_expression_mutable_nonprim.php", line 5, characters 12-20:
-This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])
 WARN: File "as_expression_mutable_nonprim.php", line 5, characters 12-20:
 This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `Foo` which is a subtype of `Foo`. (Warn[12011])
+ERROR: File "as_expression_mutable_nonprim.php", line 5, characters 12-20:
+This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])

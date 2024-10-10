@@ -1,7 +1,7 @@
 Errors:
+  [7:3-21] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<nothing, A<Ta#2, Tb#1>>`.
   [7:8-21] Invalid `as` expression hint
   [7:13-20] The `as` operator cannot be used with a reified type containing a wildcard (`_`)
-  [7:3-21] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `int` which shares no values with `A<nothing, A<Ta#2, Tb#1>>`.
 [(Class
     { c_span = [4:1-25]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

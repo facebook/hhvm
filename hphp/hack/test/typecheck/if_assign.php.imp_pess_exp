@@ -1,3 +1,6 @@
+WARN: File "if_assign.php", line 13, characters 7-13:
+Sketchy condition: testing the truthiness of a string may not behave as expected.
+The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty`. (Warn[12006])
 ERROR: File "if_assign.php", line 13, characters 7-8:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 ERROR: File "if_assign.php", line 15, characters 10-11:
@@ -6,6 +9,3 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "if_assign.php", line 13, characters 12-13:
   But got `string`
-WARN: File "if_assign.php", line 13, characters 7-13:
-Sketchy condition: testing the truthiness of a string may not behave as expected.
-The values `""` and `"0"` are both considered falsy. To check for non-emptiness, use `!Str\is_empty`. (Warn[12006])

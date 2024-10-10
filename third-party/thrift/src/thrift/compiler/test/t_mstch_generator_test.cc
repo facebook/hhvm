@@ -25,7 +25,7 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-TEST(t_mstch_generator_test, cache_leaks) {
+TEST(MstchGeneratorTest, cache_leaks) {
   class leaky_program : public mstch_program {
    public:
     leaky_program(

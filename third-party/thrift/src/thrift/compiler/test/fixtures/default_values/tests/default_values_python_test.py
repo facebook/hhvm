@@ -22,7 +22,6 @@ from facebook.thrift.compiler.test.fixtures.default_values.module.thrift_types i
 
 
 class ThriftPythonDefaultValuesTest(unittest.TestCase):
-
     def test_intrinsic_default_values(self) -> None:
         """
         Tests intrinsic (i.e., non-custom) default values for struct fields.

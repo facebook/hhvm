@@ -155,9 +155,9 @@ class SerializerTests(SerializerTestBase):
         with self.assertRaises(Error):
             deserialize(easy, b"\x05AAAAAAAA")
         with self.assertRaises(Error):
-            deserialize(easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY)
+            deserialize(easy, b"\x02\xde\xad\xbe\xef", protocol=Protocol.BINARY)
         with self.assertRaises(BufferError):
-            deserialize_from_header(easy, b"\x02\xDE\xAD\xBE\xEF")
+            deserialize_from_header(easy, b"\x02\xde\xad\xbe\xef")
         control = easy(val=5, val_list=[4, 3, 2, 1])
         buf = serialize_with_header(control, transform=Transform.ZSTD_TRANSFORM)
         newBytes = bytearray(buf)

@@ -415,7 +415,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "'str' object has no attribute 'timestamp'"
         ):
-            TestUnionAdaptedTypesImmutable.fromValue("1718728839"),
+            (TestUnionAdaptedTypesImmutable.fromValue("1718728839"),)
         _thrift_serialization_round_trip(self, immutable_serializer, u2)
 
         u3 = TestUnionAdaptedTypesImmutable(non_adapted_i32=1718728839)

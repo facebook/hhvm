@@ -116,27 +116,27 @@ class TestMarshalPrimitives(MarshalFixture):
         self.assert_type_error(fixture.roundtrip_bool, None, "oops", 1, 1.0)
 
     def test_bytes(self) -> None:
-        for x in (b"", b"bytes", b"\xE2\x82\xAC"):
+        for x in (b"", b"bytes", b"\xe2\x82\xac"):
             self.assertEqual(x, fixture.roundtrip_bytes(x))
         self.assert_type_error(fixture.roundtrip_bytes, None, "oops", 1, 1.0)
 
     def test_unicode(self) -> None:
-        for x in ("", "unicode", b"\xE2\x82\xAC".decode()):
+        for x in ("", "unicode", b"\xe2\x82\xac".decode()):
             self.assertEqual(x, fixture.roundtrip_unicode(x))
         self.assert_type_error(fixture.roundtrip_unicode, None, b"oops", 1, 1.0)
 
-        self.assertEqual("€", fixture.make_unicode(b"\xE2\x82\xAC"))
+        self.assertEqual("€", fixture.make_unicode(b"\xe2\x82\xac"))
         with self.assertRaises(UnicodeDecodeError):
-            fixture.make_unicode(b"\xE2\x82")
+            fixture.make_unicode(b"\xe2\x82")
 
     def test_iobuf_stack(self) -> None:
-        for b in (b"", b"bytes", b"\xE2\x82\xAC"):
+        for b in (b"", b"bytes", b"\xe2\x82\xac"):
             x = IOBuf(memoryview(b))
             self.assertEqual(x, fixture.roundtrip_iobuf_stack(x))
         self.assert_type_error(fixture.roundtrip_iobuf_stack, None, b"oops", 1, 1.0)
 
     def test_iobuf_heap(self) -> None:
-        for b in (b"", b"bytes", b"\xE2\x82\xAC"):
+        for b in (b"", b"bytes", b"\xe2\x82\xac"):
             x = IOBuf(memoryview(b))
             self.assertEqual(x, fixture.roundtrip_iobuf_heap(x))
         self.assert_type_error(fixture.roundtrip_iobuf_heap, None, b"oops", 1, 1.0)
@@ -190,7 +190,7 @@ class TestMarshalList(MarshalFixture):
         empty_tuple_refcount = getrefcount(())
 
         def make_list():
-            return (b"", b"-1", b"wef2", b"\xE2\x82\xAC")
+            return (b"", b"-1", b"wef2", b"\xe2\x82\xac")
 
         self.assertEqual(make_list(), fixture.roundtrip_bytes_list(make_list()))
         self.assertEqual((), fixture.roundtrip_bytes_list(()))
@@ -204,7 +204,7 @@ class TestMarshalList(MarshalFixture):
         empty_tuple_refcount = getrefcount(())
 
         def make_list():
-            return ("", "-1", "€", "", b"\xE2\x82\xAC".decode())
+            return ("", "-1", "€", "", b"\xe2\x82\xac".decode())
 
         self.assertEqual(make_list(), fixture.roundtrip_unicode_list(make_list()))
         self.assertEqual((), fixture.roundtrip_unicode_list(()))
@@ -213,7 +213,7 @@ class TestMarshalList(MarshalFixture):
         self.assertEqual(empty_tuple_refcount, getrefcount(()))
 
         with self.assertRaises(UnicodeDecodeError):
-            fixture.make_unicode_list((b"", b"", b"", b"", b"\xE2\x82"))
+            fixture.make_unicode_list((b"", b"", b"", b"", b"\xe2\x82"))
         # The empty str created before error are not leaked
         self.assertEqual(empty_refcount, getrefcount(""))
 
@@ -256,7 +256,7 @@ class TestMarshalSet(MarshalFixture):
         empty_refcount = getrefcount(b"")
 
         def make_set():
-            return frozenset({b"", b"-1", b"wef2", b"\xE2\x82\xAC"})
+            return frozenset({b"", b"-1", b"wef2", b"\xe2\x82\xac"})
 
         self.assertEqual(make_set(), fixture.roundtrip_bytes_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_bytes_set(frozenset()))
@@ -268,7 +268,7 @@ class TestMarshalSet(MarshalFixture):
         empty_refcount = getrefcount("")
 
         def make_set():
-            return frozenset({"", "-1", "€", b"\xE2\x82\xAC".decode()})
+            return frozenset({"", "-1", "€", b"\xe2\x82\xac".decode()})
 
         self.assertEqual(make_set(), fixture.roundtrip_unicode_set(make_set()))
         self.assertEqual(frozenset(), fixture.roundtrip_unicode_set(frozenset()))
@@ -276,7 +276,7 @@ class TestMarshalSet(MarshalFixture):
         self.assertEqual(empty_refcount, getrefcount(""))
 
         with self.assertRaises(UnicodeDecodeError):
-            fixture.make_unicode_set(frozenset((b"", b"a", b"c", b"e", b"\xE2\x82")))
+            fixture.make_unicode_set(frozenset((b"", b"a", b"c", b"e", b"\xe2\x82")))
         # The empty str created before error are not leaked
         self.assertEqual(empty_refcount, getrefcount(""))
 
@@ -401,7 +401,7 @@ class TestMarshalMap(MarshalFixture):
         self.assertEqual(ace_refcount, getrefcount(1))
 
         with self.assertRaises(UnicodeDecodeError):
-            fixture.make_unicode_val_map(((-1, b""), (0, b"a"), (1, b"\xE2\x82")))
+            fixture.make_unicode_val_map(((-1, b""), (0, b"a"), (1, b"\xe2\x82")))
 
         self.assertEqual(nil_refcount, getrefcount(0))
         self.assertEqual(int_refcount, getrefcount(-1))

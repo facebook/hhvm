@@ -45,7 +45,6 @@ def _gen_find_recursive_files(top: Path) -> typing.Generator[Path, None, None]:
 
 
 class FixtureTest(unittest.TestCase):
-
     MSG = " ".join(
         [
             "One or more fixtures are out of sync with the thrift compiler.",
@@ -107,7 +106,6 @@ class FixtureTest(unittest.TestCase):
         self.maxDiff = None
 
     def runTest(self, fixture_name: str) -> None:
-
         repo_root_dir_abspath = Path.cwd()
         fixture_dir_abspath = (
             repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name

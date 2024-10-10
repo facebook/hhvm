@@ -206,16 +206,16 @@ class ThriftServiceProxy(Protocol):
 def gen_metadata(cls: Metadata) -> ThriftMetadata: ...
 @overload
 def gen_metadata(
-    cls: Union[StructOrUnion, Type[StructOrUnion]]
+    cls: Union[StructOrUnion, Type[StructOrUnion]],
 ) -> ThriftStructProxy: ...
 @overload
 def gen_metadata(
-    cls: Union[GeneratedError, Type[GeneratedError]]
+    cls: Union[GeneratedError, Type[GeneratedError]],
 ) -> ThriftExceptionProxy: ...
 @overload
 def gen_metadata(
     # pyre-fixme[11]: Annotation `ServiceInterface` is not defined as a type.
-    cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]]
+    cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]],
 ) -> ThriftServiceProxy: ...
 @overload
 # pyre-fixme[43]: Signature of overloaded function `gen_metadata` will never be matched.

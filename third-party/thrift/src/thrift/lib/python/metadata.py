@@ -557,7 +557,7 @@ def gen_metadata(
         Type[GeneratedError],
         ServiceInterface,
         Type[ServiceInterface],
-    ]
+    ],
 ) -> Union[ThriftStructProxy, ThriftExceptionProxy, ThriftServiceProxy]:
     if hasattr(obj_or_cls, "getThriftModuleMetadata"):
         return obj_or_cls.getThriftModuleMetadata()

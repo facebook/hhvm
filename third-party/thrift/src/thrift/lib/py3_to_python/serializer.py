@@ -16,7 +16,6 @@
 Intermediate solution to be able to have a generic serializer from
 """
 
-
 from enum import Enum
 from functools import singledispatch
 

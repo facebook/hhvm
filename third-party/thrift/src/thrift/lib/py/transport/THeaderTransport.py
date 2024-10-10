@@ -620,7 +620,6 @@ def _frame_size_check(sz, set_max_size, header: bool = True) -> None:
 
 
 class RequestHandler(http_server.BaseHTTPRequestHandler):
-
     # Same as superclass function, but append 'POST' because we
     # stripped it in the calling function.  Would be nice if
     # we had an ungetch instead

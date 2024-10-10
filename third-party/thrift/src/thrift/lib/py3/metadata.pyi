@@ -206,11 +206,11 @@ def gen_metadata(cls: Metadata) -> ThriftMetadata: ...
 def gen_metadata(cls: Union[Struct, Type[Struct]]) -> ThriftStructProxy: ...
 @overload
 def gen_metadata(
-    cls: Union[GeneratedError, Type[GeneratedError]]
+    cls: Union[GeneratedError, Type[GeneratedError]],
 ) -> ThriftExceptionProxy: ...
 @overload
 def gen_metadata(
-    cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]]
+    cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]],
 ) -> ThriftServiceProxy: ...
 @overload
 # pyre-fixme[43]: Signature of overloaded function `gen_metadata` will never be matched.

@@ -203,7 +203,6 @@ def future_process_main():
 
 
 def write_result(result, reply_type, seqid, event_handler, handler_ctx, fn_name, oprot):
-
     event_handler.preWrite(handler_ctx, fn_name, result)
 
     try:

@@ -149,7 +149,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
         mock_enable_resource_pools_for_python(self.enable_resource_pools_for_python)
 
     async def test_get_context(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -178,7 +177,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
             await handler.getName()
 
     async def test_rpc_headers(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -189,7 +187,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertIn("from server", options.read_headers)
 
     async def test_server_localhost(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -201,7 +198,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                     await client.takes_a_list([])
 
     async def test_no_client_aexit(self) -> None:
-
         async with TestServer() as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -259,7 +255,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_renamed_func(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -352,7 +347,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_request_with_default_rpc_options(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -363,7 +357,6 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
 
     async def test_request_with_specified_rpc_options(self) -> None:
-
         async with TestServer(ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port
@@ -421,7 +414,6 @@ class ClientStackServerTests(unittest.IsolatedAsyncioTestCase):
         mock_enable_resource_pools_for_python(self.enable_resource_pools_for_python)
 
     async def test_server_localhost(self) -> None:
-
         async with TestServer(handler=StackHandler(), ip="::1") as sa:
             ip, port = sa.ip, sa.port
             assert ip and port

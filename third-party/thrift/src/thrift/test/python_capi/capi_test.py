@@ -236,7 +236,7 @@ class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_field_adapted(self) -> None:
         a, b = ("TacosSalad", "DaLassoCat")
         s = StringPair(normal=a, doubled=b)
-        self.assertEqual(s, fixture.roundtrip_StringPair(s)),
+        (self.assertEqual(s, fixture.roundtrip_StringPair(s)),)
 
     def test_roundtrip_type_adapted(self) -> None:
         s = DoubledPair(s="TacosSalad", x=42)

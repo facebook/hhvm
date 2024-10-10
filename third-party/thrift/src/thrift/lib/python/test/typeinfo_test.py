@@ -46,7 +46,6 @@ from thrift.python.types import (
 
 
 class TypeInfoTests(unittest.TestCase):
-
     @parameterized.expand(
         [
             AdaptedTypeInfo,

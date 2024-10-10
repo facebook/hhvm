@@ -85,7 +85,11 @@ class ClientTests(unittest.TestCase):
             with self.assertRaises(TypeError):
                 await client.take_it_easy(9)  # pyre-ignore[20] testing bad behaviour
             with self.assertRaises(TypeError):
-                await client.take_it_easy(9, None)  # pyre-ignore[6] testing bad behaviour
+                await client.take_it_easy(
+                    9,
+                    # pyre-fixme[6]: For 2nd argument expected `easy` but got `None`.
+                    None,
+                )
             with self.assertRaises(TypeError):
                 await client.takes_a_list(None)  # pyre-ignore[6] testing bad behaviour
             with self.assertRaises(TypeError):
@@ -93,7 +97,11 @@ class ClientTests(unittest.TestCase):
             with self.assertRaises(TypeError):
                 await client.pick_a_color(None)  # pyre-ignore[6] testing bad behaviour
             with self.assertRaises(TypeError):
-                await client.take_it_easy(None, easy())  # pyre-ignore[6] testing bad behaviour
+                await client.take_it_easy(
+                    # pyre-fixme[6]: For 1st argument expected `int` but got `None`.
+                    None,
+                    easy(),
+                )
 
     @brokenInAutoMigrate()  # Exceptions aren't unified
     def test_bad_unix_domain_socket_raises_TransportError_on_connection(self) -> None:
@@ -152,14 +160,25 @@ class ClientTests(unittest.TestCase):
             await client.takes_a_list(I32List([1, 2, 3]))
 
             with self.assertRaises(TypeError):
-                await client.takes_a_list([1, "b", "three"])  # pyre-ignore[6] testing bad behaviour
+                await client.takes_a_list(
+                    # pyre-fixme[6]: For 1st argument expected `Sequence[int]` but
+                    #  got `Sequence[Union[int, str]]`.
+                    [1, "b", "three"]
+                )
 
     async def test_rpc_non_container_types(self) -> None:
         async with ClientEventHandlerTestHelper().get_async_client(
             TestingService, port=1
         ) as client:
             with self.assertRaises(TypeError):
-                await client.complex_action(b"foo", "bar", "nine", fourth="baz")  # pyre-ignore[6] testing bad behaviour
+                await client.complex_action(
+                    # pyre-fixme[6]: For 1st argument expected `str` but got `bytes`.
+                    b"foo",
+                    "bar",
+                    # pyre-fixme[6]: For 3rd argument expected `int` but got `str`.
+                    "nine",
+                    fourth="baz",
+                )
 
     async def test_rpc_enum_args(self) -> None:
         async with ClientEventHandlerTestHelper().get_async_client(

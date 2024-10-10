@@ -748,7 +748,6 @@ class TestStructRandomizer(TestRandomizer, unittest.TestCase):
             self.assertIsNotNone(val)
 
     def testSubRanomizersHaveDefaults(self):
-
         # Have constraints with a field that is never
         # used and won't come from the existing defaults.
         # Then make sure that constraint for StructWithOptionals

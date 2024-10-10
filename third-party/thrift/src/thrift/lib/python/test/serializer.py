@@ -189,7 +189,7 @@ class SerializerTests(unittest.TestCase):
             self.serializer.deserialize(self.easy, b"\x05AAAAAAAA")
         with self.assertRaises(Error):
             self.serializer.deserialize(
-                self.easy, b"\x02\xDE\xAD\xBE\xEF", protocol=Protocol.BINARY
+                self.easy, b"\x02\xde\xad\xbe\xef", protocol=Protocol.BINARY
             )
 
     def thrift_serialization_round_trip(

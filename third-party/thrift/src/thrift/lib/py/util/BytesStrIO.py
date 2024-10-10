@@ -19,7 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import sys
 
 if sys.version_info[0] >= 3:
-
     from io import BytesIO
 
     class BytesStrIO(BytesIO):

@@ -343,6 +343,9 @@ add_dependencies(
   thriftanyrep
   serverdbginfo
 )
+
+find_package(xxhash REQUIRED)
+target_include_directories(thriftcpp2 PUBLIC ${xxhash_INCLUDE_DIRS})
 target_link_libraries(
   thriftcpp2
   PUBLIC
@@ -357,6 +360,7 @@ target_link_libraries(
     thrifttype
     thriftanyrep
     serverdbginfo
+    xxhash::xxhash
 )
 
 add_library(

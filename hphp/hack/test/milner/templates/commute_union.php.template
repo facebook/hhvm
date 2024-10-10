@@ -2,6 +2,7 @@
 
 <<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 <<file: __EnableUnstableFeatures('case_types')>>
+<<file: __EnableUnstableFeatures('like_type_hints')>>
 
 function takes_reflection((TYPE#2 | TYPE#1) $_): void {}
 

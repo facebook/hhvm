@@ -144,6 +144,7 @@ and Kind : sig
     | Shape
     | Awaitable
     | Function
+    | Like
 
   val pick : Environment.t -> t
 
@@ -170,6 +171,7 @@ end = struct
     | Shape
     | Awaitable
     | Function
+    | Like
   [@@deriving enum, eq]
 
   (* suppress warning about to_enum not used *)
@@ -395,6 +397,7 @@ end = struct
         variadic: t option;
         return_: t;
       }
+    | Like of t
   [@@deriving eq, ord]
 
   let rec is_immediately_inhabited = function
@@ -434,7 +437,8 @@ end = struct
     | Alias _
     | Newtype _
     | TypeConst _
-    | Case _ ->
+    | Case _
+    | Like _ ->
       false
 
   (** Computes all subfields of a given field. It combines all subtypes with
@@ -550,6 +554,9 @@ end = struct
                 | Some ty -> [Some ty]
               in
               Function { parameters; variadic; return_ }
+            | Like ty ->
+              (* TODO: dynamic here when it is supported *)
+              subtypes_of ty
           end
 
   let rec show_field { key; ty; optional } =
@@ -632,6 +639,7 @@ end = struct
       let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
       let return_ = show return_ in
       Format.sprintf "(function(%s%s): %s)" parameters variadic return_
+    | Like ty -> "~" ^ show ty
 
   let are_disjoint env ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
@@ -684,6 +692,7 @@ end = struct
       | Primitive _
       | Classish _ ->
         [ty]
+      | Like _ -> [Mixed]
     in
     let ordered_subtypes ty =
       weaken_for_disjointness ty
@@ -790,14 +799,15 @@ end = struct
     | Alias _
     | Newtype _
     | TypeConst _
-    | Case _ ->
+    | Case _
+    | Like _ ->
       None
 
   let inhabitant_of env ty =
     let subtypes = subtypes_of env ~pick:true ty in
     let inhabitants = List.filter_map subtypes ~f:expr_of in
     try select inhabitants with
-    | Failure _ ->
+    | _ ->
       raise
       @@ Failure
            ("Tried to find an inhabitant for a type: "
@@ -1053,6 +1063,9 @@ end = struct
           (env, Some ty)
       in
       (env, Function { parameters; variadic; return_ })
+    | Kind.Like ->
+      let (env, ty) = mk env in
+      (env, Like ty)
 end
 
 and TypeMap : (WrappedMap.S with type key = Type.t) = WrappedMap.Make (Type)

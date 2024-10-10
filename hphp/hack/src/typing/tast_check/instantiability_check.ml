@@ -176,8 +176,11 @@ let handler =
         match t.t_assignment with
         | SimpleTypeDef { tvh_vis = _; tvh_hint } -> [tvh_hint]
         | CaseType (variant, variants) ->
-          List.map (variant :: variants) ~f:(fun v -> v.tctv_hint)
-        (* TODO T201569125 - do we need to check the where clauses at all? *)
+          List.concat_map (variant :: variants) ~f:(fun v ->
+              v.tctv_hint
+              :: List.concat_map
+                   v.tctv_where_constraints
+                   ~f:(fun (h1, _ck, h2) -> [h1; h2]))
       in
       List.iter hints ~f:(check_hint env);
       Option.iter t.t_as_constraint ~f:(check_hint env);

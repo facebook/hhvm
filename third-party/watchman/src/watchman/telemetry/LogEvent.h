@@ -17,10 +17,19 @@
 #include <string>
 
 #include "eden/common/telemetry/DynamicEvent.h"
+#include "eden/common/telemetry/LogEvent.h"
 
 namespace watchman {
 
 using DynamicEvent = facebook::eden::DynamicEvent;
+using TypedEvent = facebook::eden::TypedEvent;
+
+struct WatchmanEvent : public TypedEvent {
+  // Keep populate() and getType() pure virtual to force subclasses
+  // to implement them
+  virtual void populate(DynamicEvent&) const override = 0;
+  virtual const char* getType() const override = 0;
+};
 
 enum LogEventType : uint8_t {
   DispatchCommandType,
@@ -88,67 +97,76 @@ struct MetadataEventData {
   }
 };
 
-struct DispatchCommand {
-  static constexpr const char* type = "dispatch_command";
+// TODO: add a WatchmanTypedEvent which just contains MetadataEventData and have
+// all of these structs inherit from WatchmanTypedEvent rather than TypedEvent
 
+struct DispatchCommand : public WatchmanEvent {
   MetadataEventData meta;
   std::string command;
   std::string args;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     event.addString("command", command);
     if (!args.empty()) {
       event.addString("args", args);
     }
   }
-};
 
-struct ClockTest {
-  static constexpr const char* type = "clock_test";
-
-  BaseEventData base;
-
-  void populate(DynamicEvent& event) const {
-    base.populate(event);
+  const char* getType() const override {
+    return "dispatch_command";
   }
 };
 
-struct AgeOut {
-  static constexpr const char* type = "age_out";
+struct ClockTest : public WatchmanEvent {
+  BaseEventData base;
 
+  void populate(DynamicEvent& event) const override {
+    base.populate(event);
+  }
+
+  const char* getType() const override {
+    return "clock_test";
+  }
+};
+
+struct AgeOut : public WatchmanEvent {
   MetadataEventData meta;
   int64_t walked = 0;
   int64_t files = 0;
   int64_t dirs = 0;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     event.addInt("walked", walked);
     event.addInt("files", files);
     event.addInt("dirs", dirs);
   }
+
+  const char* getType() const override {
+    return "age_out";
+  }
 };
 
-struct SyncToNow {
-  static constexpr const char* type = "sync_to_now";
-
+struct SyncToNow : public WatchmanEvent {
   MetadataEventData meta;
   bool success = true;
   int64_t timeoutms = 0;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     event.addBool("success", success);
     event.addInt("timeoutms", timeoutms);
   }
+
+  const char* getType() const override {
+    return "sync_to_now";
+  }
 };
 
-struct SavedState {
+struct SavedState : public WatchmanEvent {
   enum Target { Manifold = 1, Xdb = 2 };
   enum Action { GetProperties = 1, Connect = 2, Query = 3 };
-
-  static constexpr const char* type = "saved_state";
 
   MetadataEventData meta;
   Target target = Manifold;
@@ -160,7 +178,7 @@ struct SavedState {
   std::string properties;
   bool success = false;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     event.addInt("target", target);
     event.addInt("action", action);
@@ -177,11 +195,13 @@ struct SavedState {
     }
     event.addBool("success", success);
   }
+
+  const char* getType() const override {
+    return "saved_state";
+  }
 };
 
-struct QueryExecute {
-  static constexpr const char* type = "query_execute";
-
+struct QueryExecute : public WatchmanEvent {
   MetadataEventData meta;
   std::string request_id;
   int64_t num_special_files = 0;
@@ -195,7 +215,7 @@ struct QueryExecute {
   int64_t eden_changed_files_duration_us = 0;
   int64_t eden_file_properties_duration_us = 0;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     if (!request_id.empty()) {
       event.addString("request_id", request_id);
@@ -223,27 +243,35 @@ struct QueryExecute {
           "eden_file_properties_duration_us", eden_file_properties_duration_us);
     }
   }
-};
 
-struct FullCrawl {
-  static constexpr const char* type = "full_crawl";
-
-  MetadataEventData meta;
-
-  void populate(DynamicEvent& event) const {
-    meta.populate(event);
+  const char* getType() const override {
+    return "query_execute";
   }
 };
 
-struct Dropped {
-  static constexpr const char* type = "dropped";
+struct FullCrawl : public WatchmanEvent {
+  MetadataEventData meta;
 
+  void populate(DynamicEvent& event) const override {
+    meta.populate(event);
+  }
+
+  const char* getType() const override {
+    return "full_crawl";
+  }
+};
+
+struct Dropped : public WatchmanEvent {
   MetadataEventData meta;
   bool isKernel = false;
 
-  void populate(DynamicEvent& event) const {
+  void populate(DynamicEvent& event) const override {
     meta.populate(event);
     event.addBool("isKernel", isKernel);
+  }
+
+  const char* getType() const override {
+    return "dropped";
   }
 };
 

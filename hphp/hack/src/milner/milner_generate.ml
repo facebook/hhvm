@@ -577,7 +577,6 @@ end = struct
       Format.sprintf "(%s%s)" conjuncts open_
     | Shape { fields; open_ } ->
       let is_nullary = List.length fields = 0 in
-      let fields = List.permute fields in
       let fields = List.map ~f:show_field fields |> String.concat ~sep:", " in
       let open_ =
         if open_ && is_nullary then

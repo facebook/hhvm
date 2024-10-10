@@ -313,6 +313,7 @@ module.exports = {
           'fb/server/server-lifecycle',
           'fb/server/server-modules',
           'fb/server/service-interceptors',
+          'fb/server/client-interceptors',
           'fb/server/background-tasks',
           'fb/server/flavors-of-main',
           'fb/server/components',

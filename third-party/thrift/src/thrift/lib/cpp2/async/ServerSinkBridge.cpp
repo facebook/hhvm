@@ -38,7 +38,7 @@ ServerSinkBridge::ServerSinkBridge(
       evb_(folly::getKeepAliveToken(&evb)),
       clientCallback_(callback) {
   interaction_ =
-      TileStreamGuard::transferFrom(std::move(sinkConsumer.interaction));
+      TileStreamGuard::transferFrom(std::move(consumer_.interaction));
   bool scheduledWait = clientWait(this);
   DCHECK(scheduledWait);
 }

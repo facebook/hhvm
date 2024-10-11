@@ -35,7 +35,7 @@ TEST(ChecksumPayloadSerializerStrategyTest, TestPackWithoutChecksum) {
       false,
       nullptr);
 
-  auto other = strategy.unpack<RequestPayload>(std::move(payload));
+  auto other = strategy.unpack<RequestPayload>(std::move(payload), false);
   EXPECT_EQ(other.hasException(), false);
 }
 
@@ -56,7 +56,7 @@ TEST(ChecksumPayloadSerializerStrategyTest, TestPackWithChecksumHappyPath) {
       false,
       nullptr);
 
-  auto other = strategy.unpack<RequestPayload>(std::move(payload));
+  auto other = strategy.unpack<RequestPayload>(std::move(payload), false);
   EXPECT_EQ(other.hasException(), false);
   EXPECT_TRUE(other->metadata.checksum().has_value());
   EXPECT_EQ(

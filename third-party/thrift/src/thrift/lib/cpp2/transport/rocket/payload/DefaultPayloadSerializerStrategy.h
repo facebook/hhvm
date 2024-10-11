@@ -32,9 +32,10 @@ class DefaultPayloadSerializerStrategy final
   DefaultPayloadSerializerStrategy() : PayloadSerializerStrategy(*this) {}
 
   template <class T>
-  folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
+  folly::Try<T> unpackAsCompressed(
+      rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
     return folly::makeTryWith([&]() {
-      T t = unpackImpl<T>(std::move(payload));
+      T t = unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
       if (auto compression = t.metadata.compression()) {
         t.payload = uncompressBuffer(std::move(t.payload), *compression);
       }
@@ -43,9 +44,11 @@ class DefaultPayloadSerializerStrategy final
   }
 
   template <class T>
-  folly::Try<T> unpack(rocket::Payload&& payload) {
-    return folly::makeTryWith(
-        [&]() { return unpackImpl<T>(std::move(payload)); });
+  folly::Try<T> unpack(
+      rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
+    return folly::makeTryWith([&]() {
+      return unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
+    });
   }
 
   template <typename Metadata>
@@ -154,22 +157,28 @@ class DefaultPayloadSerializerStrategy final
   }
 
   template <typename T>
-  T unpackImpl(rocket::Payload&& payload) {
+  T unpackImpl(rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
     T t{{}, {}};
-    unpackPayloadMetadata(t, payload);
+    unpackPayloadMetadata(t, payload, decodeMetadataUsingBinary);
     t.payload = std::move(payload).data();
     return t;
   }
 
   template <typename T>
-  void unpackPayloadMetadata(T& t, rocket::Payload& payload) {
+  void unpackPayloadMetadata(
+      T& t, rocket::Payload& payload, bool decodeMetadataUsingBinary) {
     if (payload.hasNonemptyMetadata()) {
-      if (unpackCompact(t.metadata, payload.buffer()) !=
-          payload.metadataSize()) {
+      size_t metadataSize;
+      if (decodeMetadataUsingBinary) {
+        metadataSize = unpackBinary(t.metadata, payload.buffer());
+      } else {
+        metadataSize = unpackCompact(t.metadata, payload.buffer());
+      }
+
+      if (metadataSize != payload.metadataSize()) {
         folly::throw_exception<std::out_of_range>("metadata size mismatch");
       }
     }
   }
 };
-
 } // namespace apache::thrift::rocket

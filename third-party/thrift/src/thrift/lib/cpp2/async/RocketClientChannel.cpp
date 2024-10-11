@@ -600,7 +600,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
 
       response =
           rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
-              std::move(*payload));
+              std::move(*payload), false /* decodeMetadataUsingBinary */);
       if (response.hasException()) {
         cb_.release()->onResponseError(std::move(response.exception()));
         return;

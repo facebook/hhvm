@@ -439,7 +439,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
       rocket::PayloadSerializer::getInstance()
-          .unpackAsCompressed<RequestPayload>(std::move(payload));
+          .unpackAsCompressed<RequestPayload>(
+              std::move(payload), false /* decodeMetadataUsingBinary */);
 
   auto makeActiveRequest = [&](auto&& md, auto&& payload, auto&& reqCtx) {
     serverConfigs_->incActiveRequests();

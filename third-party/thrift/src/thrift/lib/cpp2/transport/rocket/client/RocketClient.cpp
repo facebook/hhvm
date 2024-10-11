@@ -387,7 +387,7 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
   }
   auto firstResponse =
       rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
-          std::move(fullPayload));
+          std::move(fullPayload), false /* decodeMetadataUsingBinary */);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     return StreamChannelStatus::Complete;
@@ -443,7 +443,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
   if (next) {
     auto streamPayload =
         rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
-            std::move(fullPayload));
+            std::move(fullPayload), false /* decodeMetadataUsingBinary */);
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
     }
@@ -512,7 +512,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
   if (next) {
     auto streamPayload =
         rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
-            std::move(fullPayload));
+            std::move(fullPayload), false /* decodeMetadataUsingBinary */);
     if (streamPayload.hasException()) {
       return serverCallback.onFinalResponseError(
           std::move(streamPayload.exception()));

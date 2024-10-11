@@ -55,18 +55,24 @@ class ChecksumPayloadSerializerStrategy final
   }
 
   template <class T>
-  FOLLY_ERASE folly::Try<T> unpackAsCompressed(Payload&& payload) {
+  FOLLY_ERASE folly::Try<T> unpackAsCompressed(
+      Payload&& payload, bool decodeMetadataUsingBinary) {
     return unpackImpl<T>(
-        std::move(payload), [this](Payload&& payload) -> folly::Try<T> {
-          return delegate_.template unpackAsCompressed<T>(std::move(payload));
+        std::move(payload),
+        [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
+          return delegate_.template unpackAsCompressed<T>(
+              std::move(payload), decodeMetadataUsingBinary);
         });
   }
 
   template <typename T>
-  FOLLY_ERASE folly::Try<T> unpack(Payload&& payload) {
+  FOLLY_ERASE folly::Try<T> unpack(
+      Payload&& payload, bool decodeMetadataUsingBinary) {
     return unpackImpl<T>(
-        std::move(payload), [this](Payload&& payload) -> folly::Try<T> {
-          return delegate_.template unpack<T>(std::move(payload));
+        std::move(payload),
+        [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
+          return delegate_.template unpack<T>(
+              std::move(payload), decodeMetadataUsingBinary);
         });
   }
 

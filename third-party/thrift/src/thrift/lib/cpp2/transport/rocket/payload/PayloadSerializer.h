@@ -87,16 +87,20 @@ class PayloadSerializer {
   static PayloadSerializer& getInstance();
 
   template <class T>
-  folly::Try<T> unpackAsCompressed(Payload&& payload) {
+  folly::Try<T> unpackAsCompressed(
+      Payload&& payload, bool decodeMetadataUsingBinary) {
     return visit([&](auto& strategy) {
-      return strategy.template unpackAsCompressed<T>(std::move(payload));
+      return strategy.template unpackAsCompressed<T>(
+          std::move(payload), decodeMetadataUsingBinary);
     });
   }
 
   template <class T>
-  folly::Try<T> unpack(rocket::Payload&& payload) {
+  folly::Try<T> unpack(
+      rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
     return visit([&](auto& strategy) {
-      return strategy.template unpack<T>(std::move(payload));
+      return strategy.template unpack<T>(
+          std::move(payload), decodeMetadataUsingBinary);
     });
   }
 

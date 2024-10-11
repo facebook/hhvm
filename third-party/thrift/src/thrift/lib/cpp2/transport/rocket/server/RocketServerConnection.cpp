@@ -676,7 +676,7 @@ void RocketServerConnection::handleSinkFrame(
       if (next) {
         auto streamPayload =
             PayloadSerializer::getInstance().unpack<StreamPayload>(
-                std::move(*fullPayload));
+                std::move(*fullPayload), false /* decodeMetadataUsingBinary */);
         if (streamPayload.hasException()) {
           notViolateContract =
               clientCallback.onSinkError(std::move(streamPayload.exception()));

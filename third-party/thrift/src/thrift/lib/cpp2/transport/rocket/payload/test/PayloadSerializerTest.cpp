@@ -62,7 +62,7 @@ TEST(PayloadSerializerTest, TestPackWithoutChecksumUsingFacade) {
       false, /* encodeMetadataUsingBinary */
       nullptr);
 
-  auto other = serializer.unpack<RequestPayload>(std::move(payload));
+  auto other = serializer.unpack<RequestPayload>(std::move(payload), false);
   EXPECT_EQ(other.hasException(), false);
 }
 

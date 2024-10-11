@@ -75,10 +75,18 @@ size_t unpackBinary(T& output, const folly::io::Cursor& cursor) {
 
 namespace detail {
 template <class PayloadType, bool uncompressPayload>
-inline PayloadType unpackPayload(rocket::Payload&& payload) {
+inline PayloadType unpackPayload(
+    rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
   PayloadType t{{}, {}};
   if (payload.hasNonemptyMetadata()) {
-    if (unpackCompact(t.metadata, payload.buffer()) != payload.metadataSize()) {
+    size_t metadataSize;
+    if (decodeMetadataUsingBinary) {
+      metadataSize = unpackBinary(t.metadata, payload.buffer());
+    } else {
+      metadataSize = unpackCompact(t.metadata, payload.buffer());
+    }
+
+    if (metadataSize != payload.metadataSize()) {
       folly::throw_exception<std::out_of_range>("metadata size mismatch");
     }
   }
@@ -96,15 +104,21 @@ inline PayloadType unpackPayload(rocket::Payload&& payload) {
 } // namespace detail
 
 template <class T>
-folly::Try<T> unpackAsCompressed(rocket::Payload&& payload) {
-  return folly::makeTryWith(
-      [&] { return detail::unpackPayload<T, false>(std::move(payload)); });
+folly::Try<T> unpackAsCompressed(
+    rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
+  return folly::makeTryWith([&] {
+    return detail::unpackPayload<T, false>(
+        std::move(payload), decodeMetadataUsingBinary);
+  });
 }
 
 template <class T>
-folly::Try<T> unpack(rocket::Payload&& payload) {
-  return folly::makeTryWith(
-      [&] { return detail::unpackPayload<T, true>(std::move(payload)); });
+folly::Try<T> unpack(
+    rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
+  return folly::makeTryWith([&] {
+    return detail::unpackPayload<T, true>(
+        std::move(payload), decodeMetadataUsingBinary);
+  });
 }
 
 template <typename T>

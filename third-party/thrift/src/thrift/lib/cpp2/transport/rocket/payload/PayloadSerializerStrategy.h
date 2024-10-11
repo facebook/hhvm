@@ -32,13 +32,16 @@ template <typename Child>
 class PayloadSerializerStrategy {
  public:
   template <class T>
-  FOLLY_ALWAYS_INLINE folly::Try<T> unpackAsCompressed(Payload&& payload) {
-    return child_.unpackAsCompressed(std::move(payload));
+  FOLLY_ALWAYS_INLINE folly::Try<T> unpackAsCompressed(
+      Payload&& payload, bool decodeMetadataUsingBinary) {
+    return child_.unpackAsCompressed(
+        std::move(payload), decodeMetadataUsingBinary);
   }
 
   template <class T>
-  FOLLY_ALWAYS_INLINE folly::Try<T> unpack(Payload&& payload) {
-    return child_.unpack(std::move(payload));
+  FOLLY_ALWAYS_INLINE folly::Try<T> unpack(
+      Payload&& payload, bool decodeMetadataUsingBinary) {
+    return child_.unpack(std::move(payload), decodeMetadataUsingBinary);
   }
 
   template <typename T>

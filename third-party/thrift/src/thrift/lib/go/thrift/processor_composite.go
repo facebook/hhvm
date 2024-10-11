@@ -24,8 +24,7 @@ import (
 // Currently all generated Go processors satisfy this interface.
 type CompositeProcessor interface {
 	Processor
-	Include(processor map[string]types.ProcessorFunction)
-	ProcessorFunctionMap() map[string]types.ProcessorFunction
+	Include(processor Processor)
 }
 
 // compositeProcessor allows different ComposableProcessor to sit under one
@@ -46,8 +45,8 @@ func NewCompositeProcessor() CompositeProcessor {
 // include wins).
 // A full solution (inclusion respecting namespaces) will require changes
 // to the thrift compiler
-func (p *compositeProcessor) Include(processorMap map[string]types.ProcessorFunction) {
-	for name, tfunc := range processorMap {
+func (p *compositeProcessor) Include(processor Processor) {
+	for name, tfunc := range processor.ProcessorFunctionMap() {
 		p.serviceProcessorMap[name] = tfunc
 	}
 }

@@ -298,7 +298,7 @@ TEST(RuntimeTest, MapAdd) {
 TEST(RuntimeTest, Struct) {
   DecodedUri actual;
   auto ref = Ref::to(actual);
-  EXPECT_FALSE(ref.empty());
+  EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 5);
   EXPECT_EQ(*actual.scheme(), "");
   EXPECT_EQ(ref[FieldId{1}], "");

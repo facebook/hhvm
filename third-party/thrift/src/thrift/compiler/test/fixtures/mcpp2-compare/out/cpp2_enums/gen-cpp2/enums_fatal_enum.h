@@ -230,3 +230,30 @@ FATAL_REGISTER_ENUM_TRAITS(
   >
 );
 } // namespace facebook::ns::qwerty
+namespace apache::thrift::detail {
+template <>
+struct ExtraEnumTraits<::facebook::ns::qwerty::AnEnumA> {
+  static inline constexpr std::string_view name = "AnEnumA";
+  using module = ::facebook::ns::qwerty::enums_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::facebook::ns::qwerty::AnEnumB> {
+  static inline constexpr std::string_view name = "AnEnumB";
+  using module = ::facebook::ns::qwerty::enums_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::facebook::ns::qwerty::AnEnumC> {
+  static inline constexpr std::string_view name = "AnEnumC";
+  using module = ::facebook::ns::qwerty::enums_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::facebook::ns::qwerty::AnEnumD> {
+  static inline constexpr std::string_view name = "AnEnumD";
+  using module = ::facebook::ns::qwerty::enums_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::facebook::ns::qwerty::AnEnumE> {
+  static inline constexpr std::string_view name = "AnEnumE";
+  using module = ::facebook::ns::qwerty::enums_tags::module;
+};
+}

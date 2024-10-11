@@ -512,3 +512,25 @@ FATAL_REGISTER_ENUM_TRAITS(
   >
 );
 } // namespace test_cpp2::cpp_reflection
+namespace apache::thrift::detail {
+template <>
+struct ExtraEnumTraits<::test_cpp2::cpp_reflection::enum1> {
+  static inline constexpr std::string_view name = "enum1";
+  using module = ::test_cpp2::cpp_reflection::module_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::test_cpp2::cpp_reflection::enum2> {
+  static inline constexpr std::string_view name = "enum2";
+  using module = ::test_cpp2::cpp_reflection::module_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::test_cpp2::cpp_reflection::enum3> {
+  static inline constexpr std::string_view name = "enum3";
+  using module = ::test_cpp2::cpp_reflection::module_tags::module;
+};
+template <>
+struct ExtraEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names> {
+  static inline constexpr std::string_view name = "enum_with_special_names";
+  using module = ::test_cpp2::cpp_reflection::module_tags::module;
+};
+}

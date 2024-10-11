@@ -18,6 +18,7 @@
 #define THRIFT_FATAL_REFLECTION_H_ 1
 
 #include <cstdint>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -1906,6 +1907,13 @@ struct reflected_variant_member_metadata {
  */
 template <typename T>
 using is_reflectable_union = fatal::has_variant_traits<T>;
+
+namespace detail {
+template <typename Enum>
+struct ExtraEnumTraits {
+  static_assert(folly::always_false<Enum>);
+};
+} // namespace detail
 
 } // namespace apache::thrift
 

@@ -182,11 +182,10 @@ struct impl<T, type_class::string> {
 
 template <typename T>
 struct impl<T, type_class::enumeration> {
-  using meta = reflect_enum<T>;
-  using meta_traits = typename meta::traits;
-  using module_meta = reflect_module<typename meta::module>;
-  static constexpr auto rname =
-      "enum "_fs + fs<module_meta>() + "." + fs<meta_traits>();
+  using extra = ::apache::thrift::detail::ExtraEnumTraits<T>;
+  using module_meta = reflect_module<typename extra::module>;
+  static constexpr auto rname = "enum "_fs + fs<module_meta>() + "." +
+      folly::FixedString<extra::name.size()>(extra::name);
   static id_t rid() {
     static const auto storage = get_type_id(type_t::TYPE_ENUM, rname);
     return storage;

@@ -33,8 +33,6 @@ type {{service:go_name}}Processor struct {
     handler            {{service:go_name}}
     {{/service:extends?}}
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*{{service:go_name}}Processor)(nil)
 
 func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_name}}Processor {
     p := &{{service:go_name}}Processor{

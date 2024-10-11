@@ -128,8 +128,6 @@ type CProcessor struct {
     functionServiceMap   map[string]string
     handler            C
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*CProcessor)(nil)
 
 func NewCProcessor(handler C) *CProcessor {
     p := &CProcessor{

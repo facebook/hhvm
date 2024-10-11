@@ -104,8 +104,6 @@ type ServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            Service
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*ServiceProcessor)(nil)
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
     p := &ServiceProcessor{
@@ -298,8 +296,6 @@ type AdapterServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            AdapterService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*AdapterServiceProcessor)(nil)
 
 func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {
     p := &AdapterServiceProcessor{

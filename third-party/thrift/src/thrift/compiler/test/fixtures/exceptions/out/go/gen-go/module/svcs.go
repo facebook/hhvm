@@ -179,8 +179,6 @@ type RaiserProcessor struct {
     functionServiceMap   map[string]string
     handler            Raiser
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*RaiserProcessor)(nil)
 
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {
     p := &RaiserProcessor{

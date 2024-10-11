@@ -103,8 +103,6 @@ type MyServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            MyService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -272,8 +270,6 @@ type FactoriesProcessor struct {
     functionServiceMap   map[string]string
     handler            Factories
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*FactoriesProcessor)(nil)
 
 func NewFactoriesProcessor(handler Factories) *FactoriesProcessor {
     p := &FactoriesProcessor{
@@ -441,8 +437,6 @@ type PerformProcessor struct {
     functionServiceMap   map[string]string
     handler            Perform
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*PerformProcessor)(nil)
 
 func NewPerformProcessor(handler Perform) *PerformProcessor {
     p := &PerformProcessor{
@@ -610,8 +604,6 @@ type InteractWithSharedProcessor struct {
     functionServiceMap   map[string]string
     handler            InteractWithShared
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*InteractWithSharedProcessor)(nil)
 
 func NewInteractWithSharedProcessor(handler InteractWithShared) *InteractWithSharedProcessor {
     p := &InteractWithSharedProcessor{

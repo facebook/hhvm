@@ -194,8 +194,6 @@ type NestedContainersProcessor struct {
     functionServiceMap   map[string]string
     handler            NestedContainers
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*NestedContainersProcessor)(nil)
 
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {
     p := &NestedContainersProcessor{

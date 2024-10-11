@@ -152,8 +152,6 @@ type FinderProcessor struct {
     functionServiceMap   map[string]string
     handler            Finder
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*FinderProcessor)(nil)
 
 func NewFinderProcessor(handler Finder) *FinderProcessor {
     p := &FinderProcessor{

@@ -236,8 +236,6 @@ type MyServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            MyService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -755,8 +753,6 @@ type MyServicePrioParentProcessor struct {
     functionServiceMap   map[string]string
     handler            MyServicePrioParent
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServicePrioParentProcessor)(nil)
 
 func NewMyServicePrioParentProcessor(handler MyServicePrioParent) *MyServicePrioParentProcessor {
     p := &MyServicePrioParentProcessor{
@@ -987,8 +983,6 @@ type MyServicePrioChildProcessor struct {
     // Inherited/extended processor
     *MyServicePrioParentProcessor
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServicePrioChildProcessor)(nil)
 
 func NewMyServicePrioChildProcessor(handler MyServicePrioChild) *MyServicePrioChildProcessor {
     p := &MyServicePrioChildProcessor{
@@ -1134,8 +1128,6 @@ type BadServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            BadService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*BadServiceProcessor)(nil)
 
 func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
     p := &BadServiceProcessor{
@@ -1348,8 +1340,6 @@ type FooBarBazServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            FooBarBazService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*FooBarBazServiceProcessor)(nil)
 
 func NewFooBarBazServiceProcessor(handler FooBarBazService) *FooBarBazServiceProcessor {
     p := &FooBarBazServiceProcessor{

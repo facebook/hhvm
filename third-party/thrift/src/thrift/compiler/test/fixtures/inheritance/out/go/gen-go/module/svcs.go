@@ -101,8 +101,6 @@ type MyRootProcessor struct {
     functionServiceMap   map[string]string
     handler            MyRoot
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyRootProcessor)(nil)
 
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {
     p := &MyRootProcessor{
@@ -281,8 +279,6 @@ type MyNodeProcessor struct {
     // Inherited/extended processor
     *MyRootProcessor
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyNodeProcessor)(nil)
 
 func NewMyNodeProcessor(handler MyNode) *MyNodeProcessor {
     p := &MyNodeProcessor{
@@ -439,8 +435,6 @@ type MyLeafProcessor struct {
     // Inherited/extended processor
     *MyNodeProcessor
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyLeafProcessor)(nil)
 
 func NewMyLeafProcessor(handler MyLeaf) *MyLeafProcessor {
     p := &MyLeafProcessor{

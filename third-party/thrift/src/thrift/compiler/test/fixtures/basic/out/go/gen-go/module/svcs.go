@@ -101,8 +101,6 @@ type FooServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            FooService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*FooServiceProcessor)(nil)
 
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
     p := &FooServiceProcessor{
@@ -271,8 +269,6 @@ type FB303ServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            FB303Service
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*FB303ServiceProcessor)(nil)
 
 func NewFB303ServiceProcessor(handler FB303Service) *FB303ServiceProcessor {
     p := &FB303ServiceProcessor{
@@ -643,8 +639,6 @@ type MyServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            MyService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{
@@ -1313,8 +1307,6 @@ type DbMixedStackArgumentsProcessor struct {
     functionServiceMap   map[string]string
     handler            DbMixedStackArguments
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*DbMixedStackArgumentsProcessor)(nil)
 
 func NewDbMixedStackArgumentsProcessor(handler DbMixedStackArguments) *DbMixedStackArgumentsProcessor {
     p := &DbMixedStackArgumentsProcessor{

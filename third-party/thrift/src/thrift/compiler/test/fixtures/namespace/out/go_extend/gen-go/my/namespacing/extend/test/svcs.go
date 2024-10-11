@@ -115,8 +115,6 @@ type ExtendTestServiceProcessor struct {
     // Inherited/extended processor
     *test0.HsTestServiceProcessor
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*ExtendTestServiceProcessor)(nil)
 
 func NewExtendTestServiceProcessor(handler ExtendTestService) *ExtendTestServiceProcessor {
     p := &ExtendTestServiceProcessor{

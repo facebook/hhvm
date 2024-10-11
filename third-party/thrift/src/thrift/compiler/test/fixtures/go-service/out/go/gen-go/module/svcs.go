@@ -580,8 +580,6 @@ type GetEntityProcessor struct {
     functionServiceMap   map[string]string
     handler            GetEntity
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*GetEntityProcessor)(nil)
 
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {
     p := &GetEntityProcessor{

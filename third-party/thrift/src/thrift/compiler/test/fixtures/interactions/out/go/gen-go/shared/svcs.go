@@ -79,8 +79,6 @@ type InteractLocallyProcessor struct {
     functionServiceMap   map[string]string
     handler            InteractLocally
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*InteractLocallyProcessor)(nil)
 
 func NewInteractLocallyProcessor(handler InteractLocally) *InteractLocallyProcessor {
     p := &InteractLocallyProcessor{

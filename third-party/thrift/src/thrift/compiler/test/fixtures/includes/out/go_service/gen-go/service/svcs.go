@@ -131,8 +131,6 @@ type MyServiceProcessor struct {
     functionServiceMap   map[string]string
     handler            MyService
 }
-// Compile time interface enforcer
-var _ thrift.Processor = (*MyServiceProcessor)(nil)
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
     p := &MyServiceProcessor{

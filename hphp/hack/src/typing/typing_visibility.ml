@@ -31,7 +31,7 @@ module Cls = Folded_class
  * Using `require_class` also allows a trait to access the private
  * method from the class it requires
  *)
-let is_private_visible ~is_static env origin_id self_id =
+let is_private_visible env origin_id self_id =
   if String.equal origin_id self_id then
     None
   else
@@ -47,7 +47,7 @@ let is_private_visible ~is_static env origin_id self_id =
         List.map (Cls.all_ancestor_req_class_requirements cls) ~f:snd
       in
       (* If the right class is required, give access *)
-      if (not is_static) && in_bounds bounds_from_require_class_constraints then
+      if in_bounds bounds_from_require_class_constraints then
         None
       else
         Some "You cannot access this member"
@@ -82,9 +82,9 @@ let is_private_visible_for_class env x self_id cid class_ =
       Some
         "Private members cannot be accessed with static:: since a child class may also have an identically named private member")
   | CIparent -> Some "You cannot access a private member with parent::"
-  | CIself -> is_private_visible ~is_static:true env x self_id
+  | CIself -> is_private_visible env x self_id
   | CI (_, called_ci) ->
-    (match is_private_visible ~is_static:true env x self_id with
+    (match is_private_visible env x self_id with
     | None -> None
     | Some _ -> begin
       match Env.get_class env called_ci with
@@ -264,7 +264,7 @@ let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some ("You cannot access this " ^ member_ty)
-    | Some self_id -> is_private_visible ~is_static:false env x self_id)
+    | Some self_id -> is_private_visible env x self_id)
   | Vprotected x ->
     if is_receiver_interface then
       Some "You cannot invoke a protected method on an interface"
@@ -290,7 +290,7 @@ let is_lsb_accessible env vis =
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"
-    | Some self_id -> is_private_visible ~is_static:false env x self_id)
+    | Some self_id -> is_private_visible env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"

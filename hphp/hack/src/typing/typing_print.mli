@@ -61,14 +61,6 @@ val debug_decl : env -> Typing_defs.decl_ty -> string
 (** Print an internal type to a string, stripping namespaces, including exact annotations and type variable numbering *)
 val debug_i : env -> Typing_defs.internal_type -> string
 
-val class_ : Provider_context.t -> Decl_provider.class_decl -> string
-
-val gconst : TypecheckerOptions.t -> Decl_provider.gconst_decl -> string
-
-val fun_ : TypecheckerOptions.t -> Decl_provider.fun_decl -> string
-
-val typedef : TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
-
 val constraints_for_type :
   hide_internals:bool -> env -> Typing_defs.locl_ty -> string
 

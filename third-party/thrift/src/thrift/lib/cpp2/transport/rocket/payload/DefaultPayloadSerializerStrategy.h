@@ -53,6 +53,7 @@ class DefaultPayloadSerializerStrategy final
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
+      bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport);
 
   template <typename T>
@@ -104,12 +105,15 @@ class DefaultPayloadSerializerStrategy final
 
   template <class PayloadType>
   rocket::Payload pack(
-      PayloadType&& payload, folly::AsyncTransport* transport) {
+      PayloadType&& payload,
+      bool encodeMetadataUsingBinary,
+      folly::AsyncTransport* transport) {
     auto metadata = std::forward<PayloadType>(payload).metadata;
     return packWithFds(
         &metadata,
         std::forward<PayloadType>(payload).payload,
         std::forward<PayloadType>(payload).fds,
+        encodeMetadataUsingBinary,
         transport);
   }
 
@@ -120,7 +124,8 @@ class DefaultPayloadSerializerStrategy final
   rocket::Payload finalizePayload(
       std::unique_ptr<folly::IOBuf>&& payload,
       Metadata* metadata,
-      folly::SocketFds fds);
+      folly::SocketFds fds,
+      bool encodeMetadataUsingBinary);
 
   bool canSerializeMetadataIntoDataBufferHeadroom(
       const std::unique_ptr<folly::IOBuf>& data, const size_t serSize) const;

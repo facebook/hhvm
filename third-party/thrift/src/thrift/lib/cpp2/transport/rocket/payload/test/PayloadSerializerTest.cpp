@@ -56,7 +56,11 @@ TEST(PayloadSerializerTest, TestPackWithoutChecksumUsingFacade) {
   RequestRpcMetadata metadata;
   metadata.protocol() = ProtocolId::COMPACT;
   auto payload = serializer.packWithFds(
-      &metadata, folly::IOBuf::copyBuffer("test"), folly::SocketFds(), nullptr);
+      &metadata,
+      folly::IOBuf::copyBuffer("test"),
+      folly::SocketFds(),
+      false, /* encodeMetadataUsingBinary */
+      nullptr);
 
   auto other = serializer.unpack<RequestPayload>(std::move(payload));
   EXPECT_EQ(other.hasException(), false);

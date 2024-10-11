@@ -62,7 +62,9 @@ bool RocketSinkClientCallback::onFirstResponse(
   connection_.sendPayload(
       streamId_,
       payloadSerializer_.pack(
-          std::move(firstResponse), connection_.getRawSocket()),
+          std::move(firstResponse),
+          false, /* encodeMetadataUsingBinary */
+          connection_.getRawSocket()),
       Flags().next(true));
   return true;
 }
@@ -79,6 +81,7 @@ void RocketSinkClientCallback::onFirstResponseError(
                 streamId_,
                 payloadSerializer_.pack(
                     std::move(encodedError.encoded),
+                    false, /* encodeMetadataUsingBinary */
                     connection_.getRawSocket()),
                 Flags().next(true).complete(true));
           });
@@ -103,7 +106,9 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
   connection_.sendPayload(
       streamId_,
       payloadSerializer_.pack(
-          std::move(finalResponse), connection_.getRawSocket()),
+          std::move(finalResponse),
+          false, /* encodeMetadataUsingBinary */
+          connection_.getRawSocket()),
       Flags().next(true).complete(true));
   auto state = state_;
   auto& connection = connection_;
@@ -133,7 +138,9 @@ void RocketSinkClientCallback::onFinalResponseError(
         connection_.sendPayload(
             streamId_,
             payloadSerializer_.pack(
-                std::move(err.encoded), connection_.getRawSocket()),
+                std::move(err.encoded),
+                false, /* encodeMetadataUsingBinary */
+                connection_.getRawSocket()),
             Flags().next(true).complete(true));
       },
       [&](...) {

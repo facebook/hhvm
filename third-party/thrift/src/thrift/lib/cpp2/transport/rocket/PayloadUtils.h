@@ -123,15 +123,20 @@ rocket::Payload packWithFds(
     Metadata* metadata,
     std::unique_ptr<folly::IOBuf>&& payload,
     folly::SocketFds fds,
+    bool encodeMetadataUsingBinary,
     folly::AsyncTransport* transport);
 
 template <class PayloadType>
-rocket::Payload pack(PayloadType&& payload, folly::AsyncTransport* transport) {
+rocket::Payload pack(
+    PayloadType&& payload,
+    bool encodeMetadataUsingBinary,
+    folly::AsyncTransport* transport) {
   auto metadata = std::forward<PayloadType>(payload).metadata;
   return packWithFds(
       &metadata,
       std::forward<PayloadType>(payload).payload,
       std::forward<PayloadType>(payload).fds,
+      encodeMetadataUsingBinary,
       transport);
 }
 } // namespace apache::thrift::rocket

@@ -80,22 +80,30 @@ class ChecksumPayloadSerializerStrategy final
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
+      bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
     if (auto checksumOpt = calculateChecksum(*payload, metadata->checksum())) {
       metadata->checksum() = *checksumOpt;
     }
     return delegate_.packWithFds(
-        metadata, std::move(payload), std::move(fds), transport);
+        metadata,
+        std::move(payload),
+        std::move(fds),
+        encodeMetadataUsingBinary,
+        transport);
   }
 
   template <class PayloadType>
-  FOLLY_ERASE Payload
-  pack(PayloadType&& payload, folly::AsyncTransport* transport) {
+  FOLLY_ERASE Payload pack(
+      PayloadType&& payload,
+      bool encodeMetadataUsingBinary,
+      folly::AsyncTransport* transport) {
     auto metadata = std::forward<PayloadType>(payload).metadata;
     return packWithFds(
         &metadata,
         std::forward<PayloadType>(payload).payload,
         std::forward<PayloadType>(payload).fds,
+        encodeMetadataUsingBinary,
         transport);
   }
 

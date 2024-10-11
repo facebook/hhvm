@@ -138,19 +138,28 @@ class PayloadSerializer {
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
+      bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
     return visit([&](auto& strategy) {
       return strategy.template packWithFds<Metadata>(
-          metadata, std::move(payload), std::move(fds), transport);
+          metadata,
+          std::move(payload),
+          std::move(fds),
+          encodeMetadataUsingBinary,
+          transport);
     });
   }
 
   template <class PayloadType>
   rocket::Payload pack(
-      PayloadType&& payload, folly::AsyncTransport* transport) {
+      PayloadType&& payload,
+      bool encodeMetadataUsingBinary,
+      folly::AsyncTransport* transport) {
     return visit([&](auto& strategy) {
       return strategy.template pack<PayloadType>(
-          std::forward<PayloadType>(payload), transport);
+          std::forward<PayloadType>(payload),
+          encodeMetadataUsingBinary,
+          transport);
     });
   }
 

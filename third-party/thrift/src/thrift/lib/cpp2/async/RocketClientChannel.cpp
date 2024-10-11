@@ -850,6 +850,7 @@ void RocketClientChannel::sendRequestStream(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
+      false, /* encodeMetadataUsingBinary */
       getTransportWrapper());
   return rocket::RocketClient::sendRequestStream(
       std::move(payload),
@@ -891,6 +892,7 @@ void RocketClientChannel::sendRequestSink(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
+      false, /* encodeMetadataUsingBinary */
       getTransportWrapper());
   return rocket::RocketClient::sendRequestSink(
       std::move(payload),
@@ -966,6 +968,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
+      false, /* encodeMetadataUsingBinary */
       getTransportWrapper());
   const bool isSync = cb->isSync();
   SingleRequestNoResponseCallback callback(std::move(cb));
@@ -991,6 +994,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
+      false, /* encodeMetadataUsingBinary */
       getTransportWrapper());
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =

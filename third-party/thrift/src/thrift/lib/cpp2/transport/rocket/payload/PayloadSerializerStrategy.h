@@ -51,15 +51,25 @@ class PayloadSerializerStrategy {
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
+      bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
     return child_.packWithFds(
-        metadata, std::move(payload), std::move(fds), transport);
+        metadata,
+        std::move(payload),
+        std::move(fds),
+        encodeMetadataUsingBinary,
+        transport);
   }
 
   template <class PayloadType>
-  FOLLY_ALWAYS_INLINE Payload
-  pack(PayloadType&& payload, folly::AsyncTransport* transport) {
-    return child_.pack(std::forward<PayloadType>(payload), transport);
+  FOLLY_ALWAYS_INLINE Payload pack(
+      PayloadType&& payload,
+      bool encodeMetadataUsingBinary,
+      folly::AsyncTransport* transport) {
+    return child_.pack(
+        std::forward<PayloadType>(payload),
+        encodeMetadataUsingBinary,
+        transport);
   }
 
   template <typename T>

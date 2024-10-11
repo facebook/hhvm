@@ -66,9 +66,13 @@ class LegacyPayloadSerializerStrategy final
 
   template <class PayloadType>
   FOLLY_ERASE rocket::Payload pack(
-      PayloadType&& payload, folly::AsyncTransport* transport) {
+      PayloadType&& payload,
+      bool encodeMetadataUsingBinary,
+      folly::AsyncTransport* transport) {
     return ::apache::thrift::rocket::pack(
-        std::forward<PayloadType>(payload), transport);
+        std::forward<PayloadType>(payload),
+        encodeMetadataUsingBinary,
+        transport);
   }
 
   template <typename Metadata>
@@ -76,9 +80,14 @@ class LegacyPayloadSerializerStrategy final
       Metadata* metadata,
       std::unique_ptr<folly::IOBuf>&& payload,
       folly::SocketFds fds,
+      bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport) {
     return ::apache::thrift::rocket::packWithFds(
-        metadata, std::move(payload), std::move(fds), transport);
+        metadata,
+        std::move(payload),
+        std::move(fds),
+        encodeMetadataUsingBinary,
+        transport);
   }
 };
 

@@ -29,7 +29,11 @@ TEST(ChecksumPayloadSerializerStrategyTest, TestPackWithoutChecksum) {
   RequestRpcMetadata metadata;
   metadata.protocol() = ProtocolId::COMPACT;
   auto payload = strategy.packWithFds(
-      &metadata, folly::IOBuf::copyBuffer("test"), folly::SocketFds(), nullptr);
+      &metadata,
+      folly::IOBuf::copyBuffer("test"),
+      folly::SocketFds(),
+      false,
+      nullptr);
 
   auto other = strategy.unpack<RequestPayload>(std::move(payload));
   EXPECT_EQ(other.hasException(), false);
@@ -46,7 +50,11 @@ TEST(ChecksumPayloadSerializerStrategyTest, TestPackWithChecksumHappyPath) {
   metadata.checksum() = checksum;
 
   auto payload = strategy.packWithFds(
-      &metadata, folly::IOBuf::copyBuffer("test"), folly::SocketFds(), nullptr);
+      &metadata,
+      folly::IOBuf::copyBuffer("test"),
+      folly::SocketFds(),
+      false,
+      nullptr);
 
   auto other = strategy.unpack<RequestPayload>(std::move(payload));
   EXPECT_EQ(other.hasException(), false);

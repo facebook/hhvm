@@ -1076,7 +1076,9 @@ bool RocketClient::sendPayload(
       PayloadFrame(
           streamId,
           rocket::PayloadSerializer::getInstance().pack(
-              std::move(payload), getTransportWrapper()),
+              std::move(payload),
+              false, /* encodeMetadataUsingBinary */
+              getTransportWrapper()),
           flags),
       [this,
        dg = DestructorGuard(this),

@@ -65,7 +65,7 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))
 	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
 	r.client = client
-	return nil
+	return err
 }
 
 func acceptor(onMetadataPush OnServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {

@@ -263,6 +263,45 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   void apply(type::AnyData& val) const { apply(val.toThrift()); }
 
+  // TODO(dokwon): Consider migrating it to be part of patch splitting when it
+  // is available.
+
+  /// Extracts the patch for the given patch type.
+  template <typename VPatch>
+  VPatch extractPatchAsIf() const {
+    using VTag = type::infer_tag<typename VPatch::value_type>;
+    using VPatchTag = type::infer_tag<VPatch>;
+    struct AnyPatchExtractionVisitor {
+      void assign(const type::AnyStruct& any) {
+        if (type::identicalType(any.type().value(), type_)) {
+          patch = type::AnyData{any}.get<VTag>();
+        }
+      }
+      void clear() { patch.clear(); }
+      void patchIfTypeIs(
+          const type::Type& type, const protocol::DynamicPatch& dpatch) {
+        if (!type::identicalType(type, type_)) {
+          return;
+        }
+        auto patchObj = dpatch.toObject();
+        patch.merge(protocol::fromObjectStruct<VPatchTag>(patchObj));
+      }
+      void ensureAny(const type::AnyStruct& any) {
+        // TODO(dokwon): Consider short circuiting `patchIfTypeIsPrior` if
+        // `ensureAny` ensures to different type.
+        if (!type::identicalType(any.type().value(), type_)) {
+          op::clear<VPatchTag>(patch);
+        }
+      }
+
+      VPatch patch;
+      const type::Type type_ = type::Type::create<VTag>();
+    };
+    AnyPatchExtractionVisitor visitor;
+    customVisit(visitor);
+    return std::move(visitor.patch);
+  }
+
  private:
   using Base::assignOr;
   using Base::data_;

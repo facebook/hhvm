@@ -107,28 +107,28 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 		processor := newRocketUpgradeProcessor(r.processor)
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
-			r.log.Println("thrift: error constructing header protocol: ", err)
+			r.log.Printf("thrift: error constructing header protocol from %s: %s", conn.RemoteAddr().String(), err)
 			return
 		}
 		if err := r.processHeaderRequest(ctx, headerProtocol, processor); err != nil {
-			r.log.Println("thrift: error processing request: ", err)
+			r.log.Printf("thrift: error processing request from %s: %s", conn.RemoteAddr().String(), err)
 			return
 		}
 		if processor.upgraded {
 			r.processRocketRequests(ctx, conn)
 		} else {
 			if err := r.processHeaderRequests(ctx, headerProtocol, processor); err != nil {
-				r.log.Println("thrift: error processing request: ", err)
+				r.log.Printf("thrift: error processing request from %s: %s", conn.RemoteAddr().String(), err)
 			}
 		}
 	case TransportIDHeader:
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
-			r.log.Println("thrift: error constructing header protocol: ", err)
+			r.log.Printf("thrift: error constructing header protocol from %s: %s", conn.RemoteAddr().String(), err)
 			return
 		}
 		if err := r.processHeaderRequests(ctx, headerProtocol, r.processor); err != nil {
-			r.log.Println("thrift: error processing request: ", err)
+			r.log.Printf("thrift: error processing request from %s: %s", conn.RemoteAddr().String(), err)
 		}
 	}
 }

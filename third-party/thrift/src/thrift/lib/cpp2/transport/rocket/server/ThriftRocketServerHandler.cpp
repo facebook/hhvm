@@ -198,20 +198,12 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
   RequestSetupMetadata meta;
   try {
-    if (frame.encodeMetadataUsingBinary()) {
-      if (PayloadSerializer::getInstance().unpackBinary(meta, cursor) !=
-          frame.payload().metadataSize()) {
-        return connection.close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID_SETUP,
-            "Error deserializing SETUP payload: underflow"));
-      }
-    } else {
-      if (PayloadSerializer::getInstance().unpackCompact(meta, cursor) !=
-          frame.payload().metadataSize()) {
-        return connection.close(folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID_SETUP,
-            "Error deserializing SETUP payload: underflow"));
-      }
+    if (PayloadSerializer::getInstance().unpack(
+            meta, cursor, frame.encodeMetadataUsingBinary()) !=
+        frame.payload().metadataSize()) {
+      return connection.close(folly::make_exception_wrapper<RocketException>(
+          ErrorCode::INVALID_SETUP,
+          "Error deserializing SETUP payload: underflow"));
     }
 
     connContext_.readSetupMetadata(meta);

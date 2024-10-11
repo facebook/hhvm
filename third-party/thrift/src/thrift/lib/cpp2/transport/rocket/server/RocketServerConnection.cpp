@@ -529,8 +529,8 @@ void RocketServerConnection::handleUntrackedFrame(
       MetadataPushFrame metadataFrame(std::move(frame));
       ClientPushMetadata clientMeta;
       try {
-        PayloadSerializer::getInstance().unpackCompact(
-            clientMeta, metadataFrame.metadata());
+        PayloadSerializer::getInstance().unpack(
+            clientMeta, metadataFrame.metadata(), false);
       } catch (...) {
         close(folly::make_exception_wrapper<RocketException>(
             ErrorCode::INVALID, "Failed to deserialize metadata push frame"));

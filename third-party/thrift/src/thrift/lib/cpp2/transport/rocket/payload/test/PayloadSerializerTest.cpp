@@ -29,7 +29,7 @@ void testPackAndUnpackWithCompactProtocol(PayloadSerializer& serializer) {
   EXPECT_GT(payload->computeChainDataLength(), 1);
 
   RequestRpcMetadata other;
-  serializer.unpackCompact<RequestRpcMetadata>(other, payload.get());
+  serializer.unpack<RequestRpcMetadata>(other, payload.get(), false);
   EXPECT_EQ(other, metadata);
   EXPECT_EQ(other.protocol(), ProtocolId::COMPACT);
 }

@@ -127,8 +127,8 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 
   ResponseRpcError responseError;
   try {
-    rocket::PayloadSerializer::getInstance().unpackCompact(
-        responseError, ex.moveErrorData().get());
+    rocket::PayloadSerializer::getInstance().unpack(
+        responseError, ex.moveErrorData().get(), false);
   } catch (...) {
     return folly::Try<FirstResponsePayload>(
         folly::make_exception_wrapper<TApplicationException>(fmt::format(

@@ -1148,9 +1148,6 @@ void apache::thrift::Client<::cpp2::MyService>::sync_lobDataById(apache::thrift:
     [&] {
       fbthrift_serialize_and_send_lobDataById(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback), p_id, p_dataStr);
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

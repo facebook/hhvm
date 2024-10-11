@@ -62,9 +62,11 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
     [&] {
       fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{ > service_common/param_list}});
     });
+{{#unless function:oneway?}}
   if (contextStack != nullptr) {
     contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
   }
+{{/unless}}
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

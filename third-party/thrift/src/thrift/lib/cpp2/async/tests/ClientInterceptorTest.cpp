@@ -156,6 +156,8 @@ class ClientInterface {
       apache::thrift::ClientSink<std::int32_t, std::int32_t>>
   dump() = 0;
 
+  virtual folly::coro::Task<void> fireAndForget(std::int32_t value) = 0;
+
  protected:
   std::unique_ptr<apache::thrift::Client<test::ClientInterceptorTest>> client_;
 };
@@ -203,6 +205,10 @@ class CoroClientInterface : public ClientInterface {
   folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
   dump() override {
     co_return co_await client_->co_dump();
+  }
+
+  folly::coro::Task<void> fireAndForget(std::int32_t value) override {
+    co_await client_->co_fireAndForget(value);
   }
 };
 
@@ -253,6 +259,11 @@ class SyncClientInterface : public ClientInterface {
   dump() override {
     throw std::logic_error("sync_* functions do not support sinks");
   }
+
+  folly::coro::Task<void> fireAndForget(std::int32_t value) override {
+    client_->sync_fireAndForget(value);
+    co_return;
+  }
 };
 
 class SemiFutureClientInterface : public ClientInterface {
@@ -298,6 +309,10 @@ class SemiFutureClientInterface : public ClientInterface {
   dump() override {
     throw std::logic_error("semifuture_* functions do not support sinks");
   }
+
+  folly::coro::Task<void> fireAndForget(std::int32_t value) override {
+    co_await client_->semifuture_fireAndForget(value);
+  }
 };
 
 class FutureClientInterface : public ClientInterface {
@@ -339,6 +354,10 @@ class FutureClientInterface : public ClientInterface {
   folly::coro::Task<apache::thrift::ClientSink<std::int32_t, std::int32_t>>
   dump() override {
     throw std::logic_error("future_* functions do not support sinks");
+  }
+
+  folly::coro::Task<void> fireAndForget(std::int32_t value) override {
+    co_await client_->future_fireAndForget(value);
   }
 };
 
@@ -526,6 +545,27 @@ CO_TEST_P(ClientInterceptorTestP, Basic) {
   };
   EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
   EXPECT_THAT(tracer->responses(), ElementsAreArray(expectedTrace));
+}
+
+CO_TEST_P(ClientInterceptorTestP, BasicOneWay) {
+  auto interceptor =
+      std::make_shared<ClientInterceptorCountWithRequestState>("Interceptor1");
+  auto tracer = std::make_shared<TracingClientInterceptor>("Tracer");
+  auto client = makeClient(makeInterceptorsList(interceptor, tracer));
+
+  co_await client->fireAndForget(0);
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  EXPECT_EQ(interceptor->onResponseCount, 0);
+
+  using Trace = TracingClientInterceptor::Trace;
+  const std::vector<Trace> expectedTrace{
+      Trace{"ClientInterceptorTest", "fireAndForget"},
+  };
+  EXPECT_THAT(tracer->requests(), ElementsAreArray(expectedTrace));
+  EXPECT_THAT(tracer->responses(), IsEmpty());
+
+  // Make sure to wait until requests are processed.
+  co_await client->noop();
 }
 
 CO_TEST_P(ClientInterceptorTestP, OnRequestException) {

@@ -46,4 +46,6 @@ service ClientInterceptorTest {
   stream<i32> iota(1: i32 start);
 
   sink<i32, i32> dump();
+
+  oneway void fireAndForget(1: i32 ignored);
 }

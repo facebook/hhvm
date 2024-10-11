@@ -217,9 +217,6 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     } else {
       co_await callback.co_waitUntilDone();
     }
-    if (ctx != nullptr) {
-      ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-    }
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }

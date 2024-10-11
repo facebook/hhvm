@@ -540,9 +540,6 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::sync_pin
     [&] {
       fbthrift_serialize_and_send_ping(rpcOptions, ctxAndHeader.second, ctxAndHeader.first.get(), std::move(wrappedCallback));
     });
-  if (contextStack != nullptr) {
-    contextStack->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
-  }
   if (returnState.isException()) {
     returnState.exception().throw_exception();
   }

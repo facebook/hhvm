@@ -153,9 +153,11 @@
     } else {
       co_await callback.co_waitUntilDone();
     }
+  {{^function:oneway?}}
     if (ctx != nullptr) {
       ctx->processClientInterceptorsOnResponse(returnState.header()).throwUnlessValue();
     }
+  {{/function:oneway?}}
     if (returnState.isException()) {
       co_yield folly::coro::co_error(std::move(returnState.exception()));
     }

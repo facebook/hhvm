@@ -1913,6 +1913,8 @@ template <typename Enum>
 struct ExtraEnumTraits {
   static_assert(folly::always_false<Enum>);
 };
+template <typename T>
+inline constexpr bool kHasExtraEnumTraits = false;
 } // namespace detail
 
 } // namespace apache::thrift

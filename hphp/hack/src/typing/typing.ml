@@ -8069,8 +8069,17 @@ end = struct
         List.fold_left_env env tyl ~init:acc ~f:find_unsupported_tys
       | Tnewtype (name, _, _) -> begin
         match Env.get_typedef env name with
-        (* TODO T201569125 - do I need to do something with the where constraints here? *)
-        | Decl_entry.Found { td_type_assignment = CaseType _; _ } -> (env, acc)
+        | Decl_entry.Found
+            { td_type_assignment = CaseType (variant, variants); _ } ->
+          (* Conservatively ban case types with where clauses for now;
+           * implement handling later *)
+          if
+            List.for_all (variant :: variants) ~f:(fun (_hint, where_clauses) ->
+                List.is_empty where_clauses)
+          then
+            (env, acc)
+          else
+            (env, ty :: acc)
         | _ -> (env, ty :: acc)
       end
       | _ -> (env, ty :: acc)

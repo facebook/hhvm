@@ -1,0 +1,2 @@
+ERROR: File "match_statement_scrutinee.php", line 8, characters 3-54:
+This expression has type `CT<T>`, which is not supported in match statements (Typing[4479])

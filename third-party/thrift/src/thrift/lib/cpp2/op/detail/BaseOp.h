@@ -36,7 +36,7 @@ const TypeInfo& getAnyTypeInfo();
 template <typename Tag, typename T = type::native_type<Tag>>
 RuntimeType getAnyType() {
   static_assert(
-      std::is_same<folly::remove_cvref_t<T>, type::native_type<Tag>>::value,
+      std::is_same_v<folly::remove_cvref_t<T>, type::native_type<Tag>>,
       "type missmatch");
   return RuntimeType::create<T>(getAnyTypeInfo<Tag>());
 }

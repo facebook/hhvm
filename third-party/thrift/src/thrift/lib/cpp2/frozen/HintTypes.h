@@ -41,7 +41,7 @@ namespace apache::thrift::frozen {
 template <class T>
 class VectorUnpacked : public std::vector<T> {
   static_assert(
-      std::is_arithmetic<T>::value || std::is_enum<T>::value,
+      std::is_arithmetic_v<T> || std::is_enum_v<T>,
       "Unpacked storage is only available for simple item types");
   using std::vector<T>::vector;
 };

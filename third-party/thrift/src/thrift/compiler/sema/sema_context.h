@@ -36,7 +36,7 @@ class node_metadata_cache {
   using element_type = typename decltype(std::declval<F>()())::element_type;
   template <typename T, typename... Args>
   using if_is_constructible =
-      std::enable_if_t<std::is_constructible<T, Args...>::value, T&>;
+      std::enable_if_t<std::is_constructible_v<T, Args...>, T&>;
   using key_type = std::pair<const t_node*, std::type_index>;
 
  public:

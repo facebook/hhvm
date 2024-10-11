@@ -27,7 +27,7 @@
 template <typename TypeClass>
 struct printer {
   static_assert(
-      !std::is_same<apache::thrift::type_class::unknown, TypeClass>::value,
+      !std::is_same_v<apache::thrift::type_class::unknown, TypeClass>,
       "no static reflection support for the given type"
       " - did you forget to include the reflection metadata?"
       " see thrift/lib/cpp2/reflection/reflection.h");

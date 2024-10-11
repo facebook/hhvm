@@ -42,7 +42,7 @@ namespace op::detail {
 
 template <typename T, typename Tag>
 inline constexpr bool kIsStrongType =
-    std::is_enum<folly::remove_cvref_t<T>>::value &&
+    std::is_enum_v<folly::remove_cvref_t<T>> &&
     type::is_a_v<Tag, type::integral_c>;
 
 template <typename T, typename Tag>

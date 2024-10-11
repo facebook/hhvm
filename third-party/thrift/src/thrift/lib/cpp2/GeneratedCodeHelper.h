@@ -127,7 +127,7 @@ struct FieldData {
   static const constexpr protocol::TType ttype = protocol_type_v<TC, T>;
   typedef TC type_class;
   typedef T type;
-  typedef typename std::remove_pointer<T>::type value_type;
+  typedef std::remove_pointer_t<T> value_type;
   using Ops = Cpp2Ops<value_type>;
   T value;
   static_assert(std::is_pointer_v<T> != std::is_base_of_v<TException, T>, "");

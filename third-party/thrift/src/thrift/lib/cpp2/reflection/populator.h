@@ -92,12 +92,10 @@ template <typename T>
 struct is_smart_pointer<std::shared_ptr<T>> : std::true_type {};
 
 template <typename T>
-using enable_if_smart_pointer =
-    typename std::enable_if<is_smart_pointer<T>::value>::type;
+using enable_if_smart_pointer = std::enable_if_t<is_smart_pointer<T>::value>;
 
 template <typename T>
-using disable_if_smart_pointer =
-    typename std::enable_if<!is_smart_pointer<T>::value>::type;
+using disable_if_smart_pointer = std::enable_if_t<!is_smart_pointer<T>::value>;
 
 struct extract_descriptor_fid {
   template <typename T>
@@ -126,7 +124,7 @@ struct deref<std::unique_ptr<folly::IOBuf>> {
 // unique pointer contains
 template <typename PtrType>
 struct deref<PtrType, enable_if_smart_pointer<PtrType>> {
-  using T = typename std::remove_const<typename PtrType::element_type>::type;
+  using T = std::remove_const_t<typename PtrType::element_type>;
   static T& clear_and_get(std::shared_ptr<const T>& in) {
     auto t = std::make_shared<T>();
     auto ret = t.get();
@@ -287,7 +285,7 @@ struct populator_methods<
     detail::infer_tag<Type>,
     Type,
     std::enable_if_t<type::is_a_v<detail::infer_tag<Type>, type::enum_c>>> {
-  using int_type = typename std::underlying_type<Type>::type;
+  using int_type = std::underlying_type_t<Type>;
   using int_methods = populator_methods<detail::infer_tag<int_type>, int_type>;
 
   template <typename Rng>

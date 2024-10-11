@@ -658,7 +658,7 @@ void readList(
   using traits = std::iterator_traits<typename List::iterator>;
   using cat = typename traits::iterator_category;
   if (folly::reserve_if_available(out, listSize) ||
-      std::is_same<cat, std::bidirectional_iterator_tag>::value) {
+      std::is_same_v<cat, std::bidirectional_iterator_tag>) {
     while (listSize--) {
       consumeListElem<List>(context, object, reader);
     }

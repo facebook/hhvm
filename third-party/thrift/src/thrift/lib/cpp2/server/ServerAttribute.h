@@ -87,7 +87,7 @@ struct ServerAttributeThreadLocal;
  */
 template <typename T>
 using ServerAttributeDynamic = std::conditional_t<
-    sizeof(T) <= sizeof(std::uint64_t) && std::is_trivially_copyable<T>::value,
+    sizeof(T) <= sizeof(std::uint64_t) && std::is_trivially_copyable_v<T>,
     ServerAttributeAtomic<T>,
     ServerAttributeThreadLocal<T>>;
 

@@ -172,7 +172,7 @@ constexpr bool set_emplace_hint_is_invocable_v = folly::is_invocable_v<
     typename T::value_type>;
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-typename std::enable_if<sorted_unique_constructible_v<Map>>::type
+std::enable_if_t<sorted_unique_constructible_v<Map>>
 deserialize_known_length_map(
     Map& map,
     std::uint32_t map_size,
@@ -202,9 +202,8 @@ deserialize_known_length_map(
 }
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-typename std::enable_if<
-    !sorted_unique_constructible_v<Map> &&
-    map_emplace_hint_is_invocable_v<Map>>::type
+std::enable_if_t<
+    !sorted_unique_constructible_v<Map> && map_emplace_hint_is_invocable_v<Map>>
 deserialize_known_length_map(
     Map& map,
     std::uint32_t map_size,
@@ -222,9 +221,9 @@ deserialize_known_length_map(
 }
 
 template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
-typename std::enable_if<
+std::enable_if_t<
     !sorted_unique_constructible_v<Map> &&
-    !map_emplace_hint_is_invocable_v<Map>>::type
+    !map_emplace_hint_is_invocable_v<Map>>
 deserialize_known_length_map(
     Map& map,
     std::uint32_t map_size,
@@ -238,7 +237,7 @@ deserialize_known_length_map(
 }
 
 template <typename Set, typename ValDeserializer>
-typename std::enable_if<sorted_unique_constructible_v<Set>>::type
+std::enable_if_t<sorted_unique_constructible_v<Set>>
 deserialize_known_length_set(
     Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
   if (set_size == 0) {
@@ -263,9 +262,8 @@ deserialize_known_length_set(
 }
 
 template <typename Set, typename ValDeserializer>
-typename std::enable_if<
-    !sorted_unique_constructible_v<Set> &&
-    set_emplace_hint_is_invocable_v<Set>>::type
+std::enable_if_t<
+    !sorted_unique_constructible_v<Set> && set_emplace_hint_is_invocable_v<Set>>
 deserialize_known_length_set(
     Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
   folly::reserve_if_available(set, set_size);
@@ -278,9 +276,9 @@ deserialize_known_length_set(
 }
 
 template <typename Set, typename ValDeserializer>
-typename std::enable_if<
+std::enable_if_t<
     !sorted_unique_constructible_v<Set> &&
-    !set_emplace_hint_is_invocable_v<Set>>::type
+    !set_emplace_hint_is_invocable_v<Set>>
 deserialize_known_length_set(
     Set& set, std::uint32_t set_size, const ValDeserializer& vr) {
   folly::reserve_if_available(set, set_size);
@@ -464,12 +462,12 @@ struct protocol_methods<type_class::binary, Type> {
   THRIFT_PROTOCOL_METHODS_REGISTER_RW_COMMON(binary, Type, Binary)
 
   template <bool ZeroCopy, typename Protocol>
-  static typename std::enable_if<ZeroCopy, std::size_t>::type serializedSize(
+  static std::enable_if_t<ZeroCopy, std::size_t> serializedSize(
       Protocol& protocol, const Type& in) {
     return protocol.serializedSizeZCBinary(in);
   }
   template <bool ZeroCopy, typename Protocol>
-  static typename std::enable_if<!ZeroCopy, std::size_t>::type serializedSize(
+  static std::enable_if_t<!ZeroCopy, std::size_t> serializedSize(
       Protocol& protocol, const Type& in) {
     return protocol.serializedSizeBinary(in);
   }
@@ -484,7 +482,7 @@ struct protocol_methods<type_class::binary, Type> {
 
 template <typename Type, typename int_type = std::underlying_type_t<Type>>
 struct enum_protocol_methods {
-  static_assert(std::is_enum<Type>::value, "must be enum");
+  static_assert(std::is_enum_v<Type>, "must be enum");
   using int_methods = protocol_methods<type_class::integral, int_type>;
 
   template <typename Protocol>
@@ -524,8 +522,7 @@ template <typename Type>
 struct protocol_methods<
     type_class::integral,
     Type,
-    std::enable_if_t<std::is_enum<Type>::value>> : enum_protocol_methods<Type> {
-};
+    std::enable_if_t<std::is_enum_v<Type>>> : enum_protocol_methods<Type> {};
 
 /*
  * List Specialization

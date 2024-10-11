@@ -41,7 +41,7 @@ class Serializer {
 
   // All data in rsocket protocol is transmitted in Big Endian format.
   template <class T>
-  std::enable_if_t<std::is_arithmetic<T>::value, size_t> writeBE(T value) {
+  std::enable_if_t<std::is_arithmetic_v<T>, size_t> writeBE(T value) {
     const auto bigEndianValue = folly::Endian::big(value);
     const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&bigEndianValue);
     return push(bytes, sizeof(T));

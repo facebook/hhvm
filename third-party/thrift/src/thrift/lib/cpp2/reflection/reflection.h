@@ -567,9 +567,8 @@ using try_reflect_module = fatal::try_registry_lookup<
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-using is_reflectable_module = std::integral_constant<
-    bool,
-    !std::is_same<try_reflect_module<T, void>, void>::value>;
+using is_reflectable_module = std::
+    integral_constant<bool, !std::is_same_v<try_reflect_module<T, void>, void>>;
 
 /**
  * Gets the reflection metadata tag for the Thrift file where the type `T` is
@@ -1397,9 +1396,8 @@ using try_reflect_struct = fatal::try_registry_lookup<
  * @author: Marcelo Juchem <marcelo@fb.com>
  */
 template <typename T>
-using is_reflectable_struct = std::integral_constant<
-    bool,
-    !std::is_same<try_reflect_struct<T, void>, void>::value>;
+using is_reflectable_struct = std::
+    integral_constant<bool, !std::is_same_v<try_reflect_struct<T, void>, void>>;
 
 //////////////////////////////
 // SECTION: ENUMERATION API //

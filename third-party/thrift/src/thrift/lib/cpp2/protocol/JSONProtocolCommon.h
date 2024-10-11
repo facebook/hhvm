@@ -243,11 +243,11 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   void readJSONVal(int32_t& val);
   void readJSONVal(int64_t& val);
   template <typename Floating>
-  typename std::enable_if<std::is_floating_point<Floating>::value>::type
-  readJSONVal(Floating& val);
+  std::enable_if_t<std::is_floating_point_v<Floating>> readJSONVal(
+      Floating& val);
   template <typename Str>
-  typename std::enable_if<apache::thrift::detail::is_string<Str>::value>::type
-  readJSONVal(Str& val);
+  std::enable_if_t<apache::thrift::detail::is_string<Str>::value> readJSONVal(
+      Str& val);
   bool JSONtoBool(const std::string& s);
   void readJSONVal(bool& val);
   void readJSONNull();

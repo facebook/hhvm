@@ -340,7 +340,7 @@ struct FieldBase {
   virtual void clear() = 0;
 };
 
-template <class T, class Layout = Layout<typename std::decay<T>::type>>
+template <class T, class Layout = Layout<std::decay_t<T>>>
 struct Field final : public FieldBase {
   Layout layout;
 
@@ -975,7 +975,7 @@ class Bundled : public Base {
 
   Bundled& operator=(Bundled&&) = default;
 
-  template <class T, class Decayed = typename std::decay<T>::type>
+  template <class T, class Decayed = std::decay_t<T>>
   Decayed* hold(T&& t) {
     std::unique_ptr<HolderImpl<Decayed>> holder(
         new HolderImpl<Decayed>(std::forward<T>(t)));
@@ -989,7 +989,7 @@ class Bundled : public Base {
     holds_.push_back(std::move(holder));
   }
 
-  template <typename T, class Decayed = typename std::decay<T>::type>
+  template <typename T, class Decayed = std::decay_t<T>>
   const Decayed* findFirstOfType() const {
     for (const auto& h : holds_) {
       if (auto p = dynamic_cast<const HolderImpl<Decayed>*>(h.get())) {
@@ -1063,7 +1063,7 @@ void thawField(ViewPosition self, const Field<T>& f, field_ref<T&> ref) {
 template <
     class T,
     class D,
-    std::enable_if_t<!std::is_same<T, folly::IOBuf>::value>>
+    std::enable_if_t<!std::is_same_v<T, folly::IOBuf>>>
 void thawField(
     ViewPosition self,
     const Field<std::unique_ptr<T, D>>& f,

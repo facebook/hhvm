@@ -78,7 +78,7 @@ constexpr ptrdiff_t unionTypeOffset();
 
 template <typename Ident, typename Adapter, FieldId Id, typename Ref>
 struct wrapped_struct_argument {
-  static_assert(std::is_reference<Ref>::value, "not a reference");
+  static_assert(std::is_reference_v<Ref>, "not a reference");
   Ref ref;
   FOLLY_ERASE explicit wrapped_struct_argument(Ref ref_)
       : ref(static_cast<Ref>(ref_)) {}
@@ -115,8 +115,8 @@ wrap_struct_argument(T&& value) {
 }
 
 template <typename Adapter, FieldId Id, typename F, typename T, typename S>
-FOLLY_ERASE typename std::enable_if<std::is_void<Adapter>::value>::type
-assign_struct_field(F f, T&& t, S&) {
+FOLLY_ERASE std::enable_if_t<std::is_void_v<Adapter>> assign_struct_field(
+    F f, T&& t, S&) {
   f = static_cast<T&&>(t);
 }
 template <typename Adapter, FieldId Id, typename F, typename T, typename S>
@@ -128,8 +128,8 @@ FOLLY_ERASE void assign_struct_field(std::shared_ptr<F>& f, T&& t, S&) {
   f = std::make_shared<folly::remove_cvref_t<T>>(static_cast<T&&>(t));
 }
 template <typename Adapter, FieldId Id, typename F, typename T, typename S>
-FOLLY_ERASE typename std::enable_if<!std::is_void<Adapter>::value>::type
-assign_struct_field(F f, T&& t, S& s) {
+FOLLY_ERASE std::enable_if_t<!std::is_void_v<Adapter>> assign_struct_field(
+    F f, T&& t, S& s) {
   f = ::apache::thrift::adapt_detail::
       fromThriftField<Adapter, folly::to_underlying(Id)>(
           static_cast<T&&>(t), s);
@@ -283,8 +283,7 @@ class FindOrdinal {
 template <class T, class... Args>
 class FindOrdinal<T, folly::tag_t<Args...>> {
  private:
-  static constexpr bool matches[sizeof...(Args)] = {
-      std::is_same<T, Args>::value...};
+  static constexpr bool matches[sizeof...(Args)] = {std::is_same_v<T, Args>...};
 
  public:
   static constexpr auto value = findOrdinal(matches, std::end(matches), true);
@@ -408,7 +407,7 @@ inline constexpr type::Ordinal
 #endif
 
 template <class Id, class Idents, class TypeTags, class IdList>
-FOLLY_CONSTEVAL std::enable_if_t<std::is_same<Id, void>::value, FieldOrdinal>
+FOLLY_CONSTEVAL std::enable_if_t<std::is_same_v<Id, void>, FieldOrdinal>
 getFieldOrdinal(IdList&&) {
   return static_cast<FieldOrdinal>(0);
 }

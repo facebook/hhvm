@@ -44,7 +44,7 @@ struct protocol_type_<type_class::integral> {
   // clang-format off
   template <typename Type>
   static constexpr protocol::TType apply =
-      std::is_same<Type, bool>::value ? protocol::TType::T_BOOL :
+      std::is_same_v<Type, bool> ? protocol::TType::T_BOOL :
       sizeof(Type) == 1 ? protocol::TType::T_BYTE :
       sizeof(Type) == 2 ? protocol::TType::T_I16 :
       sizeof(Type) == 4 ? protocol::TType::T_I32 :

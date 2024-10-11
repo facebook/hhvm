@@ -499,8 +499,8 @@ struct adapter_serialized_size<
             Adapter,
             AdaptedT,
             Protocol> &&
-        std::is_arithmetic<decltype(Adapter::toThrift(
-            std::declval<AdaptedT&>()))>::value>> {
+        std::is_arithmetic_v<decltype(Adapter::toThrift(
+            std::declval<AdaptedT&>()))>>> {
   uint32_t operator()(Protocol& prot, const AdaptedT&, FallbackF) {
     return serializedSizeFixed(
         prot, decltype(Adapter::toThrift(std::declval<AdaptedT&>()))(0));

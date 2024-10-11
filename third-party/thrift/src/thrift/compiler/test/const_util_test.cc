@@ -26,7 +26,7 @@ template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
 }
-template <typename Enum, typename = std::enable_if_t<std::is_enum<Enum>::value>>
+template <typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
 std::unique_ptr<t_const_value> val(Enum val) {
   return std::make_unique<t_const_value>(
       static_cast<std::underlying_type_t<Enum>>(val));

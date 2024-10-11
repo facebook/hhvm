@@ -206,8 +206,8 @@ constexpr bool is_thrift_union_v =
     apache::thrift::detail::st::IsThriftUnion<T>::value;
 
 template <typename T>
-constexpr bool is_thrift_exception_v = is_thrift_class_v<T> &&
-    std::is_base_of<apache::thrift::TException, T>::value;
+constexpr bool is_thrift_exception_v =
+    is_thrift_class_v<T> && std::is_base_of_v<apache::thrift::TException, T>;
 
 template <typename T>
 constexpr bool is_thrift_struct_v =
@@ -226,7 +226,7 @@ using type_class_of_thrift_class_or_t = //
 template <typename T, typename Fallback>
 using type_class_of_thrift_class_enum_or_t = //
     folly::conditional_t<
-        std::is_enum<T>::value,
+        std::is_enum_v<T>,
         type_class::enumeration,
         type_class_of_thrift_class_or_t<T, Fallback>>;
 
@@ -242,7 +242,7 @@ namespace detail {
 template <typename T>
 struct enum_hash {
   size_t operator()(T t) const {
-    using underlying_t = typename std::underlying_type<T>::type;
+    using underlying_t = std::underlying_type_t<T>;
     return std::hash<underlying_t>()(underlying_t(t));
   }
 };
@@ -263,18 +263,14 @@ template <typename Class, typename T>
 struct is_safe_overload<Class, T> {
   using type = std::integral_constant<
       bool,
-      !std::is_same<
-          Class,
-          typename std::remove_cv<
-              typename std::remove_reference<T>::type>::type>::value>;
+      !std::is_same_v<Class, std::remove_cv_t<std::remove_reference_t<T>>>>;
 };
 
 } // namespace detail
 
 template <typename Class, typename... Args>
-using safe_overload_t = typename std::enable_if<
-    apache::thrift::detail::is_safe_overload<Class, Args...>::type::value>::
-    type;
+using safe_overload_t = std::enable_if_t<
+    apache::thrift::detail::is_safe_overload<Class, Args...>::type::value>;
 
 } // namespace apache::thrift
 

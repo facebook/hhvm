@@ -393,7 +393,7 @@ constexpr auto hasIndexSupport(long) {
 template <class Protocol>
 constexpr auto hasIndexSupport(int)
     -> decltype(Protocol::ProtocolWriter::kHasIndexSupport()) {
-  return !std::is_base_of<VirtualReaderBase, Protocol>::value &&
+  return !std::is_base_of_v<VirtualReaderBase, Protocol> &&
       Protocol::ProtocolWriter::kHasIndexSupport();
 }
 

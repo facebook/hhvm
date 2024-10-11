@@ -619,7 +619,7 @@ inline void JSONProtocolReaderCommon::readJSONVal(int64_t& val) {
 }
 
 template <typename Floating>
-inline typename std::enable_if<std::is_floating_point<Floating>::value>::type
+inline typename std::enable_if_t<std::is_floating_point_v<Floating>>
 JSONProtocolReaderCommon::readJSONVal(Floating& val) {
   static_assert(
       std::numeric_limits<Floating>::is_iec559,
@@ -652,9 +652,8 @@ JSONProtocolReaderCommon::readJSONVal(Floating& val) {
 }
 
 template <typename Str>
-inline
-    typename std::enable_if<apache::thrift::detail::is_string<Str>::value>::type
-    JSONProtocolReaderCommon::readJSONVal(Str& val) {
+inline typename std::enable_if_t<apache::thrift::detail::is_string<Str>::value>
+JSONProtocolReaderCommon::readJSONVal(Str& val) {
   readJSONString(val);
 }
 

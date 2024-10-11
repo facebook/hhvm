@@ -92,9 +92,8 @@ class VirtualReader : public VirtualReaderBase {
 
   template <
       typename... Args,
-      typename std::enable_if<
-          std::is_constructible<ProtocolT, Args...>::value,
-          bool>::type = false>
+      std::enable_if_t<std::is_constructible_v<ProtocolT, Args...>, bool> =
+          false>
   explicit VirtualReader(Args&&... args)
       : protocol_(std::forward<Args>(args)...) {}
   ~VirtualReader() override {}

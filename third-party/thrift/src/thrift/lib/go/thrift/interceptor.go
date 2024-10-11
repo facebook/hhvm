@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // Interceptor is a function that runs before the actual method. It is passed
@@ -58,6 +59,10 @@ func (p *interceptorProcessor) ProcessorFunctionMap() map[string]types.Processor
 		}
 	}
 	return mi
+}
+
+func (p *interceptorProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return p.Processor.GetThriftMetadata()
 }
 
 type interceptorProcessorFunction struct {

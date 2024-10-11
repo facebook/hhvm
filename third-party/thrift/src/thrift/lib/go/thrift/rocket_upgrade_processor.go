@@ -21,6 +21,7 @@ import (
 	"maps"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 type rocketUpgradeProcessor struct {
@@ -41,6 +42,10 @@ func (r *rocketUpgradeProcessor) ProcessorFunctionMap() map[string]types.Process
 	mr := map[string]types.ProcessorFunction{"upgradeToRocket": &rocketUpgradeProcessorFunction{&r.upgraded}}
 	maps.Copy(mr, m)
 	return mr
+}
+
+func (r *rocketUpgradeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return r.processor.GetThriftMetadata()
 }
 
 type rocketUpgradeProcessorFunction struct {

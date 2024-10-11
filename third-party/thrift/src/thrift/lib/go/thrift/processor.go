@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // Processor exposes access to processor functions which
@@ -37,6 +38,7 @@ type Processor interface {
 	// sent which explains that no processor function exists with the specified
 	// name on this server.
 	ProcessorFunctionMap() map[string]types.ProcessorFunction
+	GetThriftMetadata() *metadata.ThriftMetadata
 }
 
 func errorType(err error) string {

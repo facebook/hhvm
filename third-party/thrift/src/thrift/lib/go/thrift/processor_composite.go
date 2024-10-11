@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // CompositeProcessor is a serial Processor can report what functions it has
@@ -31,12 +32,14 @@ type CompositeProcessor interface {
 // server as long as their functions carry distinct names
 type compositeProcessor struct {
 	serviceProcessorMap map[string]types.ProcessorFunction
+	metadata            *metadata.ThriftMetadata
 }
 
 // NewCompositeProcessor creates a new CompositeProcessor
 func NewCompositeProcessor() CompositeProcessor {
 	return &compositeProcessor{
 		serviceProcessorMap: make(map[string]types.ProcessorFunction),
+		metadata:            metadata.NewThriftMetadata(),
 	}
 }
 
@@ -49,6 +52,18 @@ func (p *compositeProcessor) Include(processor Processor) {
 	for name, tfunc := range processor.ProcessorFunctionMap() {
 		p.serviceProcessorMap[name] = tfunc
 	}
+	for name, v := range processor.GetThriftMetadata().GetEnums() {
+		p.metadata.Enums[name] = v
+	}
+	for name, v := range processor.GetThriftMetadata().GetStructs() {
+		p.metadata.Structs[name] = v
+	}
+	for name, v := range processor.GetThriftMetadata().GetExceptions() {
+		p.metadata.Exceptions[name] = v
+	}
+	for name, v := range processor.GetThriftMetadata().GetServices() {
+		p.metadata.Services[name] = v
+	}
 }
 
 // GetProcessorFunction multiplexes redirects to the appropriate Processor
@@ -60,4 +75,8 @@ func (p *compositeProcessor) GetProcessorFunction(name string) types.ProcessorFu
 // ProcessorMap returns the map that maps method names to Processors
 func (p *compositeProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return p.serviceProcessorMap
+}
+
+func (p *compositeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return p.metadata
 }

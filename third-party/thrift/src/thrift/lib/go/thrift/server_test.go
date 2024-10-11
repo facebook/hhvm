@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
@@ -64,6 +65,10 @@ type testProcessor struct {
 
 func (t *testProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return map[string]types.ProcessorFunction{"test": &testProcessorFunction{}}
+}
+
+func (t *testProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return nil
 }
 
 type testProcessorFunction struct{}

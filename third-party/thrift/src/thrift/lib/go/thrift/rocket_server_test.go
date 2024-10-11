@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 type rocketServerTestProcessor struct {
@@ -32,6 +33,10 @@ type rocketServerTestProcessor struct {
 
 func (t *rocketServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return map[string]types.ProcessorFunction{"test": &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
+}
+
+func (t *rocketServerTestProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return nil
 }
 
 type rocketServerTestProcessorFunction struct {

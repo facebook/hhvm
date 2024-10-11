@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 type headerServerTestProcessor struct {
@@ -31,6 +32,10 @@ type headerServerTestProcessor struct {
 
 func (t *headerServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
 	return map[string]types.ProcessorFunction{"test": &headerServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
+}
+
+func (t *headerServerTestProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+	return nil
 }
 
 type headerServerTestProcessorFunction struct {

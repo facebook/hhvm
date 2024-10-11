@@ -17,9 +17,9 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
 
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/transport/rocket/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 
 namespace apache::thrift::rocket {
 

@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/transport/rocket/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
 
 namespace apache::thrift::rocket {

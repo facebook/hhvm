@@ -17,7 +17,7 @@
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 
-#include <thrift/lib/cpp2/transport/rocket/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 
 namespace apache::thrift::rocket {
 namespace detail {

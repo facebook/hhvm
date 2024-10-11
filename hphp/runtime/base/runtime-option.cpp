@@ -911,8 +911,8 @@ int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 #ifdef HHVM_FACEBOOK
 
-int RuntimeOption::ThriftFBServerWorkerThreads = 1;
-int RuntimeOption::ThriftFBServerPoolThreads = 1;
+int RuntimeOption::ThriftFBServerThriftServerIOWorkerThreads = 1;
+int RuntimeOption::ThriftFBServerThriftServerCPUWorkerThreads = 1;
 std::set<std::string> RuntimeOption::ThriftFBServerHighPriorityEndPoints;
 
 bool RuntimeOption::EnableFb303Server = false;
@@ -1967,9 +1967,9 @@ void RuntimeOption::Load(
 #ifdef HHVM_FACEBOOK
   {
     // ThriftFBServer
-    Config::Bind(ThriftFBServerWorkerThreads, ini, config,
-                 "ThriftFBServer.WorkerThreads", 1);
-    Config::Bind(ThriftFBServerPoolThreads, ini, config, "ThriftFBServer.PoolThreads",
+    Config::Bind(ThriftFBServerThriftServerIOWorkerThreads, ini, config,
+                 "ThriftFBServer.ThriftServerIOThreads", 1);
+    Config::Bind(ThriftFBServerThriftServerCPUWorkerThreads, ini, config, "ThriftFBServer.ThriftServerCPUWorkerThreads",
                  1);
     Config::Bind(ThriftFBServerHighPriorityEndPoints, ini, config, "ThriftFBServer.HighPriorityEndPoints");
 

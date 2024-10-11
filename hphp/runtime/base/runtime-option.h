@@ -993,8 +993,8 @@ public:
 
 #ifdef HHVM_FACEBOOK
   // ThriftFBServer
-  static int ThriftFBServerWorkerThreads;
-  static int ThriftFBServerPoolThreads;
+  static int ThriftFBServerThriftServerIOWorkerThreads;
+  static int ThriftFBServerThriftServerCPUWorkerThreads;
   static std::set<std::string> ThriftFBServerHighPriorityEndPoints;
 
   // fb303 server

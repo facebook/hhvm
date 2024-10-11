@@ -31,13 +31,13 @@ type Interceptor func(ctx context.Context, methodName string, pfunc types.Proces
 
 type interceptorProcessor struct {
 	interceptor Interceptor
-	types.Processor
+	Processor
 }
 
 // WrapInterceptor wraps an interceptor around the Processor p
 // such as when running the method returned by that processor it will execute
 // the interceptor instead.
-func WrapInterceptor(interceptor Interceptor, p types.Processor) types.Processor {
+func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 	if interceptor == nil {
 		return p
 	}

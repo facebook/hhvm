@@ -24,7 +24,7 @@ import (
 )
 
 type exampleProcessor struct {
-	types.Processor
+	Processor
 	hit *bool
 }
 

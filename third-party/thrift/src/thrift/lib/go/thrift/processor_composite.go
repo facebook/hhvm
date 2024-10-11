@@ -23,7 +23,7 @@ import (
 // CompositeProcessor is a serial Processor can report what functions it has
 // Currently all generated Go processors satisfy this interface.
 type CompositeProcessor interface {
-	types.Processor
+	Processor
 	Include(processor map[string]types.ProcessorFunction)
 	ProcessorFunctionMap() map[string]types.ProcessorFunction
 }

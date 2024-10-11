@@ -22,8 +22,6 @@ import (
 	"net"
 	"os"
 	"runtime/debug"
-
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // headerServer is a functional but unoptimized server that is easy to
@@ -36,14 +34,14 @@ import (
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
 type headerServer struct {
-	processor   types.Processor
+	processor   Processor
 	listener    net.Listener
 	log         *log.Logger
 	connContext func(context.Context, net.Conn) context.Context
 }
 
 // newHeaderServer creates a new server that only supports Header Transport.
-func newHeaderServer(processor types.Processor, listener net.Listener, options *ServerOptions) Server {
+func newHeaderServer(processor Processor, listener net.Listener, options *ServerOptions) Server {
 	return &headerServer{
 		processor:   processor,
 		listener:    listener,

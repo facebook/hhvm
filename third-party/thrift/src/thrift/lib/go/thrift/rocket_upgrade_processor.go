@@ -25,10 +25,10 @@ import (
 
 type rocketUpgradeProcessor struct {
 	upgraded  bool
-	processor types.Processor
+	processor Processor
 }
 
-func newRocketUpgradeProcessor(processor types.Processor) *rocketUpgradeProcessor {
+func newRocketUpgradeProcessor(processor Processor) *rocketUpgradeProcessor {
 	return &rocketUpgradeProcessor{processor: processor}
 }
 

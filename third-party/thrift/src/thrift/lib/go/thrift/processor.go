@@ -24,6 +24,21 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
+// Processor exposes access to processor functions which
+// manage I/O and processing of a input message for a specific
+// server function
+type Processor interface {
+	// GetProcessorFunctionMap is given the name of a thrift function
+	// of the inbound thrift message.  It is expected to return
+	// a non-nil GetProcessorFunction when the function can be successfully
+	// found.
+	//
+	// If GetProcessorFunctionMap is nil or a value in the map is nil, a generic error will be
+	// sent which explains that no processor function exists with the specified
+	// name on this server.
+	ProcessorFunctionMap() map[string]types.ProcessorFunction
+}
+
 func errorType(err error) string {
 	// get type name without package or pointer information
 	fqet := strings.Replace(fmt.Sprintf("%T", err), "*", "", -1)
@@ -31,7 +46,7 @@ func errorType(err error) string {
 	return et[len(et)-1]
 }
 
-func getProcessorFunction(processor types.Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationException) {
+func getProcessorFunction(processor Processor, messageType types.MessageType, name string) (types.ProcessorFunction, types.ApplicationException) {
 	if messageType != types.CALL && messageType != types.ONEWAY {
 		// case one: invalid message type
 		return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("unexpected message type: %d", messageType))
@@ -71,7 +86,7 @@ func setRequestHeadersForResult(protocol types.Protocol, result types.WritableSt
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor types.Processor, prot types.Protocol) (ext types.Exception) {
+func process(ctx context.Context, processor Processor, prot types.Protocol) (ext types.Exception) {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.

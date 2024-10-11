@@ -32,8 +32,6 @@ type ClientInterface = types.ClientInterface
 
 type ProcessorFunction = types.ProcessorFunction
 
-type Processor = types.Processor
-
 type Decoder = types.Decoder
 
 type Struct = types.Struct

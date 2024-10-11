@@ -705,7 +705,15 @@ module DataType = struct
             env
             ty
         in
-        (* TODO T201569125 - do I need to do something with the where constraints here? *)
+        (* Ignore case type where clauses for now.
+         * This will over-approximate the datatype because it will include all
+         * the variants' types regardless of satisfaction of the where clause.
+         * Over-approximation is safe, but incomplete: e.g. the following is OK
+         * but results in an error if where clauses are ignored.
+         *   case type Type1<T> = bool where T as arraykey | int;
+         *   case type Type2 = bool | Type1<float>;
+         * We can revisit should there be a use case for this.
+         *)
         let tyl = List.map (variant :: variants) ~f:fst in
         List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) variant ->
             let ((env, _ty_err_opt), variant) = localize env variant in

@@ -300,8 +300,9 @@ add_library(
   transport/core/ThriftRequest.cpp
   transport/rocket/FdSocket.cpp
   transport/rocket/PayloadUtils.cpp
+  transport/rocket/ChecksumGenerator.cpp
   transport/rocket/Types.cpp
-  transport/rocket/Compression.cpp
+  transport/rocket/compression/Compression.cpp
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp
   transport/rocket/client/RocketClient.cpp
@@ -344,8 +345,6 @@ add_dependencies(
   serverdbginfo
 )
 
-find_package(xxhash REQUIRED)
-target_include_directories(thriftcpp2 PUBLIC ${xxhash_INCLUDE_DIRS})
 target_link_libraries(
   thriftcpp2
   PUBLIC
@@ -360,7 +359,7 @@ target_link_libraries(
     thrifttype
     thriftanyrep
     serverdbginfo
-    xxhash::xxhash
+    ${Xxhash_LIBRARY}
 )
 
 add_library(

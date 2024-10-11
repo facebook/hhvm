@@ -112,6 +112,7 @@ if (THRIFT_LIB_ONLY OR build_all)
   find_package(wangle CONFIG REQUIRED)
   find_package(ZLIB REQUIRED)
   find_package(Zstd REQUIRED)
+  find_package(Xxhash REQUIRED)
   find_package(mvfst CONFIG REQUIRED)
   # https://cmake.org/cmake/help/v3.9/module/FindThreads.html
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -121,6 +122,7 @@ if (THRIFT_LIB_ONLY OR build_all)
     ${GLOG_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR}
     ${ZSTD_INCLUDE_DIRS}
+    ${Xxhash_INCLUDE_DIR}
   )
   add_definitions("-DTHRIFT_HAVE_LIBSNAPPY=0")
   if (THRIFT_LIB_ONLY)

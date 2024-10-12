@@ -30,15 +30,6 @@ struct print_annotations {
   }
 };
 
-template <typename T>
-void print_enum_annotations() {
-  using info = reflect_enum<T>;
-
-  std::cout << "enum annotations:\n";
-  fatal::foreach<typename info::annotations::map>(print_annotations(), "- ");
-  std::cout << '\n';
-}
-
 struct print_struct_member_annotations {
   template <typename Member, std::size_t Index>
   void operator()(fatal::indexed<Member, Index>) const {
@@ -60,7 +51,6 @@ void print_struct_annotations() {
 }
 
 int main() {
-  print_enum_annotations<annotated_enum>();
   print_struct_annotations<annotated_struct>();
 
   return 0;

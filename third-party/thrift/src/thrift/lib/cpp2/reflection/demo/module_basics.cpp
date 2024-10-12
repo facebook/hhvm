@@ -29,23 +29,6 @@ struct print_namespace {
   }
 };
 
-struct print_enum_member {
-  template <typename Member, std::size_t Index>
-  void operator()(fatal::indexed<Member, Index>) const {
-    std::cout << "    " << fatal::z_data<typename Member::name>() << '\n';
-  }
-};
-
-struct print_enum {
-  template <typename T, typename Name, std::size_t Index>
-  void operator()(fatal::indexed_pair<T, Name, Index>) const {
-    using info = fatal::enum_traits<T>;
-    std::cout << "  enum " << fatal::z_data<Name>() << " {\n";
-    fatal::foreach<typename info::fields>(print_enum_member());
-    std::cout << "  }\n\n";
-  }
-};
-
 struct print_variant_member {
   template <typename Member, std::size_t Index>
   void operator()(fatal::indexed<Member, Index>) const {
@@ -92,9 +75,6 @@ void print_module_info() {
   fatal::foreach<typename info::namespaces>(print_namespace());
 
   std::cout << '\n';
-
-  std::cout << "enums declared in module\n";
-  fatal::foreach<typename info::enums>(print_enum());
 
   std::cout << "variants declared in module\n";
   fatal::foreach<typename info::unions>(print_variant());

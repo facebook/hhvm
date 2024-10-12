@@ -51,7 +51,7 @@ TEST(ObjectTest, i64) {
       w::i64(0L),
       w::i64(short(-1)),
       w::i64(std::int32_t(4)),
-      w::i64(char(5)),
+      w::i64(std::int8_t(5)),
   };
   for (auto& o : objects) {
     EXPECT_TRUE(o.is_i64());

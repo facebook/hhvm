@@ -503,19 +503,17 @@ namespace make {
 
 namespace detail {
 
+template <typename T, typename... Alternatives>
+static constexpr bool is_any_of = (std::is_same_v<T, Alternatives> || ...);
+
 /**
  * The set of integral types that are supported by whisker::object (and are
  * therefore also implicitly convertible from).
  */
 template <typename T>
 static constexpr bool is_supported_integral_type =
-    std::is_integral_v<T> && std::is_signed_v<T> && sizeof(T) <= sizeof(i64);
-
-static_assert(is_supported_integral_type<i64>);
-static_assert(is_supported_integral_type<char>);
-static_assert(is_supported_integral_type<short>);
-static_assert(is_supported_integral_type<int>);
-static_assert(is_supported_integral_type<long>);
+    is_any_of<T, signed char, short, int, long, long long> &&
+    sizeof(T) <= sizeof(whisker::i64);
 
 /**
  * The set of floating point types that are supported by whisker::object (and
@@ -523,7 +521,7 @@ static_assert(is_supported_integral_type<long>);
  */
 template <typename T>
 static constexpr bool is_supported_floating_point_type =
-    std::is_same_v<T, float> || std::is_same_v<T, double>;
+    is_any_of<T, float, double>;
 
 } // namespace detail
 

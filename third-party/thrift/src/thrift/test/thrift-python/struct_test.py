@@ -56,6 +56,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     map_constant,
     set_constant,
     string_constant,
+    struct_constant,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestExceptionCopy as TestExceptionCopyMutable,
     TestStruct as TestStructMutable,
@@ -1593,3 +1594,22 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotEqual(
             e.unqualified_map_string_i32, e_clone.unqualified_map_string_i32
         )
+
+    def test_struct_constant(self) -> None:
+        """
+        const TestStructConstant struct_constant = {
+          "unqualified_i32": 42,
+          "unqualified_string": "Hello world!",
+          "unqualified_list_i32": [1, 2, 3],
+        };
+        """
+        # It is just a MutableStruct
+        self.assertIsInstance(struct_constant, MutableStruct)
+
+        self.assertEqual(42, struct_constant.unqualified_i32)
+        self.assertEqual("Hello world!", struct_constant.unqualified_string)
+        self.assertEqual([1, 2, 3], struct_constant.unqualified_list_i32)
+
+        # It is `const` but it is possible to mutate
+        struct_constant.unqualified_list_i32.append(4)
+        self.assertEqual([1, 2, 3, 4], struct_constant.unqualified_list_i32)

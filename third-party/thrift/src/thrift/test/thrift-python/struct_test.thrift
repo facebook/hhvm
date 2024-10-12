@@ -35,6 +35,18 @@ const set<string> set_constant = ["foo", "bar", "baz"];
 
 const map<string, i32> map_constant = {"foo": 1, "bar": 2};
 
+struct TestStructConstant {
+  1: i32 unqualified_i32;
+  2: string unqualified_string;
+  3: list<i32> unqualified_list_i32;
+}
+
+const TestStructConstant struct_constant = {
+  "unqualified_i32": 42,
+  "unqualified_string": "Hello world!",
+  "unqualified_list_i32": [1, 2, 3],
+};
+
 struct TestStruct {
   1: string unqualified_string;
   2: optional string optional_string;

@@ -89,6 +89,10 @@ struct DynamicPatchOptions {
   bool doNotConvertStringToBinary = false;
 };
 
+// Note: this function is half-baked.
+// Currently we only implemented struct/union for internal use cases.
+// Ideally we should also support primitive types (e.g., i32 --> I32Patch).
+// External users should use toPatchUri/fromPatchUri instead for now.
 type::Type toPatchType(type::Type input);
 } // namespace detail
 

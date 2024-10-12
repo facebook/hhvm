@@ -68,6 +68,11 @@ constexpr Clock::time_point kNoStartTime = Clock::time_point{};
 SessionKind sessionKind();
 
 /*
+ * Return the current thread's request index.
+ */
+int64_t requestIdx();
+
+/*
  * The Treadmill allows us to defer work until all currently
  * outstanding requests have finished.  We hook request start and
  * finish to know when these events happen.

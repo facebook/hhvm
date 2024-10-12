@@ -61,6 +61,7 @@
 #include <folly/Bits.h>
 #include <folly/MapUtil.h>
 #include <folly/Random.h>
+#include <folly/synchronization/EventCount.h>
 
 #include <algorithm>
 #include <iostream>
@@ -83,7 +84,28 @@ const StaticString s___MockClass("__MockClass");
 const StaticString s___Reified("__Reified");
 const StaticString s___ModuleLevelTrait("__ModuleLevelTrait");
 
-Mutex g_classesMutex;
+int64_t constexpr kInvalidIdx = std::numeric_limits<int64_t>::max();
+
+namespace {
+constexpr size_t kNumBuckets = 8192;
+
+struct classBucket {
+  std::atomic<int64_t> inProgress{kInvalidIdx};
+  folly::EventCount ec;
+  Mutex mutex;
+};
+
+std::array<classBucket, kNumBuckets> s_classes;
+classBucket& getBucket(const StringData* s) {
+  auto const idx = Cfg::Eval::SynchronizeClassLoading 
+    ? s->hash() % kNumBuckets : 0;
+  return s_classes[idx];
+}
+Mutex& getMutex(const StringData* s) {
+  return getBucket(s).mutex;
+}
+}
+
 static std::atomic<ClassId::Id> s_nextClassId{1};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -464,7 +486,7 @@ void Class::destroy() {
    */
   if (!m_cachedClass.bound()) return;
 
-  Lock l(g_classesMutex);
+  Lock l(getMutex(name()));
   // Need to recheck now we have the lock
   if (!m_cachedClass.bound()) return;
   // Only do this once.
@@ -4888,6 +4910,69 @@ void setupClass(Class* newClass, NamedType* nameList) {
 
 }
 
+// Construct a class. If another thread is already defining the class,
+// waits for it to finish and reuse the result. Conservative: if two threads
+// try to construct classes belonging to same shard, if second thread is newer,
+// it waits. Otherwise, it races first thread to prevent deadlock.
+Class* newClassImpl(const PreClass* preClass,
+                    Class* parent,
+                    const Class* top,
+                    NamedType* nameList) {
+    auto& bucket = getBucket(preClass->name());
+    const int64_t ridx = Cfg::Eval::SynchronizeClassLoading
+      ? Treadmill::requestIdx() : 0;
+
+    auto setClassInRDS = [&](Class* newClass) -> Class* {
+      assertx(newClass);
+      if (top != nameList->clsList()) return nullptr;
+
+      Lock l(bucket.mutex);
+      // If another thread beat us to creating a class for this name,
+      // use it instead.
+      if (top != nameList->clsList()) return nullptr;
+      setupClass(newClass, nameList);
+
+      /*
+      * call setCached after adding to the class list, otherwise the
+      * target-cache short circuit at the top could return a class
+      * which is not yet on the clsList().
+      */
+      newClass->setCached();
+      return newClass;
+    };
+
+    auto createClass = [&]() -> Class* {
+      FrameRestore fr(preClass);
+      auto c = Class::newClass(const_cast<PreClass*>(preClass), parent);
+      auto res = setClassInRDS(c);
+      auto expectedRIdx = ridx;
+      if (bucket.inProgress.compare_exchange_strong(expectedRIdx, kInvalidIdx) ||
+        res != nullptr) {
+        bucket.ec.notifyAll();
+      }
+      return res;
+    };
+    
+    while (true) {
+      auto const didAcquire = [&] {
+        auto expected = bucket.inProgress.load();
+        while (expected > ridx) {
+          if (bucket.inProgress.compare_exchange_strong(expected, ridx)) {
+            return true;
+          }
+        }
+        return expected == ridx;
+      }();
+      if (didAcquire) return createClass();
+
+      bucket.ec.await([&] {
+        return top != nameList->clsList() ||
+        bucket.inProgress.load() > ridx;
+      });
+      if (top != nameList->clsList()) return nullptr;
+    }
+}
+
 const StaticString s__JitSerdesPriority("__JitSerdesPriority");
 
 Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
@@ -4989,36 +5074,17 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
         }
       }
     }
-
-    // Create a new class.
-    ClassPtr newClass;
-    {
-      FrameRestore fr(preClass);
-      newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
+    Class* newClass = newClassImpl(preClass, parent, top, nameList);
+    if (newClass == nullptr) {
+      assertx(top != nameList->clsList());
+      top = nameList->clsList();
+      continue;
     }
 
-    {
-      Lock l(g_classesMutex);
-
-      if (UNLIKELY(top != nameList->clsList())) {
-        top = nameList->clsList();
-        continue;
-      }
-
-      setupClass(newClass.get(), nameList);
-
-      /*
-      * call setCached after adding to the class list, otherwise the
-      * target-cache short circuit at the top could return a class
-      * which is not yet on the clsList().
-      */
-      newClass.get()->setCached();
-    }
-
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass));
     assertx(!RO::RepoAuthoritative ||
-            (newClass.get()->isPersistent() &&
-             classHasPersistentRDS(newClass.get())));
+            (newClass->isPersistent() &&
+             classHasPersistentRDS(newClass)));
 
     if (UNLIKELY(Cfg::Eval::EnableIntrinsicsExtension)) {
       Lock l(s_priority_serialize_mutex);
@@ -5027,12 +5093,13 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       if (it != preClass->userAttributes().end()) {
         auto const prio = it->second;
         if (tvIsInt(prio)) {
-          s_priority_serialize.emplace(val(prio).num, newClass.get());
+          s_priority_serialize.emplace(val(prio).num, newClass);
         }
       }
     }
 
-    return newClass.get();
+    assertx(newClass != nullptr);
+    return newClass;
   }
 }
 
@@ -5082,7 +5149,7 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
     Class::newClass(const_cast<PreClass*>(preClass), parent)
   };
 
-  Lock l(g_classesMutex);
+  Lock l(getMutex(preClass->name()));
 
   if (auto const cls = find()) return cls;
   setupClass(newClass.get(), nameList);

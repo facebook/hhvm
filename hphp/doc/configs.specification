@@ -271,6 +271,10 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   Log stats about calls to handleResume to hhvm_resume_locations using
   StructuredLog
 
+- bool Eval.SynchronizeClassLoading = false, voork
+
+  Synchronize class loading between threads
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

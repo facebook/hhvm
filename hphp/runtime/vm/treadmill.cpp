@@ -93,18 +93,6 @@ struct StateGuard {
 };
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Return the current thread's index.
- */
-int64_t requestIdx() {
-  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
-    *rl_thisRequestIdx =
-      g_nextThreadIdx.fetch_add(1, std::memory_order_acq_rel);
-  }
-  return *rl_thisRequestIdx;
-}
-
 char const* getSessionKindName(SessionKind value) {
   switch(value) {
     case SessionKind::None: return "None";
@@ -225,7 +213,17 @@ void refreshStats() {
     std::chrono::duration_cast<std::chrono::seconds>(oldestAge).count()
   );
 }
+}
 
+/*
+ * Return the current thread's index.
+ */
+int64_t requestIdx() {
+  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
+    *rl_thisRequestIdx =
+      g_nextThreadIdx.fetch_add(1, std::memory_order_acq_rel);
+  }
+  return *rl_thisRequestIdx;
 }
 
 struct PendingTriggers : std::list<std::unique_ptr<WorkItem>> {

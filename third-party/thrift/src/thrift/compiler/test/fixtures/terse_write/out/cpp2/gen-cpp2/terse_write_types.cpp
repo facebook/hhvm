@@ -606,46 +606,6 @@ bool StructLevelTerseStruct::operator<([[maybe_unused]] const StructLevelTerseSt
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::std::vector<::std::int16_t>& StructLevelTerseStruct::get_list_field() const& {
-  return __fbthrift_field_list_field;
-}
-
-::std::vector<::std::int16_t> StructLevelTerseStruct::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
-}
-
-const ::std::set<::std::int16_t>& StructLevelTerseStruct::get_set_field() const& {
-  return __fbthrift_field_set_field;
-}
-
-::std::set<::std::int16_t> StructLevelTerseStruct::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
-}
-
-const ::std::map<::std::int16_t, ::std::int16_t>& StructLevelTerseStruct::get_map_field() const& {
-  return __fbthrift_field_map_field;
-}
-
-::std::map<::std::int16_t, ::std::int16_t> StructLevelTerseStruct::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
-}
-
-const ::facebook::thrift::test::terse_write::MyStruct& StructLevelTerseStruct::get_struct_field() const& {
-  return __fbthrift_field_struct_field;
-}
-
-::facebook::thrift::test::terse_write::MyStruct StructLevelTerseStruct::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
-}
-
-const ::facebook::thrift::test::terse_write::MyUnion& StructLevelTerseStruct::get_union_field() const& {
-  return __fbthrift_field_union_field;
-}
-
-::facebook::thrift::test::terse_write::MyUnion StructLevelTerseStruct::get_union_field() && {
-  return std::move(__fbthrift_field_union_field);
-}
-
 
 void swap([[maybe_unused]] StructLevelTerseStruct& a, [[maybe_unused]] StructLevelTerseStruct& b) {
   using ::std::swap;
@@ -930,46 +890,6 @@ bool FieldLevelTerseStruct::operator<([[maybe_unused]] const FieldLevelTerseStru
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::std::vector<::std::int16_t>& FieldLevelTerseStruct::get_terse_list_field() const& {
-  return __fbthrift_field_terse_list_field;
-}
-
-::std::vector<::std::int16_t> FieldLevelTerseStruct::get_terse_list_field() && {
-  return std::move(__fbthrift_field_terse_list_field);
-}
-
-const ::std::set<::std::int16_t>& FieldLevelTerseStruct::get_terse_set_field() const& {
-  return __fbthrift_field_terse_set_field;
-}
-
-::std::set<::std::int16_t> FieldLevelTerseStruct::get_terse_set_field() && {
-  return std::move(__fbthrift_field_terse_set_field);
-}
-
-const ::std::map<::std::int16_t, ::std::int16_t>& FieldLevelTerseStruct::get_terse_map_field() const& {
-  return __fbthrift_field_terse_map_field;
-}
-
-::std::map<::std::int16_t, ::std::int16_t> FieldLevelTerseStruct::get_terse_map_field() && {
-  return std::move(__fbthrift_field_terse_map_field);
-}
-
-const ::facebook::thrift::test::terse_write::MyStruct& FieldLevelTerseStruct::get_terse_struct_field() const& {
-  return __fbthrift_field_terse_struct_field;
-}
-
-::facebook::thrift::test::terse_write::MyStruct FieldLevelTerseStruct::get_terse_struct_field() && {
-  return std::move(__fbthrift_field_terse_struct_field);
-}
-
-const ::facebook::thrift::test::terse_write::MyUnion& FieldLevelTerseStruct::get_terse_union_field() const& {
-  return __fbthrift_field_terse_union_field;
-}
-
-::facebook::thrift::test::terse_write::MyUnion FieldLevelTerseStruct::get_terse_union_field() && {
-  return std::move(__fbthrift_field_terse_union_field);
-}
-
 const ::std::vector<::std::int16_t>& FieldLevelTerseStruct::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
@@ -1250,38 +1170,6 @@ bool TerseStructWithCustomDefault::operator==([[maybe_unused]] const TerseStruct
 
 bool TerseStructWithCustomDefault::operator<([[maybe_unused]] const TerseStructWithCustomDefault& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
-}
-
-const ::std::vector<::std::int16_t>& TerseStructWithCustomDefault::get_list_field() const& {
-  return __fbthrift_field_list_field;
-}
-
-::std::vector<::std::int16_t> TerseStructWithCustomDefault::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
-}
-
-const ::std::set<::std::int16_t>& TerseStructWithCustomDefault::get_set_field() const& {
-  return __fbthrift_field_set_field;
-}
-
-::std::set<::std::int16_t> TerseStructWithCustomDefault::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
-}
-
-const ::std::map<::std::int16_t, ::std::int16_t>& TerseStructWithCustomDefault::get_map_field() const& {
-  return __fbthrift_field_map_field;
-}
-
-::std::map<::std::int16_t, ::std::int16_t> TerseStructWithCustomDefault::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
-}
-
-const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& TerseStructWithCustomDefault::get_struct_field() const& {
-  return __fbthrift_field_struct_field;
-}
-
-::facebook::thrift::test::terse_write::MyStructWithCustomDefault TerseStructWithCustomDefault::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
 }
 
 

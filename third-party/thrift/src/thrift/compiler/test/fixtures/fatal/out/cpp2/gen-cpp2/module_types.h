@@ -7373,18 +7373,6 @@ class struct3 final  {
     return {static_cast<T&&>(this->__fbthrift_field_fieldR), __isset.at(16), __isset.bit(16)};
   }
 
-  /** Glean { "field": "fieldA" } */
-  ::std::int32_t get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
-
-  /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  ::std::int32_t& set_fieldA(::std::int32_t fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
-
   /** Glean { "field": "fieldB" } */
   const ::std::string& get_fieldB() const& {
     return __fbthrift_field_fieldB;

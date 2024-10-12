@@ -3697,54 +3697,6 @@ class MinPaddingWithCustomType final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_tiny)};
   }
 
-  /** Glean { "field": "small" } */
-  ::std::int8_t get_small() const {
-    return __fbthrift_field_small;
-  }
-
-  /** Glean { "field": "small" } */
-  [[deprecated("Use `FOO.small() = BAR;` instead of `FOO.set_small(BAR);`")]]
-  ::std::int8_t& set_small(::std::int8_t small_) {
-    small_ref() = small_;
-    return __fbthrift_field_small;
-  }
-
-  /** Glean { "field": "big" } */
-  ::std::int64_t get_big() const {
-    return __fbthrift_field_big;
-  }
-
-  /** Glean { "field": "big" } */
-  [[deprecated("Use `FOO.big() = BAR;` instead of `FOO.set_big(BAR);`")]]
-  ::std::int64_t& set_big(::std::int64_t big_) {
-    big_ref() = big_;
-    return __fbthrift_field_big;
-  }
-
-  /** Glean { "field": "biggish" } */
-  ::std::int32_t get_biggish() const {
-    return __fbthrift_field_biggish;
-  }
-
-  /** Glean { "field": "biggish" } */
-  [[deprecated("Use `FOO.biggish() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
-  ::std::int32_t& set_biggish(::std::int32_t biggish_) {
-    biggish_ref() = biggish_;
-    return __fbthrift_field_biggish;
-  }
-
-  /** Glean { "field": "tiny" } */
-  ::std::int8_t get_tiny() const {
-    return __fbthrift_field_tiny;
-  }
-
-  /** Glean { "field": "tiny" } */
-  [[deprecated("Use `FOO.tiny() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
-  ::std::int8_t& set_tiny(::std::int8_t tiny_) {
-    tiny_ref() = tiny_;
-    return __fbthrift_field_tiny;
-  }
-
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
   template <class Protocol_>

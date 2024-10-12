@@ -1893,7 +1893,8 @@ class cpp_mstch_field : public mstch_field {
     return !cpp2::is_explicit_ref(field_) && !cpp2::is_lazy(field_) &&
         !cpp_name_resolver::find_first_adapter(*field_) &&
         !cpp_name_resolver::find_field_interceptor(*field_) &&
-        !has_option("no_getters_setters");
+        !has_option("no_getters_setters") &&
+        field_->get_req() != t_field::e_req::terse;
   }
   mstch::node cpp_ref() { return cpp2::is_explicit_ref(field_); }
   mstch::node opt_cpp_ref() {

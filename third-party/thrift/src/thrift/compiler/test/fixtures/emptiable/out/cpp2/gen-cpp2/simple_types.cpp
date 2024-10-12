@@ -491,38 +491,6 @@ bool EmptiableTerseStruct::operator<([[maybe_unused]] const EmptiableTerseStruct
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-const ::std::vector<::std::int16_t>& EmptiableTerseStruct::get_list_field() const& {
-  return __fbthrift_field_list_field;
-}
-
-::std::vector<::std::int16_t> EmptiableTerseStruct::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
-}
-
-const ::std::set<::std::int16_t>& EmptiableTerseStruct::get_set_field() const& {
-  return __fbthrift_field_set_field;
-}
-
-::std::set<::std::int16_t> EmptiableTerseStruct::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
-}
-
-const ::std::map<::std::int16_t, ::std::int16_t>& EmptiableTerseStruct::get_map_field() const& {
-  return __fbthrift_field_map_field;
-}
-
-::std::map<::std::int16_t, ::std::int16_t> EmptiableTerseStruct::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
-}
-
-const ::apache::thrift::test::MyStruct& EmptiableTerseStruct::get_struct_field() const& {
-  return __fbthrift_field_struct_field;
-}
-
-::apache::thrift::test::MyStruct EmptiableTerseStruct::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
-}
-
 
 void swap([[maybe_unused]] EmptiableTerseStruct& a, [[maybe_unused]] EmptiableTerseStruct& b) {
   using ::std::swap;

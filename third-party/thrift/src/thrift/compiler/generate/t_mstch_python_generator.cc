@@ -153,6 +153,8 @@ class python_mstch_program : public mstch_program {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
             {"program:generate_mutable_types",
              &python_mstch_program::generate_mutable_types},
+            {"program:generate_immutable_types",
+             &python_mstch_program::generate_immutable_types},
             {"program:generate_to_mutable_python_conversion_methods?",
              &python_mstch_program::
                  generate_to_mutable_python_conversion_methods},
@@ -228,6 +230,10 @@ class python_mstch_program : public mstch_program {
 
   mstch::node generate_mutable_types() {
     return !get_option("generate_mutable_types").empty();
+  }
+
+  mstch::node generate_immutable_types() {
+    return !get_option("generate_immutable_types").empty();
   }
 
   mstch::node generate_to_mutable_python_conversion_methods() {
@@ -624,9 +630,17 @@ class python_mstch_type : public mstch_type {
   }
 
   mstch::node module_path() {
-    std::string_view types_import_path =
-        get_option("generate_mutable_types").empty() ? ".thrift_types"
-                                                     : ".thrift_mutable_types";
+    std::string_view types_import_path = [this]() {
+      if (!get_option("generate_mutable_types").empty()) {
+        return ".thrift_mutable_types";
+      }
+      if (!get_option("generate_immutable_types").empty()) {
+        return ".thrift_types";
+      }
+      throw std::runtime_error(
+          "Expected one option out of generate_mutable_types and generate_immutable_types to be set, and neither is set.");
+    }();
+
     return get_py3_namespace_with_name_and_prefix(
                get_type_program(), get_option("root_module_prefix"))
         .append(types_import_path);
@@ -1215,6 +1229,8 @@ void t_mstch_python_generator::generate_file(
   mstch_context_
       .set_or_erase_option(
           is_types_file == IsTypesFile::Yes, "is_types_file", "")
+      .set_or_erase_option(
+          type_kind == TypeKind::Immutable, "generate_immutable_types", "yes")
       .set_or_erase_option(
           type_kind == TypeKind::Mutable, "generate_mutable_types", "yes");
 

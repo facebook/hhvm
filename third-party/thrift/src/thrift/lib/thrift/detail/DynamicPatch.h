@@ -65,6 +65,10 @@ template <typename T>
 constexpr static bool has_merge_with_badge_v =
     folly::is_detected_v<detect_merge_with_badge, T>;
 
+template <typename T, typename U>
+using if_same_type_after_remove_cvref = std::enable_if_t<
+    std::is_same_v<folly::remove_cvref_t<T>, folly::remove_cvref_t<U>>>;
+
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
   PatchType patch;
@@ -164,11 +168,20 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     validateAndGetCategory();
   }
 
-  template <class Visitor>
-  void customVisit(detail::Badge, Visitor&&) const;
+ private:
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&&, detail::Badge, Visitor&&);
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
+
   void apply(detail::Badge, Value&) const;
-  void merge(detail::Badge badge, const DynamicUnknownPatch& other) {
-    other.customVisit(badge, *this);
+
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicUnknownPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 
  private:
@@ -213,27 +226,37 @@ class DynamicListPatch : public DynamicPatchBase {
     get(op::PatchOp::Put).ensure_list().push_back(std::move(v));
   }
 
-  template <class Visitor>
-  void customVisit(detail::Badge badge, Visitor&& v) const {
-    if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      v.assign(badge, assign->as_list());
+ private:
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+    if (auto assign = self.get_ptr(op::PatchOp::Assign)) {
+      std::forward<Visitor>(v).assign(
+          badge, folly::forward_like<Self>(assign->as_list()));
       return;
     }
 
-    if (auto clear = get_ptr(op::PatchOp::Clear); clear && clear->as_bool()) {
-      v.clear(badge);
+    if (auto clear = self.get_ptr(op::PatchOp::Clear);
+        clear && clear->as_bool()) {
+      std::forward<Visitor>(v).clear(badge);
     }
 
-    if (auto put = get_ptr(op::PatchOp::Put)) {
+    if (auto put = self.get_ptr(op::PatchOp::Put)) {
       for (auto& i : put->as_list()) {
-        v.push_back(badge, i);
+        std::forward<Visitor>(v).push_back(badge, folly::forward_like<Self>(i));
       }
     }
   }
 
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
+
   void apply(detail::Badge, detail::ValueList& v) const;
-  void merge(detail::Badge badge, const DynamicListPatch& other) {
-    other.customVisit(badge, *this);
+
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicListPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 };
 
@@ -279,29 +302,41 @@ class DynamicSetPatch : public DynamicPatchBase {
     }
   }
 
-  template <class Visitor>
-  void customVisit(detail::Badge badge, Visitor&& v) const {
-    if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      v.assign(badge, assign->as_set());
+ private:
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+    if (auto assign = self.get_ptr(op::PatchOp::Assign)) {
+      std::forward<Visitor>(v).assign(
+          badge, folly::forward_like<Self>(assign->as_set()));
       return;
     }
 
-    if (auto clear = get_ptr(op::PatchOp::Clear); clear && clear->as_bool()) {
-      v.clear(badge);
+    if (auto clear = self.get_ptr(op::PatchOp::Clear);
+        clear && clear->as_bool()) {
+      std::forward<Visitor>(v).clear(badge);
     }
 
-    if (auto remove = get_ptr(op::PatchOp::Remove)) {
-      v.remove(badge, remove->as_set());
+    if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
+      std::forward<Visitor>(v).remove(
+          badge, folly::forward_like<Self>(remove->as_set()));
     }
 
-    if (auto add = get_ptr(op::PatchOp::Add)) {
-      v.add(badge, add->as_set());
+    if (auto add = self.get_ptr(op::PatchOp::Add)) {
+      std::forward<Visitor>(v).add(
+          badge, folly::forward_like<Self>(add->as_set()));
     }
   }
 
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
+
   void apply(detail::Badge, detail::ValueSet& v) const;
-  void merge(detail::Badge badge, const DynamicSetPatch& other) {
-    other.customVisit(badge, *this);
+
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicSetPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 };
 
@@ -354,11 +389,19 @@ class DynamicMapPatch {
         put_.empty() && patchPrior_.empty() && patchAfter_.empty();
   }
 
-  template <class Visitor>
-  void customVisit(detail::Badge badge, Visitor&& v) const;
+ private:
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v);
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
   void apply(detail::Badge, detail::ValueMap& v) const;
-  void merge(detail::Badge badge, const DynamicMapPatch& other) {
-    other.customVisit(badge, *this);
+
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicMapPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 
   void doNotConvertStringToBinary(detail::Badge) {
@@ -426,8 +469,13 @@ class DynamicStructurePatch {
     options_.doNotConvertStringToBinary = true;
   }
 
-  template <class Visitor>
-  void customVisit(detail::Badge, Visitor&& v) const;
+ private:
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge, Visitor&& v);
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
   void apply(detail::Badge, Object& obj) const;
 
  private:
@@ -452,14 +500,18 @@ class DynamicStructurePatch {
 
 class DynamicStructPatch : public DynamicStructurePatch<false> {
  public:
-  void merge(detail::Badge badge, const DynamicStructPatch& p) {
-    p.customVisit(badge, *this);
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicStructPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 };
 class DynamicUnionPatch : public DynamicStructurePatch<true> {
  public:
-  void merge(detail::Badge badge, const DynamicUnionPatch& p) {
-    p.customVisit(badge, *this);
+  template <class Next>
+  detail::if_same_type_after_remove_cvref<Next, DynamicUnionPatch> merge(
+      detail::Badge badge, Next&& other) {
+    std::forward<Next>(other).customVisit(badge, *this);
   }
 
  private:
@@ -524,89 +576,98 @@ class DynamicPatch {
   std::unique_ptr<Patch> patch_;
 };
 
-template <class Visitor>
-void DynamicUnknownPatch::customVisit(detail::Badge badge, Visitor&& v) const {
+template <class Self, class Visitor>
+void DynamicUnknownPatch::customVisitImpl(
+    Self&& self, detail::Badge badge, Visitor&& v) {
   // We don't need to check EnsureStruct and EnsureUnion fields since they won't
   // exists -- otherwise we are able to identify the exact patch type and it
   // should not be unknown patch.
-  if (auto assign = get_ptr(op::PatchOp::Assign)) {
-    v.assign(badge, assign->as_object());
+  if (auto assign = self.get_ptr(op::PatchOp::Assign)) {
+    std::forward<Visitor>(v).assign(
+        badge, folly::forward_like<Self>(assign->as_object()));
     return;
   }
 
-  if (auto clear = get_ptr(op::PatchOp::Clear); clear && clear->as_bool()) {
-    v.clear(badge);
+  if (auto clear = self.get_ptr(op::PatchOp::Clear);
+      clear && clear->as_bool()) {
+    std::forward<Visitor>(v).clear(badge);
   }
 
   for (auto op : {op::PatchOp::PatchPrior, op::PatchOp::PatchAfter}) {
-    if (auto subPatch = get_ptr(op)) {
-      for (const auto& [fieldId, fieldPatch] : subPatch->as_object()) {
+    if (auto subPatch = self.get_ptr(op)) {
+      for (auto& [fieldId, fieldPatch] : subPatch->as_object()) {
         DynamicPatch patch;
-        patch.fromObject(badge, fieldPatch.as_object());
-        v.patchIfSet(badge, static_cast<FieldId>(fieldId), patch);
+        patch.fromObject(
+            badge, folly::forward_like<Self>(fieldPatch.as_object()));
+        std::forward<Visitor>(v).patchIfSet(
+            badge, static_cast<FieldId>(fieldId), patch);
       }
     }
   }
 
-  if (auto remove = get_ptr(op::PatchOp::Remove)) {
-    for (const auto& i : remove->as_set()) {
-      v.remove(badge, i);
+  if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
+    for (auto& i : remove->as_set()) {
+      std::forward<Visitor>(v).remove(badge, i);
     }
   }
 }
 
-template <class Visitor>
-void DynamicMapPatch::customVisit(detail::Badge badge, Visitor&& v) const {
-  if (assign_) {
-    v.assign(badge, *assign_);
+template <class Self, class Visitor>
+void DynamicMapPatch::customVisitImpl(
+    Self&& self, detail::Badge badge, Visitor&& v) {
+  if (self.assign_) {
+    std::forward<Visitor>(v).assign(badge, *std::forward<Self>(self).assign_);
     return;
   }
 
-  if (clear_) {
-    v.clear(badge);
+  if (self.clear_) {
+    std::forward<Visitor>(v).clear(badge);
   }
 
-  for (auto&& [k, p] : patchPrior_) {
-    v.patchByKey(badge, k, p);
+  for (auto& [k, p] : self.patchPrior_) {
+    std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));
   }
 
-  v.add(badge, add_);
-  v.remove(badge, remove_);
-  v.put(badge, put_);
+  std::forward<Visitor>(v).add(badge, std::forward<Self>(self).add_);
+  std::forward<Visitor>(v).remove(badge, std::forward<Self>(self).remove_);
+  std::forward<Visitor>(v).put(badge, std::forward<Self>(self).put_);
 
-  for (auto&& [k, p] : patchAfter_) {
-    v.patchByKey(badge, k, p);
+  for (auto& [k, p] : self.patchAfter_) {
+    std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));
   }
 }
 
 template <bool IsUnion>
-template <class Visitor>
-void DynamicStructurePatch<IsUnion>::customVisit(
-    detail::Badge badge, Visitor&& v) const {
-  if (assign_) {
-    v.assign(badge, *assign_);
+template <class Self, class Visitor>
+void DynamicStructurePatch<IsUnion>::customVisitImpl(
+    Self&& self, detail::Badge badge, Visitor&& v) {
+  if (self.assign_) {
+    std::forward<Visitor>(v).assign(badge, *std::forward<Self>(self).assign_);
     return;
   }
 
-  if (clear_) {
-    v.clear(badge);
+  if (self.clear_) {
+    std::forward<Visitor>(v).clear(badge);
   }
 
-  for (const auto& [id, p] : patchPrior_) {
-    v.patchIfSet(badge, id, p);
+  for (auto& [id, p] : self.patchPrior_) {
+    std::forward<Visitor>(v).patchIfSet(
+        badge, id, folly::forward_like<Self>(p));
   }
 
-  for (const auto& [id, value] : ensure_) {
-    v.ensure(badge, id, value);
+  for (auto& [id, value] : self.ensure_) {
+    std::forward<Visitor>(v).ensure(
+        badge, id, folly::forward_like<Self>(value));
   }
 
-  for (const auto& [id, p] : patchAfter_) {
-    v.patchIfSet(badge, id, p);
+  for (auto& [id, p] : self.patchAfter_) {
+    std::forward<Visitor>(v).patchIfSet(
+        badge, id, folly::forward_like<Self>(p));
   }
 
   if constexpr (!IsUnion) {
-    for (const auto& id : remove_) {
-      v.remove(badge, id);
+    for (const auto& id : self.remove_) {
+      std::forward<Visitor>(v).remove(badge, id);
     }
   }
 }

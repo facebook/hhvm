@@ -895,4 +895,82 @@ TEST(DynamicPatchTest, AnyPatch) {
   EXPECT_EQ(srcValue, dstValue);
 }
 
+// We want to test when merging r-value patches, whether we moved the fields
+// instead of copying it.
+//
+// This is done by checking the address of assign field between merged patch and
+// the r-value patch we are merging into another patch.
+//
+// * If we moved the assign field, the address of the first element should be
+//   unchanged.
+// * If we copied the assign field, the address of the first element should be
+//   different.
+struct CheckAssign {
+  void assign(detail::Badge, const auto& v) {
+    EXPECT_EQ(v.size(), 100);
+    // Check whether the address of the first element is expected.
+    // This ensures that we moved the assign data to the patch (not copied).
+    EXPECT_EQ(&*v.begin(), expected);
+  }
+  void push_back(auto&&...) {}
+  void clear(auto&&...) {}
+  void remove(auto&&...) {}
+  void add(auto&&...) {}
+  void put(auto&&...) {}
+  void patchIfSet(auto&&...) {}
+  void patchByKey(auto&&...) {}
+  void ensure(auto&&...) {}
+  const void* expected;
+};
+
+template <class Patch, class T>
+void testMergeMovedPatch(T t) {
+  CHECK_EQ(t.size(), 100);
+
+  CheckAssign checkAssign{&*t.begin()};
+
+  Patch p1, p2;
+  p1.assign(badge, std::move(t)); // we moved `t` into p1's assign field
+  p1.customVisit(badge, checkAssign);
+
+  p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
+  p2.customVisit(badge, checkAssign);
+}
+
+TEST(DynamicPatchTest, MergeMovedListPatch) {
+  detail::ValueList l;
+  for (int i = 0; i < 100; i++) {
+    l.emplace_back().emplace_i32(i);
+  }
+  testMergeMovedPatch<DynamicListPatch>(l);
+}
+
+TEST(DynamicPatchTest, MergeMovedSetPatch) {
+  detail::ValueSet s;
+  for (int i = 0; i < 100; i++) {
+    Value v;
+    v.emplace_i32(i);
+    s.insert(v);
+  }
+  testMergeMovedPatch<DynamicSetPatch>(s);
+}
+
+TEST(DynamicPatchTest, MergeMovedMapPatch) {
+  detail::ValueMap m;
+  for (int i = 0; i < 100; i++) {
+    Value v;
+    v.emplace_i32(i);
+    m[v].emplace_i32(-i);
+  }
+  testMergeMovedPatch<DynamicMapPatch>(m);
+}
+
+TEST(DynamicPatchTest, MergeMovedStructPatch) {
+  Object obj;
+  for (int i = 1; i <= 100; i++) {
+    obj[static_cast<FieldId>(i)].emplace_i32(-i);
+  }
+  testMergeMovedPatch<DynamicStructPatch>(obj);
+}
+
 } // namespace apache::thrift::protocol

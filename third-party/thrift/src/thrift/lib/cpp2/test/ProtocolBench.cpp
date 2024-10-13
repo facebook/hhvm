@@ -49,12 +49,7 @@ using GetWriter = typename SerializerTraits<T>::Writer;
 struct FrozenSerializer {
   template <class T>
   static void serialize(const T& obj, folly::IOBufQueue* out) {
-    auto p = new string(frozen::freezeToString(obj));
-    out->append(folly::IOBuf::takeOwnership(
-        p->data(),
-        p->size(),
-        [](void*, void* p) { delete static_cast<string*>(p); },
-        static_cast<void*>(p)));
+    out->append(folly::IOBuf::fromString(frozen::freezeToString(obj)));
   }
   template <class T>
   static size_t deserialize(folly::IOBuf* iobuf, T& t) {

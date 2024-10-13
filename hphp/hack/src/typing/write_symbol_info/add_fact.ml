@@ -336,17 +336,17 @@ let container_defn source_text clss decl_id members fa =
 let build_signature source_text params ctxs ret fa =
   let (params, fa) =
     List.fold params ~init:([], fa) ~f:(fun (t_params, fa) p ->
-        let (type_, type_info, fa) =
+        let (_type, type_info, fa) =
           Aast.hint_of_type_hint p.param_type_hint |> hint_opt_to_type_info fa
         in
-        ((p, type_info, type_) :: t_params, fa))
+        ((p, type_info) :: t_params, fa))
   in
   let params = List.rev params in
-  let (returns, returns_type_info, fa) =
+  let (_return, returns_type_info, fa) =
     Aast.hint_of_type_hint ret |> hint_opt_to_type_info fa
   in
   let signature =
-    Build_fact.signature source_text params ctxs ~returns ~returns_type_info
+    Build_fact.signature source_text params ctxs ~returns_type_info
   in
   (signature, fa)
 
@@ -404,14 +404,13 @@ let method_overrides
   Fact_acc.add_fact Predicate.(Hack MethodOverrides) json fa
 
 let property_defn source_text prop decl_id fa =
-  let (type_, type_info, fa) =
+  let (_type, type_info, fa) =
     Aast.hint_of_type_hint prop.cv_type |> hint_opt_to_type_info fa
   in
   let json =
     PropertyDefinition.(
       {
         declaration = PropertyDeclaration.Id decl_id;
-        type_ : Type.t option;
         visibility = Util.(make_visibility prop.cv_visibility);
         is_final = prop.cv_final;
         is_abstract = prop.cv_abstract;
@@ -431,15 +430,10 @@ let class_const_defn source_text const decl_id fa =
     | CCConcrete expr ->
       Some (Pretty.expr_to_string source_text expr)
   in
-  let (type_, type_info, fa) = hint_opt_to_type_info fa const.cc_type in
+  let (_type, type_info, fa) = hint_opt_to_type_info fa const.cc_type in
   let json =
     ClassConstDefinition.(
-      {
-        declaration = ClassConstDeclaration.Id decl_id;
-        type_;
-        value;
-        type_info;
-      }
+      { declaration = ClassConstDeclaration.Id decl_id; value; type_info }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack ClassConstDefinition) json fa
@@ -447,20 +441,19 @@ let class_const_defn source_text const decl_id fa =
 let type_const_defn source_text tc decl_id fa =
   (* TODO(T88552052) should the default of an abstract type constant be used
      * as a value here *)
-  let (type_, type_info, fa) =
+  let (type_info, fa) =
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
     | TCAbstract { c_atc_default = Some h; _ } ->
-      let (x, y, fa) = hint_to_type_info h fa in
-      (Some x, Some y, fa)
-    | TCAbstract { c_atc_default = None; _ } -> (None, None, fa)
+      let (_type, type_info, fa) = hint_to_type_info h fa in
+      (Some type_info, fa)
+    | TCAbstract { c_atc_default = None; _ } -> (None, fa)
   in
   let json =
     TypeConstDefinition.(
       {
         declaration = TypeConstDeclaration.Id decl_id;
         kind = Util.(make_type_const_kind tc.c_tconst_kind);
-        type_;
         attributes =
           Build_fact.attributes source_text tc.c_tconst_user_attributes;
         type_info;
@@ -481,7 +474,7 @@ let enum_defn source_text enm enum_id enum_data enumerators fa =
   let (enum_base, enum_base_type_info, fa) =
     hint_to_type_info enum_data.e_base fa
   in
-  let (enum_constraint, enum_constraint_type_info, fa) =
+  let (_enum_constraint, enum_constraint_type_info, fa) =
     hint_opt_to_type_info fa enum_data.e_constraint
   in
   let json =
@@ -494,7 +487,6 @@ let enum_defn source_text enm enum_id enum_data enumerators fa =
         includes;
         is_enum_class = Aast.is_enum_class enm;
         module_;
-        enum_constraint;
         enum_constraint_type_info;
         enum_base_type_info = Some enum_base_type_info;
       }
@@ -597,15 +589,10 @@ let gconst_decl name fa =
 let gconst_defn source_text elem decl_id fa =
   let fa = namespace_decl_opt elem.cst_namespace fa in
   let value = Pretty.expr_to_string source_text elem.cst_value in
-  let (type_, type_info, fa) = hint_opt_to_type_info fa elem.cst_type in
+  let (_type, type_info, fa) = hint_opt_to_type_info fa elem.cst_type in
   let json =
     GlobalConstDefinition.(
-      {
-        declaration = GlobalConstDeclaration.Id decl_id;
-        type_;
-        value;
-        type_info;
-      }
+      { declaration = GlobalConstDeclaration.Id decl_id; value; type_info }
       |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack GlobalConstDefinition) json fa

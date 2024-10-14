@@ -131,8 +131,8 @@ add_library(
 
   generate/cpp/reference_type.cc
   generate/cpp/name_resolver.cc
+  generate/cpp/util.cc
 
-  lib/cpp2/util.cc
   lib/go/util.cc
   lib/java/util.cc
   lib/rust/util.cc

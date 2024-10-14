@@ -785,7 +785,7 @@ extern "C" {
 #endif
 #if (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR >= 1) || \
     (JEMALLOC_VERSION_MAJOR > 5) // requires jemalloc >= 5.1
-    ",metadata_thp:disabled"
+    ",metadata_thp:disabled,bin_shards:1-256:16|320-14336:4|4096-4096:16"
 #endif
 #ifdef ENABLE_HHPROF
     ",prof:true,prof_active:false,prof_thread_active_init:false"

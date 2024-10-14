@@ -553,7 +553,9 @@ class DynamicPatch {
     return std::get_if<PatchType>(patch_.get());
   }
 
-  void merge(detail::Badge, const DynamicPatch& other);
+  template <class Other>
+  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(
+      detail::Badge, Other&&);
 
  private:
   using Patch = std::variant<
@@ -600,7 +602,7 @@ void DynamicUnknownPatch::customVisitImpl(
         patch.fromObject(
             badge, folly::forward_like<Self>(fieldPatch.as_object()));
         std::forward<Visitor>(v).patchIfSet(
-            badge, static_cast<FieldId>(fieldId), patch);
+            badge, static_cast<FieldId>(fieldId), std::move(patch));
       }
     }
   }

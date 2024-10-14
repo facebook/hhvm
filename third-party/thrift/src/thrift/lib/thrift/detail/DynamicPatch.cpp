@@ -1114,7 +1114,9 @@ void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
   return customVisit(badge, Visitor{v});
 }
 
-void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
+template <class Other>
+detail::if_same_type_after_remove_cvref<Other, DynamicPatch>
+DynamicPatch::merge(detail::Badge, Other&& other) {
   // If only one of the patch is Unknown patch, convert the Unknown patch type
   // to the known patch type.
   if (std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
@@ -1122,7 +1124,8 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
     std::visit(
         [&](auto&& other) {
           *patch_ = detail::createPatchFromObject<
-              folly::remove_cvref_t<decltype(other)>>(badge, toObject());
+              folly::remove_cvref_t<decltype(other)>>(
+              badge, std::move(*this).toObject());
         },
         *other.patch_);
   }
@@ -1131,20 +1134,23 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
     return std::visit(
         [&](auto&& patch) {
           auto tmp = DynamicPatch{detail::createPatchFromObject<
-              folly::remove_cvref_t<decltype(patch)>>(badge, other.toObject())};
-          return merge(badge, tmp);
+              folly::remove_cvref_t<decltype(patch)>>(
+              badge, std::forward<Other>(other).toObject())};
+          return merge(badge, std::move(tmp));
         },
         *patch_);
   }
   if (std::holds_alternative<op::StringPatch>(*patch_) &&
       std::holds_alternative<op::BinaryPatch>(*other.patch_)) {
-    *patch_ = detail::createPatchFromObject<op::BinaryPatch>(badge, toObject());
-    return merge(badge, other);
+    *patch_ = detail::createPatchFromObject<op::BinaryPatch>(
+        badge, std::move(*this).toObject());
+    return merge(badge, std::forward<Other>(other));
   }
   if (std::holds_alternative<op::BinaryPatch>(*patch_) &&
       std::holds_alternative<op::StringPatch>(*other.patch_)) {
-    *patch_ = detail::createPatchFromObject<op::StringPatch>(badge, toObject());
-    return merge(badge, other);
+    *patch_ = detail::createPatchFromObject<op::StringPatch>(
+        badge, std::move(*this).toObject());
+    return merge(badge, std::forward<Other>(other));
   }
 
   if (other.empty(badge)) {
@@ -1162,9 +1168,9 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
         using R = folly::remove_cvref_t<decltype(r)>;
         if constexpr (std::is_same_v<L, R>) {
           if constexpr (detail::has_merge_with_badge_v<L>) {
-            l.merge(badge, r);
+            l.merge(badge, folly::forward_like<Other>(r));
           } else {
-            l.merge(r);
+            l.merge(folly::forward_like<Other>(r));
           }
         } else {
           folly::throw_exception<std::runtime_error>(fmt::format(
@@ -1176,6 +1182,11 @@ void DynamicPatch::merge(detail::Badge, const DynamicPatch& other) {
       *patch_,
       *other.patch_);
 }
+
+template void DynamicPatch::merge(detail::Badge, DynamicPatch&);
+template void DynamicPatch::merge(detail::Badge, DynamicPatch&&);
+template void DynamicPatch::merge(detail::Badge, const DynamicPatch&);
+template void DynamicPatch::merge(detail::Badge, const DynamicPatch&&);
 
 void DynamicPatch::fromObject(detail::Badge, Object obj) {
   if (auto p = get_ptr(obj, op::PatchOp::EnsureStruct)) {

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/cpp2/util.h>
-#include "thrift/compiler/ast/t_program.h"
+#include <thrift/compiler/generate/cpp/util.h>
 
 #include <algorithm>
 #include <functional>
@@ -32,6 +31,7 @@
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_node.h>
+#include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>

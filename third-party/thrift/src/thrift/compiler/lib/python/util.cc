@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/generate/cpp/util.h>
 
 namespace apache::thrift::compiler {
 

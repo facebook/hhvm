@@ -27,7 +27,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
-#include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/sema_context.h>
 

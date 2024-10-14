@@ -26,7 +26,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/codemod/file_manager.h>
 #include <thrift/compiler/compiler.h>
-#include <thrift/compiler/lib/cpp2/util.h>
+#include <thrift/compiler/generate/cpp/util.h>
 
 using namespace apache::thrift::compiler;
 

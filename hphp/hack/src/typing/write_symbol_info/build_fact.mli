@@ -26,8 +26,9 @@ val attributes :
    and an option type_xref fact *)
 val signature :
   Full_fidelity_source_text.t ->
-  (('a, 'b) Aast.fun_param * TypeInfo.t option) list ->
+  (('a, 'b) Aast.fun_param * TypeInfo.t option * Type.t option) list ->
   Aast.contexts option ->
+  returns:Type.t option ->
   returns_type_info:TypeInfo.t option ->
   Signature.t
 

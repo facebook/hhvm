@@ -281,6 +281,7 @@ and ClassConstDefinition: sig
 
   and key = {
     declaration: ClassConstDeclaration.t;
+    type_: Type.t option;
     value: string option;
     type_info: TypeInfo.t option;
   }
@@ -298,6 +299,7 @@ end = struct
 
   and key = {
     declaration: ClassConstDeclaration.t;
+    type_: Type.t option;
     value: string option;
     type_info: TypeInfo.t option;
   }
@@ -307,10 +309,14 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; value; type_info} = 
+  and to_json_key {declaration; type_; value; type_info} = 
     let fields = [
       ("declaration", ClassConstDeclaration.to_json declaration);
     ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
     let fields =
       match value with
       | None -> fields
@@ -331,6 +337,7 @@ and GlobalConstDefinition: sig
 
   and key = {
     declaration: GlobalConstDeclaration.t;
+    type_: Type.t option;
     value: string;
     type_info: TypeInfo.t option;
   }
@@ -348,6 +355,7 @@ end = struct
 
   and key = {
     declaration: GlobalConstDeclaration.t;
+    type_: Type.t option;
     value: string;
     type_info: TypeInfo.t option;
   }
@@ -357,11 +365,15 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; value; type_info} = 
+  and to_json_key {declaration; type_; value; type_info} = 
     let fields = [
       ("declaration", GlobalConstDeclaration.to_json declaration);
       ("value", JSON_String value);
     ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
     let fields =
       match type_info with
       | None -> fields
@@ -1017,6 +1029,7 @@ and PropertyDefinition: sig
 
   and key = {
     declaration: PropertyDeclaration.t;
+    type_: Type.t option;
     visibility: Visibility.t;
     is_final: bool;
     is_abstract: bool;
@@ -1038,6 +1051,7 @@ end = struct
 
   and key = {
     declaration: PropertyDeclaration.t;
+    type_: Type.t option;
     visibility: Visibility.t;
     is_final: bool;
     is_abstract: bool;
@@ -1051,7 +1065,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; visibility; is_final; is_abstract; is_static; attributes; type_info} = 
+  and to_json_key {declaration; type_; visibility; is_final; is_abstract; is_static; attributes; type_info} = 
     let fields = [
       ("declaration", PropertyDeclaration.to_json declaration);
       ("visibility", Visibility.to_json visibility);
@@ -1060,6 +1074,10 @@ end = struct
       ("isStatic", JSON_Bool is_static);
       ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
     ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
     let fields =
       match type_info with
       | None -> fields
@@ -1615,6 +1633,7 @@ and TypeConstDefinition: sig
 
   and key = {
     declaration: TypeConstDeclaration.t;
+    type_: Type.t option;
     kind: TypeConstKind.t;
     attributes: UserAttribute.t list;
     type_info: TypeInfo.t option;
@@ -1633,6 +1652,7 @@ end = struct
 
   and key = {
     declaration: TypeConstDeclaration.t;
+    type_: Type.t option;
     kind: TypeConstKind.t;
     attributes: UserAttribute.t list;
     type_info: TypeInfo.t option;
@@ -1643,12 +1663,16 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; kind; attributes; type_info} = 
+  and to_json_key {declaration; type_; kind; attributes; type_info} = 
     let fields = [
       ("declaration", TypeConstDeclaration.to_json declaration);
       ("kind", TypeConstKind.to_json kind);
       ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
     ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
     let fields =
       match type_info with
       | None -> fields
@@ -1852,6 +1876,7 @@ and EnumDefinition: sig
     declaration: EnumDeclaration.t;
     enum_base: Type.t;
     enum_base_type_info: TypeInfo.t option;
+    enum_constraint: Type.t option;
     enum_constraint_type_info: TypeInfo.t option;
     enumerators: Enumerator.t list;
     attributes: UserAttribute.t list;
@@ -1875,6 +1900,7 @@ end = struct
     declaration: EnumDeclaration.t;
     enum_base: Type.t;
     enum_base_type_info: TypeInfo.t option;
+    enum_constraint: Type.t option;
     enum_constraint_type_info: TypeInfo.t option;
     enumerators: Enumerator.t list;
     attributes: UserAttribute.t list;
@@ -1888,7 +1914,7 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {declaration; enum_base; enum_base_type_info; enum_constraint_type_info; enumerators; attributes; includes; is_enum_class; module_} = 
+  and to_json_key {declaration; enum_base; enum_base_type_info; enum_constraint; enum_constraint_type_info; enumerators; attributes; includes; is_enum_class; module_} = 
     let fields = [
       ("declaration", EnumDeclaration.to_json declaration);
       ("enumBase", Type.to_json enum_base);
@@ -1901,6 +1927,10 @@ end = struct
       match enum_base_type_info with
       | None -> fields
       | Some enum_base_type_info -> ("enumBaseTypeInfo", TypeInfo.to_json enum_base_type_info) :: fields in
+    let fields =
+      match enum_constraint with
+      | None -> fields
+      | Some enum_constraint -> ("enumConstraint", Type.to_json enum_constraint) :: fields in
     let fields =
       match enum_constraint_type_info with
       | None -> fields
@@ -2433,6 +2463,7 @@ and Signature: sig
   [@@deriving ord]
 
   and key = {
+    returns: Type.t option;
     parameters: Parameter.t list;
     contexts: Context_.t list option;
     returns_type_info: TypeInfo.t option;
@@ -2450,6 +2481,7 @@ end = struct
   [@@deriving ord]
 
   and key = {
+    returns: Type.t option;
     parameters: Parameter.t list;
     contexts: Context_.t list option;
     returns_type_info: TypeInfo.t option;
@@ -2460,10 +2492,14 @@ end = struct
     | Id f -> Util.id f
     | Key t -> Util.key (to_json_key t)
 
-  and to_json_key {parameters; contexts; returns_type_info} = 
+  and to_json_key {returns; parameters; contexts; returns_type_info} = 
     let fields = [
       ("parameters", JSON_Array (List.map ~f:(fun x -> Parameter.to_json x) parameters));
     ] in
+    let fields =
+      match returns with
+      | None -> fields
+      | Some returns -> ("returns", Type.to_json returns) :: fields in
     let fields =
       match contexts with
       | None -> fields
@@ -3447,6 +3483,7 @@ end
 and Parameter: sig
   type t = {
     name: Name.t;
+    type_: Type.t option;
     is_inout: bool;
     is_variadic: bool;
     default_value: string option;
@@ -3460,6 +3497,7 @@ and Parameter: sig
 end = struct
   type t = {
     name: Name.t;
+    type_: Type.t option;
     is_inout: bool;
     is_variadic: bool;
     default_value: string option;
@@ -3469,13 +3507,17 @@ end = struct
   }
   [@@deriving ord]
 
-  let rec to_json {name; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
+  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} = 
     let fields = [
       ("name", Name.to_json name);
       ("isInout", JSON_Bool is_inout);
       ("isVariadic", JSON_Bool is_variadic);
       ("attributes", JSON_Array (List.map ~f:(fun x -> UserAttribute.to_json x) attributes));
     ] in
+    let fields =
+      match type_ with
+      | None -> fields
+      | Some type_ -> ("type", Type.to_json type_) :: fields in
     let fields =
       match default_value with
       | None -> fields

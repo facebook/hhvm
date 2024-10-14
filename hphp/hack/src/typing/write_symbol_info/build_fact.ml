@@ -39,16 +39,21 @@ let call_arguments arguments =
   List.fold arguments ~init:([], 0) ~f |> fst |> List.rev
 
 let signature
-    source_text params (ctxs_hints : Aast.contexts option) ~returns_type_info =
+    source_text
+    params
+    (ctxs_hints : Aast.contexts option)
+    ~returns
+    ~returns_type_info =
   let hint_to_ctx hint =
     Context_.Key (Pretty.hint_to_string ~is_ctx:true hint)
   in
   let f (_pos, hint) = List.map ~f:hint_to_ctx hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
-  let param (p, type_xref) =
+  let param (p, type_xref, type_) =
     Parameter.
       {
         name = Util.make_name p.param_name;
+        type_;
         default_value =
           Option.map
             (Aast_utils.get_param_default p)
@@ -65,7 +70,8 @@ let signature
       }
   in
   let parameters = List.map params ~f:param in
-  Signature.(Key { parameters; contexts = ctxs_hints; returns_type_info })
+  Signature.(
+    Key { returns; parameters; contexts = ctxs_hints; returns_type_info })
 
 let generic_xrefs (sym_pos : (XRefTarget.t * Pretty.pos list) Seq.t) =
   let xrefs =

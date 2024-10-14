@@ -1,2 +1,14 @@
 ERROR: File "match_statement_scrutinee.php", line 8, characters 3-54:
 This expression has type `CT<T>`, which is not supported in match statements (Typing[4479])
+ERROR: File "match_statement_scrutinee.php", line 8, characters 3-54:
+Typing error (Typing[4110])
+  File "match_statement_scrutinee.php", line 7, characters 15-19:
+  Expected `CT<T>`
+  File "match_statement_scrutinee.php", line 5, characters 19-21:
+  But got `int`
+ERROR: File "match_statement_scrutinee.php", line 8, characters 3-54:
+Typing error (Typing[4110])
+  File "match_statement_scrutinee.php", line 7, characters 15-19:
+  Expected `CT<T>`
+  File "match_statement_scrutinee.php", line 5, characters 39-44:
+  But got `string`

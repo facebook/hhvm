@@ -4904,6 +4904,29 @@ end = struct
         in
         (* Use `if_unsat` so we report arraykey in the error *)
         if_unsat (invalid ~fail) @@ prop env
+      | (r, Tprim Aast.Tnum) ->
+        let r =
+          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
+            Typing_reason.prj_num_sub ~sub:r ~sub_prj:r
+          else
+            r
+        in
+        let ty_float = MakeType.float r and ty_int = MakeType.int r in
+        let prop env =
+          env
+          |> simplify
+               ~subtype_env
+               ~this_ty
+               ~lhs:{ sub_supportdyn; ty_sub = ty_float }
+               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          &&& simplify
+                ~subtype_env
+                ~this_ty
+                ~lhs:{ sub_supportdyn; ty_sub = ty_int }
+                ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        in
+        (* Use `if_unsat` so we report num in the error *)
+        if_unsat (invalid ~fail) @@ prop env
       | (_, Tgeneric _) when subtype_env.Subtype_env.require_completeness ->
         default_subtype
           ~subtype_env
@@ -4912,17 +4935,16 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
-      | _ ->
-        (* x <: case_type *)
-        let try_lower_bound subtype_env td_tparams localize lower env =
-          match
-            Subtype_env.check_infinite_recursion
-              subtype_env
-              { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
-          with
-          | Error _ -> invalid env ~fail
-          | Ok subtype_env ->
-            let ((env, _err), lower_bound) =
+      | _ -> begin
+        match
+          Subtype_env.check_infinite_recursion
+            subtype_env
+            { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
+        with
+        | Error _ -> invalid env ~fail
+        | Ok subtype_env ->
+          let localize td_tparams hint env =
+            let ((env, _err), ty) =
               let ety_env =
                 (* The this_ty cannot does not need to be set because newtypes
                    * & case types cannot appear within classes thus cannot us
@@ -4937,62 +4959,91 @@ end = struct
                       Decl_subst.make_locl td_tparams lty_supers);
                 }
               in
-              localize ~ety_env env lower
+              Phase.localize ~ety_env env hint
             in
+            (env, ty)
+          in
+          let simplify_ ty_sub ty_super env =
             simplify
               ~subtype_env
               ~this_ty:None
               ~lhs:{ sub_supportdyn = None; ty_sub }
-              ~rhs:
-                { super_like; super_supportdyn = false; ty_super = lower_bound }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
               env
-        in
-        (match Env.get_typedef env name_super with
-        | Decl_entry.Found
-            {
-              (* TODO T201569125 - Consider where constraints *)
-              td_type_assignment = CaseType (variant, variants);
-              td_tparams;
-              _;
-            } ->
-          let lower = TUtils.get_case_type_variants_as_type variant variants in
-          let ( ||| ) = ( ||| ) ~fail in
-          default_subtype
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super }
-            env
-          ||| try_lower_bound
-                subtype_env
-                td_tparams
-                Phase.localize_disjoint_union
-                lower
-        | Decl_entry.Found
-            {
-              td_super_constraint = Some lower;
-              td_tparams;
-              td_type_assignment = SimpleTypeDef _;
-              _;
-            } ->
-          let ( ||| ) = ( ||| ) ~fail in
-          default_subtype
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super }
-            env
-          ||| try_lower_bound subtype_env td_tparams Phase.localize lower
-        | _ ->
-          default_subtype
-            ~subtype_env
-            ~this_ty
-            ~fail
-            ~lhs:{ sub_supportdyn; ty_sub }
-            ~rhs:{ super_like; super_supportdyn = false; ty_super }
-            env)
+          in
+          (* x <: case_type *)
+          (match Env.get_typedef env name_super with
+          | Decl_entry.Found
+              {
+                td_type_assignment = CaseType (variant, variants);
+                td_tparams;
+                _;
+              } ->
+            let check_where_constraint (left, ck, right) env :
+                Typing_env_types.env * TL.subtype_prop =
+              let (env, local_left) = localize td_tparams left env in
+              let (env, local_right) = localize td_tparams right env in
+              match ck with
+              | Ast_defs.Constraint_as -> simplify_ local_left local_right env
+              | Ast_defs.Constraint_super ->
+                simplify_ local_right local_left env
+              | Ast_defs.Constraint_eq ->
+                simplify_ local_left local_right env
+                &&& simplify_ local_right local_left
+            in
+            (* For
+             * CT<T1, ... Tn> =
+             * | U1 where [constraints_1] | ... | Um where [constraints_m]
+             * Then T < CT<t1, ... tn> iff
+             * for any k in [1..m]:
+             * T < Vk[t1/T1, ...] &&& constraints_k[t1/T1, ...]
+             *)
+            let ( ||| ) = ( ||| ) ~fail in
+            let try_variant (hint, wcs) env =
+              let (env, hint_ty) = localize td_tparams hint env in
+              List.fold_left
+                wcs
+                ~init:(simplify_ ty_sub hint_ty env)
+                ~f:(fun acc wc -> acc &&& check_where_constraint wc)
+            in
+            List.fold_left
+              (variant :: variants)
+              ~init:
+                (default_subtype
+                   ~subtype_env
+                   ~this_ty
+                   ~fail
+                   ~lhs:{ sub_supportdyn; ty_sub }
+                   ~rhs:{ super_like; super_supportdyn = false; ty_super }
+                   env)
+              ~f:(fun acc variant -> acc ||| try_variant variant)
+          | Decl_entry.Found
+              {
+                td_super_constraint = Some lower;
+                td_tparams;
+                td_type_assignment = SimpleTypeDef _;
+                _;
+              } ->
+            let ( ||| ) = ( ||| ) ~fail in
+            default_subtype
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
+              env
+            ||| fun env ->
+            let (env, lower_ty) = localize td_tparams lower env in
+            simplify_ ty_sub lower_ty env
+          | _ ->
+            default_subtype
+              ~subtype_env
+              ~this_ty
+              ~fail
+              ~lhs:{ sub_supportdyn; ty_sub }
+              ~rhs:{ super_like; super_supportdyn = false; ty_super }
+              env)
+      end
     end
     (* -- C-unapplied-alias-R --------------------------------------------------- *)
     | (_, (_, Tunapplied_alias n_sup)) ->

@@ -1,0 +1,42 @@
+ERROR: File "simple_subtyping.php", line 20, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 19, characters 37-43:
+  Expected `CT<int>`
+  File "simple_subtyping.php", line 19, characters 26-30:
+  But got `float`
+ERROR: File "simple_subtyping.php", line 24, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 23, characters 39-46:
+  Expected `CT<null>`
+  File "simple_subtyping.php", line 23, characters 28-32:
+  But got `float`
+ERROR: File "simple_subtyping.php", line 34, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 33, characters 35-43:
+  Expected `CT<?bool>`
+  File "simple_subtyping.php", line 33, characters 25-28:
+  But got `bool`
+ERROR: File "simple_subtyping.php", line 38, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 37, characters 33-43:
+  Expected `CT<nothing>`
+  File "simple_subtyping.php", line 37, characters 23-26:
+  But got `bool`
+ERROR: File "simple_subtyping.php", line 42, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 41, characters 35-42:
+  Expected `CT<null>`
+  File "simple_subtyping.php", line 41, characters 25-28:
+  But got `bool`
+ERROR: File "simple_subtyping.php", line 52, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 51, characters 37-44:
+  Expected `CT<?num>`
+  File "simple_subtyping.php", line 51, characters 25-30:
+  But got `string`
+ERROR: File "simple_subtyping.php", line 60, characters 10-11:
+Invalid return type (Typing[4110])
+  File "simple_subtyping.php", line 59, characters 37-44:
+  Expected `CT<null>`
+  File "simple_subtyping.php", line 59, characters 25-30:
+  But got `string`

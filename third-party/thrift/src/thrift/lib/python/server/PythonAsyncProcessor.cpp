@@ -286,16 +286,13 @@ void PythonAsyncProcessor::executeRequest(
 
   auto protocol =
       apache::thrift::detail::ServerRequestHelper::protocol(request);
-
   auto* ctx = request.requestContext();
-  auto req =
-      apache::thrift::detail::ServerRequestHelper::request(std::move(request));
 
   if (!(protocol ==
             apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL ||
         protocol ==
             apache::thrift::protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL)) {
-    req->sendErrorWrapped(
+    request.request()->sendErrorWrapped(
         apache::thrift::TApplicationException(
             "Thrift Python server only supports Binary and Compact Protocols."),
         kConnectionClosingErrorCode);
@@ -317,6 +314,9 @@ void PythonAsyncProcessor::executeRequest(
   auto* eb = apache::thrift::detail::ServerRequestHelper::eventBase(request);
   auto executor =
       apache::thrift::detail::ServerRequestHelper::executor(request);
+  auto requestData = request.requestData();
+  auto req =
+      apache::thrift::detail::ServerRequestHelper::request(std::move(request));
   auto kind = methodMetadata.rpcKind;
 
   try {
@@ -338,7 +338,7 @@ void PythonAsyncProcessor::executeRequest(
       ctx,
       eb,
       executor,
-      request.requestData(),
+      std::move(requestData),
       std::move(req),
       std::move(ctxStack),
       serviceName,

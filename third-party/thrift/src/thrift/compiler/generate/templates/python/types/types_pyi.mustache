@@ -77,20 +77,18 @@ class {{> structs/unadapted_name}}({{!
         }}{{/struct:union?}}{{!
         }}, _fbthrift_compatible_with_{{> structs/unadapted_name}}{{!
         }}):
-{{#program:generate_immutable_types}}
     {{#struct:fields_ordered_by_id}}
-    {{field:py_name}}: _typing.Final[{{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
+    {{field:py_name}}: {{!
+            }}{{#program:generate_immutable_types}}{{!
+            }}_typing.Final[{{!
+            }}{{/program:generate_immutable_types}}{{!
+            }}{{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
             }}{{> fields/adapted_type}}{{!
-            }}{{#field:optional?}}]{{/field:optional?}}] = ...
+            }}{{#field:optional?}}]{{/field:optional?}}{{!
+            }}{{#program:generate_immutable_types}}{{!
+            }}]{{!
+            }}{{/program:generate_immutable_types}} = ...
     {{/struct:fields_ordered_by_id}}
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
-    {{#struct:fields_ordered_by_id}}
-    {{field:py_name}}: {{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
-            }}{{> fields/adapted_type}}{{!
-            }}{{#field:optional?}}]{{/field:optional?}} = ...
-    {{/struct:fields_ordered_by_id}}
-{{/program:generate_mutable_types}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
         {{field:py_name}}: _typing.Optional[{{> fields/compatible_adapted_type}}]=...{{/struct:fields_ordered_by_id}}

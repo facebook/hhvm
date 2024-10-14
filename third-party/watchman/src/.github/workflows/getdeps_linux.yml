@@ -36,6 +36,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests glog
     - name: Fetch googletest
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests googletest
+    - name: Fetch xxhash
+      run: python3 build/fbcode_builder/getdeps.py fetch --no-tests xxhash
     - name: Fetch zstd
       run: python3 build/fbcode_builder/getdeps.py fetch --no-tests zstd
     - name: Fetch double-conversion
@@ -112,6 +114,8 @@ jobs:
       run: python3 build/fbcode_builder/getdeps.py build --no-tests glog
     - name: Build googletest
       run: python3 build/fbcode_builder/getdeps.py build --no-tests googletest
+    - name: Build xxhash
+      run: python3 build/fbcode_builder/getdeps.py build --no-tests xxhash
     - name: Build zstd
       run: python3 build/fbcode_builder/getdeps.py build --no-tests zstd
     - name: Build double-conversion

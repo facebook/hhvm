@@ -199,31 +199,6 @@ class MyForwardRefEnum_enum_traits {
 };
 
 } // __fbthrift_refl
-
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::has_bitwise_ops_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::has_bitwise_ops_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(5985603065023377992ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::is_unscoped_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::is_unscoped_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(9333429324667881000ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::MyForwardRefEnum_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::MyForwardRefEnum_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(3846919192928447240ull)
-  >
-);
 } // namespace apache::thrift::fixtures::types
 namespace apache::thrift::detail {
 template <>

@@ -478,39 +478,6 @@ class enum_with_special_names_enum_traits {
 };
 
 } // __fbthrift_refl
-
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::enum1_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::enum1_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(208192744385601544ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::enum2_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::enum2_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(12040799367005187432ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::enum3_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::enum3_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(8068328626500945544ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::enum_with_special_names_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::enum_with_special_names_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(1630079061865176360ull)
-  >
-);
 } // namespace test_cpp2::cpp_reflection
 namespace apache::thrift::detail {
 template <>

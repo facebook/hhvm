@@ -9,7 +9,8 @@
 (library
  (name process)
  (wrapped false)
- (modules process)
+ (modules
+  process)
  (preprocess
   (pps ppx_deriving.std))
  (libraries

@@ -80,6 +80,8 @@ let make_result
     | Unix.WSTOPPED _ ->
       Error (Abnormal_exit { status; stdout; stderr }))
 
+exception Poll_exception of Sys_utils.Poll.Flags.error list
+
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
 let rec maybe_consume
@@ -91,9 +93,13 @@ let rec maybe_consume
   else
     let start_t = Unix.time () in
     Option.iter !fd_ref ~f:(fun fd ->
-        match Sys_utils.select_non_intr [fd] [] [] max_time with
-        | ([], _, _) -> ()
-        | _ ->
+        match
+          Sys_utils.Poll.wait_fd_read_non_intr
+            fd
+            ~timeout_ms:(Some (Int.of_float max_time * 1000))
+        with
+        | Ok false -> ()
+        | Ok true ->
           let bytes_read = Unix.read fd buffer 0 chunk_size in
           if bytes_read = 0 then (
             (* EOF reached. *)
@@ -106,7 +112,8 @@ let rec maybe_consume
             Stack.push chunk acc;
             let consumed_t = Unix.time () -. start_t in
             let max_time = max_time -. consumed_t in
-            maybe_consume ~max_time fd_ref acc)
+            maybe_consume ~max_time fd_ref acc
+        | Error flags -> raise (Poll_exception flags))
 
 (** Read data from stdout and stderr until EOF is reached. Waits for
     process to terminate returns the stderr and stdout

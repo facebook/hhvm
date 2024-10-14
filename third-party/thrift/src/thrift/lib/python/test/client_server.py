@@ -35,6 +35,7 @@ from stack_args.thrift_types import simple
 from testing.thrift_clients import TestingService
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy, SimpleError
+from thrift.lib.python.test.event_handlers.helper import ThrowHelper, ThrowHelperHandler
 from thrift.py3.server import get_context, SocketAddress
 from thrift.python.client import get_client
 from thrift.python.common import Priority, RpcOptions
@@ -368,6 +369,17 @@ class ClientServerTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(timeout, 15.0)
                 priority = await client.getPriority(rpc_options=options)
                 self.assertEqual(Priority(priority), Priority.BEST_EFFORT)
+
+    async def test_client_event_handler_throw(self) -> None:
+        for handler in ThrowHelperHandler:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                self.assertIsNotNone(ip)
+                self.assertIsNotNone(port)
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    with ThrowHelper(handler):
+                        with self.assertRaisesRegex(ApplicationError, handler.value):
+                            await client.complex_action("1", "2", 3, "4")
 
 
 class StackHandler(StackServiceInterface):

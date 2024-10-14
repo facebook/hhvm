@@ -44,6 +44,13 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
     cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
         pass
 
+cdef extern from "thrift/lib/cpp/EventHandlerBase.h" namespace "::apache::thrift":
+    cdef cppclass cTProcessorBase "apache::thrift::TProcessorBase":
+        @staticmethod
+        void addProcessorEventHandler(shared_ptr[cTProcessorEventHandler] handler)
+        @staticmethod
+        void removeProcessorEventHandler(shared_ptr[cTProcessorEventHandler] handler)
+
 cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::thrift::python::client":
     cdef cppclass ChannelFactory "::thrift::python::client::ChannelFactory":
         cFollyFuture[cRequestChannel_ptr] createThriftChannelTCP(

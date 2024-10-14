@@ -30,6 +30,14 @@ void do_import() {
   }
 }
 
+auto get_deserialize_error_function(apache::thrift::ProtocolType protocol) {
+  return protocol == apache::thrift::protocol::PROTOCOL_TYPES::T_BINARY_PROTOCOL
+      ? apache::thrift::detail::ap::process_handle_exn_deserialization<
+            apache::thrift::BinaryProtocolWriter>
+      : apache::thrift::detail::ap::process_handle_exn_deserialization<
+            apache::thrift::CompactProtocolWriter>;
+}
+
 } // namespace
 
 std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
@@ -205,8 +213,20 @@ void PythonAsyncProcessor::processSerializedCompressedRequestWithMetadata(
       functionFullNameMap_.at(context->getMethodName()).c_str(),
       context);
 
-  executeReadEventCallbacks(
-      context, ctxStack.get(), serializedRequest, protocol);
+  try {
+    executeReadEventCallbacks(
+        context, ctxStack.get(), serializedRequest, protocol);
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    auto throw_func = get_deserialize_error_function(protocol);
+    throw_func(
+        ew,
+        std::move(req),
+        context,
+        eb,
+        functionFullNameMap_.at(context->getMethodName()).c_str());
+    return;
+  }
 
   // While this folly::makeSemiFuture().deferValue() may seem
   // unnecessary, without this deferValue, the call to
@@ -299,7 +319,19 @@ void PythonAsyncProcessor::executeRequest(
       apache::thrift::detail::ServerRequestHelper::executor(request);
   auto kind = methodMetadata.rpcKind;
 
-  executeReadEventCallbacks(ctx, ctxStack.get(), serializedRequest, protocol);
+  try {
+    executeReadEventCallbacks(ctx, ctxStack.get(), serializedRequest, protocol);
+  } catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    auto throw_func = get_deserialize_error_function(protocol);
+    throw_func(
+        ew,
+        std::move(req),
+        ctx,
+        eb,
+        functionFullNameMap_.at(ctx->getMethodName()).c_str());
+    return;
+  }
 
   dispatchRequest(
       protocol,

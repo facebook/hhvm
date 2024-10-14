@@ -19,7 +19,7 @@ hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../../../utils/cargo/hhbc_string_utils" }
 ir = { version = "0.0.0", path = "../../../.." }
-itertools = "0.11.0"
+itertools = "0.12.1"
 log = { version = "0.4.22", features = ["kv_unstable"] }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../../../naming" }
 newtype = { version = "0.0.0", path = "../../../../../../utils/newtype" }

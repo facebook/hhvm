@@ -225,27 +225,27 @@ void print_command_list_for_help(FILE* where) {
 
 /* One does not simply use getopt_long() */
 
-[[noreturn]] void usage(const OptDesc* opts, FILE* where) {
+[[noreturn]] void usage(const OptDesc* opts_2, FILE* where) {
   int i;
   size_t len;
   size_t longest = 0;
   const char* label;
 
-  fprintf(where, "Usage: watchman [opts] command\n");
+  fprintf(where, "Usage: watchman [opts_2] command\n");
 
   /* measure up option names so we can format nicely */
-  for (i = 0; opts[i].optname; i++) {
-    label = opts[i].arglabel ? opts[i].arglabel : "ARG";
+  for (i = 0; opts_2[i].optname; i++) {
+    label = opts_2[i].arglabel ? opts_2[i].arglabel : "ARG";
 
-    len = strlen(opts[i].optname);
-    switch (opts[i].argtype) {
+    len = strlen(opts_2[i].optname);
+    switch (opts_2[i].argtype) {
       case REQ_STRING:
         len += strlen(label) + strlen("=");
         break;
       default:;
     }
 
-    if (opts[i].shortopt) {
+    if (opts_2[i].shortopt) {
       len += strlen("-X, ");
     }
 
@@ -257,34 +257,34 @@ void print_command_list_for_help(FILE* where) {
   /* space between option definition and help text */
   longest += 3;
 
-  for (i = 0; opts[i].optname; i++) {
+  for (i = 0; opts_2[i].optname; i++) {
     char buf[80];
 
-    if (!opts[i].helptext) {
+    if (!opts_2[i].helptext) {
       // This is a signal that this option shouldn't be printed out.
       continue;
     }
 
-    label = opts[i].arglabel ? opts[i].arglabel : "ARG";
+    label = opts_2[i].arglabel ? opts_2[i].arglabel : "ARG";
 
     fprintf(where, "\n ");
-    if (opts[i].shortopt) {
-      fprintf(where, "-%c, ", opts[i].shortopt);
+    if (opts_2[i].shortopt) {
+      fprintf(where, "-%c, ", opts_2[i].shortopt);
     } else {
       fprintf(where, "    ");
     }
-    switch (opts[i].argtype) {
+    switch (opts_2[i].argtype) {
       case REQ_STRING:
-        snprintf(buf, sizeof(buf), "--%s=%s", opts[i].optname, label);
+        snprintf(buf, sizeof(buf), "--%s=%s", opts_2[i].optname, label);
         break;
       default:
-        snprintf(buf, sizeof(buf), "--%s", opts[i].optname);
+        snprintf(buf, sizeof(buf), "--%s", opts_2[i].optname);
         break;
     }
 
     fprintf(where, "%-*s ", (unsigned int)longest, buf);
 
-    fprintf(where, "%s", opts[i].helptext);
+    fprintf(where, "%s", opts_2[i].helptext);
     fprintf(where, "\n");
   }
 
@@ -302,7 +302,7 @@ void print_command_list_for_help(FILE* where) {
 }
 
 std::vector<std::string>
-w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
+w_getopt(const OptDesc* opts_2, int* argcp, char*** argvp) {
   int num_opts, i;
   char* nextshort;
   int argc = *argcp;
@@ -311,7 +311,7 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
   int res;
 
   /* first build up the getopt_long bits that we need */
-  for (num_opts = 0; opts[num_opts].optname; num_opts++) {
+  for (num_opts = 0; opts_2[num_opts].optname; num_opts++) {
     ;
   }
 
@@ -335,9 +335,9 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
 
   /* now transfer information into the space we made */
   for (i = 0; i < num_opts; i++) {
-    long_opts[i].name = (char*)opts[i].optname;
-    long_opts[i].val = opts[i].shortopt;
-    switch (opts[i].argtype) {
+    long_opts[i].name = (char*)opts_2[i].optname;
+    long_opts[i].val = opts_2[i].shortopt;
+    switch (opts_2[i].argtype) {
       case OPT_NONE:
         long_opts[i].has_arg = no_argument;
         break;
@@ -347,8 +347,8 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
         break;
     }
 
-    if (opts[i].shortopt) {
-      nextshort[0] = (char)opts[i].shortopt;
+    if (opts_2[i].shortopt) {
+      nextshort[0] = (char)opts_2[i].shortopt;
       nextshort++;
 
       if (long_opts[i].has_arg != no_argument) {
@@ -369,13 +369,13 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
         /* missing option argument.
          * Check to see if it was actually optional */
         for (long_pos = 0; long_pos < num_opts; long_pos++) {
-          if (opts[long_pos].shortopt == optopt) {
-            if (IS_REQUIRED(opts[long_pos].argtype)) {
+          if (opts_2[long_pos].shortopt == optopt) {
+            if (IS_REQUIRED(opts_2[long_pos].argtype)) {
               fprintf(
                   stderr,
                   "--%s (-%c) requires an argument",
-                  opts[long_pos].optname,
-                  opts[long_pos].shortopt);
+                  opts_2[long_pos].optname,
+                  opts_2[long_pos].shortopt);
               return daemon_argv;
             }
           }
@@ -385,19 +385,19 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
       case '?':
         /* unknown option */
         fprintf(stderr, "Unknown or invalid option! %s\n", argv[optind - 1]);
-        usage(opts, stderr);
+        usage(opts_2, stderr);
         return daemon_argv;
 
       default:
         if (res == 0) {
           /* we got a long option */
-          o = &opts[long_pos];
+          o = &opts_2[long_pos];
         } else {
           /* map short option to the real thing */
           o = NULL;
           for (long_pos = 0; long_pos < num_opts; long_pos++) {
-            if (opts[long_pos].shortopt == res) {
-              o = &opts[long_pos];
+            if (opts_2[long_pos].shortopt == res) {
+              o = &opts_2[long_pos];
               break;
             }
           }

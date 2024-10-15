@@ -172,6 +172,12 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'Bar', 'baz', $args);
       $result->success = await $this->handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'baz', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
@@ -202,6 +208,12 @@ abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'Bar', 'baz', $args);
       $result->success = $this->handler->baz($args->a, $args->b, $args->c, $args->d, $args->e);
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'baz', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);

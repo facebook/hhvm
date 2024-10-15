@@ -111,6 +111,12 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioChild', 'pang', $args);
       await $this->handler->pang();
       $this->eventHandler_->postExec($handler_ctx, 'pang', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'pang', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'pang', $ex);
@@ -141,6 +147,12 @@ abstract class MyServicePrioChildSyncProcessorBase extends MyServicePrioParentSy
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioChild', 'pang', $args);
       $this->handler->pang();
       $this->eventHandler_->postExec($handler_ctx, 'pang', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'pang', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'pang', $ex);

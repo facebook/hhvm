@@ -190,6 +190,12 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'BadService', 'bar', $args);
       $result->success = await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'bar', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
@@ -220,6 +226,12 @@ abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'BadService', 'bar', $args);
       $result->success = $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'bar', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);

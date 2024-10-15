@@ -5823,26 +5823,24 @@ void t_hack_generator::generate_process_function(
                        << fn_name << "', $result);\n";
   }
   indent_down();
-  int exc_num = 0;
-  for (const t_field& x : get_elems(tfunction->exceptions())) {
-    f_service_ << indent() << "} catch ("
-               << type_to_typehint(
-                      x.get_type(),
-                      // Type aliases are not supported in `catch` clauses. Hack
-                      // expects the name of a class.
-                      {{TypeToTypehintVariations::IGNORE_TYPEDEF_OPTION, true}})
-               << " $exc" << exc_num << ") {\n";
-    if (tfunction->qualifier() != t_function_qualifier::oneway) {
-      indent_up();
-      f_service_ << indent()
-                 << "$this->eventHandler_->handlerException($handler_ctx, '"
-                 << fn_name << "', $exc" << exc_num << ");\n"
-                 << indent() << "$result->" << x.name() << " = $exc" << exc_num
-                 << ";\n";
-      indent_down();
-    }
-    ++exc_num;
+  f_service_ << indent() << "} catch (\\TException $exc) {\n";
+  indent_up();
+  if (tfunction->qualifier() != t_function_qualifier::oneway) {
+    f_service_ << indent()
+               << "$this->eventHandler_->handlerError($handler_ctx, '"
+               << fn_name << "', $exc);\n"
+               << indent() << "if ($result->setException($exc)) {\n";
+    indent_up();
+    // If it is not a declared exception, wrap it in an application exception
+    f_service_ << indent() << "$reply_type = \\TMessageType::EXCEPTION;\n"
+               << indent()
+               << "$result = new "
+                  "\\TApplicationException($exc->getMessage().\"\\n\".$exc->"
+                  "getTraceAsString());\n";
+    indent_down();
+    f_service_ << indent() << "}\n";
   }
+  indent_down();
   f_service_ << indent() << "} catch (\\Exception $ex) {\n"
              << indent() << "  $reply_type = \\TMessageType::EXCEPTION;\n"
              << indent()

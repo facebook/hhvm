@@ -121,9 +121,12 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
-    } catch (\foo\hack_ns\FooException $exc0) {
-      $this->eventHandler_->handlerException($handler_ctx, 'ping', $exc0);
-      $result->ex = $exc0;
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
@@ -154,9 +157,12 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
       $result->success = $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
-    } catch (\foo\hack_ns\FooException $exc0) {
-      $this->eventHandler_->handlerException($handler_ctx, 'ping', $exc0);
-      $result->ex = $exc0;
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);

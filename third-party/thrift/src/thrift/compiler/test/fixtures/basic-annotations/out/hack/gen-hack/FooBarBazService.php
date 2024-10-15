@@ -201,6 +201,12 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
       await $this->handler->foo();
       $this->eventHandler_->postExec($handler_ctx, 'foo', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'foo', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'foo', $ex);
@@ -217,6 +223,12 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
       await $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'bar', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
@@ -233,6 +245,12 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
       await $this->handler->baz();
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'baz', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);
@@ -263,6 +281,12 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'foo', $args);
       $this->handler->foo();
       $this->eventHandler_->postExec($handler_ctx, 'foo', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'foo', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'foo', $ex);
@@ -279,6 +303,12 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'bar', $args);
       $this->handler->bar();
       $this->eventHandler_->postExec($handler_ctx, 'bar', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'bar', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'bar', $ex);
@@ -295,6 +325,12 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'FooBarBazService', 'baz', $args);
       $this->handler->baz();
       $this->eventHandler_->postExec($handler_ctx, 'baz', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'baz', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'baz', $ex);

@@ -156,6 +156,12 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
@@ -172,6 +178,12 @@ abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcess
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
       await $this->handler->pong();
       $this->eventHandler_->postExec($handler_ctx, 'pong', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'pong', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'pong', $ex);
@@ -202,6 +214,12 @@ abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'ping', $args);
       $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
@@ -218,6 +236,12 @@ abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor
       $this->eventHandler_->preExec($handler_ctx, 'MyServicePrioParent', 'pong', $args);
       $this->handler->pong();
       $this->eventHandler_->postExec($handler_ctx, 'pong', $result);
+    } catch (\TException $exc) {
+      $this->eventHandler_->handlerError($handler_ctx, 'pong', $exc);
+      if ($result->setException($exc)) {
+        $reply_type = \TMessageType::EXCEPTION;
+        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
+      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'pong', $ex);

@@ -86,51 +86,6 @@ class HQSessionController
   uint64_t sessionCount_{0};
 };
 
-class QuicAcceptCB : public quic::QuicSocket::ConnectionSetupCallback {
- public:
-  QuicAcceptCB(HQSessionController* controller,
-               wangle::ConnectionManager* connMgr)
-      : controller_(controller), connMgr_(connMgr) {
-  }
-
-  std::shared_ptr<quic::QuicSocket> quicSocket;
-
- private:
-  void onConnectionSetupError(quic::QuicError code) noexcept override {
-    LOG(ERROR) << "Failed to accept QUIC connection: " << code.message;
-    quicSocket->setConnectionSetupCallback(nullptr);
-    delete this;
-  }
-
-  void onTransportReady() noexcept override {
-    quicSocket->setConnectionSetupCallback(nullptr);
-    auto alpn = quicSocket->getAppProtocol();
-    if (alpn && alpn == kHQ) {
-      new H1QDownstreamSession(std::move(quicSocket), controller_, connMgr_);
-    } else {
-      wangle::TransportInfo tinfo;
-      auto session = new HQDownstreamSession(
-          connMgr_->getDefaultTimeout(), controller_, tinfo, controller_);
-      quicSocket->setConnectionSetupCallback(session);
-      quicSocket->setConnectionCallback(session);
-      session->setSocket(std::move(quicSocket));
-      session->setEgressSettings(
-          {{proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
-           {proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8, 1},
-           {proxygen::SettingsId::_HQ_DATAGRAM, 1},
-           {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
-           {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1}});
-
-      session->startNow();
-      session->onTransportReady();
-    }
-    delete this;
-  }
-
-  HQSessionController* controller_{nullptr};
-  wangle::ConnectionManager* connMgr_{nullptr};
-};
-
 HQSessionController::HQSessionController(
     const HQServerParams& params,
     const HTTPTransactionHandlerProvider& httpTransactionHandlerProvider,
@@ -189,6 +144,15 @@ HQServerTransportFactory::HQServerTransportFactory(
       httpTransactionHandlerProvider_(
           std::move(httpTransactionHandlerProvider)),
       onTransportReadyFn_(std::move(onTransportReadyFn)) {
+  alpnHandlers_[kHQ] = [this](std::shared_ptr<quic::QuicSocket> quicSocket,
+                              wangle::ConnectionManager* connMgr) {
+    quicSocket->setConnectionSetupCallback(nullptr);
+    return new H1QDownstreamSession(
+        std::move(quicSocket),
+        new HQSessionController(
+            params_, httpTransactionHandlerProvider_, onTransportReadyFn_),
+        connMgr);
+  };
 }
 
 QuicServerTransport::Ptr HQServerTransportFactory::make(
@@ -197,9 +161,44 @@ QuicServerTransport::Ptr HQServerTransportFactory::make(
     const folly::SocketAddress& /* peerAddr */,
     quic::QuicVersion,
     std::shared_ptr<const FizzServerContext> ctx) noexcept {
-  // Session controller is self owning
-  auto hqSessionController = new HQSessionController(
-      params_, httpTransactionHandlerProvider_, onTransportReadyFn_);
+  auto transport = quic::QuicHandshakeSocketHolder::makeServerTransport(
+      evb, std::move(socket), std::move(ctx), this);
+  if (!params_.qLoggerPath.empty()) {
+    transport->setQLogger(std::make_shared<HQLoggerHelper>(
+        params_.qLoggerPath, params_.prettyJson, quic::VantagePoint::Server));
+  }
+  return transport;
+}
+
+void HQServerTransportFactory::onQuicTransportReady(
+    std::shared_ptr<quic::QuicSocket> quicSocket) {
+  auto alpn = quicSocket->getAppProtocol();
+  auto it = alpnHandlers_.end();
+  if (alpn) {
+    it = alpnHandlers_.find(*alpn);
+  }
+  auto qevb = quicSocket->getEventBase();
+  folly::EventBase* evb{nullptr};
+  if (qevb) {
+    evb = qevb->getTypedEventBase<quic::FollyQuicEventBase>()
+              ->getBackingEventBase();
+  }
+
+  if (it == alpnHandlers_.end()) {
+    // by default, it's H3
+    handleHQAlpn(std::move(quicSocket), getConnectionManager(evb));
+  } else {
+    it->second(std::move(quicSocket), getConnectionManager(evb));
+  }
+}
+
+void HQServerTransportFactory::onConnectionSetupError(
+    std::shared_ptr<quic::QuicSocket>, quic::QuicError code) {
+  LOG(ERROR) << "Failed to accept QUIC connection: " << code.message;
+}
+
+wangle::ConnectionManager* HQServerTransportFactory::getConnectionManager(
+    folly::EventBase* evb) {
   auto connMgrPtrPtr = connMgr_.get(*evb);
   wangle::ConnectionManager* connMgr{nullptr};
   if (connMgrPtrPtr) {
@@ -209,21 +208,44 @@ QuicServerTransport::Ptr HQServerTransportFactory::make(
         *evb, wangle::ConnectionManager::makeUnique(evb, params_.txnTimeout));
     connMgr = connMgrPtrRef.get();
   }
-  auto connCb = new QuicAcceptCB(hqSessionController, connMgr);
-  auto transport = quic::QuicServerTransport::make(
-      evb, std::move(socket), connCb, nullptr, ctx);
-  if (!params_.qLoggerPath.empty()) {
-    transport->setQLogger(std::make_shared<HQLoggerHelper>(
-        params_.qLoggerPath, params_.prettyJson, quic::VantagePoint::Server));
-  }
-  connCb->quicSocket = transport;
-  return transport;
+  return connMgr;
+}
+
+void HQServerTransportFactory::handleHQAlpn(
+    std::shared_ptr<quic::QuicSocket> quicSocket,
+    wangle::ConnectionManager* connMgr) {
+  wangle::TransportInfo tinfo;
+  auto controller = new HQSessionController(
+      params_, httpTransactionHandlerProvider_, onTransportReadyFn_);
+  auto session = new HQDownstreamSession(
+      connMgr->getDefaultTimeout(), controller, tinfo, controller);
+  quicSocket->setConnectionSetupCallback(session);
+  quicSocket->setConnectionCallback(session);
+  session->setSocket(std::move(quicSocket));
+  session->setEgressSettings(
+      {{proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL, 1},
+       {proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8, 1},
+       {proxygen::SettingsId::_HQ_DATAGRAM, 1},
+       {proxygen::SettingsId::_HQ_DATAGRAM_RFC, 1},
+       {proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1}});
+
+  session->startNow();
+  session->onTransportReady();
 }
 
 HQServer::HQServer(
     HQServerParams params,
     HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
     std::function<void(proxygen::HQSession*)> onTransportReadyFn)
+    : HQServer(std::move(params),
+               std::make_unique<HQServerTransportFactory>(
+                   params_,
+                   std::move(httpTransactionHandlerProvider),
+                   std::move(onTransportReadyFn))) {
+}
+
+HQServer::HQServer(HQServerParams params,
+                   std::unique_ptr<quic::QuicServerTransportFactory> factory)
     : params_(std::move(params)) {
   params_.transportSettings.datagramConfig.enabled = true;
   server_ = quic::QuicServer::createQuicServer(params_.transportSettings);
@@ -232,11 +254,7 @@ HQServer::HQServer(
   server_->setCongestionControllerFactory(
       std::make_shared<ServerCongestionControllerFactory>());
 
-  server_->setQuicServerTransportFactory(
-      std::make_unique<HQServerTransportFactory>(
-          params_,
-          std::move(httpTransactionHandlerProvider),
-          std::move(onTransportReadyFn)));
+  server_->setQuicServerTransportFactory(std::move(factory));
   server_->setQuicUDPSocketFactory(
       std::make_unique<QuicSharedUDPSocketFactory>());
   server_->setHealthCheckToken("health");

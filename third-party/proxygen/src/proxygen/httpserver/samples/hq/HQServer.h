@@ -14,6 +14,7 @@
 #include <folly/io/async/EventBaseLocal.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <quic/server/QuicHandshakeSocketHolder.h>
 #include <quic/server/QuicServer.h>
 
 namespace proxygen {
@@ -27,10 +28,13 @@ using HTTPTransactionHandlerProvider =
 
 class HQServer {
  public:
-  explicit HQServer(
+  HQServer(
       HQServerParams params,
       HTTPTransactionHandlerProvider httpTransactionHandlerProvider,
       std::function<void(proxygen::HQSession*)> onTransportReadyFn = nullptr);
+
+  HQServer(HQServerParams params,
+           std::unique_ptr<quic::QuicServerTransportFactory> factory);
 
   // Starts the QUIC transport in background thread
   void start();
@@ -82,7 +86,9 @@ class ScopedHQServer {
   HQServer server_;
 };
 
-class HQServerTransportFactory : public quic::QuicServerTransportFactory {
+class HQServerTransportFactory
+    : public quic::QuicServerTransportFactory
+    , private quic::QuicHandshakeSocketHolder::Callback {
  public:
   explicit HQServerTransportFactory(
       const HQServerParams& params,
@@ -99,13 +105,31 @@ class HQServerTransportFactory : public quic::QuicServerTransportFactory {
       std::shared_ptr<const fizz::server::FizzServerContext> ctx) noexcept
       override;
 
+  using AlpnHandlerFn = std::function<void(std::shared_ptr<quic::QuicSocket>,
+                                           wangle::ConnectionManager*)>;
+  void addAlpnHandler(const std::vector<std::string>& alpns,
+                      const AlpnHandlerFn& handler) {
+    for (auto& alpn : alpns) {
+      alpnHandlers_[alpn] = handler;
+    }
+  }
+
  private:
+  void onQuicTransportReady(
+      std::shared_ptr<quic::QuicSocket> quicSocket) override;
+  void onConnectionSetupError(std::shared_ptr<quic::QuicSocket> quicSocket,
+                              quic::QuicError code) override;
+  wangle::ConnectionManager* getConnectionManager(folly::EventBase* evb);
+  void handleHQAlpn(std::shared_ptr<quic::QuicSocket> quicSocket,
+                    wangle::ConnectionManager* connMgr);
+
   // Configuration params
   const HQServerParams& params_;
   // Provider of HTTPTransactionHandler
   HTTPTransactionHandlerProvider httpTransactionHandlerProvider_;
   std::function<void(proxygen::HQSession*)> onTransportReadyFn_;
   folly::EventBaseLocal<wangle::ConnectionManager::UniquePtr> connMgr_;
+  std::map<std::string, AlpnHandlerFn> alpnHandlers_;
 };
 
 } // namespace quic::samples

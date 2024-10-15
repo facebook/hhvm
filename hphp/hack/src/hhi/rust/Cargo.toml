@@ -17,3 +17,6 @@ clap = { version = "3.2.25", features = ["derive", "env", "regex", "unicode", "w
 gen_hhi_contents_lib = { version = "0.0.0", path = "cargo/gen_hhi_contents_lib" }
 generate_hhi_lib = { version = "0.0.0", path = "../../generate_hhi/cargo/generate_hhi_lib" }
 walkdir = "2.3"
+
+[lints]
+rust = { unexpected_cfgs = { check-cfg = ["cfg(fbcode_build)"], level = "warn" } }

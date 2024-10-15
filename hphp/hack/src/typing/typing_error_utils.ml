@@ -1563,6 +1563,39 @@ end = struct
       in
       (error_code, claim, reason, [], User_error_flags.empty)
 
+    let cross_pkg_access_with_requirepackage
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (current_package_opt : string option)
+        (target_package_opt : string option) =
+      let current_package = get_package_str current_package_opt in
+      let target_package =
+        match target_package_opt with
+        | Some s -> s
+        | None ->
+          failwith "target package can't be default for RequirePackage call"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot reference this RequirePackage method defined in package %s from %s"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This function is marked with __RequirePackage(\"%s\"), so requires the package %s to be loaded. You can check if package %s is loaded by placing this call inside a block like `if(package %s)`"
+                target_package
+                target_package
+                target_package
+                target_package );
+          ]
+      in
+      (Error_code.InvalidCrossPackage, claim, reason, [], User_error_flags.empty)
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.Package in
       match t with
@@ -1585,6 +1618,13 @@ end = struct
           current_filename
           target_filename
           false (* Soft *)
+      | Cross_pkg_access_with_requirepackage
+          { pos; decl_pos; current_package_opt; target_package_opt } ->
+        cross_pkg_access_with_requirepackage
+          pos
+          decl_pos
+          current_package_opt
+          target_package_opt
       | Soft_included_access
           {
             pos;

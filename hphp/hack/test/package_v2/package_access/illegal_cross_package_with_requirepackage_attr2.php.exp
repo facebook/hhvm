@@ -1,5 +1,5 @@
-error: Typing[4472] Cannot reference this CrossPackage method defined in package pkg2 from package pkg1 [1]
--> This function is marked cross package, so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
+error: Typing[4472] Cannot reference this RequirePackage method defined in package pkg2 from package pkg1 [1]
+-> This function is marked with __RequirePackage("pkg2"), so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
 
 illegal_cross_package_with_requirepackage_attr2.php--a.php:12:7
 5 | class A {

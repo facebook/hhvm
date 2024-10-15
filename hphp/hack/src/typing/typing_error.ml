@@ -357,6 +357,12 @@ module Primary = struct
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
         }
+      | Cross_pkg_access_with_requirepackage of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+        }
       | Soft_included_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;

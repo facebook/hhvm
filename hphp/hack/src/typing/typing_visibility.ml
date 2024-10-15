@@ -447,8 +447,9 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
       | None -> Some Naming_special_names.Modules.default
       | x -> x
     in
+    let is_package_v2 = TypecheckerOptions.package_v2 @@ Env.get_tcopt env in
     let current_pkg =
-      if not (TypecheckerOptions.package_v2 @@ Env.get_tcopt env) then
+      if not is_package_v2 then
         Option.bind ~f:(Env.get_package_for_module env) current_module
       else
         let current_file = Env.get_file env in
@@ -457,16 +458,28 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_packages.get_package_violation env current_pkg target_pkg with
     | Some _ ->
-      Some
-        (Typing_error.modules
-           (Module_cross_pkg_call
-              {
-                pos = use_pos;
-                decl_pos = def_pos;
-                current_package_opt =
-                  Option.map ~f:Package.get_package_name current_pkg;
-                target_package_opt = cross_package;
-              }))
+      if is_package_v2 then
+        Some
+          (Typing_error.package
+             (Cross_pkg_access_with_requirepackage
+                {
+                  pos = use_pos;
+                  decl_pos = def_pos;
+                  current_package_opt =
+                    Option.map ~f:Package.get_package_name current_pkg;
+                  target_package_opt = cross_package;
+                }))
+      else
+        Some
+          (Typing_error.modules
+             (Module_cross_pkg_call
+                {
+                  pos = use_pos;
+                  decl_pos = def_pos;
+                  current_package_opt =
+                    Option.map ~f:Package.get_package_name current_pkg;
+                  target_package_opt = cross_package;
+                }))
     | _ -> None)
   | None -> None
 

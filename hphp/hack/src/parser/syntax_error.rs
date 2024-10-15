@@ -1285,6 +1285,20 @@ pub fn cross_package_wrong_arity(count: usize) -> Error {
     ))
 }
 
+pub fn invalid_require_package_argument(message: &str) -> Error {
+    Cow::Owned(format!(
+        "This is an invalid use of '__RequirePackage' because {}",
+        message
+    ))
+}
+
+pub fn require_package_wrong_arity(count: usize) -> Error {
+    Cow::Owned(format!(
+        "The '__RequirePackage' attribute expects exactly 1 argument, {} given.",
+        count
+    ))
+}
+
 pub const expected_bar_or_semicolon: Error = Cow::Borrowed(
     "Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.",
 );

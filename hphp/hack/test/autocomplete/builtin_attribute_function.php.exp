@@ -36,6 +36,11 @@ SORT TEXT: none
   Requires these type parameters to have some overlap with each other.
   
   This prevents Hack inferring completely unrelated types. For example, this allows the typechecker to warn on `C\contains(vec[1], "foo")`.
+__RequirePackage
+  INSERT __RequirePackage
+  built-in attribute
+SORT TEXT: none
+  Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('require_package')>>`
 __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute

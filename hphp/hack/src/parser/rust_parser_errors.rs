@@ -1936,6 +1936,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
     }
 
+    // For Package V1 (to be deprecated after Package V2 rollout T203287767)
     fn check_cross_package_args_are_string_literals(&mut self, node: S<'a>) {
         let mut crossed_packages_count = 0;
         if let Some(args) = self.attr_args(node) {
@@ -1967,6 +1968,37 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         ))
     }
 
+    fn check_require_package_args_are_string_literals(&mut self, node: S<'a>) {
+        let mut required_packages_count = 0;
+        if let Some(args) = self.attr_args(node) {
+            for arg in args.peekable() {
+                required_packages_count += 1;
+                if let LiteralExpression(x) = &arg.children {
+                    if let Token(t) = &x.expression.children {
+                        if t.kind() == TokenKind::SingleQuotedStringLiteral
+                            || t.kind() == TokenKind::DoubleQuotedStringLiteral
+                        {
+                            continue;
+                        }
+                    }
+                }
+                self.errors.push(make_error_from_node(
+                    arg,
+                    errors::invalid_require_package_argument(
+                        "this is not a literal string expression",
+                    ),
+                ))
+            }
+            if required_packages_count == 1 {
+                return;
+            }
+        }
+        self.errors.push(make_error_from_node(
+            node,
+            errors::require_package_wrong_arity(required_packages_count),
+        ))
+    }
+
     fn check_attr_enabled(&mut self, attrs: S<'a>) {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
@@ -1987,6 +2019,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                     if sn::user_attributes::is_cross_package(n) {
                         self.check_cross_package_args_are_string_literals(node);
+                    }
+                    if sn::user_attributes::is_require_package(n) {
+                        self.check_can_use_feature(node, &FeatureName::RequirePackage);
+                        self.check_require_package_args_are_string_literals(node);
                     }
                 }
                 None => {}

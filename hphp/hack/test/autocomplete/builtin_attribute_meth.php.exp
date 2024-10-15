@@ -43,6 +43,11 @@ __Override
   built-in attribute
 SORT TEXT: none
   Ensures there's a parent method being overridden.
+__RequirePackage
+  INSERT __RequirePackage
+  built-in attribute
+SORT TEXT: none
+  Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('require_package')>>`
 __ReturnDisposable
   INSERT __ReturnDisposable
   built-in attribute

@@ -30,6 +30,7 @@ impl FeatureName {
             RequireClass => OngoingRelease,
             NewtypeSuperBounds => Unstable,
             Package => OngoingRelease,
+            RequirePackage => Unstable,
             CaseTypes => Preview,
             CaseTypeWhereClauses => Unstable,
             ModuleLevelTraits => OngoingRelease,

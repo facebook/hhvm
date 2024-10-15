@@ -39,6 +39,7 @@ type feature_name =
   | RequireClass
   | NewtypeSuperBounds
   | Package
+  | RequirePackage
   | CaseTypes
   | CaseTypeWhereClauses
   | ModuleLevelTraits

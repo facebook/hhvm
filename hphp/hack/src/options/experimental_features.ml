@@ -45,6 +45,7 @@ type feature_name =
   | RequireClass
   | NewtypeSuperBounds
   | Package
+  | RequirePackage
   | CaseTypes
   | CaseTypeWhereClauses
   | ModuleLevelTraits
@@ -84,6 +85,7 @@ let feature_name_map =
       ("require_class", RequireClass);
       ("newtype_super_bounds", NewtypeSuperBounds);
       ("package", Package);
+      ("require_package", RequirePackage);
       ("case_types", CaseTypes);
       ("case_type_where_clauses", CaseTypeWhereClauses);
       ("module_level_traits", ModuleLevelTraits);

@@ -287,13 +287,19 @@ LockFreePtrWrapper<T>::lock_for_update() {
     // value we found there.
     if (c & kLockNoWaitersBit) {
       auto const desired = (c & kPtrMask) + kLockWithWaitersBit;
-      if (!bits.compare_exchange_weak(c, desired, std::memory_order_acq_rel)) {
-        // We failed, so someone else got in before us. start over.
+      if (bits.compare_exchange_weak(c, desired, std::memory_order_acq_rel)) {
+        // compare_exchange_weak only updates c when it fails, so set it
+        // to the value we actually wrote to memory.
+        c = desired;
+        // fallthrough
+      } else if (!(c & kLockWithWaitersBit)) {
+        // If we failed, and kLockWithWaitersBit is not set, then the value
+        // we read must be in the unlocked state. Try again.
         continue;
-      }
-      // compare_exchange_weak only updates c when it fails, so set it
-      // to the value we actually wrote to memory.
-      c = desired;
+      } 
+      // fallthrough
+      // We failed, and kLockWithWaitersBit is set. 
+      // We'll wait for it to be unlocked.
     }
     assertx(!(c & kLockNoWaitersBit));
     if (c & kLockWithWaitersBit) {

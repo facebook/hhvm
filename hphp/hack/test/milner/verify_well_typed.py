@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 from concurrent.futures import as_completed
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -85,14 +85,18 @@ def milner_and_type_check(
 
 
 def verify_well_typed(
-    template_file: str, out_dir: str, sample_size: int, milner_exe: str, hhstc_exe: str
+    template_file: str,
+    out_dir: str,
+    seed_range: Tuple[int, int],
+    milner_exe: str,
+    hhstc_exe: str,
 ) -> int:
     # In parallel generate programs with seeds
-    # (1...sample_size) with milner and verify that they are well-typed with
-    # hh_single_type_check
+    # (seed_range[0]...seed_range[1]) with milner and verify that they are
+    # well-typed with hh_single_type_check
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = []
-        for seed in range(1, sample_size + 1):
+        for seed in range(seed_range[0], seed_range[1]):
             futures.append(
                 executor.submit(
                     milner_and_type_check,
@@ -130,7 +134,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Verify well-typed templates")
     parser.add_argument("--template", help="Directory to search for templates")
     parser.add_argument(
-        "--sample-size", required=True, type=int, help="Number of templates"
+        "--seed-range",
+        required=True,
+        nargs=2,
+        help="Number of templates",
     )
     parser.add_argument("--milner-exe", required=True, help="Path to milner executable")
     parser.add_argument(
@@ -139,10 +146,12 @@ def main() -> None:
 
     args: argparse.Namespace = parser.parse_args()
 
+    seed_range = (int(args.seed_range[0]), int(args.seed_range[1]))
+
     # Temporary directory to store generated programs
     out_dir = tempfile.TemporaryDirectory()
     exit_code = verify_well_typed(
-        args.template, out_dir.name, args.sample_size, args.milner_exe, args.hhstc_exe
+        args.template, out_dir.name, seed_range, args.milner_exe, args.hhstc_exe
     )
     out_dir.cleanup()
 

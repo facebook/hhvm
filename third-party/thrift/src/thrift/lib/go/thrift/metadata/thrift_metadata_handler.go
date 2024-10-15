@@ -24,7 +24,7 @@ import (
 
 // ThriftMetadataHandler is a handler for ThriftMetadataService from thrift/lib/thrift/metadata.thrift
 type ThriftMetadataHandler struct {
-	tmc                   *ThriftMetadataCombiner
+	proc                  ProcessorWithMetadata
 	thriftMetadataEnabled bool
 }
 
@@ -32,13 +32,13 @@ type ThriftMetadataHandler struct {
 var _ metadata.ThriftMetadataService = (*ThriftMetadataHandler)(nil)
 
 // NewThriftMetadataHandler creates a new ThriftMetadataHandler.
-func NewThriftMetadataHandler(tmc *ThriftMetadataCombiner) *ThriftMetadataHandler {
+func NewThriftMetadataHandler(proc ProcessorWithMetadata) *ThriftMetadataHandler {
 	return &ThriftMetadataHandler{
-		tmc: tmc,
+		proc: proc,
 	}
 }
 
 // GetThriftServiceMetadata implements a required ThriftMetadataService method.
 func (h *ThriftMetadataHandler) GetThriftServiceMetadata(context.Context) (*metadata.ThriftServiceMetadataResponse, error) {
-	return h.tmc.GetThriftServiceMetadataResponse(), nil
+	return GetThriftServiceMetadataResponse(h.proc.GetThriftMetadata()), nil
 }

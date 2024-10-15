@@ -132,7 +132,10 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 
   template <class F>
   void handleRequestCommon(
-      Payload&& payload, F&& makeRequest, RpcKind expectedKind);
+      Payload&& payload,
+      F&& makeRequest,
+      RpcKind expectedKind,
+      bool decodeMetadataUsingBinary);
 
   FOLLY_NOINLINE void handleRequestWithBadMetadata(
       ThriftRequestCoreUniquePtr request);

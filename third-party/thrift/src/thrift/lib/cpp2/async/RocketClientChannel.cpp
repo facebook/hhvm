@@ -551,14 +551,16 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       ManagedStringView&& methodName,
       size_t requestSerializedSize,
       size_t requestWireSize,
-      size_t requestMetadataAndPayloadSize)
+      size_t requestMetadataAndPayloadSize,
+      bool encodeMetadataUsingBinary)
       : cb_(std::move(cb)),
         protocolId_(protocolId),
         methodName_(std::move(methodName)),
         requestSerializedSize_(requestSerializedSize),
         requestWireSize_(requestWireSize),
         requestMetadataAndPayloadSize_(requestMetadataAndPayloadSize),
-        timeBeginSend_(clock::now()) {}
+        timeBeginSend_(clock::now()),
+        encodeMetadataUsingBinary_(encodeMetadataUsingBinary) {}
 
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
 
@@ -600,7 +602,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
 
       response =
           rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
-              std::move(*payload), false /* decodeMetadataUsingBinary */);
+              std::move(*payload), encodeMetadataUsingBinary_);
       if (response.hasException()) {
         cb_.release()->onResponseError(std::move(response.exception()));
         return;
@@ -666,6 +668,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
   const size_t requestMetadataAndPayloadSize_;
   const std::chrono::time_point<clock> timeBeginSend_;
   std::chrono::time_point<clock> timeEndSend_;
+  const bool encodeMetadataUsingBinary_;
 };
 
 class RocketClientChannel::SingleRequestNoResponseCallback final
@@ -717,9 +720,13 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
     clientMetadata.agent_ref() = "RocketClientChannel.cpp";
   }
 
-  folly::IOBufQueue paramQueue;
   uint32_t serialized_size;
-  if (THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding)) {
+  folly::IOBufQueue paramQueue;
+  bool encodeMetadataUsingBinary =
+      THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding);
+
+  // TODO: migrate this to
+  if (encodeMetadataUsingBinary) {
     BinaryProtocolWriter binaryProtocolWriter;
     binaryProtocolWriter.setOutput(&paramQueue);
     meta.write(&binaryProtocolWriter);
@@ -749,7 +756,7 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
 
   return rocket::SetupFrame(
       rocket::Payload::makeFromMetadataAndData(queue.move(), {}),
-      THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding));
+      encodeMetadataUsingBinary);
 }
 
 RocketClientChannel::RocketClientChannel(
@@ -850,7 +857,7 @@ void RocketClientChannel::sendRequestStream(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
-      false, /* encodeMetadataUsingBinary */
+      encodeMetadataUsingBinary(),
       getTransportWrapper());
   return rocket::RocketClient::sendRequestStream(
       std::move(payload),
@@ -892,7 +899,7 @@ void RocketClientChannel::sendRequestSink(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
-      false, /* encodeMetadataUsingBinary */
+      encodeMetadataUsingBinary(),
       getTransportWrapper());
   return rocket::RocketClient::sendRequestSink(
       std::move(payload),
@@ -968,7 +975,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
-      false, /* encodeMetadataUsingBinary */
+      encodeMetadataUsingBinary(),
       getTransportWrapper());
   const bool isSync = cb->isSync();
   SingleRequestNoResponseCallback callback(std::move(cb));
@@ -994,7 +1001,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
-      false, /* encodeMetadataUsingBinary */
+      encodeMetadataUsingBinary(),
       getTransportWrapper());
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
@@ -1006,7 +1013,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       std::move(*metadata.name_ref()),
       requestSerializedSize,
       requestWireSize,
-      requestMetadataAndPayloadSize);
+      requestMetadataAndPayloadSize,
+      encodeMetadataUsingBinary());
 
   if (isSync && folly::fibers::onFiber()) {
     callback.onResponsePayload(

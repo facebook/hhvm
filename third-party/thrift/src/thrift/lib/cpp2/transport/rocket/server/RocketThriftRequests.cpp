@@ -485,7 +485,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
       &metadata,
       std::move(data),
       std::move(getRequestContext()->getHeader()->fds),
-      false, /* encodeMetadataUsingBinary */
+      context_.connection().isDecodingMetadataUsingBinaryProtocol(),
       context_.connection().getRawSocket());
 
   if (maxResponseWriteTime_ > std::chrono::milliseconds{0}) {

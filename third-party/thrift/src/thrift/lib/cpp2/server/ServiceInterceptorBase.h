@@ -47,14 +47,14 @@ class ServiceInterceptorBase {
   virtual folly::coro::Task<void> co_onStartServing(InitParams);
 
   struct ConnectionInfo {
-    const Cpp2ConnContext* context = nullptr;
+    Cpp2ConnContext* context = nullptr;
     detail::ServiceInterceptorOnConnectionStorage* storage = nullptr;
   };
   virtual void internal_onConnection(ConnectionInfo) noexcept = 0;
   virtual void internal_onConnectionClosed(ConnectionInfo) noexcept = 0;
 
   struct RequestInfo {
-    const Cpp2RequestContext* context = nullptr;
+    Cpp2RequestContext* context = nullptr;
     detail::ServiceInterceptorOnRequestStorage* storage = nullptr;
     detail::ServiceInterceptorOnRequestArguments arguments;
     /**

@@ -22,23 +22,30 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
+// ProcessorWithMetadata is an interface for Processors
+// that are able to provide their Thrift metadata.
+type ProcessorWithMetadata interface {
+	GetThriftMetadata() *metadata.ThriftMetadata
+}
+
 // ThriftMetadataHandler is a handler for ThriftMetadataService from thrift/lib/thrift/metadata.thrift
 type ThriftMetadataHandler struct {
-	proc                  ProcessorWithMetadata
-	thriftMetadataEnabled bool
+	proc               ProcessorWithMetadata
+	metadataModuleName string
 }
 
 // Compile time interface enforcer
 var _ metadata.ThriftMetadataService = (*ThriftMetadataHandler)(nil)
 
 // NewThriftMetadataHandler creates a new ThriftMetadataHandler.
-func NewThriftMetadataHandler(proc ProcessorWithMetadata) *ThriftMetadataHandler {
+func NewThriftMetadataHandler(metadataModuleName string, proc ProcessorWithMetadata) *ThriftMetadataHandler {
 	return &ThriftMetadataHandler{
-		proc: proc,
+		proc:               proc,
+		metadataModuleName: metadataModuleName,
 	}
 }
 
 // GetThriftServiceMetadata implements a required ThriftMetadataService method.
 func (h *ThriftMetadataHandler) GetThriftServiceMetadata(context.Context) (*metadata.ThriftServiceMetadataResponse, error) {
-	return GetThriftServiceMetadataResponse(h.proc.GetThriftMetadata()), nil
+	return GetThriftServiceMetadataResponse(h.metadataModuleName, h.proc.GetThriftMetadata()), nil
 }

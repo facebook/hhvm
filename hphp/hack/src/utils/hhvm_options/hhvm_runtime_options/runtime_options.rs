@@ -253,6 +253,11 @@ fn is_pattern_match(pattern: &String, value: &str, multiline: bool) -> Result<bo
         .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / prefix"))?
         .strip_suffix('/')
         .ok_or_else(|| anyhow::anyhow!("{pattern}: should have a / suffix"))?;
+    if Regex::new("[a-zA-Z0-9_-]/").unwrap().is_match(pattern) {
+        return Err(anyhow::anyhow!(
+            "{pattern}: non-boundary / needs to be escaped"
+        ));
+    }
     let re = if multiline {
         Regex::new(format!("(?m:{pattern})").as_str())?
     } else {
@@ -388,6 +393,7 @@ mod test {
             // HHVM specific requirements
             ("test\\/nobody/", "should have a / prefix"),
             ("/test\\/nobody", "should have a / suffix"),
+            ("/test/nobody/", "non-boundary / needs to be escaped"),
             // Regex bad patterns
             ("/i_am(broken/", "unclosed group"),
             ("/i_am(broken\\)/", "unclosed group"),

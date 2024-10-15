@@ -341,8 +341,7 @@ void ThriftRocketServerHandler::handleRequestResponseFrame(
   handleRequestCommon(
       std::move(frame.payload()),
       std::move(makeRequestResponse),
-      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 }
 
 void ThriftRocketServerHandler::handleRequestFnfFrame(
@@ -368,8 +367,7 @@ void ThriftRocketServerHandler::handleRequestFnfFrame(
   handleRequestCommon(
       std::move(frame.payload()),
       std::move(makeRequestFnf),
-      RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      RpcKind::SINGLE_REQUEST_NO_RESPONSE);
 }
 
 void ThriftRocketServerHandler::handleRequestStreamFrame(
@@ -396,8 +394,7 @@ void ThriftRocketServerHandler::handleRequestStreamFrame(
   handleRequestCommon(
       std::move(frame.payload()),
       std::move(makeRequestStream),
-      RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE);
 }
 
 void ThriftRocketServerHandler::handleRequestChannelFrame(
@@ -422,10 +419,7 @@ void ThriftRocketServerHandler::handleRequestChannelFrame(
   };
 
   handleRequestCommon(
-      std::move(frame.payload()),
-      std::move(makeRequestSink),
-      RpcKind::SINK,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      std::move(frame.payload()), std::move(makeRequestSink), RpcKind::SINK);
 }
 
 void ThriftRocketServerHandler::connectionClosing() {
@@ -437,10 +431,7 @@ void ThriftRocketServerHandler::connectionClosing() {
 
 template <class F>
 void ThriftRocketServerHandler::handleRequestCommon(
-    Payload&& payload,
-    F&& makeRequest,
-    RpcKind expectedKind,
-    bool decodeMetadataUsingBinary) {
+    Payload&& payload, F&& makeRequest, RpcKind expectedKind) {
   std::chrono::steady_clock::time_point readEnd{
       std::chrono::steady_clock::now()};
   auto wiredPayloadSize = payload.metadataAndDataSize();
@@ -449,7 +440,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto requestPayloadTry =
       rocket::PayloadSerializer::getInstance()
           .unpackAsCompressed<RequestPayload>(
-              std::move(payload), decodeMetadataUsingBinary);
+              std::move(payload), false /* decodeMetadataUsingBinary */);
 
   auto makeActiveRequest = [&](auto&& md, auto&& payload, auto&& reqCtx) {
     serverConfigs_->incActiveRequests();

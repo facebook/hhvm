@@ -103,8 +103,7 @@ RocketClient::RocketClient(
       detachableLoopCallback_(*this),
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),
-      setupFrame_(std::move(setupFrame)),
-      encodeMetadataUsingBinary_(setupFrame_->encodeMetadataUsingBinary()) {
+      setupFrame_(std::move(setupFrame)) {
   DCHECK(socket_ != nullptr);
   socket_->setReadCB(&parser_);
   if (auto socket_2 = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
@@ -1078,7 +1077,7 @@ bool RocketClient::sendPayload(
           streamId,
           rocket::PayloadSerializer::getInstance().pack(
               std::move(payload),
-              THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding),
+              false, /* encodeMetadataUsingBinary */
               getTransportWrapper()),
           flags),
       [this,

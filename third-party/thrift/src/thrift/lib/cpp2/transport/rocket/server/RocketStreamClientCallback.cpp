@@ -94,7 +94,7 @@ bool RocketStreamClientCallback::onFirstResponse(
       streamId_,
       payloadSerializer_.pack(
           std::move(firstResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
+          false, /* encodeMetadataUsingBinary */
           connection_.getRawSocket()),
       Flags().next(true));
 
@@ -117,7 +117,7 @@ void RocketStreamClientCallback::onFirstResponseError(
                 streamId_,
                 payloadSerializer_.pack(
                     std::move(encodedError.encoded),
-                    connection_.isDecodingMetadataUsingBinaryProtocol(),
+                    false, /* encodeMetadataUsingBinary */
                     connection_.getRawSocket()),
                 Flags().next(true).complete(true));
           });
@@ -147,7 +147,7 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
       streamId_,
       payloadSerializer_.pack(
           std::move(payload),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
+          false, /* encodeMetadataUsingBinary */
           connection_.getRawSocket()),
       Flags().next(true));
 
@@ -189,7 +189,7 @@ void RocketStreamClientCallback::onStreamError(folly::exception_wrapper ew) {
             streamId_,
             payloadSerializer_.pack(
                 std::move(err.encoded),
-                connection_.isDecodingMetadataUsingBinaryProtocol(),
+                false, /* encodeMetadataUsingBinary */
                 connection_.getRawSocket()),
             Flags().next(true).complete(true));
       },

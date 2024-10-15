@@ -63,7 +63,7 @@ bool RocketSinkClientCallback::onFirstResponse(
       streamId_,
       payloadSerializer_.pack(
           std::move(firstResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
+          false, /* encodeMetadataUsingBinary */
           connection_.getRawSocket()),
       Flags().next(true));
   return true;
@@ -81,7 +81,7 @@ void RocketSinkClientCallback::onFirstResponseError(
                 streamId_,
                 payloadSerializer_.pack(
                     std::move(encodedError.encoded),
-                    connection_.isDecodingMetadataUsingBinaryProtocol(),
+                    false, /* encodeMetadataUsingBinary */
                     connection_.getRawSocket()),
                 Flags().next(true).complete(true));
           });
@@ -107,7 +107,7 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
       streamId_,
       payloadSerializer_.pack(
           std::move(finalResponse),
-          connection_.isDecodingMetadataUsingBinaryProtocol(),
+          false, /* encodeMetadataUsingBinary */
           connection_.getRawSocket()),
       Flags().next(true).complete(true));
   auto state = state_;
@@ -139,7 +139,7 @@ void RocketSinkClientCallback::onFinalResponseError(
             streamId_,
             payloadSerializer_.pack(
                 std::move(err.encoded),
-                connection_.isDecodingMetadataUsingBinaryProtocol(),
+                false, /* encodeMetadataUsingBinary */
                 connection_.getRawSocket()),
             Flags().next(true).complete(true));
       },

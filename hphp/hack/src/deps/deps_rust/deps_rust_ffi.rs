@@ -344,7 +344,7 @@ ocaml_ffi! {
      }
 }
 
-#[cfg(all(test, use_unstable_features))]
+#[cfg(test)]
 mod tests {
     extern crate test;
 

@@ -27,6 +27,7 @@
 
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -152,7 +153,10 @@ class RenderTest : public testing::Test {
   }
 
   const std::vector<diagnostic>& diagnostics() const {
-    return last_render_.value().diagnostics;
+    if (last_render_.has_value()) {
+      return last_render_.value().diagnostics;
+    }
+    throw std::logic_error("Unreachable");
   }
 };
 

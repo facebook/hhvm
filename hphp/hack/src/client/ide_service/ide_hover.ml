@@ -588,10 +588,23 @@ let go_quarantined
          know the type of the expression. Just show the type.
 
          This can occur if the user hovers over a literal such as `123`. *)
+      let addendum =
+        match Typing_defs.get_node ty with
+        | Typing_defs.Tgeneric (name, _)
+          when String.equal name SN.Typehints.this ->
+          let upper_bounds =
+            Tast_env.get_upper_bounds env SN.Typehints.this []
+            |> Typing_set.to_list
+            |> List.map ~f:(Tast_env.print_ty env)
+            |> String.concat ~sep:", "
+          in
+          ["this has the following upper bounds: " ^ upper_bounds]
+        | _ -> []
+      in
       [
         {
           snippet = Tast_env.print_ty env ty ^ under_dynamic_result;
-          addendum = [];
+          addendum;
           pos = None;
         };
       ]

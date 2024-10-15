@@ -437,6 +437,76 @@ TEST(reflection, is_reflectable_struct) {
           std::unordered_map<std::string, struct1>>>();
 }
 
+TEST(reflection, is_reflectable_enum) {
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<reflection_tags::module>>();
+
+  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_enum<enum1>>();
+  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_enum<enum2>>();
+  EXPECT_SAME<std::true_type, apache::thrift::is_reflectable_enum<enum3>>();
+
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<union1>>();
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<union2>>();
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<union3>>();
+
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<struct1>>();
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<struct2>>();
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<struct3>>();
+
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<void>>();
+  EXPECT_SAME<std::false_type, apache::thrift::is_reflectable_enum<int>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::string>>();
+
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::vector<int>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::vector<std::string>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::vector<struct1>>>();
+
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::set<int>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::set<std::string>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::set<struct1>>>();
+
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::unordered_set<int>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::unordered_set<std::string>>>();
+
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::map<int, std::string>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::map<std::string, struct1>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<std::map<struct1, struct2>>>();
+
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<
+          std::unordered_map<int, std::string>>>();
+  EXPECT_SAME<
+      std::false_type,
+      apache::thrift::is_reflectable_enum<
+          std::unordered_map<std::string, struct1>>>();
+}
+
 TEST(reflection, is_reflectable_union) {
   EXPECT_SAME<
       std::false_type,

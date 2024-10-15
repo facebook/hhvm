@@ -98,6 +98,7 @@ impl WitnessDecl {
             | Self::PessimisedReturn(pos_or_decl)
             | Self::PessimisedProp(pos_or_decl)
             | Self::PessimisedThis(pos_or_decl)
+            | Self::IllegalRecursiveType(pos_or_decl, _)
             | Self::TupleFromSplat(pos_or_decl) => pos_or_decl,
         }
     }

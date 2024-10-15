@@ -3,31 +3,31 @@ Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 10, characters 22-27:
   Expected `vec<A>`
   File "subtyping_mutual3b.php", line 6, characters 16-16:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_mutual3b.php", line 31, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 11, characters 22-27:
   Expected `vec<B>`
   File "subtyping_mutual3b.php", line 6, characters 16-16:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_mutual3b.php", line 33, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 12, characters 25-35:
   Expected `vec<vec<A>>`
   File "subtyping_mutual3b.php", line 6, characters 16-16:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_mutual3b.php", line 37, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 10, characters 22-27:
   Expected `vec<A>`
   File "subtyping_mutual3b.php", line 4, characters 16-16:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
 ERROR: File "subtyping_mutual3b.php", line 38, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 11, characters 22-27:
   Expected `vec<B>`
   File "subtyping_mutual3b.php", line 4, characters 16-16:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
 ERROR: File "subtyping_mutual3b.php", line 65, characters 12-15:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3b.php", line 8, characters 19-19:

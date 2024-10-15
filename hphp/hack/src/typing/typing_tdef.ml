@@ -94,6 +94,7 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
   with
   | Error cycle ->
     let (env, ty) =
+      let r = Typing_reason.illegal_recursive_type (Reason.to_pos r) x in
       match td_as_constraint with
       | Some ty ->
         (match get_node ty with

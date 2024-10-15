@@ -1,12 +1,12 @@
 Errors:
   [4:3-11] You are trying to access an element of this container but the container could be `null`. 
-  [3:15-20] This is what makes me believe it can be `null`.
+  [3:15-20] This is what makes me believe it can be `null`
   [5:3-9] You are trying to access an element of this container but the container could be `null`. 
-  [3:15-20] This is what makes me believe it can be `null`.
+  [3:15-20] This is what makes me believe it can be `null`
   [6:3-9] You are trying to access an element of this container but the container could be `null`. 
-  [3:15-20] This is what makes me believe it can be `null`.
+  [3:15-20] This is what makes me believe it can be `null`
   [7:3-9] You are trying to access an element of this container but the container could be `null`. 
-  [3:15-20] This is what makes me believe it can be `null`.
+  [3:15-20] This is what makes me believe it can be `null`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

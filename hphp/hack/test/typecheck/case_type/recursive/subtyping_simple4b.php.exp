@@ -3,40 +3,40 @@ Invalid constraint on `newtype` (Typing[4332])
   File "subtyping_simple4b.php", line 4, characters 20-20:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 29-29:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 4, characters 11-11:
 Invalid constraint on `newtype` (Typing[4332])
   File "subtyping_simple4b.php", line 4, characters 20-20:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 29-29:
-  But got `nonnull`
+  But got `nonnull`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 22, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 7, characters 26-26:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 22, characters 15-16:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 7, characters 26-26:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `nonnull`
+  But got `nonnull`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 28, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 8, characters 29-34:
   Expected `vec<A>`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 34, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 8, characters 33-33:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A
 ERROR: File "subtyping_simple4b.php", line 34, characters 5-7:
 Invalid argument (Typing[4110])
   File "subtyping_simple4b.php", line 8, characters 33-33:
   Expected `A`
   File "subtyping_simple4b.php", line 4, characters 20-20:
-  But got `nonnull`
+  But got `nonnull`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A

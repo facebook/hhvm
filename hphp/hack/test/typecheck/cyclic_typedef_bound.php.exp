@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
   File "cyclic_typedef_bound.php--uses.php", line 3, characters 24-29:
   Expected `string`
   File "cyclic_typedef_bound.php--defines.php", line 3, characters 14-14:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A

@@ -398,7 +398,7 @@ let rec array_get
                      null_witness =
                        lazy
                          (Reason.to_string
-                            "This is what makes me believe it can be `null`."
+                            "This is what makes me believe it can be `null`"
                             r);
                    });
         array_get

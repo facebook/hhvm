@@ -3,7 +3,7 @@ Invalid case type declaration. More than one variant of `CT` could contain value
   File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-24:
   This is the type `Recursive`, which includes **strings**
   File "case_type_cyclic_new_type.php--file1.php", line 3, characters 22-30:
-    via the constraint on the newtype `Recursive`
+    via the constraint on the newtype `Recursive`. Using `mixed` instead of Recursive because this is an illegal recursive use of Recursive in the definition of Recursive
   File "case_type_cyclic_new_type.php--file2.php", line 4, characters 28-33:
   It overlaps with `string`, which also includes **strings**
 ERROR: File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12:

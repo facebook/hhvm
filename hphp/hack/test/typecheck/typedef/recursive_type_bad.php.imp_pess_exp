@@ -19,4 +19,4 @@ Invalid return type (Typing[4110])
   File "recursive_type_bad.php", line 24, characters 33-44:
   Expected `shape('inner' => mixed, 'value1' => int, 'value2' => string)`
   File "recursive_type_bad.php", line 20, characters 25-37:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of MyParentShape because this is an illegal recursive use of MyParentShape in the definition of MyParentShape

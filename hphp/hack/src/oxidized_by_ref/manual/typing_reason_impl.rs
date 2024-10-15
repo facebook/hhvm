@@ -100,6 +100,7 @@ impl<'a> WitnessDecl<'a> {
             | WitnessDecl::PessimisedInout(p)
             | WitnessDecl::PessimisedReturn(p)
             | WitnessDecl::PessimisedProp(p)
+            | WitnessDecl::IllegalRecursiveType((p, _))
             | WitnessDecl::PessimisedThis(p) => p,
         }
     }

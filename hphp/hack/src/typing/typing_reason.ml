@@ -1008,6 +1008,7 @@ type witness_decl =
   | Pessimised_return of (Pos_or_decl.t[@hash.ignore])
   | Pessimised_prop of (Pos_or_decl.t[@hash.ignore])
   | Pessimised_this of (Pos_or_decl.t[@hash.ignore])
+  | Illegal_recursive_type of (Pos_or_decl.t[@hash.ignore]) * string
 [@@deriving hash]
 
 let witness_decl_to_raw_pos = function
@@ -1024,6 +1025,7 @@ let witness_decl_to_raw_pos = function
   | Vec_or_dict_key pos_or_decl
   | Missing_optional_field (pos_or_decl, _)
   | Implicit_upper_bound (pos_or_decl, _)
+  | Pessimised_this pos_or_decl
   | Global_type_variable_generics (pos_or_decl, _, _)
   | Solve_fail pos_or_decl
   | Cstr_on_generics (pos_or_decl, _)
@@ -1036,7 +1038,7 @@ let witness_decl_to_raw_pos = function
   | Pessimised_inout pos_or_decl
   | Pessimised_return pos_or_decl
   | Pessimised_prop pos_or_decl
-  | Pessimised_this pos_or_decl ->
+  | Illegal_recursive_type (pos_or_decl, _) ->
     pos_or_decl
 
 let map_pos_witness_decl pos_or_decl witness =
@@ -1069,6 +1071,8 @@ let map_pos_witness_decl pos_or_decl witness =
   | Pessimised_return p -> Pessimised_return (pos_or_decl p)
   | Pessimised_prop p -> Pessimised_prop (pos_or_decl p)
   | Pessimised_this p -> Pessimised_this (pos_or_decl p)
+  | Illegal_recursive_type (p, name) ->
+    Illegal_recursive_type (pos_or_decl p, name)
 
 let constructor_string_of_witness_decl = function
   | Witness_from_decl _ -> "Rwitness_from_decl"
@@ -1097,6 +1101,7 @@ let constructor_string_of_witness_decl = function
   | Pessimised_return _ -> "Rpessimised_return"
   | Pessimised_prop _ -> "Rpessimised_prop"
   | Pessimised_this _ -> "Rpessimised_this"
+  | Illegal_recursive_type _ -> "Rillegal_recursive_type"
 
 let pp_witness_decl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -1111,6 +1116,7 @@ let pp_witness_decl fmt witness =
       Ast_defs.pp_fun_kind fmt fk;
       ()
     | Implicit_upper_bound (p, s)
+    | Illegal_recursive_type (p, s)
     | Missing_optional_field (p, s)
     | Class_class (p, s) ->
       Pos_or_decl.pp fmt p;
@@ -1278,6 +1284,13 @@ let witness_decl_to_json = function
     Hh_json.(
       JSON_Object
         [("Pessimised_this", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Illegal_recursive_type (pos_or_decl, name) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Illegal_recursive_type",
+            JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String name] );
+        ])
 
 let witness_decl_to_string prefix witness =
   match witness with
@@ -1366,6 +1379,15 @@ let witness_decl_to_string prefix witness =
       prefix
       ^ " from \"as this\" or \"is this\" in a class whose generic parameters (or those of a subclass) are erased at runtime"
     )
+  | Illegal_recursive_type (pos_or_decl, name) ->
+    let name = strip_ns name in
+    ( pos_or_decl,
+      prefix
+      ^ Printf.sprintf
+          ". Using `mixed` instead of %s because this is an illegal recursive use of %s in the definition of %s"
+          name
+          name
+          name )
 
 (* ~~ Axiom ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -2701,6 +2723,9 @@ module Constructors = struct
   let missing_field = Missing_field
 
   let pessimised_this p = from_witness_decl @@ Pessimised_this p
+
+  let illegal_recursive_type p name =
+    from_witness_decl @@ Illegal_recursive_type (p, name)
 end
 
 include Constructors

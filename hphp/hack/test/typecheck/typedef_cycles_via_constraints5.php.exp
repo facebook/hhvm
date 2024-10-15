@@ -3,6 +3,6 @@ Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints5.php--uses.php", line 3, characters 24-29:
   Expected `string`
   File "typedef_cycles_via_constraints5.php--defs.php", line 4, characters 19-22:
-  But got `mixed`
+  But got `mixed`. Using `mixed` instead of B because this is an illegal recursive use of B in the definition of B
   File "typedef_cycles_via_constraints5.php--defs.php", line 5, characters 17-17:
     via this generic `T`

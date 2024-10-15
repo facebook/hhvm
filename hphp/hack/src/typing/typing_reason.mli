@@ -569,6 +569,8 @@ val missing_field : t
 
 val pessimised_this : Pos_or_decl.t -> 'phase t_
 
+val illegal_recursive_type : Pos_or_decl.t -> string -> 'phase t_
+
 val compare : 'phase t_ -> 'phase t_ -> int
 
 val map_pos :

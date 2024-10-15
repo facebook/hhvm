@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<918b60cd8c49eefa45db8a2647a0d896>>
+// @generated SignedSource<<4f8f4d52a8e4379833bc5baf0a95d91f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -539,6 +539,8 @@ pub enum WitnessDecl {
     PessimisedProp(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Pessimised_this")]
     PessimisedThis(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Illegal_recursive_type")]
+    IllegalRecursiveType(pos_or_decl::PosOrDecl, String),
 }
 
 /// Axioms are information about types provided by the user in class or type

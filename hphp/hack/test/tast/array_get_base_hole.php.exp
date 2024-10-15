@@ -1,10 +1,10 @@
 Errors:
   [4:3-8] You are trying to access an element of this container but the container could be `null`. 
-  [3:15-20] This is what makes me believe it can be `null`.
+  [3:15-20] This is what makes me believe it can be `null`
   [5:3-8] This is not an object of type `KeyedContainer`, this is a nonnull value
   [3:25-32] Definition is here
   [6:3-8] You are trying to access an element of this container but the container could be `null`. 
-  [3:12-13] This is what makes me believe it can be `null`.
+  [3:12-13] This is what makes me believe it can be `null`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

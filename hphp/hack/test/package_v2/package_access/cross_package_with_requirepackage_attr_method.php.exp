@@ -1,0 +1,47 @@
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_with_requirepackage_attr_method.php--b.php, which belongs to package pkg2 [2]
+-> But cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+
+cross_package_with_requirepackage_attr_method.php--a.php:8:5
+6 |   public function foo(): void {
+7 |     pkg3_call();
+[1] 8 |     pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
+9 |     invariant(package pkg2, "");
+10 |     pkg2_call(); // ok
+
+cross_package_with_requirepackage_attr_method.php--b.php:3:10
+1 | <?hh
+2 | <<file: __PackageOverride('pkg2')>>
+[2] 3 | function pkg2_call(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3] 3 | [packages.pkg1]
+4 | include_paths=["//"]
+5 |
+
+error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
+-> This is from cross_package_with_requirepackage_attr_method.php--b.php, which belongs to package pkg2 [2]
+-> But cross_package_with_requirepackage_attr_method.php--a.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+
+cross_package_with_requirepackage_attr_method.php--a.php:17:3
+15 | function foo(): void {
+16 |   pkg3_call();
+[1] 17 |   pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
+18 |   invariant(package pkg2, "");
+19 |   pkg2_call(); // ok
+
+cross_package_with_requirepackage_attr_method.php--b.php:3:10
+1 | <?hh
+2 | <<file: __PackageOverride('pkg2')>>
+[2]  3 | function pkg2_call(): void {}
+
+PACKAGES.toml:3:11
+1 | [packages]
+2 |
+[3]  3 | [packages.pkg1]
+4 | include_paths=["//"]
+5 |
+
+2 errors found

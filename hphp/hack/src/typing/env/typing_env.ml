@@ -701,11 +701,13 @@ let load_packages env packages =
   { env with loaded_packages = SSet.union env.loaded_packages packages }
 
 let load_cross_packages_from_attr env attr =
-  match
-    Naming_attributes.find
+  let cross_package_attr =
+    if package_v2 env then
+      Naming_special_names.UserAttributes.uaRequirePackage
+    else
       Naming_special_names.UserAttributes.uaCrossPackage
-      attr
-  with
+  in
+  match Naming_attributes.find cross_package_attr attr with
   | Some attr ->
     let pkgs_to_load =
       List.fold

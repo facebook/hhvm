@@ -19,7 +19,6 @@ pub(crate) fn copy_node_order(m: &mut MemDepGraph, path: &Path) -> std::io::Resu
     log::info!("Copying node order from existing file {}", path.display());
 
     let dep_graph = DepGraph::from_path(path)?;
-    let DepGraph(old_dep_graph) = dep_graph;
 
     let num_hashes = m.hashes.len();
     let in_use: IdVec<HashIndex, AtomicBool> =
@@ -33,7 +32,7 @@ pub(crate) fn copy_node_order(m: &mut MemDepGraph, path: &Path) -> std::io::Resu
         .par_iter()
         .zip(remap_old_to_new.par_iter_mut())
         .filter_map(|(&dep, remap_ref)| {
-            if let Some(index) = old_dep_graph.get_index(dep) {
+            if let Some(index) = dep_graph.get_index(dep) {
                 // `old_graph` may have more HashIndexes than `m`, but we want to keep
                 // `m`'s numbering dense so if we see an out-of-range HashIndex just
                 // pretend we didn't see it.

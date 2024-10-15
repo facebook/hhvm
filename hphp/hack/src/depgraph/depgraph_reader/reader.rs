@@ -8,7 +8,6 @@ pub mod compress;
 
 use std::fs::File;
 use std::iter::FusedIterator;
-use std::ops::Deref;
 use std::ops::Range;
 
 pub use dep::Dep;
@@ -25,105 +24,8 @@ use crate::compress::*;
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct HashListId(u32);
 
-pub trait DepGraphTrait {
-    /// Make sure the database is not corrupt.
-    ///
-    /// If you got this far, the indexer and lookup table were
-    /// successfully initialized. This function checks whether
-    /// all hash lists can be properly read from disk.
-    fn validate_hash_lists(&self) -> Result<(), String>;
-
-    /// Query the hash list for a given hash.
-    ///
-    /// Returns `None` if there is no hash list related to the hash.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the file is corrupt. Use `validate_hash_lists` when
-    /// initializing the reader to avoid these panics.
-    fn hash_list_for(&self, hash: Dep) -> Option<HashList<'_>> {
-        self.hash_list_id_for_dep(hash)
-            .map(|id| self.hash_list_for_id(id))
-    }
-
-    fn hash_list_id_for_dep(&self, hash: Dep) -> Option<HashListId>;
-
-    fn hash_list_id_for_index(&self, index: u32) -> Option<HashListId>;
-
-    fn hash_list_for_id(&self, id: HashListId) -> HashList<'_>;
-
-    /// Query the hash list for a given hash index.
-    ///
-    /// Returns `None` if there is no hash list related to the hash.
-    fn hash_list_for_index(&self, index: u32) -> Option<HashList<'_>> {
-        self.hash_list_id_for_index(index)
-            .map(|id| self.hash_list_for_id(id))
-    }
-
-    fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool;
-
-    fn contains(&self, dep: Dep) -> bool;
-}
-
-pub struct DepGraph(pub NewDepGraph);
-
-impl DepGraph {
-    /// Open the dependency graph, or return an error description.
-    pub fn from_mmap(mmap: Mmap) -> Result<DepGraph, String> {
-        let in_bytes: &[u8] = mmap.as_ref();
-        if in_bytes.len() >= std::mem::size_of::<UncompressedHeader>() {
-            if let Ok(maybe_header) = bytemuck::try_from_bytes::<UncompressedHeader>(
-                &in_bytes[..std::mem::size_of::<UncompressedHeader>()],
-            ) {
-                // It's technically possible for the first four bytes of an old file
-                // to randomly be "HHDG", but the version won't look like a small number.
-                // By the time we get to a large version number we'll have deleted OldDepGraph.
-                if maybe_header.magic == UncompressedHeader::MAGIC && maybe_header.version < 100 {
-                    return Ok(DepGraph(NewDepGraph::from_mmap(mmap)?));
-                }
-            }
-        }
-        Err("Unable to open depgraph from mmap, possibly expected old depgraph format".into())
-    }
-
-    /// Create a dependency graph opener given an open file handle.
-    ///
-    /// The file handle can be safely closed afterwards.
-    pub fn from_file(file: &std::fs::File) -> std::io::Result<Self> {
-        // Safety: we rely on the memmap library to provide safety.
-        let mmap = unsafe { Mmap::map(file) }?;
-        Self::from_mmap(mmap).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
-    }
-
-    /// Create a dependency graph opener given a file path.
-    pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Self> {
-        let f = File::open(path)?;
-        Self::from_file(&f)
-    }
-
-    /// Return an iterator over all hashes in a hash list.
-    pub fn hash_list_hashes<'a>(
-        &'a self,
-        hash_list: HashList<'a>,
-    ) -> impl Iterator<Item = Dep> + 'a {
-        let HashList(h) = hash_list;
-        self.0.hash_list_hashes(h)
-    }
-
-    /// All unique dependency hashes in the graph.
-    pub fn all_hashes(&self) -> impl DoubleEndedIterator<Item = Dep> + ExactSizeIterator + '_ {
-        self.0.all_hashes()
-    }
-
-    /// All unique dependency hashes in the graph.
-    pub fn par_all_hashes(&self) -> impl IndexedParallelIterator<Item = Dep> + '_ {
-        self.0.par_all_hashes()
-    }
-}
-
 pub trait BaseDepgraphTrait {
     fn iter_dependents(&self, dep: Dep) -> Box<dyn Iterator<Item = Dep> + '_>;
-
     fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool;
 }
 
@@ -134,24 +36,13 @@ impl BaseDepgraphTrait for DepGraph {
             Some(hashes) => Either::Right(self.hash_list_hashes(hashes)),
         })
     }
-
     fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
-        self.deref()
-            .dependent_dependency_edge_exists(dependent, dependency)
-    }
-}
-
-impl Deref for DepGraph {
-    type Target = dyn DepGraphTrait + Send + Sync;
-
-    fn deref(&self) -> &Self::Target {
-        let DepGraph(dg) = self;
-        dg
+        self.dependent_dependency_edge_exists(dependent, dependency)
     }
 }
 
 /// An memory-mapped dependency graph.
-pub struct NewDepGraph {
+pub struct DepGraph {
     /// The file holding the storage for this graph.
     storage: Mmap,
 
@@ -178,13 +69,46 @@ pub struct NewDepGraph {
     /// Amount to left-shift unshifted_edge_list_offset to get a byte index into `adjacency_lists`.
     adjacency_list_alignment_shift: u8,
 
-    /// Individually serialized edge lists. `NewHashList` knows how to deserialize.
+    /// Individually serialized edge lists. `HashList` knows how to deserialize.
     /// This holds the byte range in the mmap file for this data -- use `unshifted_lists_range()` to access.
     adjacency_lists_range: Range<usize>,
 }
 
-impl NewDepGraph {
-    fn from_mmap(mmap: Mmap) -> Result<Self, String> {
+impl DepGraph {
+    /// Open the dependency graph, or return an error description.
+    pub fn from_mmap(mmap: Mmap) -> Result<DepGraph, String> {
+        let in_bytes: &[u8] = mmap.as_ref();
+        if in_bytes.len() >= std::mem::size_of::<UncompressedHeader>() {
+            if let Ok(maybe_header) = bytemuck::try_from_bytes::<UncompressedHeader>(
+                &in_bytes[..std::mem::size_of::<UncompressedHeader>()],
+            ) {
+                // It's technically possible for the first four bytes of an old file
+                // to randomly be "HHDG", but the version won't look like a small number.
+                // By the time we get to a large version number we'll have deleted OldDepGraph.
+                if maybe_header.magic == UncompressedHeader::MAGIC && maybe_header.version < 100 {
+                    return DepGraph::from_mmap_impl(mmap);
+                }
+            }
+        }
+        Err("Unable to open depgraph from mmap, possibly unexpected old depgraph format".into())
+    }
+
+    /// Create a dependency graph opener given an open file handle.
+    ///
+    /// The file handle can be safely closed afterwards.
+    pub fn from_file(file: &std::fs::File) -> std::io::Result<Self> {
+        // Safety: we rely on the memmap library to provide safety.
+        let mmap = unsafe { Mmap::map(file) }?;
+        Self::from_mmap(mmap).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+    }
+
+    /// Create a dependency graph opener given a file path.
+    pub fn from_path<P: AsRef<std::path::Path>>(path: P) -> std::io::Result<Self> {
+        let f = File::open(path)?;
+        Self::from_file(&f)
+    }
+
+    fn from_mmap_impl(mmap: Mmap) -> Result<Self, String> {
         let data: &[u8] = mmap.as_ref();
         let hlen = std::mem::size_of::<UncompressedHeader>();
         if data.len() < hlen {
@@ -208,7 +132,7 @@ impl NewDepGraph {
 
         let num_deps = header.num_deps as usize;
 
-        let g = NewDepGraph {
+        let g = DepGraph {
             deps_range: hlen..hlen + num_deps * 8,
             deps_order_range: hlen + num_deps * 8..hlen + num_deps * 12,
             unshifted_edge_list_offset_range: hlen + num_deps * 12..hlen + num_deps * 16,
@@ -221,7 +145,7 @@ impl NewDepGraph {
     }
 
     /// Return `true` iff the given hash list contains the index for the given hash.
-    fn hash_list_contains(&self, hash_list: HashList<'_>, dep: Dep) -> bool {
+    pub fn hash_list_contains(&self, hash_list: HashList<'_>, dep: Dep) -> bool {
         if let Some(index) = self.get_index(dep) {
             hash_list.has_index(index)
         } else {
@@ -246,9 +170,9 @@ impl NewDepGraph {
     }
 
     /// Implementation helper for `DepGraph::hash_list_hashes`.
-    fn hash_list_hashes<'a>(
+    pub fn hash_list_hashes<'a>(
         &'a self,
-        hash_list: NewHashList<'a>,
+        hash_list: HashList<'a>,
     ) -> impl Iterator<Item = Dep> + 'a {
         let deps = self.deps();
         hash_list.hash_indices().map(move |i| deps[i as usize])
@@ -283,15 +207,31 @@ impl NewDepGraph {
     ) -> impl IndexedParallelIterator<Item = Dep> + '_ {
         self.deps().par_iter().copied()
     }
-}
 
-impl DepGraphTrait for NewDepGraph {
-    fn validate_hash_lists(&self) -> Result<(), String> {
+    pub fn hash_list_for(&self, hash: Dep) -> Option<HashList<'_>> {
+        self.hash_list_id_for_dep(hash)
+            .map(|id| self.hash_list_for_id(id))
+    }
+
+    /// Query the hash list for a given hash index.
+    ///
+    /// Returns `None` if there is no hash list related to the hash.
+    pub fn hash_list_for_index(&self, index: u32) -> Option<HashList<'_>> {
+        self.hash_list_id_for_index(index)
+            .map(|id| self.hash_list_for_id(id))
+    }
+
+    /// Make sure the database is not corrupt.
+    ///
+    /// If you got this far, the indexer and lookup table were
+    /// successfully initialized. This function checks whether
+    /// all hash lists can be properly read from disk.
+    pub fn validate_hash_lists(&self) -> Result<(), String> {
         // TODO: What to check here?
         Ok(())
     }
 
-    fn hash_list_id_for_dep(&self, dep: Dep) -> Option<HashListId> {
+    pub fn hash_list_id_for_dep(&self, dep: Dep) -> Option<HashListId> {
         self.hash_list_id_for_index(self.get_index(dep)?)
     }
 
@@ -304,26 +244,28 @@ impl DepGraphTrait for NewDepGraph {
         Some(id)
     }
 
-    fn hash_list_for_id(&self, id: HashListId) -> HashList<'_> {
+    pub fn hash_list_for_id(&self, id: HashListId) -> HashList<'_> {
         let start = (id.0 as usize) << self.adjacency_list_alignment_shift;
         let bytes = &self.adjacency_lists()[start..];
-        HashList(NewHashList::new(bytes))
+        HashList::new(bytes)
     }
 
-    /// Return whether the given dependent-to-dependency edge is in the graph.
-    fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
+    /// Query the hash list for a given hash.
+    ///
+    /// Returns `None` if there is no hash list related to the hash.
+    pub fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
         match self.hash_list_for(dependency) {
             Some(hash_list) => self.hash_list_contains(hash_list, dependent),
             None => false,
         }
     }
 
-    fn contains(&self, dep: Dep) -> bool {
+    pub fn contains(&self, dep: Dep) -> bool {
         self.get_index(dep).is_some()
     }
 }
 
-pub struct NewHashList<'bytes> {
+pub struct HashList<'bytes> {
     blocks: &'bytes [RleBlock],
 
     // The total number of indices that walking `hash_indices()` will yield.
@@ -333,7 +275,7 @@ pub struct NewHashList<'bytes> {
     num_indices: u32,
 }
 
-impl<'bytes> NewHashList<'bytes> {
+impl<'bytes> HashList<'bytes> {
     fn new(mut b: &'bytes [u8]) -> Self {
         // The raw memory representation looks like two lengths followed by an array:
         //     num_blocks: vint64
@@ -386,27 +328,5 @@ impl<'bytes> NewHashList<'bytes> {
             start: b.start,
             end: b.start + b.len(),
         })
-    }
-}
-
-pub struct HashList<'bytes>(pub NewHashList<'bytes>);
-
-impl<'bytes> HashList<'bytes> {
-    // FIXME: Can we delete this? It's O(n)
-    pub fn len(&self) -> u32 {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    fn has_index(&self, index: u32) -> bool {
-        self.0.has_index(index)
-    }
-
-    /// Return all raw hash indices in this list.
-    pub fn hash_indices(&self) -> impl Iterator<Item = u32> + '_ {
-        self.0.hash_indices()
     }
 }

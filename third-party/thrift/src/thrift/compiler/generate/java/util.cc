@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/java/util.h>
+#include <thrift/compiler/generate/java/util.h>
 
 #include <cassert>
 #include <cctype>

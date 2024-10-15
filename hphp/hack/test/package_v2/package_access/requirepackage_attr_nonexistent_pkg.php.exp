@@ -1,0 +1,10 @@
+error: Naming[2049] Unbound name: pkgNotDefined5 (a package) [1]
+
+requirepackage_attr_nonexistent_pkg.php--a.php:7:22
+5 |
+6 | class A {
+[1] 7 |   <<__RequirePackage("pkgNotDefined5")>> // pkgNotDefined doesn't exist
+8 |   public function test() : void {
+9 |   }
+
+1 error found

@@ -333,11 +333,18 @@ let handler ctx =
             ua_name
       in
       let () =
-        if
-          String.equal
-            (snd ua_name)
+        let is_package_v2 =
+          TypecheckerOptions.package_v2 @@ Provider_context.get_tcopt env.ctx
+        in
+        let attr_to_check =
+          if is_package_v2 then
+            Naming_special_names.UserAttributes.uaRequirePackage
+          else
+            (* CrossPackage is a Package V1 feature to be deprecated
+               after Package V2 rollout (T203287767) *)
             Naming_special_names.UserAttributes.uaCrossPackage
-        then
+        in
+        if String.equal (snd ua_name) attr_to_check then
           List.iter
             ~f:(function
               | (_, pos, Aast.String pkg_name) ->

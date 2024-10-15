@@ -1,13 +1,15 @@
 error: Typing[4472] Cannot reference this CrossPackage method defined in package pkg2 from package pkg1 [1]
 -> This function is marked cross package, so requires the package pkg2 to be loaded. You can check if package pkg2 is loaded by placing this call inside a block like if(package pkg2) [2]
 
-illegal_cross_package_with_crosspackage_attr1.php--a.php:5:5
-3 | class A {
-4 |   public function test() : void {
-[1] 5 |     test(); // error
-6 |   }
-7 | }
-8 | <<__CrossPackage("pkg2")>>
-[2] 9 | function test(): void {}
+illegal_cross_package_with_requirepackage_attr2.php--a.php:12:7
+5 | class A {
+6 |   <<__RequirePackage("pkg2")>>
+[2]  7 |   public function test() : void {
+8 |   }
+9 | }
+10 | function test(): void {
+11 |   $x = new A();
+[1] 12 |   $x->test(); // error
+13 | }
 
 1 error found

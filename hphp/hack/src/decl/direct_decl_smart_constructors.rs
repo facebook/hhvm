@@ -1802,7 +1802,14 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
                     }
+                    // CrossPackage is a Package V1 feature to be deprecated
+                    // after Package V2 rollout (T203287767)
                     "__CrossPackage" => {
+                        attributes.cross_package = attribute
+                            .string_literal_param
+                            .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
+                    }
+                    "__RequirePackage" => {
                         attributes.cross_package = attribute
                             .string_literal_param
                             .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));

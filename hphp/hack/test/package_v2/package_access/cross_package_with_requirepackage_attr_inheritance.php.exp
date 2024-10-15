@@ -6,18 +6,18 @@ error: Typing[4341] The method test2 is not compatible with the overridden metho
 -> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [1]
 -> This function is marked <<__CrossPackage(pkg2)>> [2]
 
-cross_package_with_crosspackage_attr_inheritance.php--a.php:14:19
-4 | interface IA {
-5 |   <<__CrossPackage("pkg2")>>
-[2]  6 |   public function test2(): void;
-7 | }
-8 |
+cross_package_with_requirepackage_attr_inheritance.php--a.php:15:19
+5 | interface IA {
+6 |   <<__RequirePackage("pkg2")>>
+[2]  7 |   public function test2(): void;
+8 | }
+9 |
 :
-12 |   }
-13 |   <<__CrossPackage("pkg1")>> // error cross package mismatch
-[1] 14 |   public function test2(): void {
-15 |   }
-16 | }
+13 |   }
+14 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
+[1] 15 |   public function test2(): void {
+16 |   }
+17 | }
 
 error: Typing[4341] Some members in class B are incompatible with those declared in type IA [1]
 -> The method test2 is not compatible with the overridden method [2]
@@ -28,21 +28,21 @@ error: Typing[4341] Some members in class B are incompatible with those declared
 -> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [2]
 -> This function is marked <<__CrossPackage(pkg2)>> [3]
 
-cross_package_with_crosspackage_attr_inheritance.php--a.php:17:30
-4 | interface IA {
-5 |   <<__CrossPackage("pkg2")>>
-[3]  6 |   public function test2(): void;
-7 | }
-8 |
+cross_package_with_requirepackage_attr_inheritance.php--a.php:18:30
+5 | interface IA {
+6 |   <<__RequirePackage("pkg2")>>
+[3]  7 |   public function test2(): void;
+8 | }
+9 |
 :
-12 |   }
-13 |   <<__CrossPackage("pkg1")>> // error cross package mismatch
-[2] 14 |   public function test2(): void {
-15 |   }
-16 | }
-[1] 17 | class B extends A implements IA  {
-18 |   <<__Override>>
-19 |   public function test(): void {} // ok
+13 |   }
+14 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
+[2] 15 |   public function test2(): void {
+16 |   }
+17 | }
+[1] 18 | class B extends A implements IA  {
+19 |   <<__Override>>
+20 |   public function test(): void {} // ok
 
 error: Typing[4341] Some members in class C are incompatible with those declared in type IA [1]
 -> The method test2 is not compatible with the overridden method [2]
@@ -53,24 +53,24 @@ error: Typing[4341] Some members in class C are incompatible with those declared
 -> This function is marked <<__CrossPackage(pkg1)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg1)>> [2]
 -> This function is marked <<__CrossPackage(pkg2)>> [3]
 
-cross_package_with_crosspackage_attr_inheritance.php--a.php:21:30
-4 | interface IA {
-5 |   <<__CrossPackage("pkg2")>>
-[3]  6 |   public function test2(): void;
-7 | }
-8 |
+cross_package_with_requirepackage_attr_inheritance.php--a.php:22:30
+5 | interface IA {
+6 |   <<__RequirePackage("pkg2")>>
+[3]  7 |   public function test2(): void;
+8 | }
+9 |
 :
-12 |   }
-13 |   <<__CrossPackage("pkg1")>> // error cross package mismatch
-[2] 14 |   public function test2(): void {
-15 |   }
-16 | }
+13 |   }
+14 |   <<__RequirePackage("pkg1")>> // error cross package mismatch
+[2] 15 |   public function test2(): void {
+16 |   }
+17 | }
 :
-19 |   public function test(): void {} // ok
-20 | }
-[1] 21 | class C extends B implements IA  {
-22 |   <<__Override, __CrossPackage("pkg2")>>
-23 |   public function test(): void {} // error
+20 |   public function test(): void {} // ok
+21 | }
+[1] 22 | class C extends B implements IA  {
+23 |   <<__Override, __RequirePackage("pkg2")>>
+24 |   public function test(): void {} // error
 
 error: Typing[4341] The method test is not compatible with the overridden method [1]
 -> Method test has type (function(): void) in C [1]
@@ -80,15 +80,15 @@ error: Typing[4341] The method test is not compatible with the overridden method
 -> This function is marked <<__CrossPackage(pkg2)>>, so it's only compatible with other functions marked <<__CrossPackage(pkg2)>> [1]
 -> This function is not cross package [2]
 
-cross_package_with_crosspackage_attr_inheritance.php--a.php:23:19
-17 | class B extends A implements IA  {
-18 |   <<__Override>>
-[2] 19 |   public function test(): void {} // ok
-20 | }
-21 | class C extends B implements IA  {
-22 |   <<__Override, __CrossPackage("pkg2")>>
-[1] 23 |   public function test(): void {} // error
-24 | }
-25 |
+cross_package_with_requirepackage_attr_inheritance.php--a.php:24:19
+18 | class B extends A implements IA  {
+19 |   <<__Override>>
+[2] 20 |   public function test(): void {} // ok
+21 | }
+22 | class C extends B implements IA  {
+23 |   <<__Override, __RequirePackage("pkg2")>>
+[1] 24 |   public function test(): void {} // error
+25 | }
+26 |
 
 4 errors found

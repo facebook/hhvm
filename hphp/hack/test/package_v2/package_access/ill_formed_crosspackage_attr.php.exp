@@ -1,9 +1,0 @@
-error: Parsing[1002] This is an invalid use of '__CrossPackage' because this is not a literal string expression [1]
-
-ill_formed_crosspackage_attr.php:3:32
-1 | <?hh
-2 | // package pkg1
-[1] 3 | <<__EntryPoint, __CrossPackage(123)>> // parse error
-4 | function test() : void {}
-
-1 error found

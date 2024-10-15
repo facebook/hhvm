@@ -1,8 +1,10 @@
 //// a.php
 <?hh
 // package pkg1
+<<file:__EnableUnstableFeatures('require_package')>>
+
 class A {
-  <<__CrossPackage("pkg2")>>
+  <<__RequirePackage("pkg2")>>
   public function test() : void {
   }
 }

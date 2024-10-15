@@ -1,0 +1,4 @@
+(6,5)-(6,28) The require_package feature is only allowed in Package V2. Please ensure the config option package_v2 is set to true.
+(9,5)-(9,35) The require_package feature is only allowed in Package V2. Please ensure the config option package_v2 is set to true.
+(9,5)-(9,35) The '__RequirePackage' attribute expects exactly 1 argument, 2 given.
+(13,3)-(13,26) The require_package feature is only allowed in Package V2. Please ensure the config option package_v2 is set to true.

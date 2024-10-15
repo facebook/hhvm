@@ -42,6 +42,7 @@ impl Default for ParserOptions {
             use_legacy_experimental_feature_config: true,
             experimental_features: std::collections::BTreeMap::default(),
             consider_unspecified_experimental_features_released: true,
+            package_v2: false,
         }
     }
 }

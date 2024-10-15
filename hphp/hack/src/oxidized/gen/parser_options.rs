@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<03df81a2842375409cbfb8205ba07627>>
+// @generated SignedSource<<b921175330f5bc3f627a9a8dd090eb60>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,6 +69,7 @@ pub struct ParserOptions {
     pub use_legacy_experimental_feature_config: bool,
     pub experimental_features: s_map::SMap<experimental_features::FeatureStatus>,
     pub consider_unspecified_experimental_features_released: bool,
+    pub package_v2: bool,
 }
 
 #[derive(

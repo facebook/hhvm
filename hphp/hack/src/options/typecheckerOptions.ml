@@ -320,7 +320,7 @@ let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality
 
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
-let package_v2 t = t.GlobalOptions.tco_package_v2
+let package_v2 t = t.GlobalOptions.po.ParserOptions.package_v2
 
 let package_v2_support_multifile_tests t =
   t.GlobalOptions.tco_package_v2_support_multifile_tests

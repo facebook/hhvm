@@ -1,1 +1,2 @@
+(3,3)-(3,26) The require_package feature is only allowed in Package V2. Please ensure the config option package_v2 is set to true.
 (3,3)-(3,26) Cannot use unstable feature: `require_package`

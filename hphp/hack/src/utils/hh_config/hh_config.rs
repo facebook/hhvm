@@ -85,8 +85,8 @@ impl HhConfig {
 
     pub fn package_v2_enabled(hhconfig: &ConfigFile, overrides: &ConfigFile) -> bool {
         let package_v2_config: bool = hhconfig
-            .get_bool_or("package_v2", GlobalOptions::default().tco_package_v2)
-            .unwrap_or(GlobalOptions::default().tco_package_v2);
+            .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
+            .unwrap_or(GlobalOptions::default().po.package_v2);
         let package_v2: bool = overrides
             .get_bool_or("package_v2", package_v2_config)
             .unwrap_or(package_v2_config);
@@ -172,8 +172,8 @@ impl HhConfig {
         let package_info: PackageInfo = PackageInfo::from_text_strict(
             // FIXME
             hh_config_file
-                .get_bool_or("package_v2", GlobalOptions::default().tco_package_v2)
-                .unwrap_or(GlobalOptions::default().tco_package_v2),
+                .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
+                .unwrap_or(GlobalOptions::default().po.package_v2),
             root.as_ref().to_str().unwrap_or_default(),
             package_config_path.to_str().unwrap_or_default(),
         )
@@ -311,6 +311,7 @@ impl HhConfig {
             // If there was no experimental features status list in configuration, consider all
             // existing experimental features to be released and hence usable.
             consider_unspecified_experimental_features_released: experimental_features.is_none(),
+            package_v2: hhconfig.get_bool_or("package_v2", default.package_v2)?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
@@ -460,7 +461,6 @@ impl HhConfig {
             },
             warnings_default_all: hhconfig.get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2: hhconfig.get_bool_or("package_v2", default.tco_package_v2)?,
             tco_package_v2_support_multifile_tests: hhconfig.get_bool_or("package_v2_support_multifile_tests", default.tco_package_v2_support_multifile_tests)?,
             tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or("package_v2_bypass_package_check_for_class_const", default.tco_package_v2_bypass_package_check_for_class_const)?,
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,

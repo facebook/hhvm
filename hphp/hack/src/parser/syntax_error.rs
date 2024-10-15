@@ -1299,6 +1299,18 @@ pub fn require_package_wrong_arity(count: usize) -> Error {
     ))
 }
 
+pub fn incompatible_package_version_and_xpkg_feature(
+    is_package_v2: bool,
+    feature_name: &str,
+) -> Error {
+    Cow::Owned(format!(
+        "The {} feature is only allowed in Package V{}. Please ensure the config option package_v2 is set to {}.",
+        feature_name,
+        if is_package_v2 { "1" } else { "2" },
+        if is_package_v2 { "false" } else { "true" },
+    ))
+}
+
 pub const expected_bar_or_semicolon: Error = Cow::Borrowed(
     "Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.",
 );

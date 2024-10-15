@@ -870,6 +870,7 @@ let parse_options () =
         disable_hh_ignore_error = !disable_hh_ignore_error;
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
+        package_v2 = default.package_v2;
       }
   in
 
@@ -2500,7 +2501,7 @@ let decl_and_run_mode
     | Some _ ->
       let (errors, info) =
         PackageConfig.load_and_parse
-          ~package_v2:tcopt.GlobalOptions.tco_package_v2
+          ~package_v2:(TypecheckerOptions.package_v2 tcopt)
           ~strict:false
           ~pkgs_config_abs_path:packages_config_path
           ()

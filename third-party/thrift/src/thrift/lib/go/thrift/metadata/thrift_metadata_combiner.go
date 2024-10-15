@@ -72,10 +72,8 @@ func (tm *ThriftMetadataCombiner) GetCombinedThriftMetadata() *metadata.ThriftMe
 		SetServices(allServices)
 }
 
-// GetServiceContexts returns Thrift service context references for all added Processors.
-func (tm *ThriftMetadataCombiner) GetServiceContexts() []*metadata.ThriftServiceContextRef {
-	md := tm.GetCombinedThriftMetadata()
-
+// GetServiceContexts returns Thrift service context references.
+func GetServiceContexts(md *metadata.ThriftMetadata) []*metadata.ThriftServiceContextRef {
 	serviceContexts := make([]*metadata.ThriftServiceContextRef, 0, len(md.GetServices()))
 	for serviceName := range md.GetServices() {
 		sc := metadata.NewThriftServiceContextRef().
@@ -86,15 +84,18 @@ func (tm *ThriftMetadataCombiner) GetServiceContexts() []*metadata.ThriftService
 			)
 		serviceContexts = append(serviceContexts, sc)
 	}
-
 	return serviceContexts
 }
 
-// GetThriftServiceMetadataResponse returns a Thrift service metadata response for all added Processors.
-func (tm *ThriftMetadataCombiner) GetThriftServiceMetadataResponse() *metadata.ThriftServiceMetadataResponse {
-	thriftMetadata := tm.GetCombinedThriftMetadata()
-	serviceContexts := tm.GetServiceContexts()
+// GetServiceContexts returns Thrift service context references for all added Processors.
+func (tm *ThriftMetadataCombiner) GetServiceContexts() []*metadata.ThriftServiceContextRef {
+	md := tm.GetCombinedThriftMetadata()
+	return GetServiceContexts(md)
+}
 
+// GetThriftServiceMetadataResponse returns a Thrift service metadata response.
+func GetThriftServiceMetadataResponse(thriftMetadata *metadata.ThriftMetadata) *metadata.ThriftServiceMetadataResponse {
+	serviceContexts := GetServiceContexts(thriftMetadata)
 	return metadata.NewThriftServiceMetadataResponse().
 		SetContext(
 			metadata.NewThriftServiceContext().
@@ -110,4 +111,10 @@ func (tm *ThriftMetadataCombiner) GetThriftServiceMetadataResponse() *metadata.T
 		).
 		SetMetadata(thriftMetadata).
 		SetServices(serviceContexts)
+}
+
+// GetThriftServiceMetadataResponse returns a Thrift service metadata response for all added Processors.
+func (tm *ThriftMetadataCombiner) GetThriftServiceMetadataResponse() *metadata.ThriftServiceMetadataResponse {
+	thriftMetadata := tm.GetCombinedThriftMetadata()
+	return GetThriftServiceMetadataResponse(thriftMetadata)
 }

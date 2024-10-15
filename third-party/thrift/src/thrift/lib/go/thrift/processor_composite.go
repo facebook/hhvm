@@ -52,16 +52,17 @@ func (p *compositeProcessor) Include(processor Processor) {
 	for name, tfunc := range processor.ProcessorFunctionMap() {
 		p.serviceProcessorMap[name] = tfunc
 	}
-	for name, v := range processor.GetThriftMetadata().GetEnums() {
+	metadata := processor.GetThriftMetadata()
+	for name, v := range metadata.GetEnums() {
 		p.metadata.Enums[name] = v
 	}
-	for name, v := range processor.GetThriftMetadata().GetStructs() {
+	for name, v := range metadata.GetStructs() {
 		p.metadata.Structs[name] = v
 	}
-	for name, v := range processor.GetThriftMetadata().GetExceptions() {
+	for name, v := range metadata.GetExceptions() {
 		p.metadata.Exceptions[name] = v
 	}
-	for name, v := range processor.GetThriftMetadata().GetServices() {
+	for name, v := range metadata.GetServices() {
 		p.metadata.Services[name] = v
 	}
 }

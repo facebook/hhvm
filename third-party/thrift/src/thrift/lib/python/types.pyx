@@ -39,6 +39,13 @@ from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
 
+
+cdef extern from *:
+    """
+    #undef _serialize
+    """
+
+
 def _is_py3_struct(obj):
     try: 
         import thrift.py3.types

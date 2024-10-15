@@ -18,6 +18,11 @@ from thrift.python.exceptions cimport Error, GeneratedError
 from thrift.python.types cimport Struct, StructOrUnion, Union
 from thrift.python.protocol import Protocol
 
+cdef extern from *:
+    """
+    #undef _serialize
+    """
+
 
 def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT):
     if not isinstance(strct, (StructOrUnion, GeneratedError)):

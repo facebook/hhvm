@@ -34,6 +34,7 @@ let visitor ctx =
       Private_final_check.handler;
       Well_formed_internal_trait.handler;
       Type_structure_leak_check.handler;
+      Package_expression_check.handler;
     ]
   in
   let handlers =

@@ -7372,33 +7372,7 @@ end = struct
           env
           (fun env ->
             let (env, { pkgs }) = condition_true env in
-            let (env, b1) =
-              Env.with_packages env pkgs @@ fun env -> block env b1
-            in
-            let rec get_loaded_packages_from_invariant (_, _, e) acc =
-              match e with
-              | Aast.Package (_, pkg) -> SSet.add pkg acc
-              | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
-                get_loaded_packages_from_invariant lhs acc
-                |> get_loaded_packages_from_invariant rhs
-              | _ -> acc
-            in
-            (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
-                revisit the branch and harvest packages loaded in `cond` if the branch contains an
-                invariant statement. *)
-            let env =
-              List.fold ~init:env b1 ~f:(fun env (_, tst) ->
-                  match (te, tst) with
-                  | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
-                      Aast.Expr (_, _, Call { func = (_, _, Id (_, s)); _ }) )
-                    when String.equal
-                           s
-                           SN.AutoimportedFunctions.invariant_violation ->
-                    get_loaded_packages_from_invariant e SSet.empty
-                    |> Env.load_packages env
-                  | _ -> env)
-            in
-            (env, b1))
+            Env.with_packages env pkgs @@ fun env -> block env b1)
           (fun env ->
             let (env, { pkgs }) = condition_false env in
             Env.with_packages env pkgs @@ fun env -> block env b2)

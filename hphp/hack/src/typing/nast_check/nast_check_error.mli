@@ -182,5 +182,6 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Package_expr_in_invariant of Pos.t
 
 val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

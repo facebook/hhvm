@@ -280,6 +280,7 @@ module NastCheck = struct
     | RefinementInTypeStruct [@value 3101]
     | Soft_internal_without_internal [@value 3102]
     | CloneReturnType [@value 3104]
+    | PackageExprInInvariant [@value 3105]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

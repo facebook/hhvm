@@ -183,6 +183,7 @@ type t =
   | Lateinit_with_default of Pos.t
   | Missing_assign of Pos.t
   | Clone_return_type of Pos.t
+  | Package_expr_in_invariant of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make_err
@@ -813,6 +814,15 @@ let clone_return_type pos =
     )
     []
 
+let package_expression_in_invariant pos =
+  User_error.make_err
+    Error_code.(to_enum PackageExprInInvariant)
+    ( pos,
+      "`package` expressions are not allowed inside invariant calls. "
+      ^ "Consider using an `if` statement or writing a method with the __RequirePackage attribute."
+    )
+    []
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -905,3 +915,4 @@ let to_user_error = function
   | Lateinit_with_default pos -> lateinit_with_default pos
   | Missing_assign pos -> missing_assign pos
   | Clone_return_type pos -> clone_return_type pos
+  | Package_expr_in_invariant pos -> package_expression_in_invariant pos

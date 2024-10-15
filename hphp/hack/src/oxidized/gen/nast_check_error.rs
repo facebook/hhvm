@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<329de45fc366a90028ebba14b229980e>>
+// @generated SignedSource<<05f20e14e15f3b9b42ee0ce7a78ac6e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -300,4 +300,6 @@ pub enum NastCheckError {
     MissingAssign(pos::Pos),
     #[rust_to_ocaml(name = "Clone_return_type")]
     CloneReturnType(pos::Pos),
+    #[rust_to_ocaml(name = "Package_expr_in_invariant")]
+    PackageExprInInvariant(pos::Pos),
 }

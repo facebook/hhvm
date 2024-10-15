@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![cfg_attr(use_unstable_features, feature(test))]
+#![cfg_attr(test, feature(test))]
 
 use std::cell::RefCell;
 use std::ffi::OsString;

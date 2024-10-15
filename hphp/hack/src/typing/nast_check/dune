@@ -31,6 +31,7 @@
    nast_check
    nast_class_method_check
    nast_generics_check
+   package_expression_check
    pessimisation_node_recording
    php_lambda_check
    private_final_check

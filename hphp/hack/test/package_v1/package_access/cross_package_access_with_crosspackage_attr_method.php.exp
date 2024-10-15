@@ -7,8 +7,8 @@ cross_package_access_with_crosspackage_attr_method.php--a.php:9:5
     7 |   public function foo(): void {
     8 |     pkg3_call();
 [1] 9 |     pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
-   10 |     invariant(package pkg2, "");
-   11 |     pkg2_call(); // ok
+   10 |     invariant(package pkg2, ""); // error: invariant(package pkg2, "") is not allowed
+   11 |     pkg2_call(); // error: invariant(package pkg2, "") had no effect
 
 cross_package_access_with_crosspackage_attr_method.php--b.php:3:10
     1 | <?hh
@@ -31,12 +31,12 @@ error: Typing[4472] Cannot access a public element which belongs to package pkg2
 -> But module a belongs to package pkg1 [3]
 -> And package pkg1 does not include package pkg2 [4]
 
-cross_package_access_with_crosspackage_attr_method.php--a.php:18:3
-    16 | function foo(): void {
-    17 |   pkg3_call();
-[1] 18 |   pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
-    19 |   invariant(package pkg2, "");
-    20 |   pkg2_call(); // ok
+cross_package_access_with_crosspackage_attr_method.php--a.php:11:5
+     9 |     pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
+    10 |     invariant(package pkg2, ""); // error: invariant(package pkg2, "") is not allowed
+[1] 11 |     pkg2_call(); // error: invariant(package pkg2, "") had no effect
+    12 |     pkg1_call();
+    13 |   }
 
 cross_package_access_with_crosspackage_attr_method.php--b.php:3:10
      1 | <?hh
@@ -54,4 +54,32 @@ PACKAGES.toml:3:11
      4 | uses = ["a", "b.*"]
      5 | includes=["default"]
 
-2 errors found
+error: Typing[4472] Cannot access a public element which belongs to package pkg2 from package pkg1 [1]
+-> This is from module b.b1, which belongs to package pkg2 [2]
+-> But module a belongs to package pkg1 [3]
+-> And package pkg1 does not include package pkg2 [4]
+
+cross_package_access_with_crosspackage_attr_method.php--a.php:18:3
+    16 | function foo(): void {
+    17 |   pkg3_call();
+[1] 18 |   pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
+    19 |   if (package pkg2) {
+    20 |     pkg2_call(); // ok
+
+cross_package_access_with_crosspackage_attr_method.php--b.php:3:10
+     1 | <?hh
+     2 | module b.b1;
+[2]  3 | function pkg2_call(): void {}
+
+cross_package_access_with_crosspackage_attr_method.php--module_a.php:2:12
+     1 | <?hh
+[3]  2 | new module a {} // package pkg1
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | uses = ["a", "b.*"]
+     5 | includes=["default"]
+
+3 errors found

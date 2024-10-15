@@ -28,8 +28,8 @@ class A {
   public function foo(): void {
     pkg3_call();
     pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
-    invariant(package pkg2, "");
-    pkg2_call(); // ok
+    invariant(package pkg2, ""); // error: invariant(package pkg2, "") is not allowed
+    pkg2_call(); // error: invariant(package pkg2, "") had no effect
     pkg1_call();
   }
 }
@@ -37,8 +37,9 @@ class A {
 function foo(): void {
   pkg3_call();
   pkg2_call(); // error: pkg3 includes pkg2, but you need to explicitly include it here
-  invariant(package pkg2, "");
-  pkg2_call(); // ok
+  if (package pkg2) {
+    pkg2_call(); // ok
+  }
   pkg1_call();
 }
 

@@ -50,6 +50,55 @@ struct FieldIdListToSetAdapter {
   }
 };
 
+template <typename Tag>
+struct FieldPatchAssigner {
+  template <typename Patch, typename Val>
+  void operator()(Patch& patch, Val&& val) {
+    patch.assign(std::forward<Val>(val));
+  }
+};
+
+// Special cases FieldPatch.assign(...) for fields with adapters
+template <typename Adapter, typename Tag>
+struct FieldPatchAssigner<type::adapted<Adapter, Tag>> {
+  template <typename Patch, typename Val>
+  void operator()(Patch& patch, Val&& val) {
+    using value_type = typename Patch::value_type;
+    if constexpr (std::is_same_v<value_type, folly::remove_cvref_t<Val>>) {
+      // Maintain compatbility with legacy AnyPatch
+      patch.assign(std::forward<Val>(val));
+    } else {
+      patch.assign(Adapter::toThrift(std::forward<Val>(val)));
+    }
+  }
+};
+
+template <typename Tag>
+struct PatchIfSetApplier {
+  template <typename Patch, typename FieldRef>
+  void operator()(const Patch& patch, FieldRef&& ref) {
+    patch.apply(std::forward<FieldRef>(ref));
+  }
+};
+
+// Special cases FieldPatch.apply(...) for fields with adapters
+template <typename Adapter, typename Tag>
+struct PatchIfSetApplier<type::adapted<Adapter, Tag>> {
+  template <typename Patch, typename FieldRef>
+  void operator()(const Patch& patch, FieldRef&& ref) {
+    using value_type = typename Patch::value_type;
+    if constexpr (std::is_same_v<value_type, type::native_type<Tag>>) {
+      if (auto* value = getValueOrNull(ref)) {
+        type::native_type<Tag> temp = Adapter::toThrift(std::move(*value));
+        patch.apply(temp);
+        ref = Adapter::fromThrift(std::move(temp));
+      }
+    } else {
+      patch.apply(std::forward<FieldRef>(ref));
+    }
+  }
+};
+
 /// Patch for a Thrift field.
 ///
 /// Requires Patch have fields with ids 1:1 with the fields they patch.
@@ -116,7 +165,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
     template <class Id, class FieldPatch>
     void patchIfSet(const FieldPatch& patch) {
-      patch.apply(op::get<Id>(v));
+      PatchIfSetApplier<get_type_tag<T, Id>>{}(patch, get<Id>(v));
     }
 
     template <class>
@@ -245,7 +294,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
         // patch). If we assign the value in Patch after, then the behavior
         // would be the same between static/dynamic patch.
         patchPrior<Id>().reset();
-        patchAfter<Id>() = std::forward<U>(defaultVal);
+        FieldPatchAssigner<get_type_tag<T, Id>>{}(
+            patchAfter<Id>(), std::forward<U>(defaultVal));
       } else {
         getEnsure<Id>(data_) = std::forward<U>(defaultVal);
       }
@@ -450,7 +500,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
             prior.toThrift().clear() = true;
           } else {
             ensure = {};
-            after.assign(std::move(*field));
+            FieldPatchAssigner<op::get_type_tag<T, FId>>{}(
+                after, std::move(*field));
           }
         }
       });

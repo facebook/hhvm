@@ -19,15 +19,7 @@ pub(crate) fn copy_node_order(m: &mut MemDepGraph, path: &Path) -> std::io::Resu
     log::info!("Copying node order from existing file {}", path.display());
 
     let dep_graph = DepGraph::from_path(path)?;
-    let old_dep_graph = match dep_graph {
-        DepGraph::New(g) => g,
-        DepGraph::Old(..) => {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                "Can only copy node ordering from new-format .hhdg files",
-            ));
-        }
-    };
+    let DepGraph(old_dep_graph) = dep_graph;
 
     let num_hashes = m.hashes.len();
     let in_use: IdVec<HashIndex, AtomicBool> =

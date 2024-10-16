@@ -398,6 +398,14 @@ struct ValueHelper<TT, std::enable_if_t<kIsStructured<TT>>> {
   }
 };
 
+inline TType unifyStringType(TType type) {
+  if (type == protocol::T_UTF7 || type == protocol::T_UTF8 ||
+      type == protocol::T_UTF16) {
+    return protocol::T_STRING;
+  }
+  return type;
+}
+
 template <class Protocol>
 Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true);
 
@@ -411,7 +419,7 @@ void parseValueInplace(
     TType arg_type,
     Value& result,
     bool string_to_binary = true) {
-  switch (arg_type) {
+  switch (unifyStringType(arg_type)) {
     case protocol::T_BOOL: {
       bool boolv;
       prot.readBool(boolv);
@@ -544,11 +552,7 @@ const T& getByValueId(const std::vector<T>& values, type::ValueId id) {
 
 inline TType getTType(const Value& val) {
   auto type = toTType(static_cast<type::BaseType>(val.getType()));
-  if (type == protocol::T_UTF7 || type == protocol::T_UTF8 ||
-      type == protocol::T_UTF16) {
-    return protocol::T_STRING;
-  }
-  return type;
+  return unifyStringType(type);
 }
 
 inline void ensureSameType(const Value& a, TType b) {

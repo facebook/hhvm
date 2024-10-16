@@ -1326,6 +1326,34 @@ void t_mstch_python_generator::generate_services() {
   }
 }
 
+class t_python_patch_generator : public t_mstch_generator {
+ public:
+  using t_mstch_generator::t_mstch_generator;
+
+  std::string template_prefix() const override { return "python"; }
+
+  void generate_program() override {
+    out_dir_base_ = "gen-python-patch";
+
+    set_mstch_factories();
+    mstch_context_.set_or_erase_option(true, "generate_immutable_types", "yes");
+    const auto* program = get_program();
+    auto mstch_program = mstch_context_.program_factory->make_mstch_object(
+        program, mstch_context_);
+
+    render_to_file(
+        std::move(mstch_program), "thrift_patch.py", "thrift_patch.py");
+  }
+
+ private:
+  void set_mstch_factories() {
+    mstch_context_.add<python_mstch_program>();
+    mstch_context_.add<python_mstch_struct>();
+    mstch_context_.add<python_mstch_field>();
+    mstch_context_.add<python_mstch_type>(program_);
+  }
+};
+
 } // namespace
 
 THRIFT_REGISTER_GENERATOR(
@@ -1342,5 +1370,10 @@ THRIFT_REGISTER_GENERATOR(
     "      option) should be considered UNSTABLE and is subject to arbitrary\n"
     "      (backwards incompatible) changes and undefined behavior.\n"
     "      NEVER ENABLE THIS OPTION in production environments.\n");
+
+namespace patch {
+THRIFT_REGISTER_GENERATOR(
+    python_patch, "Python patch", "Python patch generator\n");
+}
 
 } // namespace apache::thrift::compiler

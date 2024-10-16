@@ -1,0 +1,54 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+# @{{!}}generated
+
+import typing
+import typing as _typing
+
+from common.thrift.patch.detail.dynamic_patch import (
+    BaseStructPatch,
+    MapPatch,
+    OptionalFieldPatch,
+)
+
+from common.thrift.patch.detail.py_bindings.DynamicPatch import (
+    StringPatch,
+)
+
+import {{program:module_path}}.thrift_types
+from {{program:module_path}}.thrift_types import (
+{{#program:structs}}
+    {{struct:py_name}},
+{{/program:structs}}
+)
+
+{{#program:structs}}
+
+class {{struct:py_name}}Patch(BaseStructPatch[{{struct:py_name}}]):
+{{#struct:fields_ordered_by_id}}
+    @property
+    def {{field:py_name}}(self) -> OptionalFieldPatch[
+            {{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}},
+            {{#field:type}}{{> types/unadapted_pep484_patch_type}}{{/field:type}}]:
+
+        return OptionalFieldPatch(
+            {{#field:type}}{{> common/thrift_patch_callback}}{{/field:type}},
+            self._patch,
+            {{field:key}})
+{{/struct:fields_ordered_by_id}}
+{{/program:structs}}

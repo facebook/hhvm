@@ -14,3 +14,4 @@ python_service: mstch_python src/service.thrift
 python_capi: mstch_python_capi src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types_service: mstch_python:experimental_generate_mutable_types src/service.thrift
+python_patch: python_patch src/module.thrift

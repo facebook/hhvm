@@ -43,9 +43,9 @@ std::string variable_lookup::chain_string() const {
   return detail::variant_match(
       chain,
       [](this_ref) -> std::string { return "."; },
-      [](const std::vector<identifier>& chain) -> std::string {
+      [](const std::vector<identifier>& chain_2) -> std::string {
         return to_joined_string(
-            chain, '.', [](const identifier& id) -> const std::string& {
+            chain_2, '.', [](const identifier& id) -> const std::string& {
               return id.name;
             });
       });

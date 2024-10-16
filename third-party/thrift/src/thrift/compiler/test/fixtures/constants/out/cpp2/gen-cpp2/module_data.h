@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::EmptyEnum> {
   using type = ::cpp2::EmptyEnum;
   static constexpr const std::size_t size = 0;
-  static constexpr std::string_view type_name = "EmptyEnum";
   static constexpr std::array<type, size> values = { {
   }};
   static constexpr std::array<std::string_view, size> names = { {
@@ -25,7 +24,6 @@ template <> struct TEnumDataStorage<::cpp2::EmptyEnum> {
 template <> struct TEnumDataStorage<::cpp2::City> {
   using type = ::cpp2::City;
   static constexpr const std::size_t size = 4;
-  static constexpr std::string_view type_name = "City";
   static constexpr std::array<type, size> values = { {
       type::NYC,
       type::MPK,
@@ -43,7 +41,6 @@ template <> struct TEnumDataStorage<::cpp2::City> {
 template <> struct TEnumDataStorage<::cpp2::Company> {
   using type = ::cpp2::Company;
   static constexpr const std::size_t size = 4;
-  static constexpr std::string_view type_name = "Company";
   static constexpr std::array<type, size> values = { {
       type::FACEBOOK,
       type::WHATSAPP,

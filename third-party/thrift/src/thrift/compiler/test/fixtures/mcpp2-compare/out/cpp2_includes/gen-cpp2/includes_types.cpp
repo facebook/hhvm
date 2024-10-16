@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::a::different::ns::AnEnum>::type_name = TEnumDataStorage<::a::different::ns::AnEnum>::type_name;
 folly::Range<::a::different::ns::AnEnum const*> const TEnumTraits<::a::different::ns::AnEnum>::values = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::a::different::ns::AnEnum>::names = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::names);
 

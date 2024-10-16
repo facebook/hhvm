@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::Metasyntactic>::type_name = TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::type_name;
 folly::Range<::test::fixtures::enums::Metasyntactic const*> const TEnumTraits<::test::fixtures::enums::Metasyntactic>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::Metasyntactic>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::names);
 
@@ -31,7 +30,6 @@ bool TEnumTraits<::test::fixtures::enums::Metasyntactic>::findValue(std::string_
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyEnum1>::type_name = TEnumDataStorage<::test::fixtures::enums::MyEnum1>::type_name;
 folly::Range<::test::fixtures::enums::MyEnum1 const*> const TEnumTraits<::test::fixtures::enums::MyEnum1>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum1>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyEnum1>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum1>::names);
 
@@ -48,7 +46,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum1>::findValue(std::string_view n
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyEnum2>::type_name = TEnumDataStorage<::test::fixtures::enums::MyEnum2>::type_name;
 folly::Range<::test::fixtures::enums::MyEnum2 const*> const TEnumTraits<::test::fixtures::enums::MyEnum2>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum2>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyEnum2>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum2>::names);
 
@@ -65,7 +62,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum2>::findValue(std::string_view n
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyEnum3>::type_name = TEnumDataStorage<::test::fixtures::enums::MyEnum3>::type_name;
 folly::Range<::test::fixtures::enums::MyEnum3 const*> const TEnumTraits<::test::fixtures::enums::MyEnum3>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum3>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyEnum3>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum3>::names);
 
@@ -82,7 +78,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum3>::findValue(std::string_view n
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyEnum4>::type_name = TEnumDataStorage<::test::fixtures::enums::MyEnum4>::type_name;
 folly::Range<::test::fixtures::enums::MyEnum4 const*> const TEnumTraits<::test::fixtures::enums::MyEnum4>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum4>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyEnum4>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyEnum4>::names);
 
@@ -99,7 +94,6 @@ bool TEnumTraits<::test::fixtures::enums::MyEnum4>::findValue(std::string_view n
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::type_name = TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::type_name;
 folly::Range<::test::fixtures::enums::MyBitmaskEnum1 const*> const TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::names);
 
@@ -116,7 +110,6 @@ bool TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1>::findValue(std::string
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::type_name = TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::type_name;
 folly::Range<::test::fixtures::enums::MyBitmaskEnum2 const*> const TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::values = folly::range(TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2>::names = folly::range(TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::names);
 

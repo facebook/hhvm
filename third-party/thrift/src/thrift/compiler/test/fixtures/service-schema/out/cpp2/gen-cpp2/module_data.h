@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::Result> {
   using type = ::cpp2::Result;
   static constexpr const std::size_t size = 3;
-  static constexpr std::string_view type_name = "Result";
   static constexpr std::array<type, size> values = { {
       type::OK,
       type::SO_SO,

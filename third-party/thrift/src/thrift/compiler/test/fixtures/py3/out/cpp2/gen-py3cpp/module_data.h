@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::py3::simple::AnEnum> {
   using type = ::py3::simple::AnEnum;
   static constexpr const std::size_t size = 5;
-  static constexpr std::string_view type_name = "AnEnum";
   static constexpr std::array<type, size> values = { {
       type::None,
       type::ONE,
@@ -35,7 +34,6 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnum> {
 template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed> {
   using type = ::py3::simple::AnEnumRenamed;
   static constexpr const std::size_t size = 3;
-  static constexpr std::string_view type_name = "AnEnumRenamed";
   static constexpr std::array<type, size> values = { {
       type::name,
       type::value,
@@ -51,7 +49,6 @@ template <> struct TEnumDataStorage<::py3::simple::AnEnumRenamed> {
 template <> struct TEnumDataStorage<::py3::simple::Flags> {
   using type = ::py3::simple::Flags;
   static constexpr const std::size_t size = 4;
-  static constexpr std::string_view type_name = "Flags";
   static constexpr std::array<type, size> values = { {
       type::flag_A,
       type::flag_B,

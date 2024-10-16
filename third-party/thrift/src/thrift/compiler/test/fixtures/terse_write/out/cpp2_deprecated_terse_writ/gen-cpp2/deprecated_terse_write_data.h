@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum> {
   using type = ::facebook::thrift::test::terse_write::deprecated::MyEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::string_view type_name = "MyEnum";
   static constexpr std::array<type, size> values = { {
       type::ME0,
       type::ME1,

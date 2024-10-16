@@ -107,7 +107,6 @@ template <> struct TEnumTraits<::cpp2::YourEnum> {
   using type = ::cpp2::YourEnum;
 
   static constexpr std::size_t const size = 3;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

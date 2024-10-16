@@ -121,7 +121,6 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleEnum> {
   using type = ::test::fixtures::tablebased::ExampleEnum;
 
   static constexpr std::size_t const size = 2;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

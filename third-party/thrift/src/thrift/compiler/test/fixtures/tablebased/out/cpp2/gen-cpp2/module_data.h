@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum> {
   using type = ::test::fixtures::tablebased::ExampleEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::string_view type_name = "ExampleEnum";
   static constexpr std::array<type, size> values = { {
       type::ZERO,
       type::NONZERO,

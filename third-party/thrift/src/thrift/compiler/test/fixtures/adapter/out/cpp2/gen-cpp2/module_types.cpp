@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::Color>::type_name = TEnumDataStorage<::facebook::thrift::test::Color>::type_name;
 folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
 
@@ -31,7 +30,6 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(std::string_view na
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::type_name = TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::type_name;
 folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
 

@@ -228,18 +228,21 @@ FATAL_REGISTER_ENUM_TRAITS(
 namespace apache::thrift::detail {
 template <>
 struct ExtraEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops> {
+  static inline constexpr std::string_view name = "has_bitwise_ops";
   using module = ::apache::thrift::fixtures::types::module_tags::module;
 };
 template<>
 inline constexpr bool kHasExtraEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops> = true;
 template <>
 struct ExtraEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
+  static inline constexpr std::string_view name = "is_unscoped";
   using module = ::apache::thrift::fixtures::types::module_tags::module;
 };
 template<>
 inline constexpr bool kHasExtraEnumTraits<::apache::thrift::fixtures::types::is_unscoped> = true;
 template <>
 struct ExtraEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum> {
+  static inline constexpr std::string_view name = "MyForwardRefEnum";
   using module = ::apache::thrift::fixtures::types::module_tags::module;
 };
 template<>

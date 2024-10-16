@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::type_name = TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::type_name;
 folly::Range<::apache::thrift::fixtures::types::has_bitwise_ops const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names);
 
@@ -31,7 +30,6 @@ bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::type_name = TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::type_name;
 folly::Range<::apache::thrift::fixtures::types::is_unscoped const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names);
 
@@ -48,7 +46,6 @@ bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(std:
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::type_name = TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::type_name;
 folly::Range<::apache::thrift::fixtures::types::MyForwardRefEnum const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names);
 

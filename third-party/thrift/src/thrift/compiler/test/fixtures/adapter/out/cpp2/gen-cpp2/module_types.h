@@ -519,7 +519,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::Color> {
   using type = ::facebook::thrift::test::Color;
 
   static constexpr std::size_t const size = 4;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -542,7 +541,6 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
   using type = ::facebook::thrift::test::ThriftAdaptedEnum;
 
   static constexpr std::size_t const size = 2;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

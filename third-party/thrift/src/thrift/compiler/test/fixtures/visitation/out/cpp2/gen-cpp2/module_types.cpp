@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum1>::type_name = TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::type_name;
 folly::Range<::test_cpp2::cpp_reflection::enum1 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names);
 
@@ -31,7 +30,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum2>::type_name = TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::type_name;
 folly::Range<::test_cpp2::cpp_reflection::enum2 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names);
 
@@ -48,7 +46,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum3>::type_name = TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::type_name;
 folly::Range<::test_cpp2::cpp_reflection::enum3 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names);
 
@@ -65,7 +62,6 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::type_name = TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::type_name;
 folly::Range<::test_cpp2::cpp_reflection::enum_with_special_names const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names);
 

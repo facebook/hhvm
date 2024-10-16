@@ -103,7 +103,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
   using type = ::test::fixtures::enumstrict::EmptyEnum;
 
   static constexpr std::size_t const size = 0;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -124,7 +123,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   using type = ::test::fixtures::enumstrict::MyEnum;
 
   static constexpr std::size_t const size = 2;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -147,7 +145,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
   using type = ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum;
 
   static constexpr std::size_t const size = 3;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -170,7 +167,6 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;
 
   static constexpr std::size_t const size = 20;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

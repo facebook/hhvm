@@ -14,7 +14,6 @@
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::cpp2::EmptyEnum>::type_name = TEnumDataStorage<::cpp2::EmptyEnum>::type_name;
 folly::Range<::cpp2::EmptyEnum const*> const TEnumTraits<::cpp2::EmptyEnum>::values = {};
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::EmptyEnum>::names = {};
 
@@ -31,7 +30,6 @@ bool TEnumTraits<::cpp2::EmptyEnum>::findValue(std::string_view name, type* out)
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::cpp2::City>::type_name = TEnumDataStorage<::cpp2::City>::type_name;
 folly::Range<::cpp2::City const*> const TEnumTraits<::cpp2::City>::values = folly::range(TEnumDataStorage<::cpp2::City>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::City>::names = folly::range(TEnumDataStorage<::cpp2::City>::names);
 
@@ -48,7 +46,6 @@ bool TEnumTraits<::cpp2::City>::findValue(std::string_view name, type* out) noex
 
 namespace apache { namespace thrift {
 
-const std::string_view TEnumTraits<::cpp2::Company>::type_name = TEnumDataStorage<::cpp2::Company>::type_name;
 folly::Range<::cpp2::Company const*> const TEnumTraits<::cpp2::Company>::values = folly::range(TEnumDataStorage<::cpp2::Company>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::Company>::names = folly::range(TEnumDataStorage<::cpp2::Company>::names);
 

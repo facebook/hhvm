@@ -15,7 +15,6 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::a::different::ns::AnEnum> {
   using type = ::a::different::ns::AnEnum;
   static constexpr const std::size_t size = 2;
-  static constexpr std::string_view type_name = "AnEnum";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,

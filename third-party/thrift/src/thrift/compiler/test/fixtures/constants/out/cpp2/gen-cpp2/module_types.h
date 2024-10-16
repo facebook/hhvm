@@ -193,7 +193,6 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
   using type = ::cpp2::EmptyEnum;
 
   static constexpr std::size_t const size = 0;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -214,7 +213,6 @@ template <> struct TEnumTraits<::cpp2::City> {
   using type = ::cpp2::City;
 
   static constexpr std::size_t const size = 4;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -237,7 +235,6 @@ template <> struct TEnumTraits<::cpp2::Company> {
   using type = ::cpp2::Company;
 
   static constexpr std::size_t const size = 4;
-  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

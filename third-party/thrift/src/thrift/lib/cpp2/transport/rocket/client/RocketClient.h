@@ -439,6 +439,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   size_t interactions_{0};
   std::unique_ptr<SetupFrame> setupFrame_;
+  const bool encodeMetadataUsingBinary_;
 
  protected:
   RocketClient(
@@ -447,6 +448,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
       std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
+
+  bool encodeMetadataUsingBinary() const { return encodeMetadataUsingBinary_; }
 
  private:
   template <class OnError>

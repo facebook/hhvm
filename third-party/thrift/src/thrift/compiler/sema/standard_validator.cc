@@ -1227,7 +1227,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"py3.hidden", kPythonPy3HiddenUri},
       {"py3.name", kPythonNameUri},
       {"py3.flags", kPythonFlagsUri},
-      {"java.switch.mutable", kJavaMutableUri},
+      {"java.swift.mutable", kJavaMutableUri},
       {"java.swift.annotations", kJavaAnnotationUri},
       {"go.name", kGoNameUri},
       {"go.tag", kGoTagUri},

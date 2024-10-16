@@ -58,6 +58,7 @@ def generate_hhvm_compilation_and_run_commands(
         "-vRuntime.Eval.Jit=1",
         "-vRuntime.Eval.JitRetranslateAllRequest=2",
         "-vRuntime.Eval.JitRetranslateAllSeconds=300",
+        "-vRuntime.Hack.Lang.AllowUnstableFeatures=1",
         "-vEval.PreludePath=",
     ]
     hhvm_run_args = [
@@ -72,6 +73,7 @@ def generate_hhvm_compilation_and_run_commands(
         "-vEval.JitRetranslateAllRequest=2",
         "-vEval.JitRetranslateAllSeconds=300",
         "-vRepo.Authoritative=true",
+        "-vRuntime.Hack.Lang.AllowUnstableFeatures=1",
         "-vEval.PreludePath=",
     ]
 
@@ -175,6 +177,7 @@ def run_hhvm_program(
             process = subprocess.run(
                 [
                     hhvm_exe,
+                    "-vHack.Lang.AllowUnstableFeatures=1",
                     program.program_file,
                 ],
                 stdout=subprocess.PIPE,

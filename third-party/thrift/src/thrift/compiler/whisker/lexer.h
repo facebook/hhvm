@@ -116,13 +116,13 @@ struct lexer_scan_window {
   }
   [[nodiscard]] bool empty() const { return start == head; }
 
-  lexer_scan_window with_start(cursor start) const {
-    assert(start <= head);
-    return lexer_scan_window(*src, start, head);
+  lexer_scan_window with_start(cursor start_2) const {
+    assert(start_2 <= head);
+    return lexer_scan_window(*src, start_2, head);
   }
-  lexer_scan_window with_head(cursor head) const {
-    assert(start <= head);
-    return lexer_scan_window(*src, start, head);
+  lexer_scan_window with_head(cursor head_2) const {
+    assert(start <= head_2);
+    return lexer_scan_window(*src, start, head_2);
   }
 
   std::string_view text() const {

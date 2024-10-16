@@ -132,10 +132,10 @@ add_library(
   generate/cpp/reference_type.cc
   generate/cpp/name_resolver.cc
   generate/cpp/util.cc
+  generate/go/util.cc
   generate/java/util.cc
+  generate/rust/util.cc
 
-  lib/go/util.cc
-  lib/rust/util.cc
   lib/py3/util.cpp
   lib/python/util.cc
 )

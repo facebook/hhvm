@@ -17,7 +17,7 @@
 #include <cctype>
 #include <boost/algorithm/string.hpp>
 #include <fmt/core.h>
-#include <thrift/compiler/lib/go/util.h>
+#include <thrift/compiler/generate/go/util.h>
 
 namespace apache::thrift::compiler::go {
 

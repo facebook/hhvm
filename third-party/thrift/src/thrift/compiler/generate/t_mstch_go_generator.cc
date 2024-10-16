@@ -23,8 +23,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <fmt/format.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/generate/go/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/go/util.h>
 
 namespace apache::thrift::compiler {
 

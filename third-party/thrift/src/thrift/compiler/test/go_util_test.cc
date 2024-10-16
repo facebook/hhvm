@@ -16,7 +16,7 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/lib/go/util.h>
+#include <thrift/compiler/generate/go/util.h>
 
 using namespace apache::thrift::compiler;
 

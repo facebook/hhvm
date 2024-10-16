@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/rust/uri.h>
-#include <thrift/compiler/lib/rust/util.h>
+#include <thrift/compiler/generate/rust/uri.h>
+#include <thrift/compiler/generate/rust/util.h>
 
 #ifdef _WIN32
 #include <filesystem>

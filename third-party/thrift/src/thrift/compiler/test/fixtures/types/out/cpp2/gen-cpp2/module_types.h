@@ -416,6 +416,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   using type = ::apache::thrift::fixtures::types::has_bitwise_ops;
 
   static constexpr std::size_t const size = 5;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -438,6 +439,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   using type = ::apache::thrift::fixtures::types::is_unscoped;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -460,6 +462,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   using type = ::apache::thrift::fixtures::types::MyForwardRefEnum;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

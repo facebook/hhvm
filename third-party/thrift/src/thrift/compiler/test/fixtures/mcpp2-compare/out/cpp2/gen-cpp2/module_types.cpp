@@ -14,6 +14,7 @@
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::some::valid::ns::MyEnumA>::type_name = TEnumDataStorage<::some::valid::ns::MyEnumA>::type_name;
 folly::Range<::some::valid::ns::MyEnumA const*> const TEnumTraits<::some::valid::ns::MyEnumA>::values = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumA>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::some::valid::ns::MyEnumA>::names = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumA>::names);
 
@@ -30,6 +31,7 @@ bool TEnumTraits<::some::valid::ns::MyEnumA>::findValue(std::string_view name, t
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::some::valid::ns::AnnotatedEnum>::type_name = TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::type_name;
 folly::Range<::some::valid::ns::AnnotatedEnum const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum>::values = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum>::names = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::names);
 
@@ -46,6 +48,7 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum>::findValue(std::string_view n
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::some::valid::ns::AnnotatedEnum2>::type_name = TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::type_name;
 folly::Range<::some::valid::ns::AnnotatedEnum2 const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum2>::values = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::some::valid::ns::AnnotatedEnum2>::names = folly::range(TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::names);
 
@@ -62,6 +65,7 @@ bool TEnumTraits<::some::valid::ns::AnnotatedEnum2>::findValue(std::string_view 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::some::valid::ns::MyEnumB>::type_name = TEnumDataStorage<::some::valid::ns::MyEnumB>::type_name;
 folly::Range<::some::valid::ns::MyEnumB const*> const TEnumTraits<::some::valid::ns::MyEnumB>::values = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumB>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::some::valid::ns::MyEnumB>::names = folly::range(TEnumDataStorage<::some::valid::ns::MyEnumB>::names);
 

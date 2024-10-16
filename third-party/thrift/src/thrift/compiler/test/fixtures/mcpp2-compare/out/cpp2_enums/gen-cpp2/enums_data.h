@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumA> {
   using type = ::facebook::ns::qwerty::AnEnumA;
   static constexpr const std::size_t size = 1;
+  static constexpr std::string_view type_name = "AnEnumA";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
   }};
@@ -26,6 +27,7 @@ template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumA> {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumB> {
   using type = ::facebook::ns::qwerty::AnEnumB;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "AnEnumB";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,
@@ -39,6 +41,7 @@ template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumB> {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumC> {
   using type = ::facebook::ns::qwerty::AnEnumC;
   static constexpr const std::size_t size = 1;
+  static constexpr std::string_view type_name = "AnEnumC";
   static constexpr std::array<type, size> values = { {
       type::FIELDC,
   }};
@@ -50,6 +53,7 @@ template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumC> {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumD> {
   using type = ::facebook::ns::qwerty::AnEnumD;
   static constexpr const std::size_t size = 1;
+  static constexpr std::string_view type_name = "AnEnumD";
   static constexpr std::array<type, size> values = { {
       type::FIELDD,
   }};
@@ -61,6 +65,7 @@ template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumD> {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumE> {
   using type = ::facebook::ns::qwerty::AnEnumE;
   static constexpr const std::size_t size = 1;
+  static constexpr std::string_view type_name = "AnEnumE";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
   }};

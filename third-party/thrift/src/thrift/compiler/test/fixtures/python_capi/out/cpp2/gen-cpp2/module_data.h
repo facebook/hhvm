@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum> {
   using type = ::test::fixtures::python_capi::MyEnum;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "MyEnum";
   static constexpr std::array<type, size> values = { {
       type::MyValue1,
       type::MyValue2,
@@ -28,6 +29,7 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::MyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum> {
   using type = ::test::fixtures::python_capi::NormalDecentEnum;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "AnnoyingEnum";
   static constexpr std::array<type, size> values = { {
       type::l0O1,
       type::FuBaR,

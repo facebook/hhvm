@@ -907,6 +907,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
   using type = ::test_cpp2::cpp_reflection::enum1;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -929,6 +930,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   using type = ::test_cpp2::cpp_reflection::enum2;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -951,6 +953,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
   using type = ::test_cpp2::cpp_reflection::enum3;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -973,6 +976,7 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
   using type = ::test_cpp2::cpp_reflection::enum_with_special_names;
 
   static constexpr std::size_t const size = 28;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

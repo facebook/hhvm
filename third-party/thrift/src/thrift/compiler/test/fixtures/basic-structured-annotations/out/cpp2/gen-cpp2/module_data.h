@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum> {
   using type = ::test::fixtures::basic-structured-annotations::MyEnum;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "MyEnum";
   static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
       type::ONE,

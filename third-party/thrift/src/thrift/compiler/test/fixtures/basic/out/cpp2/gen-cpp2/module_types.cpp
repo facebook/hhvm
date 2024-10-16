@@ -14,6 +14,7 @@
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::basic::MyEnum>::type_name = TEnumDataStorage<::test::fixtures::basic::MyEnum>::type_name;
 folly::Range<::test::fixtures::basic::MyEnum const*> const TEnumTraits<::test::fixtures::basic::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic::MyEnum>::names);
 
@@ -30,6 +31,7 @@ bool TEnumTraits<::test::fixtures::basic::MyEnum>::findValue(std::string_view na
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::basic::HackEnum>::type_name = TEnumDataStorage<::test::fixtures::basic::HackEnum>::type_name;
 folly::Range<::test::fixtures::basic::HackEnum const*> const TEnumTraits<::test::fixtures::basic::HackEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic::HackEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic::HackEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic::HackEnum>::names);
 

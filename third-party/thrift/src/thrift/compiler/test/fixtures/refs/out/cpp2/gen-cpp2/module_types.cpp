@@ -14,6 +14,7 @@
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::cpp2::MyEnum>::type_name = TEnumDataStorage<::cpp2::MyEnum>::type_name;
 folly::Range<::cpp2::MyEnum const*> const TEnumTraits<::cpp2::MyEnum>::values = folly::range(TEnumDataStorage<::cpp2::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::MyEnum>::names = folly::range(TEnumDataStorage<::cpp2::MyEnum>::names);
 
@@ -30,6 +31,7 @@ bool TEnumTraits<::cpp2::MyEnum>::findValue(std::string_view name, type* out) no
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::cpp2::TypedEnum>::type_name = TEnumDataStorage<::cpp2::TypedEnum>::type_name;
 folly::Range<::cpp2::TypedEnum const*> const TEnumTraits<::cpp2::TypedEnum>::values = folly::range(TEnumDataStorage<::cpp2::TypedEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::TypedEnum>::names = folly::range(TEnumDataStorage<::cpp2::TypedEnum>::names);
 

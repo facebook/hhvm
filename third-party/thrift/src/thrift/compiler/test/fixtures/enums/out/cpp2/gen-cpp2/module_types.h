@@ -223,6 +223,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   using type = ::test::fixtures::enums::Metasyntactic;
 
   static constexpr std::size_t const size = 4;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -245,6 +246,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   using type = ::test::fixtures::enums::MyEnum1;
 
   static constexpr std::size_t const size = 6;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -267,6 +269,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   using type = ::test::fixtures::enums::MyEnum2;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -289,6 +292,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   using type = ::test::fixtures::enums::MyEnum3;
 
   static constexpr std::size_t const size = 6;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -311,6 +315,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   using type = ::test::fixtures::enums::MyEnum4;
 
   static constexpr std::size_t const size = 4;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -333,6 +338,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   using type = ::test::fixtures::enums::MyBitmaskEnum1;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -355,6 +361,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   using type = ::test::fixtures::enums::MyBitmaskEnum2;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

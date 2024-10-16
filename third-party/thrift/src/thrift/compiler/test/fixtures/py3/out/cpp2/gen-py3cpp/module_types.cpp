@@ -14,6 +14,7 @@
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::AnEnum>::type_name = TEnumDataStorage<::py3::simple::AnEnum>::type_name;
 folly::Range<::py3::simple::AnEnum const*> const TEnumTraits<::py3::simple::AnEnum>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnum>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::names);
 
@@ -30,6 +31,7 @@ bool TEnumTraits<::py3::simple::AnEnum>::findValue(std::string_view name, type* 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::AnEnumRenamed>::type_name = TEnumDataStorage<::py3::simple::AnEnumRenamed>::type_name;
 folly::Range<::py3::simple::AnEnumRenamed const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::names);
 
@@ -46,6 +48,7 @@ bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(std::string_view name,
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::Flags>::type_name = TEnumDataStorage<::py3::simple::Flags>::type_name;
 folly::Range<::py3::simple::Flags const*> const TEnumTraits<::py3::simple::Flags>::values = folly::range(TEnumDataStorage<::py3::simple::Flags>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::Flags>::names = folly::range(TEnumDataStorage<::py3::simple::Flags>::names);
 

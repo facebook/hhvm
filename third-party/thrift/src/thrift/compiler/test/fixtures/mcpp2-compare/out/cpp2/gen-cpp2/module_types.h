@@ -942,6 +942,7 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumA> {
   using type = ::some::valid::ns::MyEnumA;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -964,6 +965,7 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
   using type = ::some::valid::ns::AnnotatedEnum;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -986,6 +988,7 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum2> {
   using type = ::some::valid::ns::AnnotatedEnum2;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -1008,6 +1011,7 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
   using type = ::some::valid::ns::MyEnumB;
 
   static constexpr std::size_t const size = 1;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

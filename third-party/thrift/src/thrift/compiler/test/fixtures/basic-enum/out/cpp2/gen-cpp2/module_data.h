@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum> {
   using type = ::test::fixtures::enumstrict::EmptyEnum;
   static constexpr const std::size_t size = 0;
+  static constexpr std::string_view type_name = "EmptyEnum";
   static constexpr std::array<type, size> values = { {
   }};
   static constexpr std::array<std::string_view, size> names = { {
@@ -24,6 +25,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
   using type = ::test::fixtures::enumstrict::MyEnum;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "MyEnum";
   static constexpr std::array<type, size> values = { {
       type::ONE,
       type::TWO,
@@ -37,6 +39,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum> {
   using type = ::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "MyUseIntrinsicDefaultEnum";
   static constexpr std::array<type, size> values = { {
       type::ZERO,
       type::ONE,
@@ -52,6 +55,7 @@ template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsic
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;
   static constexpr const std::size_t size = 20;
+  static constexpr std::string_view type_name = "MyBigEnum";
   static constexpr std::array<type, size> values = { {
       type::UNKNOWN,
       type::ONE,

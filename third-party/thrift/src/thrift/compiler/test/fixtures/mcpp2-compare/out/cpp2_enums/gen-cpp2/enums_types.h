@@ -87,6 +87,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumA> {
   using type = ::facebook::ns::qwerty::AnEnumA;
 
   static constexpr std::size_t const size = 1;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -109,6 +110,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumB> {
   using type = ::facebook::ns::qwerty::AnEnumB;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -131,6 +133,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumC> {
   using type = ::facebook::ns::qwerty::AnEnumC;
 
   static constexpr std::size_t const size = 1;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -153,6 +156,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumD> {
   using type = ::facebook::ns::qwerty::AnEnumD;
 
   static constexpr std::size_t const size = 1;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -175,6 +179,7 @@ template <> struct TEnumTraits<::facebook::ns::qwerty::AnEnumE> {
   using type = ::facebook::ns::qwerty::AnEnumE;
 
   static constexpr std::size_t const size = 1;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

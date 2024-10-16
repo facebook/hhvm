@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1> {
   using type = ::test_cpp2::cpp_reflection::enum1;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "enum1";
   static constexpr std::array<type, size> values = { {
       type::field0,
       type::field1,
@@ -30,6 +31,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2> {
   using type = ::test_cpp2::cpp_reflection::enum2;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "enum2";
   static constexpr std::array<type, size> values = { {
       type::field0_2,
       type::field1_2,
@@ -45,6 +47,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3> {
   using type = ::test_cpp2::cpp_reflection::enum3;
   static constexpr const std::size_t size = 2;
+  static constexpr std::string_view type_name = "enum3";
   static constexpr std::array<type, size> values = { {
       type::field0_3,
       type::field1_3,
@@ -58,6 +61,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3> {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names> {
   using type = ::test_cpp2::cpp_reflection::enum_with_special_names;
   static constexpr const std::size_t size = 28;
+  static constexpr std::string_view type_name = "enum_with_special_names";
   static constexpr std::array<type, size> values = { {
       type::get,
       type::getter,

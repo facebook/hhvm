@@ -202,6 +202,7 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   using type = ::py3::simple::AnEnum;
 
   static constexpr std::size_t const size = 5;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -224,6 +225,7 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   using type = ::py3::simple::AnEnumRenamed;
 
   static constexpr std::size_t const size = 3;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -246,6 +248,7 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   using type = ::py3::simple::Flags;
 
   static constexpr std::size_t const size = 4;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

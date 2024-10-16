@@ -449,6 +449,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::MyEnum> {
   using type = ::test::fixtures::python_capi::MyEnum;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -471,6 +472,7 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum> 
   using type = ::test::fixtures::python_capi::NormalDecentEnum;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

@@ -15,6 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA> {
   using type = ::some::valid::ns::MyEnumA;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "MyEnumA";
   static constexpr std::array<type, size> values = { {
       type::fieldA,
       type::fieldB,
@@ -30,6 +31,7 @@ template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA> {
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum> {
   using type = ::some::valid::ns::AnnotatedEnum;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "AnnotatedEnum";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,
@@ -45,6 +47,7 @@ template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum> {
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2> {
   using type = ::some::valid::ns::AnnotatedEnum2;
   static constexpr const std::size_t size = 3;
+  static constexpr std::string_view type_name = "AnnotatedEnum2";
   static constexpr std::array<type, size> values = { {
       type::FIELDA,
       type::FIELDB,
@@ -60,6 +63,7 @@ template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2> {
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumB> {
   using type = ::some::valid::ns::MyEnumB;
   static constexpr const std::size_t size = 1;
+  static constexpr std::string_view type_name = "MyEnumB";
   static constexpr std::array<type, size> values = { {
       type::AField,
   }};

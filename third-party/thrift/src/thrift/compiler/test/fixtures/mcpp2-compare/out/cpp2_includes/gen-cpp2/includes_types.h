@@ -57,6 +57,7 @@ template <> struct TEnumTraits<::a::different::ns::AnEnum> {
   using type = ::a::different::ns::AnEnum;
 
   static constexpr std::size_t const size = 2;
+  static const std::string_view type_name;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

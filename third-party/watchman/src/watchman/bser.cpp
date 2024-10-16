@@ -492,13 +492,13 @@ class BserParser {
     }
     std::string expected = "{";
     bool comma = false;
-    for (char type : types) {
+    for (char type_2 : types) {
       if (comma) {
         expected += ",";
       } else {
         comma = true;
       }
-      expected += std::to_string(static_cast<int>(type));
+      expected += std::to_string(static_cast<int>(type_2));
     }
     expected += "}";
     throw BserParseError(

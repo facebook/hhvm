@@ -147,6 +147,13 @@ val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
 
+val remove_classes :
+  Provider_context.t ->
+  SSet.t ->
+  old_members:Decl_class_elements.t SMap.t lazy_t ->
+  new_members:Decl_class_elements.t SMap.t lazy_t ->
+  unit
+
 val lookup_or_populate_class_cache :
   type_key ->
   (type_key -> Typing_class_types.class_t option) ->

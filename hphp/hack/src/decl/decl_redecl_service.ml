@@ -527,8 +527,8 @@ let invalidate_folded_classes
     workers
     ~bucket_size
     ~get_classes_in_file
-    (changed_classes : Shallow_class_fanout.changed_class list) =
-  let invalidated =
+    (changed_classes : Shallow_class_fanout.changed_class list) : unit =
+  let to_invalidate =
     List.fold
       changed_classes
       ~init:SSet.empty
@@ -539,21 +539,14 @@ let invalidate_folded_classes
           descendant_deps
         |> SSet.union acc)
   in
-  (match Provider_backend.get () with
-  | Provider_backend.Rust_provider_backend be ->
-    let names = FileInfo.{ empty_names with n_classes = invalidated } in
-    Rust_provider_backend.Decl.remove_old_defs be names;
-    Rust_provider_backend.Decl.remove_defs be names;
-    ()
-  | _ ->
+  let (old_members, new_members) =
     let get_elems n_classes =
       get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
     in
-    Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
-    Decl_class_elements.remove_all (get_elems invalidated ~old:false);
-    Decl_heap.Classes.remove_old_batch invalidated;
-    Decl_heap.Classes.remove_batch invalidated;
-    ());
+    ( lazy (get_elems to_invalidate ~old:true),
+      lazy (get_elems to_invalidate ~old:false) )
+  in
+  Decl_provider.remove_classes ctx to_invalidate ~old_members ~new_members;
   SharedMem.invalidate_local_caches ();
   SharedMem.GC.collect `gentle;
   ()

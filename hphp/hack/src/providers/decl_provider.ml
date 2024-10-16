@@ -172,6 +172,38 @@ let get_class
   end)
   |> Decl_entry.map ~f:(Tuple3.map_snd ~f:Folded_class.make)
 
+let remove_classes_from_decl_heap (names : SSet.t) ~old_members ~new_members =
+  Decl_class_elements.remove_old_all old_members;
+  Decl_class_elements.remove_all new_members;
+  Decl_heap.Classes.remove_old_batch names;
+  Decl_heap.Classes.remove_batch names;
+  ()
+
+let remove_classes ctx (names : SSet.t) ~old_members ~new_members : unit =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Rust_provider_backend be ->
+    SSet.iter Cache.remove names;
+    let names = FileInfo.{ empty_names with n_classes = names } in
+    Rust_provider_backend.Decl.remove_old_defs be names;
+    Rust_provider_backend.Decl.remove_defs be names;
+    ()
+  | Provider_backend.Analysis
+  | Provider_backend.Local_memory _ ->
+    failwith "unimplemented"
+  | Provider_backend.Pessimised_shared_memory _ ->
+    remove_classes_from_decl_heap
+      names
+      ~old_members:(Lazy.force old_members)
+      ~new_members:(Lazy.force new_members);
+    ()
+  | Provider_backend.Shared_memory ->
+    SSet.iter Cache.remove names;
+    remove_classes_from_decl_heap
+      names
+      ~old_members:(Lazy.force old_members)
+      ~new_members:(Lazy.force new_members);
+    ()
+
 let maybe_pessimise_fun_decl ctx fun_decl =
   if Provider_context.implicit_sdt_for_fun ctx fun_decl then
     let no_auto_likes = Provider_context.no_auto_likes_for_fun fun_decl in

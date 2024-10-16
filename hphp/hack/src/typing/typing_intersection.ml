@@ -446,9 +446,11 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
 
 (** Attempts to simplify an intersection involving a case type and another type. If [case_type]
  is a case type, we fetch the list of variant types, then filter this list down to only the types
- that intersect with the data types associated with [ty]. If the resulting filtered type is a
+ that intersect with the data types associated with [ty]. If the resulting filtered type is
  not a union type, we consider it to be a simplified version of the case type and return it.
- Otherwise simplification fails and [None] is returned. As an example consider:
+ Otherwise simplification fails and [None] is returned.
+
+ As an example consider:
    [case_type] = int | vec<int> | string
    [ty] = not int & not string
 
@@ -464,7 +466,9 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
 
   This would succeed, because the union `int | string` would simplify to `arraykey`
   *)
-and try_simplifying_case_type env rec_tracker ~case_type ~intersect_ty =
+and try_simplifying_case_type
+    env rec_tracker ~(case_type : locl_ty) ~(intersect_ty : locl_ty) :
+    Typing_env_types.env * locl_ty option =
   match deref case_type with
   | (r, Tnewtype (name, ty_args, _)) ->
     let (env, variants_opt) =

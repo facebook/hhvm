@@ -12,7 +12,7 @@ open Typing_env_types
 (**
   A runtime data type describes the set of values that can carry a particular
   set of runtime tags. It is possible to map any type to a particular
-  runtime data type, and based on this reason about if two types can possibly
+  runtime data type, and based on this, reason about if two types can possibly
   intersect.
 *)
 type runtime_data_type
@@ -61,6 +61,7 @@ val filter_variants_using_datatype :
    [get_variant_tys env name ty_args] looks up a case type by [name] in the decls.
    If the case type exists, it returns the list of
    variant types. If the case type doesn't exist, it returns [None].
+   The result is instantiated with [ty_args].
 *)
 val get_variant_tys : env -> string -> locl_ty list -> env * locl_ty list option
 

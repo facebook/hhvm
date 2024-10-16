@@ -16,9 +16,8 @@ module SN = Naming_special_names
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
-(** Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
 module Tag = struct
-  type ctx = env
+  type ctx = Typing_env_types.env
 
   type class_kind =
     | Class
@@ -26,6 +25,7 @@ module Tag = struct
     | Interface
   [@@deriving eq]
 
+  (** Modelled after data types in HHVM. See hphp/runtime/base/datatype.h *)
   type t =
     | DictData
     | ShapeData
@@ -304,7 +304,51 @@ module TagWithReason = struct
     (pos, msg) :: trail_result
 end
 
-module DataType = struct
+module DataType : sig
+  module Set : sig
+    type t
+
+    type disjoint =
+      | Sat
+      | Unsat of {
+          left: TagWithReason.t;
+          relation: SetRelation.t;
+          right: TagWithReason.t;
+        }
+
+    val disjoint : TagWithReason.ctx -> t -> t -> disjoint
+
+    val are_disjoint : TagWithReason.ctx -> t -> t -> bool
+
+    val diff : t -> t -> t
+  end
+
+  (** Each type can be mapped to a set of possible runtime tags.
+    This represents such a set. *)
+  type t = Set.t
+
+  val fromHint : env -> Aast.hint -> env * (decl_ty * t)
+
+  val fromTy : env -> locl_ty -> env * t
+
+  val fun_to_datatypes : trail:DataTypeReason.trail -> t
+
+  val nonnull_to_datatypes : trail:DataTypeReason.trail -> t
+
+  val tuple_to_datatypes : trail:DataTypeReason.trail -> t
+
+  val shape_to_datatypes : trail:DataTypeReason.trail -> t
+
+  val label_to_datatypes : trail:DataTypeReason.trail -> t
+
+  val prim_to_datatypes : trail:DataTypeReason.trail -> Ast_defs.tprim -> t
+
+  val mixed : reason:DataTypeReason.subreason * DataTypeReason.trail -> Set.t
+
+  module Class : sig
+    val to_datatypes : trail:DataTypeReason.trail -> env -> string -> env * t
+  end
+end = struct
   module Set = struct
     include ApproxSet.Make (TagWithReason)
 

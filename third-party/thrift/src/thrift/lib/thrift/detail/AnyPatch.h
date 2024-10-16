@@ -28,14 +28,6 @@
 
 namespace apache {
 namespace thrift {
-namespace protocol {
-namespace detail {
-
-struct PatchBadgeFactory;
-using Badge = folly::badge<PatchBadgeFactory>;
-
-} // namespace detail
-} // namespace protocol
 namespace op {
 namespace detail {
 
@@ -227,8 +219,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   // The provided type MUST match with the value type of patch stored in
   // provided patch as Thrift Any.
-  void patchIfTypeIs(
-      protocol::detail::Badge, type::Type type, type::AnyStruct patch) {
+  void patchIfTypeIs(type::Type type, type::AnyStruct patch) {
     if (!type.isValid()) {
       throwTypeNotValid(type);
     }
@@ -240,8 +231,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   // The provided type in ensureAny MUST match with the value type of patch
   // stored in provided patch as Thrift Any.
-  void ensureAndPatch(
-      protocol::detail::Badge, type::AnyStruct ensure, type::AnyStruct patch) {
+  void ensureAndPatch(type::AnyStruct ensure, type::AnyStruct patch) {
     throwIfInvalidOrUnsupportedAny(ensure);
     throwIfInvalidOrUnsupportedAny(patch);
     type::Type type = ensure.type().value();

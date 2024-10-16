@@ -975,7 +975,7 @@ op::AnyPatch DiffVisitorBase::diffAny(
     anySubPatch.data() =
         *serializeObject<CompactProtocolWriter>(subPatch.toObject());
     anySubPatch.type() = detail::toPatchType(*src.type());
-    patch.patchIfTypeIs(badge, *src.type(), std::move(anySubPatch));
+    patch.patchIfTypeIs(*src.type(), std::move(anySubPatch));
   }
 
   return patch;

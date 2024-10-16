@@ -39,19 +39,19 @@ constexpr R fs() {
 }
 
 inline datatype_t* registering_datatype_prep(
-    schema_t& schema, folly::StringPiece rname, id_t rid) {
+    schema_t& schema, std::string rname, id_t rid) {
   auto& dt = schema.dataTypes()[rid];
   if (!dt.name()->empty()) {
     return nullptr; // this datatype has already been registered
   }
-  *dt.name() = rname.str();
+  *dt.name() = rname;
   schema.names()[*dt.name()] = rid;
   return &dt;
 }
 
 template <typename F>
 void registering_datatype(
-    schema_t& schema, folly::StringPiece rname, id_t rid, F&& f) {
+    schema_t& schema, std::string rname, id_t rid, F&& f) {
   if (auto* dt = registering_datatype_prep(schema, rname, rid)) {
     f(*dt);
   }
@@ -107,14 +107,14 @@ struct impl;
 
 template <>
 struct impl<void, type_class::nothing> {
-  static constexpr auto rname = "void"_fs;
+  static std::string rname() { return "void"; }
   static id_t rid() { return id_t(type_t::TYPE_VOID); }
   static void go(schema_t&) {}
 };
 
 template <>
 struct impl<bool, type_class::integral> {
-  static constexpr auto rname = "bool"_fs;
+  static std::string rname() { return "bool"; }
   static id_t rid() { return id_t(type_t::TYPE_BOOL); }
   static void go(schema_t&) {}
 };
@@ -124,28 +124,28 @@ struct impl_integral;
 
 template <>
 struct impl_integral<1> {
-  static constexpr auto rname = "byte"_fs;
+  static std::string rname() { return "byte"; }
   static id_t rid() { return id_t(type_t::TYPE_BYTE); }
   static void go(schema_t&) {}
 };
 
 template <>
 struct impl_integral<2> {
-  static constexpr auto rname = "i16"_fs;
+  static std::string rname() { return "i16"; }
   static id_t rid() { return id_t(type_t::TYPE_I16); }
   static void go(schema_t&) {}
 };
 
 template <>
 struct impl_integral<4> {
-  static constexpr auto rname = "i32"_fs;
+  static std::string rname() { return "i32"; }
   static id_t rid() { return id_t(type_t::TYPE_I32); }
   static void go(schema_t&) {}
 };
 
 template <>
 struct impl_integral<8> {
-  static constexpr auto rname = "i64"_fs;
+  static std::string rname() { return "i64"; }
   static id_t rid() { return id_t(type_t::TYPE_I64); }
   static void go(schema_t&) {}
 };
@@ -155,44 +155,46 @@ struct impl<I, type_class::integral> : impl_integral<sizeof(I)> {};
 
 template <>
 struct impl<double, type_class::floating_point> {
-  static constexpr auto rname = "double"_fs;
+  static std::string rname() { return "double"; }
   static id_t rid() { return id_t(type_t::TYPE_DOUBLE); }
   static void go(schema_t&) {}
 };
 template <>
 struct impl<float, type_class::floating_point> {
-  static constexpr auto rname = "float"_fs;
+  static std::string rname() { return "float"; }
   static id_t rid() { return id_t(type_t::TYPE_FLOAT); }
   static void go(schema_t&) {}
 };
 
 template <typename T>
 struct impl<T, type_class::binary> {
-  static constexpr auto rname = "string"_fs;
+  static std::string rname() { return "string"; }
   static id_t rid() { return id_t(type_t::TYPE_STRING); }
   static void go(schema_t&) {}
 };
 
 template <typename T>
 struct impl<T, type_class::string> {
-  static constexpr auto rname = "string"_fs;
+  static std::string rname() { return "string"; }
   static id_t rid() { return id_t(type_t::TYPE_STRING); }
   static void go(schema_t&) {}
 };
 
 template <typename T>
 struct impl<T, type_class::enumeration> {
-  using extra = ::apache::thrift::detail::ExtraEnumTraits<T>;
-  using module_meta = reflect_module<typename extra::module>;
-  static constexpr auto rname = "enum "_fs + fs<module_meta>() + "." +
-      folly::FixedString<extra::name.size()>(extra::name);
+  static std::string rname() {
+    using extra = ::apache::thrift::detail::ExtraEnumTraits<T>;
+    using module_meta = reflect_module<typename extra::module>;
+    return "enum "_fs + fs<module_meta>() + "." +
+        folly::FixedString<extra::name.size()>(extra::name);
+  }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_ENUM, rname);
+    static const auto storage = get_type_id(type_t::TYPE_ENUM, rname());
     return storage;
   }
   static void go(schema_t& schema) {
     using traits = TEnumTraits<T>;
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       apache::thrift::ensure_isset_unsafe(dt.enumValues());
       for (size_t i = 0; i < traits::size; ++i) {
         (*dt.enumValues())[std::string(traits::names[i])] =
@@ -256,14 +258,15 @@ struct impl<T, type_class::structure> {
       });
     }
   };
-  static constexpr auto rname =
-      "struct "_fs + fs<module_meta>() + "." + fs<meta>();
+  static std::string rname() {
+    return "struct "_fs + fs<module_meta>() + "." + fs<meta>();
+  }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname);
+    static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname());
     return storage;
   }
   static void go(schema_t& schema) {
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       apache::thrift::ensure_isset_unsafe(dt.fields());
       fatal::foreach<typename meta::members>(visitor(), schema, dt);
     });
@@ -292,14 +295,15 @@ struct impl<T, type_class::variant> {
       *f.order_ref() = Index;
     }
   };
-  static constexpr auto rname =
-      "struct "_fs + fs<module_meta>() + "." + fs<meta_traits>();
+  static std::string rname() {
+    return "struct "_fs + fs<module_meta>() + "." + fs<meta_traits>();
+  }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname);
+    static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname());
     return storage;
   }
   static void go(schema_t& schema) {
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       apache::thrift::ensure_isset_unsafe(dt.fields());
       fatal::foreach<typename meta::traits::descriptors>(visitor(), schema, dt);
     });
@@ -310,13 +314,13 @@ template <typename T, typename ValueTypeClass>
 struct impl<T, type_class::list<ValueTypeClass>> {
   using value_type = typename T::value_type;
   using value_helper = get_helper<value_type, ValueTypeClass>;
-  static constexpr auto rname = "list<"_fs + value_helper::name() + ">";
+  static std::string rname() { return "list<" + value_helper::name() + ">"; }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_LIST, rname);
+    static const auto storage = get_type_id(type_t::TYPE_LIST, rname());
     return storage;
   }
   static void go(schema_t& schema) {
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       dt.valueType() = value_helper::id();
       value_helper::register_into(schema);
     });
@@ -327,13 +331,13 @@ template <typename T, typename ValueTypeClass>
 struct impl<T, type_class::set<ValueTypeClass>> {
   using value_type = typename T::value_type;
   using value_helper = get_helper<value_type, ValueTypeClass>;
-  static constexpr auto rname = "set<"_fs + value_helper::name() + ">";
+  static std::string rname() { return "set<" + value_helper::name() + ">"; }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_SET, rname);
+    static const auto storage = get_type_id(type_t::TYPE_SET, rname());
     return storage;
   }
   static void go(schema_t& schema) {
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       dt.valueType() = value_helper::id();
       value_helper::register_into(schema);
     });
@@ -346,14 +350,15 @@ struct impl<T, type_class::map<KeyTypeClass, MappedTypeClass>> {
   using key_helper = get_helper<key_type, KeyTypeClass>;
   using mapped_type = typename T::mapped_type;
   using mapped_helper = get_helper<mapped_type, MappedTypeClass>;
-  static constexpr auto rname =
-      "map<"_fs + key_helper::name() + ", " + mapped_helper::name() + ">";
+  static std::string rname() {
+    return "map<" + key_helper::name() + ", " + mapped_helper::name() + ">";
+  }
   static id_t rid() {
-    static const auto storage = get_type_id(type_t::TYPE_MAP, rname);
+    static const auto storage = get_type_id(type_t::TYPE_MAP, rname());
     return storage;
   }
   static void go(schema_t& schema) {
-    registering_datatype(schema, rname, rid(), [&](datatype_t& dt) {
+    registering_datatype(schema, rname(), rid(), [&](datatype_t& dt) {
       dt.mapKeyType() = key_helper::id();
       dt.valueType() = mapped_helper::id();
       key_helper::register_into(schema);
@@ -368,13 +373,13 @@ template <typename T, typename TC>
 struct helper {
   using type_impl = impl<T, TC>;
   static void register_into(schema_t& schema) { type_impl::go(schema); }
-  static constexpr auto name() { return type_impl::rname; }
+  static std::string name() { return type_impl::rname(); }
   static id_t id() { return type_impl::rid(); }
 };
 
 struct helper_noop {
   static void register_into(schema_t&) {}
-  static constexpr auto name() { return ""_fs; }
+  static std::string name() { return ""; }
   static id_t id() { return {}; }
 };
 

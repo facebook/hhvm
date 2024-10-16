@@ -28,7 +28,7 @@ using namespace apache::thrift;
 using namespace apache::thrift::test;
 
 TEST(FatalLegacyReflectionTest, name) {
-  constexpr auto actual = legacy_reflection<SampleStruct>::name();
+  const auto actual = legacy_reflection<SampleStruct>::name();
   EXPECT_EQ("struct fatal_legacy_reflection.SampleStruct", actual);
 }
 

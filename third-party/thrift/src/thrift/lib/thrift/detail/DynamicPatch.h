@@ -537,6 +537,7 @@ class DynamicPatch {
   type::AnyStruct toAny(detail::Badge, type::Type type) const;
 
   [[nodiscard]] bool empty(detail::Badge) const;
+  [[nodiscard]] bool empty() const;
 
   void apply(detail::Badge, Value&) const;
 
@@ -679,6 +680,7 @@ class DiffVisitorBase {
   [[nodiscard]] DynamicPatch diff(const Object& src, const Object& dst);
   [[nodiscard]] DynamicPatch diff(
       detail::Badge, const Value& src, const Value& dst);
+  [[nodiscard]] DynamicPatch diff(const Value& src, const Value& dst);
 
   virtual ~DiffVisitorBase() = default;
 
@@ -708,7 +710,8 @@ class DiffVisitorBase {
  protected:
   [[nodiscard]] DynamicUnionPatch diffUnion(
       const Object& src, const Object& dst);
-  [[nodiscard]] op::AnyPatch diffAny(const Object& src, const Object& dst);
+  [[nodiscard]] virtual op::AnyPatch diffAny(
+      const Object& src, const Object& dst);
   void diffField(
       const Object& src,
       const Object& dst,

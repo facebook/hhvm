@@ -236,6 +236,10 @@ bool DynamicPatch::empty(detail::Badge badge) const {
       *patch_);
 }
 
+bool DynamicPatch::empty() const {
+  return empty(badge);
+}
+
 template <class SubPatch>
 DynamicPatch& DynamicMapPatch::patchByKeyImpl(Value k, SubPatch&& p) {
   ensurePatchable();
@@ -618,6 +622,10 @@ template class DynamicStructurePatch<false>;
 
 DynamicPatch DiffVisitorBase::diff(const Object& src, const Object& dst) {
   return diffStructured(src, dst);
+}
+
+DynamicPatch DiffVisitorBase::diff(const Value& src, const Value& dst) {
+  return diff(badge, src, dst);
 }
 
 DynamicPatch DiffVisitorBase::diff(

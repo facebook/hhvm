@@ -539,6 +539,7 @@ let invalidate_folded_classes
           descendant_deps
         |> SSet.union acc)
   in
+  Hh_logger.log "Invalidating %d folded classes" (SSet.cardinal to_invalidate);
   let (old_members, new_members) =
     let get_elems n_classes =
       get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
@@ -568,7 +569,7 @@ let redo_type_decl
     ~(previously_oldified_defs : FileInfo.names)
     ~(defs : Decl_compare.VersionedNames.t Relative_path.Map.t) :
     redo_type_decl_result =
-  Hh_logger.log "Decl_redecl_service.redo_type_decl #1";
+  Hh_logger.log "Decl_redecl_service.redo_type_decl: oldifying defs";
   let all_defs =
     Relative_path.Map.fold
       defs
@@ -591,7 +592,8 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
 
-  Hh_logger.log "Decl_redecl_service.redo_type_decl #2";
+  Hh_logger.log
+    "Decl_redecl_service.redo_type_decl: computing fanout of non-classes";
   let (fanout_acc, old_decl_missing_count) =
     (* If there aren't enough files, let's do this ourselves ... it's faster! *)
     if List.length fnl < 10 then
@@ -603,7 +605,8 @@ let redo_type_decl
     else
       parallel_redecl_compare_and_get_fanout ctx workers bucket_size defs fnl
   in
-  Hh_logger.log "Decl_redecl_service.redo_type_decl #3";
+  Hh_logger.log
+    "Decl_redecl_service.redo_type_decl: computing fanout of classes";
   let fanout =
     let changes =
       Shallow_decl_compare.compute_changes
@@ -612,7 +615,6 @@ let redo_type_decl
         ~class_names:
           (Decl_compare.VersionedSSet.get_classes all_defs
           |> Decl_compare.VersionedSSet.diff)
-        fnl
     in
     invalidate_folded_classes
       ctx

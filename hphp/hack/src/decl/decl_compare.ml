@@ -88,6 +88,9 @@ module VersionedSSet = struct
         empty_diff
     in
     { diff with added = SSet.diff new_ old }
+
+  let diff_cardinal { removed; kept; added } =
+    SSet.cardinal removed + SSet.cardinal kept + SSet.cardinal added
 end
 
 module VersionedFileInfo = struct

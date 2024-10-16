@@ -43,6 +43,8 @@ module VersionedSSet : sig
   val merge : t -> t -> t
 
   val diff : t -> diff
+
+  val diff_cardinal : diff -> int
 end
 
 module VersionedFileInfo : sig

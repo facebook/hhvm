@@ -127,7 +127,7 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
   if List.is_empty changes then
     Hh_logger.log "No class changes detected"
   else
-    Hh_logger.log "Computing fanout from %d changed classes" change_count;
+    Hh_logger.log "Found %d changed classes:" change_count;
   let max = 1000 in
   Hh_logger.log_lazy
   @@ lazy
@@ -147,13 +147,11 @@ let log_changes (changes : (string * ClassDiff.t) list) : unit =
   ()
 
 let compute_changes
-    (ctx : Provider_context.t)
-    ~during_init
-    ~(class_names : VersionedSSet.diff)
-    (changed_files : Relative_path.t list) :
-    Shallow_class_fanout.changed_class list =
-  let file_count = List.length changed_files in
-  Hh_logger.log "Detecting changes to classes in %d files:" file_count;
+    (ctx : Provider_context.t) ~during_init ~(class_names : VersionedSSet.diff)
+    : Shallow_class_fanout.changed_class list =
+  Hh_logger.log
+    "Detecting changes to %d classes"
+    (VersionedSSet.diff_cardinal class_names);
 
   let changes = compute_class_diffs ctx ~during_init ~class_names in
   log_changes changes;

@@ -68,6 +68,7 @@ fn add_symbol_refs<'d>(
     implements: &[ClassName],
     uses: &[ClassName],
     requirements: &[hhbc::Requirement],
+    enum_includes: &[ClassName],
 ) {
     base.iter().for_each(|&x| emitter.add_class_ref(*x));
     implements.iter().for_each(|x| emitter.add_class_ref(*x));
@@ -75,6 +76,7 @@ fn add_symbol_refs<'d>(
     requirements
         .iter()
         .for_each(|r| emitter.add_class_ref(r.name));
+    enum_includes.iter().for_each(|x| emitter.add_class_ref(*x));
 }
 
 fn make_86method<'d>(
@@ -786,7 +788,14 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
     flags.set(Attr::AttrInternal, ast_class.internal);
     flags.set(Attr::AttrIsClosureClass, is_closure);
 
-    add_symbol_refs(emitter, base.as_ref(), &implements, &uses, &requirements);
+    add_symbol_refs(
+        emitter,
+        base.as_ref(),
+        &implements,
+        &uses,
+        &requirements,
+        &enum_includes,
+    );
     Ok(Class {
         attributes: attributes.into(),
         base: Maybe::from(base),

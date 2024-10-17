@@ -158,6 +158,7 @@ class MockCert : public Cert {
  public:
   MOCK_METHOD(std::string, getIdentity, (), (const));
   MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const));
+  MOCK_METHOD(std::optional<std::string>, getDER, (), (const));
 };
 
 class MockSelfCert : public SelfCert {

@@ -30,6 +30,7 @@ class Cert {
  public:
   virtual ~Cert() = default;
   virtual std::string getIdentity() const = 0;
+  virtual std::optional<std::string> getDER() const = 0;
 };
 
 using SelfCertBase = Cert;
@@ -54,6 +55,8 @@ class IdentityCert : public IdentityCertBase {
   ~IdentityCert() override = default;
 
   std::string getIdentity() const override;
+
+  std::optional<std::string> getDER() const override;
 
  private:
   std::string identity_;

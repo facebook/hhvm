@@ -15,4 +15,8 @@ IdentityCert::IdentityCert(std::string identity) : identity_(identity) {}
 std::string IdentityCert::getIdentity() const {
   return identity_;
 }
+
+std::optional<std::string> IdentityCert::getDER() const {
+  return std::nullopt;
+}
 } // namespace fizz

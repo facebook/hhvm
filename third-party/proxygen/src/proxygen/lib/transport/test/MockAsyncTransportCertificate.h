@@ -17,6 +17,7 @@ namespace proxygen {
 class MockAsyncTransportCertificate : public folly::AsyncTransportCertificate {
  public:
   MOCK_METHOD(std::string, getIdentity, (), (const, override));
+  MOCK_METHOD(std::optional<std::string>, getDER, (), (const, override));
 };
 
 class MockOpenSSLTransportCertificate

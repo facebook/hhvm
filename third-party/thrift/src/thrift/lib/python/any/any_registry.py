@@ -52,7 +52,7 @@ from thrift.python.types import Enum, StructOrUnion, Union
 _ELEM_TYPE_FOR_EMPTY_CONTAINERS = Type(name=TypeName(boolType=Void.Unused))
 
 
-from thrift.python.any.typestub import (
+from thrift.lib.python.any.typestub import (
     ClassWithUri,
     ObjWithUri,
     PrimitiveType,

@@ -25,6 +25,7 @@ from apache.thrift.type.standard.thrift_types import TypeName, Void
 from apache.thrift.type.type.thrift_types import Type
 from folly.iobuf import IOBuf
 from testing.thrift_types import Color
+from thrift.lib.python.any.typestub import PrimitiveType, SerializableType, TKey, TValue
 from thrift.python.any.serializer import (
     deserialize_list,
     deserialize_map,
@@ -35,7 +36,6 @@ from thrift.python.any.serializer import (
     serialize_primitive,
     serialize_set,
 )
-from thrift.python.any.typestub import PrimitiveType, SerializableType, TKey, TValue
 
 # @manual=//thrift/test/testset:testset-python-types
 from thrift.test.testset import thrift_types

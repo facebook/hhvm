@@ -15,7 +15,7 @@ end
 module Environment : sig
   type t
 
-  val default : t
+  val default : verbose:bool -> t
 
   val definitions : t -> Definition.t list
 end

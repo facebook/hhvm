@@ -79,9 +79,10 @@ module rec Environment : sig
     for_enum: bool;
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
+    verbose: bool;
   }
 
-  val default : t
+  val default : verbose:bool -> t
 
   val add_definition : t -> Definition.t -> t
 
@@ -90,6 +91,8 @@ module rec Environment : sig
   val record_subtype : t -> super:Type.t -> sub:Type.t -> t
 
   val get_subtypes : t -> Type.t -> Type.t list
+
+  val debug : t -> string Lazy.t -> unit
 end = struct
   type t = {
     for_option: bool;
@@ -98,9 +101,18 @@ end = struct
     for_enum: bool;
     definitions: Definition.t list;
     subtypes: Type.t list TypeMap.t;
+    verbose: bool;
   }
 
-  let default =
+  let show { for_option; for_reified; for_alias; for_enum; _ } =
+    Format.sprintf
+      "{for_option: %b, for_reified: %b, for_alias: %b; for_enum: %b}"
+      for_option
+      for_reified
+      for_alias
+      for_enum
+
+  let default ~verbose =
     {
       for_option = false;
       for_reified = false;
@@ -108,6 +120,7 @@ end = struct
       for_enum = false;
       definitions = [];
       subtypes = TypeMap.empty;
+      verbose;
     }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
@@ -123,6 +136,13 @@ end = struct
 
   let get_subtypes env super =
     Option.value ~default:[] @@ TypeMap.find_opt super env.subtypes
+
+  let debug (Environment.{ verbose; _ } as env) str =
+    if verbose then begin
+      Format.eprintf "%s\n" (Lazy.force str);
+      Format.eprintf "  %s\n" (show env);
+      Out_channel.flush Out_channel.stderr
+    end
 end
 
 and Kind : sig
@@ -142,6 +162,7 @@ and Kind : sig
     | Awaitable
     | Function
     | Like
+  [@@deriving show { with_path = false }]
 
   val pick : Environment.t -> t
 
@@ -169,7 +190,7 @@ end = struct
     | Awaitable
     | Function
     | Like
-  [@@deriving enum, eq]
+  [@@deriving show, enum, eq]
 
   (* suppress warning about to_enum not used *)
   let _ = to_enum
@@ -445,8 +466,13 @@ end = struct
       can be immediately turned into an expression, e.g., an `arraykey` is
       eventually inhabited whereas `int` and `string` are immediately inhabited.
       *)
-  and subtype_of ~pick_immediately_inhabited env ty =
+  let subtype_of ~pick_immediately_inhabited env ty =
+    Environment.debug env
+    @@ lazy (Format.sprintf "subtypes_of: %s" (Type.show ty));
     let rec subfield_of { key; ty; optional } =
+      Environment.debug env
+      @@ lazy
+           (Format.sprintf "subtypes_of subfield_of %s: %s" key (Type.show ty));
       let ty = select @@ step ty in
       let optional =
         if optional then
@@ -456,6 +482,8 @@ end = struct
       in
       { key; ty; optional }
     and step ty =
+      Environment.debug env
+      @@ lazy (Format.sprintf "subtypes_of step: %s" (Type.show ty));
       ty
       :: begin
            Environment.get_subtypes env ty
@@ -531,6 +559,8 @@ end = struct
          end
     in
     let rec driver ty =
+      Environment.debug env
+      @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show ty));
       let tys = step ty in
       if Random.bool () then
         (* We decide to go on a stochastic walk and explore further subtypes. *)
@@ -668,7 +698,12 @@ end = struct
        we pay the price.
     *)
     let weaken_for_disjointness ty : t list =
-      let rec step ty =
+      Environment.debug env
+      @@ lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty));
+      let step ty =
+        Environment.debug env
+        @@ lazy
+             (Format.sprintf "weaken_for_disjointness step: %s" (Type.show ty));
         match ty with
         | Classish info when Kind.equal_classish info.kind Kind.Interface ->
           (* This can be improved on if we introduce an internal Object type which
@@ -703,7 +738,15 @@ end = struct
         | Primitive _ -> [ty]
         | Classish _ -> Environment.get_subtypes env ty
         | Like _ -> [Mixed]
-      and driver acc =
+      in
+      let rec driver acc =
+        Environment.debug env
+        @@ lazy
+             (Format.sprintf
+                "weaken_for_disjointness driver: %s"
+                (TypeSet.to_list acc
+                |> List.map ~f:Type.show
+                |> String.concat ~sep:","));
         let acc' =
           TypeSet.to_list acc
           |> List.concat_map ~f:step
@@ -846,6 +889,7 @@ end = struct
       env
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
+    Environment.debug env @@ lazy "mk_classish";
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
@@ -931,7 +975,9 @@ end = struct
         Environment.{ env with for_alias }
         ~pick_immediately_inhabited:false
     in
-    match Kind.pick env with
+    let kind = Kind.pick env in
+    Environment.debug env @@ lazy (Format.sprintf "mk %s" (Kind.show kind));
+    match kind with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
     | Kind.Option ->

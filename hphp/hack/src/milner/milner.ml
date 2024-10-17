@@ -33,8 +33,9 @@ let init_table contents placeholder =
 
 (* Generate types and conforming expressions for all placeholders in the
    template *)
-let generate_tables template =
-  let mk_type () = Gen.Type.mk Gen.Environment.default ~depth:None in
+let generate_tables ~verbose template =
+  let env = Gen.Environment.default ~verbose in
+  let mk_type () = Gen.Type.mk env ~depth:None in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let ty_table = Hashtbl.map ty_table ~f:mk_type in
@@ -95,7 +96,7 @@ let milner verbose seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (defs, ty_table, expr_table) = generate_tables template in
+  let (defs, ty_table, expr_table) = generate_tables ~verbose template in
   let output =
     fill_in_template ty_table expr_table template
     |> add_missing_definitions defs

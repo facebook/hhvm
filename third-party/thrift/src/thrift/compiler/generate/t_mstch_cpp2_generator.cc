@@ -2493,7 +2493,6 @@ void t_mstch_cpp2_generator::generate_reflection(const t_program* program) {
   // Unique Compile-time Strings, Metadata tags and Metadata registration
   render_to_file(prog, "module_fatal.h", name + "_fatal.h");
 
-  render_to_file(prog, "module_fatal_enum.h", name + "_fatal_enum.h");
   render_to_file(prog, "module_fatal_union.h", name + "_fatal_union.h");
   render_to_file(prog, "module_fatal_struct.h", name + "_fatal_struct.h");
   render_to_file(prog, "module_fatal_constant.h", name + "_fatal_constant.h");

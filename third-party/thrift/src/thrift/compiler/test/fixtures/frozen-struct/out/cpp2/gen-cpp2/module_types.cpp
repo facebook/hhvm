@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::some::ns::EnumB>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::some::ns::EnumB const*> const TEnumTraits<::some::ns::EnumB>::values = folly::range(TEnumDataStorage<::some::ns::EnumB>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::some::ns::EnumB>::names = folly::range(TEnumDataStorage<::some::ns::EnumB>::names);
 

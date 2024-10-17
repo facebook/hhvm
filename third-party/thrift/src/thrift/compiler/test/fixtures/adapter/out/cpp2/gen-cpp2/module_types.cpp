@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::facebook::thrift::test::Color>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::facebook::thrift::test::Color>::findValue(std::string_view na
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
 

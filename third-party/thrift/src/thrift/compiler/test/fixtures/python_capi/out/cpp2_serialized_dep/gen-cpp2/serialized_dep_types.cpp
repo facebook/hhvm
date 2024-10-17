@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "serialized_dep";
 
 
 namespace apache {

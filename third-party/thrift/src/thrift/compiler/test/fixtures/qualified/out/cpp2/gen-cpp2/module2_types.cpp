@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module2";
 
 
 namespace apache {

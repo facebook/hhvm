@@ -18,6 +18,7 @@
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<{{ > common/namespace_cpp2}}{{enum:cpp_name}} const*> const TEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}>::values = {{!
   }}{{#enum:empty?}}{{!
     }}{};{{!

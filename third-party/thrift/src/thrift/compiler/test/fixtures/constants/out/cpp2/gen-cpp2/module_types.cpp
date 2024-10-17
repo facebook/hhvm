@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/constants/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::cpp2::EmptyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::cpp2::EmptyEnum const*> const TEnumTraits<::cpp2::EmptyEnum>::values = {};
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::EmptyEnum>::names = {};
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::cpp2::EmptyEnum>::findValue(std::string_view name, type* out)
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::cpp2::City>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::cpp2::City const*> const TEnumTraits<::cpp2::City>::values = folly::range(TEnumDataStorage<::cpp2::City>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::City>::names = folly::range(TEnumDataStorage<::cpp2::City>::names);
 
@@ -46,6 +49,7 @@ bool TEnumTraits<::cpp2::City>::findValue(std::string_view name, type* out) noex
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::cpp2::Company>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::cpp2::Company const*> const TEnumTraits<::cpp2::Company>::values = folly::range(TEnumDataStorage<::cpp2::Company>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::cpp2::Company>::names = folly::range(TEnumDataStorage<::cpp2::Company>::names);
 

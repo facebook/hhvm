@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::basic-structured-annotations::MyEnum const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::basic-structured-annotations::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::names);
 

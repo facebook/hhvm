@@ -183,11 +183,10 @@ struct impl<T, type_class::string> {
 template <typename T>
 struct impl<T, type_class::enumeration> {
   static std::string rname() {
-    using extra = ::apache::thrift::detail::ExtraEnumTraits<T>;
-    using module_meta = reflect_module<typename extra::module>;
     return folly::to<std::string>(
         "enum ",
-        fs<module_meta>(),
+        apache::thrift::TEnumTraits<
+            T>::__fbthrift_module_name_internal_do_not_use,
         ".",
         apache::thrift::TEnumTraits<T>::typeName());
   }

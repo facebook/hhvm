@@ -25,6 +25,7 @@
 {{/program:any?}}
 
 #include "{{program:include_prefix}}{{program:name}}_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
 
 {{#program:any?}}
 {{ > common/namespace_cpp2_begin}}

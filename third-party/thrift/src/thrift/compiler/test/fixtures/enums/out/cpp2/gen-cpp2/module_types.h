@@ -225,6 +225,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   static constexpr std::size_t const size = 4;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -252,6 +253,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   static constexpr std::size_t const size = 6;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -279,6 +281,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -306,6 +309,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   static constexpr std::size_t const size = 6;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -333,6 +337,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   static constexpr std::size_t const size = 4;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -360,6 +365,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -387,6 +393,7 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;

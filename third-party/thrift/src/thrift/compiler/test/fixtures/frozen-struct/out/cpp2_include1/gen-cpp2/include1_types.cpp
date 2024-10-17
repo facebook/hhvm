@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "include1";
 
 
 namespace apache {

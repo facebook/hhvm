@@ -204,6 +204,7 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   static constexpr std::size_t const size = 5;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -231,6 +232,7 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -258,6 +260,7 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   static constexpr std::size_t const size = 4;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;

@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::enumstrict::EmptyEnum const*> const TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::values = {};
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::names = {};
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::test::fixtures::enumstrict::EmptyEnum>::findValue(std::string
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::enumstrict::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::enumstrict::MyEnum const*> const TEnumTraits<::test::fixtures::enumstrict::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enumstrict::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::names);
 
@@ -46,6 +49,7 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyEnum>::findValue(std::string_vi
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum const*> const TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::names);
 
@@ -62,6 +66,7 @@ bool TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum>::findV
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::enumstrict::MyBigEnum const*> const TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::enumstrict::MyBigEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::names);
 

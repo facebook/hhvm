@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/deprecated_terse_write_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "deprecated_terse_write";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::facebook::thrift::test::terse_write::deprecated::MyEnum const*> const TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyEnum>::names);
 

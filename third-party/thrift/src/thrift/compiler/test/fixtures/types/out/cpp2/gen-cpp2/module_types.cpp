@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::apache::thrift::fixtures::types::has_bitwise_ops const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names);
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::apache::thrift::fixtures::types::is_unscoped const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names);
 
@@ -46,6 +49,7 @@ bool TEnumTraits<::apache::thrift::fixtures::types::is_unscoped>::findValue(std:
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::apache::thrift::fixtures::types::MyForwardRefEnum const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names);
 

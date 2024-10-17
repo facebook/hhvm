@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/simple_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "simple";
 
 
 namespace apache {

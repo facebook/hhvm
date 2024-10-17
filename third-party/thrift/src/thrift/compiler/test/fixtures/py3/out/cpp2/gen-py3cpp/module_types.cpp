@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::AnEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::py3::simple::AnEnum const*> const TEnumTraits<::py3::simple::AnEnum>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnum>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnum>::names);
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::py3::simple::AnEnum>::findValue(std::string_view name, type* 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::AnEnumRenamed>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::py3::simple::AnEnumRenamed const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::values = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::AnEnumRenamed>::names = folly::range(TEnumDataStorage<::py3::simple::AnEnumRenamed>::names);
 
@@ -46,6 +49,7 @@ bool TEnumTraits<::py3::simple::AnEnumRenamed>::findValue(std::string_view name,
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::py3::simple::Flags>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::py3::simple::Flags const*> const TEnumTraits<::py3::simple::Flags>::values = folly::range(TEnumDataStorage<::py3::simple::Flags>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::py3::simple::Flags>::names = folly::range(TEnumDataStorage<::py3::simple::Flags>::names);
 

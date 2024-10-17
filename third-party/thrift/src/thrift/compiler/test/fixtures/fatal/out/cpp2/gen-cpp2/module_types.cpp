@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum1>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test_cpp2::cpp_reflection::enum1 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum1>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names);
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum1>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum2>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test_cpp2::cpp_reflection::enum2 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum2>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names);
 
@@ -46,6 +49,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum2>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum3>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test_cpp2::cpp_reflection::enum3 const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum3>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names);
 
@@ -62,6 +66,7 @@ bool TEnumTraits<::test_cpp2::cpp_reflection::enum3>::findValue(std::string_view
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test_cpp2::cpp_reflection::enum_with_special_names const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::values = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range(TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names);
 

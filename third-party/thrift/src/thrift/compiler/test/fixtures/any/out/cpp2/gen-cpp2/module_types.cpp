@@ -11,6 +11,7 @@
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 
 #include "thrift/compiler/test/fixtures/any/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 namespace facebook::thrift::compiler::test::fixtures::any {
 // Static-init time registration for dynamically-linked libraries.

@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "includes";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::a::different::ns::AnEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::a::different::ns::AnEnum const*> const TEnumTraits<::a::different::ns::AnEnum>::values = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::a::different::ns::AnEnum>::names = folly::range(TEnumDataStorage<::a::different::ns::AnEnum>::names);
 

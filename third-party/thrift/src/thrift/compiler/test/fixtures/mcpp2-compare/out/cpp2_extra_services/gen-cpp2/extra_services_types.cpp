@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/extra_services_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "extra_services";
 
 
 namespace apache {

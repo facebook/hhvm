@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "empty";
 
 
 namespace cpp2 { namespace {

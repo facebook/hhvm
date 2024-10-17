@@ -418,6 +418,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   static constexpr std::size_t const size = 5;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -445,6 +446,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   static constexpr std::size_t const size = 2;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
@@ -472,6 +474,7 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   static constexpr std::size_t const size = 2;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
+  static const std::string_view __fbthrift_module_name_internal_do_not_use;
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;

@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/deprecated_terse_writes_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "deprecated_terse_writes";
 
 
 namespace apache {

@@ -10,6 +10,7 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_no_uri_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module_no_uri";
 
 
 namespace apache {

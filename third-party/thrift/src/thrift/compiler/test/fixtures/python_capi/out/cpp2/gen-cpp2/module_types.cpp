@@ -10,10 +10,12 @@
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_data.h"
+[[maybe_unused]] static constexpr std::string_view kModuleName = "module";
 
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::python_capi::MyEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::python_capi::MyEnum const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::MyEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::MyEnum>::names);
 
@@ -30,6 +32,7 @@ bool TEnumTraits<::test::fixtures::python_capi::MyEnum>::findValue(std::string_v
 
 namespace apache { namespace thrift {
 
+const std::string_view TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::__fbthrift_module_name_internal_do_not_use = kModuleName;
 folly::Range<::test::fixtures::python_capi::NormalDecentEnum const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::values);
 folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::NormalDecentEnum>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::NormalDecentEnum>::names);
 

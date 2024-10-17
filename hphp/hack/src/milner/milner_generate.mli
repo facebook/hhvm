@@ -12,10 +12,16 @@ module Definition : sig
   val show : t -> string
 end
 
-module Environment : sig
+module ReadOnlyEnvironment : sig
   type t
 
   val default : verbose:bool -> t
+end
+
+module Environment : sig
+  type t
+
+  val default : t
 
   val definitions : t -> Definition.t list
 end
@@ -23,9 +29,13 @@ end
 module Type : sig
   type t
 
-  val inhabitant_of : Environment.t -> t -> string
-
   val show : t -> string
 
-  val mk : Environment.t -> depth:int option -> Environment.t * t
+  val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
+
+  val mk :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    depth:int option ->
+    Environment.t * t
 end

@@ -71,26 +71,16 @@ module Container = struct
   let pick () = Random.int_incl min max |> of_enum |> Option.value_exn
 end
 
-module rec Environment : sig
+module ReadOnlyEnvironment : sig
   type t = {
     for_option: bool;
     for_reified: bool;
     for_alias: bool;
     for_enum: bool;
-    definitions: Definition.t list;
-    subtypes: Type.t list TypeMap.t;
     verbose: bool;
   }
 
   val default : verbose:bool -> t
-
-  val add_definition : t -> Definition.t -> t
-
-  val definitions : t -> Definition.t list
-
-  val record_subtype : t -> super:Type.t -> sub:Type.t -> t
-
-  val get_subtypes : t -> Type.t -> Type.t list
 
   val debug : t -> string Lazy.t -> unit
 end = struct
@@ -99,10 +89,17 @@ end = struct
     for_reified: bool;
     for_alias: bool;
     for_enum: bool;
-    definitions: Definition.t list;
-    subtypes: Type.t list TypeMap.t;
     verbose: bool;
   }
+
+  let default ~verbose =
+    {
+      for_option = false;
+      for_reified = false;
+      for_alias = false;
+      for_enum = false;
+      verbose;
+    }
 
   let show { for_option; for_reified; for_alias; for_enum; _ } =
     Format.sprintf
@@ -112,16 +109,36 @@ end = struct
       for_alias
       for_enum
 
-  let default ~verbose =
-    {
-      for_option = false;
-      for_reified = false;
-      for_alias = false;
-      for_enum = false;
-      definitions = [];
-      subtypes = TypeMap.empty;
-      verbose;
-    }
+  let debug ({ verbose; _ } as renv) str =
+    if verbose then begin
+      Format.eprintf "%s\n" (Lazy.force str);
+      Format.eprintf "  %s\n" (show renv);
+      Out_channel.flush Out_channel.stderr
+    end
+end
+
+module rec Environment : sig
+  type t = {
+    definitions: Definition.t list;
+    subtypes: Type.t list TypeMap.t;
+  }
+
+  val default : t
+
+  val add_definition : t -> Definition.t -> t
+
+  val definitions : t -> Definition.t list
+
+  val record_subtype : t -> super:Type.t -> sub:Type.t -> t
+
+  val get_subtypes : t -> Type.t -> Type.t list
+end = struct
+  type t = {
+    definitions: Definition.t list;
+    subtypes: Type.t list TypeMap.t;
+  }
+
+  let default = { definitions = []; subtypes = TypeMap.empty }
 
   let add_definition env def = { env with definitions = def :: env.definitions }
 
@@ -136,13 +153,6 @@ end = struct
 
   let get_subtypes env super =
     Option.value ~default:[] @@ TypeMap.find_opt super env.subtypes
-
-  let debug (Environment.{ verbose; _ } as env) str =
-    if verbose then begin
-      Format.eprintf "%s\n" (Lazy.force str);
-      Format.eprintf "  %s\n" (show env);
-      Out_channel.flush Out_channel.stderr
-    end
 end
 
 and Kind : sig
@@ -164,7 +174,7 @@ and Kind : sig
     | Like
   [@@deriving show { with_path = false }]
 
-  val pick : Environment.t -> t
+  val pick : ReadOnlyEnvironment.t -> t
 
   type classish =
     | Class
@@ -195,25 +205,25 @@ end = struct
   (* suppress warning about to_enum not used *)
   let _ = to_enum
 
-  let pick env =
+  let pick renv =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
       |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
     in
     let kinds =
-      if env.Environment.for_alias then
+      if renv.ReadOnlyEnvironment.for_alias then
         List.filter ~f:(fun k -> not @@ equal k TypeConst) kinds
       else
         kinds
     in
     let kinds =
-      if env.Environment.for_reified then
+      if renv.ReadOnlyEnvironment.for_reified then
         List.filter ~f:(fun k -> not @@ equal k Function) kinds
       else
         kinds
     in
     let kinds =
-      if env.Environment.for_option then
+      if renv.ReadOnlyEnvironment.for_option then
         List.filter ~f:(fun k -> not @@ equal k Case) kinds
       else
         kinds
@@ -354,9 +364,13 @@ and Type : sig
 
   val show : t -> string
 
-  val inhabitant_of : Environment.t -> t -> string
+  val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
-  val mk : Environment.t -> depth:int option -> Environment.t * t
+  val mk :
+    ReadOnlyEnvironment.t ->
+    Environment.t ->
+    depth:int option ->
+    Environment.t * t
 end = struct
   type field = {
     key: string;
@@ -466,11 +480,11 @@ end = struct
       can be immediately turned into an expression, e.g., an `arraykey` is
       eventually inhabited whereas `int` and `string` are immediately inhabited.
       *)
-  let subtype_of ~pick_immediately_inhabited env ty =
-    Environment.debug env
+  let subtype_of ~pick_immediately_inhabited renv env ty =
+    ReadOnlyEnvironment.debug renv
     @@ lazy (Format.sprintf "subtypes_of: %s" (Type.show ty));
     let rec subfield_of { key; ty; optional } =
-      Environment.debug env
+      ReadOnlyEnvironment.debug renv
       @@ lazy
            (Format.sprintf "subtypes_of subfield_of %s: %s" key (Type.show ty));
       let ty = select @@ step ty in
@@ -482,7 +496,7 @@ end = struct
       in
       { key; ty; optional }
     and step ty =
-      Environment.debug env
+      ReadOnlyEnvironment.debug renv
       @@ lazy (Format.sprintf "subtypes_of step: %s" (Type.show ty));
       ty
       :: begin
@@ -559,7 +573,7 @@ end = struct
          end
     in
     let rec driver ty =
-      Environment.debug env
+      ReadOnlyEnvironment.debug renv
       @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show ty));
       let tys = step ty in
       if Random.bool () then
@@ -568,7 +582,7 @@ end = struct
       else if not pick_immediately_inhabited then begin
         let filtered_tys = tys in
         let filtered_tys =
-          if env.Environment.for_alias then
+          if renv.ReadOnlyEnvironment.for_alias then
             List.filter filtered_tys ~f:(function
                 | TypeConst _ -> false
                 | _ -> true)
@@ -576,7 +590,7 @@ end = struct
             filtered_tys
         in
         let filtered_tys =
-          if env.Environment.for_enum then
+          if renv.ReadOnlyEnvironment.for_enum then
             List.filter filtered_tys ~f:(function
                 | Case _ -> false
                 | _ -> true)
@@ -683,7 +697,7 @@ end = struct
       Format.sprintf "(function(%s%s): %s)" parameters variadic return_
     | Like ty -> "~" ^ show ty
 
-  let are_disjoint env ty ty' =
+  let are_disjoint (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
        it can only make disjointness more conservative.
@@ -698,10 +712,10 @@ end = struct
        we pay the price.
     *)
     let weaken_for_disjointness ty : t list =
-      Environment.debug env
+      ReadOnlyEnvironment.debug renv
       @@ lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty));
       let step ty =
-        Environment.debug env
+        ReadOnlyEnvironment.debug renv
         @@ lazy
              (Format.sprintf "weaken_for_disjointness step: %s" (Type.show ty));
         match ty with
@@ -740,7 +754,7 @@ end = struct
         | Like _ -> [Mixed]
       in
       let rec driver acc =
-        Environment.debug env
+        ReadOnlyEnvironment.debug renv
         @@ lazy
              (Format.sprintf
                 "weaken_for_disjointness driver: %s"
@@ -867,8 +881,9 @@ end = struct
     | Like _ ->
       None
 
-  let inhabitant_of env ty =
-    let subtype = subtype_of ~pick_immediately_inhabited:true env ty in
+  let inhabitant_of
+      (renv : ReadOnlyEnvironment.t) (env : Environment.t) (ty : t) =
+    let subtype = subtype_of ~pick_immediately_inhabited:true renv env ty in
     let inhabitant = expr_of subtype in
     match inhabitant with
     | Some inhabitant -> inhabitant
@@ -879,17 +894,19 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  let mk_arraykey env =
+  let mk_arraykey (renv : ReadOnlyEnvironment.t) (env : Environment.t) =
     subtype_of
       ~pick_immediately_inhabited:false
+      renv
       env
       (Primitive Primitive.Arraykey)
 
   let rec mk_classish
-      env
+      (renv : ReadOnlyEnvironment.t)
+      (env : Environment.t)
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
-    Environment.debug env @@ lazy "mk_classish";
+    ReadOnlyEnvironment.debug renv @@ lazy "mk_classish";
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
@@ -902,16 +919,14 @@ end = struct
           Kind.pick_classish ()
     in
     let gen_children env ~parent n =
+      let (kind, name, generic) = parent in
+      let super = Classish { kind; name; generic } in
       List.init n ~f:(fun _ -> ())
       |> List.fold ~init:env ~f:(fun env _ ->
-             let (env, child) =
-               mk_classish env ~parent:(Some parent) ~depth:(depth + 1)
-             in
-             let (kind, name, generic) = parent in
-             Environment.record_subtype
-               env
-               ~super:(Classish { kind; name; generic })
-               ~sub:child)
+             let parent = Some parent in
+             let depth = depth + 1 in
+             let (env, child) = mk_classish renv env ~parent ~depth in
+             Environment.record_subtype env ~super ~sub:child)
     in
     let (name, num_of_children) =
       match kind with
@@ -943,16 +958,17 @@ end = struct
           (not Kind.(equal_classish kind Interface)) && Random.bool ()
         in
         let (env, instantiation) =
-          let env =
-            Environment.
+          let renv =
+            ReadOnlyEnvironment.
               {
-                env with
+                renv with
                 for_option = false;
-                for_reified = is_reified || env.Environment.for_reified;
+                for_reified = is_reified || renv.ReadOnlyEnvironment.for_reified;
                 for_alias = false;
+                for_enum = false;
               }
           in
-          mk env ~depth:(Some depth)
+          mk renv env ~depth:(Some depth)
         in
         (env, Some { instantiation; is_reified })
       else
@@ -965,24 +981,28 @@ end = struct
     in
     (env, Classish { kind; name; generic })
 
-  and mk (env : Environment.t) ~(depth : int option) : Environment.t * t =
+  and mk
+      (renv : ReadOnlyEnvironment.t) (env : Environment.t) ~(depth : int option)
+      : Environment.t * t =
     let depth = Option.value ~default:0 depth in
-    let mk ?(for_alias = false) env =
-      mk Environment.{ env with for_alias } ~depth:(Some depth)
+    let mk ?(for_alias = false) renv env =
+      mk ReadOnlyEnvironment.{ renv with for_alias } env ~depth:(Some depth)
     in
-    let subtype_of ?(for_alias = false) env =
+    let subtype_of ?(for_alias = false) renv env =
       subtype_of
-        Environment.{ env with for_alias }
+        ReadOnlyEnvironment.{ renv with for_alias }
+        env
         ~pick_immediately_inhabited:false
     in
-    let kind = Kind.pick env in
-    Environment.debug env @@ lazy (Format.sprintf "mk %s" (Kind.show kind));
+    let kind = Kind.pick renv in
+    ReadOnlyEnvironment.debug renv
+    @@ lazy (Format.sprintf "mk %s" (Kind.show kind));
     match kind with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
     | Kind.Option ->
       let rec candidate () =
-        match mk Environment.{ env with for_option = true } with
+        match mk ReadOnlyEnvironment.{ renv with for_option = true } env with
         | (_, Mixed) -> candidate ()
         | (_, Option _) as res ->
           res
@@ -992,12 +1012,14 @@ end = struct
       in
       candidate ()
     | Kind.Awaitable ->
-      let (env, ty) = mk Environment.{ env with for_option = false } in
+      let (env, ty) =
+        mk ReadOnlyEnvironment.{ renv with for_option = false } env
+      in
       (env, Awaitable ty)
-    | Kind.Classish -> mk_classish env ~parent:None ~depth
+    | Kind.Classish -> mk_classish renv env ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
-      let (env, aliased) = mk env ~for_alias:true in
+      let (env, aliased) = mk renv env ~for_alias:true in
       let env =
         Environment.add_definition env @@ Definition.alias ~name aliased
       in
@@ -1006,11 +1028,11 @@ end = struct
       let name = fresh "N" in
       let (env, aliased, bound) =
         if Random.bool () then
-          let (env, bound) = mk env in
-          let aliased = subtype_of ~for_alias:true env bound in
+          let (env, bound) = mk renv env in
+          let aliased = subtype_of ~for_alias:true renv env bound in
           (env, aliased, Some bound)
         else
-          let (env, aliased) = mk ~for_alias:true env in
+          let (env, aliased) = mk ~for_alias:true renv env in
           (env, aliased, None)
       in
       let env =
@@ -1021,7 +1043,7 @@ end = struct
       (env, ty)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in
-      let (env, aliased) = mk env in
+      let (env, aliased) = mk renv env in
       let typeconst_def = Definition.typeconst ~name:tc_name aliased in
       let class_name = fresh "CTC" in
       let env =
@@ -1039,29 +1061,29 @@ end = struct
       let name = fresh "CT" in
       let (env, bound) =
         if Random.bool () then
-          let (env, bound) = mk env in
+          let (env, bound) = mk renv env in
           (env, Some bound)
         else
           (env, None)
       in
-      let mk env =
+      let mk renv env =
         match bound with
         | Some bound ->
-          let ty = subtype_of ~for_alias:true env bound in
+          let ty = subtype_of renv env ~for_alias:true bound in
           (env, ty)
-        | None -> mk env ~for_alias:true
+        | None -> mk renv env ~for_alias:true
       in
       let rec add_disjuncts (env, disjuncts) =
         if Random.bool () then
-          let (env, disjunct) = mk env in
-          if List.for_all disjuncts ~f:(are_disjoint env disjunct) then
+          let (env, disjunct) = mk renv env in
+          if List.for_all disjuncts ~f:(are_disjoint renv env disjunct) then
             add_disjuncts @@ (env, disjunct :: disjuncts)
           else
             add_disjuncts (env, disjuncts)
         else
           (env, disjuncts)
       in
-      let (env, ty) = mk env in
+      let (env, ty) = mk renv env in
       let (env, disjuncts) = add_disjuncts (env, [ty]) in
       let env =
         Environment.add_definition env
@@ -1082,18 +1104,23 @@ end = struct
       let ty = Enum { name } in
       let (env, bound, underlying_ty, value) =
         if Random.bool () then
-          let bound = mk_arraykey Environment.{ env with for_enum = true } in
-          let underlying_ty =
-            subtype_of Environment.{ env with for_enum = true } bound
+          let bound =
+            mk_arraykey ReadOnlyEnvironment.{ renv with for_enum = true } env
           in
-          let value = inhabitant_of env underlying_ty in
+          let underlying_ty =
+            subtype_of
+              ReadOnlyEnvironment.{ renv with for_enum = true }
+              env
+              bound
+          in
+          let value = inhabitant_of renv env underlying_ty in
           let env = Environment.record_subtype env ~super:bound ~sub:ty in
           (env, Some bound, underlying_ty, value)
         else
           let underlying_ty =
-            mk_arraykey Environment.{ env with for_enum = true }
+            mk_arraykey ReadOnlyEnvironment.{ renv with for_enum = true } env
           in
-          let value = inhabitant_of env underlying_ty in
+          let value = inhabitant_of renv env underlying_ty in
           let env = Environment.record_subtype env ~super:Mixed ~sub:ty in
           (env, None, underlying_ty, value)
       in
@@ -1103,33 +1130,34 @@ end = struct
       in
       (env, ty)
     | Kind.Container -> begin
-      let env = Environment.{ env with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
       match Container.pick () with
       | Container.Vec ->
-        let (env, ty) = mk env in
+        let (env, ty) = mk renv env in
         (env, Vec ty)
       | Container.Dict ->
-        let key = mk_arraykey env in
-        let (env, value) = mk env in
+        let key = mk_arraykey renv env in
+        let (env, value) = mk renv env in
         (env, Dict { key; value })
       | Container.Keyset ->
-        let ty = mk_arraykey env in
+        let ty = mk_arraykey renv env in
         (env, Keyset ty)
     end
     | Kind.Tuple ->
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
-      let env = Environment.{ env with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
       let (env, conjuncts) =
         List.init n ~f:(fun _ -> ())
-        |> List.fold_map ~init:env ~f:(fun env _ -> mk env)
+        |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)
       in
       (env, Tuple { conjuncts; open_ = false })
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
+      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
       let mk_field env key =
-        let (env, ty) = mk Environment.{ env with for_option = false } in
+        let (env, ty) = mk renv env in
         let optional = Random.bool () in
         (env, { key; optional; ty })
       in
@@ -1137,22 +1165,22 @@ end = struct
       let open_ = Random.bool () in
       (env, Shape { fields; open_ })
     | Kind.Function ->
-      let env = Environment.{ env with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
       let (env, parameters) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
-        |> List.fold_map ~init:env ~f:(fun env _ -> mk env)
+        |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)
       in
-      let (env, return_) = mk env in
+      let (env, return_) = mk renv env in
       let (env, variadic) =
         if Random.bool () then
           (env, None)
         else
-          let (env, ty) = mk env in
+          let (env, ty) = mk renv env in
           (env, Some ty)
       in
       (env, Function { parameters; variadic; return_ })
     | Kind.Like ->
-      let (env, ty) = mk env in
+      let (env, ty) = mk renv env in
       (env, Like ty)
 end
 

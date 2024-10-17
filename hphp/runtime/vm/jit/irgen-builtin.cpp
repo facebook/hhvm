@@ -587,10 +587,6 @@ SSATmp* genConcat(IRGS& env, std::vector<SSATmp*>&& tokens) {
 
   auto lhs = tokens[0];
   size_t frontier = 1;
-  // we want unique DecRefProfileIds for each of the decRef below
-  // emitRetC will use the DecRefProfileIds upto numLocals, so let's 
-  // use IDs over that
-  auto decrefBaseId = curFunc(env)->numLocals();
   while (frontier < tokens.size()) {
     auto const remaining = tokens.size() - frontier;
     if (remaining < 3) {
@@ -599,20 +595,14 @@ SSATmp* genConcat(IRGS& env, std::vector<SSATmp*>&& tokens) {
           always_assert(false);
         case 1:
           lhs = gen(env, ConcatStrStr, lhs, tokens[frontier]);
-          decRef(env, tokens[frontier], static_cast<DecRefProfileId>(decrefBaseId + frontier));
           break;
         case 2:
           lhs = gen(env, ConcatStr3, lhs, tokens[frontier], tokens[frontier+1]);
-          decRef(env, tokens[frontier], static_cast<DecRefProfileId>(decrefBaseId + frontier));
-          decRef(env, tokens[frontier+1], static_cast<DecRefProfileId>(decrefBaseId + frontier + 1));
           break;
       }
       frontier += remaining;
     } else {
       lhs = gen(env, ConcatStr4, lhs, tokens[frontier], tokens[frontier+1], tokens[frontier+2]);
-      decRef(env, tokens[frontier], static_cast<DecRefProfileId>(decrefBaseId + frontier));
-      decRef(env, tokens[frontier+1], static_cast<DecRefProfileId>(decrefBaseId + frontier + 1));
-      decRef(env, tokens[frontier+1], static_cast<DecRefProfileId>(decrefBaseId + frontier + 2));
       frontier += 3;
     }
   }

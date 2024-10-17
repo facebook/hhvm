@@ -847,7 +847,9 @@ void t_mstch_go_generator::generate_program() {
   if (data_.gen_metadata) {
     render_to_file(prog, "metadata.go", package_dir / "metadata.go");
   }
-  render_to_file(prog, "codec.go", package_dir / "codec.go");
+  if (data_.use_reflect_codec) {
+    render_to_file(prog, "codec.go", package_dir / "codec.go");
+  }
   if (program->has_doc()) {
     render_to_file(prog, "doc.go", package_dir / "doc.go");
   }

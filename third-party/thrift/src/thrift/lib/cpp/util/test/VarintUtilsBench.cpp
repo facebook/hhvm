@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
 }
 
 #if 0
-$ buck run @mode/opt-clang-thinlto --config=cxx.use_default_autofdo_profile=false \
+$ buck run @mode/opt-clang-thinlto \
     //thrift/lib/cpp/util/test:varint_utils_bench -- --bm_min_iters=1000000
 ============================================================================
 [...]ib/cpp/util/test/VarintUtilsBench.cpp     relative  time/iter   iters/s

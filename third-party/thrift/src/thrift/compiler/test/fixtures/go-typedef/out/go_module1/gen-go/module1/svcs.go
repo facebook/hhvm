@@ -189,6 +189,10 @@ func (p *FinderProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *FinderProcessor) PackageName() string {
+    return "module1"
+}
+
 func (p *FinderProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module1.Finder")
 }

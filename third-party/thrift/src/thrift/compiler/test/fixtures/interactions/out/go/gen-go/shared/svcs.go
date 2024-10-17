@@ -110,6 +110,10 @@ func (p *InteractLocallyProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *InteractLocallyProcessor) PackageName() string {
+    return "shared"
+}
+
 func (p *InteractLocallyProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("shared.InteractLocally")
 }

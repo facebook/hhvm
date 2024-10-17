@@ -134,6 +134,10 @@ func (p *FooServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *FooServiceProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *FooServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.FooService")
 }
@@ -300,6 +304,10 @@ func (p *FB303ServiceProcessor) ProcessorFunctionMap() map[string]thrift.Process
 
 func (p *FB303ServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *FB303ServiceProcessor) PackageName() string {
+    return "module"
 }
 
 func (p *FB303ServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
@@ -688,6 +696,10 @@ func (p *MyServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorF
 
 func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *MyServiceProcessor) PackageName() string {
+    return "module"
 }
 
 func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
@@ -1340,6 +1352,10 @@ func (p *DbMixedStackArgumentsProcessor) ProcessorFunctionMap() map[string]thrif
 
 func (p *DbMixedStackArgumentsProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *DbMixedStackArgumentsProcessor) PackageName() string {
+    return "module"
 }
 
 func (p *DbMixedStackArgumentsProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

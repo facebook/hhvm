@@ -136,6 +136,10 @@ func (p *MyServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *MyServiceProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyService")
 }
@@ -301,6 +305,10 @@ func (p *FactoriesProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorF
 
 func (p *FactoriesProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *FactoriesProcessor) PackageName() string {
+    return "module"
 }
 
 func (p *FactoriesProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
@@ -470,6 +478,10 @@ func (p *PerformProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *PerformProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *PerformProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Perform")
 }
@@ -635,6 +647,10 @@ func (p *InteractWithSharedProcessor) ProcessorFunctionMap() map[string]thrift.P
 
 func (p *InteractWithSharedProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
+}
+
+func (p *InteractWithSharedProcessor) PackageName() string {
+    return "module"
 }
 
 func (p *InteractWithSharedProcessor) GetThriftMetadata() *metadata.ThriftMetadata {

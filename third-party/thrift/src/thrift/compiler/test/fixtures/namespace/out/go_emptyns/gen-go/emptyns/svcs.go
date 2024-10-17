@@ -135,6 +135,10 @@ func (p *TestServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *TestServiceProcessor) PackageName() string {
+    return "emptyns"
+}
+
 func (p *TestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("emptyns.TestService")
 }

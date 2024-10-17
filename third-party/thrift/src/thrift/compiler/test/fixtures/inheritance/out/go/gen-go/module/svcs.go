@@ -134,6 +134,10 @@ func (p *MyRootProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *MyRootProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *MyRootProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyRoot")
 }

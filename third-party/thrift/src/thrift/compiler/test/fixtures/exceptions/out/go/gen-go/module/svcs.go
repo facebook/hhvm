@@ -218,6 +218,10 @@ func (p *RaiserProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *RaiserProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *RaiserProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Raiser")
 }

@@ -82,6 +82,10 @@ func (p *{{service:go_name}}Processor) ProcessorFunctionMap() map[string]thrift.
 func (p *{{service:go_name}}Processor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
+
+func (p *{{service:go_name}}Processor) PackageName() string {
+    return "{{program:go_pkg_name}}"
+}
 {{/service:extends?}}
 
 {{#program:gen_metadata?}}

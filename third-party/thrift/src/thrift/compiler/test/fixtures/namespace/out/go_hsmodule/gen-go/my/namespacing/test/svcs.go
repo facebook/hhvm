@@ -135,6 +135,10 @@ func (p *HsTestServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *HsTestServiceProcessor) PackageName() string {
+    return "test"
+}
+
 func (p *HsTestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("hsmodule.HsTestService")
 }

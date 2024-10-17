@@ -162,6 +162,10 @@ func (p *SomeServiceProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *SomeServiceProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *SomeServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SomeService")
 }

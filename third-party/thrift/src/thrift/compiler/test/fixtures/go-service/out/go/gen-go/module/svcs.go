@@ -655,6 +655,10 @@ func (p *GetEntityProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *GetEntityProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *GetEntityProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.GetEntity")
 }

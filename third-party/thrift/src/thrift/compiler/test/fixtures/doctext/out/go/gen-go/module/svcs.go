@@ -163,6 +163,10 @@ func (p *CProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *CProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *CProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.C")
 }

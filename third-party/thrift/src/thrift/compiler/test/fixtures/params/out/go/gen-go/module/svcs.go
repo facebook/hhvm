@@ -235,6 +235,10 @@ func (p *NestedContainersProcessor) FunctionServiceMap() map[string]string {
     return p.functionServiceMap
 }
 
+func (p *NestedContainersProcessor) PackageName() string {
+    return "module"
+}
+
 func (p *NestedContainersProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.NestedContainers")
 }

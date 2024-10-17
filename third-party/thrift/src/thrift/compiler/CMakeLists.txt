@@ -134,10 +134,9 @@ add_library(
   generate/cpp/util.cc
   generate/go/util.cc
   generate/java/util.cc
+  generate/py3/util.cpp
+  generate/python/util.cc
   generate/rust/util.cc
-
-  lib/py3/util.cpp
-  lib/python/util.cc
 )
 target_link_libraries(
   compiler

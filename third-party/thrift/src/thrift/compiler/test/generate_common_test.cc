@@ -20,7 +20,7 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/generate/common.h>
-#include <thrift/compiler/lib/py3/util.h>
+#include <thrift/compiler/generate/py3/util.h>
 
 namespace apache::thrift::compiler {
 

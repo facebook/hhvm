@@ -33,9 +33,9 @@
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
+#include <thrift/compiler/generate/py3/util.h>
+#include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/py3/util.h>
-#include <thrift/compiler/lib/python/util.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
 

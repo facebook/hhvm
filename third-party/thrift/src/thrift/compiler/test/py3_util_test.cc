@@ -18,7 +18,7 @@
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/lib/py3/util.h>
+#include <thrift/compiler/generate/py3/util.h>
 
 using namespace apache::thrift::compiler;
 

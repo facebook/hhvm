@@ -17,7 +17,7 @@
 #include <regex>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <thrift/compiler/lib/py3/util.h>
+#include <thrift/compiler/generate/py3/util.h>
 
 namespace apache::thrift::compiler {
 

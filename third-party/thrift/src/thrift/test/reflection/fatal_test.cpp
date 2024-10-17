@@ -227,13 +227,6 @@ namespace cpp_reflection {
 TEST(fatal, reflect_module_tag) {
   using tag = reflection_tags::module;
 
-  EXPECT_SAME<tag, apache::thrift::reflect_module_tag<enum1>>();
-  EXPECT_SAME<tag, apache::thrift::reflect_module_tag<enum2>>();
-  EXPECT_SAME<tag, apache::thrift::reflect_module_tag<enum3>>();
-  EXPECT_SAME<
-      tag,
-      apache::thrift::reflect_module_tag<enum_with_special_names>>();
-
   EXPECT_SAME<tag, apache::thrift::reflect_module_tag<union1>>();
   EXPECT_SAME<tag, apache::thrift::reflect_module_tag<union2>>();
   EXPECT_SAME<tag, apache::thrift::reflect_module_tag<union3>>();
@@ -255,13 +248,6 @@ TEST(fatal, reflect_module_tag) {
 
 TEST(fatal, try_reflect_module_tag) {
   using tag = reflection_tags::module;
-
-  EXPECT_SAME<tag, apache::thrift::try_reflect_module_tag<enum1, void>>();
-  EXPECT_SAME<tag, apache::thrift::try_reflect_module_tag<enum2, void>>();
-  EXPECT_SAME<tag, apache::thrift::try_reflect_module_tag<enum3, void>>();
-  EXPECT_SAME<
-      tag,
-      apache::thrift::try_reflect_module_tag<enum_with_special_names, void>>();
 
   EXPECT_SAME<tag, apache::thrift::try_reflect_module_tag<union1, void>>();
   EXPECT_SAME<tag, apache::thrift::try_reflect_module_tag<union2, void>>();

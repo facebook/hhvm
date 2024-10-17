@@ -69,7 +69,7 @@ struct reflect_type_class_of_thrift_class_enum_impl {
 
 template <typename T, bool IsTry>
 struct reflect_module_tag_selector<type_class::enumeration, T, IsTry> {
-  using type = typename ExtraEnumTraits<T>::module;
+  static_assert(folly::always_false<T>);
 };
 
 template <typename T, bool IsTry>

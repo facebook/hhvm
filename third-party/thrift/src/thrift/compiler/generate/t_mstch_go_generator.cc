@@ -455,9 +455,12 @@ class mstch_go_struct : public mstch_struct {
             {"struct:go_qualified_name", &mstch_go_struct::go_qualified_name},
             {"struct:go_qualified_new_func",
              &mstch_go_struct::go_qualified_new_func},
+            {"struct:go_package_alias_prefix",
+             &mstch_go_struct::go_package_alias_prefix_},
             {"struct:go_public_req_name", &mstch_go_struct::go_public_req_name},
             {"struct:go_public_resp_name",
              &mstch_go_struct::go_public_resp_name},
+            {"struct:struct_spec_name", &mstch_go_struct::struct_spec_name},
             {"struct:req_resp?", &mstch_go_struct::is_req_resp_struct},
             {"struct:resp?", &mstch_go_struct::is_resp_struct},
             {"struct:req?", &mstch_go_struct::is_req_struct},
@@ -474,6 +477,9 @@ class mstch_go_struct : public mstch_struct {
   mstch::node go_qualified_new_func() {
     auto prefix = data_.go_package_alias_prefix(struct_->program());
     return prefix + go_new_func_();
+  }
+  mstch::node go_package_alias_prefix_() {
+    return data_.go_package_alias_prefix(struct_->program());
   }
   mstch::node is_req_resp_struct() {
     // Whether this is a helper request or response struct.
@@ -496,6 +502,9 @@ class mstch_go_struct : public mstch_struct {
   mstch::node go_public_resp_name() {
     return boost::algorithm::erase_first_copy(struct_->name(), "resp") +
         "ResultDeprecated";
+  }
+  mstch::node struct_spec_name() {
+    return "premadeStructSpec_" + struct_->name();
   }
   mstch::node fields_sorted() {
     return make_mstch_fields(struct_->get_sorted_members());
@@ -688,6 +697,9 @@ class mstch_go_type : public mstch_type {
             {"type:metadata_name", &mstch_go_type::metadata_name},
             {"type:metadata_thrift_type_getter",
              &mstch_go_type::metadata_thrift_type_getter},
+            {"type:codec_type_spec_name", &mstch_go_type::codec_type_spec_name},
+            {"type:codec_type_spec_getter",
+             &mstch_go_type::codec_type_spec_getter},
         });
   }
 
@@ -701,6 +713,7 @@ class mstch_go_type : public mstch_type {
   mstch::node has_name() { return !type_->name().empty(); }
   mstch::node full_name() { return type_->get_full_name(); }
   mstch::node metadata_name() { return metadata_name_(); }
+  mstch::node codec_type_spec_name() { return codec_type_spec_name_(); }
   mstch::node metadata_thrift_type_getter() {
     // Program will be null for primitive (base) types.
     // They should be treated as being from the current program.
@@ -720,12 +733,34 @@ class mstch_go_type : public mstch_type {
           type_->get_full_name());
     }
   }
+  mstch::node codec_type_spec_getter() {
+    // Program will be null for primitive (base) types.
+    // They should be treated as being from the current program.
+    auto is_from_current_program = type_->get_program() == nullptr ||
+        data_.is_current_program(type_->get_program());
+
+    if (is_from_current_program) {
+      // If the type is from the current program, we can simply use its
+      // corresponding *ThriftType variable already present in the program.
+      return codec_type_spec_name_();
+    } else {
+      // If the type is external, we must retrieve it from its corresponding
+      // program/package using GetMetadataThriftType helper method.
+      return fmt::format(
+          "{}.GetCodecTypeSpec(\"{}\")",
+          data_.get_go_package_alias(type_->program()),
+          type_->get_full_name());
+    }
+  }
 
  private:
   go::codegen_data& data_;
 
   std::string metadata_name_() {
     return "premadeThriftType_" + sanitized_full_name_();
+  }
+  mstch::node codec_type_spec_name_() {
+    return "premadeCodecTypeSpec_" + sanitized_full_name_();
   }
   std::string sanitized_full_name_() {
     std::string full_name = type_->get_full_name();

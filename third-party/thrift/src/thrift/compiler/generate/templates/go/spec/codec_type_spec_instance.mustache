@@ -1,0 +1,72 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+  This template defines a codec spec for a Thrift type.
+
+}}
+{{#type:typedef?}}
+{{#type:typedef}}
+{{#typedef:defined_kind?}}
+&thrift.CodecTypedefSpec{
+	UnderlyingTypeSpec: {{#type:typedef_type}}{{type:codec_type_spec_getter}}{{/type:typedef_type}},
+},
+{{/typedef:defined_kind?}}
+{{^typedef:defined_kind?}}
+{{#type:typedef_type}}
+{{> spec/codec_type_spec_instance}}
+{{/type:typedef_type}}
+{{/typedef:defined_kind?}}
+{{/type:typedef}}
+{{/type:typedef?}}
+{{^type:typedef?}}
+{{#type:base?}}
+&thrift.CodecPrimitiveSpec{
+    PrimitiveType: thrift.{{> spec/codec_primitive_type}},
+},
+{{/type:base?}}
+{{#type:enum?}}
+{{#type:enum}}
+&thrift.CodecEnumSpec{},
+{{/type:enum}}
+{{/type:enum?}}
+{{#type:struct?}}
+{{#type:struct}}
+&thrift.CodecStructSpec{},
+{{/type:struct}}
+{{/type:struct?}}
+{{#type:list?}}
+&thrift.CodecListSpec{
+    ElementWireType: {{#type:list_elem_type}}{{> common/ttype}}{{/type:list_elem_type}},
+	ElementTypeSpec: {{#type:list_elem_type}}{{type:codec_type_spec_getter}}{{/type:list_elem_type}},
+},
+{{/type:list?}}
+{{#type:map?}}
+&thrift.CodecMapSpec{
+	KeyTypeSpec:   {{#type:key_type}}{{type:codec_type_spec_getter}}{{/type:key_type}},
+	ValueTypeSpec: {{#type:value_type}}{{type:codec_type_spec_getter}}{{/type:value_type}},
+    KeyWireType:   {{#type:key_type}}{{> common/ttype}}{{/type:key_type}},
+	ValueWireType: {{#type:value_type}}{{> common/ttype}}{{/type:value_type}},
+},
+{{/type:map?}}
+{{#type:set?}}
+&thrift.CodecSetSpec{
+    ElementWireType: {{#type:set_elem_type}}{{> common/ttype}}{{/type:set_elem_type}},
+	ElementTypeSpec: {{#type:set_elem_type}}{{type:codec_type_spec_getter}}{{/type:set_elem_type}},
+},
+{{/type:set?}}
+{{/type:typedef?}}

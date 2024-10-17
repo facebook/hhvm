@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.util.resources;
 
-import com.facebook.thrift.metrics.Ewma;
+import com.facebook.thrift.metrics.rate.ExpMovingAverageRate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 final class ForkJoinPoolSchedulerStats {
   private static final Logger LOGGER = LoggerFactory.getLogger(ForkJoinPoolSchedulerStats.class);
   private final String name;
-  private final Ewma pending;
-  private final Ewma active;
+  private final ExpMovingAverageRate pending;
+  private final ExpMovingAverageRate active;
   private final LongAdder disposed;
   private final LongAdder completed;
 
@@ -37,20 +37,20 @@ final class ForkJoinPoolSchedulerStats {
 
   ForkJoinPoolSchedulerStats(String name) {
     this.name = name;
-    this.pending = Ewma.oneMinuteDecay();
-    this.active = Ewma.oneMinuteDecay();
+    this.pending = new ExpMovingAverageRate();
+    this.active = new ExpMovingAverageRate();
     this.disposed = new LongAdder();
     this.completed = new LongAdder();
     this.executionTime = new Recorder(3, false);
   }
 
   public long incrementPendingAndStartRecordingTime() {
-    pending.insert(1);
+    pending.add(1);
     return System.nanoTime();
   }
 
   public void incrementActiveTasks() {
-    active.insert(1);
+    active.add(1);
   }
 
   public void incrementDisposedTasksAndRecordTime(long ignore) {
@@ -66,12 +66,12 @@ final class ForkJoinPoolSchedulerStats {
   public Map<String, Long> getStats() {
     Map<String, Long> stats = new HashMap<>();
 
-    double result = pending.value();
+    double result = pending.oneMinuteRate();
     stats.put(
         "thrift." + name + ".pending_tasks.avg.60",
         Double.isInfinite(result) ? 0L : Math.round(result));
 
-    result = active.value();
+    result = active.oneMinuteRate();
     stats.put(
         "thrift." + name + ".active_tasks.avg.60",
         Double.isInfinite(result) ? 0L : Math.round(result));

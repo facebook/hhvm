@@ -115,12 +115,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
       $result->success = await $this->handler->second($args->count);
       $this->eventHandler_->postExec($handler_ctx, 'second', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'second', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'second', $ex);
@@ -151,12 +145,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'MyService', 'second', $args);
       $result->success = $this->handler->second($args->count);
       $this->eventHandler_->postExec($handler_ctx, 'second', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'second', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'second', $ex);

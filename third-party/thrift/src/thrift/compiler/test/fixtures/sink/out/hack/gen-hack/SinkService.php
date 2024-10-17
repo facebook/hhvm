@@ -971,7 +971,7 @@ class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResu
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is InitialException) {
       $this->ex = $e;
       return true;
@@ -1357,7 +1357,7 @@ class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResul
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is SinkException1) {
       $this->ex = $e;
       return true;
@@ -1743,7 +1743,7 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is SinkException2) {
       $this->ex = $e;
       return true;
@@ -1967,7 +1967,7 @@ class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResul
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is SinkException1) {
       $this->ex = $e;
       return true;
@@ -2087,7 +2087,7 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is SinkException2) {
       $this->ex = $e;
       return true;

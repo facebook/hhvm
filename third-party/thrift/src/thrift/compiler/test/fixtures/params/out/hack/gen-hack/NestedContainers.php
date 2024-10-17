@@ -331,12 +331,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
       await $this->handler->mapList($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapList', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'mapList', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'mapList', $ex);
@@ -353,12 +347,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
       await $this->handler->mapSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapSet', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $ex);
@@ -375,12 +363,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
       await $this->handler->listMap($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listMap', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'listMap', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'listMap', $ex);
@@ -397,12 +379,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
       await $this->handler->listSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listSet', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'listSet', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'listSet', $ex);
@@ -419,12 +395,6 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
       await $this->handler->turtles($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'turtles', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'turtles', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'turtles', $ex);
@@ -455,12 +425,6 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapList', $args);
       $this->handler->mapList($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapList', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'mapList', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'mapList', $ex);
@@ -477,12 +441,6 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'mapSet', $args);
       $this->handler->mapSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'mapSet', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'mapSet', $ex);
@@ -499,12 +457,6 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listMap', $args);
       $this->handler->listMap($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listMap', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'listMap', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'listMap', $ex);
@@ -521,12 +473,6 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'listSet', $args);
       $this->handler->listSet($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'listSet', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'listSet', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'listSet', $ex);
@@ -543,12 +489,6 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, 'NestedContainers', 'turtles', $args);
       $this->handler->turtles($args->foo);
       $this->eventHandler_->postExec($handler_ctx, 'turtles', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'turtles', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'turtles', $ex);

@@ -809,7 +809,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -1104,7 +1104,7 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -1375,7 +1375,7 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e1 = $e;
       return true;
@@ -1568,7 +1568,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -1661,7 +1661,7 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -1850,7 +1850,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -2191,7 +2191,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -2380,7 +2380,7 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -2495,7 +2495,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;

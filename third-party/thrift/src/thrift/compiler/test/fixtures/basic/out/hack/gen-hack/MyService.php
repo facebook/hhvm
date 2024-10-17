@@ -466,12 +466,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
@@ -488,12 +482,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $ex);
@@ -510,12 +498,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       await $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'sink', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'sink', $ex);
@@ -532,12 +514,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $ex);
@@ -554,12 +530,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $ex);
@@ -576,12 +546,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $ex);
@@ -598,12 +562,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       await $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'deleteDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'deleteDataById', $ex);
@@ -618,7 +576,6 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
-    } catch (\TException $exc) {
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'lobDataById', $ex);
@@ -649,12 +606,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'ping', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'ping', $ex);
@@ -671,12 +622,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getRandomData', $ex);
@@ -693,12 +638,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'sink', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'sink', $ex);
@@ -715,12 +654,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'putDataById', $ex);
@@ -737,12 +670,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'hasDataById', $ex);
@@ -759,12 +686,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataById', $ex);
@@ -781,12 +702,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'deleteDataById', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'deleteDataById', $ex);
@@ -801,7 +716,6 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
     try {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       $this->handler->lobDataById($args->id, $args->data);
-    } catch (\TException $exc) {
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'lobDataById', $ex);

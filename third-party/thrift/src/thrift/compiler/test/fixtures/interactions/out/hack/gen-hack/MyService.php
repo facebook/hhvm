@@ -928,7 +928,7 @@ class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithRes
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is CustomException) {
       $this->ex = $e;
       return true;

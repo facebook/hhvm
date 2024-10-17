@@ -171,12 +171,6 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = await $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $ex);
@@ -193,12 +187,6 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = await $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $ex);
@@ -229,12 +217,6 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey0', $args);
       $result->success = $this->handler->getDataByKey0($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey0', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey0', $ex);
@@ -251,12 +233,6 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\DbMixedStackArguments', 'getDataByKey1', $args);
       $result->success = $this->handler->getDataByKey1($args->key);
       $this->eventHandler_->postExec($handler_ctx, 'getDataByKey1', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'getDataByKey1', $ex);

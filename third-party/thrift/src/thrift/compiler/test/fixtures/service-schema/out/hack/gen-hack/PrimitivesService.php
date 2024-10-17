@@ -539,7 +539,7 @@ class PrimitivesService_method_that_throws_result extends \ThriftSyncStructWithR
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is CustomException) {
       $this->e = $e;
       return true;

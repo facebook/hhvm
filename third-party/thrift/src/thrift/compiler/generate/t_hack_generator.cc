@@ -4472,7 +4472,7 @@ void t_hack_generator::generate_exception_method(
   indent(out) << "}\n";
 
   indent(out) << "\n";
-  indent(out) << "public function setException(\\TException $e): bool {\n";
+  indent(out) << "public function setException(\\Exception $e): bool {\n";
   indent_up();
   it = fields.begin() + (fields[0].name() == "success");
   for (; it != fields.end(); ++it) {
@@ -5823,34 +5823,41 @@ void t_hack_generator::generate_process_function(
                        << fn_name << "', $result);\n";
   }
   indent_down();
-  f_service_ << indent() << "} catch (\\TException $exc) {\n";
+  f_service_ << indent() << "} catch (\\Exception $ex) {\n";
   indent_up();
-  if (tfunction->qualifier() != t_function_qualifier::oneway) {
-    f_service_ << indent()
-               << "$this->eventHandler_->handlerError($handler_ctx, '"
-               << fn_name << "', $exc);\n"
-               << indent() << "if ($result->setException($exc)) {\n";
+  if (tfunction->qualifier() != t_function_qualifier::oneway &&
+      !get_elems(tfunction->exceptions()).empty()) {
+    f_service_ << indent() << "if ($result->setException($ex)) {\n";
     indent_up();
-    // If it is not a declared exception, wrap it in an application exception
+    f_service_ << indent()
+               << "$this->eventHandler_->handlerException($handler_ctx, '"
+               << fn_name << "', $ex);\n";
+    indent_down();
+    f_service_ << indent() << "} else {\n";
+    indent_up();
+    // If $ex is not a declared exception, wrap it in an application exception
     f_service_ << indent() << "$reply_type = \\TMessageType::EXCEPTION;\n"
                << indent()
+               << "$this->eventHandler_->handlerError($handler_ctx, '"
+               << fn_name << "', $ex);\n"
+               << indent()
                << "$result = new "
-                  "\\TApplicationException($exc->getMessage().\"\\n\".$exc->"
+                  "\\TApplicationException($ex->getMessage().\"\\n\".$ex->"
                   "getTraceAsString());\n";
     indent_down();
     f_service_ << indent() << "}\n";
+  } else {
+    f_service_ << indent() << "$reply_type = \\TMessageType::EXCEPTION;\n"
+               << indent()
+               << "$this->eventHandler_->handlerError($handler_ctx, '"
+               << fn_name << "', $ex);\n"
+               << indent()
+               << "$result = new "
+                  "\\TApplicationException($ex->getMessage().\"\\n\".$ex->"
+                  "getTraceAsString());\n";
   }
   indent_down();
-  f_service_ << indent() << "} catch (\\Exception $ex) {\n"
-             << indent() << "  $reply_type = \\TMessageType::EXCEPTION;\n"
-             << indent()
-             << "  $this->eventHandler_->handlerError($handler_ctx, '"
-             << fn_name << "', $ex);\n"
-             << indent()
-             << "  $result = new "
-                "\\TApplicationException($ex->getMessage().\"\\n\".$ex->"
-                "getTraceAsString());\n"
-             << indent() << "}\n";
+  f_service_ << indent() << "}\n";
 
   // Shortcut out here for oneway functions
   if (tfunction->qualifier() == t_function_qualifier::oneway) {

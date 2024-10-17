@@ -553,7 +553,7 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \I
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is Banal) {
       $this->b = $e;
       return true;
@@ -912,7 +912,7 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is Fiery) {
       $this->f = $e;
       return true;

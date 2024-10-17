@@ -393,12 +393,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'returnstream', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstream_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'returnstream', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'returnstream', $ex);
@@ -418,12 +412,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'streamthrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_streamthrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'streamthrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'streamthrows', $ex);
@@ -443,16 +431,14 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'servicethrows', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'servicethrows', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
     }
     $this->writeHelper($result, 'servicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
@@ -468,16 +454,14 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_servicethrows2_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows2', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'servicethrows2', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'servicethrows2', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'servicethrows2', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
     }
     $this->writeHelper($result, 'servicethrows2', $seqid, $handler_ctx, $output, $reply_type);
   }
@@ -493,16 +477,14 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_boththrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'boththrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'boththrows', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'boththrows', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'boththrows', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
     }
     $this->writeHelper($result, 'boththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
@@ -519,12 +501,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'responseandstreamstreamthrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamstreamthrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamstreamthrows', $ex);
@@ -545,16 +521,14 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamservicethrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamservicethrows', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'responseandstreamservicethrows', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamservicethrows', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
     }
     $this->writeHelper($result, 'responseandstreamservicethrows', $seqid, $handler_ctx, $output, $reply_type);
   }
@@ -571,16 +545,14 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamboththrows', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamboththrows', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'responseandstreamboththrows', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'responseandstreamboththrows', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
     }
     $this->writeHelper($result, 'responseandstreamboththrows', $seqid, $handler_ctx, $output, $reply_type);
   }
@@ -596,12 +568,6 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
       $this->writeHelper($result, 'returnstreamFast', $seqid, $handler_ctx, $output, $reply_type);
       await $this->genExecuteStream($response_and_stream->stream, PubSubStreamingService_returnstreamFast_StreamResponse::class, $output);
       return;
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'returnstreamFast', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'returnstreamFast', $ex);
@@ -1037,7 +1003,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -1332,7 +1298,7 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -1603,7 +1569,7 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e1 = $e;
       return true;
@@ -1796,7 +1762,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -1889,7 +1855,7 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -2078,7 +2044,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -2419,7 +2385,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;
@@ -2608,7 +2574,7 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooStreamEx) {
       $this->e = $e;
       return true;
@@ -2723,7 +2689,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
     return null;
   }
   
-  public function setException(\TException $e): bool {
+  public function setException(\Exception $e): bool {
     if ($e is FooEx) {
       $this->e = $e;
       return true;

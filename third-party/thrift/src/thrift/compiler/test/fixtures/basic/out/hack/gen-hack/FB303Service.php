@@ -122,12 +122,6 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = await $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $ex);
@@ -158,12 +152,6 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
-    } catch (\TException $exc) {
-      $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $exc);
-      if ($result->setException($exc)) {
-        $reply_type = \TMessageType::EXCEPTION;
-        $result = new \TApplicationException($exc->getMessage()."\n".$exc->getTraceAsString());
-      }
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
       $this->eventHandler_->handlerError($handler_ctx, 'renamed_rpc', $ex);

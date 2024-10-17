@@ -244,6 +244,11 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(Color.red, Enum)
         self.assertTrue(issubclass(Color, Enum))
 
+    def test_callable(self) -> None:
+        vals = range(3)
+        colors = list(map(Color, vals))
+        self.assertEqual(colors, list(Color))
+
 
 class EnumMetaTests(unittest.TestCase):
     def test_iter_forward_compatible(self) -> None:

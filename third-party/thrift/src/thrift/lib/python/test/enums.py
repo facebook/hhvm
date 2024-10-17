@@ -334,6 +334,12 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(self.Color.red, Enum)
         self.assertTrue(issubclass(self.Color, Enum))
 
+    def test_callable(self) -> None:
+        vals = range(3)
+        # this is done to verify pyre typestub more than anything
+        colors = list(map(self.Color, vals))
+        self.assertEqual(colors, list(self.Color))
+
 
 # tt = test_types, ser = serializer
 @parameterized_class(

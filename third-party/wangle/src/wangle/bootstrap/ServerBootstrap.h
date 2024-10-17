@@ -79,6 +79,13 @@ class ServerBootstrap {
     return this;
   }
 
+  ServerBootstrap* useConnectionEventCallback(
+      std::shared_ptr<folly::AsyncServerSocket::ConnectionEventCallback>
+          connectionEventCallback) {
+    connectionEventCallback_ = connectionEventCallback;
+    return this;
+  }
+
   /*
    * BACKWARDS COMPATIBILITY - an acceptor factory can be set.  Your
    * Acceptor is responsible for managing the connection pool.
@@ -234,7 +241,11 @@ class ServerBootstrap {
     auto startupFunc = [&](std::shared_ptr<folly::Baton<>> barrier) {
       try {
         auto socket = socketFactory_->newSocket(
-            address, socketConfig.acceptBacklog, reusePort, socketConfig);
+            address,
+            socketConfig.acceptBacklog,
+            reusePort,
+            socketConfig,
+            connectionEventCallback_.get());
         sock_lock.lock();
         new_sockets.push_back(socket);
         sock_lock.unlock();
@@ -385,6 +396,8 @@ class ServerBootstrap {
       std::make_unique<folly::Baton<>>()};
   bool stopped_{false};
   bool useSharedSSLContextManager_{false};
+  std::shared_ptr<folly::AsyncServerSocket::ConnectionEventCallback>
+      connectionEventCallback_;
 };
 
 } // namespace wangle

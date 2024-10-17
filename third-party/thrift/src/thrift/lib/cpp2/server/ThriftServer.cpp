@@ -686,6 +686,11 @@ void ThriftServer::setup() {
       std::unique_lock lock(ioGroupMutex_);
       ServerBootstrap::group(acceptPool_, ioThreadPool_);
     }
+    // RemoteAcceptor needs to be initialized with ConnectionEventCallback
+    // during address bind, in order to enable it to report connection events
+    // back to ThriftServer
+    connEventCallback_ = std::make_shared<ConnectionEventCallback>(*this);
+    ServerBootstrap::useConnectionEventCallback(connEventCallback_);
     if (socket_) {
       ServerBootstrap::bind(std::move(socket_));
     } else if (!getAddress().isInitialized()) {
@@ -704,7 +709,6 @@ void ThriftServer::setup() {
     // we enable zerocopy for the server socket if the
     // zeroCopyEnableFunc_ is valid
     bool useZeroCopy = !!zeroCopyEnableFunc_;
-    connEventCallback_ = std::make_unique<ConnectionEventCallback>(*this);
     for (auto& socket : getSockets()) {
       auto* evb = socket->getEventBase();
       evb->runImmediatelyOrRunInEventBaseThreadAndWait([&] {
@@ -714,9 +718,6 @@ void ThriftServer::setup() {
         socket->setQueueTimeout(getSocketQueueTimeout());
         if (callbackAssignFunc_) {
           socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
-        }
-        if (connEventCallback_) {
-          socket->setConnectionEventCallback(connEventCallback_.get());
         }
 
         try {

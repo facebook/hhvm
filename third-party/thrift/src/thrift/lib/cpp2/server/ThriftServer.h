@@ -1862,7 +1862,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   std::shared_ptr<wangle::AcceptorFactory> acceptorFactory_;
   std::shared_ptr<wangle::SharedSSLContextManager> sharedSSLContextManager_;
   class ConnectionEventCallback;
-  std::unique_ptr<ConnectionEventCallback> connEventCallback_;
+  std::shared_ptr<ConnectionEventCallback> connEventCallback_;
 
   void handleSetupFailure(void);
 

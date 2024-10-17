@@ -121,7 +121,7 @@ class HTTPParallelCodec : public HTTPCodec {
       }
       return true;
     } else {
-      VLOG(2) << "Suppressing " << cbName << " for stream=" << stream
+      VLOG(3) << "Suppressing " << cbName << " for stream=" << stream
               << " egressGoawayAck_=" << egressGoawayAck_;
     }
     return false;

@@ -42,24 +42,58 @@ final class InputStreamByteBuf extends ByteBuf {
   }
 
   private void read(int length) {
+    readIntoBuffer(buffer, 0, length);
+  }
+
+  /**
+   * reads byte from the underlying input stream into a buffer. Ensures that `length` bytes are read
+   * or that the end of the stream has been reached. This method will block until `length` bas been
+   * read.
+   *
+   * @param buffer destination buffer for read bytes
+   * @param index index in destination buffer where bytes will be copied
+   * @param length number of bytes to be copied into destination buffer
+   * @return number of bytes read, should always be equal to length else a RuntimeException should
+   *     be thrown.
+   */
+  private int readIntoBuffer(byte[] buffer, int index, int length) {
+    if (index + length > buffer.length) {
+      throw Exceptions.propagate(
+          new IllegalArgumentException(
+              "Attempt read data into byte[] at index: "
+                  + index
+                  + " with length: "
+                  + length
+                  + " which is larger than the buffer length: "
+                  + buffer.length));
+    }
+
     try {
-      int read = inputStream.read(buffer, 0, length);
-      ensureLength(read, length);
+      int read = 0;
+      while (read < length) {
+        int result = inputStream.read(buffer, read + index, length - read);
+        // Read beyond the end of buffer, throw exception
+        if (result == -1) {
+          throwIOOBException(read, length);
+        }
+
+        read += result;
+      }
+
+      return read;
     } catch (IOException e) {
       throw Exceptions.propagate(e);
     }
   }
 
-  private void ensureLength(int read, int expected) {
-    if (read < expected) {
-      throw Exceptions.propagate(
-          new IndexOutOfBoundsException(
-              "Attempted to read beyond the end of InputStream, read: "
-                  + read
-                  + " bytes, expected:"
-                  + expected
-                  + " bytes"));
-    }
+  private void throwIOOBException(int read, int expected) {
+    throw Exceptions.propagate(
+        new IndexOutOfBoundsException(
+            "Attempted to read beyond the end of InputStream, read: "
+                + read
+                + " bytes, expected:"
+                + expected
+                + " bytes"));
   }
 
   // read methods
@@ -259,11 +293,7 @@ final class InputStreamByteBuf extends ByteBuf {
 
   @Override
   public ByteBuf readBytes(byte[] dst, int dstIndex, int length) {
-    try {
-      inputStream.read(dst, dstIndex, length);
-    } catch (IOException e) {
-      throw Exceptions.propagate(e);
-    }
+    readIntoBuffer(dst, dstIndex, length);
     return this;
   }
 
@@ -299,13 +329,9 @@ final class InputStreamByteBuf extends ByteBuf {
 
   @Override
   public CharSequence readCharSequence(int length, Charset charset) {
-    try {
-      byte[] buffer = new byte[length];
-      int read = inputStream.read(buffer, 0, length);
-      return new String(buffer, 0, read, charset);
-    } catch (IOException e) {
-      throw Exceptions.propagate(e);
-    }
+    byte[] buffer = new byte[length];
+    int read = readIntoBuffer(buffer, 0, length);
+    return new String(buffer, 0, read, charset);
   }
 
   @Override

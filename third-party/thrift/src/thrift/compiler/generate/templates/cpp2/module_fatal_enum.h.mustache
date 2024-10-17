@@ -17,22 +17,3 @@
 }}
 {{ > Autogen}}
 #pragma once
-
-#include "{{program:include_prefix}}{{program:name}}_types.h"
-#include "{{program:include_prefix}}{{program:name}}_fatal.h"
-
-#include <fatal/type/enum.h>
-
-#include <type_traits>
-
-namespace apache::thrift::detail {
-{{#program:enums}}
-template <>
-struct ExtraEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> {
-  static inline constexpr std::string_view name = "{{enum:name}}";
-  using module = {{ > common/namespace_cpp2}}{{program:name}}_tags::module;
-};
-template<>
-inline constexpr bool kHasExtraEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> = true;
-{{/program:enums}}
-}

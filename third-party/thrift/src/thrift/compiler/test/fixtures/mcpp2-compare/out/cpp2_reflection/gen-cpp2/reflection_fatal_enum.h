@@ -5,13 +5,3 @@
  *  @generated @nocommit
  */
 #pragma once
-
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_types.h"
-#include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/reflection_fatal.h"
-
-#include <fatal/type/enum.h>
-
-#include <type_traits>
-
-namespace apache::thrift::detail {
-}

@@ -59,14 +59,6 @@ struct reflect_type_class_of_thrift_class_impl {
           type_class::unknown>>;
 };
 
-template <typename T>
-struct reflect_type_class_of_thrift_class_enum_impl {
-  using type = fatal::conditional<
-      kHasExtraEnumTraits<T>,
-      type_class::enumeration,
-      reflect_type_class_of_thrift_class<T>>;
-};
-
 template <typename T, bool IsTry>
 struct reflect_module_tag_selector<type_class::enumeration, T, IsTry> {
   static_assert(folly::always_false<T>);

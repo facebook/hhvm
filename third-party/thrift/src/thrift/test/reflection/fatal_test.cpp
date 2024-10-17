@@ -534,47 +534,6 @@ TEST(reflection, reflect_type_class_of_thrift_class) {
       apache::thrift::reflect_type_class_of_thrift_class<struct3>>();
 }
 
-TEST(reflection, reflect_type_class_of_thrift_class_enum) {
-  EXPECT_SAME<
-      apache::thrift::type_class::unknown,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<
-          reflection_tags::module>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::unknown,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<void>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::unknown,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<int32_t>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::unknown,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<
-          std::vector<int32_t>>>();
-
-  EXPECT_SAME<
-      apache::thrift::type_class::enumeration,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<enum1>>();
-
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<union1>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<union2>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::variant,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<union3>>();
-
-  EXPECT_SAME<
-      apache::thrift::type_class::structure,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<struct1>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::structure,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<struct2>>();
-  EXPECT_SAME<
-      apache::thrift::type_class::structure,
-      apache::thrift::reflect_type_class_of_thrift_class_enum<struct3>>();
-}
-
 TEST(reflection, reflected_module_name) {
   using module = test_cpp2::cpp_reflection::reflection_tags::module;
   using module_meta = apache::thrift::reflect_module<module>;

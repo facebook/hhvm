@@ -12,6 +12,121 @@ open Typing_env_types
 module Env = Typing_env
 module DataType = Typing_case_types.AtomicDataTypes
 
+module TyPredicate = struct
+  let rec of_ty env (ty : locl_ty) =
+    Result.map ~f:(fun pred -> (get_reason ty, pred))
+    @@
+    match get_node ty with
+    | Tprim Aast.Tbool -> Result.Ok (IsTag BoolTag)
+    | Tprim Aast.Tint -> Result.Ok (IsTag IntTag)
+    | Tprim Aast.Tstring -> Result.Ok (IsTag StringTag)
+    | Tprim Aast.Tarraykey -> Result.Ok (IsTag ArraykeyTag)
+    | Tprim Aast.Tfloat -> Result.Ok (IsTag FloatTag)
+    | Tprim Aast.Tnum -> Result.Ok (IsTag NumTag)
+    | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
+    | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
+    (* TODO: optional and variadic fields T201398626 T201398652 *)
+    | Ttuple { t_required; t_extra = Textra { t_optional = []; t_variadic } }
+      when is_nothing t_variadic -> begin
+      match
+        List.fold_left t_required ~init:(Result.Ok []) ~f:(fun acc ty ->
+            let open Result.Monad_infix in
+            acc >>= fun predicates ->
+            of_ty env ty >>| fun predicate -> predicate :: predicates)
+      with
+      | Result.Error err -> Result.Error ("tuple-" ^ err)
+      | Result.Ok predicates ->
+        Result.Ok (IsTupleOf { tp_required = List.rev predicates })
+    end
+    | Tshape { s_origin = _; s_unknown_value; s_fields } ->
+      if
+        not
+        @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
+      then
+        Result.Error "shape"
+      else if
+        (* this type comes from localizing a hint so a closed shape should have
+           the canonical form of the nothing type *)
+        Typing_defs.is_nothing s_unknown_value
+      then begin
+        match
+          TShapeMap.fold
+            (fun key s_field acc ->
+              if s_field.sft_optional then
+                (* Skip shapes with optional fields for now T196048813 *)
+                Result.Error "optional_field"
+              else
+                let open Result.Monad_infix in
+                acc >>= fun sf_predicates ->
+                of_ty env s_field.sft_ty >>| fun sfp_predicate ->
+                (key, { sfp_predicate }) :: sf_predicates)
+            s_fields
+            (Result.Ok [])
+        with
+        | Result.Error err -> Result.Error ("shape-" ^ err)
+        | Result.Ok elts ->
+          Result.Ok (IsShapeOf { sp_fields = TShapeMap.of_list elts })
+      end else
+        Result.Error "open_shape"
+    | Tprim Aast.Tvoid -> Result.Error "void"
+    | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
+    | Tnonnull -> Result.Error "nonnull"
+    | Tdynamic -> Result.Error "dynamic"
+    | Tany _ -> Result.Error "any"
+    | Toption _ -> Result.Error "option"
+    | Tfun _ -> Result.Error "fun"
+    | Tgeneric (_, _) -> Result.Error "generic"
+    | Tunion _ -> Result.Error "union"
+    | Tintersection _ -> Result.Error "intersection"
+    | Tvec_or_dict _ -> Result.Error "vec_or_dict"
+    | Taccess _ -> Result.Error "access"
+    | Tvar _ -> Result.Error "tvar"
+    | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
+    | Tunapplied_alias _ -> Result.Error "unapplied_alias"
+    | Tdependent _ -> Result.Error "dependent"
+    | Tclass _ -> Result.Error "class"
+    | Tneg _ -> Result.Error "neg"
+    | Tlabel _ -> Result.Error "label"
+    | Ttuple _ -> Result.Error "tuple"
+
+  let rec to_ty predicate =
+    let tag_to_ty reason tag =
+      match tag with
+      | BoolTag -> Typing_make_type.bool reason
+      | IntTag -> Typing_make_type.int reason
+      | StringTag -> Typing_make_type.string reason
+      | ArraykeyTag -> Typing_make_type.arraykey reason
+      | FloatTag -> Typing_make_type.float reason
+      | NumTag -> Typing_make_type.num reason
+      | ResourceTag -> Typing_make_type.resource reason
+      | NullTag -> Typing_make_type.null reason
+      | ClassTag id -> Typing_make_type.class_type reason id []
+    in
+    match predicate with
+    | (reason, IsTag tag) -> tag_to_ty reason tag
+    | (reason, IsTupleOf { tp_required }) ->
+      mk
+        ( reason,
+          Ttuple
+            {
+              t_required = List.map tp_required ~f:to_ty;
+              t_extra =
+                Textra
+                  {
+                    t_optional = [];
+                    t_variadic = Typing_make_type.nothing reason;
+                  };
+            } )
+    | (reason, IsShapeOf { sp_fields }) ->
+      let map =
+        TShapeMap.map
+          (fun { sfp_predicate } ->
+            { sft_optional = false; sft_ty = to_ty sfp_predicate })
+          sp_fields
+      in
+      Typing_make_type.shape reason (Typing_make_type.nothing reason) map
+end
+
 module TyPartition = Partition.Make (struct
   type t = locl_ty
 
@@ -341,118 +456,3 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
       span = TyPartition.span partition;
       right = TyPartition.right partition;
     } )
-
-module TyPredicate = struct
-  let rec of_ty env (ty : locl_ty) =
-    Result.map ~f:(fun pred -> (get_reason ty, pred))
-    @@
-    match get_node ty with
-    | Tprim Aast.Tbool -> Result.Ok (IsTag BoolTag)
-    | Tprim Aast.Tint -> Result.Ok (IsTag IntTag)
-    | Tprim Aast.Tstring -> Result.Ok (IsTag StringTag)
-    | Tprim Aast.Tarraykey -> Result.Ok (IsTag ArraykeyTag)
-    | Tprim Aast.Tfloat -> Result.Ok (IsTag FloatTag)
-    | Tprim Aast.Tnum -> Result.Ok (IsTag NumTag)
-    | Tprim Aast.Tresource -> Result.Ok (IsTag ResourceTag)
-    | Tprim Aast.Tnull -> Result.Ok (IsTag NullTag)
-    (* TODO: optional and variadic fields T201398626 T201398652 *)
-    | Ttuple { t_required; t_extra = Textra { t_optional = []; t_variadic } }
-      when is_nothing t_variadic -> begin
-      match
-        List.fold_left t_required ~init:(Result.Ok []) ~f:(fun acc ty ->
-            let open Result.Monad_infix in
-            acc >>= fun predicates ->
-            of_ty env ty >>| fun predicate -> predicate :: predicates)
-      with
-      | Result.Error err -> Result.Error ("tuple-" ^ err)
-      | Result.Ok predicates ->
-        Result.Ok (IsTupleOf { tp_required = List.rev predicates })
-    end
-    | Tshape { s_origin = _; s_unknown_value; s_fields } ->
-      if
-        not
-        @@ TypecheckerOptions.type_refinement_partition_shapes env.genv.tcopt
-      then
-        Result.Error "shape"
-      else if
-        (* this type comes from localizing a hint so a closed shape should have
-           the canonical form of the nothing type *)
-        Typing_defs.is_nothing s_unknown_value
-      then begin
-        match
-          TShapeMap.fold
-            (fun key s_field acc ->
-              if s_field.sft_optional then
-                (* Skip shapes with optional fields for now T196048813 *)
-                Result.Error "optional_field"
-              else
-                let open Result.Monad_infix in
-                acc >>= fun sf_predicates ->
-                of_ty env s_field.sft_ty >>| fun sfp_predicate ->
-                (key, { sfp_predicate }) :: sf_predicates)
-            s_fields
-            (Result.Ok [])
-        with
-        | Result.Error err -> Result.Error ("shape-" ^ err)
-        | Result.Ok elts ->
-          Result.Ok (IsShapeOf { sp_fields = TShapeMap.of_list elts })
-      end else
-        Result.Error "open_shape"
-    | Tprim Aast.Tvoid -> Result.Error "void"
-    | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
-    | Tnonnull -> Result.Error "nonnull"
-    | Tdynamic -> Result.Error "dynamic"
-    | Tany _ -> Result.Error "any"
-    | Toption _ -> Result.Error "option"
-    | Tfun _ -> Result.Error "fun"
-    | Tgeneric (_, _) -> Result.Error "generic"
-    | Tunion _ -> Result.Error "union"
-    | Tintersection _ -> Result.Error "intersection"
-    | Tvec_or_dict _ -> Result.Error "vec_or_dict"
-    | Taccess _ -> Result.Error "access"
-    | Tvar _ -> Result.Error "tvar"
-    | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
-    | Tunapplied_alias _ -> Result.Error "unapplied_alias"
-    | Tdependent _ -> Result.Error "dependent"
-    | Tclass _ -> Result.Error "class"
-    | Tneg _ -> Result.Error "neg"
-    | Tlabel _ -> Result.Error "label"
-    | Ttuple _ -> Result.Error "tuple"
-
-  let rec to_ty predicate =
-    let tag_to_ty reason tag =
-      match tag with
-      | BoolTag -> Typing_make_type.bool reason
-      | IntTag -> Typing_make_type.int reason
-      | StringTag -> Typing_make_type.string reason
-      | ArraykeyTag -> Typing_make_type.arraykey reason
-      | FloatTag -> Typing_make_type.float reason
-      | NumTag -> Typing_make_type.num reason
-      | ResourceTag -> Typing_make_type.resource reason
-      | NullTag -> Typing_make_type.null reason
-      | ClassTag id -> Typing_make_type.class_type reason id []
-    in
-    match predicate with
-    | (reason, IsTag tag) -> tag_to_ty reason tag
-    | (reason, IsTupleOf { tp_required }) ->
-      mk
-        ( reason,
-          Ttuple
-            {
-              t_required = List.map tp_required ~f:to_ty;
-              t_extra =
-                Textra
-                  {
-                    t_optional = [];
-                    t_variadic = Typing_make_type.nothing reason;
-                  };
-            } )
-    | (reason, IsShapeOf { sp_fields }) ->
-      let map =
-        TShapeMap.map
-          (fun { sfp_predicate } ->
-            { sft_optional = false; sft_ty = to_ty sfp_predicate })
-          sp_fields
-      in
-      Typing_make_type.shape reason (Typing_make_type.nothing reason) map
-end

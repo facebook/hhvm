@@ -77,6 +77,7 @@ module ReadOnlyEnvironment : sig
     for_reified: bool;
     for_alias: bool;
     for_enum: bool;
+    pick_immediately_inhabited: bool;
     verbose: bool;
   }
 
@@ -89,6 +90,7 @@ end = struct
     for_reified: bool;
     for_alias: bool;
     for_enum: bool;
+    pick_immediately_inhabited: bool;
     verbose: bool;
   }
 
@@ -98,16 +100,26 @@ end = struct
       for_reified = false;
       for_alias = false;
       for_enum = false;
+      pick_immediately_inhabited = false;
       verbose;
     }
 
-  let show { for_option; for_reified; for_alias; for_enum; _ } =
+  let show
+      {
+        for_option;
+        for_reified;
+        for_alias;
+        for_enum;
+        pick_immediately_inhabited;
+        _;
+      } =
     Format.sprintf
-      "{for_option: %b, for_reified: %b, for_alias: %b; for_enum: %b}"
+      "{for_option: %b, for_reified: %b, for_alias: %b; for_enum: %b; pick_immediately_inhabited: %b}"
       for_option
       for_reified
       for_alias
       for_enum
+      pick_immediately_inhabited
 
   let debug ({ verbose; _ } as renv) str =
     if verbose then begin
@@ -473,21 +485,23 @@ end = struct
   (** Goes on a stochastic walk to pick an inhabited subtype of the given type.
 
       Termination of this function crucially relies on the invariant that EVERY
-      type has an inhabitant subtype. There are quite few denotable types where
-      this invariant does not hold, most trivially the `nothing` type.
+      input type has a subtype that satisfies the constraints set in the read
+      only environment.
 
-      If `pick_immediately_inhabited` is set, we're looking for a subtype that
-      can be immediately turned into an expression, e.g., an `arraykey` is
-      eventually inhabited whereas `int` and `string` are immediately inhabited.
+      For example, when pick_immediately_inhabited is set, the input type must
+      have some subtype that is inhabited, e.g., if one passes an abstract class
+      without a concrete class extending it somewhere down the hierarchy.
       *)
-  let subtype_of ~pick_immediately_inhabited renv env ty =
+  let subtype_of (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty =
     ReadOnlyEnvironment.debug renv
     @@ lazy (Format.sprintf "subtypes_of: %s" (Type.show ty));
-    let rec subfield_of { key; ty; optional } =
+    (* select_step makes sure we don't get into infinite loops by randomly being
+       an identity function and otherwise recursive via step. *)
+    let rec subfield_of renv { key; ty; optional } =
       ReadOnlyEnvironment.debug renv
       @@ lazy
            (Format.sprintf "subtypes_of subfield_of %s: %s" key (Type.show ty));
-      let ty = select @@ step ty in
+      let ty = driver renv ty in
       let optional =
         if optional then
           select [true; false]
@@ -495,7 +509,7 @@ end = struct
           false
       in
       { key; ty; optional }
-    and step ty =
+    and step renv ty =
       ReadOnlyEnvironment.debug renv
       @@ lazy (Format.sprintf "subtypes_of step: %s" (Type.show ty));
       ty
@@ -518,7 +532,7 @@ end = struct
            end
            | Option ty -> [Primitive Primitive.Null; ty]
            | Awaitable ty ->
-             let ty = select @@ step ty in
+             let ty = driver renv ty in
              [Awaitable ty]
            | Alias info -> [info.aliased]
            | TypeConst info -> [info.aliased]
@@ -528,17 +542,29 @@ end = struct
            | Enum _ ->
              []
            | Vec ty ->
-             let ty = select @@ step ty in
+             let renv =
+               ReadOnlyEnvironment.
+                 { renv with pick_immediately_inhabited = false }
+             in
+             let ty = driver renv ty in
              [Vec ty]
            | Dict { key; value } ->
-             let key = select @@ step key in
-             let value = select @@ step value in
+             let renv =
+               ReadOnlyEnvironment.
+                 { renv with pick_immediately_inhabited = false }
+             in
+             let key = driver renv key in
+             let value = driver renv value in
              [Dict { key; value }]
            | Keyset ty ->
-             let ty = select @@ step ty in
+             let renv =
+               ReadOnlyEnvironment.
+                 { renv with pick_immediately_inhabited = false }
+             in
+             let ty = driver renv ty in
              [Keyset ty]
            | Tuple { conjuncts; open_ } ->
-             let conjuncts = List.map ~f:(Fn.compose select step) conjuncts in
+             let conjuncts = List.map ~f:(driver renv) conjuncts in
              let open_ =
                if open_ then
                  (* Here we should be adding new conjuncts, but with the current setup
@@ -549,7 +575,7 @@ end = struct
              in
              [Tuple { conjuncts; open_ }]
            | Shape { fields; open_ } ->
-             let fields = List.map ~f:subfield_of fields in
+             let fields = List.map ~f:(subfield_of renv) fields in
              let open_ =
                if open_ then
                  (* Here we should be adding new fields, but with the current setup
@@ -560,61 +586,86 @@ end = struct
              in
              [Shape { fields; open_ }]
            | Function { parameters; variadic; return_ } ->
-             let return_ = select @@ step return_ in
+             let return_ = driver renv return_ in
              let variadic =
                match variadic with
-               | None -> select [None; Some (select @@ step Mixed)]
+               | None ->
+                 Lazy.force
+                 @@ select
+                      [
+                        lazy None;
+                        lazy
+                          (Some
+                             (driver
+                                ReadOnlyEnvironment.
+                                  {
+                                    renv with
+                                    pick_immediately_inhabited = false;
+                                  }
+                                Mixed));
+                      ]
                | Some ty -> Some ty
              in
              [Function { parameters; variadic; return_ }]
            | Like ty ->
              (* TODO: dynamic here when it is supported *)
-             step ty
+             [driver renv ty]
          end
-    in
-    let rec driver ty =
+    and driver renv candidate =
       ReadOnlyEnvironment.debug renv
-      @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show ty));
-      let tys = step ty in
+      @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show candidate));
+      let candidates = step renv candidate in
       if Random.bool () then
         (* We decide to go on a stochastic walk and explore further subtypes. *)
-        driver @@ select tys
-      else if not pick_immediately_inhabited then begin
-        let filtered_tys = tys in
-        let filtered_tys =
-          if renv.ReadOnlyEnvironment.for_alias then
-            List.filter filtered_tys ~f:(function
-                | TypeConst _ -> false
-                | _ -> true)
+        driver renv @@ select candidates
+      else
+        let filtered_candidates = candidates in
+        let filtered_candidates =
+          if renv.ReadOnlyEnvironment.pick_immediately_inhabited then
+            List.filter ~f:is_immediately_inhabited filtered_candidates
           else
-            filtered_tys
+            filtered_candidates
         in
-        let filtered_tys =
-          if renv.ReadOnlyEnvironment.for_enum then
-            List.filter filtered_tys ~f:(function
+        let filtered_candidates =
+          if renv.ReadOnlyEnvironment.for_option then
+            List.filter filtered_candidates ~f:(function
                 | Case _ -> false
                 | _ -> true)
           else
-            filtered_tys
+            filtered_candidates
         in
-        if List.is_empty filtered_tys then
-          (* We don't have any choices left filtering, so we keep looking based
-             off of the initial set of types. *)
-          driver @@ select tys
-        else
-          select filtered_tys
-      end else
-        (* We would like to terminate with an immediately inhabited type. *)
-        let (immediately_inhabited, latent_inhabited) =
-          List.partition_tf ~f:is_immediately_inhabited tys
+        let filtered_candidates =
+          if renv.ReadOnlyEnvironment.for_reified then
+            List.filter filtered_candidates ~f:(function
+                | Function _ -> false
+                | _ -> true)
+          else
+            filtered_candidates
         in
-        if List.is_empty immediately_inhabited then
-          (* There are no immediately inhabited type, so we must keep exploring. *)
-          driver @@ select latent_inhabited
+        let filtered_candidates =
+          if renv.ReadOnlyEnvironment.for_alias then
+            List.filter filtered_candidates ~f:(function
+                | TypeConst _ -> false
+                | _ -> true)
+          else
+            filtered_candidates
+        in
+        let filtered_candidates =
+          if renv.ReadOnlyEnvironment.for_enum then
+            List.filter filtered_candidates ~f:(function
+                | Case _ -> false
+                | _ -> true)
+          else
+            filtered_candidates
+        in
+        if List.is_empty filtered_candidates then
+          (* We don't have any choices left filtering, so we try again from
+             scratch! *)
+          driver renv @@ select candidates
         else
-          select immediately_inhabited
+          select filtered_candidates
     in
-    driver ty
+    driver renv ty
 
   let rec show_field { key; ty; optional } =
     let optional =
@@ -883,7 +934,10 @@ end = struct
 
   let inhabitant_of
       (renv : ReadOnlyEnvironment.t) (env : Environment.t) (ty : t) =
-    let subtype = subtype_of ~pick_immediately_inhabited:true renv env ty in
+    let renv =
+      ReadOnlyEnvironment.{ renv with pick_immediately_inhabited = true }
+    in
+    let subtype = subtype_of renv env ty in
     let inhabitant = expr_of subtype in
     match inhabitant with
     | Some inhabitant -> inhabitant
@@ -895,11 +949,10 @@ end = struct
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
   let mk_arraykey (renv : ReadOnlyEnvironment.t) (env : Environment.t) =
-    subtype_of
-      ~pick_immediately_inhabited:false
-      renv
-      env
-      (Primitive Primitive.Arraykey)
+    let renv =
+      ReadOnlyEnvironment.{ renv with pick_immediately_inhabited = false }
+    in
+    subtype_of renv env (Primitive Primitive.Arraykey)
 
   let rec mk_classish
       (renv : ReadOnlyEnvironment.t)
@@ -989,10 +1042,7 @@ end = struct
       mk ReadOnlyEnvironment.{ renv with for_alias } env ~depth:(Some depth)
     in
     let subtype_of ?(for_alias = false) renv env =
-      subtype_of
-        ReadOnlyEnvironment.{ renv with for_alias }
-        env
-        ~pick_immediately_inhabited:false
+      subtype_of ReadOnlyEnvironment.{ renv with for_alias } env
     in
     let kind = Kind.pick renv in
     ReadOnlyEnvironment.debug renv

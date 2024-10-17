@@ -109,6 +109,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "EmptyEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -128,6 +133,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyEnum";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -151,6 +161,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyUseIntrinsicDefaultEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -172,6 +187,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyBigEnum";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;

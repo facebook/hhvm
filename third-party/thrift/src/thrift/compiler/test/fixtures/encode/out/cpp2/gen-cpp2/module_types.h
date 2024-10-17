@@ -132,6 +132,11 @@ template <> struct TEnumTraits<::facebook::thrift::test::Enum> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "Enum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

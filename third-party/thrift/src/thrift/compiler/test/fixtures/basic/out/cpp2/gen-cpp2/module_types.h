@@ -192,6 +192,11 @@ template <> struct TEnumTraits<::test::fixtures::basic::MyEnum> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -213,6 +218,11 @@ template <> struct TEnumTraits<::test::fixtures::basic::HackEnum> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "HackEnum";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;

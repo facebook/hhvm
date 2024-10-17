@@ -185,8 +185,11 @@ struct impl<T, type_class::enumeration> {
   static std::string rname() {
     using extra = ::apache::thrift::detail::ExtraEnumTraits<T>;
     using module_meta = reflect_module<typename extra::module>;
-    return "enum "_fs + fs<module_meta>() + "." +
-        folly::FixedString<extra::name.size()>(extra::name);
+    return folly::to<std::string>(
+        "enum ",
+        fs<module_meta>(),
+        ".",
+        apache::thrift::TEnumTraits<T>::typeName());
   }
   static id_t rid() {
     static const auto storage = get_type_id(type_t::TYPE_ENUM, rname());

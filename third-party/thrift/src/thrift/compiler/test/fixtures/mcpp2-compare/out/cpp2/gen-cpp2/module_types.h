@@ -948,6 +948,11 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumA> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyEnumA";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -969,6 +974,11 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "AnnotatedEnum";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -992,6 +1002,11 @@ template <> struct TEnumTraits<::some::valid::ns::AnnotatedEnum2> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "AnnotatedEnum2";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -1013,6 +1028,11 @@ template <> struct TEnumTraits<::some::valid::ns::MyEnumB> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "MyEnumB";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;

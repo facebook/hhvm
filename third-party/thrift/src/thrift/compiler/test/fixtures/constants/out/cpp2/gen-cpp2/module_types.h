@@ -199,6 +199,11 @@ template <> struct TEnumTraits<::cpp2::EmptyEnum> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "EmptyEnum";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -218,6 +223,11 @@ template <> struct TEnumTraits<::cpp2::City> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "City";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;
@@ -240,6 +250,11 @@ template <> struct TEnumTraits<::cpp2::Company> {
 
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
+
+  template <class ...>
+  FOLLY_ERASE static std::string_view typeName() noexcept {
+    return "Company";
+  }
 
   static char const* findName(type value) noexcept {
     std::string_view ret;

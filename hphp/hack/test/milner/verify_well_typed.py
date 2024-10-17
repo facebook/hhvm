@@ -40,6 +40,7 @@ def milner_and_type_check(
     out_dir: str,
     template_file: str,
     seed: int,
+    skip_hhstc: bool,
 ) -> Optional[Failure]:
     basename = os.path.basename(template_file)
     temp_file = os.path.join(out_dir, f"{basename}.{seed}.out")
@@ -63,23 +64,24 @@ def milner_and_type_check(
         )
 
     # Run the verifier on the temporary file
-    result = subprocess.run(
-        [hhstc_exe, temp_file],
-        capture_output=True,
-        timeout=60,
-    )
-
-    # Check if the verifier found any errors
-    stdout = result.stdout.decode()
-    if "No errors" not in stdout:
-        with open(temp_file, "r") as out:
-            contents = out.read()
-        return Failure(
-            temp_file,
-            contents,
-            result.stdout,
-            result.stderr,
+    if not skip_hhstc:
+        result = subprocess.run(
+            [hhstc_exe, temp_file],
+            capture_output=True,
+            timeout=60,
         )
+
+        # Check if the verifier found any errors
+        stdout = result.stdout.decode()
+        if "No errors" not in stdout:
+            with open(temp_file, "r") as out:
+                contents = out.read()
+            return Failure(
+                temp_file,
+                contents,
+                result.stdout,
+                result.stderr,
+            )
 
     return None
 
@@ -88,6 +90,7 @@ def verify_well_typed(
     template_file: str,
     out_dir: str,
     seed_range: Tuple[int, int],
+    skip_hhstc: bool,
     milner_exe: str,
     hhstc_exe: str,
 ) -> int:
@@ -105,6 +108,7 @@ def verify_well_typed(
                     out_dir,
                     template_file,
                     seed,
+                    skip_hhstc,
                 )
             )
 
@@ -143,6 +147,11 @@ def main() -> None:
     parser.add_argument(
         "--hhstc-exe", required=True, help="Path to hh_single_type_check executable"
     )
+    parser.add_argument(
+        "--skip-hhstc",
+        action="store_true",
+        help="Skip hh_single_type_check run on generated programs",
+    )
 
     args: argparse.Namespace = parser.parse_args()
 
@@ -151,7 +160,12 @@ def main() -> None:
     # Temporary directory to store generated programs
     out_dir = tempfile.TemporaryDirectory()
     exit_code = verify_well_typed(
-        args.template, out_dir.name, seed_range, args.milner_exe, args.hhstc_exe
+        args.template,
+        out_dir.name,
+        seed_range,
+        args.skip_hhstc,
+        args.milner_exe,
+        args.hhstc_exe,
     )
     out_dir.cleanup()
 

@@ -43,6 +43,14 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
       this.regularBinary = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyMapping other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private com.foo.FastLongStringMap lsMap = null;
         private com.foo.FastIntObjectMap<com.foo.FastIntLongMap> ioMap = null;
@@ -101,8 +109,8 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyMapping");
     private final com.foo.FastLongStringMap lsMap;

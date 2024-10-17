@@ -40,6 +40,14 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
       this.reqField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithRefTypeUnique other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.refs.Empty defField = null;
         private test.fixtures.refs.Empty optField = null;
@@ -87,8 +95,8 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithRefTypeUnique");
     private final test.fixtures.refs.Empty defField;

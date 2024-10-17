@@ -37,6 +37,14 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
       this.id = 0;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(BigStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.module2.Struct s = null;
         private int id = 0;
@@ -73,8 +81,8 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("BigStruct");
     private final test.fixtures.module2.Struct s;

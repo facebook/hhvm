@@ -34,6 +34,14 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
       this.field1 = 1L;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStructWithCustomDefault other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long field1 = 1L;
     
@@ -59,8 +67,8 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStructWithCustomDefault");
     private final long field1;

@@ -37,6 +37,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.myBigEnum = test.fixtures.swift.enumstrict.MyBigEnum.ONE;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.swift.enumstrict.MyEnum myEnum = test.fixtures.swift.enumstrict.MyEnum.fromInteger(0);
         private test.fixtures.swift.enumstrict.MyBigEnum myBigEnum = test.fixtures.swift.enumstrict.MyBigEnum.ONE;
@@ -73,8 +81,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
     private final test.fixtures.swift.enumstrict.MyEnum myEnum;

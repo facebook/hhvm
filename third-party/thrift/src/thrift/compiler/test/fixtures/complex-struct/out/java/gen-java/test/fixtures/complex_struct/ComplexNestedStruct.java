@@ -85,6 +85,14 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
       this.mapKeyListValSet = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(ComplexNestedStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private Set<Set<Integer>> setOfSetOfInt = null;
         private List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> listofListOfListOfListOfEnum = null;
@@ -297,8 +305,8 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("ComplexNestedStruct");
     private final Set<Set<Integer>> setOfSetOfInt;

@@ -40,6 +40,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.myIncludedInt = 42L;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.includes.includes.Included myIncludedField = test.fixtures.includes.includes.Constants.EXAMPLE_INCLUDED;
         private test.fixtures.includes.includes.Included myOtherIncludedField = null;
@@ -87,8 +95,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
     private final test.fixtures.includes.includes.Included myIncludedField;

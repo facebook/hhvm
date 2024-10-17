@@ -40,6 +40,14 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
       this.f = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithUnion other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.refs.MyUnion u = null;
         private double aDouble = 0.;
@@ -87,8 +95,8 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithUnion");
     private final test.fixtures.refs.MyUnion u;

@@ -49,6 +49,14 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
       this.listRefSharedConst = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithContainers other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private List<Integer> listRef = null;
         private Set<Integer> setRef = null;
@@ -129,8 +137,8 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithContainers");
     private final List<Integer> listRef;

@@ -34,6 +34,14 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
       this.field1 = 7;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(WrappedFields other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private int field1 = 7;
     
@@ -59,8 +67,8 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("WrappedFields");
     private final int field1;

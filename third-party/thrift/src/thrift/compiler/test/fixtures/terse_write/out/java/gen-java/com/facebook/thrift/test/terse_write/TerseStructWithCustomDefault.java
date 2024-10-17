@@ -79,6 +79,14 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       this.structField = com.facebook.thrift.test.terse_write.MyStructWithCustomDefault.defaultInstance();
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(TerseStructWithCustomDefault other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private boolean boolField = true;
         private byte byteField = (byte)1;
@@ -253,8 +261,8 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("TerseStructWithCustomDefault");
     private final boolean boolField;

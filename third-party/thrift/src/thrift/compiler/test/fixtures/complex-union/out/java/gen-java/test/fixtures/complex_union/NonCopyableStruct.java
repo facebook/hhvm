@@ -34,6 +34,14 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
       this.num = 0L;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(NonCopyableStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long num = 0L;
     
@@ -59,8 +67,8 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("NonCopyableStruct");
     private final long num;

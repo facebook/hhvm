@@ -76,6 +76,14 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
       this.unionField = com.facebook.thrift.test.terse_write.MyUnion.defaultInstance();
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructLevelTerseStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private boolean boolField = false;
         private byte byteField = (byte)0;
@@ -255,8 +263,8 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructLevelTerseStruct");
     private final boolean boolField;

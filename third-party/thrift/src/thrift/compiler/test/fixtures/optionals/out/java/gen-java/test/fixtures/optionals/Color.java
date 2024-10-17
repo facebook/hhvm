@@ -43,6 +43,14 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
       this.alpha = 0.;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Color other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private double red = 0.;
         private double green = 0.;
@@ -101,8 +109,8 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Color");
     private final double red;

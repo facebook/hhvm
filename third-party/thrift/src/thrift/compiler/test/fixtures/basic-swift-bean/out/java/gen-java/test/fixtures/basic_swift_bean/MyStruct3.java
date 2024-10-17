@@ -56,6 +56,14 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         .build());
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStruct3 other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private short myInt16 = (short)42;
         private int myInt32 = 422;
@@ -218,8 +226,8 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         return result;    }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct3");
     private short myInt16;

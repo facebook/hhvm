@@ -37,6 +37,14 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
       this.password = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(SecretStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long id = 0L;
         private String password = null;
@@ -74,8 +82,8 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("SecretStruct");
     private final long id;

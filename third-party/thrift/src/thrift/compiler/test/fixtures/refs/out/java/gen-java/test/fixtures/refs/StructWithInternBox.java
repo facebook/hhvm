@@ -37,6 +37,14 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
       this.field2 = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithInternBox other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.refs.Empty field1 = null;
         private test.fixtures.refs.MyField field2 = null;
@@ -73,8 +81,8 @@ public final class StructWithInternBox implements com.facebook.thrift.payload.Th
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithInternBox");
     private final test.fixtures.refs.Empty field1;

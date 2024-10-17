@@ -37,6 +37,14 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
       this.mapListOfFloats = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStructMapFloatThrowExp other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long myLongField = 0L;
         private Map<Integer, List<List<Float>>> mapListOfFloats = null;
@@ -73,8 +81,8 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStructMapFloatThrowExp");
     private final long myLongField;

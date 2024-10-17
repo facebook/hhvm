@@ -103,6 +103,14 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
       this.doubleTypedefBool = false;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(AdaptTemplatedTestStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private boolean adaptedBool = false;
         private byte adaptedByte = 0;
@@ -365,8 +373,8 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("AdaptTemplatedTestStruct");
     private final boolean adaptedBool;

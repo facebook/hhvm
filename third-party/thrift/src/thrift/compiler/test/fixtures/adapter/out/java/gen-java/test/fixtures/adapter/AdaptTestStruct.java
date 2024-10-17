@@ -61,6 +61,14 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       this.binaryData = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(AdaptTestStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long delay = 0L;
         private byte[] custom = null;
@@ -185,8 +193,8 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("AdaptTestStruct");
     private final long delay;

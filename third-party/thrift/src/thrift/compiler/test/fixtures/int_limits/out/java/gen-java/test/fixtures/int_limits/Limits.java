@@ -55,6 +55,14 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
       this.minByteField = (byte)-128;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Limits other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long maxI64Field = 9223372036854775807L;
         private long minI64Field = -9223372036854775808L;
@@ -157,8 +165,8 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Limits");
     private final long maxI64Field;

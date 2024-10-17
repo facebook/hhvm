@@ -43,6 +43,14 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       this.binaryTestBuffer = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(TypeRemapped other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap = null;
         private it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> ioMap = null;
@@ -101,8 +109,8 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("TypeRemapped");
     private final it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap;

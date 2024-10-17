@@ -40,6 +40,14 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
       this.reqSharedConst = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithSharedConst other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.refs.MyField optSharedConst = null;
         private test.fixtures.refs.MyField sharedConst = null;
@@ -87,8 +95,8 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithSharedConst");
     private final test.fixtures.refs.MyField optSharedConst;

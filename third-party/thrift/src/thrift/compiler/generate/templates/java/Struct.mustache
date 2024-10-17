@@ -41,11 +41,19 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 public final class {{struct:javaCapitalName}} implements com.facebook.thrift.payload.ThriftSerializable {
     {{> struct/ThriftConstructor}}
 
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder({{struct:javaCapitalName}} other) {
+      return new Builder(other);
+    }
+
     {{> struct/StructBuilder}}
     {{> struct/AdapterDefinition}}
 
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("{{struct:name}}");
     {{#struct:fields}}{{!

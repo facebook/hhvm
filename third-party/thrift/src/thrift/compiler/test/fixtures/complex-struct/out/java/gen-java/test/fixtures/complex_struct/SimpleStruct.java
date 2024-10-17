@@ -37,6 +37,14 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
       this.name = "Batman";
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(SimpleStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long age = 60L;
         private String name = "Batman";
@@ -73,8 +81,8 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("SimpleStruct");
     private final long age;

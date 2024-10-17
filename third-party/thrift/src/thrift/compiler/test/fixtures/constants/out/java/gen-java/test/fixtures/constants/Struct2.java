@@ -43,6 +43,14 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
       this.d = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Struct2 other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private int a = 0;
         private String b = null;
@@ -101,8 +109,8 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("struct2");
     private final int a;

@@ -43,6 +43,14 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
       this.myFloatField = 0.f;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStructFloatFieldThrowExp other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long myLongField = 0L;
         private byte myByteField = 0;
@@ -101,8 +109,8 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStructFloatFieldThrowExp");
     private final long myLongField;

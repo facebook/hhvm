@@ -283,6 +283,14 @@ public final class MyMutableBigStruct implements com.facebook.thrift.payload.Thr
       this.msg257 = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyMutableBigStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String msg1 = null;
         private String msg2 = null;
@@ -3122,8 +3130,8 @@ public final class MyMutableBigStruct implements com.facebook.thrift.payload.Thr
         return result;    }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyMutableBigStruct");
     private String msg1;

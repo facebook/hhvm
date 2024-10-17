@@ -40,6 +40,14 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
       this.typedefValue = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Val other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String strVal = null;
         private int intVal = 0;
@@ -87,8 +95,8 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Val");
     private final String strVal;

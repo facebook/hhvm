@@ -37,6 +37,14 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
       this.myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Included other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long myIntField = 0L;
         private test.fixtures.includes.transitive.Foo myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
@@ -73,8 +81,8 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Included");
     private final long myIntField;

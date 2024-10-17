@@ -34,6 +34,14 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
       this.sink = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(CompatibleWithKeywordSink other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String sink = null;
     
@@ -59,8 +67,8 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("CompatibleWithKeywordSink");
     private final String sink;

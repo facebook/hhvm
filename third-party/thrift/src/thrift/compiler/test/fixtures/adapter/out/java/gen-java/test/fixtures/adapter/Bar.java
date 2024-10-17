@@ -52,6 +52,14 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
       this.adaptedStructField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Bar other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.adapter.Foo structField = null;
         private test.fixtures.adapter.Foo optionalStructField = null;
@@ -143,8 +151,8 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Bar");
     private final test.fixtures.adapter.Foo structField;

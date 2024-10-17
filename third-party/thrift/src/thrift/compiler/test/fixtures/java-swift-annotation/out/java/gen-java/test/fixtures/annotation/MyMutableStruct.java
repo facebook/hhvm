@@ -28,6 +28,14 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
       this.stringField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyMutableStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long intField = 0L;
         private String stringField = null;
@@ -62,8 +70,8 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
         return result;    }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyMutableStruct");
     private long intField;

@@ -37,6 +37,14 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
       this.color = test.fixtures.adapter.Color.RED;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyAnnotation other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String signature = null;
         private test.fixtures.adapter.Color color = test.fixtures.adapter.Color.RED;
@@ -73,8 +81,8 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyAnnotation");
     private final String signature;

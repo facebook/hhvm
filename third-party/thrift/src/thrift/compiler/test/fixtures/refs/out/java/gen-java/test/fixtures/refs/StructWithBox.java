@@ -40,6 +40,14 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
       this.c = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithBox other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String a = null;
         private List<Long> b = null;
@@ -87,8 +95,8 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithBox");
     private final String a;

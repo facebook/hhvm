@@ -43,6 +43,14 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       this.optBoxedField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(StructWithFieldAdapter other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private int field = 0;
         private int sharedField = 0;
@@ -101,8 +109,8 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("StructWithFieldAdapter");
     private final int field;

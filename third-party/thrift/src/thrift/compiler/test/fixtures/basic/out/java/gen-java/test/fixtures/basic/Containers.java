@@ -40,6 +40,14 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       this.stringToI64Map = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Containers other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private List<Integer> i32List = null;
         private Set<String> stringSet = null;
@@ -87,8 +95,8 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Containers");
     private final List<Integer> i32List;

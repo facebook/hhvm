@@ -43,6 +43,14 @@ public final class FieldsInjectedWithIncludedStruct implements com.facebook.thri
       this.injectedUnstructuredAnnotationField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(FieldsInjectedWithIncludedStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String stringField = null;
         private String injectedField = null;
@@ -101,8 +109,8 @@ public final class FieldsInjectedWithIncludedStruct implements com.facebook.thri
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("FieldsInjectedWithIncludedStruct");
     private final String stringField;

@@ -37,6 +37,14 @@ public final class NoEffect implements com.facebook.thrift.payload.ThriftSeriali
       this.aCamelI32 = 0;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(NoEffect other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String anSnakeString = null;
         private int aCamelI32 = 0;
@@ -73,8 +81,8 @@ public final class NoEffect implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("No_effect");
     private final String anSnakeString;

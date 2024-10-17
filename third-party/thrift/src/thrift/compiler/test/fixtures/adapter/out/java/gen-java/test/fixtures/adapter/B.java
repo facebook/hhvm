@@ -34,6 +34,14 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       this.a = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(B other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.adapter.A a = null;
     
@@ -59,8 +67,8 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("B");
     private final test.fixtures.adapter.A a;

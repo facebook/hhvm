@@ -37,6 +37,14 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
       this.max = 0;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Range other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private int min = 0;
         private int max = 0;
@@ -73,8 +81,8 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Range");
     private final int min;

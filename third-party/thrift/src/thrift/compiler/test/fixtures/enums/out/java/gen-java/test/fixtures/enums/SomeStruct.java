@@ -44,6 +44,14 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
         .build();
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(SomeStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.enums.Metasyntactic reasonable = test.fixtures.enums.Metasyntactic.FOO;
         private test.fixtures.enums.Metasyntactic fine = test.fixtures.enums.Metasyntactic.BAR;
@@ -103,8 +111,8 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("SomeStruct");
     private final test.fixtures.enums.Metasyntactic reasonable;

@@ -121,6 +121,14 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
       this.myDoubleField30 = 0.;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyNomralStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String msg1 = null;
         private String msg2 = null;
@@ -465,8 +473,8 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyNomralStruct");
     private final String msg1;

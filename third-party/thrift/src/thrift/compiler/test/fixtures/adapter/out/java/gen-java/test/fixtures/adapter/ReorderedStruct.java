@@ -34,6 +34,14 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
       this.reorderedDependentAdapted = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(ReorderedStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted = null;
     
@@ -59,8 +67,8 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("ReorderedStruct");
     private final test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted;

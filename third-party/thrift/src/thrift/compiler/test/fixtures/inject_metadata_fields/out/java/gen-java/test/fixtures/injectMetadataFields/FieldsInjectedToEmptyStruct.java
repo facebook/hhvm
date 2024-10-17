@@ -34,6 +34,14 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
       this.injectedField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(FieldsInjectedToEmptyStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private String injectedField = null;
     
@@ -59,8 +67,8 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("FieldsInjectedToEmptyStruct");
     private final String injectedField;

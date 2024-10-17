@@ -28,6 +28,14 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
       this.myString = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStruct2 other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.basic_swift_bean.MyStruct1 myStruct1 = null;
         private String myString = null;
@@ -62,8 +70,8 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
         return result;    }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct2");
     private test.fixtures.basic_swift_bean.MyStruct1 myStruct1;

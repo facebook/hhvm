@@ -58,6 +58,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.noHackCodegenField = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(MyStruct other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private long myIntField = 0L;
         private String myStringField = null;
@@ -171,8 +179,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct");
     private final long myIntField;

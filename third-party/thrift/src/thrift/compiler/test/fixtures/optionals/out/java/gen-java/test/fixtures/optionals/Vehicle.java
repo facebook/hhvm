@@ -46,6 +46,14 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
       this.hasAC = null;
     }
     
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static Builder builder(Vehicle other) {
+      return new Builder(other);
+    }
+
     public static class Builder {
         private test.fixtures.optionals.Color color = null;
         private String licensePlate = null;
@@ -115,8 +123,8 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
         
-    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
-    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
+    public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("Vehicle");
     private final test.fixtures.optionals.Color color;

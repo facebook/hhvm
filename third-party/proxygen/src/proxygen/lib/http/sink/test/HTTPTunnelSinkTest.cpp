@@ -168,8 +168,8 @@ TEST_F(HTTPTunnelSinkTest, test_idle_timeout) {
   // Wait another 8ms; the timeout was reset, so this still shouldn't expire
   sleep_evb(evb_, std::chrono::milliseconds(8));
 
-  // Ok, now, expect a call to detachTransaction and closeNow which happens
-  // during timeout expiration
+  // Ok, now, expect callbacks which happen during timeout expiration
+  EXPECT_CALL(*mockHandler_, onError).WillOnce(Return());
   EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
   EXPECT_CALL(*mockSocket_, closeNow).WillOnce(Return());
   sleep_evb(evb_, std::chrono::milliseconds(8));
@@ -228,8 +228,17 @@ TEST_F(HTTPTunnelSinkTest, test_send_abort) {
 }
 
 TEST_F(HTTPTunnelSinkTest, test_read_error) {
-  EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
   EXPECT_CALL(*mockHandler_, onError).WillOnce(Return());
+  EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
+  sink_->readErr(folly::AsyncSocketException(
+      folly::AsyncSocketException::AsyncSocketExceptionType::UNKNOWN, "test"));
+}
+
+TEST_F(HTTPTunnelSinkTest, test_read_error_with_abort) {
+  EXPECT_CALL(*mockHandler_, onError).WillOnce(Invoke([&](auto &&) {
+    sink_->detachAndAbortIfIncomplete(std::move(sink_));
+  }));
+  EXPECT_CALL(*mockHandler_, detachTransaction).Times(0);
   sink_->readErr(folly::AsyncSocketException(
       folly::AsyncSocketException::AsyncSocketExceptionType::UNKNOWN, "test"));
 }
@@ -245,6 +254,22 @@ TEST_F(HTTPTunnelSinkTest, test_write_error) {
       }));
   EXPECT_CALL(*mockHandler_, onError).WillOnce(Return());
   EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
+  sink_->sendBody(folly::IOBuf::copyBuffer("hello world"));
+}
+
+TEST_F(HTTPTunnelSinkTest, test_write_error_with_abort) {
+  EXPECT_CALL(*mockSocket_, writeChain)
+      .WillRepeatedly(Invoke([](WriteCB *cb, auto &&, auto &&) {
+        cb->writeErr(
+            0,
+            folly::AsyncSocketException(
+                folly::AsyncSocketException::AsyncSocketExceptionType::UNKNOWN,
+                "test"));
+      }));
+  EXPECT_CALL(*mockHandler_, onError).WillOnce(Invoke([&](auto &&) {
+    sink_->detachAndAbortIfIncomplete(std::move(sink_));
+  }));
+  EXPECT_CALL(*mockHandler_, detachTransaction).Times(0);
   sink_->sendBody(folly::IOBuf::copyBuffer("hello world"));
 }
 

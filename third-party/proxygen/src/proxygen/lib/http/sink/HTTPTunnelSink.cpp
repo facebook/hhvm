@@ -32,9 +32,13 @@ void HTTPTunnelSink::detachAndAbortIfIncomplete(
 }
 
 void HTTPTunnelSink::sendBody(std::unique_ptr<folly::IOBuf> body) {
+  DestructorCheck::Safety safety(*this);
   resetIdleTimeout();
   ++outstandingWrites_;
   sock_->writeChain(this, std::move(body));
+  if (safety.destroyed()) {
+    return;
+  }
   if (outstandingWrites_ >= kMaxOutstandingWrites && !handlerEgressPaused_) {
     handlerEgressPaused_ = true;
     handler_->onEgressPaused();
@@ -91,9 +95,12 @@ void HTTPTunnelSink::timeoutExpired() noexcept {
   XLOG(DBG4) << "Closing socket now";
   sock_->closeNow();
   if (handler_) {
+    DestructorCheck::Safety safety(*this);
     handler_->onError(HTTPException(
         HTTPException::Direction::INGRESS_AND_EGRESS, "Idle timeout expired"));
-    handler_->detachTransaction();
+    if (!safety.destroyed() && handler_) {
+      handler_->detachTransaction();
+    }
   }
   idleTimeout_ = std::chrono::milliseconds(0);
 }
@@ -136,9 +143,12 @@ void HTTPTunnelSink::readEOF() noexcept {
 }
 
 void HTTPTunnelSink::readErr(const folly::AsyncSocketException& err) noexcept {
+  DestructorCheck::Safety safety(*this);
   handler_->onError(
       HTTPException(HTTPException::Direction::INGRESS_AND_EGRESS, err.what()));
-  handler_->detachTransaction();
+  if (!safety.destroyed() && handler_) {
+    handler_->detachTransaction();
+  }
 }
 
 // Returns true if this sink is destroyed
@@ -170,9 +180,12 @@ void HTTPTunnelSink::writeErr(size_t,
                               const folly::AsyncSocketException& err) noexcept {
   bool destroyed = writeComplete();
   if (!destroyed && handler_) {
+    DestructorCheck::Safety safety(*this);
     handler_->onError(HTTPException(
         HTTPException::Direction::INGRESS_AND_EGRESS, err.what()));
-    handler_->detachTransaction();
+    if (!safety.destroyed() && handler_) {
+      handler_->detachTransaction();
+    }
   }
 }
 

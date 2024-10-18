@@ -482,7 +482,10 @@ end = struct
     | Like _ ->
       false
 
-  (** Goes on a stochastic walk to pick an inhabited subtype of the given type.
+  exception Backtrack
+
+  (** Goes on a backtracking stochastic walk to pick an inhabited subtype of the
+      given type.
 
       Termination of this function crucially relies on the invariant that EVERY
       input type has a subtype that satisfies the constraints set in the read
@@ -612,60 +615,74 @@ end = struct
              [driver renv ty]
          end
     and driver renv candidate =
-      ReadOnlyEnvironment.debug renv
-      @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show candidate));
-      let candidates = step renv candidate in
-      if Random.bool () then
-        (* We decide to go on a stochastic walk and explore further subtypes. *)
-        driver renv @@ select candidates
-      else
-        let filtered_candidates = candidates in
-        let filtered_candidates =
-          if renv.ReadOnlyEnvironment.pick_immediately_inhabited then
-            List.filter ~f:is_immediately_inhabited filtered_candidates
-          else
-            filtered_candidates
-        in
-        let filtered_candidates =
-          if renv.ReadOnlyEnvironment.for_option then
-            List.filter filtered_candidates ~f:(function
-                | Case _ -> false
-                | _ -> true)
-          else
-            filtered_candidates
-        in
-        let filtered_candidates =
-          if renv.ReadOnlyEnvironment.for_reified then
-            List.filter filtered_candidates ~f:(function
-                | Function _ -> false
-                | _ -> true)
-          else
-            filtered_candidates
-        in
-        let filtered_candidates =
-          if renv.ReadOnlyEnvironment.for_alias then
-            List.filter filtered_candidates ~f:(function
-                | TypeConst _ -> false
-                | _ -> true)
-          else
-            filtered_candidates
-        in
-        let filtered_candidates =
-          if renv.ReadOnlyEnvironment.for_enum then
-            List.filter filtered_candidates ~f:(function
-                | Case _ -> false
-                | _ -> true)
-          else
-            filtered_candidates
-        in
-        if List.is_empty filtered_candidates then
-          (* We don't have any choices left filtering, so we try again from
-             scratch! *)
+      try
+        ReadOnlyEnvironment.debug renv
+        @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show candidate));
+        let candidates = step renv candidate in
+        if Random.bool () then
+          (* We decide to go on a stochastic walk and explore further subtypes. *)
           driver renv @@ select candidates
         else
-          select filtered_candidates
+          let filtered_candidates = candidates in
+          let filtered_candidates =
+            if renv.ReadOnlyEnvironment.pick_immediately_inhabited then
+              List.filter ~f:is_immediately_inhabited filtered_candidates
+            else
+              filtered_candidates
+          in
+          let filtered_candidates =
+            if renv.ReadOnlyEnvironment.for_option then
+              List.filter filtered_candidates ~f:(function
+                  | Case _ -> false
+                  | _ -> true)
+            else
+              filtered_candidates
+          in
+          let filtered_candidates =
+            if renv.ReadOnlyEnvironment.for_reified then
+              List.filter filtered_candidates ~f:(function
+                  | Function _ -> false
+                  | _ -> true)
+            else
+              filtered_candidates
+          in
+          let filtered_candidates =
+            if renv.ReadOnlyEnvironment.for_alias then
+              List.filter filtered_candidates ~f:(function
+                  | TypeConst _ -> false
+                  | _ -> true)
+            else
+              filtered_candidates
+          in
+          let filtered_candidates =
+            if renv.ReadOnlyEnvironment.for_enum then
+              List.filter filtered_candidates ~f:(function
+                  | Case _ -> false
+                  | _ -> true)
+            else
+              filtered_candidates
+          in
+          if List.is_empty filtered_candidates then
+            (* We don't have any choices left after filtering! So try a different
+               path either by going down or going up the tree. *)
+            if Random.bool () then
+              driver renv @@ select candidates
+            else
+              raise Backtrack
+          else
+            select filtered_candidates
+      with
+      | Backtrack ->
+        if Random.bool () then
+          driver renv candidate
+        else
+          raise Backtrack
     in
-    driver renv ty
+    let rec retry () =
+      try driver renv ty with
+      | Backtrack -> retry ()
+    in
+    retry ()
 
   let rec show_field { key; ty; optional } =
     let optional =

@@ -272,7 +272,6 @@ impl HhConfig {
             )?,
             disallow_silence: hhconfig.get_bool_or("disallow_silence", default.disallow_silence)?,
             abstract_static_props: default.abstract_static_props,
-            parser_errors_only: default.parser_errors_only,
             disallow_func_ptrs_in_constants: hhconfig.get_bool_or(
                 "disallow_func_ptrs_in_constants",
                 default.disallow_func_ptrs_in_constants,

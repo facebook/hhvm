@@ -839,7 +839,6 @@ let parse_options () =
           default.disallow_static_constants_in_default_func_args;
         stack_size = default.stack_size;
         unwrap_concurrent = default.unwrap_concurrent;
-        parser_errors_only = default.parser_errors_only;
         no_parser_readonly_check = default.no_parser_readonly_check;
         experimental_features = default.experimental_features;
         consider_unspecified_experimental_features_released =

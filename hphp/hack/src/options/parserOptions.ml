@@ -36,7 +36,6 @@ type t = {
   unwrap_concurrent: bool;
   disallow_silence: bool;
   no_parser_readonly_check: bool;
-  parser_errors_only: bool;
   disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
   use_legacy_experimental_feature_config: bool;
@@ -75,7 +74,6 @@ let default =
     unwrap_concurrent = false;
     disallow_silence = false;
     no_parser_readonly_check = false;
-    parser_errors_only = false;
     disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
     use_legacy_experimental_feature_config = true;

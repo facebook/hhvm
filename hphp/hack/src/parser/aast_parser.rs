@@ -275,7 +275,7 @@ impl<'src> AastParser {
             NamespaceMode::ForTypecheck => {
                 let first_error = tree.errors().into_iter().next();
                 match first_error {
-                    None if !env.quick_mode && !env.parser_options.parser_errors_only => {
+                    None if !env.quick_mode => {
                         let is_hhi = indexed_source_text
                             .source_text()
                             .file_path()

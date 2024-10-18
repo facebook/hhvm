@@ -55,9 +55,6 @@ type t = {
       (** Replace concurrent blocks with their bodies in the AST *)
   disallow_silence: bool;  (** Flag to disable the error suppression operator *)
   no_parser_readonly_check: bool;  (** Disable parser-based readonly checking *)
-  parser_errors_only: bool;
-      (** Ignore all errors except those that can influence the shape of syntax tree
-         (skipping post parse error checks) *)
   disable_hh_ignore_error: int;
       (** Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2. *)
   allowed_decl_fixme_codes: ISet.t;

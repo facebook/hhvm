@@ -299,7 +299,6 @@ let load_config config options =
         stack_size = po_opt.stack_size;
         no_parser_readonly_check = po_opt.no_parser_readonly_check;
         unwrap_concurrent = po_opt.unwrap_concurrent;
-        parser_errors_only = po_opt.parser_errors_only;
         (* Never use the legacy mode for hh_server *)
         use_legacy_experimental_feature_config = false;
         (* The remainder are set in the config file *)
@@ -587,7 +586,6 @@ let load
               default.po with
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
-              parser_errors_only = Option.is_some ai_options;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:

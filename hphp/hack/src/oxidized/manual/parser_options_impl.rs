@@ -36,7 +36,6 @@ impl Default for ParserOptions {
             unwrap_concurrent: false,
             disallow_silence: false,
             no_parser_readonly_check: false,
-            parser_errors_only: false,
             disable_hh_ignore_error: 0,
             allowed_decl_fixme_codes: i_set::ISet::new(),
             use_legacy_experimental_feature_config: true,

@@ -50,6 +50,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/rds-local.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/trace.h"
 
 #include <atomic>
@@ -67,6 +68,8 @@ __thread bool tl_is_jitting = false;
 CodeCache* g_code{nullptr};
 SrcDB g_srcDB;
 UniqueStubs g_ustubs;
+ServiceData::ExportedCounter* g_JitMaturityCounter{nullptr};
+int g_maxJitMaturity = 100; // may be reduced to 99 when workload changes
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -348,6 +351,7 @@ void processInit() {
 
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
+  g_JitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
   // Write an .eh_frame section that covers the JIT portion of the TC.
   initUnwinder(g_code->base(), g_code->tcSize(),
@@ -365,6 +369,17 @@ void processInit() {
 
 void processExit() {
   recycleStop();
+}
+
+void recordWorkloadChange() {
+  if (RO::EvalWorkloadAwareMaturity && getJitMaturity() < g_maxJitMaturity) {
+    g_maxJitMaturity = 99;
+  }
+}
+
+int getJitMaturity() {
+  if (!g_JitMaturityCounter) return 0;
+  return g_JitMaturityCounter->getValue();
 }
 
 bool isValidCodeAddress(TCA addr) {

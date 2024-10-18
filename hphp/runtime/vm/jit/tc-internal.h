@@ -238,6 +238,28 @@ ALWAYS_INLINE SrcDB& srcDB() {
   return g_srcDB;
 }
 
+
+/*
+ * Called when we detect a change in the workload during JIT warmup, which makes
+ * the JIT less effective. This affects the reported JIT maturity.
+ */
+void recordWorkloadChange();
+
+/*
+ * Get the current maturity of the JIT. It is an integer between 0 and 100 that
+ * never decreases. When TC is filled up, the value is 100 or 99 (it will be
+ * stuck at 99 when recordWorkloadChange() happened during warmup).
+ */
+int getJitMaturity();
+
+/*
+ * Whether JIT maturity is 100, or 99 due to workload changes.
+ */
+extern int g_maxJitMaturity;
+ALWAYS_INLINE bool isMature() {
+  return getJitMaturity() >= g_maxJitMaturity;
+}
+
 /*
  * Initialize the TC recycling mechanism. Does nothing if EvalEnableReusableTC
  * is false.

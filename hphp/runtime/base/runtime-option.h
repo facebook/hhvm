@@ -557,6 +557,7 @@ struct RuntimeOption {
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(bool, RegionRelaxGuards,           true)                            \
+  F(bool, WorkloadAwareMaturity,       true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   /* DumpHhas =1 dumps user php, =2 dumps systemlib & user php */       \

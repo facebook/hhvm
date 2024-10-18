@@ -252,10 +252,11 @@ size_t getOptMainUsage() {
  * JIT.
  */
 void reportJitMaturity() {
-  auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
+  extern ServiceData::ExportedCounter* g_JitMaturityCounter;
+  auto jitMaturityCounter = g_JitMaturityCounter;
   if (!jitMaturityCounter) return;
   auto const before = jitMaturityCounter->getValue();
-  if (before == 100) return;
+  if (before >= g_maxJitMaturity) return;
 
   // Limit jit maturity to 70 before retranslateAll finishes (if enabled). If
   // the JIT running in jumpstart seeer mode, don't consider retranslateAll to
@@ -292,7 +293,7 @@ void reportJitMaturity() {
              code().main().used() >= CodeCache::AMaxUsage ||
              code().cold().used() >= CodeCache::AColdMaxUsage ||
              code().frozen().used() >= CodeCache::AFrozenMaxUsage) {
-    maturity = 100;
+    maturity = g_maxJitMaturity;
   } else if (codeSize >= fullSize) {
     maturity = 99;
   } else {
@@ -304,7 +305,7 @@ void reportJitMaturity() {
   // warmupStatusString() is empty, which indicates that the JIT is warmed up
   // based on the rate in which JITed code is being produced.
   if (Cfg::Jit::MatureAfterWarmup && warmupStatusString().empty()) {
-    maturity = 100;
+    maturity = g_maxJitMaturity;
   }
 
   if (maturity > before) {

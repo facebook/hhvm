@@ -244,8 +244,6 @@ type t = {
       (** List of files whose TASTs to be dumped in /tmp/hh_server/tasts. *)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
-  use_old_decls_from_cas: bool;
-      (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
   lsp_sticky_quarantine: bool;
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
   lsp_invalidation: bool;

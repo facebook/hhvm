@@ -94,7 +94,6 @@ let default =
     disable_naming_table_fallback_loading = false;
     use_distc = true;
     use_compressed_dep_graph = true;
-    use_old_decls_from_cas = false;
     hh_distc_fanout_threshold = 250_000;
     hh_distc_exponential_backoff_num_retries = 10;
     ide_load_naming_table_on_disk = true;
@@ -752,13 +751,6 @@ let load_
       ~current_version
       config
   in
-  let use_old_decls_from_cas =
-    bool_if_min_version
-      "use_old_decls_from_cas"
-      ~default:default.use_old_decls_from_cas
-      ~current_version
-      config
-  in
   let hh_distc_fanout_threshold =
     int_
       "hh_distc_fanout_threshold"
@@ -915,7 +907,6 @@ let load_
     disable_naming_table_fallback_loading;
     use_distc;
     use_compressed_dep_graph;
-    use_old_decls_from_cas;
     hh_distc_fanout_threshold;
     hh_distc_exponential_backoff_num_retries;
     ide_load_naming_table_on_disk;
@@ -959,7 +950,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;
       use_compressed_dep_graph = options.use_compressed_dep_graph;
-      use_old_decls_from_cas = options.use_old_decls_from_cas;
       consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       rust_elab = options.rust_elab;

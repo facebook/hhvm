@@ -102,8 +102,6 @@ let class_pointer_level t flag =
 
 let remote_old_decls_no_limit t = t.GlobalOptions.tco_remote_old_decls_no_limit
 
-let use_old_decls_from_cas t = t.GlobalOptions.tco_use_old_decls_from_cas
-
 let fetch_remote_old_decls t = t.GlobalOptions.tco_fetch_remote_old_decls
 
 let populate_member_heaps t = t.GlobalOptions.tco_populate_member_heaps

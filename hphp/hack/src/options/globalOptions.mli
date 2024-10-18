@@ -106,8 +106,6 @@ type t = {
       (** Map of restriction levels for class pointer migration *)
   tco_remote_old_decls_no_limit: bool;
       (** Flag to fetch old decls from remote decl store *)
-  tco_use_old_decls_from_cas: bool;
-      (** Don't limit amount of remote old decls fetched *)
   tco_fetch_remote_old_decls: bool;
       (** Fetch old decls from CAS instead of memcache/manifold *)
   tco_populate_member_heaps: bool;
@@ -306,7 +304,6 @@ val set :
   ?log_levels:int SMap.t ->
   ?class_pointer_levels:int SMap.t ->
   ?tco_remote_old_decls_no_limit:bool ->
-  ?tco_use_old_decls_from_cas:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->

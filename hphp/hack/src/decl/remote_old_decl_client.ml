@@ -70,14 +70,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
         names
     in
     let start_t = Unix.gettimeofday () in
-    let old_decls =
-      let use_old_decls_from_cas =
-        TypecheckerOptions.use_old_decls_from_cas
-          (Provider_context.get_tcopt ctx)
-      in
-      Hh_logger.log "Using old decls from CAS? %b" use_old_decls_from_cas;
-      fetch_old_decls_via_file_hashes ~ctx ~db_path names
-    in
+    let old_decls = fetch_old_decls_via_file_hashes ~ctx ~db_path names in
     let to_fetch = List.length decl_hashes in
     let telemetry =
       Telemetry.create ()

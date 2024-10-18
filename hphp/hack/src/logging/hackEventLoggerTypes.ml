@@ -110,8 +110,6 @@ type rollout_flags = {
       (** POC: @nzthomas, if clientIDEDaemon is loading a naming table from disk instead of Manifold, set a globalrev distance threshold *)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
-  use_old_decls_from_cas: bool;
-      (** POC: @bobren, use old decls from CAS instead of memcache/manifold *)
   load_state_natively_v4: bool;
       (** POC: @bobren, whether to allow hh_server to fetch saved state (thus overriding load_state_natively setting on Sandcastle) *)
   saved_state_rollouts: Saved_state_rollouts.t;

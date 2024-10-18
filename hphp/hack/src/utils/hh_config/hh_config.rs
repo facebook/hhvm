@@ -335,7 +335,6 @@ impl HhConfig {
             log_levels: hhconfig.get_str("log_levels").map_or(Ok(default.log_levels), parse_json)?,
             class_pointer_levels: hhconfig.get_str("class_pointer_levels").map_or(Ok(default.class_pointer_levels), parse_json)?,
             tco_remote_old_decls_no_limit: default.tco_remote_old_decls_no_limit,
-            tco_use_old_decls_from_cas: default.tco_use_old_decls_from_cas,
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
             tco_populate_member_heaps: default.tco_populate_member_heaps,
             tco_skip_hierarchy_checks: default.tco_skip_hierarchy_checks,

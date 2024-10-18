@@ -128,7 +128,6 @@ impl Default for GlobalOptions {
             tco_autocomplete_mode: false,
             tco_package_info: PackageInfo::default(),
             tco_log_exhaustivity_check: false,
-            tco_use_old_decls_from_cas: false,
             tco_sticky_quarantine: false,
             tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,

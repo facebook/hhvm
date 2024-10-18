@@ -2473,7 +2473,7 @@ end = struct
         (env2, err2, true)
     end
 
-  let typename_expr env p sid outer result =
+  let typename_expr env pcid sid outer result =
     begin
       match Env.get_typedef env (snd sid) with
       | Decl_entry.Found { td_tparams = tparaml; _ } ->
@@ -2488,7 +2488,7 @@ end = struct
               end
             tparaml
         in
-        let p_ = Pos_or_decl.of_raw_pos p in
+        let p_ = Pos_or_decl.of_raw_pos pcid in
         let tdef =
           mk
             ( Reason.witness_from_decl p_,
@@ -2500,7 +2500,7 @@ end = struct
               Tapply ((p_, SN.Classes.cTypename), [tdef]) )
         in
         let (env, tparams) =
-          List.map_env env tparaml ~f:(fun env _tp -> Env.fresh_type env p)
+          List.map_env env tparaml ~f:(fun env _tp -> Env.fresh_type env pcid)
         in
         let ety_env =
           {
@@ -2511,7 +2511,7 @@ end = struct
           }
         in
         let (env, ty_err_opt1) =
-          Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
+          Phase.check_tparams_constraints ~use_pos:pcid ~ety_env env tparaml
         in
         Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt1;
         let ((env, ty_err_opt2), ty) = Phase.localize ~ety_env env typename in
@@ -2520,7 +2520,7 @@ end = struct
       | Decl_entry.NotYetAvailable
       | Decl_entry.DoesNotExist ->
         (* Should not expect None as we've checked whether the sid is a typedef *)
-        expr_error env p outer
+        expr_error env pcid outer
     end
 
   let rec expr ~(expected : ExpectedTy.t option) ~ctxt env ((_, p, _) as e) =
@@ -3811,10 +3811,10 @@ end = struct
       (env, tuop, ty)
     | Eif (c, e1, e2) ->
       eif env ~expected ~in_await:ctxt.Context.in_await p c e1 e2
-    | Class_const ((_, p, CI sid), pstr)
+    | Class_const ((_, pcid, CI sid), pstr)
       when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
-      typename_expr env p sid outer (fun env ty ->
-          make_result env p (Class_const ((ty, p, CI sid), pstr)) ty)
+      typename_expr env pcid sid outer (fun env ty ->
+          make_result env p (Class_const ((ty, pcid, CI sid), pstr)) ty)
     | Class_const (cid, mid) ->
       class_const
         env
@@ -4614,9 +4614,9 @@ end = struct
       make_result env p (Aast.EnumClassLabel (Some enum_name, name)) ty
     | Package ((p, _) as id) ->
       make_result env p (Aast.Package id) (MakeType.bool (Reason.witness p))
-    | Nameof (_, p, CI sid) when Env.is_typedef env (snd sid) ->
-      typename_expr env p sid outer (fun env ty ->
-          make_result env p (Aast.Nameof (ty, p, CI sid)) ty)
+    | Nameof (_, pcid, CI sid) when Env.is_typedef env (snd sid) ->
+      typename_expr env pcid sid outer (fun env ty ->
+          make_result env p (Aast.Nameof (ty, pcid, CI sid)) ty)
     | Nameof cid ->
       let (env, _tal, ce, cty) =
         Class_id.class_expr ~inside_nameof:true env [] cid

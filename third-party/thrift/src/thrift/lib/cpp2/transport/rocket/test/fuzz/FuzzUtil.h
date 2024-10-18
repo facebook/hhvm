@@ -101,6 +101,17 @@ class FakeProcessor final : public apache::thrift::AsyncProcessor {
         << "This AsyncProcessor doesn't support Thrift interactions. "
         << "Please implement processInteraction to support interactions.";
   }
+
+  void executeRequest(
+      ServerRequest&& req,
+      const AsyncProcessorFactory::MethodMetadata&) override {
+    req.request()->sendErrorWrapped(
+        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+            apache::thrift::TApplicationException::TApplicationExceptionType::
+                INTERNAL_ERROR,
+            "place holder"),
+        "1" /* doesnt matter */);
+  }
 };
 
 class FakeProcessorFactory final
@@ -108,6 +119,14 @@ class FakeProcessorFactory final
  public:
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::make_unique<FakeProcessor>();
+  }
+
+  CreateMethodMetadataResult createMethodMetadata() override {
+    WildcardMethodMetadataMap wildcardMap;
+    wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>(
+        MethodMetadata::ExecutorType::ANY);
+    wildcardMap.knownMethods = {};
+    return wildcardMap;
   }
 
   std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()

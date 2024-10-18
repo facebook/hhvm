@@ -69,7 +69,9 @@ ContextStack::ContextStack(
     return;
   }
   for (size_t i = 0; i < handlers_->size(); ++i) {
-    contextAt(i) = (*handlers_)[i]->getServiceContext(
+    auto* handler = (*handlers_)[i].get();
+    CHECK(handler != nullptr);
+    contextAt(i) = handler->getServiceContext(
         serviceName_, methodNamePrefixed_, connectionContext);
   }
 }

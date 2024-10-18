@@ -28,6 +28,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 class _fbthrift_compatible_with_EmptyEnum:
     pass
@@ -157,7 +158,12 @@ class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible
     a: int = ...
     b: str = ...
     c: struct1 = ...
-    d: _typing.MutableSequence[int] = ...
+
+    @property
+    def d(self) -> _typing.MutableSequence[int]: ...
+    @d.setter
+    def d(self, value: _typing.MutableSequence[int]): ...
+
     def __init__(
         self, *,
         a: _typing.Optional[int]=...,

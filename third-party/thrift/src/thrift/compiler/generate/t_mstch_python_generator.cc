@@ -799,6 +799,7 @@ class python_mstch_field : public mstch_field {
             {"field:user_default_value",
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
+            {"field:is_container_type", &python_mstch_field::is_container_type},
         });
   }
 
@@ -849,6 +850,12 @@ class python_mstch_field : public mstch_field {
   mstch::node adapter() {
     return adapter_node(
         adapter_annotation_, transitive_adapter_annotation_, context_, pos_);
+  }
+
+  mstch::node is_container_type() {
+    const auto* type = field_->get_type();
+    return type->get_true_type()->is_list() ||
+        type->get_true_type()->is_map() || type->get_true_type()->is_set();
   }
 
  private:

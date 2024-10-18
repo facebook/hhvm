@@ -26,6 +26,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 class _fbthrift_compatible_with_Metasyntactic:
     pass
@@ -128,7 +129,12 @@ class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     reasonable: Metasyntactic = ...
     fine: Metasyntactic = ...
     questionable: Metasyntactic = ...
-    tags: _typing.MutableSet[int] = ...
+
+    @property
+    def tags(self) -> _typing.MutableSet[int]: ...
+    @tags.setter
+    def tags(self, value: _typing.MutableSet[int]): ...
+
     def __init__(
         self, *,
         reasonable: _typing.Optional[_fbthrift_compatible_with_Metasyntactic]=...,

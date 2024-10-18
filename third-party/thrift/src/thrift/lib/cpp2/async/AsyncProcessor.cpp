@@ -963,25 +963,16 @@ bool HandlerCallbackBase::fulfillTilePromise(std::unique_ptr<Tile> ptr) {
     return false;
   }
 
-  auto fn = [connCtx = reqCtx_->getConnectionContext(),
-             interactionId = reqCtx_->getInteractionId(),
-             interaction = std::move(interaction_),
-             ptr = std::move(ptr),
-             tm = getThreadManager_deprecated(),
-             eb = eb_,
-             executor = executor_,
-             isRPEnabled = isResourcePoolEnabled()]() mutable {
-    TilePtr tile{ptr.release(), eb};
-    DCHECK(dynamic_cast<TilePromise*>(interaction.get()));
-    if (isRPEnabled) {
-      static_cast<TilePromise&>(*interaction).fulfill(*tile, executor, *eb);
-    } else {
-      static_cast<TilePromise&>(*interaction).fulfill(*tile, tm, *eb);
-    }
-    connCtx->tryReplaceTile(interactionId, std::move(tile));
-  };
-
-  eb_->runImmediatelyOrRunInEventBaseThread(std::move(fn));
+  putMessageInReplyQueue(
+      std::in_place_type_t<TilePromiseReplyInfo>(),
+      reqCtx_->getConnectionContext(),
+      reqCtx_->getInteractionId(),
+      std::move(interaction_),
+      std::move(ptr),
+      getThreadManager_deprecated(),
+      eb_,
+      executor_,
+      isResourcePoolEnabled());
   return true;
 }
 

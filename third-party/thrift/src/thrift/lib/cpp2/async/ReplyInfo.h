@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/Sink.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace apache::thrift {
 
@@ -86,8 +87,52 @@ class SinkConsumerReplyInfo {
   folly::Optional<uint32_t> crc32c_;
 };
 
-using ReplyInfo =
-    std::variant<QueueReplyInfo, StreamReplyInfo, SinkConsumerReplyInfo>;
+class TilePromiseReplyInfo {
+ public:
+  TilePromiseReplyInfo(
+      Cpp2ConnContext* connCtx,
+      int64_t interactionId,
+      TilePtr interaction,
+      std::unique_ptr<Tile> ptr,
+      concurrency::ThreadManager* tm,
+      folly::EventBase* eb,
+      folly::Executor::KeepAlive<> executor,
+      bool isRPEnabled)
+      : connCtx_(connCtx),
+        interactionId_(interactionId),
+        interaction_(std::move(interaction)),
+        ptr_(std::move(ptr)),
+        tm_(tm),
+        eb_(eb),
+        executor_(std::move(executor)),
+        isRPEnabled_(isRPEnabled) {}
+
+  void operator()() noexcept {
+    TilePtr tile{ptr_.release(), eb_};
+    DCHECK(dynamic_cast<TilePromise*>(interaction_.get()));
+    if (isRPEnabled_) {
+      static_cast<TilePromise&>(*interaction_).fulfill(*tile, executor_, *eb_);
+    } else {
+      static_cast<TilePromise&>(*interaction_).fulfill(*tile, tm_, *eb_);
+    }
+    connCtx_->tryReplaceTile(interactionId_, std::move(tile));
+  }
+
+  Cpp2ConnContext* connCtx_;
+  int64_t interactionId_;
+  TilePtr interaction_;
+  std::unique_ptr<Tile> ptr_;
+  concurrency::ThreadManager* tm_;
+  folly::EventBase* eb_;
+  folly::Executor::KeepAlive<> executor_;
+  bool isRPEnabled_;
+};
+
+using ReplyInfo = std::variant<
+    QueueReplyInfo,
+    StreamReplyInfo,
+    SinkConsumerReplyInfo,
+    TilePromiseReplyInfo>;
 
 /**
  * Used in EventBaseAtomicNotificationQueue to process each dequeued item

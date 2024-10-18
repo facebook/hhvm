@@ -1386,6 +1386,7 @@ void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> cythonFilesWithTypeContext{
       "types.pyx",
       "types.pxd",
+      "cbindings.pxd",
       "types.pyi",
   };
 

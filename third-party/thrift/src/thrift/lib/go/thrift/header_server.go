@@ -83,7 +83,7 @@ func (p *headerServer) acceptLoop(ctx context.Context) error {
 		go func(ctx context.Context, conn net.Conn) {
 			ctx = p.connContext(ctx, conn)
 			if err := p.processRequests(ctx, conn); err != nil {
-				p.log.Printf("error processing request from %s: %s", conn.RemoteAddr().String(), err)
+				p.log.Printf("error processing request from %s: %s\n", conn.RemoteAddr(), err)
 			}
 		}(ctx, conn)
 	}

@@ -94,6 +94,8 @@ cdef class TypeInfoTests():
             "Use the 'same_as' method for comparing TypeInfoBase instances."):
             list_type_info == list_type_info
 
+        self.ut.assertTrue(list_type_info.is_container())
+
     def test_ListTypeInfo_nested(self) -> None:
         element_type_info = ListTypeInfo(typeinfo_i64)
         list_type_info = ListTypeInfo(element_type_info)
@@ -125,6 +127,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(set_type_info.same_as(set_type_info))
         self.ut.assertTrue(SetTypeInfo(typeinfo_i64).same_as(set_type_info))
         self.ut.assertFalse(SetTypeInfo(typeinfo_i32).same_as(set_type_info))
+        self.ut.assertTrue(set_type_info.is_container())
 
     def test_SetTypeInfo_nested(self) -> None:
         element_type_info = SetTypeInfo(typeinfo_i64)
@@ -156,6 +159,7 @@ cdef class TypeInfoTests():
 
         self.ut.assertTrue(typeinfo_i64.same_as(typeinfo_i64))
         self.ut.assertFalse(typeinfo_i32.same_as(typeinfo_i64))
+        self.ut.assertFalse(typeinfo_i32.is_container())
 
     def test_StringTypeInfo(self) -> None:
         self.ut.assertIsInstance(typeinfo_string, TypeInfoBase)
@@ -175,6 +179,7 @@ cdef class TypeInfoTests():
 
         self.ut.assertTrue(typeinfo_string.same_as(typeinfo_string))
         self.ut.assertFalse(typeinfo_i32.same_as(typeinfo_string))
+        self.ut.assertFalse(typeinfo_string.is_container())
 
     def test_TypeInfo(self) -> None:
         # `typeinfo_{bool,float,double}` are instances of `TypeInfo`
@@ -197,6 +202,7 @@ cdef class TypeInfoTests():
         self.ut.assertFalse(typeinfo_float.same_as(typeinfo_double))
         self.ut.assertFalse(typeinfo_double.same_as(typeinfo_float))
         self.ut.assertFalse(typeinfo_bool.same_as(typeinfo_float))
+        self.ut.assertFalse(typeinfo_bool.is_container())
 
     def test_StructTypeInfo(self) -> None:
         struct_type_info = StructTypeInfo(Foo)
@@ -218,6 +224,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(struct_type_info.same_as(struct_type_info))
         self.ut.assertTrue(StructTypeInfo(Foo).same_as(struct_type_info))
         self.ut.assertFalse(StructTypeInfo(OtherFoo).same_as(struct_type_info))
+        self.ut.assertFalse(struct_type_info.is_container())
 
     def test_EnumTypeInfo(self) -> None:
         enum_type_info = EnumTypeInfo(Bar)
@@ -240,6 +247,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(enum_type_info.same_as(enum_type_info))
         self.ut.assertTrue(EnumTypeInfo(Bar).same_as(enum_type_info))
         self.ut.assertFalse(EnumTypeInfo(OtherBar).same_as(enum_type_info))
+        self.ut.assertFalse(enum_type_info.is_container())
 
     def test_AdaptedTypeInfo(self) -> None:
         adapted_type_info = AdaptedTypeInfo(typeinfo_string, AtoiAdapter, lambda: None)
@@ -265,6 +273,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(adapted_type_info.same_as(adapted_type_info))
         self.ut.assertTrue(AdaptedTypeInfo(typeinfo_string, AtoiAdapter, lambda: None).same_as(adapted_type_info))
         self.ut.assertFalse(AdaptedTypeInfo(typeinfo_string, DatetimeAdapter, lambda: None).same_as(adapted_type_info))
+        self.ut.assertFalse(adapted_type_info.is_container())
 
     def test_IOBufTypeInfo(self) -> None:
         self.ut.assertIsInstance(typeinfo_iobuf, TypeInfoBase)
@@ -284,6 +293,7 @@ cdef class TypeInfoTests():
 
         self.ut.assertTrue(typeinfo_iobuf.same_as(typeinfo_iobuf))
         self.ut.assertFalse(typeinfo_string.same_as(typeinfo_iobuf))
+        self.ut.assertFalse(typeinfo_iobuf.is_container())
 
     def test_MapTypeInfo(self) -> None:
         map_type_info = MapTypeInfo(typeinfo_string, typeinfo_i64)
@@ -306,6 +316,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(MapTypeInfo(typeinfo_string, typeinfo_i64).same_as(map_type_info))
         self.ut.assertFalse(MapTypeInfo(typeinfo_string, typeinfo_i32).same_as(map_type_info))
         self.ut.assertFalse(MapTypeInfo(typeinfo_i32, typeinfo_i64).same_as(map_type_info))
+        self.ut.assertTrue(map_type_info.is_container())
 
     def test_MapTypeInfo_nested(self) -> None:
         # Map[str, Map[int, List[int]]]
@@ -346,6 +357,8 @@ cdef class TypeInfoTests():
             "Use the 'same_as' method for comparing TypeInfoBase instances."):
             list_type_info == list_type_info
 
+        self.ut.assertTrue(list_type_info.is_container())
+
     def test_MutableListTypeInfo_nested(self) -> None:
         element_type_info = MutableListTypeInfo(typeinfo_i64)
         list_type_info = MutableListTypeInfo(element_type_info)
@@ -377,6 +390,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(set_type_info.same_as(set_type_info))
         self.ut.assertTrue(MutableSetTypeInfo(typeinfo_i64).same_as(set_type_info))
         self.ut.assertFalse(MutableSetTypeInfo(typeinfo_i32).same_as(set_type_info))
+        self.ut.assertTrue(set_type_info.is_container())
 
     def test_MutableMapTypeInfo(self) -> None:
         map_type_info = MutableMapTypeInfo(typeinfo_string, typeinfo_i64)
@@ -399,6 +413,7 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(MutableMapTypeInfo(typeinfo_string, typeinfo_i64).same_as(map_type_info))
         self.ut.assertFalse(MutableMapTypeInfo(typeinfo_string, typeinfo_i32).same_as(map_type_info))
         self.ut.assertFalse(MutableMapTypeInfo(typeinfo_i32, typeinfo_i64).same_as(map_type_info))
+        self.ut.assertTrue(map_type_info.is_container())
 
     def test_MutableStructTypeInfo(self) -> None:
         struct_type_info = MutableStructTypeInfo(FooMutable)
@@ -420,3 +435,4 @@ cdef class TypeInfoTests():
         self.ut.assertTrue(struct_type_info.same_as(struct_type_info))
         self.ut.assertTrue(MutableStructTypeInfo(FooMutable).same_as(struct_type_info))
         self.ut.assertFalse(MutableStructTypeInfo(OtherFooMutable).same_as(struct_type_info))
+        self.ut.assertFalse(struct_type_info.is_container())

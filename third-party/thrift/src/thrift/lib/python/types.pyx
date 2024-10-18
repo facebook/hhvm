@@ -123,6 +123,13 @@ cdef class TypeInfoBase:
         """
         raise NotImplementedError("Not implemented on base TypeInfoBase class")
 
+    def is_container(self):
+        """
+        Return `True` if it is one of the immutable or mutable `TypeInfo` classes
+        for list, map or set.
+        """
+        return False
+
 @cython.final
 cdef class TypeInfo(TypeInfoBase):
     @staticmethod
@@ -622,6 +629,9 @@ cdef class ListTypeInfo(TypeInfoBase):
 
         return self.val_info.same_as((<ListTypeInfo>other).val_info)
 
+    def is_container(self):
+        return True
+
     def __reduce__(self):
         return (ListTypeInfo, (self.val_info,))
 
@@ -672,6 +682,9 @@ cdef class SetTypeInfo(TypeInfoBase):
             return False
 
         return self.val_info.same_as((<SetTypeInfo>other).val_info)
+
+    def is_container(self):
+        return True
 
     def __reduce__(self):
         return (SetTypeInfo, (self.val_info,))
@@ -739,6 +752,9 @@ cdef class MapTypeInfo(TypeInfoBase):
 
         return (self.key_info.same_as((<MapTypeInfo>other).key_info) and
             self.val_info.same_as((<MapTypeInfo>other).val_info))
+
+    def is_container(self):
+        return True
 
     def __reduce__(self):
         return (MapTypeInfo, (self.key_info, self.val_info))

@@ -206,6 +206,8 @@ class TServerObserver {
   virtual void resourcePoolsInitialized(
       const std::vector<std::string>& /*resourcePoolsDescriptions*/) {}
 
+  virtual void pendingConnections(int32_t /*numPendingConnections*/) {}
+
   // The observer has to specify a sample rate for callCompleted notifications
   inline uint32_t getSampleRate() const { return sampleRate_; }
 

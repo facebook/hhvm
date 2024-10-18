@@ -62,6 +62,7 @@
 #include <thrift/lib/cpp2/server/StandardConcurrencyController.h>
 #include <thrift/lib/cpp2/server/TMConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
+#include <thrift/lib/cpp2/server/metrics/PendingConnectionsMetrics.h>
 #include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
@@ -513,8 +514,9 @@ void ThriftServer::configureIOUring() {
 class ThriftServer::ConnectionEventCallback
     : public folly::AsyncServerSocket::ConnectionEventCallback {
  public:
-  ConnectionEventCallback(const ThriftServer& thriftServer)
-      : thriftServer_(thriftServer) {}
+  explicit ConnectionEventCallback(const ThriftServer& thriftServer)
+      : thriftServer_(thriftServer),
+        pendingConnectionsMetrics_(setupPendingConnectionsMetrics()) {}
 
   void onConnectionAccepted(
       const folly::NetworkSocket,
@@ -541,6 +543,9 @@ class ThriftServer::ConnectionEventCallback
           metadata["error_msg"] = errorMsg;
           return metadata;
         });
+    if (pendingConnectionsMetrics_) {
+      pendingConnectionsMetrics_->onConnectionDropped(errorMsg);
+    }
   }
 
   void onConnectionEnqueuedForAcceptorCallback(
@@ -548,6 +553,9 @@ class ThriftServer::ConnectionEventCallback
       const folly::SocketAddress& clientAddr) noexcept override {
     THRIFT_CONNECTION_EVENT(connection_enqueued_acceptor)
         .log(thriftServer_, clientAddr);
+    if (pendingConnectionsMetrics_) {
+      pendingConnectionsMetrics_->onConnectionEnqueuedToIoWorker();
+    }
   }
 
   void onConnectionDequeuedByAcceptorCallback(
@@ -555,6 +563,9 @@ class ThriftServer::ConnectionEventCallback
       const folly::SocketAddress& clientAddr) noexcept override {
     THRIFT_CONNECTION_EVENT(connection_dequeued_acceptor)
         .log(thriftServer_, clientAddr);
+    if (pendingConnectionsMetrics_) {
+      pendingConnectionsMetrics_->onConnectionDequedByIoWorker();
+    }
   }
 
   void onBackoffStarted() noexcept override {}
@@ -565,6 +576,14 @@ class ThriftServer::ConnectionEventCallback
 
  private:
   const ThriftServer& thriftServer_;
+  std::shared_ptr<PendingConnectionsMetrics> pendingConnectionsMetrics_;
+
+  std::shared_ptr<PendingConnectionsMetrics> setupPendingConnectionsMetrics() {
+    return thriftServer_.getObserver()
+        ? std::make_shared<PendingConnectionsMetrics>(
+              thriftServer_.getObserverShared())
+        : nullptr;
+  }
 };
 
 void ThriftServer::setup() {

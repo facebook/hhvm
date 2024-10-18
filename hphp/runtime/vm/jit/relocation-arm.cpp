@@ -379,9 +379,9 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
 
   auto const litAddr =
     src->NextInstruction()->ImmPCOffsetTarget(srcFrom->NextInstruction());
-  always_assert_flog(TCA(litAddr) >= env.start && TCA(litAddr) < env.end,
-                     "litAddr = {}  start = {}  end = {}\n",
-                     litAddr, env.start, env.end);
+
+  if (TCA(litAddr) < env.start || TCA(litAddr) >= env.end) return false;
+
   env.literalsToRemove.insert(litAddr);
 
   vixl::MacroAssembler a { env.destBlock };

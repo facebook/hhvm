@@ -31,7 +31,6 @@
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/py3/util.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/uri.h>
@@ -466,7 +465,7 @@ class python_capi_mstch_struct : public mstch_struct {
         });
   }
 
-  mstch::node py_name() { return py3::get_py3_name(*struct_); }
+  mstch::node py_name() { return python::get_py3_name(*struct_); }
 
   mstch::node tuple_positions() {
     std::vector<std::pair<int, int>> index_keys;
@@ -625,7 +624,7 @@ class python_capi_mstch_field : public mstch_field {
       mstch_element_position pos,
       const field_generator_context* field_context)
       : mstch_field(field, ctx, pos, field_context),
-        py_name_(py3::get_py3_name(*field)) {
+        py_name_(python::get_py3_name(*field)) {
     register_cached_methods(
         this,
         {

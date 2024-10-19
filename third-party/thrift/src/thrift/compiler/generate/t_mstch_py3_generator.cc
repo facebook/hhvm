@@ -26,7 +26,7 @@
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/py3/util.h>
+#include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/uri.h>
 
@@ -577,14 +577,14 @@ class py3_mstch_function : public mstch_function {
 
 class py3_mstch_type : public mstch_type {
  public:
-  using CachedProperties = apache::thrift::compiler::py3::CachedProperties;
+  using cached_properties = apache::thrift::compiler::python::cached_properties;
 
   struct data {
     const t_program* program;
-    std::unordered_map<const t_type*, CachedProperties>* cache;
+    std::unordered_map<const t_type*, cached_properties>* cache;
   };
 
-  CachedProperties& get_cached_props(const t_type* type, const data& d);
+  cached_properties& get_cached_props(const t_type* type, const data& d);
 
   py3_mstch_type(
       const t_type* type,
@@ -644,19 +644,19 @@ class py3_mstch_type : public mstch_type {
     return fmt::format("_{}", fmt::join(get_type_py3_namespace(), "_"));
   }
 
-  mstch::node flatName() { return cached_props_.flatName(); }
+  mstch::node flatName() { return cached_props_.flat_name(); }
 
   mstch::node cppNamespaces() {
     return create_string_array(get_type_cpp2_namespace());
   }
 
-  mstch::node cppTemplate() { return cached_props_.cppTemplate(); }
+  mstch::node cppTemplate() { return cached_props_.cpp_template(); }
 
   mstch::node cythonTemplate() { return to_cython_template(); }
 
   mstch::node isDefaultTemplate() { return is_default_template(); }
 
-  mstch::node cppType() { return cached_props_.cppType(); }
+  mstch::node cppType() { return cached_props_.cpp_type(); }
 
   mstch::node cythonType() { return to_cython_type(); }
 
@@ -697,7 +697,7 @@ class py3_mstch_type : public mstch_type {
         resolved_type_->is_exception();
   }
 
-  const std::string& get_flat_name() const { return cached_props_.flatName(); }
+  const std::string& get_flat_name() const { return cached_props_.flat_name(); }
 
   void set_flat_name(const std::string& extra) {
     cached_props_.set_flat_name(prog_, type_, extra);
@@ -707,7 +707,7 @@ class py3_mstch_type : public mstch_type {
     return cached_props_.is_default_template(type_);
   }
 
-  bool has_custom_cpp_type() const { return cached_props_.cppType() != ""; }
+  bool has_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
 
  protected:
   const t_program* get_type_program() const {
@@ -753,10 +753,10 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const { return !type_->is_container(); }
 
-  bool is_iobuf() const { return cached_props_.cppType() == "folly::IOBuf"; }
+  bool is_iobuf() const { return cached_props_.cpp_type() == "folly::IOBuf"; }
 
   bool is_iobuf_ref() const {
-    return cached_props_.cppType() == "std::unique_ptr<folly::IOBuf>";
+    return cached_props_.cpp_type() == "std::unique_ptr<folly::IOBuf>";
   }
 
   bool is_flexible_binary() const {
@@ -764,8 +764,8 @@ class py3_mstch_type : public mstch_type {
         !is_iobuf_ref() &&
         // We know that folly::fbstring is completely substitutable for
         // std::string and it's a common-enough type to special-case:
-        cached_props_.cppType() != "folly::fbstring" &&
-        cached_props_.cppType() != "::folly::fbstring";
+        cached_props_.cpp_type() != "folly::fbstring" &&
+        cached_props_.cpp_type() != "::folly::fbstring";
   }
 
   bool has_custom_type_behavior() const {
@@ -773,7 +773,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   const t_program* prog_;
-  CachedProperties& cached_props_;
+  cached_properties& cached_props_;
 };
 
 class py3_mstch_struct : public mstch_struct {
@@ -837,7 +837,7 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node exceptionMessage() {
     const auto* message_field =
         dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? py3::get_py3_name(*message_field) : "";
+    return message_field ? python::get_py3_name(*message_field) : "";
   }
 
   mstch::node py3_fields() { return make_mstch_fields(py3_fields_); }
@@ -887,7 +887,7 @@ class py3_mstch_field : public mstch_field {
       mstch_element_position pos,
       const field_generator_context* field_context)
       : mstch_field(field, ctx, pos, field_context),
-        pyName_(py3::get_py3_name(*field)),
+        pyName_(python::get_py3_name(*field)),
         cppName_(cpp2::get_name(field)) {
     register_cached_methods(
         this,
@@ -1038,12 +1038,12 @@ class py3_mstch_enum_value : public mstch_enum_value {
         });
   }
 
-  mstch::node pyName() { return py3::get_py3_name(*enum_value_); }
+  mstch::node pyName() { return python::get_py3_name(*enum_value_); }
 
   mstch::node cppName() { return cpp2::get_name(enum_value_); }
 
   mstch::node hasPyName() {
-    return py3::get_py3_name(*enum_value_) != enum_value_->get_name();
+    return python::get_py3_name(*enum_value_) != enum_value_->get_name();
   }
 };
 
@@ -1296,11 +1296,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
   std::filesystem::path package_to_path();
 
   std::filesystem::path generateRootPath_;
-  std::unordered_map<const t_type*, py3_mstch_type::CachedProperties>
+  std::unordered_map<const t_type*, py3_mstch_type::cached_properties>
       type_props_cache_;
 };
 
-py3_mstch_type::CachedProperties& py3_mstch_type::get_cached_props(
+py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
     const t_type* type, const data& d) {
   auto true_type = type->get_true_type();
   auto it = d.cache->find(true_type);
@@ -1308,7 +1308,7 @@ py3_mstch_type::CachedProperties& py3_mstch_type::get_cached_props(
     it = d.cache
              ->emplace(
                  true_type,
-                 py3_mstch_type::CachedProperties{
+                 py3_mstch_type::cached_properties{
                      get_cpp_template(*true_type),
                      fmt::to_string(cpp2::get_type(true_type)),
                      {}})

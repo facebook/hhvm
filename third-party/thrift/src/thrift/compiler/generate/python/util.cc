@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/generate/python/util.h>
+
+#include <regex>
+#include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/generate/cpp/util.h>
 
 namespace apache::thrift::compiler {
@@ -26,4 +30,111 @@ bool is_type_iobuf(const t_type* type) {
   return is_type_iobuf(cpp2::get_type(type));
 }
 
+std::vector<std::string> get_py3_namespace(const t_program* prog) {
+  t_program::namespace_config conf;
+  conf.no_top_level_domain = true;
+  conf.no_filename = true;
+  return prog->gen_namespace_or_default("py3", conf);
+}
+
+std::string get_py3_namespace_with_name_and_prefix(
+    const t_program* prog, const std::string& prefix, const std::string& sep) {
+  std::ostringstream ss;
+  if (!prefix.empty()) {
+    ss << prefix << sep;
+  }
+  for (const auto& name : get_py3_namespace(prog)) {
+    ss << name << sep;
+  }
+  ss << prog->name();
+  return ss.str();
+}
+
+void strip_cpp_comments_and_newlines(std::string& s) {
+  // strip c-style comments
+  auto fr = s.find("/*");
+  while (fr != std::string::npos) {
+    auto to = s.find("*/", fr + 2);
+    if (to == std::string::npos) {
+      throw std::runtime_error{"no matching */ for annotation comments"};
+    }
+    s.erase(fr, to - fr + 2);
+    fr = s.find("/*", fr);
+  }
+  // strip cpp-style comments
+  s.replace(
+      s.begin(),
+      s.end(),
+      std::regex_replace(
+          s,
+          std::regex("//.*(?=$|\\n)"), /* simulate multiline regex */
+          ""));
+
+  // strip newlines
+  boost::algorithm::replace_all(s, "\n", " ");
+}
+
+namespace python {
+cached_properties::cached_properties(
+    std::string cpp_template, std::string type, std::string flat_name)
+    : cpp_template_(std::move(cpp_template)),
+      cpp_type_(std::move(type)),
+      flat_name_(std::move(flat_name)) {
+  strip_cpp_comments_and_newlines(cpp_type_);
+}
+
+std::string cached_properties::to_cython_template() const {
+  // handle special built-ins first:
+  if (cpp_template_ == "std::vector") {
+    return "vector";
+  } else if (cpp_template_ == "std::set") {
+    return "cset";
+  } else if (cpp_template_ == "std::map") {
+    return "cmap";
+  }
+  // then default handling:
+  return boost::algorithm::replace_all_copy(cpp_template_, "::", "_");
+}
+
+std::string cached_properties::to_cython_type() const {
+  if (cpp_type_ == "") {
+    return "";
+  }
+  std::string cython_type = cpp_type_;
+  boost::algorithm::replace_all(cython_type, "::", "_");
+  boost::algorithm::replace_all(cython_type, "<", "_");
+  boost::algorithm::replace_all(cython_type, ">", "");
+  boost::algorithm::replace_all(cython_type, " ", "");
+  boost::algorithm::replace_all(cython_type, ", ", "_");
+  boost::algorithm::replace_all(cython_type, ",", "_");
+  return cython_type;
+}
+
+bool cached_properties::is_default_template(
+    const apache::thrift::compiler::t_type* type) const {
+  return (!type->is_container() && cpp_template_ == "") ||
+      (type->is_list() && cpp_template_ == "std::vector") ||
+      (type->is_set() && cpp_template_ == "std::set") ||
+      (type->is_map() && cpp_template_ == "std::map");
+}
+
+void cached_properties::set_flat_name(
+    const apache::thrift::compiler::t_program* this_prog,
+    const apache::thrift::compiler::t_type* type,
+    const std::string& extra) {
+  std::string custom_prefix;
+  if (!is_default_template(type)) {
+    custom_prefix = to_cython_template() + "__";
+  } else if (cpp_type_ != "") {
+    custom_prefix = to_cython_type() + "__";
+  }
+  const t_program* type_program = type->program();
+  if (type_program && type_program != this_prog) {
+    custom_prefix += type_program->name() + "_";
+  }
+  custom_prefix += extra;
+  flat_name_ = std::move(custom_prefix);
+}
+
+} // namespace python
 } // namespace apache::thrift::compiler

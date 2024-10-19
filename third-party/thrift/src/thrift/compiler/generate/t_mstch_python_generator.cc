@@ -33,7 +33,6 @@
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/py3/util.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/uri.h>
@@ -744,7 +743,7 @@ class python_mstch_struct : public mstch_struct {
         });
   }
 
-  mstch::node py_name() { return py3::get_py3_name(*struct_); }
+  mstch::node py_name() { return python::get_py3_name(*struct_); }
 
   mstch::node fields_ordered_by_id() {
     std::vector<const t_field*> fields = struct_->fields().copy();
@@ -761,7 +760,7 @@ class python_mstch_struct : public mstch_struct {
   mstch::node exception_message() {
     const auto* message_field =
         dynamic_cast<const t_exception&>(*struct_).get_message_field();
-    return message_field ? py3::get_py3_name(*message_field) : "";
+    return message_field ? python::get_py3_name(*message_field) : "";
   }
 
   mstch::node adapter() {
@@ -786,7 +785,7 @@ class python_mstch_field : public mstch_field {
       mstch_element_position pos,
       const field_generator_context* field_context)
       : mstch_field(field, ctx, pos, field_context),
-        py_name_(py3::get_py3_name(*field)),
+        py_name_(python::get_py3_name(*field)),
         adapter_annotation_(find_structured_adapter_annotation(*field)),
         transitive_adapter_annotation_(
             get_transitive_annotation_of_adapter_or_null(*field)) {
@@ -899,7 +898,7 @@ class python_mstch_enum_value : public mstch_enum_value {
         });
   }
 
-  mstch::node py_name() { return py3::get_py3_name(*enum_value_); }
+  mstch::node py_name() { return python::get_py3_name(*enum_value_); }
 };
 
 // Generator-specific validator that enforces "name" and "value" are not used
@@ -1123,7 +1122,7 @@ class python_mstch_const_value : public mstch_const_value {
 
   mstch::node py3_enum_value_name() {
     if (const_value_->is_enum() && const_value_->get_enum_value() != nullptr) {
-      return py3::get_py3_name(*const_value_->get_enum_value());
+      return python::get_py3_name(*const_value_->get_enum_value());
     }
     return mstch::node();
   }

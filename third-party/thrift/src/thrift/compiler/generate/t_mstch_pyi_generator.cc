@@ -28,7 +28,7 @@
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/py3/util.h>
+#include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
 namespace apache::thrift::compiler {

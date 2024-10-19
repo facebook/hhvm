@@ -32,7 +32,7 @@
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/common.h>
-#include <thrift/compiler/generate/py3/util.h>
+#include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_concat_generator.h>
 #include <thrift/compiler/generate/t_generator.h>
 

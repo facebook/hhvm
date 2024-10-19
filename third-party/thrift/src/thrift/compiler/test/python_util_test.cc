@@ -18,19 +18,21 @@
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/generate/py3/util.h>
+#include <thrift/compiler/generate/python/util.h>
 
 using namespace apache::thrift::compiler;
 
 TEST(UtilTest, get_py3_name) {
   EXPECT_EQ(
-      "foo", py3::get_py3_name(t_field(t_primitive_type::t_i32(), "foo")));
+      "foo", python::get_py3_name(t_field(t_primitive_type::t_i32(), "foo")));
   EXPECT_EQ(
-      "True_", py3::get_py3_name(t_field(t_primitive_type::t_i32(), "True")));
+      "True_",
+      python::get_py3_name(t_field(t_primitive_type::t_i32(), "True")));
   EXPECT_EQ(
-      "cpdef_", py3::get_py3_name(t_field(t_primitive_type::t_i32(), "cpdef")));
+      "cpdef_",
+      python::get_py3_name(t_field(t_primitive_type::t_i32(), "cpdef")));
 
   t_field f(t_primitive_type::t_i32(), "foo");
   f.set_annotation("py3.name", "bar");
-  EXPECT_EQ("bar", py3::get_py3_name(f));
+  EXPECT_EQ("bar", python::get_py3_name(f));
 }

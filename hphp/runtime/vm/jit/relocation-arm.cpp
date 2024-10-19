@@ -357,6 +357,11 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   auto const target = farJccTarget(srcAddrActual);
   if (!target) return false;
 
+  // We can only rely on the target address to shrink the code sequence if it's
+  // in the same code block.  Otherwise, the target may end up too far after
+  // its code block is relocated.
+  if (!env.srcBlock.contains(target)) return false;
+
   auto adjusted = env.rel.adjustedAddressAfter(target);
   if (!adjusted) adjusted = target;
   auto imm = static_cast<int64_t>(adjusted - destAddr) >> kInstructionSizeLog2;
@@ -464,6 +469,11 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   auto target = farJmpTarget(srcAddrActual);
 
   if (!target) return false;
+
+  // We can only rely on the target address to shrink the code sequence if it's
+  // in the same code block.  Otherwise, the target may end up too far after
+  // its code block is relocated.
+  if (!env.srcBlock.contains(target)) return false;
 
   assertx(((uint64_t)target & 3) == 0);
   assertx(src->Mask(LoadLiteralMask) == LDR_w_lit);

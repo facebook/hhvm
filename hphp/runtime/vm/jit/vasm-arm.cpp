@@ -614,6 +614,13 @@ void Vgen::handleLiterals(Venv& env) {
     auto const patchAddressActual =
       Instruction::Cast(env.text.toDestAddress(pl.patchAddress));
     assertx(patchAddressActual->IsLoadLiteral());
+
+    // Assert that the PC-relative offset fits in LDR's imm19 immediate.
+    auto const imm = static_cast<int64_t>(literalAddress - pl.patchAddress);
+    always_assert_flog(is_int21(imm),
+                       "handleLiterals(): literalAddress ({}) is too far from LDR ({})\n",
+                       literalAddress, pl.patchAddress);
+
     patchAddressActual->SetImmPCOffsetTarget(
       Instruction::Cast(literalAddress),
       Instruction::Cast(pl.patchAddress));

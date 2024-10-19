@@ -93,9 +93,19 @@ bool HHVM_FUNCTION(trait_exists, const String& trait_name,
   return Class::exists(trait_name.get(), autoload, ClassKind::Trait);
 }
 
-bool HHVM_FUNCTION(enum_exists, const String& enum_name,
+bool HHVM_FUNCTION(enum_exists, const Variant& enum_name,
                    bool autoload /* = true */) {
-  Class* cls = Class::get(enum_name.get(), autoload);
+  auto cls = [&]() -> Class* {
+    if (enum_name.isString()) {
+      return Class::get(enum_name.asCStrRef().get(), autoload);
+    } else if (enum_name.isLazyClass()) {
+      return Class::get(enum_name.toLazyClassVal().name(), autoload);
+    } else if (enum_name.isClass()) {
+      return enum_name.toClassVal();
+    } else {
+      always_assert(false);
+    }
+  }();
   return cls && isAnyEnum(cls);
 }
 

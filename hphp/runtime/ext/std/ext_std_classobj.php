@@ -215,13 +215,13 @@ function trait_exists(string $traitname,
 /**
  * Checks if the enum exists
  *
- * @param string $enumname -
+ * @param classname $enumname -
  * @param bool $autoload -
  *
  * @return bool - Returns TRUE if enum exists, FALSE if not
  */
 <<__Native>>
-function enum_exists(string $enumname,
+function enum_exists(classname<mixed> $enumname,
                       bool $autoload = true)[]: bool;
 
 /**

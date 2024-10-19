@@ -1293,8 +1293,12 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
        * encoded, our only recourse is to assert.
        */
       if (!writePCRelative(instr, Instruction::Cast(adjusted), instr)) {
-        always_assert_flog(false, "Can't adjust PC relative instruction.  The "
-                                  "offset is too large.\n");
+        always_assert_flog(
+          false,
+          "Can't adjust PC relative instruction.  The offset is too large.\n"
+          "  instr = {}  target = {}  adjusted = {}\n",
+          instr, target, adjusted
+        );
       }
       // Sync the updated instruction.
       auto const begin = reinterpret_cast<TCA>(instr);

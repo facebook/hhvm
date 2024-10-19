@@ -1054,21 +1054,13 @@ void Vgen::emit(const jmp& i) {
 void Vgen::emit(const jmpi& i) {
   vixl::Label data;
 
-  // If target can be addressed by pc relative offset (signed 26 bits), emit
-  // PC relative jump. Else, emit target address into code and load from there.
-  auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
-  if (vixl::is_int26(diff)) {
-    recordAddressImmediate();
-    a->b(diff);
-  } else {
-    // Cannot use simple a->Mov() since such a sequence cannot be
-    // adjusted while live following a relocation.
-    recordAddressImmediate();
-    poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
-    a->bind(&data); // This will be remapped during the handleLiterals phase.
-    a->Ldr(rAsm_w, &data);
-    a->Br(rAsm);
-  }
+  // Cannot use simple a->Mov() since such a sequence cannot be
+  // adjusted while live following a relocation.
+  recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+  a->bind(&data); // This will be remapped during the handleLiterals phase.
+  a->Ldr(rAsm_w, &data);
+  a->Br(rAsm);
 }
 
 void Vgen::emit(const ldbindretaddr& i) {

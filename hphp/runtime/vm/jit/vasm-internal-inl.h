@@ -359,6 +359,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   emitLdBindRetAddrStubs<Vemit>(env);
 
+  Vemit::processVveneers(env);
+
   Vemit::emitVeneers(env);
 
   Vemit::handleLiterals(env);

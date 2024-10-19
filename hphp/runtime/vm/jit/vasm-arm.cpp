@@ -216,12 +216,14 @@ struct Vgen {
     , jmps(env.jmps)
     , jccs(env.jccs)
     , catches(env.catches)
+    , vveneers(env.vveneers)
   {}
   ~Vgen() {
     env.cb->sync(base);
   }
 
   static void emitVeneers(Venv& env);
+  static void processVveneers(Venv& env);
   static void handleLiterals(Venv& env);
   static void retargetBinds(Venv& env);
   static void patch(Venv& env);
@@ -471,6 +473,7 @@ private:
   jit::vector<Venv::LabelPatch>& jmps;
   jit::vector<Venv::LabelPatch>& jccs;
   jit::vector<Venv::LabelPatch>& catches;
+  jit::vector<Venv::LabelPatch>& vveneers;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -647,6 +650,14 @@ void Vgen::handleLiterals(Venv& env) {
 }
 
 void Vgen::retargetBinds(Venv& env) {
+}
+
+void Vgen::processVveneers(Venv& env) {
+  for (auto& vv : env.vveneers) {
+    FTRACE(3, "processVveneers: source: {}  target: {} ({})\n",
+           vv.instr, env.addrs[vv.target], vv.target);
+    addVeneer(env.meta, vv.instr, env.addrs[vv.target]);
+  }
 }
 
 void Vgen::patch(Venv& env) {
@@ -1010,20 +1021,34 @@ void Vgen::emit(const jcc& i) {
       return emit(jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}});
     }
     auto taken = i.targets[1];
-    jccs.push_back({a->frontier(), taken});
-    vixl::Label skip, data;
 
-    // Emit a "far JCC" sequence for easy patching later.  Static relocation
-    // might be able to simplify this later (see optimizeFarJcc()).
-    recordAddressImmediate();
-    a->B(&skip, vixl::InvertCondition(C(i.cc)));
-    recordAddressImmediate();
-    poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
-                32, false);
-    a->bind(&data);  // This will be remmaped during the handleLiterals phase.
-    a->Ldr(rAsm_w, &data);
-    a->Br(rAsm);
-    a->bind(&skip);
+    // If the taken block is in a different code area than the jcc, we emit a
+    // veneer and jump through it to the taken block.  This avoids having to
+    // flip the branch and penalizing the fall-through path.  Otherwise, we flip
+    // the branch and emit a "far JCC" sequence that should be optimized later
+    // during relocation's optimizeFarJcc, which will flip the branch back.
+    if (env.unit.blocks[env.current].area_idx != env.unit.blocks[taken].area_idx) {
+      auto source = a->frontier();
+      vveneers.push_back({source, taken});
+      vixl::Label veneer_addr;
+      a->bind(&veneer_addr);
+      a->b(&veneer_addr, arm::convertCC(i.cc)); // NB: this will be patched later.
+    } else {
+      jccs.push_back({a->frontier(), taken});
+      vixl::Label skip, data;
+
+      // Emit a "far JCC" sequence for easy patching later.  Static relocation
+      // might be able to simplify this later (see optimizeFarJcc()).
+      recordAddressImmediate();
+      a->B(&skip, vixl::InvertCondition(C(i.cc)));
+      recordAddressImmediate();
+      poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
+                  32, false);
+      a->bind(&data);  // This will be remmaped during the handleLiterals phase.
+      a->Ldr(rAsm_w, &data);
+      a->Br(rAsm);
+      a->bind(&skip);
+    }
   }
   emit(jmp{i.targets[0]});
 }

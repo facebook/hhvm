@@ -72,6 +72,7 @@ struct Venv {
   jit::vector<AddrPatch> leas;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
+  jit::vector<LabelPatch> vveneers;
   jit::vector<LdBindRetAddrPatch> ldbindretaddrs;
   jit::vector<std::pair<TCA,IStack>> stacks;
 };
@@ -128,4 +129,3 @@ void setCallFuncId(Venv& env, TCA callRetAddr);
 }
 
 #include "hphp/runtime/vm/jit/vasm-internal-inl.h"
-

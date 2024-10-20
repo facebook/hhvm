@@ -451,38 +451,180 @@ end = struct
     | Like of t
   [@@deriving eq, ord]
 
-  let rec is_immediately_inhabited = function
+  let rec show_field { key; ty; optional } =
+    let optional =
+      if optional then
+        "?"
+      else
+        ""
+    in
+    Format.sprintf "%s%s => %s" optional key (show ty)
+
+  and show = function
+    | Mixed -> "mixed"
     | Primitive prim -> begin
       let open Primitive in
       match prim with
-      | Null
-      | Int
-      | String
-      | Float
-      | Bool ->
-        true
+      | Null -> "null"
+      | Int -> "int"
+      | String -> "string"
+      | Float -> "float"
+      | Bool -> "bool"
+      | Arraykey -> "arraykey"
+      | Num -> "num"
+    end
+    | Option ty -> "?" ^ show ty
+    | Awaitable ty -> Format.sprintf "Awaitable<%s>" (show ty)
+    | Classish { name; generic; kind = _ } ->
+      let generic =
+        match generic with
+        | Some generic -> Format.sprintf "<%s>" (show generic.instantiation)
+        | None -> ""
+      in
+      Format.sprintf "%s%s" name generic
+    | Alias info -> info.name
+    | Newtype info -> info.name
+    | TypeConst info -> info.name
+    | Case info -> info.name
+    | Enum info -> info.name
+    | Vec ty -> Format.sprintf "vec<%s>" (show ty)
+    | Dict { key; value } ->
+      Format.sprintf "dict<%s, %s>" (show key) (show value)
+    | Keyset ty -> Format.sprintf "keyset<%s>" (show ty)
+    | Tuple { conjuncts; open_ } ->
+      let is_nullary = List.length conjuncts = 0 in
+      let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
+      let open_ =
+        if open_ && is_nullary then
+          "..."
+        else if open_ then
+          ", ..."
+        else
+          ""
+      in
+      Format.sprintf "(%s%s)" conjuncts open_
+    | Shape { fields; open_ } ->
+      let is_nullary = List.length fields = 0 in
+      let fields = List.map ~f:show_field fields |> String.concat ~sep:", " in
+      let open_ =
+        if open_ && is_nullary then
+          "..."
+        else if open_ then
+          ", ..."
+        else
+          ""
+      in
+      Format.sprintf "shape(%s%s)" fields open_
+    | Function { parameters; variadic; return_ } ->
+      let variadic =
+        match variadic with
+        | Some ty ->
+          (if List.is_empty parameters then
+            ""
+          else
+            ", ")
+          ^ show ty
+          ^ "..."
+        | None -> ""
+      in
+      let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
+      let return_ = show return_ in
+      Format.sprintf "(function(%s%s): %s)" parameters variadic return_
+    | Like ty -> "~" ^ show ty
+
+  (** Generate an expression if the type is immediately inhabited.
+
+      This function needs to be deterministic in whether it turns `Some` or
+      `None` as this information is used first in the `subtype_of` relation to
+      determine if the type is inhabited and later to actually generate the
+      expression.
+
+      TODO: if this turns out to cause slowness make it return `string lazy
+      option` so that it is cheaper when used within the `subtype_of` check. *)
+  let rec expr_of = function
+    | Primitive prim -> begin
+      let open Primitive in
+      match prim with
+      | Null -> Some "null"
+      | Int -> Some "42"
+      | String -> Some "'apple'"
+      | Float -> Some "42.0"
+      | Bool -> Some "true"
       | Arraykey
       | Num ->
-        false
+        None
     end
     | Classish info -> begin
       match info.kind with
       | Kind.AbstractClass
       | Kind.Interface ->
-        false
-      | Kind.Class -> true
+        None
+      | Kind.Class ->
+        let generic =
+          match info.generic with
+          | Some generic when generic.is_reified || Random.bool () ->
+            Format.sprintf "<%s>" (Type.show generic.instantiation)
+          | _ -> ""
+        in
+        Some (Format.sprintf "new %s%s()" info.name generic)
     end
-    | Enum _ -> true
-    | Vec _ -> true
-    | Dict _ -> true
-    | Keyset _ -> true
+    | Enum info -> Some (info.name ^ "::A")
+    | Vec _ -> Some "vec[]"
+    | Dict _ -> Some "dict[]"
+    | Keyset _ -> Some "keyset[]"
     | Tuple { conjuncts; open_ } ->
-      List.for_all conjuncts ~f:is_immediately_inhabited && not open_
-    | Shape { fields; open_ = _ } ->
-      List.for_all fields ~f:(fun field -> is_immediately_inhabited field.ty)
-    | Awaitable ty -> is_immediately_inhabited ty
-    | Function { parameters = _; variadic = _; return_ } ->
-      is_immediately_inhabited return_
+      if open_ then
+        None
+      else
+        List.map ~f:expr_of conjuncts
+        |> Option.all
+        |> Option.map ~f:(fun exprl ->
+               String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
+    | Shape { fields; open_ = _ } -> begin
+      (* Check that all types are inhabited even if we won't end up using all of them. *)
+      match List.map fields ~f:(fun { ty; _ } -> expr_of ty) |> Option.all with
+      | None -> None
+      | Some _ ->
+        let fields =
+          List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
+        in
+        let fields = List.permute fields in
+        let show_field { key; ty; _ } =
+          expr_of ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
+        in
+        List.map ~f:show_field fields
+        |> Option.all
+        |> Option.map ~f:(fun fields ->
+               String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
+    end
+    | Awaitable ty ->
+      let open Option.Let_syntax in
+      let+ expr = expr_of ty in
+      Format.sprintf "async { return %s; }" expr
+    | Function { parameters; variadic; return_ } ->
+      let variadic =
+        match variadic with
+        | Some ty ->
+          (if List.is_empty parameters then
+            ""
+          else
+            ", ")
+          ^ show ty
+          ^ " ...$_"
+        | None -> ""
+      in
+      let parameters =
+        List.map ~f:(fun param -> show param ^ " $_") parameters
+        |> String.concat ~sep:", "
+      in
+      let open Option.Let_syntax in
+      let+ return_expr = expr_of return_ in
+      Format.sprintf
+        "(%s%s): %s ==> { return %s; }"
+        parameters
+        variadic
+        (Type.show return_)
+        return_expr
     | Mixed
     | Option _
     | Alias _
@@ -490,7 +632,7 @@ end = struct
     | TypeConst _
     | Case _
     | Like _ ->
-      false
+      None
 
   let ty_filter
       ReadOnlyEnvironment.
@@ -503,7 +645,7 @@ end = struct
           _;
         }
       ty =
-    ((not pick_immediately_inhabited) || is_immediately_inhabited ty)
+    ((not pick_immediately_inhabited) || expr_of ty |> Option.is_some)
     &&
     match ty with
     | Case _ -> not (for_option_ty || for_enum_def)
@@ -704,87 +846,6 @@ end = struct
     in
     retry ()
 
-  let rec show_field { key; ty; optional } =
-    let optional =
-      if optional then
-        "?"
-      else
-        ""
-    in
-    Format.sprintf "%s%s => %s" optional key (show ty)
-
-  and show = function
-    | Mixed -> "mixed"
-    | Primitive prim -> begin
-      let open Primitive in
-      match prim with
-      | Null -> "null"
-      | Int -> "int"
-      | String -> "string"
-      | Float -> "float"
-      | Bool -> "bool"
-      | Arraykey -> "arraykey"
-      | Num -> "num"
-    end
-    | Option ty -> "?" ^ show ty
-    | Awaitable ty -> Format.sprintf "Awaitable<%s>" (show ty)
-    | Classish { name; generic; kind = _ } ->
-      let generic =
-        match generic with
-        | Some generic -> Format.sprintf "<%s>" (show generic.instantiation)
-        | None -> ""
-      in
-      Format.sprintf "%s%s" name generic
-    | Alias info -> info.name
-    | Newtype info -> info.name
-    | TypeConst info -> info.name
-    | Case info -> info.name
-    | Enum info -> info.name
-    | Vec ty -> Format.sprintf "vec<%s>" (show ty)
-    | Dict { key; value } ->
-      Format.sprintf "dict<%s, %s>" (show key) (show value)
-    | Keyset ty -> Format.sprintf "keyset<%s>" (show ty)
-    | Tuple { conjuncts; open_ } ->
-      let is_nullary = List.length conjuncts = 0 in
-      let conjuncts = List.map ~f:show conjuncts |> String.concat ~sep:", " in
-      let open_ =
-        if open_ && is_nullary then
-          "..."
-        else if open_ then
-          ", ..."
-        else
-          ""
-      in
-      Format.sprintf "(%s%s)" conjuncts open_
-    | Shape { fields; open_ } ->
-      let is_nullary = List.length fields = 0 in
-      let fields = List.map ~f:show_field fields |> String.concat ~sep:", " in
-      let open_ =
-        if open_ && is_nullary then
-          "..."
-        else if open_ then
-          ", ..."
-        else
-          ""
-      in
-      Format.sprintf "shape(%s%s)" fields open_
-    | Function { parameters; variadic; return_ } ->
-      let variadic =
-        match variadic with
-        | Some ty ->
-          (if List.is_empty parameters then
-            ""
-          else
-            ", ")
-          ^ show ty
-          ^ "..."
-        | None -> ""
-      in
-      let parameters = List.map ~f:show parameters |> String.concat ~sep:", " in
-      let return_ = show return_ in
-      Format.sprintf "(function(%s%s): %s)" parameters variadic return_
-    | Like ty -> "~" ^ show ty
-
   let are_disjoint (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty ty' =
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
@@ -883,91 +944,6 @@ end = struct
     @@ (List.mem subtypes Mixed ~equal
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
-
-  let rec expr_of = function
-    | Primitive prim -> begin
-      let open Primitive in
-      match prim with
-      | Null -> Some "null"
-      | Int -> Some "42"
-      | String -> Some "'apple'"
-      | Float -> Some "42.0"
-      | Bool -> Some "true"
-      | Arraykey -> None
-      | Num -> None
-    end
-    | Classish info -> begin
-      match info.kind with
-      | Kind.AbstractClass
-      | Kind.Interface ->
-        None
-      | Kind.Class ->
-        let generic =
-          match info.generic with
-          | Some generic when generic.is_reified || Random.bool () ->
-            Format.sprintf "<%s>" (Type.show generic.instantiation)
-          | _ -> ""
-        in
-        Some (Format.sprintf "new %s%s()" info.name generic)
-    end
-    | Enum info -> Some (info.name ^ "::A")
-    | Vec _ -> Some "vec[]"
-    | Dict _ -> Some "dict[]"
-    | Keyset _ -> Some "keyset[]"
-    | Tuple { conjuncts; open_ = _ } ->
-      List.map ~f:expr_of conjuncts
-      |> Option.all
-      |> Option.map ~f:(fun exprl ->
-             String.concat ~sep:", " exprl |> Format.sprintf "tuple(%s)")
-    | Shape { fields; open_ = _ } ->
-      let fields =
-        List.filter fields ~f:(fun f -> (not f.optional) || Random.bool ())
-      in
-      let fields = List.permute fields in
-      let show_field { key; ty; _ } =
-        expr_of ty |> Option.map ~f:(Format.sprintf "%s => %s" key)
-      in
-      List.map ~f:show_field fields
-      |> Option.all
-      |> Option.map ~f:(fun fields ->
-             String.concat ~sep:", " fields |> Format.sprintf "shape(%s)")
-    | Awaitable ty ->
-      let open Option.Let_syntax in
-      let+ expr = expr_of ty in
-      Format.sprintf "async { return %s; }" expr
-    | Function { parameters; variadic; return_ } ->
-      let variadic =
-        match variadic with
-        | Some ty ->
-          (if List.is_empty parameters then
-            ""
-          else
-            ", ")
-          ^ show ty
-          ^ " ...$_"
-        | None -> ""
-      in
-      let parameters =
-        List.map ~f:(fun param -> show param ^ " $_") parameters
-        |> String.concat ~sep:", "
-      in
-      let open Option.Let_syntax in
-      let+ return_expr = expr_of return_ in
-      let return_ = Type.show return_ in
-      Format.sprintf
-        "(%s%s): %s ==> { return %s; }"
-        parameters
-        variadic
-        return_
-        return_expr
-    | Mixed
-    | Option _
-    | Alias _
-    | Newtype _
-    | TypeConst _
-    | Case _
-    | Like _ ->
-      None
 
   let inhabitant_of
       (renv : ReadOnlyEnvironment.t) (env : Environment.t) (ty : t) =

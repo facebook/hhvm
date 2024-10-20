@@ -416,10 +416,7 @@ end = struct
         generic: generic option;
       }
     | Alias of { name: string }
-    | Newtype of {
-        name: string;
-        aliased: t;
-      }
+    | Newtype of { name: string }
     | TypeConst of {
         name: string;
         aliased: t;
@@ -710,7 +707,7 @@ end = struct
              in
              [Awaitable ty]
            | TypeConst info -> [info.aliased]
-           | Newtype info -> [info.aliased]
+           | Newtype _
            | Alias _
            | Classish _
            | Case _
@@ -876,7 +873,7 @@ end = struct
         | Awaitable _ -> [Awaitable Mixed]
         | Alias _ -> Environment.get_subtypes env ty
         | TypeConst info -> [info.aliased]
-        | Newtype info -> [info.aliased]
+        | Newtype _ -> Environment.get_subtypes env ty
         | Case _ -> Environment.get_subtypes env ty
         | Enum _ -> Primitive.[Primitive Int; Primitive String]
         | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
@@ -1092,6 +1089,7 @@ end = struct
       (env, ty)
     | Kind.Newtype ->
       let name = fresh "N" in
+      let ty = Newtype { name } in
       let (env, aliased, bound) =
         if Random.bool () then
           let (env, bound) = mk renv env in
@@ -1101,11 +1099,11 @@ end = struct
           let (env, aliased) = mk ~for_alias_def:true renv env in
           (env, aliased, None)
       in
+      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
       let env =
         Environment.add_definition env
         @@ Definition.newtype ~name ~bound aliased
       in
-      let ty = Newtype { name; aliased } in
       (env, ty)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in

@@ -415,10 +415,7 @@ end = struct
         kind: Kind.classish;
         generic: generic option;
       }
-    | Alias of {
-        name: string;
-        aliased: t;
-      }
+    | Alias of { name: string }
     | Newtype of {
         name: string;
         aliased: t;
@@ -712,12 +709,15 @@ end = struct
                driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
              in
              [Awaitable ty]
-           | Alias info -> [info.aliased]
            | TypeConst info -> [info.aliased]
            | Newtype info -> [info.aliased]
+           | Alias _
            | Classish _
            | Case _
            | Enum _ ->
+             (* These cases either have no proper subtypes (e.g., Enum) or their
+                subtypes are covered by the subtyping relationship in the
+                environment. *)
              []
            | Vec ty ->
              let renv =
@@ -874,7 +874,7 @@ end = struct
           [Mixed]
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable _ -> [Awaitable Mixed]
-        | Alias info -> [info.aliased]
+        | Alias _ -> Environment.get_subtypes env ty
         | TypeConst info -> [info.aliased]
         | Newtype info -> [info.aliased]
         | Case _ -> Environment.get_subtypes env ty
@@ -1083,11 +1083,13 @@ end = struct
     | Kind.Classish -> mk_classish renv env ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
+      let ty = Alias { name } in
       let (env, aliased) = mk renv env ~for_alias_def:true in
+      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
       let env =
         Environment.add_definition env @@ Definition.alias ~name aliased
       in
-      (env, Alias { name; aliased })
+      (env, ty)
     | Kind.Newtype ->
       let name = fresh "N" in
       let (env, aliased, bound) =

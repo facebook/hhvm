@@ -312,7 +312,7 @@ TEST(RoundRobinRequestPileTest, GetDbgInfo) {
   // Assert
   EXPECT_TRUE(
       (*result.name()).find("RoundRobinRequestPile") != std::string::npos);
-  EXPECT_EQ(result.get_prioritiesCount(), priorities);
+  EXPECT_EQ(folly::copy(result.prioritiesCount().value()), priorities);
   for (int i = 0; i < priorities; ++i) {
     EXPECT_EQ((*result.bucketsPerPriority())[i], 10 * (i + 1));
   }

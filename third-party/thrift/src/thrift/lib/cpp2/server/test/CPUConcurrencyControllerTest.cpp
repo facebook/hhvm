@@ -168,7 +168,7 @@ TEST_F(CPUConcurrencyControllerTest, getDbgInfo) {
   auto dbgInfo = cpuConcurrencyController.getDbgInfo();
 
   // Assert
-  ASSERT_EQ("ENABLED", dbgInfo.get_mode());
+  ASSERT_EQ("ENABLED", dbgInfo.mode().value());
   ASSERT_EQ(*dbgInfo.method(), "MAX_QPS");
   ASSERT_EQ(*dbgInfo.cpuTarget(), 99);
   ASSERT_EQ(*dbgInfo.cpuLoadSource(), "CONTAINER_AND_HOST");

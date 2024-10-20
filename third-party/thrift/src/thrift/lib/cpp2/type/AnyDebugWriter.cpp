@@ -113,9 +113,9 @@ std::string getTypeName(const type::TypeStruct& type) {
 
 void appendType(const type::TypeStruct& type, fmt::memory_buffer& buf) {
   fmt::format_to(std::back_inserter(buf), "{}", getTypeName(type));
-  if (!type.get_params().empty()) {
+  if (!type.params().value().empty()) {
     buf.push_back('<');
-    appendTypeParams(type.get_params(), buf);
+    appendTypeParams(type.params().value(), buf);
     buf.push_back('>');
   }
 }

@@ -703,7 +703,7 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
     clientMetadata.hostname_ref().from_optional(hostMetadata->hostname);
     // no otherMetadata provided in makeSetupFrame override, copy
     // hostMetadata.otherMetadata directly instead of doing inserts
-    if (!clientMetadata.get_otherMetadata()) {
+    if (!apache::thrift::get_pointer(clientMetadata.otherMetadata())) {
       clientMetadata.otherMetadata_ref().from_optional(
           hostMetadata->otherMetadata);
     } else if (hostMetadata->otherMetadata) {
@@ -768,7 +768,9 @@ RocketClientChannel::RocketClientChannel(
           *eventBase,
           std::move(socket),
           std::make_unique<rocket::SetupFrame>(makeSetupFrame(meta)),
-          meta.get_keepAliveTimeoutMs() ? *meta.get_keepAliveTimeoutMs() : 0,
+          apache::thrift::get_pointer(meta.keepAliveTimeoutMs())
+              ? *apache::thrift::get_pointer(meta.keepAliveTimeoutMs())
+              : 0,
           allocatorPtr),
       evb_(eventBase) {
   apache::thrift::detail::hookForClientTransport(getTransport());

@@ -273,7 +273,7 @@ void registerGeneratedStruct() {
   const ThriftTypeInfo& type = getGeneratedThriftTypeInfo<T>();
   if (!getGeneratedAnyRegistry().registerType<T, Ps...>(type)) {
     folly::throw_exception<std::runtime_error>(
-        "Could not register: " + type.get_uri());
+        "Could not register: " + type.uri().value());
   }
   using Tag = std::conditional_t<
       is_thrift_union_v<T>,

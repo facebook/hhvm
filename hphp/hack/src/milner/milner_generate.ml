@@ -504,7 +504,7 @@ end = struct
       ReadOnlyEnvironment.debug renv
       @@ lazy
            (Format.sprintf "subtypes_of subfield_of %s: %s" key (Type.show ty));
-      let ty = driver renv ty in
+      let ty = driver ReadOnlyEnvironment.{ renv with for_alias = false } ty in
       let optional =
         if optional then
           select [true; false]
@@ -535,7 +535,9 @@ end = struct
            end
            | Option ty -> [Primitive Primitive.Null; ty]
            | Awaitable ty ->
-             let ty = driver renv ty in
+             let ty =
+               driver ReadOnlyEnvironment.{ renv with for_alias = false } ty
+             in
              [Awaitable ty]
            | Alias info -> [info.aliased]
            | TypeConst info -> [info.aliased]
@@ -547,14 +549,22 @@ end = struct
            | Vec ty ->
              let renv =
                ReadOnlyEnvironment.
-                 { renv with pick_immediately_inhabited = false }
+                 {
+                   renv with
+                   pick_immediately_inhabited = false;
+                   for_alias = false;
+                 }
              in
              let ty = driver renv ty in
              [Vec ty]
            | Dict { key; value } ->
              let renv =
                ReadOnlyEnvironment.
-                 { renv with pick_immediately_inhabited = false }
+                 {
+                   renv with
+                   pick_immediately_inhabited = false;
+                   for_alias = false;
+                 }
              in
              let key = driver renv key in
              let value = driver renv value in
@@ -562,12 +572,20 @@ end = struct
            | Keyset ty ->
              let renv =
                ReadOnlyEnvironment.
-                 { renv with pick_immediately_inhabited = false }
+                 {
+                   renv with
+                   pick_immediately_inhabited = false;
+                   for_alias = false;
+                 }
              in
              let ty = driver renv ty in
              [Keyset ty]
            | Tuple { conjuncts; open_ } ->
-             let conjuncts = List.map ~f:(driver renv) conjuncts in
+             let conjuncts =
+               List.map
+                 ~f:(driver ReadOnlyEnvironment.{ renv with for_alias = false })
+                 conjuncts
+             in
              let open_ =
                if open_ then
                  (* Here we should be adding new conjuncts, but with the current setup
@@ -589,7 +607,11 @@ end = struct
              in
              [Shape { fields; open_ }]
            | Function { parameters; variadic; return_ } ->
-             let return_ = driver renv return_ in
+             let return_ =
+               driver
+                 ReadOnlyEnvironment.{ renv with for_alias = false }
+                 return_
+             in
              let variadic =
                match variadic with
                | None ->
@@ -604,6 +626,7 @@ end = struct
                                   {
                                     renv with
                                     pick_immediately_inhabited = false;
+                                    for_alias = false;
                                   }
                                 Mixed));
                       ]

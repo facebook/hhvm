@@ -417,10 +417,7 @@ end = struct
       }
     | Alias of { name: string }
     | Newtype of { name: string }
-    | TypeConst of {
-        name: string;
-        aliased: t;
-      }
+    | TypeConst of { name: string }
     | Case of { name: string }
     | Enum of { name: string }
     | Vec of t
@@ -706,7 +703,7 @@ end = struct
                driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
              in
              [Awaitable ty]
-           | TypeConst info -> [info.aliased]
+           | TypeConst _
            | Newtype _
            | Alias _
            | Classish _
@@ -869,12 +866,14 @@ end = struct
           (* This can be improved on if we introduce an internal Object type which
              is still disjoint to non classish types. *)
           [Mixed]
+        | Classish _
+        | Alias _
+        | TypeConst _
+        | Newtype _
+        | Case _ ->
+          Environment.get_subtypes env ty
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable _ -> [Awaitable Mixed]
-        | Alias _ -> Environment.get_subtypes env ty
-        | TypeConst info -> [info.aliased]
-        | Newtype _ -> Environment.get_subtypes env ty
-        | Case _ -> Environment.get_subtypes env ty
         | Enum _ -> Primitive.[Primitive Int; Primitive String]
         | Vec _ -> [Vec Mixed; Tuple { conjuncts = []; open_ = true }]
         | Dict _ ->
@@ -896,7 +895,6 @@ end = struct
           Primitive.[Primitive Int; Primitive String]
         | Primitive Primitive.Num -> Primitive.[Primitive Int; Primitive Float]
         | Primitive _ -> [ty]
-        | Classish _ -> Environment.get_subtypes env ty
         | Like _ -> [Mixed]
       in
       let rec driver acc =
@@ -1110,6 +1108,9 @@ end = struct
       let (env, aliased) = mk renv env in
       let typeconst_def = Definition.typeconst ~name:tc_name aliased in
       let class_name = fresh "CTC" in
+      let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
+      let ty = TypeConst { name = qualified_name } in
+      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
       let env =
         Environment.add_definition env
         @@ Definition.classish
@@ -1119,8 +1120,7 @@ end = struct
              ~members:[typeconst_def]
              Kind.Class
       in
-      let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
-      (env, TypeConst { name = qualified_name; aliased })
+      (env, TypeConst { name = qualified_name })
     | Kind.Case ->
       let name = fresh "CT" in
       let (env, bound) =

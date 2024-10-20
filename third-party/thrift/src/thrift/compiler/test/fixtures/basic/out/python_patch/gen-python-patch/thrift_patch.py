@@ -10,7 +10,15 @@ from common.thrift.patch.detail.dynamic_patch import (
 )
 
 from common.thrift.patch.detail.py_bindings.DynamicPatch import (
+    BoolPatch,
+    BytePatch,
+    I16Patch,
+    I32Patch,
+    I64Patch,
+    FloatPatch,
+    DoublePatch,
     StringPatch,
+    BinaryPatch,
 )
 
 import test.fixtures.basic.module.thrift_types
@@ -33,7 +41,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             I64Patch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_i64_patch(),
             self._patch,
             1)
     @property
@@ -51,7 +59,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyDataItemPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyDataItemPatch(patch),
             self._patch,
             3)
     @property
@@ -60,7 +68,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             test.fixtures.basic.module.thrift_types.MyEnum]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_enum_patch(),
             self._patch,
             4)
     @property
@@ -69,7 +77,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             BoolPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_bool_patch(),
             self._patch,
             5)
     @property
@@ -78,7 +86,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             BoolPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_bool_patch(),
             self._patch,
             6)
     @property
@@ -87,7 +95,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             BoolPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_bool_patch(),
             self._patch,
             7)
     @property
@@ -96,7 +104,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             SetPatch[float]]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_set_patch(),
             self._patch,
             8)
     @property
@@ -116,7 +124,7 @@ class ContainersPatch(BaseStructPatch[Containers]):
             ListPatch[int]]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_list_patch(),
             self._patch,
             1)
     @property
@@ -125,7 +133,7 @@ class ContainersPatch(BaseStructPatch[Containers]):
             SetPatch[str]]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_set_patch(),
             self._patch,
             2)
     @property
@@ -134,7 +142,7 @@ class ContainersPatch(BaseStructPatch[Containers]):
             MapPatch[str, I64Patch]]:
 
         return OptionalFieldPatch(
-            lambda patch: MapPatch(lambda patch: , patch.as_map_patch()),
+            lambda patch: MapPatch(lambda patch: patch.as_i64_patch(), patch.as_map_patch()),
             self._patch,
             3)
 
@@ -147,7 +155,7 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             test.fixtures.basic.module.thrift_types.MyEnum]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_enum_patch(),
             self._patch,
             1)
     @property
@@ -156,7 +164,7 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyStructPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
             self._patch,
             2)
     @property
@@ -165,7 +173,7 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyDataItemPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyDataItemPatch(patch),
             self._patch,
             3)
     @property
@@ -174,7 +182,7 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             SetPatch[float]]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_set_patch(),
             self._patch,
             4)
 
@@ -185,7 +193,7 @@ class MyExceptionPatch(BaseStructPatch[MyException]):
             I64Patch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_i64_patch(),
             self._patch,
             1)
     @property
@@ -203,7 +211,7 @@ class MyExceptionPatch(BaseStructPatch[MyException]):
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyStructPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
             self._patch,
             3)
     @property
@@ -212,7 +220,7 @@ class MyExceptionPatch(BaseStructPatch[MyException]):
             MyUnionPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyUnionPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyUnionPatch(patch),
             self._patch,
             4)
 
@@ -223,7 +231,7 @@ class MyExceptionWithMessagePatch(BaseStructPatch[MyExceptionWithMessage]):
             I64Patch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_i64_patch(),
             self._patch,
             1)
     @property
@@ -241,7 +249,7 @@ class MyExceptionWithMessagePatch(BaseStructPatch[MyExceptionWithMessage]):
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyStructPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
             self._patch,
             3)
     @property
@@ -250,7 +258,7 @@ class MyExceptionWithMessagePatch(BaseStructPatch[MyExceptionWithMessage]):
             MyUnionPatch]:
 
         return OptionalFieldPatch(
-            lambda patch: MyUnionPatch(patch),
+            lambda patch: test.fixtures.basic.module.thrift_patch.MyUnionPatch(patch),
             self._patch,
             4)
 
@@ -261,7 +269,7 @@ class ReservedKeywordPatch(BaseStructPatch[ReservedKeyword]):
             I32Patch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_i32_patch(),
             self._patch,
             1)
 
@@ -272,6 +280,6 @@ class UnionToBeRenamedPatch(BaseStructPatch[UnionToBeRenamed]):
             I32Patch]:
 
         return OptionalFieldPatch(
-            lambda patch: ,
+            lambda patch: patch.as_i32_patch(),
             self._patch,
             1)

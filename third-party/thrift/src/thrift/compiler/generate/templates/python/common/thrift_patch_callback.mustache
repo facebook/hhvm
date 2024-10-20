@@ -16,6 +16,22 @@
 
 }}{{!
   Lambda is not type checked by pyre, though here we only used lambda internally, it won't affect UX.
-}}lambda patch: {{#type:map?}}{{#type:value_type}}MapPatch({{> common/thrift_patch_callback}}, patch.as_map_patch()){{/type:value_type}}{{/type:map?}}{{!
+}}lambda patch: {{!
+}}{{#type:bool?}}patch.as_bool_patch(){{/type:bool?}}{{!
+}}{{#type:byte?}}patch.as_byte_patch(){{/type:byte?}}{{!
+}}{{#type:i16?}}patch.as_i16_patch(){{/type:i16?}}{{!
+}}{{#type:i32?}}patch.as_i32_patch(){{/type:i32?}}{{!
+}}{{#type:i64?}}patch.as_i64_patch(){{/type:i64?}}{{!
+}}{{#type:double?}}patch.as_double_patch(){{/type:double?}}{{!
+}}{{#type:float?}}patch.as_float_patch(){{/type:float?}}{{!
 }}{{#type:string?}}patch.as_string_patch(){{/type:string?}}{{!
-}}{{#type:struct}}{{struct:py_name}}Patch(patch){{/type:struct}}
+}}{{#type:binary?}}patch.as_binary_patch(){{/type:binary?}}{{!
+}}{{#type:enum}}patch.as_enum_patch(){{/type:enum}}{{!
+}}{{#type:list?}}patch.as_list_patch(){{/type:list?}}{{!
+}}{{#type:set?}}patch.as_set_patch(){{/type:set?}}{{!
+}}{{#type:map?}}{{#type:value_type}}{{!
+}}MapPatch({{> common/thrift_patch_callback}}, patch.as_map_patch()){{!
+}}{{/type:value_type}}{{/type:map?}}{{!
+}}{{#type:struct}}{{!
+    }}{{type:patch_module_path}}.{{struct:py_name}}Patch(patch){{!
+}}{{/type:struct}}

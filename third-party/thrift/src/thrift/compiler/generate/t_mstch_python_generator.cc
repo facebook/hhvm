@@ -624,6 +624,7 @@ class python_mstch_type : public mstch_type {
         this,
         {
             {"type:module_path", &python_mstch_type::module_path},
+            {"type:patch_module_path", &python_mstch_type::patch_module_path},
             {"type:need_module_path?", &python_mstch_type::need_module_path},
         });
   }
@@ -643,6 +644,11 @@ class python_mstch_type : public mstch_type {
     return get_py3_namespace_with_name_and_prefix(
                get_type_program(), get_option("root_module_prefix"))
         .append(types_import_path);
+  }
+  mstch::node patch_module_path() {
+    return get_py3_namespace_with_name_and_prefix(
+               get_type_program(), get_option("root_module_prefix"))
+        .append(".thrift_patch");
   }
 
   mstch::node program_name() { return get_type_program()->name(); }

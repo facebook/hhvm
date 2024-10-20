@@ -72,12 +72,32 @@ module Container = struct
 end
 
 module ReadOnlyEnvironment : sig
+  (** Read-only environment primarily contains contextual information that
+      prevents generation of certain types due to various restrictions in the
+      language. This in turn allows us to keep generating well-typed programs.
+      *)
   type t = {
-    for_option: bool;
-    for_reified: bool;
-    for_alias: bool;
-    for_enum: bool;
+    for_option_ty: bool;
+        (** There is a case type completeness bug (T201523298) that causes
+            nullable case types to be rejected even if the program is valid. So
+            we prevent case types to be generated under nullables. *)
+    for_reified_ty: bool;
+        (** Function types cannot used reified type arguments. *)
+    for_alias_def: bool;
+        (** Aliases (including vanilla aliases, newtypes, and case types) cannot
+            refer to type constants due to an HHVM issues (T29968063). *)
+    for_enum_def: bool;
+        (** There is a check that bans case types to be used as a bound or the
+            underlying type of an enum. *)
     pick_immediately_inhabited: bool;
+        (** milner has the ability to create an inhabitant of any type it
+            generates to replace a placeholder. To find such types, it computes
+            subtypes that are trivially inhabited. For example, `arraykey` is
+            _eventually_ inhabited whereas `int` and `string` are immediately
+            inhabited.
+
+            This option guides the search so that `subtype_of` produces an
+            immediately inhabited type. *)
     verbose: bool;
   }
 
@@ -86,39 +106,39 @@ module ReadOnlyEnvironment : sig
   val debug : t -> string Lazy.t -> unit
 end = struct
   type t = {
-    for_option: bool;
-    for_reified: bool;
-    for_alias: bool;
-    for_enum: bool;
+    for_option_ty: bool;
+    for_reified_ty: bool;
+    for_alias_def: bool;
+    for_enum_def: bool;
     pick_immediately_inhabited: bool;
     verbose: bool;
   }
 
   let default ~verbose =
     {
-      for_option = false;
-      for_reified = false;
-      for_alias = false;
-      for_enum = false;
+      for_option_ty = false;
+      for_reified_ty = false;
+      for_alias_def = false;
+      for_enum_def = false;
       pick_immediately_inhabited = false;
       verbose;
     }
 
   let show
       {
-        for_option;
-        for_reified;
-        for_alias;
-        for_enum;
+        for_option_ty;
+        for_reified_ty;
+        for_alias_def;
+        for_enum_def;
         pick_immediately_inhabited;
         _;
       } =
     Format.sprintf
-      "{for_option: %b, for_reified: %b, for_alias: %b; for_enum: %b; pick_immediately_inhabited: %b}"
-      for_option
-      for_reified
-      for_alias
-      for_enum
+      "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; pick_immediately_inhabited: %b}"
+      for_option_ty
+      for_reified_ty
+      for_alias_def
+      for_enum_def
       pick_immediately_inhabited
 
   let debug ({ verbose; _ } as renv) str =
@@ -217,29 +237,19 @@ end = struct
   (* suppress warning about to_enum not used *)
   let _ = to_enum
 
-  let pick renv =
+  let pick
+      ReadOnlyEnvironment.{ for_alias_def; for_reified_ty; for_option_ty; _ } =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
       |> List.map ~f:(fun i -> of_enum i |> Option.value_exn)
     in
-    let kinds =
-      if renv.ReadOnlyEnvironment.for_alias then
-        List.filter ~f:(fun k -> not @@ equal k TypeConst) kinds
-      else
-        kinds
+    let kind_filter = function
+      | Case -> not for_option_ty
+      | Function -> not for_reified_ty
+      | TypeConst -> not for_alias_def
+      | _ -> true
     in
-    let kinds =
-      if renv.ReadOnlyEnvironment.for_reified then
-        List.filter ~f:(fun k -> not @@ equal k Function) kinds
-      else
-        kinds
-    in
-    let kinds =
-      if renv.ReadOnlyEnvironment.for_option then
-        List.filter ~f:(fun k -> not @@ equal k Case) kinds
-      else
-        kinds
-    in
+    let kinds = List.filter ~f:kind_filter kinds in
     select kinds
 
   type classish =
@@ -482,6 +492,25 @@ end = struct
     | Like _ ->
       false
 
+  let ty_filter
+      ReadOnlyEnvironment.
+        {
+          pick_immediately_inhabited;
+          for_option_ty;
+          for_reified_ty;
+          for_alias_def;
+          for_enum_def;
+          _;
+        }
+      ty =
+    ((not pick_immediately_inhabited) || is_immediately_inhabited ty)
+    &&
+    match ty with
+    | Case _ -> not (for_option_ty || for_enum_def)
+    | Function _ -> not for_reified_ty
+    | TypeConst _ -> not for_alias_def
+    | _ -> true
+
   exception Backtrack
 
   (** Goes on a backtracking stochastic walk to pick an inhabited subtype of the
@@ -504,7 +533,9 @@ end = struct
       ReadOnlyEnvironment.debug renv
       @@ lazy
            (Format.sprintf "subtypes_of subfield_of %s: %s" key (Type.show ty));
-      let ty = driver ReadOnlyEnvironment.{ renv with for_alias = false } ty in
+      let ty =
+        driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
+      in
       let optional =
         if optional then
           select [true; false]
@@ -536,7 +567,7 @@ end = struct
            | Option ty -> [Primitive Primitive.Null; ty]
            | Awaitable ty ->
              let ty =
-               driver ReadOnlyEnvironment.{ renv with for_alias = false } ty
+               driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
              in
              [Awaitable ty]
            | Alias info -> [info.aliased]
@@ -552,7 +583,7 @@ end = struct
                  {
                    renv with
                    pick_immediately_inhabited = false;
-                   for_alias = false;
+                   for_alias_def = false;
                  }
              in
              let ty = driver renv ty in
@@ -563,7 +594,7 @@ end = struct
                  {
                    renv with
                    pick_immediately_inhabited = false;
-                   for_alias = false;
+                   for_alias_def = false;
                  }
              in
              let key = driver renv key in
@@ -575,7 +606,7 @@ end = struct
                  {
                    renv with
                    pick_immediately_inhabited = false;
-                   for_alias = false;
+                   for_alias_def = false;
                  }
              in
              let ty = driver renv ty in
@@ -583,7 +614,9 @@ end = struct
            | Tuple { conjuncts; open_ } ->
              let conjuncts =
                List.map
-                 ~f:(driver ReadOnlyEnvironment.{ renv with for_alias = false })
+                 ~f:
+                   (driver
+                      ReadOnlyEnvironment.{ renv with for_alias_def = false })
                  conjuncts
              in
              let open_ =
@@ -609,7 +642,7 @@ end = struct
            | Function { parameters; variadic; return_ } ->
              let return_ =
                driver
-                 ReadOnlyEnvironment.{ renv with for_alias = false }
+                 ReadOnlyEnvironment.{ renv with for_alias_def = false }
                  return_
              in
              let variadic =
@@ -626,7 +659,7 @@ end = struct
                                   {
                                     renv with
                                     pick_immediately_inhabited = false;
-                                    for_alias = false;
+                                    for_alias_def = false;
                                   }
                                 Mixed));
                       ]
@@ -643,49 +676,11 @@ end = struct
         @@ lazy (Format.sprintf "subtypes_of driver: %s" (Type.show candidate));
         let candidates = step renv candidate in
         if Random.bool () then
-          (* We decide to go on a stochastic walk and explore further subtypes. *)
+          (* Go down on a stochastic walk and explore further subtypes. *)
           driver renv @@ select candidates
         else
-          let filtered_candidates = candidates in
-          let filtered_candidates =
-            if renv.ReadOnlyEnvironment.pick_immediately_inhabited then
-              List.filter ~f:is_immediately_inhabited filtered_candidates
-            else
-              filtered_candidates
-          in
-          let filtered_candidates =
-            if renv.ReadOnlyEnvironment.for_option then
-              List.filter filtered_candidates ~f:(function
-                  | Case _ -> false
-                  | _ -> true)
-            else
-              filtered_candidates
-          in
-          let filtered_candidates =
-            if renv.ReadOnlyEnvironment.for_reified then
-              List.filter filtered_candidates ~f:(function
-                  | Function _ -> false
-                  | _ -> true)
-            else
-              filtered_candidates
-          in
-          let filtered_candidates =
-            if renv.ReadOnlyEnvironment.for_alias then
-              List.filter filtered_candidates ~f:(function
-                  | TypeConst _ -> false
-                  | _ -> true)
-            else
-              filtered_candidates
-          in
-          let filtered_candidates =
-            if renv.ReadOnlyEnvironment.for_enum then
-              List.filter filtered_candidates ~f:(function
-                  | Case _ -> false
-                  | _ -> true)
-            else
-              filtered_candidates
-          in
-          if List.is_empty filtered_candidates then
+          let viable_candidates = List.filter ~f:(ty_filter renv) candidates in
+          if List.is_empty viable_candidates then
             (* We don't have any choices left after filtering! So try a different
                path either by going down or going up the tree. *)
             if Random.bool () then
@@ -693,9 +688,11 @@ end = struct
             else
               raise Backtrack
           else
-            select filtered_candidates
+            select viable_candidates
       with
       | Backtrack ->
+        (* Either keep backtracking or explore alternative paths from this point
+           downwards. *)
         if Random.bool () then
           driver renv candidate
         else
@@ -1055,10 +1052,11 @@ end = struct
             ReadOnlyEnvironment.
               {
                 renv with
-                for_option = false;
-                for_reified = is_reified || renv.ReadOnlyEnvironment.for_reified;
-                for_alias = false;
-                for_enum = false;
+                for_option_ty = false;
+                for_reified_ty =
+                  is_reified || renv.ReadOnlyEnvironment.for_reified_ty;
+                for_alias_def = false;
+                for_enum_def = false;
               }
           in
           mk renv env ~depth:(Some depth)
@@ -1078,11 +1076,11 @@ end = struct
       (renv : ReadOnlyEnvironment.t) (env : Environment.t) ~(depth : int option)
       : Environment.t * t =
     let depth = Option.value ~default:0 depth in
-    let mk ?(for_alias = false) renv env =
-      mk ReadOnlyEnvironment.{ renv with for_alias } env ~depth:(Some depth)
+    let mk ?(for_alias_def = false) renv env =
+      mk ReadOnlyEnvironment.{ renv with for_alias_def } env ~depth:(Some depth)
     in
-    let subtype_of ?(for_alias = false) renv env =
-      subtype_of ReadOnlyEnvironment.{ renv with for_alias } env
+    let subtype_of ?(for_alias_def = false) renv env =
+      subtype_of ReadOnlyEnvironment.{ renv with for_alias_def } env
     in
     let kind = Kind.pick renv in
     ReadOnlyEnvironment.debug renv
@@ -1092,7 +1090,7 @@ end = struct
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
     | Kind.Option ->
       let rec candidate () =
-        match mk ReadOnlyEnvironment.{ renv with for_option = true } env with
+        match mk ReadOnlyEnvironment.{ renv with for_option_ty = true } env with
         | (_, Mixed) -> candidate ()
         | (_, Option _) as res ->
           res
@@ -1103,13 +1101,13 @@ end = struct
       candidate ()
     | Kind.Awaitable ->
       let (env, ty) =
-        mk ReadOnlyEnvironment.{ renv with for_option = false } env
+        mk ReadOnlyEnvironment.{ renv with for_option_ty = false } env
       in
       (env, Awaitable ty)
     | Kind.Classish -> mk_classish renv env ~parent:None ~depth
     | Kind.Alias ->
       let name = fresh "A" in
-      let (env, aliased) = mk renv env ~for_alias:true in
+      let (env, aliased) = mk renv env ~for_alias_def:true in
       let env =
         Environment.add_definition env @@ Definition.alias ~name aliased
       in
@@ -1119,10 +1117,10 @@ end = struct
       let (env, aliased, bound) =
         if Random.bool () then
           let (env, bound) = mk renv env in
-          let aliased = subtype_of ~for_alias:true renv env bound in
+          let aliased = subtype_of ~for_alias_def:true renv env bound in
           (env, aliased, Some bound)
         else
-          let (env, aliased) = mk ~for_alias:true renv env in
+          let (env, aliased) = mk ~for_alias_def:true renv env in
           (env, aliased, None)
       in
       let env =
@@ -1159,9 +1157,9 @@ end = struct
       let mk renv env =
         match bound with
         | Some bound ->
-          let ty = subtype_of renv env ~for_alias:true bound in
+          let ty = subtype_of renv env ~for_alias_def:true bound in
           (env, ty)
-        | None -> mk renv env ~for_alias:true
+        | None -> mk renv env ~for_alias_def:true
       in
       let rec add_disjuncts (env, disjuncts) =
         if Random.bool () then
@@ -1195,11 +1193,13 @@ end = struct
       let (env, bound, underlying_ty, value) =
         if Random.bool () then
           let bound =
-            mk_arraykey ReadOnlyEnvironment.{ renv with for_enum = true } env
+            mk_arraykey
+              ReadOnlyEnvironment.{ renv with for_enum_def = true }
+              env
           in
           let underlying_ty =
             subtype_of
-              ReadOnlyEnvironment.{ renv with for_enum = true }
+              ReadOnlyEnvironment.{ renv with for_enum_def = true }
               env
               bound
           in
@@ -1208,7 +1208,9 @@ end = struct
           (env, Some bound, underlying_ty, value)
         else
           let underlying_ty =
-            mk_arraykey ReadOnlyEnvironment.{ renv with for_enum = true } env
+            mk_arraykey
+              ReadOnlyEnvironment.{ renv with for_enum_def = true }
+              env
           in
           let value = inhabitant_of renv env underlying_ty in
           let env = Environment.record_subtype env ~super:Mixed ~sub:ty in
@@ -1220,7 +1222,7 @@ end = struct
       in
       (env, ty)
     | Kind.Container -> begin
-      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       match Container.pick () with
       | Container.Vec ->
         let (env, ty) = mk renv env in
@@ -1237,7 +1239,7 @@ end = struct
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
-      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let (env, conjuncts) =
         List.init n ~f:(fun _ -> ())
         |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)
@@ -1245,7 +1247,7 @@ end = struct
       (env, Tuple { conjuncts; open_ = false })
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
-      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let mk_field env key =
         let (env, ty) = mk renv env in
         let optional = Random.bool () in
@@ -1255,7 +1257,7 @@ end = struct
       let open_ = Random.bool () in
       (env, Shape { fields; open_ })
     | Kind.Function ->
-      let renv = ReadOnlyEnvironment.{ renv with for_option = false } in
+      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let (env, parameters) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
         |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)

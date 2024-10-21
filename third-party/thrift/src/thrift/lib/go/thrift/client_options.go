@@ -26,7 +26,6 @@ import (
 
 // clientOptions thrift and connectivity options for the thrift client
 type clientOptions struct {
-	conn              net.Conn
 	transport         TransportID
 	protocol          types.ProtocolID
 	ioTimeout         time.Duration // Read/Write timeout
@@ -134,7 +133,7 @@ func newDefaultPersistentHeaders() map[string]string {
 }
 
 // newOptions creates a new options objects and inits it
-func newOptions(opts ...ClientOption) (*clientOptions, error) {
+func newOptions(opts ...ClientOption) *clientOptions {
 	res := &clientOptions{
 		protocol:          types.ProtocolIDCompact,
 		transport:         TransportIDUnknown,
@@ -145,35 +144,34 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 		opt(res)
 	}
 
-	if res.dialerFn != nil {
-		conn, err := res.dialerFn()
-		if err != nil {
-			return nil, err
-		}
-		res.conn = conn
-	}
-
 	if res.transport == TransportIDUnknown {
 		panic(NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}
-	return res, nil
+	return res
 }
 
 // NewClient will return a connected thrift protocol object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
 func NewClient(opts ...ClientOption) (types.Protocol, error) {
-	options, err := newOptions(opts...)
-	if err != nil {
-		return nil, err
+	options := newOptions(opts...)
+
+	var conn net.Conn
+	var err error
+	if options.dialerFn != nil {
+		conn, err = options.dialerFn()
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	switch options.transport {
 	case TransportIDHeader:
-		return newHeaderProtocol(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		return newHeaderProtocol(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDRocket:
-		return newRocketClient(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		return newRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketClient(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		return newUpgradeToRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}

@@ -31,6 +31,7 @@ type clientOptions struct {
 	protocol          types.ProtocolID
 	ioTimeout         time.Duration // Read/Write timeout
 	persistentHeaders map[string]string
+	dialerFn          func() (net.Conn, error)
 }
 
 // ClientOption is a single configuration setting for the thrift client
@@ -91,7 +92,8 @@ func WithIdentity(name string) ClientOption {
 // client should connect to should be resolved via the given function
 func WithDialer(d func() (net.Conn, error)) ClientOption {
 	return func(opts *clientOptions) error {
-		conn, err := d()
+		opts.dialerFn = d
+		conn, err := opts.dialerFn()
 		if err != nil {
 			return err
 		}

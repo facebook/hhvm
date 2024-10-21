@@ -4619,7 +4619,12 @@ end = struct
           make_result env p (Aast.Nameof (ty, pcid, CI sid)) ty)
     | Nameof cid ->
       let (env, _tal, ce, cty) =
-        Class_id.class_expr ~inside_nameof:true env [] cid
+        Class_id.class_expr
+          ~exact:Exact (* emulate C::class *)
+          ~inside_nameof:true
+          env
+          []
+          cid
       in
       make_result
         env

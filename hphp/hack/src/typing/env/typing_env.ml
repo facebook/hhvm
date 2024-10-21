@@ -2015,18 +2015,11 @@ module Log = struct
       ]
 end
 
-let update_reason { genv = { tcopt; _ }; _ } ty ~f =
-  if TypecheckerOptions.using_extended_reasons tcopt then
-    map_reason ty ~f
-  else
-    ty
+let update_reason _ ty ~f = map_reason ty ~f
 
-let update_cty_reason { genv = { tcopt; _ }; _ } cty ~f =
-  if TypecheckerOptions.using_extended_reasons tcopt then
-    let (r, cstr) = deref_constraint_type cty in
-    mk_constraint_type (f r, cstr)
-  else
-    cty
+let update_cty_reason _ cty ~f =
+  let (r, cstr) = deref_constraint_type cty in
+  mk_constraint_type (f r, cstr)
 
 let update_ity_reason t ity ~f =
   match ity with

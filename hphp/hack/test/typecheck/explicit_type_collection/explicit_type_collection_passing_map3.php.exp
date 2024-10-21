@@ -4,7 +4,7 @@ ERROR: File "explicit_type_collection_passing_map3.php", line 7, characters 10-1
 Invalid argument (Typing[4110])
   File "explicit_type_collection_passing_map3.php", line 3, characters 21-26:
   Expected `string`
-  File "explicit_type_collection_passing_map3.php", line 3, characters 21-26:
-  This type argument to `Map` must match exactly (it is invariant)
   File "explicit_type_collection_passing_map3.php", line 5, characters 8-52:
   But got `arraykey`
+  File "explicit_type_collection_passing_map3.php", line 5, characters 8-52:
+  This type argument to `Map` must match exactly (it is invariant)

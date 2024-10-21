@@ -8,3 +8,5 @@ Invalid argument (Typing[4323])
   Expected `NotWidgetParent`
   File "super_constraint_11.php", line 14, characters 31-42:
   But got `WidgetParent`
+  File "super_constraint_11.php", line 14, characters 31-42:
+  This type argument to `MyWidget` must match exactly (it is invariant)

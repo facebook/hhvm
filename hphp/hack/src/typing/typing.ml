@@ -7128,13 +7128,7 @@ end = struct
       let env = key_exists env tparamet p shape field in
       (env, { pkgs = SSet.empty })
     | Aast.Is (ivar, h) ->
-      let reason =
-        Reason.is_refinement
-          (if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            p
-          else
-            fst h)
-      in
+      let reason = Reason.is_refinement p in
       let env = refine_for_is ~hint_first:false env tparamet ivar reason h in
       (env, { pkgs = SSet.empty })
     | Aast.Package (_, pkg) when tparamet -> (env, { pkgs = SSet.singleton pkg })

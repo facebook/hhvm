@@ -2,13 +2,13 @@ ERROR: File "tuple_as_lvalue.php", line 15, characters 3-15:
 You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "tuple_as_lvalue.php", line 15, characters 3-20:
 Invalid assignment (Typing[4110])
-  File "tuple_as_lvalue.php", line 13, characters 8-11:
+  File "tuple_as_lvalue.php", line 15, characters 9-10:
   Expected `null`
   File "tuple_as_lvalue.php", line 12, characters 15-17:
   But got `int`
 ERROR: File "tuple_as_lvalue.php", line 15, characters 3-20:
 Invalid assignment (Typing[4110])
-  File "tuple_as_lvalue.php", line 14, characters 8-11:
+  File "tuple_as_lvalue.php", line 15, characters 13-14:
   Expected `null`
   File "tuple_as_lvalue.php", line 12, characters 20-25:
   But got `string`

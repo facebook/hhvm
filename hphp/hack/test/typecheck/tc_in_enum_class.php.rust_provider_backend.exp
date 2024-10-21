@@ -4,6 +4,8 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "tc_in_enum_class.php", line 91, characters 29-44:
   But got `<expr#8>::T::TSource as IAntParent::T::TSource`
+  File "tc_in_enum_class.php", line 91, characters 38-44:
+  This type argument to `IAntGetter` only allows supertypes (it is contravariant)
 ERROR: File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
   File "tc_in_enum_class.php", line 47, characters 23-25:

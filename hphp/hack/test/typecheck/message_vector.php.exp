@@ -2,7 +2,5 @@ ERROR: File "message_vector.php", line 21, characters 3-16:
 Invalid assignment (Typing[4110])
   File "message_vector.php", line 15, characters 25-25:
   Expected `B`
-  File "message_vector.php", line 15, characters 25-25:
-  This type argument to `Vector` must match exactly (it is invariant)
   File "message_vector.php", line 21, characters 14-14:
   But got `A`

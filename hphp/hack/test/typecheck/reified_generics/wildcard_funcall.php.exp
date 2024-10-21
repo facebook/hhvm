@@ -8,10 +8,10 @@ ERROR: File "wildcard_funcall.php", line 11, characters 16-27:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 11, characters 7-12:
   Expected `string`
-  File "wildcard_funcall.php", line 11, characters 7-12:
-  This type argument to `A` must match exactly (it is invariant)
   File "wildcard_funcall.php", line 11, characters 22-24:
   But got `int`
+  File "wildcard_funcall.php", line 11, characters 22-24:
+  This type argument to `A` must match exactly (it is invariant)
 ERROR: File "wildcard_funcall.php", line 11, characters 16-27:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 11, characters 22-24:
@@ -42,14 +42,6 @@ ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
 Invalid argument (Typing[4110])
   File "wildcard_funcall.php", line 16, characters 9-14:
   Expected `string`
-  File "wildcard_funcall.php", line 16, characters 9-14:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 16, characters 27-29:
-  But got `int`
-ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 16, characters 9-14:
-  Expected `string`
   File "wildcard_funcall.php", line 16, characters 27-29:
   But got `int`
   File "wildcard_funcall.php", line 16, characters 27-29:
@@ -62,11 +54,3 @@ Invalid argument (Typing[4110])
   But got `string`
   File "wildcard_funcall.php", line 16, characters 9-14:
   This type argument to `A` must match exactly (it is invariant)
-ERROR: File "wildcard_funcall.php", line 16, characters 19-33:
-Invalid argument (Typing[4110])
-  File "wildcard_funcall.php", line 16, characters 27-29:
-  Expected `int`
-  File "wildcard_funcall.php", line 16, characters 27-29:
-  This type argument to `A` must match exactly (it is invariant)
-  File "wildcard_funcall.php", line 16, characters 9-14:
-  But got `string`

@@ -1,14 +1,16 @@
 ERROR: File "bad_contra_constraint.php", line 22, characters 21-25:
 Invalid argument (Typing[4110])
-  File "bad_contra_constraint.php", line 13, characters 17-23:
+  File "bad_contra_constraint.php", line 13, characters 10-23:
   Expected `nothing` from this `is` expression test
   File "bad_contra_constraint.php", line 5, characters 15-16:
   But got `mixed`
 ERROR: File "bad_contra_constraint.php", line 22, characters 21-25:
 Invalid argument (Typing[4110])
-  File "bad_contra_constraint.php", line 13, characters 17-23:
+  File "bad_contra_constraint.php", line 13, characters 10-23:
   Expected `nothing` from this `is` expression test
   File "bad_contra_constraint.php", line 9, characters 67-68:
   But got `Td`
   File "bad_contra_constraint.php", line 9, characters 67-68:
   This type argument to `Derived` must match exactly (it is invariant)
+  File "bad_contra_constraint.php", line 9, characters 67-68:
+  This type argument to `Base` only allows supertypes (it is contravariant)

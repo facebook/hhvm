@@ -28,7 +28,7 @@ Invalid argument (Typing[4110])
   But got `int`
 ERROR: File "hh_expect.php", line 11, characters 3-33:
 hh_expect_equivalent type mismatch (Typing[4452])
-  File "hh_expect.php", line 3, characters 12-14:
+  File "hh_expect.php", line 11, characters 31-32:
   Expected `int`
   File "hh_expect.php", line 11, characters 24-28:
   But got `mixed`

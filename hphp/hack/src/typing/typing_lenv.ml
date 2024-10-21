@@ -45,12 +45,7 @@ let union
         eid = eid2;
       } =
   (* TODO(mjt) Use a more specific reason here provided as an argument *)
-  let reason =
-    if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-      Some (Typing_reason.join_point join_pos)
-    else
-      None
-  in
+  let reason = Some (Typing_reason.join_point join_pos) in
   let (env, ty) = Union.union ?reason ~approx_cancel_neg:true env ty1 ty2 in
   let (env, bound_ty) =
     match (bound_ty1, bound_ty2) with

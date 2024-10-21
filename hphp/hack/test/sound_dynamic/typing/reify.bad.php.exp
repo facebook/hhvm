@@ -10,10 +10,10 @@ ERROR: File "reify.bad.php", line 12, characters 3-19:
 Typing error (Typing[4110])
   File "reify.bad.php", line 12, characters 16-18:
   Expected `int`
-  File "reify.bad.php", line 12, characters 16-18:
-  This type argument to `C` must match exactly (it is invariant)
   File "reify.bad.php", line 10, characters 17-23:
   But got `dynamic`
+  File "reify.bad.php", line 10, characters 17-23:
+  This type argument to `C` must match exactly (it is invariant)
 ERROR: File "reify.bad.php", line 13, characters 3-32:
 Typing error (Typing[4110])
   File "reify.bad.php", line 13, characters 9-11:
@@ -26,7 +26,7 @@ ERROR: File "reify.bad.php", line 14, characters 3-32:
 Typing error (Typing[4110])
   File "reify.bad.php", line 14, characters 29-31:
   Expected `int`
-  File "reify.bad.php", line 14, characters 29-31:
-  This type argument to `C` must match exactly (it is invariant)
   File "reify.bad.php", line 14, characters 9-15:
   But got `dynamic`
+  File "reify.bad.php", line 14, characters 9-15:
+  This type argument to `C` must match exactly (it is invariant)

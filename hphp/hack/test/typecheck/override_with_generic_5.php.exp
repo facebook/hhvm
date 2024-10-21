@@ -46,6 +46,8 @@ The method `numInInvar_Super` is not compatible with the overridden method (Typi
   Expected `nothing` because the type constant Ti lacks a constraint
   File "override_with_generic_5.php", line 20, characters 39-41:
   But got `num`
+  File "override_with_generic_5.php", line 20, characters 39-41:
+  This type argument to `In` must match exactly (it is invariant)
 ERROR: File "override_with_generic_5.php", line 91, characters 19-31:
 The method `numInInvar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 91, characters 19-31:

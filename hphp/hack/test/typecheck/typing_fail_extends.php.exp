@@ -2,13 +2,7 @@ ERROR: File "typing_fail_extends.php", line 31, characters 5-29:
 Typing error (Typing[4110])
   File "typing_fail_extends.php", line 28, characters 22-30:
   Expected `Option<T>`
-  File "typing_fail_extends.php", line 28, characters 22-30:
+  File "typing_fail_extends.php", line 31, characters 25-28:
+  But got `null`
+  File "typing_fail_extends.php", line 31, characters 25-28:
   This type argument to `X` must match exactly (it is invariant)
-  File "typing_fail_extends.php", line 31, characters 25-28:
-  But got `null`
-ERROR: File "typing_fail_extends.php", line 31, characters 5-29:
-Typing error (Typing[4110])
-  File "typing_fail_extends.php", line 28, characters 22-30:
-  Expected `Option<T>`
-  File "typing_fail_extends.php", line 31, characters 25-28:
-  But got `null`

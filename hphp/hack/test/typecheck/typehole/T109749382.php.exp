@@ -8,10 +8,10 @@ This makes I2 extends I<string> but it already extends I at another instantiatio
   I<int> should be a subtype of I<string>, but it's not because
   File "T109749382.php", line 8, characters 24-29:
   Expected `string`
-  File "T109749382.php", line 8, characters 24-29:
-  This type argument to `I` must match exactly (it is invariant)
   File "T109749382.php", line 9, characters 24-26:
   But got `int`
+  File "T109749382.php", line 9, characters 24-26:
+  This type argument to `I` must match exactly (it is invariant)
 ERROR: File "T109749382.php", line 9, characters 30-31:
 This makes I2 extends I<string> but it already extends I at another instantiation (Typing[4480])
   File "T109749382.php", line 9, characters 22-27:

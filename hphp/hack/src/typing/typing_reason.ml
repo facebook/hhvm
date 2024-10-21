@@ -2134,7 +2134,6 @@ let rec to_string_help :
     | _ -> to_string_help prefix solutions into)
   | Solved { solution; of_; in_ = r } ->
     let solutions = Tvid.Map.add of_ solution solutions in
-
     to_string_help prefix solutions r
   | Lower_bound
       {
@@ -2161,29 +2160,24 @@ let rec to_string_help :
           ^ " must match exactly (it is invariant)" );
       ]
   | Lower_bound { bound = r; _ } -> to_string_help prefix solutions r
-  | Prj_both
-      {
-        sub_prj = r_orig;
-        prj = Prj_symm_ctor (_, class_name, _, Dir Contra);
-        _;
-      } ->
-    to_string_help prefix solutions r_orig
+  | Prj_both { sub_prj; prj = Prj_symm_ctor (_, class_name, _, Dir Contra); _ }
+    ->
+    to_string_help prefix solutions sub_prj
     @ [
         ( p,
           "This type argument to "
           ^ (strip_ns class_name |> Markdown_lite.md_codify)
           ^ " only allows supertypes (it is contravariant)" );
       ]
-  | Prj_both
-      { sub_prj = r_orig; prj = Prj_symm_ctor (_, class_name, _, Inv _); _ } ->
-    to_string_help prefix solutions r_orig
+  | Prj_both { sub_prj; prj = Prj_symm_ctor (_, class_name, _, Inv _); _ } ->
+    to_string_help prefix solutions sub_prj
     @ [
         ( p,
           "This type argument to "
           ^ (strip_ns class_name |> Markdown_lite.md_codify)
           ^ " must match exactly (it is invariant)" );
       ]
-  | Prj_both { sub_prj = r; _ } -> to_string_help prefix solutions r
+  | Prj_both { sub_prj; _ } -> to_string_help prefix solutions sub_prj
   | Idx (_, r2) ->
     [(p, prefix)]
     @ [

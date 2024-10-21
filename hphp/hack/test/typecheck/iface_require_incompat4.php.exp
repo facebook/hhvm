@@ -6,10 +6,10 @@ This class does not satisfy all the requirements of its traits or interfaces. (T
   Required here
   File "iface_require_incompat4.php", line 12, characters 25-29:
   Expected `float`
-  File "iface_require_incompat4.php", line 12, characters 25-29:
-  This type argument to `Super` must match exactly (it is invariant)
   File "iface_require_incompat4.php", line 19, characters 23-25:
   But got `int`
+  File "iface_require_incompat4.php", line 19, characters 23-25:
+  This type argument to `Super` must match exactly (it is invariant)
 ERROR: File "iface_require_incompat4.php", line 19, characters 7-7:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "iface_require_incompat4.php", line 19, characters 39-40:

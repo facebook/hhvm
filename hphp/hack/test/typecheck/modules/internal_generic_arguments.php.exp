@@ -10,10 +10,10 @@ ERROR: File "internal_generic_arguments.php--A.php", line 16, characters 8-13:
 Invalid argument (Typing[4110])
   File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
   Expected `string`
-  File "internal_generic_arguments.php--A.php", line 8, characters 30-35:
-  This type argument to `F` must match exactly (it is invariant)
   File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
   But got `int`
+  File "internal_generic_arguments.php--A.php", line 5, characters 33-35:
+  This type argument to `F` must match exactly (it is invariant)
 ERROR: File "internal_generic_arguments.php--A.php", line 20, characters 23-23:
 You cannot use this type in a public declaration. (Typing[4446])
   File "internal_generic_arguments.php--A.php", line 4, characters 16-16:

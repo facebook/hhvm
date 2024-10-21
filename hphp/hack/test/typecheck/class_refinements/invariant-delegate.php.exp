@@ -16,3 +16,5 @@ Invalid argument (Typing[4323])
   Expected a class with `{type T = _}`
   File "invariant-delegate.php", line 36, characters 33-35:
   But got `Box`
+  File "invariant-delegate.php", line 36, characters 33-35:
+  This type argument to `Invariant` must match exactly (it is invariant)

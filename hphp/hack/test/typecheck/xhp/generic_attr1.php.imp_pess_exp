@@ -4,11 +4,5 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "generic_attr1.php", line 8, characters 30-32:
   But got `string`
-ERROR: File "generic_attr1.php", line 10, characters 10-20:
-Invalid return type (Typing[4110])
-  File "generic_attr1.php", line 7, characters 18-20:
-  Expected `int`
-  File "generic_attr1.php", line 8, characters 30-32:
-  But got `string`
   File "generic_attr1.php", line 8, characters 30-32:
   This type argument to `Vector` must match exactly (it is invariant)

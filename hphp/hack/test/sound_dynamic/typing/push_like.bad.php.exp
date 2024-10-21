@@ -14,7 +14,7 @@ ERROR: File "push_like.bad.php", line 37, characters 10-11:
 Invalid return type (Typing[4110])
   File "push_like.bad.php", line 32, characters 46-46:
   Expected `C`
-  File "push_like.bad.php", line 32, characters 46-46:
-  This type argument to `Box` must match exactly (it is invariant)
   File "push_like.bad.php", line 32, characters 34-34:
   But got `B`
+  File "push_like.bad.php", line 32, characters 34-34:
+  This type argument to `Box` must match exactly (it is invariant)

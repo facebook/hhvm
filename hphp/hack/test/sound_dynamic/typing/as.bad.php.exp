@@ -2,7 +2,7 @@ ERROR: File "as.bad.php", line 10, characters 18-19:
 Invalid argument (Typing[4110])
   File "as.bad.php", line 6, characters 23-28:
   Expected `D<int>`
-  File "as.bad.php", line 9, characters 13-16:
+  File "as.bad.php", line 9, characters 7-16:
   But got `dynamic` from this `is` expression test
 ERROR: File "as.bad.php", line 13, characters 16-17:
 Invalid argument (Typing[4110])

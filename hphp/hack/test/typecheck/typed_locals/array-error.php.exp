@@ -8,8 +8,6 @@ ERROR: File "array-error.php", line 12, characters 3-13:
 Invalid assignment (Typing[4110])
   File "array-error.php", line 11, characters 18-25:
   Expected `arraykey`
-  File "array-error.php", line 11, characters 18-25:
-  This type argument to `Vector` must match exactly (it is invariant)
   File "array-error.php", line 12, characters 10-13:
   But got `null`
 ERROR: File "array-error.php", line 16, characters 7-8:
@@ -22,10 +20,10 @@ ERROR: File "array-error.php", line 20, characters 7-8:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "array-error.php", line 20, characters 18-23:
   Expected `string`
-  File "array-error.php", line 20, characters 18-23:
-  This type argument to `Vector` must match exactly (it is invariant)
   File "array-error.php", line 20, characters 35-42:
   But got `arraykey`
+  File "array-error.php", line 20, characters 35-42:
+  This type argument to `Vector` must match exactly (it is invariant)
 ERROR: File "array-error.php", line 24, characters 7-8:
 Typed locals can only be assigned values whose type is compatible with the declared type. (Typing[4110])
   File "array-error.php", line 24, characters 37-42:

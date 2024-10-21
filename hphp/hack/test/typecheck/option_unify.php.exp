@@ -10,3 +10,5 @@ Invalid return type (Typing[4110])
   Expected `string`
   File "option_unify.php", line 10, characters 24-25:
   But got `int`
+  File "option_unify.php", line 10, characters 24-25:
+  This type argument to `Vector` must match exactly (it is invariant)

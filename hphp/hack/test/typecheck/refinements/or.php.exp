@@ -14,8 +14,8 @@ ERROR: File "or.php", line 13, characters 19-20:
 Invalid argument (Typing[4110])
   File "or.php", line 26, characters 24-29:
   Expected `string`
-  File "or.php", line 12, characters 7-18:
-  But got `mixed` because a type could not be determined here
+  File "or.php", line 12, characters 7-34:
+  But got `mixed` because of this statement
 ERROR: File "or.php", line 14, characters 19-20:
 Invalid argument (Typing[4110])
   File "or.php", line 26, characters 24-29:

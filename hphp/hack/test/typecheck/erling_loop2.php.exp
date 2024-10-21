@@ -2,8 +2,8 @@ ERROR: File "erling_loop2.php", line 26, characters 10-16:
 Invalid return type (Typing[4110])
   File "erling_loop2.php", line 16, characters 18-20:
   Expected `int`
-  File "erling_loop2.php", line 20, characters 3-13:
-  But got `(_ & (int | string))`
+  File "erling_loop2.php", line 21, characters 3-103:
+  But got `(_ & (int | string))` because of this statement
 ERROR: File "erling_loop2.php", line 26, characters 10-16:
 Invalid return type (Typing[4110])
   File "erling_loop2.php", line 16, characters 18-20:

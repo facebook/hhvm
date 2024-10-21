@@ -917,12 +917,7 @@ and localize_class_instantiation
         (not ety_env.make_internal_opaque)
         || Typing_modules.is_class_visible env class_info
       then
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.(definition (Folded_class.pos class_info) r)
-          else
-            r
-        in
+        let r = Typing_reason.(definition (Folded_class.pos class_info) r) in
         ((env, err, cycles), mk (r, Tclass (sid, nonexact, tyl)))
       else
         let callee_module =

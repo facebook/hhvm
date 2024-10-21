@@ -28,7 +28,7 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "case_type_subtyping.php", line 4, characters 48-48:
     via this generic `T`
-  File "case_type_subtyping.php", line 4, characters 48-48:
-  This type argument to `Vector` must match exactly (it is invariant)
   File "case_type_subtyping.php", line 20, characters 17-23:
   But got `vec<int>`
+  File "case_type_subtyping.php", line 20, characters 17-23:
+  This type argument to `Vector` must match exactly (it is invariant)

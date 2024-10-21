@@ -4,3 +4,5 @@ Invalid argument (Typing[4110])
   Expected `C`
   File "meth_caller11.php", line 24, characters 42-44:
   But got `int`
+  File "meth_caller11.php", line 24, characters 42-44:
+  This type argument to `Wrapper` must match exactly (it is invariant)

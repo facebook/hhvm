@@ -5866,17 +5866,18 @@ end = struct
        in
        let right = Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub in
        let reasons = left @ right in
+       let lod =
+         Option.value ~default:GlobalOptions.Legacy
+         @@ TypecheckerOptions.tco_extended_reasons
+              Typing_env_types.(env.genv.tcopt)
+       in
        let flow =
-         Option.value_map
-           ~default:[]
-           ~f:(function
-             | GlobalOptions.Legacy -> []
-             | GlobalOptions.Extended complexity ->
-               Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
-             | GlobalOptions.Debug ->
-               Typing_reason.(debug ~sub:r_sub ~super:r_super))
-           (TypecheckerOptions.tco_extended_reasons
-              Typing_env_types.(env.genv.tcopt))
+         match lod with
+         | GlobalOptions.Legacy -> []
+         | GlobalOptions.Extended complexity ->
+           Typing_reason.(explain ~sub:r_sub ~super:r_super ~complexity)
+         | GlobalOptions.Debug ->
+           Typing_reason.(debug ~sub:r_sub ~super:r_super)
        in
        reasons @ flow)
 

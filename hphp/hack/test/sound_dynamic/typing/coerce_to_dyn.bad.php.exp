@@ -88,5 +88,5 @@ ERROR: File "coerce_to_dyn.bad.php", line 55, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 55, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 49, characters 21-23:
+  File "coerce_to_dyn.bad.php", line 50, characters 3-52:
   Type `(int | C)` is not a subtype of `dynamic` under dynamic-aware subtyping

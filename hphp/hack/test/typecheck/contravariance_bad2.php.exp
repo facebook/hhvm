@@ -10,3 +10,5 @@ Invalid argument (Typing[4110])
   Expected `I`
   File "contravariance_bad2.php", line 12, characters 24-25:
   But got `null`
+  File "contravariance_bad2.php", line 12, characters 24-25:
+  This type argument to `Contra` only allows supertypes (it is contravariant)

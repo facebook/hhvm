@@ -4,3 +4,5 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "typing2.bad.php", line 15, characters 24-26:
   But got `int`
+  File "typing2.bad.php", line 15, characters 24-26:
+  This type argument to `Box` must match exactly (it is invariant)

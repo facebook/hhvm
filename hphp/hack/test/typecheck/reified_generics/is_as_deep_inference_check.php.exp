@@ -14,14 +14,6 @@ ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
 Invalid argument (Typing[4110])
   File "is_as_deep_inference_check.php", line 8, characters 3-14:
   Expected `Reified<int>`
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  This type argument to `Reified` must match exactly (it is invariant)
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  But got `int`
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  Expected `Reified<int>`
   File "is_as_deep_inference_check.php", line 13, characters 5-7:
   But got `int`
   File "is_as_deep_inference_check.php", line 13, characters 5-7:
@@ -34,11 +26,3 @@ Invalid argument (Typing[4110])
   But got `Reified<int>`
   File "is_as_deep_inference_check.php", line 8, characters 3-14:
   This type argument to `Reified` must match exactly (it is invariant)
-ERROR: File "is_as_deep_inference_check.php", line 16, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  Expected `int`
-  File "is_as_deep_inference_check.php", line 13, characters 5-7:
-  This type argument to `Reified` must match exactly (it is invariant)
-  File "is_as_deep_inference_check.php", line 8, characters 3-14:
-  But got `Reified<int>`

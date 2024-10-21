@@ -14,3 +14,5 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   Expected `num`
   File "generic_incompatible_implementation2.php", line 10, characters 26-26:
   But got `T`
+  File "generic_incompatible_implementation2.php", line 10, characters 26-26:
+  This type argument to `C` must match exactly (it is invariant)

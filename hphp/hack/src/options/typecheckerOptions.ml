@@ -309,8 +309,6 @@ let tco_lsp_invalidation t = t.GlobalOptions.tco_lsp_invalidation
 
 let tco_extended_reasons t = t.GlobalOptions.tco_extended_reasons
 
-let using_extended_reasons t = Option.is_some @@ tco_extended_reasons t
-
 let enable_abstract_method_optional_parameters t =
   t.GlobalOptions.tco_enable_abstract_method_optional_parameters
 

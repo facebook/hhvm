@@ -28,18 +28,16 @@ ERROR: File "class3.php", line 16, characters 13-28:
 Invalid argument (Typing[4110])
   File "class3.php", line 27, characters 22-27:
   Expected `string`
-  File "class3.php", line 27, characters 22-27:
-  This type argument to `B` must match exactly (it is invariant)
   File "class3.php", line 4, characters 13-13:
   But got `mixed`
 ERROR: File "class3.php", line 16, characters 13-28:
 Invalid argument (Typing[4110])
   File "class3.php", line 27, characters 22-27:
   Expected `string`
-  File "class3.php", line 27, characters 22-27:
-  This type argument to `B` must match exactly (it is invariant)
   File "class3.php", line 16, characters 13-23:
   But got `T#2` from this "as" assertion
+  File "class3.php", line 16, characters 13-23:
+  This type argument to `B` must match exactly (it is invariant)
 ERROR: File "class3.php", line 16, characters 28-28:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "class3.php", line 4, characters 13-13:
@@ -70,18 +68,16 @@ ERROR: File "class3.php", line 19, characters 13-31:
 Invalid argument (Typing[4110])
   File "class3.php", line 27, characters 22-27:
   Expected `string`
-  File "class3.php", line 27, characters 22-27:
-  This type argument to `B` must match exactly (it is invariant)
   File "class3.php", line 4, characters 13-13:
   But got `mixed`
 ERROR: File "class3.php", line 19, characters 13-31:
 Invalid argument (Typing[4110])
   File "class3.php", line 27, characters 22-27:
   Expected `string`
-  File "class3.php", line 27, characters 22-27:
-  This type argument to `B` must match exactly (it is invariant)
   File "class3.php", line 19, characters 13-23:
   But got `T#4` from this "as" assertion
+  File "class3.php", line 19, characters 13-23:
+  This type argument to `B` must match exactly (it is invariant)
 ERROR: File "class3.php", line 21, characters 13-27:
 Invalid argument (Typing[4110])
   File "class3.php", line 10, characters 21-26:

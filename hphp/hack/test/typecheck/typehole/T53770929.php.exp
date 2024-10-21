@@ -26,7 +26,7 @@ This makes C implements A<string> but it already implements A at another instant
   Expected `string`
   File "T53770929.php", line 5, characters 26-26:
     via this generic `T`
-  File "T53770929.php", line 5, characters 26-26:
-  This type argument to `A` must match exactly (it is invariant)
   File "T53770929.php", line 17, characters 22-24:
   But got `int`
+  File "T53770929.php", line 17, characters 22-24:
+  This type argument to `A` must match exactly (it is invariant)

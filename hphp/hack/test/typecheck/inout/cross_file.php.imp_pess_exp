@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   But got `string`
 ERROR: File "cross_file.php--file2.php", line 4, characters 11-14:
 Invalid assignment to an `inout` parameter (Typing[4337])
-  File "cross_file.php--file2.php", line 3, characters 18-23:
+  File "cross_file.php--file2.php", line 3, characters 25-28:
   Expected `string`
   File "cross_file.php--file1.php", line 3, characters 18-20:
   But got `int`

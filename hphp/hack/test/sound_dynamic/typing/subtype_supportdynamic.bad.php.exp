@@ -92,7 +92,7 @@ ERROR: File "subtype_supportdynamic.bad.php", line 54, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtype_supportdynamic.bad.php", line 3, characters 12-30:
   Expected `dynamic`
-  File "subtype_supportdynamic.bad.php", line 48, characters 21-23:
+  File "subtype_supportdynamic.bad.php", line 49, characters 3-52:
   Type `(int | <expr#11> as C)` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "subtype_supportdynamic.bad.php", line 58, characters 5-6:
 Invalid argument (Typing[4110])

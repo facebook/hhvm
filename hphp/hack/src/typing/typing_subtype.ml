@@ -2340,34 +2340,20 @@ end = struct
           and ty_super = Sd.liken ~super_like env super in
           simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
         | Ast_defs.Contravariant ->
-          (* Since the current code is modifying the supertypes reason for
-                       existing ad-hoc dataflow we have to guard this on the
-                       --extended-reasons flag rather than using our helper functions
-                       directly *)
           let ty_super =
-            if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-              map_reason super ~f:(fun r_super_prj ->
-                  Typing_reason.prj_ctor_contra
-                    ~sub:r_sub
-                    ~super:r_super
-                    ~super_prj:r_super_prj
-                    ctor_kind
-                    nm
-                    idx
-                    false)
-            else
-              map_reason super ~f:(fun from ->
-                  Typing_reason.contravariant_generic (from, nm))
+            map_reason super ~f:(fun r_super_prj ->
+                Typing_reason.prj_ctor_contra
+                  ~sub:r_sub
+                  ~super:r_super
+                  ~super_prj:r_super_prj
+                  ctor_kind
+                  nm
+                  idx
+                  false)
           and ty_sub = child in
           simplify_subtype_help ~sub_supportdyn ty_super ty_sub env
         | Ast_defs.Invariant ->
           let covariant_prop env =
-            let f from =
-              if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-                from
-              else
-                Typing_reason.invariant_generic (from, nm)
-            in
             let ty_sub =
               Typing_env.update_reason env child ~f:(fun r_sub_prj ->
                   Typing_reason.prj_ctor_co
@@ -2378,21 +2364,18 @@ end = struct
                     nm
                     idx
                     true)
-            and ty_super = Sd.liken ~super_like env @@ map_reason super ~f in
+            and ty_super = Sd.liken ~super_like env super in
             simplify_subtype_help ~sub_supportdyn ty_sub ty_super env
           and contravariant_prop env =
             let f r_super_prj =
-              if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-                Typing_reason.prj_ctor_contra
-                  ~sub:r_sub
-                  ~super:r_super
-                  ~super_prj:r_super_prj
-                  ctor_kind
-                  nm
-                  idx
-                  true
-              else
-                Typing_reason.invariant_generic (r_super_prj, nm)
+              Typing_reason.prj_ctor_contra
+                ~sub:r_sub
+                ~super:r_super
+                ~super_prj:r_super_prj
+                ctor_kind
+                nm
+                idx
+                true
             in
             let ty_sub = Sd.liken ~super_like env child
             and ty_super = map_reason super ~f in
@@ -2933,16 +2916,13 @@ end = struct
         in
         let r_field_sub =
           let r_sub_prj = Typing_reason.missing_field in
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_shape
-              ~sub:r_sub
-              ~sub_prj:r_sub_prj
-              ~super:r_super
-              printable_name
-              ~kind_sub:Typing_reason.Absent
-              ~kind_super:Typing_reason.Required
-          else
-            r_sub_prj
+          Typing_reason.prj_shape
+            ~sub:r_sub
+            ~sub_prj:r_sub_prj
+            ~super:r_super
+            printable_name
+            ~kind_sub:Typing_reason.Absent
+            ~kind_super:Typing_reason.Required
         and r_field_super = get_reason ty_super in
         let ty_err_opt =
           Option.map
@@ -3512,12 +3492,7 @@ end = struct
        * we break out num first.
        *)
       | (r, Tprim Nast.Tnum) ->
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_num_sub ~sub:r ~sub_prj:r
-          else
-            r
-        in
+        let r = Typing_reason.prj_num_sub ~sub:r ~sub_prj:r in
         let ty_float = MakeType.float r and ty_int = MakeType.int r in
         simplify
           ~subtype_env
@@ -3532,12 +3507,7 @@ end = struct
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       (* Likewise, reduce nullable on left to a union *)
       | (r, Toption ty) ->
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r
-          else
-            r
-        in
+        let r = Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r in
         let ty_null = MakeType.null r in
         let prop_null =
           let prop =
@@ -4853,12 +4823,7 @@ end = struct
           end
       (* ?t <: A <=> null <: A && t <: A *)
       | (r, Toption ty_sub) ->
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r
-          else
-            r
-        in
+        let r = Typing_reason.prj_nullable_sub ~sub:r ~sub_prj:r in
         let ty_null = MakeType.null r in
         (* Errors due to `null` should refer to full option type *)
         let prop_null =
@@ -4882,12 +4847,7 @@ end = struct
               ~lhs:{ sub_supportdyn; ty_sub }
               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
       | (r, Tprim Aast.Tarraykey) ->
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_arraykey_sub ~sub:r ~sub_prj:r
-          else
-            r
-        in
+        let r = Typing_reason.prj_arraykey_sub ~sub:r ~sub_prj:r in
         let ty_string = MakeType.string r and ty_int = MakeType.int r in
         let prop env =
           env
@@ -4905,12 +4865,7 @@ end = struct
         (* Use `if_unsat` so we report arraykey in the error *)
         if_unsat (invalid ~fail) @@ prop env
       | (r, Tprim Aast.Tnum) ->
-        let r =
-          if TypecheckerOptions.using_extended_reasons env.genv.tcopt then
-            Typing_reason.prj_num_sub ~sub:r ~sub_prj:r
-          else
-            r
-        in
+        let r = Typing_reason.prj_num_sub ~sub:r ~sub_prj:r in
         let ty_float = MakeType.float r and ty_int = MakeType.int r in
         let prop env =
           env

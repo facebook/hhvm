@@ -6,7 +6,7 @@ Invalid argument (Typing[4110])
   But got `int`
 ERROR: File "supportdyn_ho_run.bad.php", line 15, characters 3-8:
 Too few arguments (required 2 but got 1) (Typing[4104])
-  File "supportdyn_ho_run.bad.php", line 10, characters 14-52:
+  File "supportdyn_ho_run.bad.php", line 10, characters 3-53:
   Definition is here
 ERROR: File "supportdyn_ho_run.bad.php", line 16, characters 6-7:
 Typing error (Typing[4110])

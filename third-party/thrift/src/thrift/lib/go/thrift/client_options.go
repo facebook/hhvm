@@ -113,10 +113,9 @@ func WithTimeout(ioTimeout time.Duration) ClientOption {
 
 // WithConn sets the connection to use for the thrift client.
 func WithConn(conn net.Conn) ClientOption {
-	return func(opts *clientOptions) error {
-		opts.conn = conn
-		return nil
-	}
+	return WithDialer(func() (net.Conn, error) {
+		return conn, nil
+	})
 }
 
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.

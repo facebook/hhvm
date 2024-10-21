@@ -113,7 +113,7 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 	return func(opts *clientOptions) {
 		opts.tlsConfig = clonedTLSConfig
 		opts.dialerFn = func() (net.Conn, error) {
-			return DialTLS(addr, dialTimeout, opts.tlsConfig)
+			return dialWithTLS(addr, dialTimeout, opts.tlsConfig)
 		}
 	}
 }
@@ -165,6 +165,11 @@ func newOptions(opts ...ClientOption) *clientOptions {
 // A thrift client can use this connection to communicate with a server.
 func NewClient(opts ...ClientOption) (types.Protocol, error) {
 	options := newOptions(opts...)
+
+	// Important: TLS config must be modified *before* the dialerFn below is called.
+	if options.tlsConfig != nil {
+		AddALPNForTransport(options.tlsConfig)
+	}
 
 	var conn net.Conn
 	var err error

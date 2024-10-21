@@ -121,14 +121,9 @@ func WithConn(conn net.Conn) ClientOption {
 
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
 func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) ClientOption {
-	return func(opts *clientOptions) error {
-		conn, err := DialTLS(addr, dialTimeout, tlsConfig)
-		if err != nil {
-			return err
-		}
-		opts.conn = conn
-		return nil
-	}
+	return WithDialer(func() (net.Conn, error) {
+		return DialTLS(addr, dialTimeout, tlsConfig)
+	})
 }
 
 // DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.

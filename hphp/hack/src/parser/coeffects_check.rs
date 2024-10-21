@@ -510,6 +510,29 @@ impl<'ast> Visitor<'ast> for Checker {
         }
         p.recurse(c, self)
     }
+
+    fn visit_def(
+        &mut self,
+        c: &mut <Self::Params as oxidized::aast_visitor::Params>::Context,
+        p: &'ast aast::Def<
+            <Self::Params as oxidized::aast_visitor::Params>::Ex,
+            <Self::Params as oxidized::aast_visitor::Params>::En,
+        >,
+    ) -> Result<(), <Self::Params as oxidized::aast_visitor::Params>::Error> {
+        if let aast::Def::Stmt(_) = p {
+            // We parse top-level statements as if they are in a function with `defaults` capabilities.
+            // This is because notebooks allow top-level statements and we don't want spurious coeffects
+            // errors in notebooks.
+            let orig_has_defaults = c.has_defaults();
+            let c = &mut Context::from_context(c);
+            c.set_has_defaults(true);
+            let res = p.recurse(c, self);
+            c.set_has_defaults(orig_has_defaults);
+            res
+        } else {
+            p.recurse(c, self)
+        }
+    }
 }
 
 pub fn check_program(program: &aast::Program<(), ()>, mode: Mode) -> Vec<SyntaxError> {

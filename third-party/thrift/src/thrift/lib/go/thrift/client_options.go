@@ -93,11 +93,6 @@ func WithIdentity(name string) ClientOption {
 func WithDialer(d func() (net.Conn, error)) ClientOption {
 	return func(opts *clientOptions) error {
 		opts.dialerFn = d
-		conn, err := opts.dialerFn()
-		if err != nil {
-			return err
-		}
-		opts.conn = conn
 		return nil
 	}
 }
@@ -159,6 +154,15 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 			return nil, err
 		}
 	}
+
+	if res.dialerFn != nil {
+		conn, err := res.dialerFn()
+		if err != nil {
+			return nil, err
+		}
+		res.conn = conn
+	}
+
 	if res.transport == TransportIDUnknown {
 		panic(NewTransportException(types.NOT_SUPPORTED, "no transport specified! Please use thrift.WithHeader() or thrift.WithUpgradeToRocket() in the thrift.NewClient call"))
 	}

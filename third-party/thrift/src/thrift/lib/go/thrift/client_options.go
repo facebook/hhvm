@@ -168,7 +168,13 @@ func NewClient(opts ...ClientOption) (types.Protocol, error) {
 
 	// Important: TLS config must be modified *before* the dialerFn below is called.
 	if options.tlsConfig != nil {
-		AddALPNForTransport(options.tlsConfig)
+		// Set ALPN based on transport
+		switch options.transport {
+		case TransportIDRocket:
+			options.tlsConfig.NextProtos = []string{"rs"}
+		default:
+			options.tlsConfig.NextProtos = []string{"thrift"}
+		}
 	}
 
 	var conn net.Conn

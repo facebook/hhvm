@@ -419,12 +419,6 @@ void mutate_inject_metadata_fields(
   }
 }
 
-void set_generated(sema_context&, mutator_context&, t_named& node) {
-  if (node.find_structured_annotation_or_null(kSetGeneratedUri)) {
-    node.set_generated();
-  }
-}
-
 void lower_deprecated_annotations(
     sema_context& ctx, mutator_context&, t_named& node) {
   if (auto cnst = node.find_structured_annotation_or_null(
@@ -578,7 +572,6 @@ std::vector<ast_mutator> standard_mutators() {
   initial.add_field_visitor(&lower_type_annotations<t_field>);
   initial.add_typedef_visitor(&lower_type_annotations<t_typedef>);
   initial.add_function_visitor(&normalize_return_type);
-  initial.add_named_visitor(&set_generated);
   initial.add_named_visitor(&lower_deprecated_annotations);
   mutators.push_back(std::move(initial));
 

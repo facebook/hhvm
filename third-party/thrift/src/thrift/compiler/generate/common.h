@@ -40,13 +40,19 @@ std::vector<std::string> split_namespace(const std::string& s);
  */
 std::unordered_set<const t_type*> collect_types(const t_structured* strct);
 
-/**
- * Return whether to generate legacy apis
- */
-bool generate_legacy_api(const t_program&);
-bool generate_legacy_api(const t_structured&);
-bool generate_legacy_api(const t_enum&);
-bool generate_legacy_api(const t_service&);
+// Returns whether to generate legacy APIs. DEPRECATED!
+inline bool generate_legacy_api(const t_program&) {
+  return true;
+}
+inline bool generate_legacy_api(const t_structured&) {
+  return true;
+}
+inline bool generate_legacy_api(const t_enum&) {
+  return true;
+}
+inline bool generate_legacy_api(const t_service&) {
+  return true;
+}
 
 inline std::string get_escaped_string(std::string_view str) {
   std::string escaped;

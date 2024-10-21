@@ -18,7 +18,7 @@
 
 namespace apache::thrift::compiler {
 
-// thrift
+// Thrift:
 inline constexpr auto kBitmaskEnumUri =
     "facebook.com/thrift/annotation/BitmaskEnum";
 inline constexpr auto kBoxUri = "facebook.com/thrift/annotation/Box";
@@ -31,13 +31,10 @@ inline constexpr auto kExceptionMessageUri =
 inline constexpr auto kInjectMetadataFieldsUri =
     "facebook.com/thrift/annotation/InjectMetadataFields";
 inline constexpr auto kMixinUri = "facebook.com/thrift/annotation/Mixin";
-inline constexpr auto kNoLegacyUri = "facebook.com/thrift/annotation/NoLegacy";
 inline constexpr auto kReserveIdsUri =
     "facebook.com/thrift/annotation/ReserveIds";
 inline constexpr auto kSerializeInFieldIdOrderUri =
     "facebook.com/thrift/annotation/SerializeInFieldIdOrder";
-inline constexpr auto kSetGeneratedUri =
-    "facebook.com/thrift/annotation/SetGenerated";
 inline constexpr auto kSchemaAnnotationUri =
     "facebook.com/thrift/annotation/Schema";
 inline constexpr auto kTerseWriteUri =
@@ -54,7 +51,7 @@ inline constexpr auto kAllowReservedIdentifierUri =
 inline constexpr auto kAllowReservedFilenameUri =
     "facebook.com/thrift/annotation/AllowReservedFilename";
 
-// scope
+// Scope:
 inline constexpr auto kScopeProgramUri =
     "facebook.com/thrift/annotation/Program";
 inline constexpr auto kScopeStructUri = "facebook.com/thrift/annotation/Struct";
@@ -75,11 +72,11 @@ inline constexpr auto kScopeEnumValueUri =
     "facebook.com/thrift/annotation/EnumValue";
 inline constexpr auto kScopeConstUri = "facebook.com/thrift/annotation/Const";
 
-// compatibility
+// Compatibility (unimplemented):
 inline constexpr auto kStringsUri = "facebook.com/thrift/annotation/Strings";
 inline constexpr auto kEnumsUri = "facebook.com/thrift/annotation/Enums";
 
-// cpp
+// C++:
 inline constexpr auto kCppAdapterUri =
     "facebook.com/thrift/annotation/cpp/Adapter";
 inline constexpr auto kCppDisableLazyChecksumUri =
@@ -109,7 +106,7 @@ inline constexpr auto kCppProcessInEbThreadUri =
 inline constexpr auto kCppGenerateDeprecatedHeaderClientMethodsUri =
     "facebook.com/thrift/annotation/cpp/GenerateDeprecatedHeaderClientMethods";
 
-// java
+// Java:
 inline constexpr auto kJavaMutableUri =
     "facebook.com/thrift/annotation/java/Mutable";
 inline constexpr auto kJavaAnnotationUri =
@@ -125,7 +122,7 @@ inline constexpr auto kJavaFieldUseUnmangledNameUri =
 inline constexpr auto kJavaUseIntrinsicDefaultUri =
     "facebook.com/thrift/annotation/java/UseIntrinsicDefault";
 
-// python
+// Python:
 inline constexpr auto kPythonAdapterUri =
     "facebook.com/thrift/annotation/python/Adapter";
 inline constexpr auto kPythonPy3HiddenUri =
@@ -139,7 +136,7 @@ inline constexpr auto kPythonNameUri =
 inline constexpr auto kUseCAPIUri =
     "facebook.com/thrift/annotation/python/UseCAPI";
 
-// hack
+// Hack:
 inline constexpr auto kHackAdapterUri =
     "facebook.com/thrift/annotation/hack/Adapter";
 inline constexpr auto kHackAttributeUri =
@@ -160,13 +157,8 @@ inline constexpr auto kHackWrapperUri =
 inline constexpr auto kHackModuleInternalUri =
     "facebook.com/thrift/annotation/hack/ModuleInternal";
 
-// go
+// Go:
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
 inline constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
-
-inline constexpr auto kGeneratePatchUri =
-    "facebook.com/thrift/op/GeneratePatch";
-inline constexpr auto kAssignOnlyPatchUri =
-    "facebook.com/thrift/op/AssignOnlyPatch";
 
 } // namespace apache::thrift::compiler

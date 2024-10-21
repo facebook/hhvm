@@ -115,13 +115,18 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 
 // DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.
 func DialTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
+	clonedTLSConfig := tlsConfig.Clone()
+	AddALPNForTransport(clonedTLSConfig)
+	return dialWithTLS(addr, dialTimeout, clonedTLSConfig)
+}
+
+// This is an internal helper to dial with TLS.
+func dialWithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
 	conn, err := net.DialTimeout("tcp", addr, dialTimeout)
 	if err != nil {
 		return nil, err
 	}
-	config := tlsConfig.Clone()
-	AddALPNForTransport(config)
-	return tls.Client(conn, config), nil
+	return tls.Client(conn, tlsConfig), nil
 }
 
 func newDefaultPersistentHeaders() map[string]string {

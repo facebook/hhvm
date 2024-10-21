@@ -35,65 +35,58 @@ type clientOptions struct {
 }
 
 // ClientOption is a single configuration setting for the thrift client
-type ClientOption func(*clientOptions) error
+type ClientOption func(*clientOptions)
 
 // NoTimeout is a special value for WithTimeout that disables timeouts.
 const NoTimeout = time.Duration(0)
 
 // WithProtocolID sets protocol to given protocolID
 func WithProtocolID(id types.ProtocolID) ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.protocol = id
-		return nil
 	}
 }
 
 // WithHeader sets the transport to Header, protocol Header is implied here.
 func WithHeader() ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.transport = TransportIDHeader
-		return nil
 	}
 }
 
 // WithUpgradeToRocket sets the protocol UpgradeToRocket is implied here.
 func WithUpgradeToRocket() ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.transport = TransportIDUpgradeToRocket
-		return nil
 	}
 }
 
 // Deprecated: Use WithUpgradeToRocket. This is only used for testing purposes.
 func WithRocket() ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.transport = TransportIDRocket
-		return nil
 	}
 }
 
 // WithPersistentHeader sets a Header persistent info value
 func WithPersistentHeader(name, value string) ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.persistentHeaders[name] = value
-		return nil
 	}
 }
 
 // WithIdentity sets the Header identity field
 func WithIdentity(name string) ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.persistentHeaders[IdentityHeader] = name
-		return nil
 	}
 }
 
 // WithDialer specifies the remote connection that the thrift
 // client should connect to should be resolved via the given function
 func WithDialer(d func() (net.Conn, error)) ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.dialerFn = d
-		return nil
 	}
 }
 
@@ -102,9 +95,8 @@ func WithDialer(d func() (net.Conn, error)) ClientOption {
 // this timeout is not a connection timeout as it is
 // not honored during Dial operation.
 func WithTimeout(ioTimeout time.Duration) ClientOption {
-	return func(opts *clientOptions) error {
+	return func(opts *clientOptions) {
 		opts.ioTimeout = ioTimeout
-		return nil
 	}
 }
 
@@ -150,9 +142,7 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 		persistentHeaders: newDefaultPersistentHeaders(),
 	}
 	for _, opt := range opts {
-		if err := opt(res); err != nil {
-			return nil, err
-		}
+		opt(res)
 	}
 
 	if res.dialerFn != nil {

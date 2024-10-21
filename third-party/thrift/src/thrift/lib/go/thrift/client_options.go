@@ -29,12 +29,15 @@ type clientOptions struct {
 	conn              net.Conn
 	transport         TransportID
 	protocol          types.ProtocolID
-	timeout           time.Duration
+	ioTimeout         time.Duration // Read/Write timeout
 	persistentHeaders map[string]string
 }
 
 // ClientOption is a single configuration setting for the thrift client
 type ClientOption func(*clientOptions) error
+
+// NoTimeout is a special value for WithTimeout that disables timeouts.
+const NoTimeout = time.Duration(0)
 
 // WithProtocolID sets protocol to given protocolID
 func WithProtocolID(id types.ProtocolID) ClientOption {
@@ -101,9 +104,9 @@ func WithDialer(d func() (net.Conn, error)) ClientOption {
 // (see https://golang.org/pkg/net/#Conn). Note that
 // this timeout is not a connection timeout as it is
 // not honored during Dial operation.
-func WithTimeout(timeout time.Duration) ClientOption {
+func WithTimeout(ioTimeout time.Duration) ClientOption {
 	return func(opts *clientOptions) error {
-		opts.timeout = timeout
+		opts.ioTimeout = ioTimeout
 		return nil
 	}
 }
@@ -115,9 +118,6 @@ func WithConn(conn net.Conn) ClientOption {
 		return nil
 	}
 }
-
-// NoTimeout is a special value for WithTimeout that disables timeouts.
-const NoTimeout = time.Duration(0)
 
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
 func WithTLS(addr string, timeout time.Duration, tlsConfig *tls.Config) ClientOption {
@@ -156,6 +156,7 @@ func newOptions(opts ...ClientOption) (*clientOptions, error) {
 	res := &clientOptions{
 		protocol:          types.ProtocolIDCompact,
 		transport:         TransportIDUnknown,
+		ioTimeout:         NoTimeout,
 		persistentHeaders: newDefaultPersistentHeaders(),
 	}
 	for _, opt := range opts {
@@ -179,11 +180,11 @@ func NewClient(opts ...ClientOption) (types.Protocol, error) {
 	}
 	switch options.transport {
 	case TransportIDHeader:
-		return newHeaderProtocol(options.conn, options.protocol, options.timeout, options.persistentHeaders)
+		return newHeaderProtocol(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDRocket:
-		return newRocketClient(options.conn, options.protocol, options.timeout, options.persistentHeaders)
+		return newRocketClient(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketClient(options.conn, options.protocol, options.timeout, options.persistentHeaders)
+		return newUpgradeToRocketClient(options.conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}

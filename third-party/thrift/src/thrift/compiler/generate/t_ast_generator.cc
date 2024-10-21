@@ -27,7 +27,7 @@
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/generate/const_util.h>
 #include <thrift/compiler/generate/t_generator.h>
-#include <thrift/compiler/lib/schematizer.h>
+#include <thrift/compiler/sema/schematizer.h>
 
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/op/Sha256Hasher.h>
@@ -36,6 +36,8 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types_custom_protocol.h>
+
+using apache::thrift::compiler::detail::schematizer;
 
 namespace apache::thrift::compiler {
 namespace {
@@ -92,7 +94,7 @@ class t_ast_generator : public t_generator {
       } else if (pair.first == "source_ranges") {
         schema_opts_.source_ranges_ = true;
       } else if (pair.first == "no_backcompat") {
-        schema_opts_.include.reset(schematizer::included_data::DoubleWrites);
+        schema_opts_.include.reset(schematizer::included_data::double_writes);
       } else if (pair.first == "use_hash") {
         schema_opts_.use_hash = true;
       } else if (pair.first == "root_program_only") {
@@ -157,11 +159,11 @@ type::Schema t_ast_generator::gen_schema(
       } else {
         ast.valuesMap()->insert({key, std::move(value)});
       }
-      return static_cast<t_program::value_id>(key);
+      return static_cast<schematizer::value_id>(key);
     }
 
     auto& values = ast.values().value();
-    auto ret = positionToId<t_program::value_id>(values.size());
+    auto ret = positionToId<schematizer::value_id>(values.size());
     values.push_back(std::move(value));
     return ret;
   };
@@ -253,8 +255,8 @@ type::Schema t_ast_generator::gen_schema(
     hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
     programs.back().id() = program_id;
     if (program.has_doc() &&
-        schema_opts.include.test(schematizer::included_data::Docs) &&
-        schema_opts.include.test(schematizer::included_data::SourceRanges)) {
+        schema_opts.include.test(schematizer::included_data::docs) &&
+        schema_opts.include.test(schematizer::included_data::source_ranges)) {
       programs.back().attrs()->docs()->sourceRange() =
           src_range(program.doc_range(), program);
     }
@@ -272,7 +274,7 @@ type::Schema t_ast_generator::gen_schema(
 
     // Double write to deprecated externed path. (T161963504)
     // The new path is populated in the Program struct by the schematizer.
-    if (schema_opts.include.test(schematizer::included_data::DoubleWrites)) {
+    if (schema_opts.include.test(schematizer::included_data::double_writes)) {
       type::SourceInfo info;
       info.fileName() = source_mgr.found_include_file(program.path())
                             .value_or(program.path());
@@ -311,7 +313,7 @@ type::Schema t_ast_generator::gen_schema(
         positionToId<apache::thrift::type::DefinitionId>(pos);
     auto& def = kind_ref_fn(definitions.emplace_back()).ensure();
     hydrate_const(def, *schema_source.gen_schema(node));
-    if (schema_opts.include.test(schematizer::included_data::SourceRanges)) {
+    if (schema_opts.include.test(schematizer::included_data::source_ranges)) {
       set_source_range(node, *def.attrs());
       set_child_source_ranges(node, def);
     }
@@ -540,7 +542,7 @@ std::string gen_schema(
 }
 
 static bool register_schema_generation = []() {
-  detail::pluggable_functions().set<GetSchemaTag>(gen_schema);
+  detail::pluggable_functions().set<detail::get_schema_tag>(gen_schema);
   return true;
 }();
 } // namespace

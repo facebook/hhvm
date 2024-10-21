@@ -24,8 +24,8 @@
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>
 
@@ -523,15 +523,16 @@ void lower_type_annotations(
 }
 
 void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
-  schematizer::options opts;
+  detail::schematizer::options opts;
   opts.only_root_program_ = true;
   opts.use_hash = true;
-  opts.include.reset(schematizer::included_data::DoubleWrites);
-  opts.include.reset(schematizer::included_data::Docs);
-  opts.include.reset(schematizer::included_data::SourceRanges);
+  opts.include.reset(detail::schematizer::included_data::double_writes);
+  opts.include.reset(detail::schematizer::included_data::docs);
+  opts.include.reset(detail::schematizer::included_data::source_ranges);
 
-  std::string serialized = detail::pluggable_functions().call<GetSchemaTag>(
-      opts, ctx.source_mgr(), prog);
+  std::string serialized =
+      detail::pluggable_functions().call<detail::get_schema_tag>(
+          opts, ctx.source_mgr(), prog);
   if (serialized.empty()) {
     throw std::runtime_error(
         "Enabling --inject-schema-const requires using thrift2ast");
@@ -540,7 +541,7 @@ void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   auto cnst = std::make_unique<t_const>(
       &prog,
       t_primitive_type::t_binary(),
-      schematizer::name_schema(ctx.source_mgr(), prog),
+      detail::schematizer::name_schema(ctx.source_mgr(), prog),
       std::make_unique<t_const_value>(std::move(serialized)));
   // Since schema injection happens after 'match_const_type_with_value' mutator
   // we need to set the explicitly type to binary here.

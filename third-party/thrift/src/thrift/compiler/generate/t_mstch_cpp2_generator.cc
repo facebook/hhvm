@@ -34,10 +34,12 @@
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/schematizer.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/ast_validator.h>
+#include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/sema/sema_context.h>
+
+using apache::thrift::compiler::detail::schematizer;
 
 namespace apache::thrift::compiler {
 namespace {

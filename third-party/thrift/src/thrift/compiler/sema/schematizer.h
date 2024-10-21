@@ -18,27 +18,36 @@
 
 #include <functional>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include <thrift/compiler/ast/t_const_value.h>
-#include <thrift/compiler/ast/t_enum.h>
-#include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_scope.h>
-#include <thrift/compiler/ast/t_service.h>
-#include <thrift/compiler/ast/t_structured.h>
-#include <thrift/compiler/ast/t_typedef.h>
+#include <thrift/compiler/ast/t_field.h>
 
 namespace apache::thrift::compiler {
+
+class t_enum;
+class t_program;
+class t_scope;
+class t_service;
+class t_structured;
+class t_typedef;
+
+namespace detail {
+
 class schematizer {
  public:
-  using InternFunc = std::function<t_program::value_id(
+  enum class value_id : int64_t {};
+
+  using intern_func = std::function<value_id(
       std::unique_ptr<t_const_value> val, t_program* program)>;
 
   enum class included_data : uint16_t {
-    DoubleWrites = 1, // Legacy copies of data for backcompat
-    Annotations = 2,
-    Docs = 4,
-    SourceRanges = 8,
+    double_writes = 1, // Legacy copies of data for backward compatiblity.
+    annotations = 2,
+    docs = 4,
+    source_ranges = 8,
   };
 
   struct included_data_set {
@@ -48,7 +57,7 @@ class schematizer {
     void set(included_data item) { data |= static_cast<storage>(item); }
     void reset(included_data item) { data &= ~static_cast<storage>(item); }
 
-    // Needed to work around https://github.com/llvm/llvm-project/issues/36032
+    // Needed to work around https://github.com/llvm/llvm-project/issues/36032.
     included_data_set() : data(static_cast<storage>(-1)) {}
 
    private:
@@ -58,7 +67,7 @@ class schematizer {
 
   struct options {
     included_data_set include;
-    InternFunc intern_value;
+    intern_func intern_value;
     bool use_hash = false; // Uses typeHashPrefixSha2_256 in typeUri and
                            // definitionKey instead of definitionId.
     bool include_generated_ = false;
@@ -96,22 +105,26 @@ class schematizer {
   options opts_;
   std::unordered_map<const t_program*, std::string> program_checksums_;
 
-  t_type_ref stdType(std::string_view uri);
-  std::unique_ptr<t_const_value> typeUri(const t_type& type);
+  t_type_ref std_type(std::string_view uri);
+  std::unique_ptr<t_const_value> type_uri(const t_type& type);
+
   void add_definition(
       t_const_value& schema,
       const t_named& node,
       const t_program* program,
-      schematizer::InternFunc& intern_value);
+      intern_func& intern_value);
+
   std::unique_ptr<t_const_value> gen_type(
       schematizer* generator,
       const t_program* program,
       t_const_value* defns_schema,
       const t_type& type);
+
   std::unique_ptr<t_const_value> gen_type(
       const t_type& type, const t_program* program) {
     return gen_type(nullptr, program, nullptr, type);
   }
+
   void add_fields(
       schematizer* generator,
       const t_program* program,
@@ -119,25 +132,27 @@ class schematizer {
       t_const_value& schema,
       const std::string& fields_name,
       node_list_view<const t_field> fields,
-      schematizer::InternFunc& intern_value);
+      intern_func& intern_value);
+
   std::string_view program_checksum(const t_program& program);
 };
 
-// Turns a t_const_value holding some value V into a t_const_value holding a
-// protocol.Value representing V.
-// Currently only uses bool/i64/double/string/list/map.
-// TODO: allow increasing type fidelity.
+// Turns a t_const_value holding some value into a t_const_value holding a
+// protocol.Value representing this value. Currently only supports bool, i64,
+// double, string, list and map.
 std::unique_ptr<t_const_value> wrap_with_protocol_value(
     const t_const_value& value, t_type_ref ttype);
 
-// Tag for obtaining a compact-encoded schema for the root program via pluggable
-// function.
-struct GetSchemaTag {
-  static std::string defaultImpl(
+// Tag for obtaining a compact-encoded schema for the root program via a
+// pluggable function.
+struct get_schema_tag {
+  static std::string default_impl(
       schematizer::options& /* schema_opts */,
       source_manager& /* source_mgr */,
       const t_program& /* root_program */) {
     return {};
   }
 };
+
+} // namespace detail
 } // namespace apache::thrift::compiler

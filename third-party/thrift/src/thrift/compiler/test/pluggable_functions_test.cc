@@ -21,14 +21,14 @@
 using apache::thrift::compiler::detail::pluggable_functions;
 
 namespace {
-struct VoidTag {
-  static void defaultImpl() {}
+struct void_tag {
+  static void default_impl() {}
 };
-struct IntTag {
-  static int defaultImpl(int) { return 0; }
+struct int_tag {
+  static int default_impl(int) { return 0; }
 };
 
-int countCalls(bool reset = false) {
+int count_calls(bool reset = false) {
   static int calls = 0;
   if (reset) {
     calls = -1;
@@ -39,19 +39,19 @@ int countCalls(bool reset = false) {
 
 TEST(PluggableFunctionsTest, unset) {
   auto& funcs = pluggable_functions();
-  funcs.call<VoidTag>();
-  EXPECT_EQ(0, funcs.call<IntTag>(42));
+  funcs.call<void_tag>();
+  EXPECT_EQ(0, funcs.call<int_tag>(42));
 }
 
 TEST(PluggableFunctionsTest, set) {
-  countCalls(true); // reset
+  count_calls(true); // reset
   auto& funcs = pluggable_functions();
-  auto* voidfn = +[] { countCalls(); };
-  funcs.set<VoidTag>(voidfn);
-  funcs.call<VoidTag>();
-  EXPECT_EQ(countCalls(), 2);
+  auto* voidfn = +[] { count_calls(); };
+  funcs.set<void_tag>(voidfn);
+  funcs.call<void_tag>();
+  EXPECT_EQ(count_calls(), 2);
 
   auto* intfn = +[](int x) { return x; };
-  funcs.set<IntTag>(intfn);
-  EXPECT_EQ(42, funcs.call<IntTag>(42));
+  funcs.set<int_tag>(intfn);
+  EXPECT_EQ(42, funcs.call<int_tag>(42));
 }

@@ -103,7 +103,6 @@ add_library(
   compiler_lib
   STATIC
 
-  lib/schematizer.cc
   parse/lexer.cc
   parse/lexer.h
   parse/parser.cc
@@ -116,6 +115,7 @@ add_library(
   sema/explicit_include_validator.cc
   sema/scope_validator.cc
   sema/sema.cc
+  sema/schematizer.cc
   sema/standard_validator.cc
 )
 target_link_libraries(

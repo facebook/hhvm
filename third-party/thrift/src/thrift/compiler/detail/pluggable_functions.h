@@ -39,7 +39,7 @@ namespace apache::thrift::compiler::detail {
  */
 class pluggable_function_set {
   template <typename Tag>
-  using signature = decltype(Tag::defaultImpl);
+  using signature = decltype(Tag::default_impl);
 
  public:
   template <typename Tag>
@@ -65,7 +65,7 @@ class pluggable_function_set {
     if (auto fn = funcs.find(id); fn != funcs.end()) {
       return reinterpret_cast<signature<Tag>*>(fn->second);
     }
-    return Tag::defaultImpl;
+    return Tag::default_impl;
   }
 };
 

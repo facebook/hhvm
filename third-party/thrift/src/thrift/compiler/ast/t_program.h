@@ -270,8 +270,6 @@ class t_program : public t_named {
     return scope_name(node.name());
   }
 
-  enum class value_id : int64_t {};
-
  private:
   t_package package_;
 

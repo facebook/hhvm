@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/schematizer.h>
+#include <thrift/compiler/sema/schematizer.h>
 
-#include <memory>
-#include <unordered_map>
-#include <utility>
 #include <folly/portability/GTest.h>
-#include <thrift/compiler/ast/t_const.h>
-#include <thrift/compiler/ast/t_function.h>
-#include <thrift/compiler/ast/t_map.h>
-#include <thrift/compiler/ast/t_paramlist.h>
-#include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_struct.h>
 
-namespace apache::thrift::compiler {
+using apache::thrift::compiler::t_const_value;
+using apache::thrift::compiler::detail::wrap_with_protocol_value;
 
-TEST(SchematizerTest, WrapWithProtocolValue) {
+TEST(SchematizerTest, wrap_with_protocol_value) {
   t_const_value str("foo");
   auto value = wrap_with_protocol_value(str, {});
   auto map = value->get_map();
   EXPECT_EQ(map.at(0).first->get_string(), "stringValue");
   EXPECT_EQ(map.at(0).second->get_string(), "foo");
 }
-
-} // namespace apache::thrift::compiler

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/sema/schematizer.h>
+
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -22,17 +24,21 @@
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+
 #include <thrift/compiler/ast/t_const.h>
+#include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
+#include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/lib/schematizer.h>
 
-namespace apache::thrift::compiler {
+namespace apache::thrift::compiler::detail {
 namespace {
+
 template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
@@ -56,12 +62,12 @@ std::string uri_or_name(const t_named& node) {
 }
 } // namespace
 
-t_type_ref schematizer::stdType(std::string_view uri) {
+t_type_ref schematizer::std_type(std::string_view uri) {
   return t_type_ref::from_req_ptr(
       static_cast<const t_type*>(scope_.find_by_uri(uri)));
 }
 
-std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
+std::unique_ptr<t_const_value> schematizer::type_uri(const t_type& type) {
   auto ret = t_const_value::make_map();
   if (opts_.use_hash) {
     ret->add_map(val("definitionKey"), val(identify_definition(type)));
@@ -70,9 +76,7 @@ std::unique_ptr<t_const_value> schematizer::typeUri(const t_type& type) {
   } else {
     ret->add_map(val("scopedName"), val(type.get_scoped_name()));
   }
-  static const std::string kTypeUriUri = "facebook.com/thrift/type/TypeUri";
-  auto typeUri_ttype = stdType(kTypeUriUri);
-  ret->set_ttype(typeUri_ttype);
+  ret->set_ttype(std_type("facebook.com/thrift/type/TypeUri"));
   return ret;
 }
 
@@ -80,7 +84,7 @@ void schematizer::add_definition(
     t_const_value& schema,
     const t_named& node,
     const t_program* program,
-    schematizer::InternFunc& intern_value) {
+    intern_func& intern_value) {
   auto definition = t_const_value::make_map();
   definition->add_map(val("name"), val(node.name()));
   if (!node.uri().empty()) {
@@ -93,16 +97,15 @@ void schematizer::add_definition(
   }
 
   if (auto structured = node.structured_annotations();
-      !structured.empty() && opts_.include.test(included_data::Annotations)) {
+      !structured.empty() && opts_.include.test(included_data::annotations)) {
     auto annots = t_const_value::make_map();
     auto structured_annots = t_const_value::make_list();
 
     for (const auto& item : structured) {
       auto annot = t_const_value::make_map();
       if (!item.value()->is_empty()) {
-        static const std::string kProtocolValueUri =
-            "facebook.com/thrift/protocol/Value";
-        auto protocol_value_ttype = stdType(kProtocolValueUri);
+        auto protocol_value_ttype =
+            std_type("facebook.com/thrift/protocol/Value");
         auto fields = t_const_value::make_map();
         for (const auto& pair : item.value()->get_map()) {
           fields->add_map(
@@ -113,23 +116,23 @@ void schematizer::add_definition(
       }
 
       // Double write to deprecated externed path. (T161963504)
-      if (opts_.include.test(included_data::DoubleWrites)) {
+      if (opts_.include.test(included_data::double_writes)) {
         auto structured_annot = annot->clone();
         structured_annot->set_ttype(
-            stdType("facebook.com/thrift/type/StructuredAnnotation"));
-        structured_annot->add_map(val("type"), typeUri(*item.type()));
+            std_type("facebook.com/thrift/type/StructuredAnnotation"));
+        structured_annot->add_map(val("type"), type_uri(*item.type()));
 
         auto id = intern_value(
             std::move(structured_annot), const_cast<t_program*>(program));
         structured_annots->add_list(val(id));
       }
 
-      annot->set_ttype(stdType("facebook.com/thrift/type/Annotation"));
+      annot->set_ttype(std_type("facebook.com/thrift/type/Annotation"));
       annots->add_map(val(uri_or_name(*item.type())), std::move(annot));
     }
 
-    // Double write to deprecated externed path. (T161963504)
-    if (opts_.include.test(included_data::DoubleWrites)) {
+    // Double write to deprecated externed path (T161963504).
+    if (opts_.include.test(included_data::double_writes)) {
       definition->add_map(
           val("structuredAnnotations"), std::move(structured_annots));
     }
@@ -137,7 +140,7 @@ void schematizer::add_definition(
   }
 
   if (auto unstructured = node.annotations();
-      !unstructured.empty() && opts_.include.test(included_data::Annotations)) {
+      !unstructured.empty() && opts_.include.test(included_data::annotations)) {
     auto annots = t_const_value::make_map();
 
     for (const auto& pair : unstructured) {
@@ -147,7 +150,7 @@ void schematizer::add_definition(
     definition->add_map(val("unstructuredAnnotations"), std::move(annots));
   }
 
-  if (node.has_doc() && opts_.include.test(included_data::Docs)) {
+  if (node.has_doc() && opts_.include.test(included_data::docs)) {
     auto docs = t_const_value::make_map();
     docs->add_map(val("contents"), val(node.doc()));
     definition->add_map(val("docs"), std::move(docs));
@@ -184,7 +187,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
       continue;
     }
 
-    type_name->add_map(val("typedefType"), typeUri(*resolved_type));
+    type_name->add_map(val("typedefType"), type_uri(*resolved_type));
     schema->add_map(val("name"), std::move(type_name));
     return schema;
   }
@@ -254,7 +257,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
             generator->gen_schema(static_cast<const t_enum&>(*resolved_type));
         add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
-      type_name->add_map(val("enumType"), typeUri(*resolved_type));
+      type_name->add_map(val("enumType"), type_uri(*resolved_type));
       break;
     }
     case t_type::type::t_structured: {
@@ -285,7 +288,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
               return "structType";
             }
           }()),
-          typeUri(*resolved_type));
+          type_uri(*resolved_type));
       break;
     }
     default:
@@ -398,7 +401,7 @@ void schematizer::add_fields(
     t_const_value& schema,
     const std::string& fields_name,
     node_list_view<const t_field> fields,
-    schematizer::InternFunc& intern_value) {
+    intern_func& intern_value) {
   auto fields_schema = t_const_value::make_list();
 
   const auto* field_qualifier_enum =
@@ -529,7 +532,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
     if (const auto& interaction = func.interaction()) {
       auto ref = t_const_value::make_map();
-      ref->add_map(val("uri"), typeUri(*interaction));
+      ref->add_map(val("uri"), type_uri(*interaction));
       func_schema->add_map(val("interactionType"), std::move(ref));
     }
     if (func.has_return_type()) {
@@ -542,7 +545,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         func_schema->add_map(
             val("returnType"), gen_type(*type, node.program()));
         // Double write of return type for backwards compatibility (T161963504).
-        if (opts_.include.test(included_data::DoubleWrites)) {
+        if (opts_.include.test(included_data::double_writes)) {
           auto return_types_schema = t_const_value::make_list();
           auto schema = t_const_value::make_map();
           schema->add_map(val("thriftType"), gen_type(*type, node.program()));
@@ -630,7 +633,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
   if (auto parent = node.extends()) {
     auto ref = t_const_value::make_map();
-    ref->add_map(val("uri"), typeUri(*parent));
+    ref->add_map(val("uri"), type_uri(*parent));
     svc_schema->add_map(val("baseService"), std::move(ref));
   }
 
@@ -776,8 +779,8 @@ std::string schematizer::identify_definition(const t_named& node) {
       node.program()->path(),
       node.name());
   SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
-  constexpr size_t kBytes = 16;
-  return std::string(reinterpret_cast<const char*>(hash), kBytes);
+  constexpr size_t num_bytes = 16;
+  return std::string(reinterpret_cast<const char*>(hash), num_bytes);
 }
 
 int64_t schematizer::identify_program(const t_program& node) {
@@ -800,4 +803,4 @@ std::string schematizer::name_schema(
       "_fbthrift_schema_{:x}", static_cast<uint64_t>(s.identify_program(node)));
 }
 
-} // namespace apache::thrift::compiler
+} // namespace apache::thrift::compiler::detail

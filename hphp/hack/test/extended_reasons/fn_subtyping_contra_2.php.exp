@@ -34,7 +34,7 @@ File fn_subtyping_contra_2.php, line 7, character 36 - line 7, character 40:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -61,7 +61,7 @@ File fn_subtyping_contra_2.php, line 8, character 3 - line 8, character 11:
  9 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -115,7 +115,7 @@ File fn_subtyping_contra_2.php, line 6, character 16 - line 6, character 54:
  9 | }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -143,7 +143,7 @@ File fn_subtyping_contra_2.php, line 7, character 26 - line 7, character 48:
  9 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

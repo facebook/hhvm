@@ -41,7 +41,7 @@ File num.php, line 3, character 14 - line 3, character 16:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -77,7 +77,7 @@ File num.php, line 3, character 23 - line 3, character 28:
  6 |   $x = $x + 5;
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a num type so next I checked the subtype constraint is satisfied for both the int and float parts.
 
@@ -155,7 +155,7 @@ File num.php, line 3, character 14 - line 3, character 16:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -191,7 +191,7 @@ File num.php, line 3, character 23 - line 3, character 28:
  6 |   $x = $x + 5;
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a num type so next I checked the subtype constraint is satisfied for both the int and float parts.
 

@@ -29,7 +29,7 @@ File newtype1.php--file1.php, line 3, character 18 - line 3, character 20:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -54,7 +54,7 @@ File newtype1.php--file2.php, line 8, character 10 - line 8, character 24:
  9 | }
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -112,7 +112,7 @@ File newtype1.php--file2.php, line 3, character 22 - line 3, character 25:
  5 | }
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 

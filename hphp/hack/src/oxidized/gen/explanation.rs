@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<285c92c019a76c84a7bf4bd6481db186>>
+// @generated SignedSource<<1d1f0a478bdb1d77def7ba232d5dadf3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub enum Elem<Pos> {
     #[rust_to_ocaml(name = "Witness_no_pos")]
     WitnessNoPos(String),
     Rule(String),
-    Path(String, bool),
+    Step(String, bool),
     Trans(String),
     Prefix {
         prefix: String,

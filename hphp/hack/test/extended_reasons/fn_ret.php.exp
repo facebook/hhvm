@@ -31,7 +31,7 @@ File fn_ret.php, line 3, character 17 - line 3, character 19:
 Here's why:
 
 
-  Step 1 of 1                    (here is where the error occurred) 
+  Step 1 of 1                                 (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 

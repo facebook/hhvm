@@ -36,7 +36,7 @@ File refinment_is.php, line 7, character 19 - line 7, character 19:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -102,7 +102,7 @@ File refinment_is.php, line 5, character 7 - line 5, character 7:
 10 |   } else {
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -163,7 +163,7 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
 10 |   } else {
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
@@ -274,7 +274,7 @@ File refinment_is.php, line 8, character 6 - line 8, character 12:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -340,7 +340,7 @@ File refinment_is.php, line 5, character 7 - line 5, character 7:
 10 |   } else {
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -438,7 +438,7 @@ File refinment_is.php, line 8, character 12 - line 8, character 12:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -504,7 +504,7 @@ File refinment_is.php, line 5, character 7 - line 5, character 7:
 10 |   } else {
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -565,7 +565,7 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
 10 |   } else {
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 

@@ -29,7 +29,7 @@ File workplace_invariant.php, line 15, character 25 - line 15, character 27:
 Here's why:
 
 
-  Step 1 of 5                                                      
+  Step 1 of 5                                                                   
 
 I started by checking this subtype relationship.
 
@@ -77,7 +77,7 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 (its definition was given above)
 
 
-  Step 2 of 5                                                      
+  Step 2 of 5                                                                   
 
 classname is a newtype so next I checked the 1st type arguments.
 
@@ -122,7 +122,7 @@ File workplace_invariant.php, line 3, character 11 - line 3, character 13:
  5 | }
 
 
-  Step 3 of 5                                                      
+  Step 3 of 5                                                                   
 
 The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
@@ -148,7 +148,7 @@ File workplace_invariant.php, line 15, character 43 - line 15, character 49:
  17 | }
 
 
-  Step 4 of 5                                                      
+  Step 4 of 5                                                                   
 
 bar is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.
@@ -174,7 +174,7 @@ File workplace_invariant.php, line 8, character 32 - line 8, character 34:
 11 |   }
 
 
-  Step 5 of 5                    (here is where the error occurred) 
+  Step 5 of 5                                 (here is where the error occurred) 
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
@@ -237,7 +237,7 @@ File workplace_invariant.php, line 15, character 47 - line 15, character 48:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -285,7 +285,7 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 (its definition was given above)
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 classname is a newtype so next I checked the 1st type arguments.
 
@@ -330,7 +330,7 @@ File workplace_invariant.php, line 3, character 11 - line 3, character 13:
  5 | }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
@@ -356,7 +356,7 @@ File workplace_invariant.php, line 15, character 43 - line 15, character 49:
  17 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 bar is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.
@@ -422,7 +422,7 @@ File workplace_invariant.php, line 8, character 32 - line 8, character 34:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -470,7 +470,7 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 (its definition was given above)
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 classname is a newtype so next I checked the 1st type arguments.
 
@@ -515,7 +515,7 @@ File workplace_invariant.php, line 3, character 11 - line 3, character 13:
  5 | }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
@@ -541,7 +541,7 @@ File workplace_invariant.php, line 15, character 43 - line 15, character 49:
  17 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 bar is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.

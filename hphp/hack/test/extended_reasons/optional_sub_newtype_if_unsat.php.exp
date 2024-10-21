@@ -35,7 +35,7 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 Here's why:
 
 
-  Step 1 of 5                                                      
+  Step 1 of 5                                                                   
 
 I started by checking this subtype relationship.
 
@@ -64,7 +64,7 @@ File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 
  9 | }
 
 
-  Step 2 of 5                                                      
+  Step 2 of 5                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -132,7 +132,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 3 of 5                                                      
+  Step 3 of 5                                                                   
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
@@ -159,7 +159,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 4 of 5                                                      
+  Step 4 of 5                                                                   
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
@@ -214,7 +214,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 5 of 5                    (here is where the error occurred) 
+  Step 5 of 5                                 (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
@@ -277,7 +277,7 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 Here's why:
 
 
-  Step 1 of 5                                                      
+  Step 1 of 5                                                                   
 
 I started by checking this subtype relationship.
 
@@ -306,7 +306,7 @@ File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 
  9 | }
 
 
-  Step 2 of 5                                                      
+  Step 2 of 5                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -374,7 +374,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 3 of 5                                                      
+  Step 3 of 5                                                                   
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
@@ -401,7 +401,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 4 of 5                                                      
+  Step 4 of 5                                                                   
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
@@ -456,7 +456,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 5 of 5                    (here is where the error occurred) 
+  Step 5 of 5                                 (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
@@ -521,7 +521,7 @@ File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -550,7 +550,7 @@ File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 
  9 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -656,7 +656,7 @@ File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -685,7 +685,7 @@ File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 
  9 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -753,7 +753,7 @@ File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character
  5 | function foo(MyThing $_): void {}
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
@@ -810,7 +810,7 @@ File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character
  9 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 

@@ -34,7 +34,7 @@ File fn_subtyping_variadic_1.php, line 6, character 40 - line 6, character 44:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -61,7 +61,7 @@ File fn_subtyping_variadic_1.php, line 8, character 3 - line 8, character 20:
  9 | }
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -115,7 +115,7 @@ File fn_subtyping_variadic_1.php, line 6, character 25 - line 6, character 51:
  9 | }
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 These are function types so next I checked the 2nd function parameter of the subtype and the 1st parameter of the supertype.
 Functions are contravariant in their parameters the direction of the subtype relationship is reversed.

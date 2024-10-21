@@ -12,7 +12,7 @@ type 'pos elem =
   | Witness of ('pos[@hash.ignore]) * string
   | Witness_no_pos of string
   | Rule of string
-  | Path of string * bool
+  | Step of string * bool
   | Trans of string
   | Prefix of {
       prefix: string;
@@ -29,7 +29,7 @@ let map_elem elem ~f =
   | Witness (pos, str) -> Witness (f pos, str)
   | Witness_no_pos str -> Witness_no_pos str
   | Rule rule -> Rule rule
-  | Path (path, is_error) -> Path (path, is_error)
+  | Step (path, is_error) -> Step (path, is_error)
   | Trans trans -> Trans trans
   | Prefix pfx -> Prefix pfx
   | Suffix sfx -> Suffix sfx

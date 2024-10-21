@@ -53,7 +53,7 @@ File vector_invariant_2.php, line 5, character 21 - line 5, character 22:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -84,7 +84,7 @@ File vector_invariant_2.php, line 6, character 2 - line 6, character 8:
  8 | }
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -159,7 +159,7 @@ File vector_invariant_2.php, line 3, character 14 - line 3, character 22:
 (its definition was given above)
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 Vector is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.
@@ -246,7 +246,7 @@ File vector_invariant_2.php, line 5, character 21 - line 5, character 22:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -325,7 +325,7 @@ File vector_invariant_2.php, line 5, character 30 - line 5, character 38:
 (its definition was given above)
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 Vector is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.

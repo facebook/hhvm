@@ -32,9 +32,7 @@ Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the hint.
 
-  Main                                                                    
-
-  [Main] Step 1 of 2                                        
+  [Main] Step 1 of 2                                                            
 
 I started by checking this subtype relationship.
 
@@ -61,7 +59,7 @@ File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
  15 | }
 
 
-  [Main] Step 2 of 2      (here is where the error occurred) 
+  [Main] Step 2 of 2                          (here is where the error occurred) 
 
 These are function types so next I checked the 2nd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -112,9 +110,7 @@ File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
 I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
-  Lower                                                                  
-
-  [Lower] Step 1 of 2                                      
+  [Lower] Step 1 of 2                                                           
 
 I started by checking this subtype relationship.
 
@@ -141,7 +137,7 @@ File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
  15 | }
 
 
-  [Lower] Step 2 of 2                                      
+  [Lower] Step 2 of 2                                                           
 
 These are function types so next I checked the 2nd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -206,9 +202,7 @@ via the generic TB
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
-  Upper                                                                  
-
-  [Upper] Step 1 of 4                                      
+  [Upper] Step 1 of 4                                                           
 
 I started by checking this subtype relationship.
 
@@ -235,7 +229,7 @@ File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
  15 | }
 
 
-  [Upper] Step 2 of 4                                      
+  [Upper] Step 2 of 4                                                           
 
 These are function types so next I checked the 3rd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -297,7 +291,7 @@ File workplace_contravariant.php, line 7, character 5 - line 7, character 20:
 (its definition was given above)
 
 
-  [Upper] Step 3 of 4                                      
+  [Upper] Step 3 of 4                                                           
 
 ISender is a class or interface so next I checked the 2nd type arguments.
 The type parameter is contravariant so the direction of the subtype relationship is reversed.
@@ -325,7 +319,7 @@ File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
  15 | }
 
 
-  [Upper] Step 4 of 4                                      
+  [Upper] Step 4 of 4                                                           
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 

@@ -37,7 +37,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 50 - l
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -66,7 +66,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 3 - l
 11 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -133,7 +133,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 5, character 7 - li
  7 | function rcvr_concrete(B $x): void {}
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
@@ -162,7 +162,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - l
 11 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
@@ -229,7 +229,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 53 - l
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -258,7 +258,7 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 3 - l
 11 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

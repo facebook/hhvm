@@ -37,7 +37,7 @@ File union_subtyping_l.php, line 6, character 19 - line 6, character 19:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -120,7 +120,7 @@ File union_subtyping_l.php, line 4, character 7 - line 4, character 7:
  8 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -196,7 +196,7 @@ File union_subtyping_l.php, line 6, character 23 - line 6, character 23:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -279,7 +279,7 @@ File union_subtyping_l.php, line 4, character 7 - line 4, character 7:
  8 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 

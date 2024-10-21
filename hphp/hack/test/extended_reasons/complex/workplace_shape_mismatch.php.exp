@@ -34,7 +34,7 @@ File workplace_shape_mismatch.php, line 15, character 4 - line 15, character 29:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -61,7 +61,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -144,7 +144,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -192,7 +192,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the _PIRANHA_SANDBOX_QUEUED_ field.
 The field is optional in the subtype but missing in the supertype.
@@ -245,7 +245,7 @@ File workplace_shape_mismatch.php, line 18, character 4 - line 18, character 25:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -272,7 +272,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -355,7 +355,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -403,7 +403,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the async_bulkapi_factor field.
 The field is optional in the subtype but missing in the supertype.
@@ -456,7 +456,7 @@ File workplace_shape_mismatch.php, line 19, character 4 - line 19, character 14:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -483,7 +483,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -566,7 +566,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -614,7 +614,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the devserver field.
 The field is optional in the subtype but missing in the supertype.
@@ -667,7 +667,7 @@ File workplace_shape_mismatch.php, line 14, character 4 - line 14, character 16:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -694,7 +694,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -777,7 +777,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -825,7 +825,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the earlyreturn field.
 The field is optional in the subtype but missing in the supertype.
@@ -896,7 +896,7 @@ File workplace_shape_mismatch.php, line 7, character 4 - line 7, character 18:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -923,7 +923,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -1006,7 +1006,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -1054,7 +1054,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the execute_after field.
 The field is optional in the subtype but missing in the supertype.
@@ -1143,7 +1143,7 @@ File workplace_shape_mismatch.php, line 8, character 4 - line 8, character 19:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -1170,7 +1170,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -1253,7 +1253,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -1301,7 +1301,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the execute_before field.
 The field is optional in the subtype but missing in the supertype.
@@ -1372,7 +1372,7 @@ File workplace_shape_mismatch.php, line 17, character 4 - line 17, character 25:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -1399,7 +1399,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -1482,7 +1482,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -1530,7 +1530,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the execution_push_phase field.
 The field is optional in the subtype but missing in the supertype.
@@ -1583,7 +1583,7 @@ File workplace_shape_mismatch.php, line 9, character 4 - line 9, character 17:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -1610,7 +1610,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -1693,7 +1693,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -1741,7 +1741,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the expire_after field.
 The field is optional in the subtype but missing in the supertype.
@@ -1793,7 +1793,7 @@ File workplace_shape_mismatch.php, line 21, character 4 - line 21, character 19:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -1820,7 +1820,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -1903,7 +1903,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -1951,7 +1951,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the fifo_dedup_key field.
 The field is optional in the subtype but missing in the supertype.
@@ -2003,7 +2003,7 @@ File workplace_shape_mismatch.php, line 20, character 4 - line 20, character 22:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -2030,7 +2030,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -2113,7 +2113,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -2161,7 +2161,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the fifo_ordering_key field.
 The field is optional in the subtype but missing in the supertype.
@@ -2214,7 +2214,7 @@ File workplace_shape_mismatch.php, line 10, character 4 - line 10, character 11:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -2241,7 +2241,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -2324,7 +2324,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -2372,7 +2372,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the region field.
 The field is optional in the subtype but missing in the supertype.
@@ -2425,7 +2425,7 @@ File workplace_shape_mismatch.php, line 16, character 4 - line 16, character 25:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -2452,7 +2452,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -2535,7 +2535,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -2583,7 +2583,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the resource_requirement field.
 The field is optional in the subtype but missing in the supertype.
@@ -2636,7 +2636,7 @@ File workplace_shape_mismatch.php, line 13, character 4 - line 13, character 18:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -2663,7 +2663,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -2746,7 +2746,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -2794,7 +2794,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the retry_attempt field.
 The field is optional in the subtype but missing in the supertype.
@@ -2847,7 +2847,7 @@ File workplace_shape_mismatch.php, line 11, character 4 - line 11, character 19:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -2874,7 +2874,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -2957,7 +2957,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -3005,7 +3005,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the scheduling_uid field.
 The field is optional in the subtype but missing in the supertype.
@@ -3057,7 +3057,7 @@ File workplace_shape_mismatch.php, line 22, character 4 - line 22, character 23:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -3084,7 +3084,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -3167,7 +3167,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -3215,7 +3215,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the send_schedule_cats field.
 The field is optional in the subtype but missing in the supertype.
@@ -3285,7 +3285,7 @@ File workplace_shape_mismatch.php, line 6, character 4 - line 6, character 25:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -3312,7 +3312,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -3395,7 +3395,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -3443,7 +3443,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the serialization_format field.
 The field is optional in the subtype but missing in the supertype.
@@ -3525,7 +3525,7 @@ File workplace_shape_mismatch.php, line 12, character 4 - line 12, character 8:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -3552,7 +3552,7 @@ File workplace_shape_mismatch.php, line 97, character 18 - line 97, character 44
  99 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -3635,7 +3635,7 @@ File workplace_shape_mismatch.php, line 89, character 5 - line 89, character 24:
  92 |   }
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The supertype is a nullable type so next I checked the subtype constraint is satisfied for either the null or non-null part.
 
@@ -3683,7 +3683,7 @@ File workplace_shape_mismatch.php, line 74, character 28 - line 84, character 1:
  87 | class Stuff {
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the tag field.
 The field is optional in the subtype but missing in the supertype.

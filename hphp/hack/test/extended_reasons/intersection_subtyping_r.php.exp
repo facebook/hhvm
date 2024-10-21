@@ -37,7 +37,7 @@ File intersection_subtyping_r.php, line 7, character 18 - line 7, character 18:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -120,7 +120,7 @@ File intersection_subtyping_r.php, line 7, character 26 - line 7, character 32:
  9 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The supertype is an intersection type so next I checked the subtype constraint is satsified for all of its elements.
 

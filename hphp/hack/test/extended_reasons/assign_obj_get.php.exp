@@ -34,7 +34,7 @@ File assign_obj_get.php, line 7, character 26 - line 7, character 30:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -59,7 +59,7 @@ File assign_obj_get.php, line 16, character 3 - line 16, character 9:
  17 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

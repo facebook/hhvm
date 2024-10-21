@@ -17,9 +17,9 @@ let cursor_l = "»"
 
 let cursor_r = "«"
 
-let error_alert = " (here is where the error occurred)"
+let header_cols = 80
 
-let header_cols = 78
+let error_alert = " (here is where the error occurred)"
 
 type merge_result =
   | Only of Pos.t
@@ -56,7 +56,7 @@ let style_elem = Tty.(Normal Green)
 
 let style_cursor = Tty.(Dim Green)
 
-let style_path = Tty.(BoldWithBG (Default, Blue))
+let style_step = Tty.(BoldWithBG (Default, Blue))
 
 let style_alert = Tty.(NormalWithBG (Default, Blue))
 
@@ -207,7 +207,7 @@ let render_reason buf spans (pos, msg) =
   mark_with_context pos ~buf ~spans;
   Buffer.add_string buf "\n"
 
-let render_elem buf spans elem =
+let render_elem buf spans cols elem =
   match elem with
   | Explanation.Witness (pos, msg) ->
     let msg = Markdown_lite.render msg in
@@ -221,21 +221,17 @@ let render_elem buf spans elem =
     Buffer.add_string buf "\n";
     Buffer.add_string buf @@ Tty.apply_color style_rule msg;
     Buffer.add_string buf "\n\n"
-  | Explanation.Path (msg, false) ->
-    let msg = String.pad_right msg ~len:(header_cols - String.length msg - 2) in
-    Buffer.add_string buf "\n";
-    Buffer.add_string buf @@ Tty.apply_color style_alert "  ";
-    Buffer.add_string buf @@ Tty.apply_color style_path msg;
+  | Explanation.Step (msg, false) ->
+    let len = cols - 2 in
+    let msg = String.pad_right msg ~len in
+    Buffer.add_string buf @@ Tty.apply_color style_alert "\n  ";
+    Buffer.add_string buf @@ Tty.apply_color style_step msg;
     Buffer.add_string buf "\n"
-  | Explanation.Path (msg, true) ->
-    let msg =
-      String.pad_right
-        msg
-        ~len:(header_cols - String.length msg - String.length error_alert - 2)
-    in
-    Buffer.add_string buf "\n";
-    Buffer.add_string buf @@ Tty.apply_color style_alert "  ";
-    Buffer.add_string buf @@ Tty.apply_color style_path msg;
+  | Explanation.Step (msg, true) ->
+    let len = cols - String.length error_alert - 2 in
+    let msg = String.pad_right msg ~len in
+    Buffer.add_string buf @@ Tty.apply_color style_alert "\n  ";
+    Buffer.add_string buf @@ Tty.apply_color style_step msg;
     Buffer.add_string buf @@ Tty.apply_color style_alert error_alert;
     Buffer.add_string buf @@ Tty.apply_color style_alert " ";
 
@@ -253,9 +249,9 @@ let render_elem buf spans elem =
     Buffer.add_string buf suffix;
     Buffer.add_string buf "\n\n"
 
-let render_derivation buf spans elems =
+let render_derivation buf spans cols elems =
   Buffer.add_string buf "Here's why:\n\n";
-  List.iter elems ~f:(render_elem buf spans)
+  List.iter elems ~f:(render_elem buf spans cols)
 
 let render_claim buf spans code (pos, msg) severity =
   let colour = User_error.Severity.tty_color severity in
@@ -306,6 +302,7 @@ let to_string
     let (_ : unit) = List.iter reasons ~f:(render_reason buf spans) in
     Buffer.contents buf
   | Explanation.Derivation elems ->
+    let cols = Option.value ~default:header_cols @@ Tty.get_term_cols () in
     let file_checked = Pos.filename pos in
     let init =
       List.fold_left
@@ -324,5 +321,5 @@ let to_string
     let buf = Buffer.create 1000 in
     let (_ : unit) = render_claim buf spans code (pos, msg) severity in
     let (_ : unit) = List.iter reasons ~f:(render_reason buf spans) in
-    let (_ : unit) = render_derivation buf spans elems in
+    let (_ : unit) = render_derivation buf spans cols elems in
     Buffer.contents buf

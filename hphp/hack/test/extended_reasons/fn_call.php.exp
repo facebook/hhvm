@@ -37,7 +37,7 @@ File fn_call.php, line 5, character 14 - line 5, character 16:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -66,7 +66,7 @@ File fn_call.php, line 6, character 3 - line 6, character 9:
  7 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

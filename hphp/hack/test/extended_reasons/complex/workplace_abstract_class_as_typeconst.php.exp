@@ -30,7 +30,7 @@ File workplace_abstract_class_as_typeconst.php, line 37, character 23 - line 37,
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -55,7 +55,7 @@ File workplace_abstract_class_as_typeconst.php, line 37, character 3 - line 37, 
  38 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.

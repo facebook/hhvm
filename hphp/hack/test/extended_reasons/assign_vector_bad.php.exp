@@ -34,7 +34,7 @@ File assign_vector_bad.php, line 4, character 11 - line 4, character 12:
 Here's why:
 
 
-  Step 1 of 1                    (here is where the error occurred) 
+  Step 1 of 1                                 (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
@@ -107,7 +107,7 @@ File assign_vector_bad.php, line 3, character 42 - line 3, character 49:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -186,7 +186,7 @@ File assign_vector_bad.php, line 3, character 35 - line 3, character 50:
 (its definition was given above)
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 Vector is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.

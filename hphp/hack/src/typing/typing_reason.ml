@@ -3781,14 +3781,7 @@ module Derivation = struct
       match t with
       | _ when Config.suppress_derivation cfg ctxt.Context.derivation_depth ->
         ([], st)
-      | Derivation steps ->
-        let (expl, st) = explain_steps steps ~st ~cfg ~ctxt in
-        let expl =
-          Option.value_map ~default:expl ~f:(fun path ->
-              Explanation.Path (path, false) :: expl)
-          @@ Context.explain_path ctxt
-        in
-        (expl, st)
+      | Derivation steps -> explain_steps steps ~st ~cfg ~ctxt
       | Transitive { lower; upper; in_; on_ } ->
         let (expl_main, st) =
           explain in_ ~st ~cfg ~ctxt:(Context.enter_main ctxt)
@@ -3951,13 +3944,13 @@ module Derivation = struct
              ~f:Subtype_rule.explain)
       in
 
-      let path =
-        Explanation.Path
+      let step =
+        Explanation.Step
           ( Format.sprintf "%s %d of %d" pfx (idx + 1) n_steps,
             toplevel && idx = n_steps - 1 )
       in
 
-      ((path :: rule :: expl_sub) @ expl_super, st)
+      ((step :: rule :: expl_sub) @ expl_super, st)
 
     and explain_reason reason ~st ~cfg ~ctxt =
       match reason with

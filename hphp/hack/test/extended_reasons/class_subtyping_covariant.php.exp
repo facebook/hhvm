@@ -49,7 +49,7 @@ File class_subtyping_covariant.php, line 5, character 32 - line 5, character 33:
 Here's why:
 
 
-  Step 1 of 4                                                      
+  Step 1 of 4                                                                   
 
 I started by checking this subtype relationship.
 
@@ -78,7 +78,7 @@ File class_subtyping_covariant.php, line 14, character 3 - line 14, character 16
  15 | }
 
 
-  Step 2 of 4                                                      
+  Step 2 of 4                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -160,7 +160,7 @@ File class_subtyping_covariant.php, line 3, character 7 - line 3, character 9:
  7 | class Super {}
 
 
-  Step 3 of 4                                                      
+  Step 3 of 4                                                                   
 
 The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
@@ -191,7 +191,7 @@ File class_subtyping_covariant.php, line 11, character 21 - line 11, character 4
  15 | }
 
 
-  Step 4 of 4                    (here is where the error occurred) 
+  Step 4 of 4                                 (here is where the error occurred) 
 
 MyA is a class or interface so next I checked the 1st type arguments.
 

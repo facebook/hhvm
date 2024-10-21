@@ -10,7 +10,7 @@ type 'pos elem =
   | Witness of ('pos[@hash.ignore]) * string
   | Witness_no_pos of string
   | Rule of string
-  | Path of string * bool
+  | Step of string * bool
   | Trans of string
   | Prefix of {
       prefix: string;

@@ -92,9 +92,7 @@ Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the type variable.
 
-  Main                                                                    
-
-  [Main] Step 1 of 2                                        
+  [Main] Step 1 of 2                                                            
 
 I started by checking this subtype relationship.
 
@@ -168,7 +166,7 @@ File metachain.php, line 22, character 17 - line 22, character 22:
  26 | <<__NoAutoLikes>>
 
 
-  [Main] Step 2 of 2      (here is where the error occurred) 
+  [Main] Step 2 of 2                          (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -200,9 +198,7 @@ File metachain.php, line 22, character 17 - line 22, character 22:
 
 I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
-  Lower                                                                  
-
-  [Lower] Step 1 of 2                                      
+  [Lower] Step 1 of 2                                                           
 
 I started by checking this subtype relationship.
 
@@ -334,7 +330,7 @@ File metachain.php, line 11, character 12 - line 11, character 23:
 via an assignment
 
 
-  [Lower] Step 2 of 2                                      
+  [Lower] Step 2 of 2                                                           
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
@@ -369,9 +365,7 @@ File metachain.php, line 7, character 10 - line 10, character 3:
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 I checked the subtype constraint in [Upper / Main] because it was implied by the other constraints on the hint.
 
-  Upper / Main                                                    
-
-  [Upper / Main] Step 1 of 3                        
+  [Upper / Main] Step 1 of 3                                                    
 
 I started by checking this subtype relationship.
 
@@ -399,7 +393,7 @@ File metachain.php, line 16, character 12 - line 16, character 20:
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 
-  [Upper / Main] Step 2 of 3                        
+  [Upper / Main] Step 2 of 3                                                    
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -461,7 +455,7 @@ File metachain.php, line 21, character 23 - line 23, character 3:
  26 | <<__NoAutoLikes>>
 
 
-  [Upper / Main] Step 3 of 3                        
+  [Upper / Main] Step 3 of 3                                                    
 
 These are shape types so next I checked the required prompt field.
 
@@ -578,9 +572,7 @@ File metachain.php, line 22, character 17 - line 22, character 22:
 
 I found the subtype for [Upper / Main] when I checked the subtype constraint in [Upper / Lower].
 
-  Upper / Lower                                                  
-
-  [Upper / Lower] Step 1 of 2                      
+  [Upper / Lower] Step 1 of 2                                                   
 
 I started by checking this subtype relationship.
 
@@ -608,7 +600,7 @@ File metachain.php, line 16, character 12 - line 16, character 20:
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 
-  [Upper / Lower] Step 2 of 2                      
+  [Upper / Lower] Step 2 of 2                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -684,9 +676,7 @@ via the generic T
 
 I found the supertype for [Upper / Main] when I checked the subtype constraint in [Upper / Upper].
 
-  Upper / Upper                                                  
-
-  [Upper / Upper] Step 1 of 1                      
+  [Upper / Upper] Step 1 of 1                                                   
 
 I started by checking this subtype relationship.
 

@@ -50,9 +50,7 @@ Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter T of HH\Vector.
 
-  Main                                                                    
-
-  [Main] Step 1 of 1      (here is where the error occurred) 
+  [Main] Step 1 of 1                          (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
@@ -82,9 +80,7 @@ File vector_invariant.php, line 3, character 24 - line 3, character 26:
 
 I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
-  Lower                                                                  
-
-  [Lower] Step 1 of 1                                      
+  [Lower] Step 1 of 1                                                           
 
 I started by checking this subtype relationship.
 
@@ -114,9 +110,7 @@ File vector_invariant.php, line 4, character 9 - line 4, character 26:
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
-  Upper                                                                  
-
-  [Upper] Step 1 of 2                                      
+  [Upper] Step 1 of 2                                                           
 
 I started by checking this subtype relationship.
 
@@ -254,7 +248,7 @@ File collections/Vector.hhi, line 48, character 15 - line 48, character 20:
  51 |      * if `null` is passed.
 
 
-  [Upper] Step 2 of 2                                      
+  [Upper] Step 2 of 2                                                           
 
 Vector is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.

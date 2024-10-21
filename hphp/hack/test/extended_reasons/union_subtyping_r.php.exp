@@ -37,7 +37,7 @@ File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-  Step 1 of 1                    (here is where the error occurred) 
+  Step 1 of 1                                 (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
@@ -158,7 +158,7 @@ File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -241,7 +241,7 @@ File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
  8 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
@@ -318,7 +318,7 @@ File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -401,7 +401,7 @@ File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
  8 | }
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 

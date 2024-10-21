@@ -35,7 +35,7 @@ File shape_subtyping_7.php, line 4, character 24 - line 4, character 26:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -62,7 +62,7 @@ File shape_subtyping_7.php, line 14, character 3 - line 14, character 37:
  15 | }
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -137,7 +137,7 @@ File shape_subtyping_7.php, line 3, character 26 - line 3, character 42:
  6 | function expects_required_a_at_int_alias(
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the b field.
 The field is required in the subtype but missing in the supertype.
@@ -189,7 +189,7 @@ File shape_subtyping_7.php, line 3, character 32 - line 3, character 34:
 Here's why:
 
 
-  Step 1 of 3                                                      
+  Step 1 of 3                                                                   
 
 I started by checking this subtype relationship.
 
@@ -216,7 +216,7 @@ File shape_subtyping_7.php, line 14, character 3 - line 14, character 37:
  15 | }
 
 
-  Step 2 of 3                                                      
+  Step 2 of 3                                                                   
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
@@ -291,7 +291,7 @@ File shape_subtyping_7.php, line 3, character 26 - line 3, character 42:
  6 | function expects_required_a_at_int_alias(
 
 
-  Step 3 of 3                    (here is where the error occurred) 
+  Step 3 of 3                                 (here is where the error occurred) 
 
 These are shape types so next I tried to check the a field.
 The field is required in the supertype but missing in the subtype.

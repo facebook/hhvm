@@ -39,7 +39,7 @@ File union_join_point.php, line 5, character 30 - line 5, character 30:
 Here's why:
 
 
-  Step 1 of 2                                                      
+  Step 1 of 2                                                                   
 
 I started by checking this subtype relationship.
 
@@ -112,7 +112,7 @@ File union_join_point.php, line 2, character 7 - line 2, character 7:
  8 |   } else{
 
 
-  Step 2 of 2                    (here is where the error occurred) 
+  Step 2 of 2                                 (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 

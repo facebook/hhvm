@@ -18,7 +18,9 @@ package thrift
 
 import (
 	"context"
+	"log"
 	"net"
+	"os"
 )
 
 // ConnContextFunc is the type for connection context modifier functions.
@@ -28,6 +30,7 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 type ServerOptions struct {
 	interceptor Interceptor
 	connContext ConnContextFunc
+	log         func(format string, args ...interface{})
 }
 
 // Deprecated: use WrapInterceptor
@@ -48,9 +51,19 @@ func WithConnContext(connContext ConnContextFunc) func(*ServerOptions) {
 	}
 }
 
+// WithLog allows you to over-ride the location that exceptional server events are logged.
+// The default is stderr.
+func WithLog(log func(format string, args ...interface{})) func(*ServerOptions) {
+	return func(server *ServerOptions) {
+		server.log = log
+	}
+}
+
 func defaultServerOptions() *ServerOptions {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
 	return &ServerOptions{
 		connContext: WithConnInfo,
+		log:         logger.Printf,
 	}
 }
 

@@ -18,9 +18,7 @@ package thrift
 
 import (
 	"context"
-	"log"
 	"net"
-	"os"
 	"runtime/debug"
 )
 
@@ -36,7 +34,7 @@ import (
 type headerServer struct {
 	processor   Processor
 	listener    net.Listener
-	log         *log.Logger
+	log         func(format string, args ...interface{})
 	connContext func(context.Context, net.Conn) context.Context
 }
 
@@ -45,7 +43,7 @@ func newHeaderServer(processor Processor, listener net.Listener, options *Server
 	return &headerServer{
 		processor:   processor,
 		listener:    listener,
-		log:         log.New(os.Stderr, "", log.LstdFlags),
+		log:         options.log,
 		connContext: options.connContext,
 	}
 }
@@ -83,7 +81,7 @@ func (p *headerServer) acceptLoop(ctx context.Context) error {
 		go func(ctx context.Context, conn net.Conn) {
 			ctx = p.connContext(ctx, conn)
 			if err := p.processRequests(ctx, conn); err != nil {
-				p.log.Printf("error processing request from %s: %s\n", conn.RemoteAddr(), err)
+				p.log("error processing request from %s: %s\n", conn.RemoteAddr(), err)
 			}
 		}(ctx, conn)
 	}
@@ -97,7 +95,7 @@ func (p *headerServer) processRequests(ctx context.Context, conn net.Conn) error
 
 	defer func() {
 		if err := recover(); err != nil {
-			p.log.Printf("panic in processor: %v: %s", err, debug.Stack())
+			p.log("panic in processor: %v: %s", err, debug.Stack())
 		}
 	}()
 	defer protocol.Close()

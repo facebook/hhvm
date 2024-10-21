@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
+import types
 import unittest
 
 import thrift.test.thrift_python.enum_test.thrift_mutable_types as mutable_types  # @manual=//thrift/test/thrift-python:enum_test_thrift-python-types
@@ -26,7 +29,7 @@ class ThriftPython_Enum(unittest.TestCase):
         self.maxDiff = None
 
     @parameterized.expand([immutable_types, mutable_types])
-    def test_enum_default(self, test_types) -> None:
+    def test_enum_default(self, test_types: types.ModuleType) -> None:
         self.assertEqual(0, test_types.PositiveNumber.NONE)
         self.assertEqual(1, test_types.PositiveNumber.ONE)
 
@@ -38,7 +41,7 @@ class ThriftPython_Enum(unittest.TestCase):
         self.assertEqual([], s.color_list)
 
     @parameterized.expand([immutable_types, mutable_types])
-    def test_enum_initialize(self, test_types) -> None:
+    def test_enum_initialize(self, test_types: types.ModuleType) -> None:
         s = test_types.TestStruct(
             number=test_types.PositiveNumber.TWO,
             number_list=[
@@ -58,7 +61,7 @@ class ThriftPython_Enum(unittest.TestCase):
         self.assertEqual([test_types.Color.blue, test_types.Color.blue], s.color_list)
 
     @parameterized.expand([mutable_types])
-    def test_enum_update(self, test_types) -> None:
+    def test_enum_update(self, test_types: types.ModuleType) -> None:
         s = test_types.TestStruct()
 
         self.assertEqual(test_types.PositiveNumber.NONE, s.number)

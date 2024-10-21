@@ -31,6 +31,7 @@ type clientOptions struct {
 	ioTimeout         time.Duration // Read/Write timeout
 	persistentHeaders map[string]string
 	dialerFn          func() (net.Conn, error)
+	tlsConfig         *tls.Config
 }
 
 // ClientOption is a single configuration setting for the thrift client
@@ -108,9 +109,13 @@ func WithConn(conn net.Conn) ClientOption {
 
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
 func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) ClientOption {
-	return WithDialer(func() (net.Conn, error) {
-		return DialTLS(addr, dialTimeout, tlsConfig)
-	})
+	clonedTLSConfig := tlsConfig.Clone()
+	return func(opts *clientOptions) {
+		opts.tlsConfig = clonedTLSConfig
+		opts.dialerFn = func() (net.Conn, error) {
+			return DialTLS(addr, dialTimeout, opts.tlsConfig)
+		}
+	}
 }
 
 // DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.

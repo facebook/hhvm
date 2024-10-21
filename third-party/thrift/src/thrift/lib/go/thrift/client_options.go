@@ -133,8 +133,7 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 
 // DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.
 func DialTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
-	dialer := net.Dialer{Timeout: dialTimeout}
-	conn, err := dialer.Dial("tcp", addr)
+	conn, err := net.DialTimeout("tcp", addr, dialTimeout)
 	if err != nil {
 		return nil, err
 	}

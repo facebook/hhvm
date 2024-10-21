@@ -39,6 +39,7 @@ File "shape_subtyping_6.php", line 3, character 39 - line 3, character 41:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -64,6 +65,7 @@ File "shape_subtyping_6.php", line 14, character 3 - line 14, character 37:
  13 | ): void {
  14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
+
 
 Step 2 of 3
 
@@ -92,7 +94,7 @@ File "shape_subtyping_6.php", line 4, character 27 - line 4, character 45:
  8 | ): void {
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "shape_subtyping_6.php", line 12, character 22 - line 12, character 23:
 
@@ -102,7 +104,9 @@ File "shape_subtyping_6.php", line 12, character 22 - line 12, character 23:
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "shape_subtyping_6.php", line 14, character 35 - line 14, character 36:
 
@@ -111,6 +115,8 @@ File "shape_subtyping_6.php", line 14, character 35 - line 14, character 36:
  13 | ): void {
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -130,6 +136,7 @@ File "shape_subtyping_6.php", line 3, character 26 - line 3, character 42:
 
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type optional_a_at_bool = shape(?'a' => bool);
+
 
 Step 3 of 3 (here is where the error occurred)
 

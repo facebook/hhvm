@@ -34,6 +34,7 @@ File "shape_subtyping_7.php", line 4, character 24 - line 4, character 26:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -59,6 +60,7 @@ File "shape_subtyping_7.php", line 14, character 3 - line 14, character 37:
  13 | ): void {
  14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
+
 
 Step 2 of 3
 
@@ -87,7 +89,7 @@ File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
  8 | ): void {
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
 
@@ -97,7 +99,9 @@ File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
 
@@ -106,6 +110,8 @@ File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
  13 | ): void {
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -126,6 +132,7 @@ File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);
 
+
 Step 3 of 3 (here is where the error occurred)
 
 These are shape types so next I tried to check the `b` field.
@@ -144,10 +151,6 @@ File "shape_subtyping_7.php", line 4, character 31 - line 4, character 33:
  9 | }
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
@@ -177,6 +180,7 @@ File "shape_subtyping_7.php", line 3, character 32 - line 3, character 34:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -202,6 +206,7 @@ File "shape_subtyping_7.php", line 14, character 3 - line 14, character 37:
  13 | ): void {
  14 |   »expects_required_a_at_int_alias($s)«;
  15 | }
+
 
 Step 2 of 3
 
@@ -230,7 +235,7 @@ File "shape_subtyping_7.php", line 4, character 18 - line 4, character 34:
  8 | ): void {
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
 
@@ -240,7 +245,9 @@ File "shape_subtyping_7.php", line 12, character 13 - line 12, character 14:
  14 |   expects_required_a_at_int_alias($s);
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
 
@@ -249,6 +256,8 @@ File "shape_subtyping_7.php", line 14, character 35 - line 14, character 36:
  13 | ): void {
  14 |   expects_required_a_at_int_alias(»$s«);
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -269,16 +278,13 @@ File "shape_subtyping_7.php", line 3, character 26 - line 3, character 42:
  3 | type required_a_at_int = »shape('a' => int)«;
  4 | type missing_a = shape('b' => int);
 
+
 Step 3 of 3 (here is where the error occurred)
 
 These are shape types so next I tried to check the `a` field.
 The field is required in the supertype but missing in the subtype.
 
 The subtype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 The supertype comes from this hint
 
 File "shape_subtyping_7.php", line 3, character 39 - line 3, character 41:

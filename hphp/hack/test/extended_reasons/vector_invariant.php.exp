@@ -107,7 +107,7 @@ File "vector_invariant.php", line 4, character 9 - line 4, character 26:
  5 |   $y = $x;
  6 |   $z = $y;
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "vector_invariant.php", line 4, character 3 - line 4, character 4:
 
@@ -116,7 +116,9 @@ File "vector_invariant.php", line 4, character 3 - line 4, character 4:
  5 |   $y = $x;
  6 |   $z = $y;
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 5, character 8 - line 5, character 9:
 
@@ -127,7 +129,9 @@ File "vector_invariant.php", line 5, character 8 - line 5, character 9:
  8 |   return $z;
  9 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 5, character 3 - line 5, character 4:
 
@@ -138,7 +142,9 @@ File "vector_invariant.php", line 5, character 3 - line 5, character 4:
  8 |   return $z;
  9 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 6, character 8 - line 6, character 9:
 
@@ -149,7 +155,9 @@ File "vector_invariant.php", line 6, character 8 - line 6, character 9:
  8 |   return $z;
  9 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 6, character 3 - line 6, character 4:
 
@@ -160,7 +168,9 @@ File "vector_invariant.php", line 6, character 3 - line 6, character 4:
  8 |   return $z;
  9 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 8, character 10 - line 8, character 11:
 
@@ -171,7 +181,9 @@ File "vector_invariant.php", line 8, character 10 - line 8, character 11:
  8 |   return »$z«;
  9 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "vector_invariant.php", line 8, character 3 - line 8, character 12:
 
@@ -181,6 +193,8 @@ File "vector_invariant.php", line 8, character 3 - line 8, character 12:
  7 |   // hh_force_solve();
  8 |   »return $z;«
  9 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -199,6 +213,7 @@ File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
  48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
  49 |     /**
  50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+
 
 [Upper] Step 2 of 2
 

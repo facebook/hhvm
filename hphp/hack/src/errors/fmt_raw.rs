@@ -26,6 +26,7 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
                 code,
                 claim: Message(pos, msg),
                 reasons,
+                explanation: _,
                 custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,

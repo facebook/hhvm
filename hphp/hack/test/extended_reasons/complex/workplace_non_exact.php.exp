@@ -50,7 +50,32 @@ File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
 13 |     $c1 = $this->c1;
 14 |     $c1->f($c1);
 
+Since `C1` is not final
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
+
+ 8 | abstract class Test {
+ 9 |   private »C1« $c1;
+10 | 
+11 |   public function fInstance(): void {
+12 |     $this->c1->f($this->c1);
+13 |     $c1 = $this->c1;
+14 |     $c1->f($c1);
+
+this might not be a `C1`
+
+File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
+
+ 8 | abstract class Test {
+ 9 |   private »C1« $c1;
+10 | 
+11 |   public function fInstance(): void {
+12 |     $this->c1->f($this->c1);
+13 |     $c1 = $this->c1;
+14 |     $c1->f($c1);
+
 Here's why:
+
 
 Step 1 of 2
 
@@ -76,6 +101,7 @@ File "workplace_non_exact.php", line 12, character 5 - line 12, character 27:
  12 |     »$this->c1->f($this->c1)«;
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -115,7 +141,7 @@ File "workplace_non_exact.php", line 3, character 16 - line 3, character 17:
  5 |   }
  6 | }
 
-and flows into this expression as the type of property
+and flows into this expression
 
 File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
 
@@ -127,6 +153,8 @@ File "workplace_non_exact.php", line 12, character 18 - line 12, character 26:
  13 |     $c1 = $this->c1;
  14 |     $c1->f($c1);
 
+as the type of property
+
 The supertype comes from this hint
 
 File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
@@ -135,29 +163,5 @@ File "workplace_non_exact.php", line 4, character 21 - line 4, character 24:
  4 |   public function f(»this« $_): void {
  5 |   }
  6 | }
-
-Since `C1` is not final
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
-
- 8 | abstract class Test {
- 9 |   private »C1« $c1;
-10 | 
-11 |   public function fInstance(): void {
-12 |     $this->c1->f($this->c1);
-13 |     $c1 = $this->c1;
-14 |     $c1->f($c1);
-
-this might not be a `C1`
-
-File "workplace_non_exact.php", line 9, character 11 - line 9, character 12:
-
- 8 | abstract class Test {
- 9 |   private »C1« $c1;
-10 | 
-11 |   public function fInstance(): void {
-12 |     $this->c1->f($this->c1);
-13 |     $c1 = $this->c1;
-14 |     $c1->f($c1);
 
 2 errors found

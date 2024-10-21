@@ -30,6 +30,7 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 45 - line 9, 
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -54,6 +55,7 @@ File "generic_subtyping_caller_upper_bound.php", line 10, character 3 - line 10,
 10 |   »rcvr_concrete($x)«;
 11 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -69,7 +71,7 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 48 - line 9, 
 10 |   rcvr_concrete($x);
 11 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 9, character 50 - line 9, character 51:
 
@@ -79,7 +81,9 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 50 - line 9, 
 10 |   rcvr_concrete($x);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10, character 18:
 
@@ -88,6 +92,8 @@ File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10
  9 | function call_conrete_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_concrete(»$x«);
 11 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -107,6 +113,7 @@ File "generic_subtyping_caller_upper_bound.php", line 5, character 7 - line 5, c
  5 | class »B« extends A {}
  6 | 
  7 | function rcvr_concrete(B $x): void {}
+
 
 Step 3 of 3 (here is where the error occurred)
 
@@ -173,6 +180,7 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 48 - line 9, 
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -197,6 +205,7 @@ File "generic_subtyping_caller_upper_bound.php", line 10, character 3 - line 10,
 10 |   »rcvr_concrete($x)«;
 11 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
@@ -212,7 +221,7 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 48 - line 9, 
 10 |   rcvr_concrete($x);
 11 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 9, character 50 - line 9, character 51:
 
@@ -222,7 +231,9 @@ File "generic_subtyping_caller_upper_bound.php", line 9, character 50 - line 9, 
 10 |   rcvr_concrete($x);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10, character 18:
 
@@ -231,6 +242,8 @@ File "generic_subtyping_caller_upper_bound.php", line 10, character 17 - line 10
  9 | function call_conrete_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_concrete(»$x«);
 11 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 

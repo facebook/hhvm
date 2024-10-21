@@ -1,0 +1,84 @@
+ERROR: File "recursive_tparam_bounds2.php", line 8, characters 3-19:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
+  Expected `T2`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 8, characters 3-19:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
+  Expected `T2`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`
+ERROR: File "recursive_tparam_bounds2.php", line 8, characters 17-18:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
+  Expected `T2`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 8, characters 17-18:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 8, characters 13-14:
+  Expected `T2`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`
+ERROR: File "recursive_tparam_bounds2.php", line 9, characters 3-22:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
+  Expected `T2`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 9, characters 3-22:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
+  Expected `T2`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`
+ERROR: File "recursive_tparam_bounds2.php", line 9, characters 20-21:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
+  Expected `T2`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 9, characters 20-21:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 9, characters 13-17:
+  Expected `T2`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`
+ERROR: File "recursive_tparam_bounds2.php", line 10, characters 3-23:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
+  Expected `string`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 10, characters 3-23:
+hh_expect type mismatch (Typing[4453])
+  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
+  Expected `string`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`
+ERROR: File "recursive_tparam_bounds2.php", line 10, characters 21-22:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
+  Expected `string`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 12-12:
+  But got `mixed`
+ERROR: File "recursive_tparam_bounds2.php", line 10, characters 21-22:
+Invalid argument (Typing[4110])
+  File "recursive_tparam_bounds2.php", line 10, characters 13-18:
+  Expected `string`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "recursive_tparam_bounds2.php", line 5, characters 48-51:
+  But got `T`

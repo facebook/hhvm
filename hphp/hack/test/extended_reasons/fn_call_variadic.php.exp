@@ -30,6 +30,7 @@ File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -54,6 +55,7 @@ File "fn_call_variadic.php", line 6, character 3 - line 6, character 17:
  6 |   »foo($x, $y, $z)«;
  7 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 3rd function parameter of the subtype and the 1st parameter of the supertype.
@@ -69,7 +71,7 @@ File "fn_call_variadic.php", line 5, character 33 - line 5, character 36:
  6 |   foo($x, $y, $z);
  7 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "fn_call_variadic.php", line 5, character 38 - line 5, character 39:
 
@@ -79,7 +81,9 @@ File "fn_call_variadic.php", line 5, character 38 - line 5, character 39:
  6 |   foo($x, $y, $z);
  7 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
 
@@ -88,6 +92,8 @@ File "fn_call_variadic.php", line 6, character 15 - line 6, character 16:
  5 | function bar(int $x, string $y, bool $z): void{
  6 |   foo($x, $y, »$z«);
  7 | }
+
+as the type of the local variable
 
 The supertype comes from this variadic parameter declaration
 

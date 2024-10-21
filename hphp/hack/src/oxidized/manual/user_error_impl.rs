@@ -49,6 +49,7 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             code,
             claim,
             reasons,
+            explanation,
             quickfixes,
             custom_msgs,
             is_fixmed,
@@ -59,6 +60,7 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             code,
             claim: claim.with_erased_lines(),
             reasons: reasons.into_iter().map(|r| r.with_erased_lines()).collect(),
+            explanation,
             quickfixes: quickfixes
                 .into_iter()
                 .map(|q| q.with_erased_lines())

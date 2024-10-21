@@ -1113,6 +1113,7 @@ let ide_diagnostics_to_lsp_diagnostics
       code;
       claim = _;
       reasons = _;
+      explanation = _;
       custom_msgs;
       is_fixmed = _;
       flags = _;

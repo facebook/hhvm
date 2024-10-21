@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9399fd0dc8affc183c4080ce93cb903b>>
+// @generated SignedSource<<a8c5c5af170cd95eedd7f7eb5cf480e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -66,6 +66,10 @@ pub struct UserError<PrimPos, Pos> {
     pub code: isize,
     pub claim: message::Message<PrimPos>,
     pub reasons: Vec<message::Message<Pos>>,
+    #[rust_to_ocaml(attr = "hash.ignore")]
+    #[rust_to_ocaml(attr = "equal fun _ _ -> true")]
+    #[rust_to_ocaml(attr = "compare fun _ _ -> 0")]
+    pub explanation: explanation::Explanation<Pos>,
     #[rust_to_ocaml(attr = "hash.ignore")]
     pub quickfixes: Vec<quickfix::Quickfix<PrimPos>>,
     pub custom_msgs: Vec<String>,

@@ -38,6 +38,7 @@ File "bad_inout_lvalue9.php", line 6, character 11 - line 6, character 23:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -61,6 +62,7 @@ File "bad_inout_lvalue9.php", line 6, character 3 - line 6, character 24:
  5 | function test(int $x, int $y): void {
  6 |   »f(inout tuple($x, $y))«;
  7 | }
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -128,6 +130,7 @@ File "bad_inout_lvalue9.php", line 3, character 18 - line 3, character 28:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -152,7 +155,7 @@ File "bad_inout_lvalue9.php", line 3, character 30 - line 3, character 31:
  6 |   f(inout tuple($x, $y));
  7 | }
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "bad_inout_lvalue9.php", line 6, character 11 - line 6, character 23:
 
@@ -161,6 +164,9 @@ File "bad_inout_lvalue9.php", line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+
+via an assignment
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -227,6 +233,7 @@ File "bad_inout_lvalue9.php", line 3, character 30 - line 3, character 31:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -251,7 +258,7 @@ File "bad_inout_lvalue9.php", line 3, character 30 - line 3, character 31:
  6 |   f(inout tuple($x, $y));
  7 | }
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "bad_inout_lvalue9.php", line 6, character 11 - line 6, character 23:
 
@@ -260,6 +267,9 @@ File "bad_inout_lvalue9.php", line 6, character 11 - line 6, character 23:
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
  7 | }
+
+via an assignment
+
 
 Step 2 of 2 (here is where the error occurred)
 

@@ -24,6 +24,7 @@ File "fn_ret.php", line 3, character 17 - line 3, character 19:
 
 Here's why:
 
+
 Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
@@ -44,66 +45,4 @@ File "fn_ret.php", line 7, character 17 - line 7, character 20:
  8 |   return foo();
  9 | }
 
-error: Typing[4110] Invalid return type
-
-File "fn_ret.php", line 8, character 10 - line 8, character 14:
-
- 7 | function bar(): bool {
- 8 |   return »foo()«;
- 9 | }
-
-Expected `bool`
-
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
-
- 7 | function bar(): »bool« {
- 8 |   return foo();
- 9 | }
-
-But got `int`
-
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
-
- 3 | function foo(): »int« {
- 4 |   return 1;
- 5 | }
-
-Here's why:
-
-Step 1 of 1 (here is where the error occurred)
-
-I started by checking this subtype relationship.
-
-The subtype comes from this hint
-
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
-
- 3 | function foo(): »int« {
- 4 |   return 1;
- 5 | }
-
-and flows into this expression as the return type of the function call
-
-File "fn_ret.php", line 8, character 10 - line 8, character 14:
-
- 7 | function bar(): bool {
- 8 |   return »foo()«;
- 9 | }
-
-which itself flows into this expression because it is used in a return position
-
-File "fn_ret.php", line 8, character 3 - line 8, character 15:
-
- 7 | function bar(): bool {
- 8 |   »return foo();«
- 9 | }
-
-The supertype comes from this hint
-
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
-
- 7 | function bar(): »bool« {
- 8 |   return foo();
- 9 | }
-
-2 errors found
+1 error found

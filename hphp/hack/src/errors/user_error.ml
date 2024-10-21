@@ -33,6 +33,8 @@ type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
+  explanation: 'pos Explanation.t;
+      [@hash.ignore] [@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]
   quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
@@ -48,14 +50,44 @@ let make
     ?(custom_msgs = [])
     ?(flags = User_error_flags.empty)
     claim
-    reasons =
-  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+    reasons
+    explanation =
+  {
+    severity;
+    code;
+    claim;
+    reasons;
+    explanation;
+    quickfixes;
+    custom_msgs;
+    is_fixmed;
+    flags;
+  }
 
-let make_err code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons =
-  make Err code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons
+let make_err
+    code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons explanation =
+  make
+    Err
+    code
+    ?is_fixmed
+    ?quickfixes
+    ?custom_msgs
+    ?flags
+    claim
+    reasons
+    explanation
 
 let make_warning code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons =
-  make Warning code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons
+  make
+    Warning
+    code
+    ?is_fixmed
+    ?quickfixes
+    ?custom_msgs
+    ?flags
+    claim
+    reasons
+    Explanation.empty
 
 let get_code { code; _ } = code
 
@@ -76,18 +108,36 @@ let to_absolute
       code;
       claim;
       reasons;
+      explanation;
       quickfixes;
       custom_msgs;
       is_fixmed;
       flags;
     } =
+  let pos_or_decl_to_absolute_pos pos_or_decl =
+    let pos = Pos_or_decl.unsafe_to_raw_pos pos_or_decl in
+    Pos.to_absolute pos
+  in
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
-    List.map reasons ~f:(fun (p, s) ->
-        (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
+    List.map reasons ~f:(fun (p, s) -> (pos_or_decl_to_absolute_pos p, s))
   in
+  let explanation =
+    Explanation.map explanation ~f:pos_or_decl_to_absolute_pos
+  in
+
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  {
+    severity;
+    code;
+    claim;
+    reasons;
+    explanation;
+    quickfixes;
+    custom_msgs;
+    is_fixmed;
+    flags;
+  }
 
 let to_relative
     {
@@ -95,6 +145,7 @@ let to_relative
       code;
       claim;
       reasons;
+      explanation;
       quickfixes;
       custom_msgs;
       is_fixmed;
@@ -104,7 +155,21 @@ let to_relative
   let reasons =
     List.map reasons ~f:(fun (p, s) -> (p |> Pos_or_decl.unsafe_to_raw_pos, s))
   in
-  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  let explanation =
+    Explanation.map explanation ~f:(fun pos ->
+        Pos_or_decl.unsafe_to_raw_pos pos)
+  in
+  {
+    severity;
+    code;
+    claim;
+    reasons;
+    explanation;
+    quickfixes;
+    custom_msgs;
+    is_fixmed;
+    flags;
+  }
 
 let make_absolute severity code = function
   | [] -> failwith "an error must have at least one message"
@@ -114,6 +179,7 @@ let make_absolute severity code = function
       code;
       claim;
       reasons;
+      explanation = Explanation.empty;
       quickfixes = [];
       custom_msgs = [];
       is_fixmed = false;
@@ -126,6 +192,7 @@ let to_absolute_for_test
       code;
       claim = (claim_pos, claim_msg);
       reasons;
+      explanation;
       quickfixes;
       custom_msgs;
       is_fixmed;
@@ -144,8 +211,23 @@ let to_absolute_for_test
   in
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
+
+  let explanation =
+    Explanation.map explanation ~f:(fun pos ->
+        Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos)
+  in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
-  { severity; code; claim; reasons; quickfixes; custom_msgs; is_fixmed; flags }
+  {
+    severity;
+    code;
+    claim;
+    reasons;
+    explanation;
+    quickfixes;
+    custom_msgs;
+    is_fixmed;
+    flags;
+  }
 
 let error_kind error_code =
   match error_code / 1000 with
@@ -179,6 +261,7 @@ let to_string
       code;
       claim;
       reasons;
+      explanation = _;
       custom_msgs;
       quickfixes = _;
       is_fixmed = _;
@@ -209,12 +292,16 @@ let to_string
         error_code
         reason_msg
     end;
-  List.iter reasons ~f:(fun (p, w) ->
-      let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
-      Buffer.add_string buf msg);
-  List.iter custom_msgs ~f:(fun w ->
-      let msg = Printf.sprintf "  %s\n" w in
-      Buffer.add_string buf msg);
+  let (_ : unit) =
+    List.iter reasons ~f:(fun (p, w) ->
+        let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
+        Buffer.add_string buf msg)
+  in
+  let (_ : unit) =
+    List.iter custom_msgs ~f:(fun w ->
+        let msg = Printf.sprintf "  %s\n" w in
+        Buffer.add_string buf msg)
+  in
   Buffer.contents buf
 
 let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
@@ -224,6 +311,7 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
     code;
     claim;
     reasons;
+    explanation = _;
     custom_msgs;
     quickfixes = _;
     is_fixmed = _;

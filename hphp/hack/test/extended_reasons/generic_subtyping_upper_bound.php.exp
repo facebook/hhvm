@@ -50,6 +50,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 49 - line 9, charact
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -74,6 +75,7 @@ File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, charac
 10 |   »rcvr_upper_bound($x)«;
 11 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -89,7 +91,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
@@ -99,7 +101,9 @@ File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
@@ -108,6 +112,8 @@ File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, chara
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound(»$x«);
 11 | }
+
+as the type of the local variable
 
 The supertype comes from this constraint on the generic parameter
 
@@ -118,6 +124,7 @@ File "generic_subtyping_upper_bound.php", line 7, character 32 - line 7, charact
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound($x);
 11 | }
+
 
 Step 3 of 3 (here is where the error occurred)
 
@@ -202,6 +209,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, charact
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -226,6 +234,7 @@ File "generic_subtyping_upper_bound.php", line 10, character 3 - line 10, charac
 10 |   »rcvr_upper_bound($x)«;
 11 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
@@ -241,7 +250,7 @@ File "generic_subtyping_upper_bound.php", line 9, character 52 - line 9, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, character 55:
 
@@ -251,7 +260,9 @@ File "generic_subtyping_upper_bound.php", line 9, character 54 - line 9, charact
 10 |   rcvr_upper_bound($x);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, character 21:
 
@@ -260,6 +271,8 @@ File "generic_subtyping_upper_bound.php", line 10, character 20 - line 10, chara
  9 | function call_upper_bound_with_upper_bound<T as A>(T $x): void {
 10 |   rcvr_upper_bound(»$x«);
 11 | }
+
+as the type of the local variable
 
 The supertype comes from this constraint on the generic parameter
 

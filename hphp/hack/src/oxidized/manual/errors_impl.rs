@@ -6,6 +6,7 @@
 use std::cmp::Ordering;
 
 use crate::errors::*;
+use crate::explanation::Explanation;
 use crate::message::Message;
 use crate::pos::Pos;
 use crate::quickfix::Edits;
@@ -20,6 +21,7 @@ impl<PP, P> UserError<PP, P> {
         code: ErrorCode,
         claim: Message<PP>,
         reasons: Vec<Message<P>>,
+        explanation: Explanation<P>,
         custom_msgs: Vec<String>,
         quickfixes: Vec<Quickfix<PP>>,
         flags: UserErrorFlags,
@@ -29,6 +31,7 @@ impl<PP, P> UserError<PP, P> {
             code,
             claim,
             reasons,
+            explanation,
             quickfixes,
             custom_msgs,
             is_fixmed: false,
@@ -59,6 +62,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             code: self_code,
             claim: Message(self_pos, self_msg),
             reasons: self_reasons,
+            explanation: _,
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
@@ -69,6 +73,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             code: other_code,
             claim: Message(other_pos, other_msg),
             reasons: other_reasons,
+            explanation: _,
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
@@ -130,6 +135,7 @@ impl Naming {
             Self::FdNameAlreadyBound as isize,
             Message(p, "Field name already bound".into()),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),
@@ -145,6 +151,7 @@ impl Naming {
                 format!("No such type `{}`, did you mean `{}`?", name, correct_name).into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![Quickfix {
                 title: format!("Change to `{}`", correct_name),
@@ -170,6 +177,7 @@ impl Naming {
                 "Methods need to be marked `public`, `private`, or `protected`.".into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![
                 Quickfix {
@@ -201,6 +209,7 @@ impl Naming {
                 "Trait use as is a PHP feature that is unsupported in Hack".into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),
@@ -216,6 +225,7 @@ impl Naming {
                 "insteadof is a PHP feature that is unsupported in Hack".into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),
@@ -234,6 +244,7 @@ impl NastCheck {
                     .into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),
@@ -249,6 +260,7 @@ impl NastCheck {
                 "XHP classes can only contain one category declaration".into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),
@@ -268,6 +280,7 @@ impl NastCheck {
                 .into(),
             ),
             vec![],
+            Explanation::Empty,
             vec![],
             vec![],
             Default::default(),

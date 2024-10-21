@@ -28,6 +28,7 @@ File "refinement_equal.php", line 6, character 22 - line 6, character 23:
 
 Here's why:
 
+
 Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
@@ -42,7 +43,7 @@ File "refinement_equal.php", line 7, character 6 - line 7, character 15:
  9 |   } else {
 10 |     $z = $c;
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinement_equal.php", line 8, character 10 - line 8, character 11:
 
@@ -52,7 +53,9 @@ File "refinement_equal.php", line 8, character 10 - line 8, character 11:
  9 |   } else {
 10 |     $z = $c;
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinement_equal.php", line 8, character 5 - line 8, character 6:
 
@@ -61,6 +64,8 @@ File "refinement_equal.php", line 8, character 5 - line 8, character 6:
  8 |     »$z« = $a;
  9 |   } else {
 10 |     $z = $c;
+
+via an assignment
 
 which I solved to this type variable
 
@@ -72,7 +77,7 @@ File "refinement_equal.php", line 7, character 6 - line 7, character 15:
  9 |   } else {
 10 |     $z = $c;
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinement_equal.php", line 12, character 10 - line 12, character 11:
 
@@ -80,13 +85,17 @@ File "refinement_equal.php", line 12, character 10 - line 12, character 11:
  12 |   return »$z«;
  13 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinement_equal.php", line 12, character 3 - line 12, character 12:
 
  11 |   }
  12 |   »return $z;«
  13 | }
+
+because it is used in a return position
 
 The supertype comes from this return hint
 

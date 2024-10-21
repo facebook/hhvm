@@ -141,61 +141,122 @@ let mark_with_context (pos : Pos.absolute) ~buf ~spans =
         end)
   | _ -> Buffer.add_string buf "No source found.\n\n"
 
-let to_string User_error.{ code; claim = (pos, msg); reasons; severity; _ } =
-  (* First fold over all positions to get a map from filename to the list of all
-     positions within it which we are going to reference, sort those lists
-     so we have the earliest positions first, then merge them *)
-  let file_checked = Pos.filename pos in
-  let init = SMap.singleton file_checked [Pos.to_relative pos] in
-  let spans =
-    SMap.map (fun ps ->
-        merge @@ List.sort ps ~compare:(fun x y -> Pos.compare y x))
-    @@ List.fold_left reasons ~init ~f:(fun acc ((p : Pos.absolute), _) ->
-           let file_checked = Pos.filename p in
-           try
-             let p = Pos.to_relative p in
-             SMap.update
-               file_checked
-               (function
-                 | Some ps -> Some (p :: ps)
-                 | None -> Some [p])
-               acc
-           with
-           | _ -> acc)
+let render_reason buf spans (pos, msg) =
+  let pos_string =
+    let fn = Pos.filename pos in
+    if String.is_suffix fn ~suffix:".hhi" then
+      let pos_str = Pos.multiline_string_no_file pos in
+      match String.split fn ~on:'/' with
+      | _ :: "tmp" :: _ :: rest ->
+        let nm = String.concat ~sep:"/" rest in
+        Format.sprintf {|File "%s", %s:|} nm pos_str
+      | _ -> Format.sprintf "%s:" pos_str
+    else
+      Pos.multiline_string pos
   in
-  let buf = Buffer.create 500 in
-  (* Next, write the primary claim to the buffer *)
-  let (_ : unit) =
-    Buffer.add_string buf
-    @@ Format.sprintf
-         "%s: %s %s\n\n"
-         (User_error.Severity.to_string severity)
-         (User_error.error_code_to_string code)
-         msg;
-    Buffer.add_string buf (Pos.multiline_string pos);
-    Buffer.add_string buf "\n\n";
-    mark_with_context pos ~buf ~spans;
+  Buffer.add_string buf msg;
+  Buffer.add_string buf "\n\n";
+  Buffer.add_string buf pos_string;
+  Buffer.add_string buf "\n\n";
+  mark_with_context pos ~buf ~spans;
+  Buffer.add_string buf "\n"
+
+let render_elem buf spans elem =
+  match elem with
+  | Explanation.Witness (pos, msg) -> render_reason buf spans (pos, msg)
+  | Explanation.Witness_no_pos msg ->
+    Buffer.add_string buf msg;
     Buffer.add_string buf "\n"
-  in
-  let (_ : unit) =
-    List.iter reasons ~f:(fun (pos, msg) ->
-        let pos_string =
-          let fn = Pos.filename pos in
-          if String.is_suffix fn ~suffix:".hhi" then
-            let pos_str = Pos.multiline_string_no_file pos in
-            match String.split fn ~on:'/' with
-            | _ :: "tmp" :: _ :: rest ->
-              let nm = String.concat ~sep:"/" rest in
-              Format.sprintf {|File "%s", %s:|} nm pos_str
-            | _ -> Format.sprintf "%s:" pos_str
-          else
-            Pos.multiline_string pos
-        in
-        Buffer.add_string buf msg;
-        Buffer.add_string buf "\n\n";
-        Buffer.add_string buf pos_string;
-        Buffer.add_string buf "\n\n";
-        mark_with_context pos ~buf ~spans;
-        Buffer.add_string buf "\n")
-  in
-  Buffer.contents buf
+  | Explanation.Rule msg ->
+    Buffer.add_string buf "\n";
+    Buffer.add_string buf msg;
+    Buffer.add_string buf "\n\n"
+  | Explanation.Path (msg, false) ->
+    Buffer.add_string buf "\n";
+    Buffer.add_string buf msg;
+    Buffer.add_string buf "\n"
+  | Explanation.Path (msg, true) ->
+    Buffer.add_string buf "\n";
+    Buffer.add_string buf msg;
+    Buffer.add_string buf " (here is where the error occurred)";
+    Buffer.add_string buf "\n"
+  | Explanation.Trans msg ->
+    Buffer.add_string buf msg;
+    Buffer.add_string buf "\n"
+  | Explanation.Prefix { prefix; sep } ->
+    Buffer.add_string buf prefix;
+    Buffer.add_string buf sep
+  | Explanation.Suffix { suffix; sep = _ } ->
+    Buffer.add_string buf suffix;
+    Buffer.add_string buf "\n\n"
+
+let render_derivation buf spans elems =
+  Buffer.add_string buf "Here's why:\n\n";
+  List.iter elems ~f:(render_elem buf spans)
+
+let render_claim buf spans code (pos, msg) severity =
+  Buffer.add_string buf
+  @@ Format.sprintf
+       "%s: %s %s\n\n"
+       (User_error.Severity.to_string severity)
+       (User_error.error_code_to_string code)
+       msg;
+  Buffer.add_string buf (Pos.multiline_string pos);
+  Buffer.add_string buf "\n\n";
+  mark_with_context pos ~buf ~spans;
+  Buffer.add_string buf "\n"
+
+let add_span acc p =
+  let file_checked = Pos.filename p in
+  try
+    let p = Pos.to_relative p in
+    SMap.update
+      file_checked
+      (function
+        | Some ps -> Some (p :: ps)
+        | None -> Some [p])
+      acc
+  with
+  | _ -> acc
+
+let to_string
+    User_error.{ code; claim = (pos, msg); reasons; explanation; severity; _ } =
+  match explanation with
+  | Explanation.Debug json ->
+    (* Just render the json, no other info *)
+    json
+  | Explanation.Empty ->
+    (* Just render the claim and reasons - only subtyping errors will have
+       explanations at the moment *)
+    let file_checked = Pos.filename pos in
+    let init = SMap.singleton file_checked [Pos.to_relative pos] in
+    let spans =
+      SMap.map (fun ps ->
+          merge @@ List.sort ps ~compare:(fun x y -> Pos.compare y x))
+      @@ List.fold_left reasons ~init ~f:(fun acc (p, _) -> add_span acc p)
+    in
+    let buf = Buffer.create 500 in
+    let (_ : unit) = render_claim buf spans code (pos, msg) severity in
+    let (_ : unit) = List.iter reasons ~f:(render_reason buf spans) in
+    Buffer.contents buf
+  | Explanation.Derivation elems ->
+    let file_checked = Pos.filename pos in
+    let init =
+      List.fold_left
+        elems
+        ~f:(fun acc elem ->
+          match elem with
+          | Explanation.Witness (p, _) -> add_span acc p
+          | _ -> acc)
+        ~init:(SMap.singleton file_checked [Pos.to_relative pos])
+    in
+    let spans =
+      SMap.map (fun ps ->
+          merge @@ List.sort ps ~compare:(fun x y -> Pos.compare y x))
+      @@ List.fold_left reasons ~init ~f:(fun acc (p, _) -> add_span acc p)
+    in
+    let buf = Buffer.create 1000 in
+    let (_ : unit) = render_claim buf spans code (pos, msg) severity in
+    let (_ : unit) = List.iter reasons ~f:(render_reason buf spans) in
+    let (_ : unit) = render_derivation buf spans elems in
+    Buffer.contents buf

@@ -52,6 +52,7 @@ let to_string (error : Errors.finalized_error) : string =
     code;
     claim;
     reasons;
+    explanation = _;
     quickfixes = _;
     custom_msgs = _;
     is_fixmed = _;

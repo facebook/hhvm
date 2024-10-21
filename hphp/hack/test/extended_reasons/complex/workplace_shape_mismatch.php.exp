@@ -30,6 +30,7 @@ File "workplace_shape_mismatch.php", line 15, character 4 - line 15, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -54,6 +55,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -96,7 +98,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -107,7 +109,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -118,6 +122,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -127,6 +133,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -170,6 +177,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `_PIRANHA_SANDBOX_QUEUED_` field.
@@ -185,10 +193,6 @@ File "workplace_shape_mismatch.php", line 15, character 34 - line 15, character 
  17 |   ?'execution_push_phase' => string,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -221,6 +225,7 @@ File "workplace_shape_mismatch.php", line 18, character 4 - line 18, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -245,6 +250,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -287,7 +293,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -298,7 +304,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -309,6 +317,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -318,6 +328,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -361,6 +372,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `async_bulkapi_factor` field.
@@ -376,10 +388,6 @@ File "workplace_shape_mismatch.php", line 18, character 30 - line 18, character 
  20 |   ?'fifo_ordering_key' => string,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -412,6 +420,7 @@ File "workplace_shape_mismatch.php", line 19, character 4 - line 19, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -436,6 +445,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -478,7 +488,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -489,7 +499,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -500,6 +512,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -509,6 +523,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -552,6 +567,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `devserver` field.
@@ -567,10 +583,6 @@ File "workplace_shape_mismatch.php", line 19, character 19 - line 19, character 
  21 |   ?'fifo_dedup_key' => string,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -603,6 +615,7 @@ File "workplace_shape_mismatch.php", line 14, character 4 - line 14, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -627,6 +640,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -669,7 +683,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -680,7 +694,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -691,6 +707,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -700,6 +718,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -743,6 +762,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `earlyreturn` field.
@@ -758,10 +778,6 @@ File "workplace_shape_mismatch.php", line 14, character 21 - line 14, character 
  16 |   ?'resource_requirement' => int,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -810,6 +826,7 @@ File "workplace_shape_mismatch.php", line 7, character 4 - line 7, character 18:
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -834,6 +851,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -876,7 +894,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -887,7 +905,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -898,6 +918,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -907,6 +929,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -950,6 +973,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `execute_after` field.
@@ -981,10 +1005,6 @@ File "workplace_shape_mismatch.php", line 7, character 23 - line 7, character 25
 24 | 
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -1033,6 +1053,7 @@ File "workplace_shape_mismatch.php", line 8, character 4 - line 8, character 19:
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1057,6 +1078,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -1099,7 +1121,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -1110,7 +1132,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -1121,6 +1145,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -1130,6 +1156,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -1172,6 +1199,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
  84 | );«
  85 | 
+
 
 Step 4 of 4 (here is where the error occurred)
 
@@ -1204,10 +1232,6 @@ File "workplace_shape_mismatch.php", line 8, character 24 - line 8, character 26
 24 | 
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -1240,6 +1264,7 @@ File "workplace_shape_mismatch.php", line 17, character 4 - line 17, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1264,6 +1289,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -1306,7 +1332,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -1317,7 +1343,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -1328,6 +1356,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -1337,6 +1367,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -1380,6 +1411,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `execution_push_phase` field.
@@ -1395,10 +1427,6 @@ File "workplace_shape_mismatch.php", line 17, character 30 - line 17, character 
  19 |   ?'devserver' => string,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -1431,6 +1459,7 @@ File "workplace_shape_mismatch.php", line 9, character 4 - line 9, character 17:
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1455,6 +1484,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -1497,7 +1527,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -1508,7 +1538,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -1519,6 +1551,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -1528,6 +1562,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -1571,6 +1606,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `expire_after` field.
@@ -1586,10 +1622,6 @@ File "workplace_shape_mismatch.php", line 9, character 22 - line 9, character 24
 11 |   ?'scheduling_uid' => int,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -1622,6 +1654,7 @@ File "workplace_shape_mismatch.php", line 21, character 4 - line 21, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1646,6 +1679,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -1688,7 +1722,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -1699,7 +1733,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -1710,6 +1746,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -1719,6 +1757,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -1762,6 +1801,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `fifo_dedup_key` field.
@@ -1777,10 +1817,6 @@ File "workplace_shape_mismatch.php", line 21, character 24 - line 21, character 
  23 | );
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -1813,6 +1849,7 @@ File "workplace_shape_mismatch.php", line 20, character 4 - line 20, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -1837,6 +1874,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -1879,7 +1917,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -1890,7 +1928,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -1901,6 +1941,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -1910,6 +1952,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -1953,6 +1996,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `fifo_ordering_key` field.
@@ -1968,10 +2012,6 @@ File "workplace_shape_mismatch.php", line 20, character 27 - line 20, character 
  22 |   ?'send_schedule_cats' => bool,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2004,6 +2044,7 @@ File "workplace_shape_mismatch.php", line 10, character 4 - line 10, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2028,6 +2069,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -2070,7 +2112,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -2081,7 +2123,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -2092,6 +2136,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -2101,6 +2147,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -2144,6 +2191,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `region` field.
@@ -2159,10 +2207,6 @@ File "workplace_shape_mismatch.php", line 10, character 16 - line 10, character 
 12 |   ?'tag' => string,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2195,6 +2239,7 @@ File "workplace_shape_mismatch.php", line 16, character 4 - line 16, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2219,6 +2264,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -2261,7 +2307,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -2272,7 +2318,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -2283,6 +2331,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -2292,6 +2342,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -2335,6 +2386,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `resource_requirement` field.
@@ -2350,10 +2402,6 @@ File "workplace_shape_mismatch.php", line 16, character 30 - line 16, character 
  18 |   ?'async_bulkapi_factor' => float,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2386,6 +2434,7 @@ File "workplace_shape_mismatch.php", line 13, character 4 - line 13, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2410,6 +2459,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -2452,7 +2502,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -2463,7 +2513,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -2474,6 +2526,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -2483,6 +2537,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -2526,6 +2581,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `retry_attempt` field.
@@ -2541,10 +2597,6 @@ File "workplace_shape_mismatch.php", line 13, character 23 - line 13, character 
  15 |   ?'_PIRANHA_SANDBOX_QUEUED_' => bool,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2577,6 +2629,7 @@ File "workplace_shape_mismatch.php", line 11, character 4 - line 11, character 1
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2601,6 +2654,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -2643,7 +2697,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -2654,7 +2708,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -2665,6 +2721,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -2674,6 +2732,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -2717,6 +2776,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `scheduling_uid` field.
@@ -2732,10 +2792,6 @@ File "workplace_shape_mismatch.php", line 11, character 24 - line 11, character 
  13 |   ?'retry_attempt' => int,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2767,6 +2823,7 @@ File "workplace_shape_mismatch.php", line 22, character 4 - line 22, character 2
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2791,6 +2848,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -2833,7 +2891,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -2844,7 +2902,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -2855,6 +2915,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -2864,6 +2926,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -2907,6 +2970,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `send_schedule_cats` field.
@@ -2921,10 +2985,6 @@ File "workplace_shape_mismatch.php", line 22, character 28 - line 22, character 
  23 | );
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -2973,6 +3033,7 @@ File "workplace_shape_mismatch.php", line 6, character 4 - line 6, character 25:
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -2997,6 +3058,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -3039,7 +3101,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -3050,7 +3112,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -3061,6 +3125,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -3070,6 +3136,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -3112,6 +3179,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  83 |   ?AsyncTierJobOption::FIFO_ORDERING_KEY => string,
  84 | );«
  85 | 
+
 
 Step 4 of 4 (here is where the error occurred)
 
@@ -3152,10 +3220,6 @@ File "workplace_shape_mismatch.php", line 3, character 7 - line 3, character 25:
  5 | type AsyncJobOptions = shape(
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 error: Typing[4057] Invalid argument
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
@@ -3188,6 +3252,7 @@ File "workplace_shape_mismatch.php", line 12, character 4 - line 12, character 8
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -3212,6 +3277,7 @@ File "workplace_shape_mismatch.php", line 97, character 18 - line 97, character 
  97 |     return await »self::genAsyncJob($options)«;
  98 |   }
  99 | }
+
 
 Step 2 of 4
 
@@ -3254,7 +3320,7 @@ File "workplace_shape_mismatch.php", line 5, character 24 - line 23, character 1
  23 | );«
  24 | 
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 28:
 
@@ -3265,7 +3331,9 @@ File "workplace_shape_mismatch.php", line 95, character 21 - line 95, character 
  98 |   }
  99 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 43:
 
@@ -3276,6 +3344,8 @@ File "workplace_shape_mismatch.php", line 97, character 36 - line 97, character 
  98 |   }
  99 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 24:
@@ -3285,6 +3355,7 @@ File "workplace_shape_mismatch.php", line 89, character 5 - line 89, character 2
  89 |     »?AsyncTierJobOptions« $options = null,
  90 |   ): Awaitable<string> {
  91 |     return "";
+
 
 Step 3 of 4
 
@@ -3328,6 +3399,7 @@ File "workplace_shape_mismatch.php", line 74, character 28 - line 84, character 
  84 | );«
  85 | 
 
+
 Step 4 of 4 (here is where the error occurred)
 
 These are shape types so next I tried to check the `tag` field.
@@ -3343,8 +3415,4 @@ File "workplace_shape_mismatch.php", line 12, character 13 - line 12, character 
  14 |   ?'earlyreturn' => int,
 
 The supertype didn't exist because the field was missing.
-
-File "", line 0, character 0 - line 0, character -1:
-
-
 17 errors found

@@ -452,6 +452,7 @@ let add tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) : unit
         code = Codes.to_enum (M.code warning);
         claim = (pos, M.claim warning);
         reasons = M.reasons warning;
+        explanation = Explanation.empty;
         quickfixes = M.quickfixes warning;
         flags = User_error_flags.empty;
         custom_msgs = [];

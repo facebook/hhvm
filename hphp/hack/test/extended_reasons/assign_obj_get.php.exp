@@ -29,6 +29,7 @@ File "assign_obj_get.php", line 7, character 26 - line 7, character 30:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -49,6 +50,7 @@ File "assign_obj_get.php", line 16, character 3 - line 16, character 9:
  15 |   $g = $f->get();
  16 |   »foo($g)«;
  17 | }
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -75,7 +77,7 @@ File "assign_obj_get.php", line 3, character 7 - line 3, character 11:
  4 | class Sub extends Super {}
  5 | class SuperBox {
 
-and flows into this expression as the return type of the function call
+and flows into this expression
 
 File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
 
@@ -84,7 +86,9 @@ File "assign_obj_get.php", line 15, character 8 - line 15, character 16:
  16 |   foo($g);
  17 | }
 
-which itself flows into this expression via an assignment
+as the return type of the function call
+
+which itself flows into this expression
 
 File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
 
@@ -93,7 +97,9 @@ File "assign_obj_get.php", line 15, character 3 - line 15, character 4:
  16 |   foo($g);
  17 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
 
@@ -101,6 +107,8 @@ File "assign_obj_get.php", line 16, character 7 - line 16, character 8:
  15 |   $g = $f->get();
  16 |   foo(»$g«);
  17 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 

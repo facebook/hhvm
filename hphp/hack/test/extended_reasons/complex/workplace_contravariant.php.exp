@@ -60,6 +60,7 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  14 |   }
  15 | }
 
+
 [Main] Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 2nd function parameters.
@@ -75,7 +76,7 @@ File "workplace_contravariant.php", line 12, character 39 - line 12, character 4
  14 |   }
  15 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_contravariant.php", line 12, character 46 - line 12, character 47:
 
@@ -85,7 +86,9 @@ File "workplace_contravariant.php", line 12, character 46 - line 12, character 4
  14 |   }
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_contravariant.php", line 13, character 29 - line 13, character 30:
 
@@ -94,6 +97,8 @@ File "workplace_contravariant.php", line 13, character 29 - line 13, character 3
  13 |     parent::__construct($a, »$b«, $sender);
  14 |   }
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -135,6 +140,7 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  14 |   }
  15 | }
 
+
 [Lower] Step 2 of 2
 
 These are function types so next I checked the 2nd function parameters.
@@ -150,7 +156,7 @@ File "workplace_contravariant.php", line 12, character 39 - line 12, character 4
  14 |   }
  15 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_contravariant.php", line 12, character 46 - line 12, character 47:
 
@@ -160,7 +166,9 @@ File "workplace_contravariant.php", line 12, character 46 - line 12, character 4
  14 |   }
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_contravariant.php", line 13, character 29 - line 13, character 30:
 
@@ -169,6 +177,8 @@ File "workplace_contravariant.php", line 13, character 29 - line 13, character 3
  13 |     parent::__construct($a, »$b«, $sender);
  14 |   }
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -182,7 +192,7 @@ File "workplace_contravariant.php", line 6, character 15 - line 6, character 16:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter `TB` of `TestServiceBase` via the generic `TB`
+and flows into this generic parameter `TB` of `TestServiceBase`
 
 File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
 
@@ -191,6 +201,8 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  13 |     »parent::__construct($a, $b, $sender)«;
  14 |   }
  15 | }
+
+via the generic `TB`
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
@@ -222,6 +234,7 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  14 |   }
  15 | }
 
+
 [Upper] Step 2 of 4
 
 These are function types so next I checked the 3rd function parameters.
@@ -243,7 +256,7 @@ File "workplace_contravariant.php", line 17, character 11 - line 17, character 1
 
  17 | interface »ISender«<-TA, -TB> {}
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "workplace_contravariant.php", line 12, character 69 - line 12, character 75:
 
@@ -253,7 +266,9 @@ File "workplace_contravariant.php", line 12, character 69 - line 12, character 7
  14 |   }
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "workplace_contravariant.php", line 13, character 33 - line 13, character 39:
 
@@ -263,7 +278,9 @@ File "workplace_contravariant.php", line 13, character 33 - line 13, character 3
  14 |   }
  15 | }
 
-The supertype comes from this hint (its definition was given above)
+as the type of the local variable
+
+The supertype comes from this hint
 
 File "workplace_contravariant.php", line 7, character 5 - line 7, character 20:
 
@@ -274,6 +291,9 @@ File "workplace_contravariant.php", line 7, character 5 - line 7, character 20:
  7 |     »ISender<TA, ?TB>« $sender,
  8 |   ) {}
  9 | }
+
+(its definition was given above)
+
 
 [Upper] Step 3 of 4
 
@@ -302,6 +322,7 @@ File "workplace_contravariant.php", line 12, character 63 - line 12, character 6
  14 |   }
  15 | }
 
+
 [Upper] Step 4 of 4
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
@@ -318,7 +339,7 @@ File "workplace_contravariant.php", line 7, character 18 - line 7, character 19:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter `TB` of `TestServiceBase` via the generic `TB`
+and flows into this generic parameter `TB` of `TestServiceBase`
 
 File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
 
@@ -327,6 +348,8 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  13 |     »parent::__construct($a, $b, $sender)«;
  14 |   }
  15 | }
+
+via the generic `TB`
 
 The supertype is the same as before.
 

@@ -28,6 +28,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 Here's why:
 
+
 Step 1 of 5
 
 I started by checking this subtype relationship.
@@ -52,6 +53,7 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  8 |   »foo($x)«;
  9 | }
 
+
 Step 2 of 5
 
 These are function types so next I checked the 1st function parameters.
@@ -67,7 +69,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -77,7 +79,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -86,6 +90,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -104,6 +110,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, charact
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
+
 
 Step 3 of 5
 
@@ -127,6 +134,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, charact
  4 | 
  5 | function foo(MyThing $_): void {}
 
+
 Step 4 of 5
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
@@ -141,7 +149,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -151,7 +159,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -161,6 +171,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  8 |   foo(»$x«);
  9 | }
 
+as the type of the local variable
+
 The supertype is the same as before.
 
 File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, character 23:
@@ -168,6 +180,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, charact
  3 | newtype MyThing = (»bool«|int);
  4 | 
  5 | function foo(MyThing $_): void {}
+
 
 Step 5 of 5 (here is where the error occurred)
 
@@ -221,6 +234,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 Here's why:
 
+
 Step 1 of 5
 
 I started by checking this subtype relationship.
@@ -245,6 +259,7 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  8 |   »foo($x)«;
  9 | }
 
+
 Step 2 of 5
 
 These are function types so next I checked the 1st function parameters.
@@ -260,7 +275,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -270,7 +285,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -279,6 +296,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -297,6 +316,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, charact
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
+
 
 Step 3 of 5
 
@@ -320,6 +340,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, charact
  4 | 
  5 | function foo(MyThing $_): void {}
 
+
 Step 4 of 5
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
@@ -334,7 +355,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -344,7 +365,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -354,6 +377,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  8 |   foo(»$x«);
  9 | }
 
+as the type of the local variable
+
 The supertype is the same as before.
 
 File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, character 27:
@@ -361,6 +386,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, charact
  3 | newtype MyThing = (bool|»int«);
  4 | 
  5 | function foo(MyThing $_): void {}
+
 
 Step 5 of 5 (here is where the error occurred)
 
@@ -416,6 +442,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -440,6 +467,7 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  8 |   »foo($x)«;
  9 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
@@ -455,7 +483,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -465,7 +493,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -474,6 +504,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -525,6 +557,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -549,6 +582,7 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  8 |   »foo($x)«;
  9 | }
 
+
 Step 2 of 4
 
 These are function types so next I checked the 1st function parameters.
@@ -564,7 +598,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -574,7 +608,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -583,6 +619,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -602,6 +640,7 @@ File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, charact
  4 | 
  5 | function foo(MyThing $_): void {}
 
+
 Step 3 of 4
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
@@ -616,7 +655,7 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
  8 |   foo($x);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
 
@@ -626,7 +665,9 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, charact
  8 |   foo($x);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
 
@@ -635,6 +676,8 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, characte
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
+
+as the type of the local variable
 
 The supertype is the same as before.
 
@@ -645,6 +688,7 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
  7 | function bar(?string $x): void {
  8 |   foo($x);
  9 | }
+
 
 Step 4 of 4 (here is where the error occurred)
 

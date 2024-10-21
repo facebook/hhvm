@@ -27,6 +27,7 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
 
 Here's why:
 
+
 Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
@@ -40,7 +41,7 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
  9 |   return $c;
 10 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
@@ -49,7 +50,9 @@ File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
@@ -58,7 +61,9 @@ File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
@@ -67,7 +72,9 @@ File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
@@ -76,7 +83,9 @@ File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11
  9 |   return »$c«;
 10 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
@@ -84,6 +93,8 @@ File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
  8 |   $c = $ai;
  9 |   »return $c;«
 10 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -132,6 +143,7 @@ File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -145,7 +157,7 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
  9 |   return $c;
 10 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
@@ -154,7 +166,9 @@ File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
@@ -163,7 +177,9 @@ File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
@@ -172,7 +188,9 @@ File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
@@ -181,7 +199,9 @@ File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11
  9 |   return »$c«;
 10 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
@@ -189,6 +209,8 @@ File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
  8 |   $c = $ai;
  9 |   »return $c;«
 10 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -208,6 +230,7 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
  5 | class »C« extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -270,6 +293,7 @@ File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -283,7 +307,7 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
  9 |   return $c;
 10 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
 
@@ -292,7 +316,9 @@ File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
 
@@ -301,7 +327,9 @@ File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
 
@@ -310,7 +338,9 @@ File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
  9 |   return $c;
 10 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
 
@@ -319,7 +349,9 @@ File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11
  9 |   return »$c«;
 10 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
 
@@ -327,6 +359,8 @@ File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
  8 |   $c = $ai;
  9 |   »return $c;«
 10 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -346,6 +380,7 @@ File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
  5 | class »C« extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+
 
 Step 2 of 2 (here is where the error occurred)
 

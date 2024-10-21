@@ -40,6 +40,7 @@ File "class_subtyping_covariant.php", line 5, character 32 - line 5, character 3
 
 Here's why:
 
+
 Step 1 of 4
 
 I started by checking this subtype relationship.
@@ -63,6 +64,7 @@ File "class_subtyping_covariant.php", line 14, character 3 - line 14, character 
  13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
  14 |   »takes_my_a($x)«;
  15 | }
+
 
 Step 2 of 4
 
@@ -89,7 +91,7 @@ File "class_subtyping_covariant.php", line 5, character 7 - line 5, character 9:
  6 | 
  7 | class Super {}
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "class_subtyping_covariant.php", line 13, character 50 - line 13, character 51:
 
@@ -99,7 +101,9 @@ File "class_subtyping_covariant.php", line 13, character 50 - line 13, character
  14 |   takes_my_a($x);
  15 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "class_subtyping_covariant.php", line 14, character 14 - line 14, character 15:
 
@@ -108,6 +112,8 @@ File "class_subtyping_covariant.php", line 14, character 14 - line 14, character
  13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
  14 |   takes_my_a(»$x«);
  15 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -129,11 +135,12 @@ File "class_subtyping_covariant.php", line 3, character 7 - line 3, character 9:
  6 | 
  7 | class Super {}
 
+
 Step 3 of 4
 
 The subtype extends or implements the supertype class or interface so next I checked that subtype constraint.
 
-The subtype comes from this hint (its definition was given in [Step 2])
+The subtype comes from this hint
 
 File "class_subtyping_covariant.php", line 5, character 28 - line 5, character 45:
 
@@ -142,6 +149,8 @@ File "class_subtyping_covariant.php", line 5, character 28 - line 5, character 4
  5 | class MyC<+T1, T2> extends »MyA<T1, Super, T2>« {}
  6 | 
  7 | class Super {}
+
+(its definition was given in [Step 2])
 
 The supertype is the same as before.
 
@@ -152,6 +161,7 @@ File "class_subtyping_covariant.php", line 11, character 21 - line 11, character
  13 | function subtype_bad_covariant(MyC<Super, Super> $x): void {
  14 |   takes_my_a($x);
  15 | }
+
 
 Step 4 of 4 (here is where the error occurred)
 
@@ -167,7 +177,7 @@ File "class_subtyping_covariant.php", line 5, character 32 - line 5, character 3
  6 | 
  7 | class Super {}
 
-and flows into this hint via the generic `T1`
+and flows into this hint
 
 File "class_subtyping_covariant.php", line 13, character 36 - line 13, character 40:
 
@@ -176,6 +186,8 @@ File "class_subtyping_covariant.php", line 13, character 36 - line 13, character
  13 | function subtype_bad_covariant(MyC<»Super«, Super> $x): void {
  14 |   takes_my_a($x);
  15 | }
+
+via the generic `T1`
 
 which is defined here
 

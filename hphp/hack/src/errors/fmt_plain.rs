@@ -22,6 +22,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
                 code,
                 claim: Message(pos, msg),
                 reasons,
+                explanation: _,
                 custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,

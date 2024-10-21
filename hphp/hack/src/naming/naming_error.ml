@@ -1301,150 +1301,155 @@ let tparam_non_shadowing_reuse pos var_name =
     )
     []
 
-let to_user_error = function
-  | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
-  | Unsupported_instead_of pos -> unsupported_instead_of pos
-  | Unexpected_arrow { pos; cname } -> unexpected_arrow pos cname
-  | Missing_arrow { pos; cname } -> missing_arrow pos cname
-  | Disallowed_xhp_type { pos; ty_name } -> disallowed_xhp_type pos ty_name
-  | Name_is_reserved { pos; name } -> name_is_reserved pos name
-  | Dollardollar_unused pos -> dollardollar_unused pos
-  | Already_bound { pos; name } -> already_bound pos name
-  | Method_name_already_bound { pos; meth_name } ->
-    method_name_already_bound pos meth_name
-  | Error_name_already_bound { pos; name; prev_pos } ->
-    error_name_already_bound pos name prev_pos
-  | Invalid_fun_pointer { pos; name } -> invalid_fun_pointer pos name
-  | Undefined { pos; var_name; did_you_mean } ->
-    undefined pos var_name did_you_mean
-  | This_reserved pos -> this_reserved pos
-  | Start_with_T pos -> start_with_T pos
-  | Unexpected_typedef { pos; expected_kind; decl_pos } ->
-    unexpected_typedef pos expected_kind decl_pos
-  | Field_name_already_bound pos -> field_name_already_bound pos
-  | Primitive_top_level pos -> primitive_top_level pos
-  | Primitive_invalid_alias { pos; ty_name_used; ty_name_canon } ->
-    primitive_invalid_alias pos ty_name_used ty_name_canon
-  | Dynamic_new_in_strict_mode pos -> dynamic_new_in_strict_mode pos
-  | Invalid_type_access_root { pos; id } -> invalid_type_access_root pos id
-  | Invalid_type_access_in_where pos -> invalid_type_access_in_where pos
-  | Duplicate_user_attribute { attr_name; prev_pos; pos } ->
-    duplicate_user_attribute attr_name prev_pos pos
-  | Invalid_memoize_label { attr_name; pos } ->
-    invalid_memoize_label attr_name pos
-  | Unbound_name { pos; name; kind } -> unbound_name pos name kind
-  | Unbound_attribute_name { pos; attr_name; closest_attr_name } ->
-    unbound_attribute_name pos attr_name closest_attr_name
-  | This_no_argument pos -> this_no_argument pos
-  | Object_cast pos -> object_cast pos
-  | This_hint_outside_class pos -> this_hint_outside_class pos
-  | Parent_outside_class pos -> parent_outside_class pos
-  | Self_outside_class pos -> self_outside_class pos
-  | Static_outside_class pos -> static_outside_class pos
-  | This_type_forbidden { pos; in_extends; in_req_extends } ->
-    this_type_forbidden pos in_extends in_req_extends
-  | Nonstatic_property_with_lsb pos -> nonstatic_property_with_lsb pos
-  | Lowercase_this { pos; ty_name } -> lowercase_this pos ty_name
-  | Classname_param pos -> classname_param pos
-  | Tparam_applied_to_type { pos; tparam_name } ->
-    tparam_applied_to_type pos tparam_name
-  | Tparam_with_tparam { pos; tparam_name } ->
-    tparam_with_tparam pos tparam_name
-  | Shadowed_tparam { prev_pos; tparam_name; pos } ->
-    shadowed_tparam prev_pos tparam_name pos
-  | Missing_typehint pos -> missing_typehint pos
-  | Expected_variable pos -> expected_variable pos
-  | Too_many_arguments pos -> too_many_arguments pos
-  | Too_few_arguments pos -> too_few_arguments pos
-  | Expected_collection { pos; cname } -> expected_collection pos cname
-  | Illegal_CLASS pos -> illegal_CLASS pos
-  | Illegal_TRAIT pos -> illegal_TRAIT pos
-  | Illegal_fun pos -> illegal_fun pos
-  | Illegal_member_variable_class pos -> illegal_member_variable_class pos
-  | Illegal_meth_fun pos -> illegal_meth_fun pos
-  | Illegal_inst_meth pos -> illegal_inst_meth pos
-  | Illegal_meth_caller pos -> illegal_meth_caller pos
-  | Illegal_class_meth pos -> illegal_class_meth pos
-  | Illegal_constant pos -> illegal_constant pos
-  | Lvar_in_obj_get { pos; lvar_pos; lvar_name } ->
-    lvar_in_obj_get pos lvar_pos lvar_name
-  | Class_meth_non_final_self { pos; class_name } ->
-    class_meth_non_final_self pos class_name
-  | Class_meth_non_final_CLASS { pos; class_name; is_trait } ->
-    class_meth_non_final_CLASS pos class_name is_trait
-  | Const_without_typehint { pos; const_name; ty_name } ->
-    const_without_typehint pos const_name ty_name
-  | Prop_without_typehint { pos; prop_name; vis } ->
-    prop_without_typehint pos prop_name vis
-  | Invalid_require_implements pos -> invalid_req_implements pos
-  | Invalid_require_extends pos -> invalid_req_extends pos
-  | Invalid_require_class pos -> invalid_req_class pos
-  | Invalid_wildcard_context pos -> invalid_wildcard_context pos
-  | Did_you_mean { name; suggest_pos; suggest_name; pos } ->
-    did_you_mean_naming pos name suggest_pos suggest_name
-  | Using_internal_class { pos; class_name } ->
-    using_internal_class pos class_name
-  | Too_few_type_arguments pos -> too_few_type_arguments pos
-  | Dynamic_class_name_in_strict_mode pos ->
-    dynamic_class_name_in_strict_mode pos
-  | Xhp_optional_required_attr { pos; attr_name } ->
-    xhp_optional_required_attr pos attr_name
-  | Xhp_required_with_default { pos; attr_name } ->
-    xhp_required_with_default pos attr_name
-  | Array_typehints_disallowed pos -> array_typehints_disallowed pos
-  | Wildcard_hint_disallowed pos -> wildcard_hint_disallowed pos
-  | Wildcard_tparam_disallowed pos -> wildcard_param_disallowed pos
-  | Illegal_use_of_dynamically_callable { meth_pos; vis; attr_pos } ->
-    illegal_use_of_dynamically_callable attr_pos meth_pos vis
-  | Parent_in_function_pointer { pos; meth_name; parent_name } ->
-    parent_in_function_pointer pos meth_name parent_name
-  | Self_in_non_final_function_pointer { pos; class_name; meth_name } ->
-    self_in_non_final_function_pointer pos class_name meth_name
-  | Return_only_typehint { pos; kind } -> return_only_typehint pos kind
-  | Unexpected_type_arguments pos -> unexpected_type_arguments pos
-  | Too_many_type_arguments pos -> too_many_type_arguments pos
-  | This_as_lexical_variable pos -> this_as_lexical_variable pos
-  | HKT_unsupported_feature { pos; because_nested; var_name; feature } ->
-    hkt_unsupported_feature pos because_nested var_name feature
-  | HKT_partial_application { pos; count } -> hkt_partial_application pos count
-  | HKT_wildcard pos -> hkt_wildcard pos
-  | HKT_implicit_argument { decl_pos; param_name; pos } ->
-    hkt_implicit_argument decl_pos param_name pos
-  | HKT_class_with_constraints_used { pos; class_name } ->
-    hkt_class_with_constraints_used pos class_name
-  | HKT_alias_with_implicit_constraints
-      {
-        typedef_pos;
-        typedef_name;
-        used_class_in_def_pos;
-        used_class_in_def_name;
-        used_class_tparam_name;
-        typedef_tparam_name;
-        pos;
-      } ->
-    hkt_alias_with_implicit_constraints
-      typedef_pos
-      typedef_name
-      used_class_in_def_pos
-      used_class_in_def_name
-      used_class_tparam_name
-      typedef_tparam_name
-      pos
-  | Explicit_consistent_constructor { pos; classish_kind } ->
-    explicit_consistent_constructor classish_kind pos
-  | Module_declaration_outside_allowed_files pos ->
-    module_declaration_outside_allowed_files pos
-  | Internal_module_level_trait pos -> internal_module_level_trait pos
-  | Dynamic_method_access pos -> dynamic_method_access pos
-  | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
-  | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
-    unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
-  | Tparam_non_shadowing_reuse { pos; tparam_name } ->
-    tparam_non_shadowing_reuse pos tparam_name
-  | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
-    undefined_in_expr_tree pos var_name dsl did_you_mean
-  | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos
-  | Illegal_typed_local { join; id_pos; id_name; def_pos } ->
-    illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
-  | Toplevel_statement pos -> toplevel_statement pos
-  | Attribute_outside_allowed_files pos -> attribute_outside_allowed_files pos
+let to_user_error t =
+  let f =
+    match t with
+    | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
+    | Unsupported_instead_of pos -> unsupported_instead_of pos
+    | Unexpected_arrow { pos; cname } -> unexpected_arrow pos cname
+    | Missing_arrow { pos; cname } -> missing_arrow pos cname
+    | Disallowed_xhp_type { pos; ty_name } -> disallowed_xhp_type pos ty_name
+    | Name_is_reserved { pos; name } -> name_is_reserved pos name
+    | Dollardollar_unused pos -> dollardollar_unused pos
+    | Already_bound { pos; name } -> already_bound pos name
+    | Method_name_already_bound { pos; meth_name } ->
+      method_name_already_bound pos meth_name
+    | Error_name_already_bound { pos; name; prev_pos } ->
+      error_name_already_bound pos name prev_pos
+    | Invalid_fun_pointer { pos; name } -> invalid_fun_pointer pos name
+    | Undefined { pos; var_name; did_you_mean } ->
+      undefined pos var_name did_you_mean
+    | This_reserved pos -> this_reserved pos
+    | Start_with_T pos -> start_with_T pos
+    | Unexpected_typedef { pos; expected_kind; decl_pos } ->
+      unexpected_typedef pos expected_kind decl_pos
+    | Field_name_already_bound pos -> field_name_already_bound pos
+    | Primitive_top_level pos -> primitive_top_level pos
+    | Primitive_invalid_alias { pos; ty_name_used; ty_name_canon } ->
+      primitive_invalid_alias pos ty_name_used ty_name_canon
+    | Dynamic_new_in_strict_mode pos -> dynamic_new_in_strict_mode pos
+    | Invalid_type_access_root { pos; id } -> invalid_type_access_root pos id
+    | Invalid_type_access_in_where pos -> invalid_type_access_in_where pos
+    | Duplicate_user_attribute { attr_name; prev_pos; pos } ->
+      duplicate_user_attribute attr_name prev_pos pos
+    | Invalid_memoize_label { attr_name; pos } ->
+      invalid_memoize_label attr_name pos
+    | Unbound_name { pos; name; kind } -> unbound_name pos name kind
+    | Unbound_attribute_name { pos; attr_name; closest_attr_name } ->
+      unbound_attribute_name pos attr_name closest_attr_name
+    | This_no_argument pos -> this_no_argument pos
+    | Object_cast pos -> object_cast pos
+    | This_hint_outside_class pos -> this_hint_outside_class pos
+    | Parent_outside_class pos -> parent_outside_class pos
+    | Self_outside_class pos -> self_outside_class pos
+    | Static_outside_class pos -> static_outside_class pos
+    | This_type_forbidden { pos; in_extends; in_req_extends } ->
+      this_type_forbidden pos in_extends in_req_extends
+    | Nonstatic_property_with_lsb pos -> nonstatic_property_with_lsb pos
+    | Lowercase_this { pos; ty_name } -> lowercase_this pos ty_name
+    | Classname_param pos -> classname_param pos
+    | Tparam_applied_to_type { pos; tparam_name } ->
+      tparam_applied_to_type pos tparam_name
+    | Tparam_with_tparam { pos; tparam_name } ->
+      tparam_with_tparam pos tparam_name
+    | Shadowed_tparam { prev_pos; tparam_name; pos } ->
+      shadowed_tparam prev_pos tparam_name pos
+    | Missing_typehint pos -> missing_typehint pos
+    | Expected_variable pos -> expected_variable pos
+    | Too_many_arguments pos -> too_many_arguments pos
+    | Too_few_arguments pos -> too_few_arguments pos
+    | Expected_collection { pos; cname } -> expected_collection pos cname
+    | Illegal_CLASS pos -> illegal_CLASS pos
+    | Illegal_TRAIT pos -> illegal_TRAIT pos
+    | Illegal_fun pos -> illegal_fun pos
+    | Illegal_member_variable_class pos -> illegal_member_variable_class pos
+    | Illegal_meth_fun pos -> illegal_meth_fun pos
+    | Illegal_inst_meth pos -> illegal_inst_meth pos
+    | Illegal_meth_caller pos -> illegal_meth_caller pos
+    | Illegal_class_meth pos -> illegal_class_meth pos
+    | Illegal_constant pos -> illegal_constant pos
+    | Lvar_in_obj_get { pos; lvar_pos; lvar_name } ->
+      lvar_in_obj_get pos lvar_pos lvar_name
+    | Class_meth_non_final_self { pos; class_name } ->
+      class_meth_non_final_self pos class_name
+    | Class_meth_non_final_CLASS { pos; class_name; is_trait } ->
+      class_meth_non_final_CLASS pos class_name is_trait
+    | Const_without_typehint { pos; const_name; ty_name } ->
+      const_without_typehint pos const_name ty_name
+    | Prop_without_typehint { pos; prop_name; vis } ->
+      prop_without_typehint pos prop_name vis
+    | Invalid_require_implements pos -> invalid_req_implements pos
+    | Invalid_require_extends pos -> invalid_req_extends pos
+    | Invalid_require_class pos -> invalid_req_class pos
+    | Invalid_wildcard_context pos -> invalid_wildcard_context pos
+    | Did_you_mean { name; suggest_pos; suggest_name; pos } ->
+      did_you_mean_naming pos name suggest_pos suggest_name
+    | Using_internal_class { pos; class_name } ->
+      using_internal_class pos class_name
+    | Too_few_type_arguments pos -> too_few_type_arguments pos
+    | Dynamic_class_name_in_strict_mode pos ->
+      dynamic_class_name_in_strict_mode pos
+    | Xhp_optional_required_attr { pos; attr_name } ->
+      xhp_optional_required_attr pos attr_name
+    | Xhp_required_with_default { pos; attr_name } ->
+      xhp_required_with_default pos attr_name
+    | Array_typehints_disallowed pos -> array_typehints_disallowed pos
+    | Wildcard_hint_disallowed pos -> wildcard_hint_disallowed pos
+    | Wildcard_tparam_disallowed pos -> wildcard_param_disallowed pos
+    | Illegal_use_of_dynamically_callable { meth_pos; vis; attr_pos } ->
+      illegal_use_of_dynamically_callable attr_pos meth_pos vis
+    | Parent_in_function_pointer { pos; meth_name; parent_name } ->
+      parent_in_function_pointer pos meth_name parent_name
+    | Self_in_non_final_function_pointer { pos; class_name; meth_name } ->
+      self_in_non_final_function_pointer pos class_name meth_name
+    | Return_only_typehint { pos; kind } -> return_only_typehint pos kind
+    | Unexpected_type_arguments pos -> unexpected_type_arguments pos
+    | Too_many_type_arguments pos -> too_many_type_arguments pos
+    | This_as_lexical_variable pos -> this_as_lexical_variable pos
+    | HKT_unsupported_feature { pos; because_nested; var_name; feature } ->
+      hkt_unsupported_feature pos because_nested var_name feature
+    | HKT_partial_application { pos; count } ->
+      hkt_partial_application pos count
+    | HKT_wildcard pos -> hkt_wildcard pos
+    | HKT_implicit_argument { decl_pos; param_name; pos } ->
+      hkt_implicit_argument decl_pos param_name pos
+    | HKT_class_with_constraints_used { pos; class_name } ->
+      hkt_class_with_constraints_used pos class_name
+    | HKT_alias_with_implicit_constraints
+        {
+          typedef_pos;
+          typedef_name;
+          used_class_in_def_pos;
+          used_class_in_def_name;
+          used_class_tparam_name;
+          typedef_tparam_name;
+          pos;
+        } ->
+      hkt_alias_with_implicit_constraints
+        typedef_pos
+        typedef_name
+        used_class_in_def_pos
+        used_class_in_def_name
+        used_class_tparam_name
+        typedef_tparam_name
+        pos
+    | Explicit_consistent_constructor { pos; classish_kind } ->
+      explicit_consistent_constructor classish_kind pos
+    | Module_declaration_outside_allowed_files pos ->
+      module_declaration_outside_allowed_files pos
+    | Internal_module_level_trait pos -> internal_module_level_trait pos
+    | Dynamic_method_access pos -> dynamic_method_access pos
+    | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
+    | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
+      unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
+    | Tparam_non_shadowing_reuse { pos; tparam_name } ->
+      tparam_non_shadowing_reuse pos tparam_name
+    | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
+      undefined_in_expr_tree pos var_name dsl did_you_mean
+    | Dynamic_hint_disallowed pos -> dynamic_hint_disallowed pos
+    | Illegal_typed_local { join; id_pos; id_name; def_pos } ->
+      illegal_typed_local ~join id_pos id_name (Pos_or_decl.of_raw_pos def_pos)
+    | Toplevel_statement pos -> toplevel_statement pos
+    | Attribute_outside_allowed_files pos -> attribute_outside_allowed_files pos
+  in
+  f Explanation.empty

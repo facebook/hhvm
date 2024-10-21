@@ -569,6 +569,7 @@ let to_string (error : Errors.finalized_error) : string =
     claim;
     reasons;
     custom_msgs;
+    explanation = _;
     quickfixes = _;
     flags = _;
     is_fixmed = _;

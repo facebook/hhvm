@@ -44,6 +44,7 @@ File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -70,6 +71,7 @@ File "vector_invariant_2.php", line 6, character 2 - line 6, character 8:
  7 |  return $x;
  8 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -95,7 +97,7 @@ File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
  49 |     /**
  50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
 
@@ -106,7 +108,9 @@ File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
  7 |  return $x;
  8 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "vector_invariant_2.php", line 6, character 6 - line 6, character 7:
 
@@ -117,7 +121,9 @@ File "vector_invariant_2.php", line 6, character 6 - line 6, character 7:
  7 |  return $x;
  8 | }
 
-The supertype comes from this hint (its definition was given above)
+as the type of the local variable
+
+The supertype comes from this hint
 
 File "vector_invariant_2.php", line 3, character 14 - line 3, character 22:
 
@@ -127,6 +133,9 @@ File "vector_invariant_2.php", line 3, character 14 - line 3, character 22:
  6 |  bar($x);
  7 |  return $x;
  8 | }
+
+(its definition was given above)
+
 
 Step 3 of 3 (here is where the error occurred)
 
@@ -198,6 +207,7 @@ File "vector_invariant_2.php", line 5, character 21 - line 5, character 22:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -219,7 +229,7 @@ File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
  49 |     /**
  50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
 
@@ -227,7 +237,9 @@ File "vector_invariant_2.php", line 5, character 25 - line 5, character 26:
  6 |  bar($x);
  7 |  return $x;
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "vector_invariant_2.php", line 7, character 9 - line 7, character 10:
 
@@ -237,7 +249,9 @@ File "vector_invariant_2.php", line 7, character 9 - line 7, character 10:
  9 | 
 10 | class A {}
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "vector_invariant_2.php", line 7, character 2 - line 7, character 11:
 
@@ -247,13 +261,18 @@ File "vector_invariant_2.php", line 7, character 2 - line 7, character 11:
  9 | 
 10 | class A {}
 
-The supertype comes from this hint (its definition was given above)
+because it is used in a return position
+
+The supertype comes from this hint
 
 File "vector_invariant_2.php", line 5, character 30 - line 5, character 38:
 
  5 | function foo(Vector<?A> $x): »Vector<A>« {
  6 |  bar($x);
  7 |  return $x;
+
+(its definition was given above)
+
 
 Step 2 of 2 (here is where the error occurred)
 

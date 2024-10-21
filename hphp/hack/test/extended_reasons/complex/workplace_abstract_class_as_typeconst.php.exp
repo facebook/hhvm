@@ -24,6 +24,7 @@ File "workplace_abstract_class_as_typeconst.php", line 37, character 23 - line 3
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -43,6 +44,7 @@ File "workplace_abstract_class_as_typeconst.php", line 37, character 3 - line 37
  36 |   $ak = new ExampleArraykeyClass();
  37 |   »$ak->addToContainer(1)«;
  38 | }
+
 
 Step 2 of 2 (here is where the error occurred)
 

@@ -108,7 +108,7 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 7, character 3 - line 7, character 6:
 
@@ -120,7 +120,9 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 11, character 28 - line 11, character 31:
 
@@ -128,6 +130,8 @@ File "metachain.php", line 11, character 28 - line 11, character 31:
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -138,6 +142,7 @@ File "metachain.php", line 22, character 17 - line 22, character 22:
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
+
 
 [Main] Step 2 of 2 (here is where the error occurred)
 
@@ -197,7 +202,7 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 7, character 3 - line 7, character 6:
 
@@ -209,7 +214,9 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 11, character 28 - line 11, character 31:
 
@@ -217,6 +224,8 @@ File "metachain.php", line 11, character 28 - line 11, character 31:
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+
+as the type of the local variable
 
 The supertype comes from this expression
 
@@ -242,7 +251,7 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 7, character 3 - line 7, character 6:
 
@@ -254,7 +263,9 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 11, character 28 - line 11, character 31:
 
@@ -263,7 +274,9 @@ File "metachain.php", line 11, character 28 - line 11, character 31:
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
 
-which itself flows into this type variable via an assignment
+as the type of the local variable
+
+which itself flows into this type variable
 
 File "metachain.php", line 11, character 12 - line 11, character 23:
 
@@ -271,6 +284,9 @@ File "metachain.php", line 11, character 12 - line 11, character 23:
  11 |   list($_, »$user_prompt«) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+
+via an assignment
+
 
 [Lower] Step 2 of 2
 
@@ -301,7 +317,6 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 12 |   //$user_prompt = $foo[1];
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
-
 I checked the subtype constraint in [Upper / Main] because it was implied by the other constraints on the hint.
 
 Upper / Main
@@ -330,6 +345,7 @@ File "metachain.php", line 16, character 12 - line 16, character 20:
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
 
+
 [Upper / Main] Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -346,7 +362,7 @@ File "metachain.php", line 13, character 8 - line 15, character 3:
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 13, character 3 - line 13, character 4:
 
@@ -357,7 +373,9 @@ File "metachain.php", line 13, character 3 - line 13, character 4:
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 16, character 18 - line 16, character 19:
 
@@ -368,6 +386,8 @@ File "metachain.php", line 16, character 18 - line 16, character 19:
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "metachain.php", line 21, character 23 - line 23, character 3:
@@ -377,6 +397,7 @@ File "metachain.php", line 21, character 23 - line 23, character 3:
  22 |     'prompt' => string,
  23 |   );«
  24 | }
+
 
 [Upper / Main] Step 3 of 3
 
@@ -406,7 +427,7 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 7, character 3 - line 7, character 6:
 
@@ -418,7 +439,9 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 11, character 28 - line 11, character 31:
 
@@ -427,7 +450,9 @@ File "metachain.php", line 11, character 28 - line 11, character 31:
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
 
-which itself flows into this type variable via an assignment
+as the type of the local variable
+
+which itself flows into this type variable
 
 File "metachain.php", line 11, character 12 - line 11, character 23:
 
@@ -436,7 +461,9 @@ File "metachain.php", line 11, character 12 - line 11, character 23:
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
 
-which itself flows into this expression via an assignment
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 11, character 12 - line 11, character 23:
 
@@ -445,7 +472,9 @@ File "metachain.php", line 11, character 12 - line 11, character 23:
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 14, character 17 - line 14, character 28:
 
@@ -455,6 +484,8 @@ File "metachain.php", line 14, character 17 - line 14, character 28:
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -494,6 +525,7 @@ File "metachain.php", line 16, character 12 - line 16, character 20:
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
 
+
 [Upper / Lower] Step 2 of 2
 
 These are function types so next I checked the 1st function parameters.
@@ -510,7 +542,7 @@ File "metachain.php", line 13, character 8 - line 15, character 3:
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
 
-and flows into this expression via an assignment
+and flows into this expression
 
 File "metachain.php", line 13, character 3 - line 13, character 4:
 
@@ -521,7 +553,9 @@ File "metachain.php", line 13, character 3 - line 13, character 4:
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "metachain.php", line 16, character 18 - line 16, character 19:
 
@@ -532,6 +566,8 @@ File "metachain.php", line 16, character 18 - line 16, character 19:
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
 
+as the type of the local variable
+
 The supertype comes from this hint
 
 File "metachain.php", line 27, character 19 - line 27, character 19:
@@ -541,7 +577,7 @@ File "metachain.php", line 27, character 19 - line 27, character 19:
  28 |   return null as nonnull;
  29 | }
 
-and flows into this generic parameter `T` of `chain` via the generic `T`
+and flows into this generic parameter `T` of `chain`
 
 File "metachain.php", line 16, character 12 - line 16, character 16:
 
@@ -551,6 +587,8 @@ File "metachain.php", line 16, character 12 - line 16, character 16:
  16 |   $chain = »chain«($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+
+via the generic `T`
 
 I found the supertype for [Upper / Main] when I checked the subtype constraint in [Upper / Upper].
 
@@ -569,7 +607,7 @@ File "metachain.php", line 34, character 62 - line 34, character 62:
  35 |   ): ReproGenesisChain<mixed> {
  36 |     return null as nonnull;
 
-and flows into this hint via the generic `T`
+and flows into this hint
 
 File "metachain.php", line 27, character 44 - line 27, character 44:
 
@@ -578,7 +616,9 @@ File "metachain.php", line 27, character 44 - line 27, character 44:
  28 |   return null as nonnull;
  29 | }
 
-which itself flows into this generic parameter `T` of `chain` via the generic `T`
+via the generic `T`
+
+which itself flows into this generic parameter `T` of `chain`
 
 File "metachain.php", line 16, character 12 - line 16, character 16:
 
@@ -588,6 +628,8 @@ File "metachain.php", line 16, character 12 - line 16, character 16:
  16 |   $chain = »chain«($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+
+via the generic `T`
 
 The supertype comes from this hint
 

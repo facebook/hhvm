@@ -824,95 +824,102 @@ let package_expression_in_invariant pos =
     []
 
 (* --------------------------------------------- *)
-let to_user_error = function
-  | Repeated_record_field_name { pos; name; prev_pos } ->
-    repeated_record_field_name pos name prev_pos
-  | Dynamically_callable_reified pos -> dynamically_callable_reified pos
-  | No_construct_parent pos -> no_construct_parent pos
-  | Nonstatic_method_in_abstract_final_class pos ->
-    nonstatic_method_in_abstract_final_class pos
-  | Constructor_required { pos; class_name; prop_names } ->
-    constructor_required pos class_name prop_names
-  | Not_initialized { pos; class_name; props } ->
-    not_initialized pos class_name props
-  | Call_before_init { pos; prop_name } -> call_before_init pos prop_name
-  | Abstract_with_body pos -> abstract_with_body pos
-  | Not_abstract_without_typeconst pos -> not_abstract_without_typeconst pos
-  | Typeconst_depends_on_external_tparam { pos; ext_pos; ext_name } ->
-    typeconst_depends_on_external_tparam pos ext_pos ext_name
-  | Interface_with_partial_typeconst pos -> interface_with_partial_typeconst pos
-  | Partially_abstract_typeconst_definition pos ->
-    partially_abstract_typeconst_definition pos
-  | Refinement_in_typestruct { pos; kind } -> refinement_in_typestruct kind pos
-  | Multiple_xhp_category pos -> multiple_xhp_category pos
-  | Return_in_gen pos -> return_in_gen pos
-  | Return_in_finally pos -> return_in_finally pos
-  | Toplevel_break pos -> toplevel_break pos
-  | Toplevel_continue pos -> toplevel_continue pos
-  | Continue_in_switch pos -> continue_in_switch pos
-  | Await_in_sync_function { pos; func_pos } ->
-    await_in_sync_function pos func_pos
-  | Interface_uses_trait pos -> interface_uses_trait pos
-  | Static_memoized_function pos -> static_memoized_function pos
-  | Magic { pos; meth_name } -> magic pos meth_name
-  | ToString_returns_string pos -> toString_returns_string pos
-  | ToString_visibility pos -> toString_visibility pos
-  | Abstract_body pos -> abstract_body pos
-  | Interface_with_member_variable pos -> interface_with_member_variable pos
-  | Interface_with_static_member_variable pos ->
-    interface_with_static_member_variable pos
-  | Illegal_function_name { pos; name } -> illegal_function_name pos name
-  | Entrypoint_arguments pos -> entrypoint_arguments pos
-  | Entrypoint_generics pos -> entrypoint_generics pos
-  | Variadic_memoize pos -> variadic_memoize pos
-  | Abstract_method_memoize pos -> abstract_method_memoize pos
-  | Instance_property_in_abstract_final_class pos ->
-    instance_property_in_abstract_final_class pos
-  | Inout_params_special pos -> inout_params_special pos
-  | Inout_params_memoize { pos; param_pos } ->
-    inout_params_memoize pos param_pos
-  | Inout_in_transformed_pseudofunction { pos; fn_name } ->
-    inout_in_transformed_pseudofunction pos fn_name
-  | Reading_from_append pos -> reading_from_append pos
-  | List_rvalue pos -> list_rvalue pos
-  | Illegal_destructor pos -> illegal_destructor pos
-  | Illegal_context { pos; name } -> illegal_context pos name
-  | Case_fallthrough { switch_pos; case_pos; next_pos } ->
-    case_fallthrough switch_pos case_pos next_pos
-  | Default_fallthrough pos -> default_fallthrough pos
-  | Php_lambda_disallowed pos -> php_lambda_disallowed pos
-  | Non_interface { pos; name; verb } -> non_interface pos name verb
-  | Uses_non_trait { pos; name; kind } -> uses_non_trait pos name kind
-  | Requires_non_class { pos; name; kind } -> requires_non_class pos name kind
-  | Requires_final_class { pos; name } -> requires_final_class pos name
-  | Internal_method_with_invalid_visibility { pos; vis } ->
-    internal_method_with_invalid_visibility pos vis
-  | Private_and_final pos -> private_and_final pos
-  | Internal_member_inside_public_trait { member_pos; trait_pos; is_method } ->
-    internal_member_inside_public_trait member_pos trait_pos is_method
-  | Attribute_conflicting_memoize { pos; second_pos } ->
-    attribute_conflicting_memoize pos second_pos
-  | Soft_internal_without_internal pos -> soft_internal_without_internal pos
-  | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
-    wrong_expression_kind_builtin_attribute pos attr_name expr_kind
-  | Attribute_too_many_arguments { pos; name; expected } ->
-    attribute_too_many_arguments pos name expected
-  | Attribute_too_few_arguments { pos; name; expected } ->
-    attribute_too_few_arguments pos name expected
-  | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
-    attribute_not_exact_number_of_args pos name expected actual
-  | Attribute_param_type { pos; x } -> attribute_param_type pos x
-  | Attribute_no_auto_dynamic pos -> attribute_no_auto_dynamic pos
-  | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
-  | Generics_not_allowed pos -> generics_not_allowed pos
-  | Local_variable_modified_and_used { pos; pos_useds } ->
-    local_variable_modified_and_used pos pos_useds
-  | Local_variable_modified_twice { pos; pos_modifieds } ->
-    local_variable_modified_twice pos pos_modifieds
-  | Assign_during_case pos -> assign_during_case pos
-  | Read_before_write { pos; member_name } ->
-    read_before_write (pos, member_name)
-  | Lateinit_with_default pos -> lateinit_with_default pos
-  | Missing_assign pos -> missing_assign pos
-  | Clone_return_type pos -> clone_return_type pos
-  | Package_expr_in_invariant pos -> package_expression_in_invariant pos
+let to_user_error t =
+  let f =
+    match t with
+    | Repeated_record_field_name { pos; name; prev_pos } ->
+      repeated_record_field_name pos name prev_pos
+    | Dynamically_callable_reified pos -> dynamically_callable_reified pos
+    | No_construct_parent pos -> no_construct_parent pos
+    | Nonstatic_method_in_abstract_final_class pos ->
+      nonstatic_method_in_abstract_final_class pos
+    | Constructor_required { pos; class_name; prop_names } ->
+      constructor_required pos class_name prop_names
+    | Not_initialized { pos; class_name; props } ->
+      not_initialized pos class_name props
+    | Call_before_init { pos; prop_name } -> call_before_init pos prop_name
+    | Abstract_with_body pos -> abstract_with_body pos
+    | Not_abstract_without_typeconst pos -> not_abstract_without_typeconst pos
+    | Typeconst_depends_on_external_tparam { pos; ext_pos; ext_name } ->
+      typeconst_depends_on_external_tparam pos ext_pos ext_name
+    | Interface_with_partial_typeconst pos ->
+      interface_with_partial_typeconst pos
+    | Partially_abstract_typeconst_definition pos ->
+      partially_abstract_typeconst_definition pos
+    | Refinement_in_typestruct { pos; kind } ->
+      refinement_in_typestruct kind pos
+    | Multiple_xhp_category pos -> multiple_xhp_category pos
+    | Return_in_gen pos -> return_in_gen pos
+    | Return_in_finally pos -> return_in_finally pos
+    | Toplevel_break pos -> toplevel_break pos
+    | Toplevel_continue pos -> toplevel_continue pos
+    | Continue_in_switch pos -> continue_in_switch pos
+    | Await_in_sync_function { pos; func_pos } ->
+      await_in_sync_function pos func_pos
+    | Interface_uses_trait pos -> interface_uses_trait pos
+    | Static_memoized_function pos -> static_memoized_function pos
+    | Magic { pos; meth_name } -> magic pos meth_name
+    | ToString_returns_string pos -> toString_returns_string pos
+    | ToString_visibility pos -> toString_visibility pos
+    | Abstract_body pos -> abstract_body pos
+    | Interface_with_member_variable pos -> interface_with_member_variable pos
+    | Interface_with_static_member_variable pos ->
+      interface_with_static_member_variable pos
+    | Illegal_function_name { pos; name } -> illegal_function_name pos name
+    | Entrypoint_arguments pos -> entrypoint_arguments pos
+    | Entrypoint_generics pos -> entrypoint_generics pos
+    | Variadic_memoize pos -> variadic_memoize pos
+    | Abstract_method_memoize pos -> abstract_method_memoize pos
+    | Instance_property_in_abstract_final_class pos ->
+      instance_property_in_abstract_final_class pos
+    | Inout_params_special pos -> inout_params_special pos
+    | Inout_params_memoize { pos; param_pos } ->
+      inout_params_memoize pos param_pos
+    | Inout_in_transformed_pseudofunction { pos; fn_name } ->
+      inout_in_transformed_pseudofunction pos fn_name
+    | Reading_from_append pos -> reading_from_append pos
+    | List_rvalue pos -> list_rvalue pos
+    | Illegal_destructor pos -> illegal_destructor pos
+    | Illegal_context { pos; name } -> illegal_context pos name
+    | Case_fallthrough { switch_pos; case_pos; next_pos } ->
+      case_fallthrough switch_pos case_pos next_pos
+    | Default_fallthrough pos -> default_fallthrough pos
+    | Php_lambda_disallowed pos -> php_lambda_disallowed pos
+    | Non_interface { pos; name; verb } -> non_interface pos name verb
+    | Uses_non_trait { pos; name; kind } -> uses_non_trait pos name kind
+    | Requires_non_class { pos; name; kind } -> requires_non_class pos name kind
+    | Requires_final_class { pos; name } -> requires_final_class pos name
+    | Internal_method_with_invalid_visibility { pos; vis } ->
+      internal_method_with_invalid_visibility pos vis
+    | Private_and_final pos -> private_and_final pos
+    | Internal_member_inside_public_trait { member_pos; trait_pos; is_method }
+      ->
+      internal_member_inside_public_trait member_pos trait_pos is_method
+    | Attribute_conflicting_memoize { pos; second_pos } ->
+      attribute_conflicting_memoize pos second_pos
+    | Soft_internal_without_internal pos -> soft_internal_without_internal pos
+    | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
+      wrong_expression_kind_builtin_attribute pos attr_name expr_kind
+    | Attribute_too_many_arguments { pos; name; expected } ->
+      attribute_too_many_arguments pos name expected
+    | Attribute_too_few_arguments { pos; name; expected } ->
+      attribute_too_few_arguments pos name expected
+    | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
+      attribute_not_exact_number_of_args pos name expected actual
+    | Attribute_param_type { pos; x } -> attribute_param_type pos x
+    | Attribute_no_auto_dynamic pos -> attribute_no_auto_dynamic pos
+    | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
+    | Generics_not_allowed pos -> generics_not_allowed pos
+    | Local_variable_modified_and_used { pos; pos_useds } ->
+      local_variable_modified_and_used pos pos_useds
+    | Local_variable_modified_twice { pos; pos_modifieds } ->
+      local_variable_modified_twice pos pos_modifieds
+    | Assign_during_case pos -> assign_during_case pos
+    | Read_before_write { pos; member_name } ->
+      read_before_write (pos, member_name)
+    | Lateinit_with_default pos -> lateinit_with_default pos
+    | Missing_assign pos -> missing_assign pos
+    | Clone_return_type pos -> clone_return_type pos
+    | Package_expr_in_invariant pos -> package_expression_in_invariant pos
+  in
+  f Explanation.empty

@@ -27,6 +27,7 @@ File "fn_subtyping_contra_1.php", line 6, character 26 - line 6, character 30:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -49,6 +50,7 @@ File "fn_subtyping_contra_1.php", line 8, character 3 - line 8, character 11:
  8 |   »foo_1($f)«;
  9 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -63,7 +65,7 @@ File "fn_subtyping_contra_1.php", line 7, character 16 - line 7, character 36:
  8 |   foo_1($f);
  9 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "fn_subtyping_contra_1.php", line 7, character 38 - line 7, character 39:
 
@@ -72,7 +74,9 @@ File "fn_subtyping_contra_1.php", line 7, character 38 - line 7, character 39:
  8 |   foo_1($f);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "fn_subtyping_contra_1.php", line 8, character 9 - line 8, character 10:
 
@@ -80,6 +84,8 @@ File "fn_subtyping_contra_1.php", line 8, character 9 - line 8, character 10:
  7 | function bar_1((function(Sub): void) $f): void {
  8 |   foo_1(»$f«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -89,6 +95,7 @@ File "fn_subtyping_contra_1.php", line 6, character 16 - line 6, character 38:
  7 | function bar_1((function(Sub): void) $f): void {
  8 |   foo_1($f);
  9 | }
+
 
 Step 3 of 3 (here is where the error occurred)
 

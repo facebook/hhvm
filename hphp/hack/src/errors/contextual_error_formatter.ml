@@ -210,6 +210,7 @@ let to_string
     code;
     claim = (_, claim_msg);
     reasons = _;
+    explanation = _;
     custom_msgs;
     quickfixes = _;
     flags = _;

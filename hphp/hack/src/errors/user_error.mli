@@ -24,6 +24,7 @@ type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
+  explanation: 'pos Explanation.t;
   quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
@@ -40,6 +41,7 @@ val make :
   ?flags:User_error_flags.t ->
   'a Message.t ->
   'b Message.t list ->
+  'b Explanation.t ->
   ('a, 'b) t
 
 (** Make a User_error.t with severity Err *)
@@ -51,6 +53,7 @@ val make_err :
   ?flags:User_error_flags.t ->
   'a Message.t ->
   'b Message.t list ->
+  'b Explanation.t ->
   ('a, 'b) t
 
 (** Make a User_error.t with severity Warning *)

@@ -50,6 +50,7 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 49 - line 11, cha
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -74,6 +75,7 @@ File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, char
  12 |   »rcvr_both_bounds($x)«;
  13 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -89,7 +91,7 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, cha
  12 |   rcvr_both_bounds($x);
  13 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, character 55:
 
@@ -99,7 +101,9 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, cha
  12 |   rcvr_both_bounds($x);
  13 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
 
@@ -108,6 +112,8 @@ File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, cha
  11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
  12 |   rcvr_both_bounds(»$x«);
  13 | }
+
+as the type of the local variable
 
 The supertype comes from this constraint on the generic parameter
 
@@ -118,6 +124,7 @@ File "generic_subtyping_upper_bound_2.php", line 9, character 32 - line 9, chara
 11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
 12 |   rcvr_both_bounds($x);
 13 | }
+
 
 Step 3 of 3 (here is where the error occurred)
 
@@ -203,6 +210,7 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, cha
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -227,6 +235,7 @@ File "generic_subtyping_upper_bound_2.php", line 12, character 3 - line 12, char
  12 |   »rcvr_both_bounds($x)«;
  13 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
@@ -242,7 +251,7 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 52 - line 11, cha
  12 |   rcvr_both_bounds($x);
  13 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, character 55:
 
@@ -252,7 +261,9 @@ File "generic_subtyping_upper_bound_2.php", line 11, character 54 - line 11, cha
  12 |   rcvr_both_bounds($x);
  13 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, character 21:
 
@@ -261,6 +272,8 @@ File "generic_subtyping_upper_bound_2.php", line 12, character 20 - line 12, cha
  11 | function call_both_bounds_with_upper_bound<T as A>(T $x): void {
  12 |   rcvr_both_bounds(»$x«);
  13 | }
+
+as the type of the local variable
 
 The supertype comes from this constraint on the generic parameter
 

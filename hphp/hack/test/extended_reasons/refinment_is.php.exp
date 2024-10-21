@@ -32,6 +32,7 @@ File "refinment_is.php", line 7, character 19 - line 7, character 19:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -49,7 +50,7 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
  13 |   return $z;
  14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
@@ -57,13 +58,17 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
  13 |   return »$z«;
  14 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
  12 |   }
  13 |   »return $z;«
  14 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -89,6 +94,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
  8 |   if($a is I) {
  9 |     $z = $a;
 
+
 Step 2 of 3
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
@@ -106,7 +112,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 13 |   return $z;
 14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
@@ -119,7 +125,9 @@ File "refinment_is.php", line 9, character 10 - line 9, character 11:
 13 |   return $z;
 14 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
@@ -132,6 +140,8 @@ File "refinment_is.php", line 9, character 5 - line 9, character 6:
 13 |   return $z;
 14 | }
 
+via an assignment
+
 The supertype is the same as before.
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
@@ -143,6 +153,7 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+
 
 Step 3 of 3 (here is where the error occurred)
 
@@ -172,7 +183,7 @@ File "refinment_is.php", line 4, character 7 - line 4, character 7:
  8 |   if($a is I) {
  9 |     $z = $a;
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "refinment_is.php", line 7, character 21 - line 7, character 22:
 
@@ -184,7 +195,9 @@ File "refinment_is.php", line 7, character 21 - line 7, character 22:
  8 |   if($a is I) {
  9 |     $z = $a;
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "refinment_is.php", line 8, character 6 - line 8, character 7:
 
@@ -196,6 +209,8 @@ File "refinment_is.php", line 8, character 6 - line 8, character 7:
 12 |   }
 13 |   return $z;
 14 | }
+
+as the type of the local variable
 
 The supertype is the same as before.
 
@@ -243,6 +258,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -260,7 +276,7 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
  13 |   return $z;
  14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
@@ -268,13 +284,17 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
  13 |   return »$z«;
  14 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
  12 |   }
  13 |   »return $z;«
  14 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -298,6 +318,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
  8 |   if($a is I) {
  9 |     $z = $a;
 
+
 Step 2 of 2 (here is where the error occurred)
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
@@ -315,7 +336,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 13 |   return $z;
 14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
@@ -328,7 +349,9 @@ File "refinment_is.php", line 9, character 10 - line 9, character 11:
 13 |   return $z;
 14 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
@@ -340,6 +363,8 @@ File "refinment_is.php", line 9, character 5 - line 9, character 6:
 12 |   }
 13 |   return $z;
 14 | }
+
+via an assignment
 
 The supertype is the same as before.
 
@@ -386,6 +411,7 @@ File "refinment_is.php", line 8, character 12 - line 8, character 12:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -403,7 +429,7 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
  13 |   return $z;
  14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 13, character 10 - line 13, character 11:
 
@@ -411,13 +437,17 @@ File "refinment_is.php", line 13, character 10 - line 13, character 11:
  13 |   return »$z«;
  14 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 13, character 3 - line 13, character 12:
 
  12 |   }
  13 |   »return $z;«
  14 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -441,6 +471,7 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
  8 |   if($a is I) {
  9 |     $z = $a;
 
+
 Step 2 of 3
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
@@ -458,7 +489,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 13 |   return $z;
 14 | }
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "refinment_is.php", line 9, character 10 - line 9, character 11:
 
@@ -471,7 +502,9 @@ File "refinment_is.php", line 9, character 10 - line 9, character 11:
 13 |   return $z;
 14 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "refinment_is.php", line 9, character 5 - line 9, character 6:
 
@@ -484,6 +517,8 @@ File "refinment_is.php", line 9, character 5 - line 9, character 6:
 13 |   return $z;
 14 | }
 
+via an assignment
+
 The supertype is the same as before.
 
 File "refinment_is.php", line 7, character 32 - line 7, character 32:
@@ -494,6 +529,7 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+
 
 Step 3 of 3 (here is where the error occurred)
 

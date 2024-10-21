@@ -27,6 +27,20 @@
     ppx_deriving.std)))
 
 (library
+  (name explanation)
+  (wrapped false)
+  (preprocess
+   (pps
+    ppx_deriving.std
+    ppx_hash))
+  (modules
+    explanation)
+  (libraries
+    core_kernel
+    hh_autoimport
+    ))
+
+(library
   (name user_error)
   (wrapped false)
   (preprocess
@@ -43,6 +57,7 @@
   (libraries
     core_kernel
     classish_positions
+    explanation
     pos_or_decl
     hh_autoimport
     utils_multifile

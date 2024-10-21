@@ -27,6 +27,7 @@ File "assign_vector_bad.php", line 4, character 11 - line 4, character 12:
 
 Here's why:
 
+
 Step 1 of 1 (here is where the error occurred)
 
 I started by checking this subtype relationship.
@@ -87,6 +88,7 @@ File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -109,7 +111,7 @@ File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
  49 |     /**
  50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "assign_vector_bad.php", line 3, character 30 - line 3, character 31:
 
@@ -118,7 +120,9 @@ File "assign_vector_bad.php", line 3, character 30 - line 3, character 31:
  5 |   return $v;
  6 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "assign_vector_bad.php", line 5, character 10 - line 5, character 11:
 
@@ -127,7 +131,9 @@ File "assign_vector_bad.php", line 5, character 10 - line 5, character 11:
  5 |   return »$v«;
  6 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "assign_vector_bad.php", line 5, character 3 - line 5, character 12:
 
@@ -136,7 +142,9 @@ File "assign_vector_bad.php", line 5, character 3 - line 5, character 12:
  5 |   »return $v;«
  6 | }
 
-The supertype comes from this hint (its definition was given above)
+because it is used in a return position
+
+The supertype comes from this hint
 
 File "assign_vector_bad.php", line 3, character 35 - line 3, character 50:
 
@@ -144,6 +152,9 @@ File "assign_vector_bad.php", line 3, character 35 - line 3, character 50:
  4 |   $v[0] = 42;
  5 |   return $v;
  6 | }
+
+(its definition was given above)
+
 
 Step 2 of 2 (here is where the error occurred)
 

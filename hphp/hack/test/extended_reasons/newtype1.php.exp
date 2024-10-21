@@ -22,6 +22,7 @@ File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
 
 Here's why:
 
+
 Step 1 of 3
 
 I started by checking this subtype relationship.
@@ -42,6 +43,7 @@ File "newtype1.php--file2.php", line 8, character 10 - line 8, character 24:
  8 |   return »expect_bool($y)«;
  9 | }
 
+
 Step 2 of 3
 
 These are function types so next I checked the 1st function parameters.
@@ -61,7 +63,7 @@ File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
 
  3 | newtype myint as int = »int«;
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
 
@@ -69,13 +71,17 @@ File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
  8 |   return expect_bool($y);
  9 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return expect_bool(»$y«);
  9 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 
@@ -84,6 +90,7 @@ File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;
  5 | }
+
 
 Step 3 of 3 (here is where the error occurred)
 

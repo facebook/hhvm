@@ -67,14 +67,16 @@ type t = locl_phase t_ [@@deriving show]
 
 val to_json : 'a t_ -> Hh_json.json
 
-val debug :
-  sub:locl_phase t_ -> super:locl_phase t_ -> (Pos_or_decl.t * string) list
+val debug_reason : sub:locl_phase t_ -> super:locl_phase t_ -> 'a Explanation.t
+
+val debug_derivation :
+  sub:locl_phase t_ -> super:locl_phase t_ -> 'a Explanation.t
 
 val explain :
   sub:locl_phase t_ ->
   super:locl_phase t_ ->
   complexity:int ->
-  (Pos_or_decl.t * string) list
+  Pos_or_decl.t Explanation.t
 
 type decl_t = decl_phase t_
 

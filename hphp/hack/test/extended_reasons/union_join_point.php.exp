@@ -35,6 +35,7 @@ File "union_join_point.php", line 5, character 30 - line 5, character 30:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -52,7 +53,7 @@ File "union_join_point.php", line 6, character 3 - line 10, character 3:
 11 | 
 12 |   return $z;
 
-and flows into this expression as the type of the local variable
+and flows into this expression
 
 File "union_join_point.php", line 12, character 10 - line 12, character 11:
 
@@ -63,7 +64,9 @@ File "union_join_point.php", line 12, character 10 - line 12, character 11:
  12 |   return »$z«;
  13 | }
 
-which itself flows into this expression because it is used in a return position
+as the type of the local variable
+
+which itself flows into this expression
 
 File "union_join_point.php", line 12, character 3 - line 12, character 12:
 
@@ -73,6 +76,8 @@ File "union_join_point.php", line 12, character 3 - line 12, character 12:
  11 | 
  12 |   »return $z;«
  13 | }
+
+because it is used in a return position
 
 The supertype comes from this hint
 
@@ -97,6 +102,7 @@ File "union_join_point.php", line 2, character 7 - line 2, character 7:
  5 | function foo(bool  $p, A $x, B $y): A {
  6 |   if($p){
  7 |     $z = $x;
+
 
 Step 2 of 2 (here is where the error occurred)
 
@@ -126,7 +132,7 @@ File "union_join_point.php", line 3, character 7 - line 3, character 7:
  6 |   if($p){
  7 |     $z = $x;
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "union_join_point.php", line 5, character 32 - line 5, character 33:
 
@@ -138,7 +144,9 @@ File "union_join_point.php", line 5, character 32 - line 5, character 33:
  6 |   if($p){
  7 |     $z = $x;
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "union_join_point.php", line 9, character 10 - line 9, character 11:
 
@@ -149,7 +157,9 @@ File "union_join_point.php", line 9, character 10 - line 9, character 11:
 12 |   return $z;
 13 | }
 
-which itself flows into this expression via an assignment
+as the type of the local variable
+
+which itself flows into this expression
 
 File "union_join_point.php", line 9, character 5 - line 9, character 6:
 
@@ -159,6 +169,8 @@ File "union_join_point.php", line 9, character 5 - line 9, character 6:
 11 | 
 12 |   return $z;
 13 | }
+
+via an assignment
 
 The supertype is the same as before.
 

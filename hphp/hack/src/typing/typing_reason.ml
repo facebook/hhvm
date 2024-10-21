@@ -3762,20 +3762,10 @@ module Derivation = struct
         | _ -> false
     end
 
-    let with_prefix ls ~prefix ~sep =
+    let with_suffix ls ~suffix =
       match ls with
-      | [] -> []
-      | (pos, expl) :: rest ->
-        (pos, Format.sprintf "%s%s%s" prefix sep expl) :: rest
-
-    let with_suffix ls ~suffix ~sep =
-      match ls with
-      | [] -> []
-      | (pos, expl) :: rest ->
-        (pos, Format.sprintf "%s%s%s" expl sep suffix) :: rest
-
-    let finish_with_suffix ls ~suffix ~sep =
-      List.rev @@ with_suffix ~suffix ~sep @@ List.rev ls
+      | hd :: tl -> hd :: suffix :: tl
+      | _ -> ls
 
     let explain_flow_kind = function
       | Flow_assign -> "via an assignment"
@@ -3794,8 +3784,8 @@ module Derivation = struct
       | Derivation steps ->
         let (expl, st) = explain_steps steps ~st ~cfg ~ctxt in
         let expl =
-          Option.value_map ~default:expl ~f:(fun prefix ->
-              with_prefix expl ~prefix ~sep:"\n\n")
+          Option.value_map ~default:expl ~f:(fun path ->
+              Explanation.Path (path, false) :: expl)
           @@ Context.explain_path ctxt
         in
         (expl, st)
@@ -3817,34 +3807,37 @@ module Derivation = struct
         let prefix_main =
           let middle =
             match explain_reason on_ ~st ~cfg ~ctxt with
-            | ((_, x) :: _, _) -> x
+            | (Explanation.Witness (_, x) :: _, _) -> x
             | _ -> "an inferred type"
           in
-          Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by the other constraints on the %s."
-            main_path
-            middle
+          Explanation.Trans
+            (Format.sprintf
+               "I checked the subtype constraint in [%s] because it was implied by the other constraints on the %s."
+               main_path
+               middle)
         and prefix_lower =
           let lower_path =
             Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
           in
-          Format.sprintf
-            "I found the subtype for [%s] when I checked the subtype constraint in [%s]."
-            main_path
-            lower_path
+          Explanation.Trans
+            (Format.sprintf
+               "I found the subtype for [%s] when I checked the subtype constraint in [%s]."
+               main_path
+               lower_path)
         and prefix_upper =
           let upper_path =
             Context.(Option.value_exn @@ explain_path @@ enter_upper ctxt)
           in
-          Format.sprintf
-            "I found the supertype for [%s] when I checked the subtype constraint in [%s]."
-            main_path
-            upper_path
+          Explanation.Trans
+            (Format.sprintf
+               "I found the supertype for [%s] when I checked the subtype constraint in [%s]."
+               main_path
+               upper_path)
         in
         let expl =
-          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
-          @ with_prefix expl_lower ~prefix:prefix_lower ~sep:"\n\n"
-          @ with_prefix expl_upper ~prefix:prefix_upper ~sep:"\n\n"
+          (prefix_main :: expl_main)
+          @ (prefix_lower :: expl_lower)
+          @ (prefix_upper :: expl_upper)
         in
         (expl, st)
       | Lower { bound; in_ } ->
@@ -3859,22 +3852,21 @@ module Derivation = struct
           Context.(Option.value_exn @@ explain_path @@ enter_main ctxt)
         in
         let prefix_main =
-          Format.sprintf
-            "I checked the subtype constraint in [%s] because it was implied by transitivity."
-            main_path
+          Explanation.Trans
+            (Format.sprintf
+               "I checked the subtype constraint in [%s] because it was implied by transitivity."
+               main_path)
         and prefix_lower =
           let lower_path =
             Context.(Option.value_exn @@ explain_path @@ enter_lower ctxt)
           in
-          Format.sprintf
-            "I found the subtype for [%s] is when I checked the subtype constraint in [%s]."
-            main_path
-            lower_path
+          Explanation.Trans
+            (Format.sprintf
+               "I found the subtype for [%s] is when I checked the subtype constraint in [%s]."
+               main_path
+               lower_path)
         in
-        let expl =
-          with_prefix expl_main ~prefix:prefix_main ~sep:"\n\n"
-          @ with_prefix expl_lower ~prefix:prefix_lower ~sep:"\n\n"
-        in
+        let expl = (prefix_main :: expl_main) @ (prefix_lower :: expl_lower) in
         (expl, st)
 
     and explain_steps steps ~st ~cfg ~ctxt =
@@ -3916,69 +3908,56 @@ module Derivation = struct
         match (arg_opt, sub) with
         | (Some Subtype_step.Supertype, _) ->
           let pos = to_pos sub in
-          ([(pos, "The subtype is the same as before.")], st)
+          ([Explanation.Witness (pos, "The subtype is the same as before.")], st)
         | (_, Missing_field) ->
           ( [
-              ( Pos_or_decl.none,
-                "The subtype didn't exist because the field was missing." );
+              Explanation.Witness_no_pos
+                "The subtype didn't exist because the field was missing.";
             ],
             st )
         | _ ->
           let (expl_sub, st) = explain_reason sub ~st ~cfg ~ctxt in
-          ( with_prefix expl_sub ~prefix:"The subtype comes from this" ~sep:" ",
+          ( Explanation.Prefix
+              { prefix = "The subtype comes from this"; sep = " " }
+            :: expl_sub,
             st )
       in
       let (expl_super, st) =
         match (arg_opt, super) with
         | (Some Subtype_step.Subtype, _) ->
           let pos = to_pos super in
-          ([(pos, "The supertype is the same as before.")], st)
+          ( [Explanation.Witness (pos, "The supertype is the same as before.")],
+            st )
         | (_, Missing_field) ->
           ( [
-              ( Pos_or_decl.none,
-                "The supertype didn't exist because the field was missing." );
+              Explanation.Witness_no_pos
+                "The supertype didn't exist because the field was missing.";
             ],
             st )
         | _ ->
           let (expl_super, st) = explain_reason super ~st ~cfg ~ctxt in
-          ( with_prefix
-              expl_super
-              ~prefix:"The supertype comes from this"
-              ~sep:" ",
-            st )
+          let prefix =
+            Explanation.Prefix
+              { prefix = "The supertype comes from this"; sep = " " }
+          in
+          (prefix :: expl_super, st)
       in
 
-      let prefix =
-        match (rule_opt, toplevel && idx = n_steps - 1) with
-        | (Some rule, true) ->
-          Format.sprintf
-            "%s %d of %d (here is where the error occurred)\n\n%s"
-            pfx
-            (idx + 1)
-            n_steps
-            (Subtype_rule.explain rule)
-        | (Some rule, false) ->
-          Format.sprintf
-            "%s %d of %d\n\n%s"
-            pfx
-            (idx + 1)
-            n_steps
-            (Subtype_rule.explain rule)
-        | (None, true) ->
-          Format.sprintf
-            "%s %d of %d (here is where the error occurred)\n\nI started by checking this subtype relationship."
-            pfx
-            (idx + 1)
-            n_steps
-        | (None, false) ->
-          Format.sprintf
-            "%s %d of %d\n\nI started by checking this subtype relationship."
-            pfx
-            (idx + 1)
-            n_steps
+      let rule =
+        Explanation.Rule
+          (Option.value_map
+             rule_opt
+             ~default:"I started by checking this subtype relationship."
+             ~f:Subtype_rule.explain)
       in
-      let expl_sub = with_prefix expl_sub ~prefix ~sep:"\n\n" in
-      (expl_sub @ expl_super, st)
+
+      let path =
+        Explanation.Path
+          ( Format.sprintf "%s %d of %d" pfx (idx + 1) n_steps,
+            toplevel && idx = n_steps - 1 )
+      in
+
+      ((path :: rule :: expl_sub) @ expl_super, st)
 
     and explain_reason reason ~st ~cfg ~ctxt =
       match reason with
@@ -3997,7 +3976,7 @@ module Derivation = struct
         explain_solved ~solution ~in_ ~st ~cfg ~ctxt
       | Missing_field ->
         (* This needs to be special cased in [explain_step] *)
-        ([(Pos_or_decl.none, "missing field")], st)
+        ([Explanation.Witness_no_pos "missing field"], st)
       (* Special handling of legacy structured reasons
          TODO(mjt) translate to flow?
       *)
@@ -4039,56 +4018,77 @@ module Derivation = struct
       (* We have no provenance information  *)
       | No_reason
       | Invalid ->
-        ([(Pos_or_decl.none, "this element")], st)
+        ([Explanation.Witness_no_pos "this element"], st)
 
     and explain_witness_locl witness =
       match witness with
-      | Is_refinement pos -> (Pos_or_decl.of_raw_pos pos, "`is` expression")
-      | Witness pos -> (Pos_or_decl.of_raw_pos pos, "expression")
-      | Type_variable (pos, _id) -> (Pos_or_decl.of_raw_pos pos, "type variable")
+      | Is_refinement pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "`is` expression")
+      | Witness pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "expression")
+      | Type_variable (pos, _id) ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "type variable")
       | Type_variable_generics (pos, x, y, _id) ->
-        ( Pos_or_decl.of_raw_pos pos,
-          Format.sprintf "generic parameter `%s` of `%s`" x y )
+        Explanation.Witness
+          ( Pos_or_decl.of_raw_pos pos,
+            Format.sprintf "generic parameter `%s` of `%s`" x y )
       | Unpack_param (pos, _, _) ->
-        (Pos_or_decl.of_raw_pos pos, "unpacked parameter")
-      | Bitwise pos -> (Pos_or_decl.of_raw_pos pos, "expression")
-      | Arith pos -> (Pos_or_decl.of_raw_pos pos, "arithmetic expression")
-      | Idx_vector pos -> (Pos_or_decl.of_raw_pos pos, "index expression")
-      | Splice pos -> (Pos_or_decl.of_raw_pos pos, "splice expression")
-      | No_return pos -> (Pos_or_decl.of_raw_pos pos, "declaration")
-      | Shape_literal pos -> (Pos_or_decl.of_raw_pos pos, "shape literal")
-      | Destructure pos -> (Pos_or_decl.of_raw_pos pos, "destructure expression")
-      | Join_point pos -> (Pos_or_decl.of_raw_pos pos, "join point")
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "unpacked parameter")
+      | Bitwise pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "expression")
+      | Arith pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "arithmetic expression")
+      | Idx_vector pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "index expression")
+      | Splice pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "splice expression")
+      | No_return pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "declaration")
+      | Shape_literal pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "shape literal")
+      | Destructure pos ->
+        Explanation.Witness
+          (Pos_or_decl.of_raw_pos pos, "destructure expression")
+      | Join_point pos ->
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "join point")
       | _ ->
-        ( witness_locl_to_raw_pos witness,
-          Format.sprintf
-            "element (`%s`)"
-            (constructor_string_of_witness_locl witness) )
+        Explanation.Witness
+          ( witness_locl_to_raw_pos witness,
+            Format.sprintf
+              "element (`%s`)"
+              (constructor_string_of_witness_locl witness) )
 
     and explain_witness_decl witness =
       match witness with
-      | Hint pos -> (pos, "hint")
-      | Witness_from_decl pos -> (pos, "declaration")
-      | Support_dynamic_type pos -> (pos, "function or method declaration")
-      | Pessimised_return pos -> (pos, "return hint")
-      | Var_param_from_decl pos -> (pos, "variadic parameter declaration")
-      | Tuple_from_splat pos -> (pos, "tuple from parameters")
-      | Cstr_on_generics (pos, _) -> (pos, "constraint on the generic parameter")
+      | Hint pos -> Explanation.Witness (pos, "hint")
+      | Witness_from_decl pos -> Explanation.Witness (pos, "declaration")
+      | Support_dynamic_type pos ->
+        Explanation.Witness (pos, "function or method declaration")
+      | Pessimised_return pos -> Explanation.Witness (pos, "return hint")
+      | Var_param_from_decl pos ->
+        Explanation.Witness (pos, "variadic parameter declaration")
+      | Tuple_from_splat pos ->
+        Explanation.Witness (pos, "tuple from parameters")
+      | Cstr_on_generics (pos, _) ->
+        Explanation.Witness (pos, "constraint on the generic parameter")
       | Implicit_upper_bound (pos, nm) ->
-        ( pos,
-          Format.sprintf
-            "implicit upper bound (`%s`) on the generic parameter"
-            nm )
+        Explanation.Witness
+          ( pos,
+            Format.sprintf
+              "implicit upper bound (`%s`) on the generic parameter"
+              nm )
       | Class_class (pos, nm) ->
-        ( pos,
-          Format.sprintf
-            "implicitly defined constant `::class` of class `%s`"
-            nm )
+        Explanation.Witness
+          ( pos,
+            Format.sprintf
+              "implicitly defined constant `::class` of class `%s`"
+              nm )
       | _ ->
-        ( witness_decl_to_raw_pos witness,
-          Format.sprintf
-            "element (`%s`)"
-            (constructor_string_of_witness_decl witness) )
+        Explanation.Witness
+          ( witness_decl_to_raw_pos witness,
+            Format.sprintf
+              "element (`%s`)"
+              (constructor_string_of_witness_decl witness) )
 
     and explain_def (pos, reason) ~st ~cfg ~ctxt =
       let (expl_reason, st) = explain_reason reason ~st ~cfg ~ctxt in
@@ -4097,17 +4097,25 @@ module Derivation = struct
       | Some (Either.Second seen_at) ->
         let expl_reason =
           if Derivation_path.equal seen_at ctxt.Context.derivation_path then
-            let suffix = "(its definition was given above)" in
-            finish_with_suffix expl_reason ~suffix ~sep:" "
+            let suffix =
+              Explanation.Suffix
+                { suffix = "(its definition was given above)"; sep = " " }
+            in
+            with_suffix expl_reason ~suffix
           else
             Option.value_map
               (Derivation_path.explain seen_at)
               ~default:expl_reason
               ~f:(fun path ->
                 let suffix =
-                  Format.sprintf "(its definition was given in [%s])" path
+                  Explanation.Suffix
+                    {
+                      suffix =
+                        Format.sprintf "(its definition was given in [%s])" path;
+                      sep = " ";
+                    }
                 in
-                finish_with_suffix expl_reason ~suffix ~sep:" ")
+                with_suffix expl_reason ~suffix)
         in
         (expl_reason, st)
       | Some (Either.First pos) ->
@@ -4122,23 +4130,28 @@ module Derivation = struct
           (expl_reason, st)
         else
           let st = State.def_seen st pos ctxt.Context.derivation_path in
-          (expl_reason @ [(pos, "which is defined here")], st)
+          ( expl_reason @ [Explanation.Witness (pos, "which is defined here")],
+            st )
 
     and explain_flow (from, into, kind) ~st ~cfg ~ctxt =
       let (expl_from, st) = explain_reason from ~st ~cfg ~ctxt in
       let (expl_into, st) =
         explain_reason into ~st ~cfg ~ctxt:(Context.set_in_flow ctxt)
       in
-      let suffix = explain_flow_kind kind
+      let suffix =
+        Explanation.Suffix { suffix = explain_flow_kind kind; sep = " " }
       and prefix =
-        if Context.in_flow ctxt then
-          "which itself flows into this"
-        else
-          "and flows into this"
+        Explanation.Prefix
+          {
+            prefix =
+              (if Context.in_flow ctxt then
+                "which itself flows into this"
+              else
+                "and flows into this");
+            sep = " ";
+          }
       in
-      let expl_into =
-        with_suffix (with_prefix expl_into ~prefix ~sep:" ") ~suffix ~sep:" "
-      in
+      let expl_into = prefix :: with_suffix expl_into ~suffix in
       (expl_from @ expl_into, st)
 
     and explain_solved ~solution ~in_ ~st ~cfg ~ctxt =
@@ -4146,30 +4159,42 @@ module Derivation = struct
       let (expl_solution, st) =
         explain_reason solution ~st ~cfg ~ctxt:Context.(enter_solution ctxt)
       in
-      let prefix = "which I solved to this" in
-      let expl_solution = with_prefix expl_solution ~prefix ~sep:" " in
+      let prefix =
+        Explanation.Prefix { prefix = "which I solved to this"; sep = " " }
+      in
+      let expl_solution = prefix :: expl_solution in
       (expl_in @ expl_solution, st)
 
     and explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt =
       explain_flow (r2, r1, Flow_instantiate nm) ~st ~cfg ~ctxt
 
     and explain_idx (pos, _r) ~st ~cfg:_ ~ctxt:_ =
-      ([(Pos_or_decl.of_raw_pos pos, "index expression")], st)
+      ( [Explanation.Witness (Pos_or_decl.of_raw_pos pos, "index expression")],
+        st )
 
     and explain_arith_ret_float (pos, _r, _arg_pos) ~st ~cfg:_ ~ctxt:_ =
-      ([(Pos_or_decl.of_raw_pos pos, "arithmetic expression")], st)
+      ( [
+          Explanation.Witness
+            (Pos_or_decl.of_raw_pos pos, "arithmetic expression");
+        ],
+        st )
 
     and explain_arith_ret_num (pos, _r, _arg_pos) ~st ~cfg:_ ~ctxt:_ =
-      ([(Pos_or_decl.of_raw_pos pos, "arithmetic expression")], st)
+      ( [
+          Explanation.Witness
+            (Pos_or_decl.of_raw_pos pos, "arithmetic expression");
+        ],
+        st )
 
     and explain_lost_info (_nm, r, _blame) ~st ~cfg ~ctxt =
       explain_reason r ~st ~cfg ~ctxt
 
     and explain_format (pos, _nm, _r) ~st ~cfg:_ ~ctxt:_ =
-      ([(Pos_or_decl.of_raw_pos pos, "format expression")], st)
+      ( [Explanation.Witness (Pos_or_decl.of_raw_pos pos, "format expression")],
+        st )
 
     and explain_typeconst (_r1, (pos, _), _str, _t2) ~st ~cfg:_ ~ctxt:_ =
-      ([(pos, "this type constant")], st)
+      ([Explanation.Witness (pos, "this type constant")], st)
 
     and explain_type_access (r, _rs) ~st ~cfg ~ctxt =
       explain_reason r ~st ~cfg ~ctxt
@@ -4184,7 +4209,8 @@ module Derivation = struct
       explain_reason r ~st ~cfg ~ctxt
 
     and explain_lambda_param (pos, _r) ~st ~cfg:_ ~ctxt:_ =
-      ([(Pos_or_decl.of_raw_pos pos, "lambda parameter")], st)
+      ( [Explanation.Witness (Pos_or_decl.of_raw_pos pos, "lambda parameter")],
+        st )
 
     and explain_dynamic_coercion r ~st ~cfg ~ctxt =
       explain_reason r ~st ~cfg ~ctxt
@@ -4204,15 +4230,15 @@ module Derivation = struct
     and cfg = Explain.Config.from_complexity complexity
     and ctxt = Explain.Context.empty in
     let (expl, _) = Explain.explain t ~st ~cfg ~ctxt in
-    let prefix = "Here's why:" in
-    Explain.with_prefix expl ~prefix ~sep:"\n\n"
+    expl
 end
 
 let explain ~sub ~super ~complexity =
-  Derivation.(explain (of_reason ~sub ~super) ~complexity)
+  Explanation.derivation
+    Derivation.(explain (of_reason ~sub ~super) ~complexity)
 
-let debug ~sub ~super =
-  let json_repr =
+let debug_reason ~sub ~super =
+  let json =
     Hh_json.(
       JSON_Object
         [
@@ -4220,12 +4246,8 @@ let debug ~sub ~super =
             JSON_Object [("sub", to_json sub); ("super", to_json super)] );
         ])
   in
-  [
-    ( Pos_or_decl.none,
-      Format.sprintf "Derivation:\n%s"
-      @@ Hh_json.json_to_string ~pretty:true
-      @@ Derivation.(to_json @@ of_reason ~sub ~super) );
-    ( Pos_or_decl.none,
-      Format.sprintf "Reason:\n%s"
-      @@ Hh_json.json_to_string ~pretty:true json_repr );
-  ]
+  Explanation.debug (Hh_json.json_to_string ~pretty:true json)
+
+let debug_derivation ~sub ~super =
+  let json = Derivation.(to_json @@ of_reason ~sub ~super) in
+  Explanation.debug (Hh_json.json_to_string ~pretty:true json)

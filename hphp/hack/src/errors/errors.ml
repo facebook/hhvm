@@ -195,6 +195,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
           code;
           claim;
           reasons;
+          explanation;
           quickfixes;
           custom_msgs;
           flags;
@@ -218,6 +219,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
          code
          claim
          reasons
+         explanation
          ~quickfixes
          ~custom_msgs
          ~flags
@@ -319,6 +321,7 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           code = x_code;
           claim = x_claim;
           reasons = x_messages;
+          explanation = _;
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
@@ -332,6 +335,7 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           code = y_code;
           claim = y_claim;
           reasons = y_messages;
+          explanation = _;
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
@@ -695,6 +699,7 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
           code;
           claim = _;
           reasons = _;
+          explanation = _;
           quickfixes;
           custom_msgs;
           flags;
@@ -709,6 +714,7 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
        code
        (fixme_pos, explanation)
        []
+       Explanation.empty
        ~quickfixes
        ~custom_msgs
        ~flags
@@ -827,6 +833,7 @@ let add_error (error : error) =
           code;
           claim;
           reasons;
+          explanation;
           quickfixes;
           custom_msgs;
           flags;
@@ -836,7 +843,15 @@ let add_error (error : error) =
   in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
   let error =
-    User_error.make severity code claim reasons ~quickfixes ~custom_msgs ~flags
+    User_error.make
+      severity
+      code
+      claim
+      reasons
+      explanation
+      ~quickfixes
+      ~custom_msgs
+      ~flags
   in
 
   let pos = fst claim in
@@ -886,10 +901,13 @@ let incremental_update ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t)
   in
   res
 
-let add_list severity code ?quickfixes (claim : _ Message.t) reasons =
-  add_error @@ User_error.make severity code claim reasons ?quickfixes
+let add_list severity code ?quickfixes (claim : _ Message.t) reasons explanation
+    =
+  add_error
+  @@ User_error.make severity code claim reasons explanation ?quickfixes
 
-let add severity code pos msg = add_list severity code (pos, msg) []
+let add severity code pos msg =
+  add_list severity code (pos, msg) [] Explanation.empty
 
 let count ?(drop_fixmed = true) err =
   files_t_fold
@@ -1173,6 +1191,7 @@ let invariant_violation pos telemetry desc ~report_to_user =
          Error_codes.Typing.(to_enum InvariantViolated)
          (pos, internal_compiler_error_msg)
          []
+         Explanation.empty
 
 let exception_occurred pos exn =
   log_exception_occurred pos exn;
@@ -1181,6 +1200,7 @@ let exception_occurred pos exn =
        Error_codes.Typing.(to_enum ExceptionOccurred)
        (pos, internal_compiler_error_msg)
        []
+       Explanation.empty
 
 let internal_error pos msg =
   add_error
@@ -1188,6 +1208,7 @@ let internal_error pos msg =
        Error_codes.Typing.(to_enum InternalError)
        (pos, "Internal error: " ^ msg)
        []
+       Explanation.empty
 
 let typechecker_timeout pos fn_name seconds =
   let claim =
@@ -1202,6 +1223,7 @@ let typechecker_timeout pos fn_name seconds =
        Error_codes.Typing.(to_enum TypecheckerTimeout)
        claim
        []
+       Explanation.empty
 
 (*****************************************************************************)
 (* Typing decl errors *)
@@ -1217,6 +1239,7 @@ let function_is_not_dynamically_callable function_name error =
     ( User_error.get_pos error,
       "Function  " ^ function_name ^ " is not dynamically callable." )
     nested_error_reason
+    Explanation.empty
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let method_is_not_dynamically_callable
@@ -1281,6 +1304,7 @@ let method_is_not_dynamically_callable
       ^ class_name
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
+    Explanation.empty
 
 (* Raise different types of error for accessing global variables. *)
 let global_access_error error_code pos message =
@@ -1302,6 +1326,7 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
               claim;
               reasons;
               custom_msgs;
+              explanation = _;
               quickfixes = _;
               is_fixmed = _;
               flags = _;

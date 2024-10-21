@@ -44,6 +44,7 @@
     xhp_attribute)
   (libraries
     ast
+    explanation
     heap_ident
     nast
     pos

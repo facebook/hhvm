@@ -39,13 +39,13 @@ summary "Write oxidized/gen/"
   --out-dir hphp/hack/src/oxidized/gen                                        \
   --regen-command "$REGEN_COMMAND"                                            \
   --rustfmt-path "$RUSTFMT_PATH"                                              \
-  --copy-types-file hphp/hack/src/oxidized/copy_types.txt                     \
-  --safe-ints-types-file hphp/hack/src/oxidized/safe_ints_types.txt           \
+  --copy-types-file hphp/hack/src/oxidized/copy_types.txt                      \
+  --safe-ints-types-file hphp/hack/src/oxidized/safe_ints_types.txt            \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/custom_error/custom_error.ml                                  \
-  hphp/hack/src/custom_error/custom_error_config.ml                           \
+  hphp/hack/src/custom_error/custom_error_config.ml                            \
   hphp/hack/src/custom_error/error_message.ml                                 \
   hphp/hack/src/custom_error/patt_binding_ty.ml                               \
   hphp/hack/src/custom_error/patt_error.ml                                    \
@@ -57,10 +57,11 @@ summary "Write oxidized/gen/"
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
+  hphp/hack/src/errors/explanation.ml                                         \
   hphp/hack/src/errors/user_error.ml                                          \
-  hphp/hack/src/errors/user_error_flags.ml                                          \
+  hphp/hack/src/errors/user_error_flags.ml                                     \
   hphp/hack/src/errors/errors.ml                                              \
-  hphp/hack/src/errors/warnings_saved_state.ml                                              \
+  hphp/hack/src/errors/warnings_saved_state.ml                                \
   hphp/hack/src/errors/error_codes.ml                                         \
   hphp/hack/src/errors/message.ml                                             \
   hphp/hack/src/naming/name_context.ml                                        \
@@ -68,9 +69,9 @@ summary "Write oxidized/gen/"
   hphp/hack/src/typing/nast_check/nast_check_error.ml                         \
   hphp/hack/src/parser/parsing_error.ml                                       \
   hphp/hack/src/errors/classish_positions_types.ml                            \
-  hphp/hack/src/errors/quickfix.ml                                            \
+  hphp/hack/src/errors/quickfix.ml                                             \
   hphp/hack/src/naming/naming_phase_error.ml                                  \
-  hphp/hack/src/options/declFoldOptions.ml                                  \
+  hphp/hack/src/options/declFoldOptions.ml                                    \
   hphp/hack/src/options/declParserOptions.ml                                  \
   hphp/hack/src/options/experimental_features.ml                              \
   hphp/hack/src/options/globalOptions.ml                                      \
@@ -79,14 +80,14 @@ summary "Write oxidized/gen/"
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/package/package.ml                                            \
   hphp/hack/src/package/packageInfo.ml                                        \
-  hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
+  hphp/hack/src/parser/full_fidelity_parser_env.ml                             \
   hphp/hack/src/search/utils/searchTypes.ml                                   \
   hphp/hack/src/typing/service/reason_collector.ml                            \
-  hphp/hack/src/typing/service/refinement_counter.ml                          \
+  hphp/hack/src/typing/service/refinement_counter.ml                           \
   hphp/hack/src/typing/service/tast_collector.ml                              \
   hphp/hack/src/typing/service/tast_hashes.ml                                 \
   hphp/hack/src/typing/service/type_counter.ml                                \
-  hphp/hack/src/typing/service/map_reduce_ffi.ml                              \
+  hphp/hack/src/typing/service/map_reduce_ffi.ml                               \
   hphp/hack/src/typing/tast.ml                                                \
   hphp/hack/src/typing/tast_with_dynamic.ml                                   \
   hphp/hack/src/typing/type_parameter_env.ml                                  \

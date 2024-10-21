@@ -29,6 +29,7 @@ File "assign_list.php", line 8, character 24 - line 8, character 28:
 
 Here's why:
 
+
 Step 1 of 2
 
 I started by checking this subtype relationship.
@@ -53,6 +54,7 @@ File "assign_list.php", line 10, character 3 - line 10, character 9:
 10 |   »foo($y)«;
 11 | }
 
+
 Step 2 of 2 (here is where the error occurred)
 
 These are function types so next I checked the 1st function parameters.
@@ -67,7 +69,7 @@ File "assign_list.php", line 8, character 16 - line 8, character 34:
 10 |   foo($y);
 11 | }
 
-and flows into this expression as the parameter hint
+and flows into this expression
 
 File "assign_list.php", line 8, character 36 - line 8, character 39:
 
@@ -76,7 +78,9 @@ File "assign_list.php", line 8, character 36 - line 8, character 39:
 10 |   foo($y);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+as the parameter hint
+
+which itself flows into this expression
 
 File "assign_list.php", line 9, character 22 - line 9, character 25:
 
@@ -85,7 +89,9 @@ File "assign_list.php", line 9, character 22 - line 9, character 25:
 10 |   foo($y);
 11 | }
 
-which itself flows into this type variable via an assignment
+as the type of the local variable
+
+which itself flows into this type variable
 
 File "assign_list.php", line 9, character 12 - line 9, character 13:
 
@@ -93,6 +99,8 @@ File "assign_list.php", line 9, character 12 - line 9, character 13:
  9 |   list($_, »$y«, $_) = $xyz;
 10 |   foo($y);
 11 | }
+
+via an assignment
 
 which I solved to this hint
 
@@ -114,7 +122,7 @@ File "assign_list.php", line 3, character 7 - line 3, character 11:
  7 | 
  8 | function bar_1((string,Super,bool) $xyz): void {
 
-which itself flows into this expression via an assignment
+which itself flows into this expression
 
 File "assign_list.php", line 9, character 12 - line 9, character 13:
 
@@ -123,7 +131,9 @@ File "assign_list.php", line 9, character 12 - line 9, character 13:
 10 |   foo($y);
 11 | }
 
-which itself flows into this expression as the type of the local variable
+via an assignment
+
+which itself flows into this expression
 
 File "assign_list.php", line 10, character 7 - line 10, character 8:
 
@@ -131,6 +141,8 @@ File "assign_list.php", line 10, character 7 - line 10, character 8:
  9 |   list($_, $y, $_) = $xyz;
 10 |   foo(»$y«);
 11 | }
+
+as the type of the local variable
 
 The supertype comes from this hint
 

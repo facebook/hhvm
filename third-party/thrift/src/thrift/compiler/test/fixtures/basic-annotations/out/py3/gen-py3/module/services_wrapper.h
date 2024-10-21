@@ -56,7 +56,7 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
         , int64_t id
         , std::unique_ptr<std::string> data
     ) override;
-    void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback
+    void async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback
         , int64_t id
         , std::unique_ptr<std::string> dataStr
     ) override;

@@ -82,7 +82,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
   virtual folly::coro::Task<void> co_lobDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, const ::std::string& p_data);
 #endif
-  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
+  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
  private:
   static ::cpp2::MyServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_hasDataById{apache::thrift::detail::si::InvocationType::AsyncTm};

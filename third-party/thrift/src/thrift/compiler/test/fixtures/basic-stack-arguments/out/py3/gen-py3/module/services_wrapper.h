@@ -44,7 +44,7 @@ class MyServiceWrapper : virtual public MyServiceSvIf {
         , int64_t id
         , const std::string& data
     ) override;
-    void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback
+    void async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback
         , int64_t id
         , const std::string& data
     ) override;
@@ -71,7 +71,7 @@ class MyServiceFastWrapper : virtual public MyServiceFastSvIf {
         , int64_t id
         , const std::string& data
     ) override;
-    void async_eb_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback
+    void async_eb_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback
         , int64_t id
         , const std::string& data
     ) override;

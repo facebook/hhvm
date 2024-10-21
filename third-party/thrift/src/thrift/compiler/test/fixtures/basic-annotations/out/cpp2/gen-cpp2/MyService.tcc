@@ -638,9 +638,9 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   }
   auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
   auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
-  auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
+  auto callback = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
-    , nullptr /* contextStack */
+    , std::move(ctxStack)
     , this->getServiceName()
     , "lobDataById"
     , nullptr /* exceptionFuncPointer */

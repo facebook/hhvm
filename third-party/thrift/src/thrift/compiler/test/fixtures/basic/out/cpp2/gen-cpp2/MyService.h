@@ -122,7 +122,7 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
   virtual folly::coro::Task<void> co_lobDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
   virtual folly::coro::Task<void> co_lobDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
 #endif
-  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
+  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data);
   virtual void sync_invalid_return_for_hack(::std::set<float>& /*_return*/);
   [[deprecated("Use sync_invalid_return_for_hack instead")]] virtual void invalid_return_for_hack(::std::set<float>& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::set<float>>> future_invalid_return_for_hack();

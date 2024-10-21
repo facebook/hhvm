@@ -29,7 +29,7 @@
 #endif
 {{/function:eb}}
 {{#function:oneway?}}
-  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}});
+  virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackOneWay::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}});
 {{/function:oneway?}}
 {{^function:oneway?}}
   virtual void async_{{#function:eb}}eb{{/function:eb}}{{^function:eb}}tm{{/function:eb}}_{{function:cpp_name}}(apache::thrift::HandlerCallbackPtr<{{ > types/return_type_server}}> callback{{function:comma}}{{ > service_common/function_param_list_server}});

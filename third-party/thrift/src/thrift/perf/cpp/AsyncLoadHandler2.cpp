@@ -35,7 +35,9 @@ void AsyncLoadHandler2::async_eb_noop(HandlerCallbackPtr<void> callback) {
 }
 
 void AsyncLoadHandler2::async_eb_onewayNoop(
-    HandlerCallbackBase::Ptr /* callback */) {}
+    HandlerCallbackOneWay::Ptr callback) {
+  HandlerCallbackOneWay::CompletionGuard completionGuard{std::move(callback)};
+}
 
 void AsyncLoadHandler2::async_eb_asyncNoop(HandlerCallbackPtr<void> callback) {
   callback->done();
@@ -57,13 +59,12 @@ void AsyncLoadHandler2::async_eb_sleep(
 }
 
 void AsyncLoadHandler2::async_eb_onewaySleep(
-    HandlerCallbackBase::Ptr callback, int64_t microseconds) {
-  auto callbackp = callback.unsafeRelease();
+    HandlerCallbackOneWay::Ptr callback, int64_t microseconds) {
   // May leak if task never finishes
-  auto eb = callbackp->getEventBase();
+  auto eb = callback->getEventBase();
   eb->runInEventBaseThread([=]() {
     eb->tryRunAfterDelay(
-        [=]() { delete callbackp; }, microseconds / Util::US_PER_MS);
+        [=]() { callback->done(); }, microseconds / Util::US_PER_MS);
   });
 }
 
@@ -134,7 +135,7 @@ void AsyncLoadHandler2::async_eb_throwUnexpected(
 }
 
 void AsyncLoadHandler2::async_eb_onewayThrow(
-    HandlerCallbackBase::Ptr callback, int32_t code) {
+    HandlerCallbackOneWay::Ptr callback, int32_t code) {
   LoadError error;
   *error.code_ref() = code;
   callback->exception(error);
@@ -147,8 +148,10 @@ void AsyncLoadHandler2::async_eb_send(
 }
 
 void AsyncLoadHandler2::async_eb_onewaySend(
-    HandlerCallbackBase::Ptr /* callback */,
-    std::unique_ptr<std::string> /* data */) {}
+    HandlerCallbackOneWay::Ptr callback,
+    std::unique_ptr<std::string> /* data */) {
+  callback->done();
+}
 
 void AsyncLoadHandler2::async_eb_recv(
     HandlerCallbackPtr<std::unique_ptr<std::string>> callback, int64_t bytes) {

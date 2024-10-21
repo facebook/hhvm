@@ -82,7 +82,7 @@ class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::Serv
   virtual folly::coro::Task<void> co_ping();
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_ping(apache::thrift::HandlerCallbackBase::Ptr callback);
+  virtual void async_tm_ping(apache::thrift::HandlerCallbackOneWay::Ptr callback);
   virtual ::apache::thrift::ServerStream<bool> sync_truthify();
   [[deprecated("Use sync_truthify instead")]] virtual ::apache::thrift::ServerStream<bool> truthify();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<bool>> semifuture_truthify();

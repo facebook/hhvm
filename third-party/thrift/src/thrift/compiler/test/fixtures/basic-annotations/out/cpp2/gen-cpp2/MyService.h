@@ -100,7 +100,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   virtual folly::coro::Task<void> co_lobDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_dataStr);
   virtual folly::coro::Task<void> co_lobDataById(apache::thrift::RequestParams params, ::std::int64_t p_id, std::unique_ptr<::std::string> p_dataStr);
 #endif
-  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_dataStr);
+  virtual void async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_dataStr);
   virtual void sync_cppDoNothing();
   [[deprecated("Use sync_cppDoNothing instead")]] virtual void cppDoNothing();
   virtual folly::Future<folly::Unit> future_cppDoNothing();

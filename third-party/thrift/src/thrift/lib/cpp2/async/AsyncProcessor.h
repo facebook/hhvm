@@ -1205,7 +1205,7 @@ namespace detail {
 // the corresponding functions are protected in HandlerCallbackBase
 
 #if FOLLY_HAS_COROUTINES
-bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&);
+bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase&) noexcept;
 
 folly::coro::Task<void> processServiceInterceptorsOnRequest(
     HandlerCallbackBase&,
@@ -1494,11 +1494,11 @@ class HandlerCallbackBase {
   void breakTilePromise();
 
 #if FOLLY_HAS_COROUTINES
-  bool shouldProcessServiceInterceptorsOnRequest() const;
+  bool shouldProcessServiceInterceptorsOnRequest() const noexcept;
   friend bool detail::shouldProcessServiceInterceptorsOnRequest(
-      HandlerCallbackBase&);
+      HandlerCallbackBase&) noexcept;
 
-  bool shouldProcessServiceInterceptorsOnResponse() const;
+  bool shouldProcessServiceInterceptorsOnResponse() const noexcept;
 
   folly::coro::Task<void> processServiceInterceptorsOnRequest(
       detail::ServiceInterceptorOnRequestArguments arguments);
@@ -1538,6 +1538,58 @@ class HandlerCallbackBase {
   RequestCompletionCallback* notifyRequestPile_{nullptr};
   RequestCompletionCallback* notifyConcurrencyController_{nullptr};
   ServerRequestData requestData_;
+};
+
+class HandlerCallbackOneWay : public HandlerCallbackBase {
+ public:
+  using Ptr =
+      util::IntrusiveSharedPtr<HandlerCallbackOneWay, IntrusiveSharedPtrAccess>;
+  using HandlerCallbackBase::HandlerCallbackBase;
+
+ private:
+#if FOLLY_HAS_COROUTINES
+  static folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(
+      Ptr callback);
+#endif // FOLLY_HAS_COROUTINES
+
+  Ptr sharedFromThis() noexcept {
+    // Constructing from raw pointer is safe in this case because
+    // `this` is guaranteed to be alive while the current
+    // function is executing.
+    return Ptr(typename Ptr::UnsafelyFromRawPointer(), this);
+  }
+
+ public:
+  void done() noexcept;
+  void complete(folly::Try<folly::Unit>&& r) noexcept;
+
+  class CompletionGuard {
+   public:
+    explicit CompletionGuard(Ptr&& callback) noexcept
+        : callback_(std::move(callback)) {}
+    CompletionGuard(CompletionGuard&& other) noexcept
+        : callback_(other.release()) {}
+    CompletionGuard& operator=(CompletionGuard&& other) noexcept {
+      callback_ = other.release();
+      return *this;
+    }
+
+    ~CompletionGuard() noexcept {
+      if (callback_ == nullptr) {
+        return;
+      }
+      if (auto ex = folly::current_exception()) {
+        callback_->exception(std::move(ex));
+      } else {
+        callback_->done();
+      }
+    }
+
+    Ptr release() noexcept { return std::exchange(callback_, nullptr); }
+
+   private:
+    Ptr callback_;
+  };
 };
 
 template <class T>

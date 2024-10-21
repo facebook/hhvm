@@ -80,7 +80,7 @@ folly::coro::Task<{{ > types/return_type_server}}> {{ > service_common/service_c
 #endif // FOLLY_HAS_COROUTINES
 {{#function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
+void {{ > service_common/service_class_name}}::async_tm_{{function:cpp_name}}(apache::thrift::HandlerCallbackOneWay::Ptr callback{{function:comma}}{{ > service_common/function_param_list_server}}) {
 {{/function:oneway?}}
 {{^function:oneway?}}
 
@@ -104,7 +104,7 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_{{function:cpp_name}}(params{{function:comma}}{{ > service_common/param_list_move}});
-        apache::thrift::detail::si::{{#function:oneway?}}async_tm_coro_oneway{{/function:oneway?}}{{^function:oneway?}}async_tm_coro{{/function:oneway?}}(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
 {{^service:interaction?}}
@@ -120,14 +120,14 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Future:
       {
         auto fut = future_{{function:cpp_name}}({{ > service_common/param_list_move}});
-        apache::thrift::detail::si::{{#function:oneway?}}async_tm_future_oneway{{/function:oneway?}}{{^function:oneway?}}async_tm_future{{/function:oneway?}}(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
         return;
       }
 {{/service:interaction?}}
       case apache::thrift::detail::si::InvocationType::SemiFuture:
       {
         auto fut = semifuture_{{function:cpp_name}}({{ > service_common/param_list_move}});
-        apache::thrift::detail::si::{{#function:oneway?}}async_tm_semifuture_oneway{{/function:oneway?}}{{^function:oneway?}}async_tm_semifuture{{/function:oneway?}}(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
@@ -136,13 +136,13 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_{{function:cpp_name}}(params{{function:comma}}{{ > service_common/param_list_move}});
-        apache::thrift::detail::si::{{#function:oneway?}}async_tm_coro_oneway{{/function:oneway?}}{{^function:oneway?}}async_tm_coro{{/function:oneway?}}(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
       case apache::thrift::detail::si::InvocationType::Coro:
       {
         auto task = co_{{function:cpp_name}}({{ > service_common/param_list_move}});
-        apache::thrift::detail::si::{{#function:oneway?}}async_tm_coro_oneway{{/function:oneway?}}{{^function:oneway?}}async_tm_coro{{/function:oneway?}}(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
@@ -186,7 +186,7 @@ determineInvocationType:
 {{#function:eb}}{{!Event base codegen}}
 {{#function:oneway?}}
 
-void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(apache::thrift::HandlerCallbackBase::Ptr /*callback*/{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
+void {{ > service_common/service_class_name}}::async_eb_{{function:cpp_name}}(apache::thrift::HandlerCallbackOneWay::Ptr /*callback*/{{function:comma}}{{ > service_common/function_param_list_server_commented_out}}) {
   LOG(DFATAL) << "Function {{function:cpp_name}} is unimplemented";
 }
 {{/function:oneway?}}

@@ -50,7 +50,7 @@ class ServiceHandler<::cpp2::MyServiceFast> : public apache::thrift::ServerInter
   virtual void async_eb_hasDataById(apache::thrift::HandlerCallbackPtr<bool> callback, ::std::int64_t p_id);
   virtual void async_eb_getDataById(apache::thrift::HandlerCallbackPtr<::std::string> callback, ::std::int64_t p_id);
   virtual void async_eb_putDataById(apache::thrift::HandlerCallbackPtr<void> callback, ::std::int64_t p_id, const ::std::string& p_data);
-  virtual void async_eb_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
+  virtual void async_eb_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, const ::std::string& p_data);
  private:
   static ::cpp2::MyServiceFastServiceInfoHolder __fbthrift_serviceInfoHolder;
 };

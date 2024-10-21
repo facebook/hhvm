@@ -38,7 +38,7 @@ void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_putDataById
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("putDataById"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(apache::thrift::HandlerCallbackBase::Ptr /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyServiceFast>::async_eb_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr /*callback*/, ::std::int64_t /*id*/, const ::std::string& /*data*/) {
   LOG(DFATAL) << "Function lobDataById is unimplemented";
 }
 

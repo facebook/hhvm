@@ -613,7 +613,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::MyService>::co_lo
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_lobDataById(apache::thrift::HandlerCallbackBase::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_lobDataById(apache::thrift::HandlerCallbackOneWay::Ptr callback, ::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -632,7 +632,7 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_lobDataById(params, p_id, std::move(p_data));
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_lobDataById.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
@@ -642,13 +642,13 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Future:
       {
         auto fut = future_lobDataById(p_id, std::move(p_data));
-        apache::thrift::detail::si::async_tm_future_oneway(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
         return;
       }
       case apache::thrift::detail::si::InvocationType::SemiFuture:
       {
         auto fut = semifuture_lobDataById(p_id, std::move(p_data));
-        apache::thrift::detail::si::async_tm_semifuture_oneway(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
@@ -657,13 +657,13 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_lobDataById(params, p_id, std::move(p_data));
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
       case apache::thrift::detail::si::InvocationType::Coro:
       {
         auto task = co_lobDataById(p_id, std::move(p_data));
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES

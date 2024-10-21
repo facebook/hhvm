@@ -1601,7 +1601,8 @@ folly::Future<T> future(
 }
 
 using CallbackBase = HandlerCallbackBase;
-using CallbackBasePtr = CallbackBase::Ptr;
+using CallbackOneWay = HandlerCallbackOneWay;
+using CallbackOneWayPtr = CallbackOneWay::Ptr;
 template <typename T>
 using Callback = HandlerCallback<T>;
 template <typename T>
@@ -1624,69 +1625,56 @@ class AsyncTmPrep {
   ~AsyncTmPrep() { si_->clearRequestParams(); }
 };
 
-inline void async_tm_future_oneway(
-    CallbackBasePtr callback, folly::Future<folly::Unit>&& fut) {
+template <typename T, typename CallbackPtr>
+void async_tm_future_impl(CallbackPtr callback, folly::Future<T>&& fut) {
   if (!fut.isReady()) {
     auto ka = callback->getInternalKeepAlive();
     std::move(fut)
         .via(std::move(ka))
-        .thenValueInline([cb = std::move(callback)](auto&&) {});
+        .thenTryInline([cb = std::move(callback)](folly::Try<T>&& ret) {
+          cb->complete(std::move(ret));
+        });
+  } else {
+    callback->complete(std::move(fut).result());
   }
 }
-
 template <typename T>
 void async_tm_future(
     CallbackPtr<T> callback, folly::Future<folly::lift_unit_t<T>>&& fut) {
+  async_tm_future_impl(std::move(callback), std::move(fut));
+}
+inline void async_tm_future(
+    CallbackOneWayPtr callback, folly::Future<folly::Unit>&& fut) {
+  async_tm_future_impl(std::move(callback), std::move(fut));
+}
+
+template <typename T, typename CallbackPtr>
+void async_tm_semifuture_impl(
+    CallbackPtr callback, folly::SemiFuture<T>&& fut) {
   if (!fut.isReady()) {
     auto ka = callback->getInternalKeepAlive();
     std::move(fut)
         .via(std::move(ka))
-        .thenTryInline([cb = std::move(callback)](
-                           folly::Try<folly::lift_unit_t<T>>&& ret) {
+        .thenTryInline([cb = std::move(callback)](folly::Try<T>&& ret) {
           cb->complete(std::move(ret));
         });
   } else {
     callback->complete(std::move(fut).result());
   }
 }
-
-inline void async_tm_semifuture_oneway(
-    CallbackBasePtr callback, folly::SemiFuture<folly::Unit>&& fut) {
-  if (!fut.isReady()) {
-    auto ka = callback->getInternalKeepAlive();
-    std::move(fut)
-        .via(std::move(ka))
-        .thenValueInline([cb = std::move(callback)](auto&&) {});
-  }
-}
-
 template <typename T>
 void async_tm_semifuture(
     CallbackPtr<T> callback, folly::SemiFuture<folly::lift_unit_t<T>>&& fut) {
-  if (!fut.isReady()) {
-    auto ka = callback->getInternalKeepAlive();
-    std::move(fut)
-        .via(std::move(ka))
-        .thenTryInline([cb = std::move(callback)](
-                           folly::Try<folly::lift_unit_t<T>>&& ret) {
-          cb->complete(std::move(ret));
-        });
-  } else {
-    callback->complete(std::move(fut).result());
-  }
+  async_tm_semifuture_impl(std::move(callback), std::move(fut));
+}
+inline void async_tm_semifuture(
+    CallbackOneWayPtr callback, folly::SemiFuture<folly::Unit>&& fut) {
+  async_tm_semifuture_impl(std::move(callback), std::move(fut));
 }
 
 #if FOLLY_HAS_COROUTINES
-inline void async_tm_coro_oneway(
-    CallbackBasePtr callback, folly::coro::Task<void>&& task) {
-  auto ka = callback->getInternalKeepAlive();
-  std::move(task)
-      .scheduleOn(std::move(ka))
-      .startInlineUnsafe([callback = std::move(callback)](auto&&) {});
-}
-
-template <typename T>
-void async_tm_coro(CallbackPtr<T> callback, folly::coro::Task<T>&& task) {
+template <typename T, typename CallbackPtr>
+void async_tm_coro_impl(CallbackPtr callback, folly::coro::Task<T>&& task) {
   auto ka = callback->getInternalKeepAlive();
   std::move(task)
       .scheduleOn(std::move(ka))
@@ -1694,6 +1682,14 @@ void async_tm_coro(CallbackPtr<T> callback, folly::coro::Task<T>&& task) {
                              folly::Try<folly::lift_unit_t<T>>&& tryResult) {
         callback->complete(std::move(tryResult));
       });
+}
+template <typename T>
+void async_tm_coro(CallbackPtr<T> callback, folly::coro::Task<T>&& task) {
+  async_tm_coro_impl(std::move(callback), std::move(task));
+}
+inline void async_tm_coro(
+    CallbackOneWayPtr callback, folly::coro::Task<void>&& task) {
+  async_tm_coro_impl(std::move(callback), std::move(task));
 }
 #endif
 

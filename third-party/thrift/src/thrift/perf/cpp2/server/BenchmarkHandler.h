@@ -28,6 +28,7 @@ namespace benchmarks {
 
 using apache::thrift::HandlerCallback;
 using apache::thrift::HandlerCallbackBase;
+using apache::thrift::HandlerCallbackOneWay;
 using apache::thrift::HandlerCallbackPtr;
 using apache::thrift::ServerStream;
 
@@ -59,8 +60,9 @@ class BenchmarkHandler
     callback->done();
   }
 
-  void async_eb_onewayNoop(HandlerCallbackBase::Ptr) override {
+  void async_eb_onewayNoop(HandlerCallbackOneWay::Ptr callback) override {
     stats_->add(kNoop_);
+    callback->done();
   }
 
   // Make the async/worker thread sleep

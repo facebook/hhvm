@@ -686,7 +686,7 @@ TEST(CoroutineExceptionTest, completesHandlerCallback) {
       &cpp2reqCtx);
   handler.async_tm_computeSumThrowsPrimitive(std::move(cb2), 0, 0);
 
-  auto cb3 = std::make_unique<apache::thrift::HandlerCallbackBase>(
+  auto cb3 = std::make_unique<apache::thrift::HandlerCallbackOneWay>(
       nullptr,
       nullptr,
       "" /* serviceName */,

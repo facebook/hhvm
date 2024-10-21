@@ -82,7 +82,7 @@ class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::Serv
   virtual folly::coro::Task<void> co_ping();
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
-  virtual void async_tm_ping(apache::thrift::HandlerCallbackBase::Ptr callback);
+  virtual void async_tm_ping(apache::thrift::HandlerCallbackOneWay::Ptr callback);
   virtual ::apache::thrift::ServerStream<bool> sync_truthify();
   [[deprecated("Use sync_truthify instead")]] virtual ::apache::thrift::ServerStream<bool> truthify();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<bool>> semifuture_truthify();
@@ -123,7 +123,7 @@ class MyInteractionFastIf : public apache::thrift::EventBaseTile, public apache:
     std::terminate();
   }
   virtual void async_eb_frobnicate(apache::thrift::HandlerCallbackPtr<::std::int32_t> callback);
-  virtual void async_eb_ping(apache::thrift::HandlerCallbackBase::Ptr callback);
+  virtual void async_eb_ping(apache::thrift::HandlerCallbackOneWay::Ptr callback);
   virtual void async_eb_truthify(apache::thrift::HandlerCallbackPtr<::apache::thrift::ServerStream<bool>> callback);
   virtual void async_eb_encode(apache::thrift::HandlerCallbackPtr<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>> callback);
  private:

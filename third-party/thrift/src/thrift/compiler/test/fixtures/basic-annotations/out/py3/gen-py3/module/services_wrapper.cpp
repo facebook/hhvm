@@ -124,7 +124,7 @@ data = std::move(data)    ]() mutable {
     });
 }
 void MyServiceWrapper::async_tm_lobDataById(
-  apache::thrift::HandlerCallbackBase::Ptr callback
+  apache::thrift::HandlerCallbackOneWay::Ptr callback
     , int64_t id
     , std::unique_ptr<std::string> dataStr
 ) {

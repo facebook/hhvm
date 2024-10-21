@@ -1063,8 +1063,26 @@ void HandlerCallback<void>::doDone() {
   sendReply(std::move(queue));
 }
 
+void HandlerCallbackOneWay::done() noexcept {
 #if FOLLY_HAS_COROUTINES
-bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest() const {
+  if (!shouldProcessServiceInterceptorsOnResponse()) {
+    return;
+  }
+  startOnExecutor(doInvokeServiceInterceptorsOnResponse(sharedFromThis()));
+#endif // FOLLY_HAS_COROUTINES
+}
+
+void HandlerCallbackOneWay::complete(folly::Try<folly::Unit>&& r) noexcept {
+  if (r.hasException()) {
+    exception(std::move(r).exception());
+  } else {
+    done();
+  }
+}
+
+#if FOLLY_HAS_COROUTINES
+bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest()
+    const noexcept {
   // The chain of objects can be null in unit tests when these objects are
   // mocked.
   if (reqCtx_ != nullptr) {
@@ -1079,7 +1097,8 @@ bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnRequest() const {
   return false;
 }
 
-bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse() const {
+bool HandlerCallbackBase::shouldProcessServiceInterceptorsOnResponse()
+    const noexcept {
   if (!shouldProcessServiceInterceptorsOnRequest()) {
     return false;
   }
@@ -1186,12 +1205,23 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
     co_yield folly::coro::co_error(TApplicationException(message));
   }
 }
+
+/* static */ folly::coro::Task<void>
+HandlerCallbackOneWay::doInvokeServiceInterceptorsOnResponse(Ptr callback) {
+  folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+      callback->processServiceInterceptorsOnResponse(
+          apache::thrift::util::TypeErasedRef::of<folly::Unit>(folly::unit)));
+  if (onResponseResult.hasException()) {
+    callback->doException(onResponseResult.exception().to_exception_ptr());
+  }
+}
 #endif // FOLLY_HAS_COROUTINES
 
 namespace detail {
 
 #if FOLLY_HAS_COROUTINES
-bool shouldProcessServiceInterceptorsOnRequest(HandlerCallbackBase& callback) {
+bool shouldProcessServiceInterceptorsOnRequest(
+    HandlerCallbackBase& callback) noexcept {
   return callback.shouldProcessServiceInterceptorsOnRequest();
 }
 

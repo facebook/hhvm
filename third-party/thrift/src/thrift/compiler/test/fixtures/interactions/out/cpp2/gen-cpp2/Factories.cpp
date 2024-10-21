@@ -586,7 +586,7 @@ folly::coro::Task<void> apache::thrift::ServiceHandler<::cpp2::Factories>::MyInt
 }
 #endif // FOLLY_HAS_COROUTINES
 
-void apache::thrift::ServiceHandler<::cpp2::Factories>::MyInteractionIf::async_tm_ping(apache::thrift::HandlerCallbackBase::Ptr callback) {
+void apache::thrift::ServiceHandler<::cpp2::Factories>::MyInteractionIf::async_tm_ping(apache::thrift::HandlerCallbackOneWay::Ptr callback) {
   // It's possible the coroutine versions will delegate to a future-based
   // version. If that happens, we need the RequestParams arguments to be
   // available to the future through the thread-local backchannel, so we create
@@ -605,7 +605,7 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_ping(params);
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
 #else // FOLLY_HAS_COROUTINES
         __fbthrift_invocation_ping.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
@@ -615,7 +615,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::SemiFuture:
       {
         auto fut = semifuture_ping();
-        apache::thrift::detail::si::async_tm_semifuture_oneway(std::move(callback), std::move(fut));
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
         return;
       }
 #if FOLLY_HAS_COROUTINES
@@ -624,13 +624,13 @@ determineInvocationType:
         apache::thrift::RequestParams params{callback->getRequestContext(),
           callback->getThreadManager_deprecated(), callback->getEventBase(), callback->getHandlerExecutor()};
         auto task = co_ping(params);
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
       case apache::thrift::detail::si::InvocationType::Coro:
       {
         auto task = co_ping();
-        apache::thrift::detail::si::async_tm_coro_oneway(std::move(callback), std::move(task));
+        apache::thrift::detail::si::async_tm_coro(std::move(callback), std::move(task));
         return;
       }
 #endif // FOLLY_HAS_COROUTINES
@@ -850,7 +850,7 @@ void apache::thrift::ServiceHandler<::cpp2::Factories>::MyInteractionFastIf::asy
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("frobnicate"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Factories>::MyInteractionFastIf::async_eb_ping(apache::thrift::HandlerCallbackBase::Ptr /*callback*/) {
+void apache::thrift::ServiceHandler<::cpp2::Factories>::MyInteractionFastIf::async_eb_ping(apache::thrift::HandlerCallbackOneWay::Ptr /*callback*/) {
   LOG(DFATAL) << "Function ping is unimplemented";
 }
 

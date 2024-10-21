@@ -1,27 +1,33 @@
 error: Typing[4110] Invalid argument
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 17 - line 10, character 18:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
 10 |   rcvr_concrete(»$x«);
 11 | }
 
-Expected `B`
+Expected B
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
 10 |   rcvr_concrete($x);
 11 | }
 
-But got `mixed`
+But got mixed
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 50 - line 9, character 50:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<»T«>(T $x): void {
@@ -31,14 +37,16 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 -
 Here's why:
 
 
-Step 1 of 4
+  Step 1 of 4                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 - line 7, character 22:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 10 - line 7, character 22:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function »rcvr_concrete«(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -47,8 +55,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 -
 
 The supertype comes from this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 - line 10, character 19:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 3 - line 10, character 19:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -56,15 +66,17 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 -
 11 | }
 
 
-Step 2 of 4
+  Step 2 of 4                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 53 - line 9, character 53:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
@@ -73,8 +85,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 -
 
 and flows into this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 55 - line 9, character 56:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 55 - line 9, character 56:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T »$x«): void {
@@ -85,8 +99,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 17 - line 10, character 18:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -97,8 +113,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -107,7 +125,7 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 
 which is defined here
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 5, character 7 - line 5, character 7:
+File generic_subtyping_caller_implicit_upper_bound.php, line 5, character 7 - line 5, character 7:
 
  4 | class A {}
  5 | class »B« extends A {}
@@ -115,14 +133,16 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 5, character 7 - 
  7 | function rcvr_concrete(B $x): void {}
 
 
-Step 3 of 4
+  Step 3 of 4                                                      
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 50 - line 9, character 50:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<»T«>(T $x): void {
@@ -131,8 +151,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 -
 
 The supertype is the same as before.
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -140,14 +162,16 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 11 | }
 
 
-Step 4 of 4 (here is where the error occurred)
+  Step 4 of 4                    (here is where the error occurred) 
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 - line 9, character 50:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 50 - line 9, character 50:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<»T«>(T $x): void {
@@ -156,8 +180,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 50 -
 
 The supertype is the same as before.
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -166,28 +192,34 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 
 error: Typing[4110] Invalid argument
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 17 - line 10, character 18:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
 10 |   rcvr_concrete(»$x«);
 11 | }
 
-Expected `B`
+Expected B
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
 10 |   rcvr_concrete($x);
 11 | }
 
-But got `T`
+But got T
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 53 - line 9, character 53:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
@@ -197,14 +229,16 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 -
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 - line 7, character 22:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 10 - line 7, character 22:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function »rcvr_concrete«(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -213,8 +247,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 10 -
 
 The supertype comes from this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 - line 10, character 19:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 3 - line 10, character 19:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -222,15 +258,17 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 3 -
 11 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 - line 9, character 53:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 53 - line 9, character 53:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(»T« $x): void {
@@ -239,8 +277,10 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 53 -
 
 and flows into this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 9, character 55 - line 9, character 56:
+File generic_subtyping_caller_implicit_upper_bound.php, line 9, character 55 - line 9, character 56:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T »$x«): void {
@@ -251,8 +291,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 10, character 17 - line 10, character 18:
+File generic_subtyping_caller_implicit_upper_bound.php, line 10, character 17 - line 10, character 18:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(B $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -263,8 +305,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 - line 7, character 24:
+File generic_subtyping_caller_implicit_upper_bound.php, line 7, character 24 - line 7, character 24:
 
+ 5 | class B extends A {}
+ 6 | 
  7 | function rcvr_concrete(»B« $x): void {}
  8 | 
  9 | function call_concrete_with_implicit_upper_bound<T>(T $x): void {
@@ -273,7 +317,7 @@ File "generic_subtyping_caller_implicit_upper_bound.php", line 7, character 24 -
 
 which is defined here
 
-File "generic_subtyping_caller_implicit_upper_bound.php", line 5, character 7 - line 5, character 7:
+File generic_subtyping_caller_implicit_upper_bound.php, line 5, character 7 - line 5, character 7:
 
  4 | class A {}
  5 | class »B« extends A {}

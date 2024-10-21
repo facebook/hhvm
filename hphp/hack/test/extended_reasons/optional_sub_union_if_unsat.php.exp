@@ -1,27 +1,33 @@
 error: Typing[4110] Invalid argument
 
-File "optional_sub_union_if_unsat.php", line 6, character 7 - line 6, character 8:
+File optional_sub_union_if_unsat.php, line 6, character 7 - line 6, character 8:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(?string $x): void {
  6 |   foo(»$x«);
  7 | }
 
-Expected `(int | string)`
+Expected (int | string)
 
-File "optional_sub_union_if_unsat.php", line 3, character 14 - line 3, character 25:
+File optional_sub_union_if_unsat.php, line 3, character 14 - line 3, character 25:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(»(string|int)« $_): void {}
  4 | 
  5 | function bar(?string $x): void {
  6 |   foo($x);
  7 | }
 
-But got `?string`
+But got ?string
 
-File "optional_sub_union_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_union_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(»?string« $x): void {
@@ -31,14 +37,16 @@ File "optional_sub_union_if_unsat.php", line 5, character 14 - line 5, character
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "optional_sub_union_if_unsat.php", line 3, character 10 - line 3, character 12:
+File optional_sub_union_if_unsat.php, line 3, character 10 - line 3, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function »foo«((string|int) $_): void {}
  4 | 
  5 | function bar(?string $x): void {
@@ -47,8 +55,10 @@ File "optional_sub_union_if_unsat.php", line 3, character 10 - line 3, character
 
 The supertype comes from this expression
 
-File "optional_sub_union_if_unsat.php", line 6, character 3 - line 6, character 9:
+File optional_sub_union_if_unsat.php, line 6, character 3 - line 6, character 9:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(?string $x): void {
@@ -56,15 +66,17 @@ File "optional_sub_union_if_unsat.php", line 6, character 3 - line 6, character 
  7 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "optional_sub_union_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_union_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(»?string« $x): void {
@@ -73,8 +85,10 @@ File "optional_sub_union_if_unsat.php", line 5, character 14 - line 5, character
 
 and flows into this expression
 
-File "optional_sub_union_if_unsat.php", line 5, character 22 - line 5, character 23:
+File optional_sub_union_if_unsat.php, line 5, character 22 - line 5, character 23:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(?string »$x«): void {
@@ -85,8 +99,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_union_if_unsat.php", line 6, character 7 - line 6, character 8:
+File optional_sub_union_if_unsat.php, line 6, character 7 - line 6, character 8:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo((string|int) $_): void {}
  4 | 
  5 | function bar(?string $x): void {
@@ -97,8 +113,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "optional_sub_union_if_unsat.php", line 3, character 14 - line 3, character 25:
+File optional_sub_union_if_unsat.php, line 3, character 14 - line 3, character 25:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(»(string|int)« $_): void {}
  4 | 
  5 | function bar(?string $x): void {

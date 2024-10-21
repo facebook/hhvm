@@ -1,25 +1,31 @@
 error: Typing[4110] Invalid argument
 
-File "fn_subtyping_variadic_2.php", line 8, character 18 - line 8, character 19:
+File fn_subtyping_variadic_2.php, line 8, character 18 - line 8, character 19:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2(»$x«);
  9 | }
 
-Expected `Sub`
+Expected Sub
 
-File "fn_subtyping_variadic_2.php", line 7, character 35 - line 7, character 37:
+File fn_subtyping_variadic_2.php, line 7, character 35 - line 7, character 37:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(»Sub«...):void) $x): void {
  8 |   foo_variadic_2($x);
  9 | }
 
-But got `Super`
+But got Super
 
-File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
+File fn_subtyping_variadic_2.php, line 6, character 40 - line 6, character 44:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, »Super«...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2($x);
@@ -28,14 +34,16 @@ File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
 Here's why:
 
 
-Step 1 of 3
+  Step 1 of 3                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "fn_subtyping_variadic_2.php", line 6, character 10 - line 6, character 23:
+File fn_subtyping_variadic_2.php, line 6, character 10 - line 6, character 23:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function »foo_variadic_2«((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2($x);
@@ -43,23 +51,27 @@ File "fn_subtyping_variadic_2.php", line 6, character 10 - line 6, character 23:
 
 The supertype comes from this expression
 
-File "fn_subtyping_variadic_2.php", line 8, character 3 - line 8, character 20:
+File fn_subtyping_variadic_2.php, line 8, character 3 - line 8, character 20:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   »foo_variadic_2($x)«;
  9 | }
 
 
-Step 2 of 3
+  Step 2 of 3                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "fn_subtyping_variadic_2.php", line 7, character 25 - line 7, character 47:
+File fn_subtyping_variadic_2.php, line 7, character 25 - line 7, character 47:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2(»(function(Sub...):void)« $x): void {
  8 |   foo_variadic_2($x);
@@ -67,8 +79,10 @@ File "fn_subtyping_variadic_2.php", line 7, character 25 - line 7, character 47:
 
 and flows into this expression
 
-File "fn_subtyping_variadic_2.php", line 7, character 49 - line 7, character 50:
+File fn_subtyping_variadic_2.php, line 7, character 49 - line 7, character 50:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) »$x«): void {
  8 |   foo_variadic_2($x);
@@ -78,8 +92,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "fn_subtyping_variadic_2.php", line 8, character 18 - line 8, character 19:
+File fn_subtyping_variadic_2.php, line 8, character 18 - line 8, character 19:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2(»$x«);
@@ -89,23 +105,27 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "fn_subtyping_variadic_2.php", line 6, character 25 - line 6, character 54:
+File fn_subtyping_variadic_2.php, line 6, character 25 - line 6, character 54:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2(»(function(Sub, Super...):void)« $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2($x);
  9 | }
 
 
-Step 3 of 3 (here is where the error occurred)
+  Step 3 of 3                    (here is where the error occurred) 
 
 These are function types so next I checked the 2nd function parameter of the subtype and the 1st parameter of the supertype.
 Functions are contravariant in their parameters the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
+File fn_subtyping_variadic_2.php, line 6, character 40 - line 6, character 44:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, »Super«...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
  8 |   foo_variadic_2($x);
@@ -113,17 +133,22 @@ File "fn_subtyping_variadic_2.php", line 6, character 40 - line 6, character 44:
 
 which is defined here
 
-File "fn_subtyping_variadic_2.php", line 3, character 7 - line 3, character 11:
+File fn_subtyping_variadic_2.php, line 3, character 7 - line 3, character 11:
 
+ 1 | <?hh
+ 2 | 
  3 | class »Super« {}
  4 | class Sub extends Super {}
  5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 7 | function bar_variadic_2((function(Sub...):void) $x): void {
 
 The supertype comes from this hint
 
-File "fn_subtyping_variadic_2.php", line 7, character 35 - line 7, character 37:
+File fn_subtyping_variadic_2.php, line 7, character 35 - line 7, character 37:
 
+ 4 | class Sub extends Super {}
+ 5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(»Sub«...):void) $x): void {
  8 |   foo_variadic_2($x);
@@ -131,11 +156,14 @@ File "fn_subtyping_variadic_2.php", line 7, character 35 - line 7, character 37:
 
 which is defined here
 
-File "fn_subtyping_variadic_2.php", line 4, character 7 - line 4, character 9:
+File fn_subtyping_variadic_2.php, line 4, character 7 - line 4, character 9:
 
+ 1 | <?hh
+ 2 | 
  3 | class Super {}
  4 | class »Sub« extends Super {}
  5 | 
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
+ 7 | function bar_variadic_2((function(Sub...):void) $x): void {
 
 1 error found

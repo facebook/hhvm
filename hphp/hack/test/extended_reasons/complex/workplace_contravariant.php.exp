@@ -1,6 +1,6 @@
 error: Typing[4110] Invalid argument
 
-File "workplace_contravariant.php", line 13, character 33 - line 13, character 39:
+File workplace_contravariant.php, line 13, character 33 - line 13, character 39:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -8,9 +8,9 @@ File "workplace_contravariant.php", line 13, character 33 - line 13, character 3
  14 |   }
  15 | }
 
-Expected `null`
+Expected null
 
-File "workplace_contravariant.php", line 12, character 63 - line 12, character 66:
+File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
@@ -18,9 +18,9 @@ File "workplace_contravariant.php", line 12, character 63 - line 12, character 6
  14 |   }
  15 | }
 
-But got `string`
+But got string
 
-File "workplace_contravariant.php", line 12, character 39 - line 12, character 44:
+File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
@@ -32,15 +32,15 @@ Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the hint.
 
-Main
+  Main                                                                    
 
-[Main] Step 1 of 2
+  [Main] Step 1 of 2                                        
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
+File workplace_contravariant.php, line 4, character 19 - line 4, character 29:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function »__construct«(
@@ -52,7 +52,7 @@ File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
 
 The supertype comes from this expression
 
-File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -61,14 +61,14 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  15 | }
 
 
-[Main] Step 2 of 2 (here is where the error occurred)
+  [Main] Step 2 of 2      (here is where the error occurred) 
 
 These are function types so next I checked the 2nd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "workplace_contravariant.php", line 12, character 39 - line 12, character 44:
+File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
@@ -78,7 +78,7 @@ File "workplace_contravariant.php", line 12, character 39 - line 12, character 4
 
 and flows into this expression
 
-File "workplace_contravariant.php", line 12, character 46 - line 12, character 47:
+File workplace_contravariant.php, line 12, character 46 - line 12, character 47:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string »$b«, ISender<int, null> $sender) {
@@ -90,7 +90,7 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "workplace_contravariant.php", line 13, character 29 - line 13, character 30:
+File workplace_contravariant.php, line 13, character 29 - line 13, character 30:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -102,7 +102,7 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "workplace_contravariant.php", line 12, character 63 - line 12, character 66:
+File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
@@ -112,15 +112,15 @@ File "workplace_contravariant.php", line 12, character 63 - line 12, character 6
 
 I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
-Lower
+  Lower                                                                  
 
-[Lower] Step 1 of 2
+  [Lower] Step 1 of 2                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
+File workplace_contravariant.php, line 4, character 19 - line 4, character 29:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function »__construct«(
@@ -132,7 +132,7 @@ File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
 
 The supertype comes from this expression
 
-File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -141,14 +141,14 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  15 | }
 
 
-[Lower] Step 2 of 2
+  [Lower] Step 2 of 2                                      
 
 These are function types so next I checked the 2nd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "workplace_contravariant.php", line 12, character 39 - line 12, character 44:
+File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, »string« $b, ISender<int, null> $sender) {
@@ -158,7 +158,7 @@ File "workplace_contravariant.php", line 12, character 39 - line 12, character 4
 
 and flows into this expression
 
-File "workplace_contravariant.php", line 12, character 46 - line 12, character 47:
+File workplace_contravariant.php, line 12, character 46 - line 12, character 47:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string »$b«, ISender<int, null> $sender) {
@@ -170,7 +170,7 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "workplace_contravariant.php", line 13, character 29 - line 13, character 30:
+File workplace_contravariant.php, line 13, character 29 - line 13, character 30:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -182,7 +182,7 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "workplace_contravariant.php", line 6, character 15 - line 6, character 16:
+File workplace_contravariant.php, line 6, character 15 - line 6, character 16:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function __construct(
@@ -192,9 +192,9 @@ File "workplace_contravariant.php", line 6, character 15 - line 6, character 16:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter `TB` of `TestServiceBase`
+and flows into this generic parameter TB of TestServiceBase
 
-File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -202,19 +202,19 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  14 |   }
  15 | }
 
-via the generic `TB`
+via the generic TB
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
-Upper
+  Upper                                                                  
 
-[Upper] Step 1 of 4
+  [Upper] Step 1 of 4                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
+File workplace_contravariant.php, line 4, character 19 - line 4, character 29:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function »__construct«(
@@ -226,7 +226,7 @@ File "workplace_contravariant.php", line 4, character 19 - line 4, character 29:
 
 The supertype comes from this expression
 
-File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -235,14 +235,14 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  15 | }
 
 
-[Upper] Step 2 of 4
+  [Upper] Step 2 of 4                                      
 
 These are function types so next I checked the 3rd function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "workplace_contravariant.php", line 12, character 50 - line 12, character 67:
+File workplace_contravariant.php, line 12, character 50 - line 12, character 67:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, »ISender<int, null>« $sender) {
@@ -252,13 +252,15 @@ File "workplace_contravariant.php", line 12, character 50 - line 12, character 6
 
 which is defined here
 
-File "workplace_contravariant.php", line 17, character 11 - line 17, character 17:
+File workplace_contravariant.php, line 17, character 11 - line 17, character 17:
 
+ 15 | }
+ 16 | 
  17 | interface »ISender«<-TA, -TB> {}
 
 and flows into this expression
 
-File "workplace_contravariant.php", line 12, character 69 - line 12, character 75:
+File workplace_contravariant.php, line 12, character 69 - line 12, character 75:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> »$sender«) {
@@ -270,7 +272,7 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "workplace_contravariant.php", line 13, character 33 - line 13, character 39:
+File workplace_contravariant.php, line 13, character 33 - line 13, character 39:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -282,7 +284,7 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "workplace_contravariant.php", line 7, character 5 - line 7, character 20:
+File workplace_contravariant.php, line 7, character 5 - line 7, character 20:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function __construct(
@@ -295,14 +297,14 @@ File "workplace_contravariant.php", line 7, character 5 - line 7, character 20:
 (its definition was given above)
 
 
-[Upper] Step 3 of 4
+  [Upper] Step 3 of 4                                      
 
-`\ISender` is a class or interface so next I checked the 2nd type arguments.
+ISender is a class or interface so next I checked the 2nd type arguments.
 The type parameter is contravariant so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "workplace_contravariant.php", line 7, character 17 - line 7, character 19:
+File workplace_contravariant.php, line 7, character 17 - line 7, character 19:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function __construct(
@@ -314,7 +316,7 @@ File "workplace_contravariant.php", line 7, character 17 - line 7, character 19:
 
 The supertype comes from this hint
 
-File "workplace_contravariant.php", line 12, character 63 - line 12, character 66:
+File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {
@@ -323,13 +325,13 @@ File "workplace_contravariant.php", line 12, character 63 - line 12, character 6
  15 | }
 
 
-[Upper] Step 4 of 4
+  [Upper] Step 4 of 4                                      
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "workplace_contravariant.php", line 7, character 18 - line 7, character 19:
+File workplace_contravariant.php, line 7, character 18 - line 7, character 19:
 
  3 | abstract class TestServiceBase<TA, TB> {
  4 |   public function __construct(
@@ -339,9 +341,9 @@ File "workplace_contravariant.php", line 7, character 18 - line 7, character 19:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter `TB` of `TestServiceBase`
+and flows into this generic parameter TB of TestServiceBase
 
-File "workplace_contravariant.php", line 13, character 5 - line 13, character 40:
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
@@ -349,11 +351,11 @@ File "workplace_contravariant.php", line 13, character 5 - line 13, character 40
  14 |   }
  15 | }
 
-via the generic `TB`
+via the generic TB
 
 The supertype is the same as before.
 
-File "workplace_contravariant.php", line 12, character 63 - line 12, character 66:
+File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
  11 | final class TestServiceWA extends TestServiceBase<int, string> {
  12 |   public function __construct(int $a, string $b, ISender<int, »null«> $sender) {

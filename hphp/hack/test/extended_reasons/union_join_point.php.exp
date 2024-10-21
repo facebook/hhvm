@@ -1,7 +1,8 @@
 error: Typing[4110] Invalid return type
 
-File "union_join_point.php", line 12, character 10 - line 12, character 11:
+File union_join_point.php, line 12, character 10 - line 12, character 11:
 
+  7 |     $z = $x;
   8 |   } else{
   9 |     $z = $y;
  10 |   }
@@ -9,9 +10,9 @@ File "union_join_point.php", line 12, character 10 - line 12, character 11:
  12 |   return »$z«;
  13 | }
 
-Expected `A`
+Expected A
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
+File union_join_point.php, line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -20,10 +21,11 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
-But got `B`
+But got B
 
-File "union_join_point.php", line 5, character 30 - line 5, character 30:
+File union_join_point.php, line 5, character 30 - line 5, character 30:
 
  1 | <?hh
  2 | class A {}
@@ -32,17 +34,18 @@ File "union_join_point.php", line 5, character 30 - line 5, character 30:
  5 | function foo(bool  $p, A $x, »B« $y): A {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this join point
 
-File "union_join_point.php", line 6, character 3 - line 10, character 3:
+File union_join_point.php, line 6, character 3 - line 10, character 3:
 
  5 | function foo(bool  $p, A $x, B $y): A {
  6 |   »if($p){
@@ -52,11 +55,13 @@ File "union_join_point.php", line 6, character 3 - line 10, character 3:
 10 |   }«
 11 | 
 12 |   return $z;
+13 | }
 
 and flows into this expression
 
-File "union_join_point.php", line 12, character 10 - line 12, character 11:
+File union_join_point.php, line 12, character 10 - line 12, character 11:
 
+  7 |     $z = $x;
   8 |   } else{
   9 |     $z = $y;
  10 |   }
@@ -68,8 +73,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_join_point.php", line 12, character 3 - line 12, character 12:
+File union_join_point.php, line 12, character 3 - line 12, character 12:
 
+  7 |     $z = $x;
   8 |   } else{
   9 |     $z = $y;
  10 |   }
@@ -81,7 +87,7 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
+File union_join_point.php, line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -90,10 +96,11 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 which is defined here
 
-File "union_join_point.php", line 2, character 7 - line 2, character 7:
+File union_join_point.php, line 2, character 7 - line 2, character 7:
 
  1 | <?hh
  2 | class »A« {}
@@ -102,15 +109,16 @@ File "union_join_point.php", line 2, character 7 - line 2, character 7:
  5 | function foo(bool  $p, A $x, B $y): A {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this hint
 
-File "union_join_point.php", line 5, character 30 - line 5, character 30:
+File union_join_point.php, line 5, character 30 - line 5, character 30:
 
  1 | <?hh
  2 | class A {}
@@ -119,10 +127,11 @@ File "union_join_point.php", line 5, character 30 - line 5, character 30:
  5 | function foo(bool  $p, A $x, »B« $y): A {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 which is defined here
 
-File "union_join_point.php", line 3, character 7 - line 3, character 7:
+File union_join_point.php, line 3, character 7 - line 3, character 7:
 
  1 | <?hh
  2 | class A {}
@@ -131,10 +140,11 @@ File "union_join_point.php", line 3, character 7 - line 3, character 7:
  5 | function foo(bool  $p, A $x, B $y): A {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 and flows into this expression
 
-File "union_join_point.php", line 5, character 32 - line 5, character 33:
+File union_join_point.php, line 5, character 32 - line 5, character 33:
 
  1 | <?hh
  2 | class A {}
@@ -143,13 +153,15 @@ File "union_join_point.php", line 5, character 32 - line 5, character 33:
  5 | function foo(bool  $p, A $x, B »$y«): A {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 as the parameter hint
 
 which itself flows into this expression
 
-File "union_join_point.php", line 9, character 10 - line 9, character 11:
+File union_join_point.php, line 9, character 10 - line 9, character 11:
 
+ 7 |     $z = $x;
  8 |   } else{
  9 |     $z = »$y«;
 10 |   }
@@ -161,8 +173,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_join_point.php", line 9, character 5 - line 9, character 6:
+File union_join_point.php, line 9, character 5 - line 9, character 6:
 
+ 7 |     $z = $x;
  8 |   } else{
  9 |     »$z« = $y;
 10 |   }
@@ -174,7 +187,7 @@ via an assignment
 
 The supertype is the same as before.
 
-File "union_join_point.php", line 5, character 37 - line 5, character 37:
+File union_join_point.php, line 5, character 37 - line 5, character 37:
 
  1 | <?hh
  2 | class A {}
@@ -183,5 +196,6 @@ File "union_join_point.php", line 5, character 37 - line 5, character 37:
  5 | function foo(bool  $p, A $x, B $y): »A« {
  6 |   if($p){
  7 |     $z = $x;
+ 8 |   } else{
 
 1 error found

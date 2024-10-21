@@ -1,6 +1,6 @@
 error: Typing[4163] Invalid argument
 
-File "shape_subtyping_2.php", line 11, character 29 - line 11, character 30:
+File shape_subtyping_2.php, line 11, character 29 - line 11, character 30:
 
   8 | function passes_optional_a_at_int(
   9 |   shape(?'a' => int) $s,
@@ -8,9 +8,9 @@ File "shape_subtyping_2.php", line 11, character 29 - line 11, character 30:
  11 |   expects_required_a_at_int(»$s«);
  12 | }
 
-The field `a` is **optional**
+The field a is optional
 
-File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
+File shape_subtyping_2.php, line 9, character 3 - line 9, character 20:
 
  8 | function passes_optional_a_at_int(
  9 |   »shape(?'a' => int)« $s,
@@ -18,19 +18,23 @@ File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
 11 |   expects_required_a_at_int($s);
 12 | }
 
-The field `a` is defined as **required**
+The field a is defined as required
 
-File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
+File shape_subtyping_2.php, line 4, character 3 - line 4, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function expects_required_a_at_int(
  4 |   »shape('a' => int)« $s,
  5 | ): void {
  6 | }
 
-`a` is defined here
+a is defined here
 
-File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
+File shape_subtyping_2.php, line 4, character 16 - line 4, character 18:
 
+ 1 | <?hh
+ 2 | 
  3 | function expects_required_a_at_int(
  4 |   shape('a' => »int«) $s,
  5 | ): void {
@@ -39,14 +43,16 @@ File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
 Here's why:
 
 
-Step 1 of 3
+  Step 1 of 3                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "shape_subtyping_2.php", line 3, character 10 - line 3, character 34:
+File shape_subtyping_2.php, line 3, character 10 - line 3, character 34:
 
+ 1 | <?hh
+ 2 | 
  3 | function »expects_required_a_at_int«(
  4 |   shape('a' => int) $s,
  5 | ): void {
@@ -54,7 +60,7 @@ File "shape_subtyping_2.php", line 3, character 10 - line 3, character 34:
 
 The supertype comes from this expression
 
-File "shape_subtyping_2.php", line 11, character 3 - line 11, character 31:
+File shape_subtyping_2.php, line 11, character 3 - line 11, character 31:
 
   8 | function passes_optional_a_at_int(
   9 |   shape(?'a' => int) $s,
@@ -63,14 +69,14 @@ File "shape_subtyping_2.php", line 11, character 3 - line 11, character 31:
  12 | }
 
 
-Step 2 of 3
+  Step 2 of 3                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
+File shape_subtyping_2.php, line 9, character 3 - line 9, character 20:
 
  8 | function passes_optional_a_at_int(
  9 |   »shape(?'a' => int)« $s,
@@ -80,7 +86,7 @@ File "shape_subtyping_2.php", line 9, character 3 - line 9, character 20:
 
 and flows into this expression
 
-File "shape_subtyping_2.php", line 9, character 22 - line 9, character 23:
+File shape_subtyping_2.php, line 9, character 22 - line 9, character 23:
 
  8 | function passes_optional_a_at_int(
  9 |   shape(?'a' => int) »$s«,
@@ -92,7 +98,7 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "shape_subtyping_2.php", line 11, character 29 - line 11, character 30:
+File shape_subtyping_2.php, line 11, character 29 - line 11, character 30:
 
   8 | function passes_optional_a_at_int(
   9 |   shape(?'a' => int) $s,
@@ -104,22 +110,24 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "shape_subtyping_2.php", line 4, character 3 - line 4, character 19:
+File shape_subtyping_2.php, line 4, character 3 - line 4, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function expects_required_a_at_int(
  4 |   »shape('a' => int)« $s,
  5 | ): void {
  6 | }
 
 
-Step 3 of 3 (here is where the error occurred)
+  Step 3 of 3                    (here is where the error occurred) 
 
-These are shape types so next I checked the `a` field.
+These are shape types so next I checked the a field.
 The field was optional in the subtype and required in the supertype.
 
 The subtype comes from this hint
 
-File "shape_subtyping_2.php", line 9, character 17 - line 9, character 19:
+File shape_subtyping_2.php, line 9, character 17 - line 9, character 19:
 
  8 | function passes_optional_a_at_int(
  9 |   shape(?'a' => »int«) $s,
@@ -129,8 +137,10 @@ File "shape_subtyping_2.php", line 9, character 17 - line 9, character 19:
 
 The supertype comes from this hint
 
-File "shape_subtyping_2.php", line 4, character 16 - line 4, character 18:
+File shape_subtyping_2.php, line 4, character 16 - line 4, character 18:
 
+ 1 | <?hh
+ 2 | 
  3 | function expects_required_a_at_int(
  4 |   shape('a' => »int«) $s,
  5 | ): void {

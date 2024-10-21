@@ -1,23 +1,28 @@
 error: Typing[4110] Invalid argument
 
-File "workplace_abstract_class_as_typeconst.php", line 37, character 23 - line 37, character 23:
+File workplace_abstract_class_as_typeconst.php, line 37, character 23 - line 37, character 23:
 
+ 35 | function test_function_2(): void {
  36 |   $ak = new ExampleArraykeyClass();
  37 |   $ak->addToContainer(»1«);
  38 | }
 
-Expected `ContainerClass::TType`
+Expected ContainerClass::TType
 
-File "workplace_abstract_class_as_typeconst.php", line 13, character 34 - line 13, character 61:
+File workplace_abstract_class_as_typeconst.php, line 13, character 34 - line 13, character 61:
 
+ 11 |   protected ?this::TContainerClass $container;
+ 12 | 
  13 |   public function addToContainer(»this::TContainerClass::TType« $val): void {
  14 |     $this->container?->add($val);
  15 |   }
+ 16 | }
 
-But got `int`
+But got int
 
-File "workplace_abstract_class_as_typeconst.php", line 37, character 23 - line 37, character 23:
+File workplace_abstract_class_as_typeconst.php, line 37, character 23 - line 37, character 23:
 
+ 35 | function test_function_2(): void {
  36 |   $ak = new ExampleArraykeyClass();
  37 |   $ak->addToContainer(»1«);
  38 | }
@@ -25,46 +30,54 @@ File "workplace_abstract_class_as_typeconst.php", line 37, character 23 - line 3
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "workplace_abstract_class_as_typeconst.php", line 13, character 19 - line 13, character 32:
+File workplace_abstract_class_as_typeconst.php, line 13, character 19 - line 13, character 32:
 
+ 11 |   protected ?this::TContainerClass $container;
+ 12 | 
  13 |   public function »addToContainer«(this::TContainerClass::TType $val): void {
  14 |     $this->container?->add($val);
  15 |   }
+ 16 | }
 
 The supertype comes from this expression
 
-File "workplace_abstract_class_as_typeconst.php", line 37, character 3 - line 37, character 24:
+File workplace_abstract_class_as_typeconst.php, line 37, character 3 - line 37, character 24:
 
+ 35 | function test_function_2(): void {
  36 |   $ak = new ExampleArraykeyClass();
  37 |   »$ak->addToContainer(1)«;
  38 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this expression
 
-File "workplace_abstract_class_as_typeconst.php", line 37, character 23 - line 37, character 23:
+File workplace_abstract_class_as_typeconst.php, line 37, character 23 - line 37, character 23:
 
+ 35 | function test_function_2(): void {
  36 |   $ak = new ExampleArraykeyClass();
  37 |   $ak->addToContainer(»1«);
  38 | }
 
 The supertype comes from this this type constant
 
-File "workplace_abstract_class_as_typeconst.php", line 13, character 57 - line 13, character 61:
+File workplace_abstract_class_as_typeconst.php, line 13, character 57 - line 13, character 61:
 
+ 11 |   protected ?this::TContainerClass $container;
+ 12 | 
  13 |   public function addToContainer(this::TContainerClass::»TType« $val): void {
  14 |     $this->container?->add($val);
  15 |   }
+ 16 | }
 
 1 error found

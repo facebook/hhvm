@@ -1,27 +1,33 @@
 error: Typing[4110] Invalid argument
 
-File "fn_call.php", line 6, character 7 - line 6, character 8:
+File fn_call.php, line 6, character 7 - line 6, character 8:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   foo(»$y«);
  7 | }
 
-Expected `string`
+Expected string
 
-File "fn_call.php", line 3, character 14 - line 3, character 19:
+File fn_call.php, line 3, character 14 - line 3, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(»string« $_): void {}
  4 | 
  5 | function bar(int $y ): void{
  6 |   foo($y);
  7 | }
 
-But got `int`
+But got int
 
-File "fn_call.php", line 5, character 14 - line 5, character 16:
+File fn_call.php, line 5, character 14 - line 5, character 16:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(»int« $y ): void{
@@ -31,14 +37,16 @@ File "fn_call.php", line 5, character 14 - line 5, character 16:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "fn_call.php", line 3, character 10 - line 3, character 12:
+File fn_call.php, line 3, character 10 - line 3, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function »foo«(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
@@ -47,8 +55,10 @@ File "fn_call.php", line 3, character 10 - line 3, character 12:
 
 The supertype comes from this expression
 
-File "fn_call.php", line 6, character 3 - line 6, character 9:
+File fn_call.php, line 6, character 3 - line 6, character 9:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
@@ -56,15 +66,17 @@ File "fn_call.php", line 6, character 3 - line 6, character 9:
  7 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "fn_call.php", line 5, character 14 - line 5, character 16:
+File fn_call.php, line 5, character 14 - line 5, character 16:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(»int« $y ): void{
@@ -73,8 +85,10 @@ File "fn_call.php", line 5, character 14 - line 5, character 16:
 
 and flows into this expression
 
-File "fn_call.php", line 5, character 18 - line 5, character 19:
+File fn_call.php, line 5, character 18 - line 5, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int »$y« ): void{
@@ -85,8 +99,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "fn_call.php", line 6, character 7 - line 6, character 8:
+File fn_call.php, line 6, character 7 - line 6, character 8:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(string $_): void {}
  4 | 
  5 | function bar(int $y ): void{
@@ -97,8 +113,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "fn_call.php", line 3, character 14 - line 3, character 19:
+File fn_call.php, line 3, character 14 - line 3, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(»string« $_): void {}
  4 | 
  5 | function bar(int $y ): void{

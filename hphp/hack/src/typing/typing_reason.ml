@@ -3173,25 +3173,25 @@ module Derivation = struct
       | Prj_symm_ctor (ctor_kind, nm, idx, Dir Co) ->
         Format.sprintf
           "`%s` is a %s so next I checked the %s type arguments."
-          nm
+          (strip_ns nm)
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Dir Contra) ->
         Format.sprintf
           "`%s` is a %s so next I checked the %s type arguments.\nThe type parameter is contravariant so the direction of the subtype relationship is reversed."
-          nm
+          (strip_ns nm)
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Inv Co) ->
         Format.sprintf
           "`%s` is a %s so next I checked the %s type arguments are subtypes.\nThe type parameter is invariant so the subtype relationship must hold in both directions.\nHere I check the covariant case."
-          nm
+          (strip_ns nm)
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_ctor (ctor_kind, nm, idx, Inv Contra) ->
         Format.sprintf
           "`%s` is a %s so next I checked the %s type arguments are subtypes.\nThe type parameter is invariant so the subtype relationship must hold in both directions.\nHere I check the contravariant case so the direction of the subtype relationship is reversed."
-          nm
+          (strip_ns nm)
           (explain_ctor_kind ctor_kind)
           (int_to_ordinal @@ (idx + 1))
       | Prj_symm_shape (nm, Absent, fld_kind_sup) ->

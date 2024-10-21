@@ -1,72 +1,88 @@
 error: Typing[4110] Invalid argument
 
-File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
+File newtype1.php--file2.php, line 8, character 22 - line 8, character 23:
 
+ 5 | }
+ 6 | 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return expect_bool(»$y«);
  9 | }
 
-Expected `bool`
+Expected bool
 
-File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+File newtype1.php--file2.php, line 3, character 22 - line 3, character 25:
 
+ 1 | <?hh
+ 2 | 
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;
  5 | }
 
-But got `int`
+But got int
 
-File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
+File newtype1.php--file1.php, line 3, character 18 - line 3, character 20:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype myint as »int« = int;
 
 Here's why:
 
 
-Step 1 of 3
+  Step 1 of 3                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "newtype1.php--file2.php", line 3, character 10 - line 3, character 20:
+File newtype1.php--file2.php, line 3, character 10 - line 3, character 20:
 
+ 1 | <?hh
+ 2 | 
  3 | function »expect_bool«(bool $x): bool {
  4 |   return $x;
  5 | }
 
 The supertype comes from this expression
 
-File "newtype1.php--file2.php", line 8, character 10 - line 8, character 24:
+File newtype1.php--file2.php, line 8, character 10 - line 8, character 24:
 
+ 5 | }
+ 6 | 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return »expect_bool($y)«;
  9 | }
 
 
-Step 2 of 3
+  Step 2 of 3                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "newtype1.php--file2.php", line 7, character 22 - line 7, character 26:
+File newtype1.php--file2.php, line 7, character 22 - line 7, character 26:
 
+ 5 | }
+ 6 | 
  7 | function pass_my_int(»myint« $y) : bool {
  8 |   return expect_bool($y);
  9 | }
 
 which is defined here
 
-File "newtype1.php--file1.php", line 3, character 24 - line 3, character 26:
+File newtype1.php--file1.php, line 3, character 24 - line 3, character 26:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype myint as int = »int«;
 
 and flows into this expression
 
-File "newtype1.php--file2.php", line 7, character 28 - line 7, character 29:
+File newtype1.php--file2.php, line 7, character 28 - line 7, character 29:
 
+ 5 | }
+ 6 | 
  7 | function pass_my_int(myint »$y«) : bool {
  8 |   return expect_bool($y);
  9 | }
@@ -75,8 +91,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "newtype1.php--file2.php", line 8, character 22 - line 8, character 23:
+File newtype1.php--file2.php, line 8, character 22 - line 8, character 23:
 
+ 5 | }
+ 6 | 
  7 | function pass_my_int(myint $y) : bool {
  8 |   return expect_bool(»$y«);
  9 | }
@@ -85,27 +103,33 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+File newtype1.php--file2.php, line 3, character 22 - line 3, character 25:
 
+ 1 | <?hh
+ 2 | 
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;
  5 | }
 
 
-Step 3 of 3 (here is where the error occurred)
+  Step 3 of 3                    (here is where the error occurred) 
 
 The subtype declares an upper bound so next I checked that was a subtype of the supertype.
 
 The subtype comes from this hint
 
-File "newtype1.php--file1.php", line 3, character 18 - line 3, character 20:
+File newtype1.php--file1.php, line 3, character 18 - line 3, character 20:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype myint as »int« = int;
 
 The supertype is the same as before.
 
-File "newtype1.php--file2.php", line 3, character 22 - line 3, character 25:
+File newtype1.php--file2.php, line 3, character 22 - line 3, character 25:
 
+ 1 | <?hh
+ 2 | 
  3 | function expect_bool(»bool« $x): bool {
  4 |   return $x;
  5 | }

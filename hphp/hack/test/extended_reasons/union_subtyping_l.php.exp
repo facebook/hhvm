@@ -1,7 +1,8 @@
 error: Typing[4110] Invalid return type
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+File union_subtyping_l.php, line 7, character 10 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -9,10 +10,11 @@ File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
  7 |   return »$ab«;
  8 | }
 
-Expected `C`
+Expected C
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -20,10 +22,11 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
  7 |   return $ab;
  8 | }
 
-But got `A`
+But got A
 
-File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
+File union_subtyping_l.php, line 6, character 19 - line 6, character 19:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -34,14 +37,15 @@ File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
+File union_subtyping_l.php, line 6, character 18 - line 6, character 24:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -51,8 +55,9 @@ File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
 
 and flows into this expression
 
-File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
+File union_subtyping_l.php, line 6, character 26 - line 6, character 28:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -64,8 +69,9 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+File union_subtyping_l.php, line 7, character 10 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -77,8 +83,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
+File union_subtyping_l.php, line 7, character 3 - line 7, character 13:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -90,8 +97,9 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -101,8 +109,9 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 which is defined here
 
-File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
+File union_subtyping_l.php, line 4, character 7 - line 4, character 7:
 
+ 2 | class A {}
  3 | class B {}
  4 | class »C« {}
  5 | 
@@ -111,14 +120,15 @@ File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
  8 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
+File union_subtyping_l.php, line 6, character 19 - line 6, character 19:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -128,7 +138,7 @@ File "union_subtyping_l.php", line 6, character 19 - line 6, character 19:
 
 which is defined here
 
-File "union_subtyping_l.php", line 2, character 7 - line 2, character 7:
+File union_subtyping_l.php, line 2, character 7 - line 2, character 7:
 
  1 | <?hh
  2 | class »A« {}
@@ -137,8 +147,9 @@ File "union_subtyping_l.php", line 2, character 7 - line 2, character 7:
 
 The supertype is the same as before.
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -148,8 +159,9 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 error: Typing[4110] Invalid return type
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+File union_subtyping_l.php, line 7, character 10 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -157,10 +169,11 @@ File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
  7 |   return »$ab«;
  8 | }
 
-Expected `C`
+Expected C
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -168,10 +181,11 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
  7 |   return $ab;
  8 | }
 
-But got `B`
+But got B
 
-File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
+File union_subtyping_l.php, line 6, character 23 - line 6, character 23:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -182,14 +196,15 @@ File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
+File union_subtyping_l.php, line 6, character 18 - line 6, character 24:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -199,8 +214,9 @@ File "union_subtyping_l.php", line 6, character 18 - line 6, character 24:
 
 and flows into this expression
 
-File "union_subtyping_l.php", line 6, character 26 - line 6, character 28:
+File union_subtyping_l.php, line 6, character 26 - line 6, character 28:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -212,8 +228,9 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "union_subtyping_l.php", line 7, character 10 - line 7, character 12:
+File union_subtyping_l.php, line 7, character 10 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -225,8 +242,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_subtyping_l.php", line 7, character 3 - line 7, character 13:
+File union_subtyping_l.php, line 7, character 3 - line 7, character 13:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -238,8 +256,9 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -249,8 +268,9 @@ File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
 
 which is defined here
 
-File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
+File union_subtyping_l.php, line 4, character 7 - line 4, character 7:
 
+ 2 | class A {}
  3 | class B {}
  4 | class »C« {}
  5 | 
@@ -259,14 +279,15 @@ File "union_subtyping_l.php", line 4, character 7 - line 4, character 7:
  8 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this hint
 
-File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
+File union_subtyping_l.php, line 6, character 23 - line 6, character 23:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 
@@ -276,16 +297,20 @@ File "union_subtyping_l.php", line 6, character 23 - line 6, character 23:
 
 which is defined here
 
-File "union_subtyping_l.php", line 3, character 7 - line 3, character 7:
+File union_subtyping_l.php, line 3, character 7 - line 3, character 7:
 
+ 1 | <?hh
  2 | class A {}
  3 | class »B« {}
  4 | class C {}
+ 5 | 
+ 6 | function union_l((A | B) $ab): C {
 
 The supertype is the same as before.
 
-File "union_subtyping_l.php", line 6, character 32 - line 6, character 32:
+File union_subtyping_l.php, line 6, character 32 - line 6, character 32:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | 

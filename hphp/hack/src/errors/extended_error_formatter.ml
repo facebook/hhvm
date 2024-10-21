@@ -9,13 +9,17 @@ open Hh_prelude
 
 let line_gap = 4
 
-let pad_before = 1
+let pad_before = 2
 
-let pad_after = 2
+let pad_after = 3
 
 let cursor_l = "»"
 
 let cursor_r = "«"
+
+let error_alert = " (here is where the error occurred)"
+
+let header_cols = 78
 
 type merge_result =
   | Only of Pos.t
@@ -46,7 +50,53 @@ let merge ps =
   | p :: ps -> merge_all ps ~cur:p ~acc:[]
   | [] -> []
 
-(* Given a position and the list of all spans for each file:
+(* ~~ Tty helpers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+let style_elem = Tty.(Normal Green)
+
+let style_cursor = Tty.(Dim Green)
+
+let style_path = Tty.(BoldWithBG (Default, Blue))
+
+let style_alert = Tty.(NormalWithBG (Default, Blue))
+
+let style_rule = Tty.(BoldItalics Default)
+
+let style_trans = Tty.(Italics Default)
+
+let style_line_num = Tty.(Dim Default)
+
+let style_filepos = Tty.(Dim Default)
+
+let style_filename = Tty.(Normal Magenta)
+
+(* ~~ Context helpers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
+
+let render_pos buf (pos : Pos.absolute) =
+  let pos_string =
+    Tty.apply_color style_filepos @@ Pos.multiline_string_no_file pos
+  in
+  let filename =
+    let fn = Pos.filename pos in
+    if String.is_suffix fn ~suffix:".hhi" then
+      match String.split fn ~on:'/' with
+      | _ :: "tmp" :: _ :: rest -> String.concat ~sep:"/" rest
+      | _ -> fn
+    else
+      fn
+  in
+  let file_pos_string =
+    Format.sprintf
+      {|%s %s%s %s%s|}
+      (Tty.apply_color Tty.(Dim Default) "File")
+      (Tty.apply_color style_filename filename)
+      (Tty.apply_color Tty.(Dim Default) ",")
+      pos_string
+      (Tty.apply_color Tty.(Dim Default) ":")
+  in
+  Buffer.add_string buf file_pos_string
+
+(** Given a position and the list of all spans for each file:
    1) Find the relevant file and find the first span that contains the position
    2) Select the lines from that file corresponding to the containing span
    3) For each line prepend the line number and a gutter marker
@@ -102,8 +152,8 @@ let mark_with_context (pos : Pos.absolute) ~buf ~spans =
               ~len:line_num_width
           in
           let (_ : unit) =
-            Buffer.add_string buf ln_num;
-            Buffer.add_string buf " | "
+            Buffer.add_string buf @@ Tty.apply_color style_line_num ln_num;
+            Buffer.add_string buf @@ Tty.apply_color style_line_num " | "
           in
           let is_start = ln = start_ln and is_end = ln = end_ln in
           let (_ : unit) =
@@ -116,77 +166,90 @@ let mark_with_context (pos : Pos.absolute) ~buf ~spans =
                  - write the suffix after the end of the marked pos
               *)
               Buffer.add_string buf (String.prefix str start_col);
-              Buffer.add_string buf cursor_l;
-              Buffer.add_string buf (String.slice str start_col (end_col + 1));
-              Buffer.add_string buf cursor_r;
+              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
+              Buffer.add_string buf
+              @@ Tty.apply_color
+                   style_elem
+                   (String.slice str start_col (end_col + 1));
+              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
               Buffer.add_string buf (String.drop_prefix str (end_col + 1))
             ) else if is_start then (
               (* If this is the start line, write the prefix, the lhs cursor and
                  substring of the marked pos that is on this line *)
               Buffer.add_string buf (String.prefix str start_col);
-              Buffer.add_string buf cursor_l;
-              Buffer.add_string buf (String.drop_prefix str start_col)
+              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
+              Buffer.add_string buf
+              @@ Tty.apply_color style_elem (String.drop_prefix str start_col)
             ) else if is_end then (
               (* If this is the end line, write the substring of the marked pos
                  that is on the line, the rhs cursor and the suffix *)
-              Buffer.add_string buf (String.prefix str end_col);
-              Buffer.add_string buf cursor_r;
+              Buffer.add_string buf
+              @@ Tty.apply_color style_elem (String.prefix str end_col);
+              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
               Buffer.add_string buf (String.drop_prefix str end_col)
-            ) else
+            ) else if ln < start_ln || ln > end_ln then
               (* Either the whole line is part of the target pos or the target
                  is not on the line at all; either way, write the entire line *)
               Buffer.add_string buf str
+            else
+              Buffer.add_string buf @@ Tty.apply_color style_elem str
           in
           Buffer.add_string buf "\n"
         end)
   | _ -> Buffer.add_string buf "No source found.\n\n"
 
 let render_reason buf spans (pos, msg) =
-  let pos_string =
-    let fn = Pos.filename pos in
-    if String.is_suffix fn ~suffix:".hhi" then
-      let pos_str = Pos.multiline_string_no_file pos in
-      match String.split fn ~on:'/' with
-      | _ :: "tmp" :: _ :: rest ->
-        let nm = String.concat ~sep:"/" rest in
-        Format.sprintf {|File "%s", %s:|} nm pos_str
-      | _ -> Format.sprintf "%s:" pos_str
-    else
-      Pos.multiline_string pos
-  in
-  Buffer.add_string buf msg;
+  let pretty_msg = Markdown_lite.render msg in
+  Buffer.add_string buf pretty_msg;
   Buffer.add_string buf "\n\n";
-  Buffer.add_string buf pos_string;
+  render_pos buf pos;
   Buffer.add_string buf "\n\n";
   mark_with_context pos ~buf ~spans;
   Buffer.add_string buf "\n"
 
 let render_elem buf spans elem =
   match elem with
-  | Explanation.Witness (pos, msg) -> render_reason buf spans (pos, msg)
+  | Explanation.Witness (pos, msg) ->
+    let msg = Markdown_lite.render msg in
+    render_reason buf spans (pos, msg)
   | Explanation.Witness_no_pos msg ->
+    let msg = Markdown_lite.render msg in
     Buffer.add_string buf msg;
     Buffer.add_string buf "\n"
   | Explanation.Rule msg ->
+    let msg = Markdown_lite.render msg in
     Buffer.add_string buf "\n";
-    Buffer.add_string buf msg;
+    Buffer.add_string buf @@ Tty.apply_color style_rule msg;
     Buffer.add_string buf "\n\n"
   | Explanation.Path (msg, false) ->
+    let msg = String.pad_right msg ~len:(header_cols - String.length msg - 2) in
     Buffer.add_string buf "\n";
-    Buffer.add_string buf msg;
+    Buffer.add_string buf @@ Tty.apply_color style_alert "  ";
+    Buffer.add_string buf @@ Tty.apply_color style_path msg;
     Buffer.add_string buf "\n"
   | Explanation.Path (msg, true) ->
+    let msg =
+      String.pad_right
+        msg
+        ~len:(header_cols - String.length msg - String.length error_alert - 2)
+    in
     Buffer.add_string buf "\n";
-    Buffer.add_string buf msg;
-    Buffer.add_string buf " (here is where the error occurred)";
+    Buffer.add_string buf @@ Tty.apply_color style_alert "  ";
+    Buffer.add_string buf @@ Tty.apply_color style_path msg;
+    Buffer.add_string buf @@ Tty.apply_color style_alert error_alert;
+    Buffer.add_string buf @@ Tty.apply_color style_alert " ";
+
     Buffer.add_string buf "\n"
   | Explanation.Trans msg ->
-    Buffer.add_string buf msg;
+    let msg = Markdown_lite.render msg in
+    Buffer.add_string buf @@ Tty.apply_color style_trans msg;
     Buffer.add_string buf "\n"
   | Explanation.Prefix { prefix; sep } ->
+    let prefix = Markdown_lite.render prefix in
     Buffer.add_string buf prefix;
     Buffer.add_string buf sep
   | Explanation.Suffix { suffix; sep = _ } ->
+    let suffix = Markdown_lite.render suffix in
     Buffer.add_string buf suffix;
     Buffer.add_string buf "\n\n"
 
@@ -195,13 +258,16 @@ let render_derivation buf spans elems =
   List.iter elems ~f:(render_elem buf spans)
 
 let render_claim buf spans code (pos, msg) severity =
+  let colour = User_error.Severity.tty_color severity in
+  let style_severity = Tty.Bold colour in
+  let pretty_msg = Markdown_lite.render ~add_bold:true ~color:colour msg in
   Buffer.add_string buf
   @@ Format.sprintf
        "%s: %s %s\n\n"
-       (User_error.Severity.to_string severity)
-       (User_error.error_code_to_string code)
-       msg;
-  Buffer.add_string buf (Pos.multiline_string pos);
+       (Tty.apply_color style_severity @@ User_error.Severity.to_string severity)
+       (Tty.apply_color style_severity @@ User_error.error_code_to_string code)
+       pretty_msg;
+  render_pos buf pos;
   Buffer.add_string buf "\n\n";
   mark_with_context pos ~buf ~spans;
   Buffer.add_string buf "\n"
@@ -226,8 +292,8 @@ let to_string
     (* Just render the json, no other info *)
     json
   | Explanation.Empty ->
-    (* Just render the claim and reasons - only subtyping errors will have
-       explanations at the moment *)
+    (* If the explanation is empty then ust render the claim and reasons;
+       only subtyping errors will have explanations at the moment *)
     let file_checked = Pos.filename pos in
     let init = SMap.singleton file_checked [Pos.to_relative pos] in
     let spans =

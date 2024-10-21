@@ -1,25 +1,31 @@
 error: Typing[4110] Invalid assignment
 
-File "assign_vector_bad.php", line 4, character 3 - line 4, character 12:
+File assign_vector_bad.php, line 4, character 3 - line 4, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   »$v[0] = 42«;
  5 |   return $v;
  6 | }
 
-Expected `string`
+Expected string
 
-File "assign_vector_bad.php", line 3, character 22 - line 3, character 27:
+File assign_vector_bad.php, line 3, character 22 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<»string«> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;
  6 | }
 
-But got `int`
+But got int
 
-File "assign_vector_bad.php", line 4, character 11 - line 4, character 12:
+File assign_vector_bad.php, line 4, character 11 - line 4, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   $v[0] = »42«;
  5 |   return $v;
@@ -28,14 +34,16 @@ File "assign_vector_bad.php", line 4, character 11 - line 4, character 12:
 Here's why:
 
 
-Step 1 of 1 (here is where the error occurred)
+  Step 1 of 1                    (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
 The subtype comes from this expression
 
-File "assign_vector_bad.php", line 4, character 11 - line 4, character 12:
+File assign_vector_bad.php, line 4, character 11 - line 4, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   $v[0] = »42«;
  5 |   return $v;
@@ -43,8 +51,10 @@ File "assign_vector_bad.php", line 4, character 11 - line 4, character 12:
 
 The supertype comes from this hint
 
-File "assign_vector_bad.php", line 3, character 22 - line 3, character 27:
+File assign_vector_bad.php, line 3, character 22 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<»string«> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -52,35 +62,43 @@ File "assign_vector_bad.php", line 3, character 22 - line 3, character 27:
 
 error: Typing[4110] Invalid return type
 
-File "assign_vector_bad.php", line 5, character 10 - line 5, character 11:
+File assign_vector_bad.php, line 5, character 10 - line 5, character 11:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return »$v«;
  6 | }
 
-Expected `string`
+Expected string
 
-File "assign_vector_bad.php", line 3, character 22 - line 3, character 27:
+File assign_vector_bad.php, line 3, character 22 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<»string«> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;
  6 | }
 
-But got `arraykey`
+But got arraykey
 
-File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
+File assign_vector_bad.php, line 3, character 42 - line 3, character 49:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<»arraykey«> {
  4 |   $v[0] = 42;
  5 |   return $v;
  6 | }
 
-This type argument to `Vector` must match exactly (it is invariant)
+This type argument to Vector must match exactly (it is invariant)
 
-File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
+File assign_vector_bad.php, line 3, character 42 - line 3, character 49:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<»arraykey«> {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -89,14 +107,16 @@ File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "assign_vector_bad.php", line 3, character 15 - line 3, character 28:
+File assign_vector_bad.php, line 3, character 15 - line 3, character 28:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(»Vector<string>« $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -104,17 +124,21 @@ File "assign_vector_bad.php", line 3, character 15 - line 3, character 28:
 
 which is defined here
 
-File "collections/Vector.hhi", line 48, character 15 - line 48, character 20:
+File collections/Vector.hhi, line 48, character 15 - line 48, character 20:
 
+ 46 |    * @guide /hack/collections/classes
  47 |    */
  48 |   final class »Vector«<Tv> implements \MutableVector<Tv> {
  49 |     /**
  50 |      * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
+ 51 |      * if `null` is passed.
 
 and flows into this expression
 
-File "assign_vector_bad.php", line 3, character 30 - line 3, character 31:
+File assign_vector_bad.php, line 3, character 30 - line 3, character 31:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> »$v«): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -124,8 +148,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "assign_vector_bad.php", line 5, character 10 - line 5, character 11:
+File assign_vector_bad.php, line 5, character 10 - line 5, character 11:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return »$v«;
@@ -135,8 +161,10 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "assign_vector_bad.php", line 5, character 3 - line 5, character 12:
+File assign_vector_bad.php, line 5, character 3 - line 5, character 12:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   »return $v;«
@@ -146,8 +174,10 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "assign_vector_bad.php", line 3, character 35 - line 3, character 50:
+File assign_vector_bad.php, line 3, character 35 - line 3, character 50:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): »Vector<arraykey>« {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -156,16 +186,18 @@ File "assign_vector_bad.php", line 3, character 35 - line 3, character 50:
 (its definition was given above)
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
-`\HH\Vector` is a class or interface so next I checked the 1st type arguments are subtypes.
+Vector is a class or interface so next I checked the 1st type arguments are subtypes.
 The type parameter is invariant so the subtype relationship must hold in both directions.
 Here I check the contravariant case so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
+File assign_vector_bad.php, line 3, character 42 - line 3, character 49:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<string> $v): Vector<»arraykey«> {
  4 |   $v[0] = 42;
  5 |   return $v;
@@ -173,8 +205,10 @@ File "assign_vector_bad.php", line 3, character 42 - line 3, character 49:
 
 The supertype comes from this hint
 
-File "assign_vector_bad.php", line 3, character 22 - line 3, character 27:
+File assign_vector_bad.php, line 3, character 22 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | function test(Vector<»string«> $v): Vector<arraykey> {
  4 |   $v[0] = 42;
  5 |   return $v;

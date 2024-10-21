@@ -1,142 +1,32 @@
 error: Typing[4110] Invalid return type
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
 
- 7 | function inter_l((A & I) $ai): C {
- 8 |   $c = $ai;
- 9 |   return »$c«;
-10 | }
-
-Expected `C`
-
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
-
- 7 | function inter_l((A & I) $ai): »C« {
- 8 |   $c = $ai;
- 9 |   return $c;
-10 | }
-
-But got `(A & I)`
-
-File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
-
- 7 | function inter_l(»(A & I)« $ai): C {
- 8 |   $c = $ai;
- 9 |   return $c;
-10 | }
-
-Here's why:
-
-
-Step 1 of 1 (here is where the error occurred)
-
-I started by checking this subtype relationship.
-
-The subtype comes from this hint
-
-File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
-
- 7 | function inter_l(»(A & I)« $ai): C {
- 8 |   $c = $ai;
- 9 |   return $c;
-10 | }
-
-and flows into this expression
-
-File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
-
- 7 | function inter_l((A & I) »$ai«): C {
- 8 |   $c = $ai;
- 9 |   return $c;
-10 | }
-
-as the parameter hint
-
-which itself flows into this expression
-
-File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
-
- 7 | function inter_l((A & I) $ai): C {
- 8 |   $c = »$ai«;
- 9 |   return $c;
-10 | }
-
-as the type of the local variable
-
-which itself flows into this expression
-
-File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
-
- 7 | function inter_l((A & I) $ai): C {
- 8 |   »$c« = $ai;
- 9 |   return $c;
-10 | }
-
-via an assignment
-
-which itself flows into this expression
-
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
-
- 7 | function inter_l((A & I) $ai): C {
- 8 |   $c = $ai;
- 9 |   return »$c«;
-10 | }
-
-as the type of the local variable
-
-which itself flows into this expression
-
-File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
-
- 7 | function inter_l((A & I) $ai): C {
- 8 |   $c = $ai;
- 9 |   »return $c;«
-10 | }
-
-because it is used in a return position
-
-The supertype comes from this hint
-
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
-
- 7 | function inter_l((A & I) $ai): »C« {
- 8 |   $c = $ai;
- 9 |   return $c;
-10 | }
-
-which is defined here
-
-File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
-
- 4 | class A {}
- 5 | class »C« extends A {}
+ 5 | class C extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
-
-error: Typing[4110] Invalid return type
-
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
-
- 7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
 10 | }
 
-Expected `C`
+Expected C
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
 
-But got `A`
+But got (A & I)
 
-File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
+File intersection_subtyping_l.php, line 7, character 18 - line 7, character 24:
 
- 7 | function inter_l((»A« & I) $ai): C {
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
@@ -144,14 +34,16 @@ File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 1                    (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
+File intersection_subtyping_l.php, line 7, character 18 - line 7, character 24:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -159,8 +51,10 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
 
 and flows into this expression
 
-File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
+File intersection_subtyping_l.php, line 7, character 26 - line 7, character 28:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -170,8 +64,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
+File intersection_subtyping_l.php, line 8, character 8 - line 8, character 10:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
  9 |   return $c;
@@ -181,8 +77,10 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
+File intersection_subtyping_l.php, line 8, character 3 - line 8, character 4:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
  9 |   return $c;
@@ -192,8 +90,10 @@ via an assignment
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
@@ -203,8 +103,10 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
+File intersection_subtyping_l.php, line 9, character 3 - line 9, character 12:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   »return $c;«
@@ -214,8 +116,10 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
@@ -223,23 +127,164 @@ File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32
 
 which is defined here
 
-File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
+File intersection_subtyping_l.php, line 5, character 7 - line 5, character 7:
 
  3 | interface I {}
  4 | class A {}
  5 | class »C« extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+
+error: Typing[4110] Invalid return type
+
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+Expected C
+
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): »C« {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+But got A
+
+File intersection_subtyping_l.php, line 7, character 19 - line 7, character 19:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((»A« & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+Here's why:
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 1 of 2                                                      
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File intersection_subtyping_l.php, line 7, character 18 - line 7, character 24:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l(»(A & I)« $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+and flows into this expression
+
+File intersection_subtyping_l.php, line 7, character 26 - line 7, character 28:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) »$ai«): C {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+as the parameter hint
+
+which itself flows into this expression
+
+File intersection_subtyping_l.php, line 8, character 8 - line 8, character 10:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = »$ai«;
+ 9 |   return $c;
+10 | }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File intersection_subtyping_l.php, line 8, character 3 - line 8, character 4:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   »$c« = $ai;
+ 9 |   return $c;
+10 | }
+
+via an assignment
+
+which itself flows into this expression
+
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   return »$c«;
+10 | }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File intersection_subtyping_l.php, line 9, character 3 - line 9, character 12:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+ 9 |   »return $c;«
+10 | }
+
+because it is used in a return position
+
+The supertype comes from this hint
+
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
+
+ 5 | class C extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): »C« {
+ 8 |   $c = $ai;
+ 9 |   return $c;
+10 | }
+
+which is defined here
+
+File intersection_subtyping_l.php, line 5, character 7 - line 5, character 7:
+
+ 3 | interface I {}
+ 4 | class A {}
+ 5 | class »C« extends A {}
+ 6 | 
+ 7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
+
+
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19:
+File intersection_subtyping_l.php, line 7, character 19 - line 7, character 19:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((»A« & I) $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -247,18 +292,21 @@ File "intersection_subtyping_l.php", line 7, character 19 - line 7, character 19
 
 which is defined here
 
-File "intersection_subtyping_l.php", line 4, character 7 - line 4, character 7:
+File intersection_subtyping_l.php, line 4, character 7 - line 4, character 7:
 
  3 | interface I {}
  4 | class »A« {}
  5 | class C extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
 
 The supertype is the same as before.
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
@@ -266,26 +314,32 @@ File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32
 
 error: Typing[4110] Invalid return type
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
 10 | }
 
-Expected `C`
+Expected C
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
 10 | }
 
-But got `I`
+But got I
 
-File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
+File intersection_subtyping_l.php, line 7, character 23 - line 7, character 23:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & »I«) $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -294,14 +348,16 @@ File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24:
+File intersection_subtyping_l.php, line 7, character 18 - line 7, character 24:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l(»(A & I)« $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -309,8 +365,10 @@ File "intersection_subtyping_l.php", line 7, character 18 - line 7, character 24
 
 and flows into this expression
 
-File "intersection_subtyping_l.php", line 7, character 26 - line 7, character 28:
+File intersection_subtyping_l.php, line 7, character 26 - line 7, character 28:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) »$ai«): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -320,8 +378,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 8, character 8 - line 8, character 10:
+File intersection_subtyping_l.php, line 8, character 8 - line 8, character 10:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = »$ai«;
  9 |   return $c;
@@ -331,8 +391,10 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 8, character 3 - line 8, character 4:
+File intersection_subtyping_l.php, line 8, character 3 - line 8, character 4:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   »$c« = $ai;
  9 |   return $c;
@@ -342,8 +404,10 @@ via an assignment
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 9, character 10 - line 9, character 11:
+File intersection_subtyping_l.php, line 9, character 10 - line 9, character 11:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   return »$c«;
@@ -353,8 +417,10 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "intersection_subtyping_l.php", line 9, character 3 - line 9, character 12:
+File intersection_subtyping_l.php, line 9, character 3 - line 9, character 12:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): C {
  8 |   $c = $ai;
  9 |   »return $c;«
@@ -364,8 +430,10 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;
@@ -373,23 +441,28 @@ File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32
 
 which is defined here
 
-File "intersection_subtyping_l.php", line 5, character 7 - line 5, character 7:
+File intersection_subtyping_l.php, line 5, character 7 - line 5, character 7:
 
+ 1 | <?hh
+ 2 | 
  3 | interface I {}
  4 | class A {}
  5 | class »C« extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
-File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23:
+File intersection_subtyping_l.php, line 7, character 23 - line 7, character 23:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & »I«) $ai): C {
  8 |   $c = $ai;
  9 |   return $c;
@@ -397,18 +470,23 @@ File "intersection_subtyping_l.php", line 7, character 23 - line 7, character 23
 
 which is defined here
 
-File "intersection_subtyping_l.php", line 3, character 11 - line 3, character 11:
+File intersection_subtyping_l.php, line 3, character 11 - line 3, character 11:
 
+ 1 | <?hh
+ 2 | 
  3 | interface »I« {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_l((A & I) $ai): C {
+ 8 |   $c = $ai;
 
 The supertype is the same as before.
 
-File "intersection_subtyping_l.php", line 7, character 32 - line 7, character 32:
+File intersection_subtyping_l.php, line 7, character 32 - line 7, character 32:
 
+ 5 | class C extends A {}
+ 6 | 
  7 | function inter_l((A & I) $ai): »C« {
  8 |   $c = $ai;
  9 |   return $c;

@@ -1,25 +1,31 @@
 error: Typing[4110] Invalid argument
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
 
-Expected `bool`
+Expected bool
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, character 23:
+File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character 23:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (»bool«|int);
  4 | 
  5 | function foo(MyThing $_): void {}
 
-But got `string`
+But got string
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -29,14 +35,16 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 Here's why:
 
 
-Step 1 of 5
+  Step 1 of 5                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, character 12:
+File optional_sub_newtype_if_unsat.php, line 5, character 10 - line 5, character 12:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function »foo«(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -45,8 +53,10 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, charact
 
 The supertype comes from this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, character 9:
+File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 9:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -54,15 +64,17 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  9 | }
 
 
-Step 2 of 5
+  Step 2 of 5                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -71,8 +83,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -83,8 +97,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -95,8 +111,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -105,21 +123,25 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
 
 which is defined here
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, character 28:
+File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character 28:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 3 of 5
+  Step 3 of 5                                                      
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -128,21 +150,25 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, character 23:
+File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character 23:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (»bool«|int);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 4 of 5
+  Step 4 of 5                                                      
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -151,8 +177,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -163,8 +191,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -175,21 +205,25 @@ as the type of the local variable
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, character 23:
+File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character 23:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (»bool«|int);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 5 of 5 (here is where the error occurred)
+  Step 5 of 5                    (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -198,34 +232,42 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 20 - line 3, character 23:
+File optional_sub_newtype_if_unsat.php, line 3, character 20 - line 3, character 23:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (»bool«|int);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 error: Typing[4110] Invalid argument
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
 
-Expected `int`
+Expected int
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, character 27:
+File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (bool|»int«);
  4 | 
  5 | function foo(MyThing $_): void {}
 
-But got `string`
+But got string
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -235,14 +277,16 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 Here's why:
 
 
-Step 1 of 5
+  Step 1 of 5                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, character 12:
+File optional_sub_newtype_if_unsat.php, line 5, character 10 - line 5, character 12:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function »foo«(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -251,8 +295,10 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, charact
 
 The supertype comes from this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, character 9:
+File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 9:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -260,15 +306,17 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  9 | }
 
 
-Step 2 of 5
+  Step 2 of 5                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -277,8 +325,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -289,8 +339,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -301,8 +353,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -311,21 +365,25 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
 
 which is defined here
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, character 28:
+File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character 28:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 3 of 5
+  Step 3 of 5                                                      
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -334,21 +392,25 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, character 27:
+File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (bool|»int«);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 4 of 5
+  Step 4 of 5                                                      
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -357,8 +419,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -369,8 +433,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -381,21 +447,25 @@ as the type of the local variable
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, character 27:
+File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (bool|»int«);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 5 of 5 (here is where the error occurred)
+  Step 5 of 5                    (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -404,36 +474,44 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 25 - line 3, character 27:
+File optional_sub_newtype_if_unsat.php, line 3, character 25 - line 3, character 27:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = (bool|»int«);
  4 | 
  5 | function foo(MyThing $_): void {}
 
 error: Typing[4110] Invalid argument
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
 
-Expected `(int | bool)`
+Expected (int | bool)
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo($x);
  9 | }
 
-But got `?string`
+But got ?string
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -443,14 +521,16 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, character 12:
+File optional_sub_newtype_if_unsat.php, line 5, character 10 - line 5, character 12:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function »foo«(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -459,8 +539,10 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, charact
 
 The supertype comes from this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, character 9:
+File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 9:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -468,15 +550,17 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  9 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -485,8 +569,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -497,8 +583,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -509,8 +597,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -519,36 +609,44 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
 
 which is defined here
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, character 28:
+File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character 28:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
 
 error: Typing[4110] Invalid argument
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo(»$x«);
  9 | }
 
-Expected `(int | bool)`
+Expected (int | bool)
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
  8 |   foo($x);
  9 | }
 
-But got `string`
+But got string
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -558,14 +656,16 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 Here's why:
 
 
-Step 1 of 4
+  Step 1 of 4                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, character 12:
+File optional_sub_newtype_if_unsat.php, line 5, character 10 - line 5, character 12:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function »foo«(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -574,8 +674,10 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 10 - line 5, charact
 
 The supertype comes from this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, character 9:
+File optional_sub_newtype_if_unsat.php, line 8, character 3 - line 8, character 9:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -583,15 +685,17 @@ File "optional_sub_newtype_if_unsat.php", line 8, character 3 - line 8, characte
  9 | }
 
 
-Step 2 of 4
+  Step 2 of 4                                                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -600,8 +704,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -612,8 +718,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -624,8 +732,10 @@ as the type of the local variable
 
 The supertype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -634,21 +744,25 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
 
 which is defined here
 
-File "optional_sub_newtype_if_unsat.php", line 3, character 19 - line 3, character 28:
+File optional_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character 28:
 
+ 1 | <?hh
+ 2 | 
  3 | newtype MyThing = »(bool|int)«;
  4 | 
  5 | function foo(MyThing $_): void {}
 
 
-Step 3 of 4
+  Step 3 of 4                                                      
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 14 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(»?string« $x): void {
@@ -657,8 +771,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 14 - line 7, charact
 
 and flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 22 - line 7, character 23:
+File optional_sub_newtype_if_unsat.php, line 7, character 22 - line 7, character 23:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string »$x«): void {
@@ -669,8 +785,10 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "optional_sub_newtype_if_unsat.php", line 8, character 7 - line 8, character 8:
+File optional_sub_newtype_if_unsat.php, line 8, character 7 - line 8, character 8:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -681,8 +799,10 @@ as the type of the local variable
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {
@@ -690,14 +810,16 @@ File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, charact
  9 | }
 
 
-Step 4 of 4 (here is where the error occurred)
+  Step 4 of 4                    (here is where the error occurred) 
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
 The subtype comes from this hint
 
-File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, character 20:
+File optional_sub_newtype_if_unsat.php, line 7, character 15 - line 7, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(MyThing $_): void {}
  6 | 
  7 | function bar(?»string« $x): void {
@@ -706,8 +828,10 @@ File "optional_sub_newtype_if_unsat.php", line 7, character 15 - line 7, charact
 
 The supertype is the same as before.
 
-File "optional_sub_newtype_if_unsat.php", line 5, character 14 - line 5, character 20:
+File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character 20:
 
+ 3 | newtype MyThing = (bool|int);
+ 4 | 
  5 | function foo(»MyThing« $_): void {}
  6 | 
  7 | function bar(?string $x): void {

@@ -1,23 +1,29 @@
 error: Typing[4110] Invalid return type
 
-File "fn_ret.php", line 8, character 10 - line 8, character 14:
+File fn_ret.php, line 8, character 10 - line 8, character 14:
 
+ 5 | }
+ 6 | 
  7 | function bar(): bool {
  8 |   return »foo()«;
  9 | }
 
-Expected `bool`
+Expected bool
 
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
+File fn_ret.php, line 7, character 17 - line 7, character 20:
 
+ 5 | }
+ 6 | 
  7 | function bar(): »bool« {
  8 |   return foo();
  9 | }
 
-But got `int`
+But got int
 
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
+File fn_ret.php, line 3, character 17 - line 3, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(): »int« {
  4 |   return 1;
  5 | }
@@ -25,22 +31,26 @@ File "fn_ret.php", line 3, character 17 - line 3, character 19:
 Here's why:
 
 
-Step 1 of 1 (here is where the error occurred)
+  Step 1 of 1                    (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "fn_ret.php", line 3, character 17 - line 3, character 19:
+File fn_ret.php, line 3, character 17 - line 3, character 19:
 
+ 1 | <?hh
+ 2 | 
  3 | function foo(): »int« {
  4 |   return 1;
  5 | }
 
 The supertype comes from this hint
 
-File "fn_ret.php", line 7, character 17 - line 7, character 20:
+File fn_ret.php, line 7, character 17 - line 7, character 20:
 
+ 5 | }
+ 6 | 
  7 | function bar(): »bool« {
  8 |   return foo();
  9 | }

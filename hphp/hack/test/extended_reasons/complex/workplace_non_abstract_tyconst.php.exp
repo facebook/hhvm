@@ -1,15 +1,16 @@
 error: Typing[4138] The assigned type of this type constant is inconsistent with its parent
 
-File "workplace_non_abstract_tyconst.php", line 15, character 14 - line 15, character 19:
+File workplace_non_abstract_tyconst.php, line 15, character 14 - line 15, character 19:
 
  14 | final class ConfigA extends Config {
  15 |   const type »TParam« = shape(
  16 |     'arg1' => keyset<SomeType>,
  17 |     'arg2' => keyset<SomeOtherType>,
+ 18 |     'arg3' => ?int,
 
 This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
 
-File "workplace_non_abstract_tyconst.php", line 7, character 23 - line 11, character 3:
+File workplace_non_abstract_tyconst.php, line 7, character 23 - line 11, character 3:
 
   6 | abstract class Config {
   7 |   const type TParam = »shape(
@@ -18,10 +19,12 @@ File "workplace_non_abstract_tyconst.php", line 7, character 23 - line 11, chara
  10 |      ...
  11 |   );«
  12 | }
+ 13 | 
+ 14 | final class ConfigA extends Config {
 
 It is incompatible with a shape that does not allow unknown fields.
 
-File "workplace_non_abstract_tyconst.php", line 15, character 23 - line 19, character 3:
+File workplace_non_abstract_tyconst.php, line 15, character 23 - line 19, character 3:
 
  14 | final class ConfigA extends Config {
  15 |   const type TParam = »shape(
@@ -30,19 +33,22 @@ File "workplace_non_abstract_tyconst.php", line 15, character 23 - line 19, char
  18 |     'arg3' => ?int,
  19 |   );«
  20 | }
+ 21 | 
+ 22 | final class ConfigB extends Config {
 
 error: Typing[4138] The assigned type of this type constant is inconsistent with its parent
 
-File "workplace_non_abstract_tyconst.php", line 23, character 14 - line 23, character 19:
+File workplace_non_abstract_tyconst.php, line 23, character 14 - line 23, character 19:
 
  22 | final class ConfigB extends Config {
  23 |   const type »TParam« = shape(
  24 |     'arg1' => keyset<SomeType>,
  25 |     'arg2' => keyset<SomeOtherType>,
+ 26 |     'arg4' => ?int,
 
 This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
 
-File "workplace_non_abstract_tyconst.php", line 7, character 23 - line 11, character 3:
+File workplace_non_abstract_tyconst.php, line 7, character 23 - line 11, character 3:
 
   6 | abstract class Config {
   7 |   const type TParam = »shape(
@@ -51,10 +57,12 @@ File "workplace_non_abstract_tyconst.php", line 7, character 23 - line 11, chara
  10 |      ...
  11 |   );«
  12 | }
+ 13 | 
+ 14 | final class ConfigA extends Config {
 
 It is incompatible with a shape that does not allow unknown fields.
 
-File "workplace_non_abstract_tyconst.php", line 23, character 23 - line 27, character 3:
+File workplace_non_abstract_tyconst.php, line 23, character 23 - line 27, character 3:
 
  22 | final class ConfigB extends Config {
  23 |   const type TParam = »shape(
@@ -63,5 +71,7 @@ File "workplace_non_abstract_tyconst.php", line 23, character 23 - line 27, char
  26 |     'arg4' => ?int,
  27 |   );«
  28 | }
+ 29 | 
+ 30 | final class UseCase {
 
 2 errors found

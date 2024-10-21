@@ -1,7 +1,8 @@
 error: Typing[4110] Invalid return type
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -9,10 +10,11 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
  7 |   return »$c«;
  8 | }
 
-Expected `(A | B)`
+Expected (A | B)
 
-File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -20,10 +22,11 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
  7 |   return $c;
  8 | }
 
-But got `C`
+But got C
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -34,14 +37,15 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-Step 1 of 1 (here is where the error occurred)
+  Step 1 of 1                    (here is where the error occurred) 
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -51,8 +55,9 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 which is defined here
 
-File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+File union_subtyping_r.php, line 4, character 7 - line 4, character 7:
 
+ 2 | class A {}
  3 | class B {}
  4 | class »C« {}
  5 | <<__NoAutoLikes>>
@@ -62,8 +67,9 @@ File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
 
 and flows into this expression
 
-File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+File union_subtyping_r.php, line 6, character 20 - line 6, character 21:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -75,8 +81,9 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -88,8 +95,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+File union_subtyping_r.php, line 7, character 3 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -101,8 +109,9 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -112,8 +121,9 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
 
 error: Typing[4110] Invalid return type
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -121,10 +131,11 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
  7 |   return »$c«;
  8 | }
 
-Expected `A`
+Expected A
 
-File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
+File union_subtyping_r.php, line 6, character 26 - line 6, character 26:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -132,10 +143,11 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
  7 |   return $c;
  8 | }
 
-But got `C`
+But got C
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -146,14 +158,15 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -163,8 +176,9 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 which is defined here
 
-File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+File union_subtyping_r.php, line 4, character 7 - line 4, character 7:
 
+ 2 | class A {}
  3 | class B {}
  4 | class »C« {}
  5 | <<__NoAutoLikes>>
@@ -174,8 +188,9 @@ File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
 
 and flows into this expression
 
-File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+File union_subtyping_r.php, line 6, character 20 - line 6, character 21:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -187,8 +202,9 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -200,8 +216,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+File union_subtyping_r.php, line 7, character 3 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -213,8 +230,9 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -223,14 +241,15 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
  8 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -240,8 +259,9 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 The supertype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
+File union_subtyping_r.php, line 6, character 26 - line 6, character 26:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -251,17 +271,19 @@ File "union_subtyping_r.php", line 6, character 26 - line 6, character 26:
 
 which is defined here
 
-File "union_subtyping_r.php", line 2, character 7 - line 2, character 7:
+File union_subtyping_r.php, line 2, character 7 - line 2, character 7:
 
  1 | <?hh
  2 | class »A« {}
  3 | class B {}
  4 | class C {}
+ 5 | <<__NoAutoLikes>>
 
 error: Typing[4110] Invalid return type
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -269,10 +291,11 @@ File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
  7 |   return »$c«;
  8 | }
 
-Expected `B`
+Expected B
 
-File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+File union_subtyping_r.php, line 6, character 28 - line 6, character 28:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -280,10 +303,11 @@ File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
  7 |   return $c;
  8 | }
 
-But got `C`
+But got C
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -294,14 +318,15 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -311,8 +336,9 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 which is defined here
 
-File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
+File union_subtyping_r.php, line 4, character 7 - line 4, character 7:
 
+ 2 | class A {}
  3 | class B {}
  4 | class »C« {}
  5 | <<__NoAutoLikes>>
@@ -322,8 +348,9 @@ File "union_subtyping_r.php", line 4, character 7 - line 4, character 7:
 
 and flows into this expression
 
-File "union_subtyping_r.php", line 6, character 20 - line 6, character 21:
+File union_subtyping_r.php, line 6, character 20 - line 6, character 21:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -335,8 +362,9 @@ as the parameter hint
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 10 - line 7, character 11:
+File union_subtyping_r.php, line 7, character 10 - line 7, character 11:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -348,8 +376,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "union_subtyping_r.php", line 7, character 3 - line 7, character 12:
+File union_subtyping_r.php, line 7, character 3 - line 7, character 12:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -361,8 +390,9 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
+File union_subtyping_r.php, line 6, character 25 - line 6, character 29:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -371,14 +401,15 @@ File "union_subtyping_r.php", line 6, character 25 - line 6, character 29:
  8 | }
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The supertype is a union type so next I checked the subtype constraint is satisfied for at least one element.
 
 The subtype is the same as before.
 
-File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
+File union_subtyping_r.php, line 6, character 18 - line 6, character 18:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -388,8 +419,9 @@ File "union_subtyping_r.php", line 6, character 18 - line 6, character 18:
 
 The supertype comes from this hint
 
-File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
+File union_subtyping_r.php, line 6, character 28 - line 6, character 28:
 
+ 2 | class A {}
  3 | class B {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
@@ -399,11 +431,13 @@ File "union_subtyping_r.php", line 6, character 28 - line 6, character 28:
 
 which is defined here
 
-File "union_subtyping_r.php", line 3, character 7 - line 3, character 7:
+File union_subtyping_r.php, line 3, character 7 - line 3, character 7:
 
+ 1 | <?hh
  2 | class A {}
  3 | class »B« {}
  4 | class C {}
  5 | <<__NoAutoLikes>>
+ 6 | function union_r(C $c): (A|B) {
 
 3 errors found

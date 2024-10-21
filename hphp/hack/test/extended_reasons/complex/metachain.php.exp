@@ -1,71 +1,84 @@
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+warning: Warn[12012] This as assertion will always fail and lead to an exception at runtime. The expression on the left has type null which shares no values with nonnull.
 
-File "metachain.php", line 28, character 10 - line 28, character 24:
+File metachain.php, line 28, character 10 - line 28, character 24:
 
+ 26 | <<__NoAutoLikes>>
  27 | function chain<T>(T $_): ReproGenesisChain<T> {
  28 |   return »null as nonnull«;
  29 | }
+ 30 | 
+ 31 | final class ReproGenesisChain<T> {
 
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+warning: Warn[12012] This as assertion will always fail and lead to an exception at runtime. The expression on the left has type null which shares no values with nonnull.
 
-File "metachain.php", line 36, character 12 - line 36, character 26:
+File metachain.php, line 36, character 12 - line 36, character 26:
 
+ 34 |     classname<ReproIGenesisRunnable with { type TInput super T; }> $_,
  35 |   ): ReproGenesisChain<mixed> {
  36 |     return »null as nonnull«;
  37 |   }
  38 | }
 
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+warning: Warn[12012] This as assertion will always fail and lead to an exception at runtime. The expression on the left has type null which shares no values with nonnull.
 
-File "metachain.php", line 50, character 12 - line 50, character 26:
+File metachain.php, line 50, character 12 - line 50, character 26:
 
  49 |   public static function fromValue(TOut $_): ReproMetaChain<TIn, TOut> {
  50 |     return »null as nonnull«;
  51 |   }
  52 |   public function then<TNextOut>(
+ 53 |     ReproIMetaChainOperator<TOut, TNextOut> $op,
 
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+warning: Warn[12012] This as assertion will always fail and lead to an exception at runtime. The expression on the left has type null which shares no values with nonnull.
 
-File "metachain.php", line 55, character 12 - line 55, character 26:
+File metachain.php, line 55, character 12 - line 55, character 26:
 
+ 53 |     ReproIMetaChainOperator<TOut, TNextOut> $op,
  54 |   ): ReproMetaChain<TIn, TNextOut> {
  55 |     return »null as nonnull«;
  56 |   }
  57 | }
 
-warning: Warn[12012] This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `null` which shares no values with `nonnull`.
+warning: Warn[12012] This as assertion will always fail and lead to an exception at runtime. The expression on the left has type null which shares no values with nonnull.
 
-File "metachain.php", line 64, character 10 - line 64, character 24:
+File metachain.php, line 64, character 10 - line 64, character 24:
 
+ 62 |   ReproIMetaChainOperator<TIn, TOut> $_,
  63 | ): Awaitable<TOut> {
  64 |   return »null as nonnull«;
  65 | }
 
 error: Typing[4110] Invalid argument
 
-File "metachain.php", line 17, character 19 - line 17, character 50:
+File metachain.php, line 17, character 19 - line 17, character 50:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(»ReproIGCreatorAIMetachain::class«);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
-Expected `string`
+Expected string
 
-File "metachain.php", line 22, character 17 - line 22, character 22:
+File metachain.php, line 22, character 17 - line 22, character 22:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = shape(
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
-But got `dynamic`
+But got dynamic
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -73,21 +86,23 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 Here's why:
 
 I checked the subtype constraint in [Main] because it was implied by the other constraints on the type variable.
 
-Main
+  Main                                                                    
 
-[Main] Step 1 of 2
+  [Main] Step 1 of 2                                        
 
 I started by checking this subtype relationship.
 
 The subtype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -95,11 +110,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 which I solved to this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -107,11 +124,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 and flows into this expression
 
-File "metachain.php", line 7, character 3 - line 7, character 6:
+File metachain.php, line 7, character 3 - line 7, character 6:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   »$foo« = await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -119,39 +138,45 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 10 |   );
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 11, character 28 - line 11, character 31:
+File metachain.php, line 11, character 28 - line 11, character 31:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 as the type of the local variable
 
 The supertype comes from this hint
 
-File "metachain.php", line 22, character 17 - line 22, character 22:
+File metachain.php, line 22, character 17 - line 22, character 22:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = shape(
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
 
-[Main] Step 2 of 2 (here is where the error occurred)
+  [Main] Step 2 of 2      (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -159,29 +184,33 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 The supertype is the same as before.
 
-File "metachain.php", line 22, character 17 - line 22, character 22:
+File metachain.php, line 22, character 17 - line 22, character 22:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = shape(
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
 I found the subtype for [Main] when I checked the subtype constraint in [Lower].
 
-Lower
+  Lower                                                                  
 
-[Lower] Step 1 of 2
+  [Lower] Step 1 of 2                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -189,11 +218,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 which I solved to this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -201,11 +232,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 and flows into this expression
 
-File "metachain.php", line 7, character 3 - line 7, character 6:
+File metachain.php, line 7, character 3 - line 7, character 6:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   »$foo« = await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -213,24 +246,28 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 10 |   );
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 11, character 28 - line 11, character 31:
+File metachain.php, line 11, character 28 - line 11, character 31:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 as the type of the local variable
 
 The supertype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -238,11 +275,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 which I solved to this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -250,11 +289,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 and flows into this expression
 
-File "metachain.php", line 7, character 3 - line 7, character 6:
+File metachain.php, line 7, character 3 - line 7, character 6:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   »$foo« = await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -262,40 +303,46 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 10 |   );
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 11, character 28 - line 11, character 31:
+File metachain.php, line 11, character 28 - line 11, character 31:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 as the type of the local variable
 
 which itself flows into this type variable
 
-File "metachain.php", line 11, character 12 - line 11, character 23:
+File metachain.php, line 11, character 12 - line 11, character 23:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, »$user_prompt«) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 via an assignment
 
 
-[Lower] Step 2 of 2
+  [Lower] Step 2 of 2                                      
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
 The subtype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -303,11 +350,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 The supertype is the same as before.
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -315,19 +364,20 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 I checked the subtype constraint in [Upper / Main] because it was implied by the other constraints on the hint.
 
-Upper / Main
+  Upper / Main                                                    
 
-[Upper / Main] Step 1 of 3
+  [Upper / Main] Step 1 of 3                        
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "metachain.php", line 27, character 10 - line 27, character 14:
+File metachain.php, line 27, character 10 - line 27, character 14:
 
  26 | <<__NoAutoLikes>>
  27 | function »chain«<T>(T $_): ReproGenesisChain<T> {
@@ -336,77 +386,90 @@ File "metachain.php", line 27, character 10 - line 27, character 14:
 
 The supertype comes from this expression
 
-File "metachain.php", line 16, character 12 - line 16, character 20:
+File metachain.php, line 16, character 12 - line 16, character 20:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = »chain($s)«;
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 
-[Upper / Main] Step 2 of 3
+  [Upper / Main] Step 2 of 3                        
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this shape literal
 
-File "metachain.php", line 13, character 8 - line 15, character 3:
+File metachain.php, line 13, character 8 - line 15, character 3:
 
+ 11 |   list($_, $user_prompt) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = »shape(
  14 |     'prompt' => $user_prompt,
  15 |   );«
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
+ 18 | }
 
 and flows into this expression
 
-File "metachain.php", line 13, character 3 - line 13, character 4:
+File metachain.php, line 13, character 3 - line 13, character 4:
 
+ 11 |   list($_, $user_prompt) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   »$s« = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
+ 18 | }
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 16, character 18 - line 16, character 19:
+File metachain.php, line 16, character 18 - line 16, character 19:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = chain(»$s«);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 as the type of the local variable
 
 The supertype comes from this hint
 
-File "metachain.php", line 21, character 23 - line 23, character 3:
+File metachain.php, line 21, character 23 - line 23, character 3:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = »shape(
  22 |     'prompt' => string,
  23 |   );«
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
 
-[Upper / Main] Step 3 of 3
+  [Upper / Main] Step 3 of 3                        
 
-These are shape types so next I checked the required `prompt` field.
+These are shape types so next I checked the required prompt field.
 
 The subtype comes from this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -414,11 +477,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 which I solved to this expression
 
-File "metachain.php", line 7, character 10 - line 10, character 3:
+File metachain.php, line 7, character 10 - line 10, character 3:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   $foo = »await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -426,11 +491,13 @@ File "metachain.php", line 7, character 10 - line 10, character 3:
 10 |   );«
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 and flows into this expression
 
-File "metachain.php", line 7, character 3 - line 7, character 6:
+File metachain.php, line 7, character 3 - line 7, character 6:
 
+ 5 |   ReproIMetaChainOperator<shape(), (nothing, string)> $obj,
  6 | ): Awaitable<void> {
  7 |   »$foo« = await genX(
  8 |     // ReproMetaChain::fromValue(shape()) instead of $val
@@ -438,76 +505,88 @@ File "metachain.php", line 7, character 3 - line 7, character 6:
 10 |   );
 11 |   list($_, $user_prompt) = $foo;
 12 |   //$user_prompt = $foo[1];
+13 |   $s = shape(
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 11, character 28 - line 11, character 31:
+File metachain.php, line 11, character 28 - line 11, character 31:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, $user_prompt) = »$foo«;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 as the type of the local variable
 
 which itself flows into this type variable
 
-File "metachain.php", line 11, character 12 - line 11, character 23:
+File metachain.php, line 11, character 12 - line 11, character 23:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, »$user_prompt«) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 11, character 12 - line 11, character 23:
+File metachain.php, line 11, character 12 - line 11, character 23:
 
+  9 |     $val->then($obj),
  10 |   );
  11 |   list($_, »$user_prompt«) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
+ 14 |     'prompt' => $user_prompt,
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 14, character 17 - line 14, character 28:
+File metachain.php, line 14, character 17 - line 14, character 28:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => »$user_prompt«,
  15 |   );
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 as the type of the local variable
 
 The supertype comes from this hint
 
-File "metachain.php", line 22, character 17 - line 22, character 22:
+File metachain.php, line 22, character 17 - line 22, character 22:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = shape(
  22 |     'prompt' => »string«,
  23 |   );
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
 I found the subtype for [Upper / Main] when I checked the subtype constraint in [Upper / Lower].
 
-Upper / Lower
+  Upper / Lower                                                  
 
-[Upper / Lower] Step 1 of 2
+  [Upper / Lower] Step 1 of 2                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this function or method declaration
 
-File "metachain.php", line 27, character 10 - line 27, character 14:
+File metachain.php, line 27, character 10 - line 27, character 14:
 
  26 | <<__NoAutoLikes>>
  27 | function »chain«<T>(T $_): ReproGenesisChain<T> {
@@ -516,129 +595,148 @@ File "metachain.php", line 27, character 10 - line 27, character 14:
 
 The supertype comes from this expression
 
-File "metachain.php", line 16, character 12 - line 16, character 20:
+File metachain.php, line 16, character 12 - line 16, character 20:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = »chain($s)«;
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 
-[Upper / Lower] Step 2 of 2
+  [Upper / Lower] Step 2 of 2                      
 
 These are function types so next I checked the 1st function parameters.
 Functions are contravariant in their parameters so the direction of the subtype relationship is reversed.
 
 The subtype comes from this shape literal
 
-File "metachain.php", line 13, character 8 - line 15, character 3:
+File metachain.php, line 13, character 8 - line 15, character 3:
 
+ 11 |   list($_, $user_prompt) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   $s = »shape(
  14 |     'prompt' => $user_prompt,
  15 |   );«
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
+ 18 | }
 
 and flows into this expression
 
-File "metachain.php", line 13, character 3 - line 13, character 4:
+File metachain.php, line 13, character 3 - line 13, character 4:
 
+ 11 |   list($_, $user_prompt) = $foo;
  12 |   //$user_prompt = $foo[1];
  13 |   »$s« = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = chain($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
+ 18 | }
 
 via an assignment
 
 which itself flows into this expression
 
-File "metachain.php", line 16, character 18 - line 16, character 19:
+File metachain.php, line 16, character 18 - line 16, character 19:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = chain(»$s«);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
 as the type of the local variable
 
 The supertype comes from this hint
 
-File "metachain.php", line 27, character 19 - line 27, character 19:
+File metachain.php, line 27, character 19 - line 27, character 19:
 
  26 | <<__NoAutoLikes>>
  27 | function chain<T>(»T« $_): ReproGenesisChain<T> {
  28 |   return null as nonnull;
  29 | }
 
-and flows into this generic parameter `T` of `chain`
+and flows into this generic parameter T of chain
 
-File "metachain.php", line 16, character 12 - line 16, character 16:
+File metachain.php, line 16, character 12 - line 16, character 16:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = »chain«($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
-via the generic `T`
+via the generic T
 
 I found the supertype for [Upper / Main] when I checked the subtype constraint in [Upper / Upper].
 
-Upper / Upper
+  Upper / Upper                                                  
 
-[Upper / Upper] Step 1 of 1
+  [Upper / Upper] Step 1 of 1                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this hint
 
-File "metachain.php", line 34, character 62 - line 34, character 62:
+File metachain.php, line 34, character 62 - line 34, character 62:
 
  33 |   public function thenMPZ(
  34 |     classname<ReproIGenesisRunnable with { type TInput super »T«; }> $_,
  35 |   ): ReproGenesisChain<mixed> {
  36 |     return null as nonnull;
+ 37 |   }
 
 and flows into this hint
 
-File "metachain.php", line 27, character 44 - line 27, character 44:
+File metachain.php, line 27, character 44 - line 27, character 44:
 
  26 | <<__NoAutoLikes>>
  27 | function chain<T>(T $_): ReproGenesisChain<»T«> {
  28 |   return null as nonnull;
  29 | }
 
-via the generic `T`
+via the generic T
 
-which itself flows into this generic parameter `T` of `chain`
+which itself flows into this generic parameter T of chain
 
-File "metachain.php", line 16, character 12 - line 16, character 16:
+File metachain.php, line 16, character 12 - line 16, character 16:
 
+ 12 |   //$user_prompt = $foo[1];
  13 |   $s = shape(
  14 |     'prompt' => $user_prompt,
  15 |   );
  16 |   $chain = »chain«($s);
  17 |   $chain->thenMPZ(ReproIGCreatorAIMetachain::class);
  18 | }
+ 19 | 
+ 20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
 
-via the generic `T`
+via the generic T
 
 The supertype comes from this hint
 
-File "metachain.php", line 21, character 23 - line 23, character 3:
+File metachain.php, line 21, character 23 - line 23, character 3:
 
  20 | final class ReproIGCreatorAIMetachain implements ReproIGenesisRunnable {
  21 |   const type TInput = »shape(
  22 |     'prompt' => string,
  23 |   );«
  24 | }
+ 25 | 
+ 26 | <<__NoAutoLikes>>
 
 6 errors found

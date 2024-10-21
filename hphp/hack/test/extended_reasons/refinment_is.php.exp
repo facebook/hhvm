@@ -1,14 +1,15 @@
 error: Typing[4110] Invalid return type
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
 
-Expected `C`
+Expected C
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
  3 | interface I {}
  4 | class A {}
@@ -17,10 +18,11 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
-But got `A`
+But got A
 
-File "refinment_is.php", line 7, character 19 - line 7, character 19:
+File refinment_is.php, line 7, character 19 - line 7, character 19:
 
  3 | interface I {}
  4 | class A {}
@@ -29,17 +31,18 @@ File "refinment_is.php", line 7, character 19 - line 7, character 19:
  7 | function inter_is(»A« $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 Here's why:
 
 
-Step 1 of 3
+  Step 1 of 3                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this join point
 
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
+File refinment_is.php, line 8, character 3 - line 12, character 3:
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -52,8 +55,9 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
 and flows into this expression
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
@@ -62,8 +66,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
+File refinment_is.php, line 13, character 3 - line 13, character 12:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   »return $z;«
  14 | }
@@ -72,7 +77,7 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
  3 | interface I {}
  4 | class A {}
@@ -81,10 +86,11 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 which is defined here
 
-File "refinment_is.php", line 5, character 7 - line 5, character 7:
+File refinment_is.php, line 5, character 7 - line 5, character 7:
 
  3 | interface I {}
  4 | class A {}
@@ -93,15 +99,16 @@ File "refinment_is.php", line 5, character 7 - line 5, character 7:
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 
-Step 2 of 3
+  Step 2 of 3                                                      
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
-The subtype comes from this `is` expression
+The subtype comes from this is expression
 
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 6 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -114,7 +121,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
 and flows into this expression
 
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
+File refinment_is.php, line 9, character 10 - line 9, character 11:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -129,7 +136,7 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
+File refinment_is.php, line 9, character 5 - line 9, character 6:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -144,7 +151,7 @@ via an assignment
 
 The supertype is the same as before.
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
  3 | interface I {}
  4 | class A {}
@@ -153,15 +160,16 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 
-Step 3 of 3 (here is where the error occurred)
+  Step 3 of 3                    (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
-File "refinment_is.php", line 7, character 19 - line 7, character 19:
+File refinment_is.php, line 7, character 19 - line 7, character 19:
 
  3 | interface I {}
  4 | class A {}
@@ -170,10 +178,11 @@ File "refinment_is.php", line 7, character 19 - line 7, character 19:
  7 | function inter_is(»A« $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 which is defined here
 
-File "refinment_is.php", line 4, character 7 - line 4, character 7:
+File refinment_is.php, line 4, character 7 - line 4, character 7:
 
  3 | interface I {}
  4 | class »A« {}
@@ -182,10 +191,11 @@ File "refinment_is.php", line 4, character 7 - line 4, character 7:
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 and flows into this expression
 
-File "refinment_is.php", line 7, character 21 - line 7, character 22:
+File refinment_is.php, line 7, character 21 - line 7, character 22:
 
  3 | interface I {}
  4 | class A {}
@@ -194,12 +204,13 @@ File "refinment_is.php", line 7, character 21 - line 7, character 22:
  7 | function inter_is(A »$a«, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 as the parameter hint
 
 which itself flows into this expression
 
-File "refinment_is.php", line 8, character 6 - line 8, character 7:
+File refinment_is.php, line 8, character 6 - line 8, character 7:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a« is I) {
@@ -214,7 +225,7 @@ as the type of the local variable
 
 The supertype is the same as before.
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
  3 | interface I {}
  4 | class A {}
@@ -223,29 +234,33 @@ File "refinment_is.php", line 7, character 32 - line 7, character 32:
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 error: Typing[4110] Invalid return type
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
 
-Expected `C`
+Expected C
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
-But got `(A & I)` from this `is` expression test
+But got (A & I) from this is expression test
 
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 6 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -259,13 +274,13 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 Here's why:
 
 
-Step 1 of 2
+  Step 1 of 2                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this join point
 
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
+File refinment_is.php, line 8, character 3 - line 12, character 3:
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -278,8 +293,9 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
 and flows into this expression
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
@@ -288,8 +304,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
+File refinment_is.php, line 13, character 3 - line 13, character 12:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   »return $z;«
  14 | }
@@ -298,34 +315,38 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 which is defined here
 
-File "refinment_is.php", line 5, character 7 - line 5, character 7:
+File refinment_is.php, line 5, character 7 - line 5, character 7:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class »C« extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 
-Step 2 of 2 (here is where the error occurred)
+  Step 2 of 2                    (here is where the error occurred) 
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
-The subtype comes from this `is` expression
+The subtype comes from this is expression
 
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 6 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -338,7 +359,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
 and flows into this expression
 
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
+File refinment_is.php, line 9, character 10 - line 9, character 11:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -353,7 +374,7 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
+File refinment_is.php, line 9, character 5 - line 9, character 6:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -368,37 +389,42 @@ via an assignment
 
 The supertype is the same as before.
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 error: Typing[4110] Invalid return type
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
 
-Expected `C`
+Expected C
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
-But got `I`
+But got I
 
-File "refinment_is.php", line 8, character 12 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is »I«) {
@@ -412,13 +438,13 @@ File "refinment_is.php", line 8, character 12 - line 8, character 12:
 Here's why:
 
 
-Step 1 of 3
+  Step 1 of 3                                                      
 
 I started by checking this subtype relationship.
 
 The subtype comes from this join point
 
-File "refinment_is.php", line 8, character 3 - line 12, character 3:
+File refinment_is.php, line 8, character 3 - line 12, character 3:
 
   7 | function inter_is(A $a, C $c): C {
   8 |   »if($a is I) {
@@ -431,8 +457,9 @@ File "refinment_is.php", line 8, character 3 - line 12, character 3:
 
 and flows into this expression
 
-File "refinment_is.php", line 13, character 10 - line 13, character 11:
+File refinment_is.php, line 13, character 10 - line 13, character 11:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   return »$z«;
  14 | }
@@ -441,8 +468,9 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 13, character 3 - line 13, character 12:
+File refinment_is.php, line 13, character 3 - line 13, character 12:
 
+ 11 |     $z = $c;
  12 |   }
  13 |   »return $z;«
  14 | }
@@ -451,34 +479,38 @@ because it is used in a return position
 
 The supertype comes from this hint
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 which is defined here
 
-File "refinment_is.php", line 5, character 7 - line 5, character 7:
+File refinment_is.php, line 5, character 7 - line 5, character 7:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class »C« extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 
-Step 2 of 3
+  Step 2 of 3                                                      
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
-The subtype comes from this `is` expression
+The subtype comes from this is expression
 
-File "refinment_is.php", line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 6 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if(»$a is I«) {
@@ -491,7 +523,7 @@ File "refinment_is.php", line 8, character 6 - line 8, character 12:
 
 and flows into this expression
 
-File "refinment_is.php", line 9, character 10 - line 9, character 11:
+File refinment_is.php, line 9, character 10 - line 9, character 11:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -506,7 +538,7 @@ as the type of the local variable
 
 which itself flows into this expression
 
-File "refinment_is.php", line 9, character 5 - line 9, character 6:
+File refinment_is.php, line 9, character 5 - line 9, character 6:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is I) {
@@ -521,23 +553,25 @@ via an assignment
 
 The supertype is the same as before.
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 
-Step 3 of 3 (here is where the error occurred)
+  Step 3 of 3                    (here is where the error occurred) 
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
 The subtype comes from this hint
 
-File "refinment_is.php", line 8, character 12 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
  8 |   if($a is »I«) {
@@ -550,21 +584,25 @@ File "refinment_is.php", line 8, character 12 - line 8, character 12:
 
 which is defined here
 
-File "refinment_is.php", line 3, character 11 - line 3, character 11:
+File refinment_is.php, line 3, character 11 - line 3, character 11:
 
+ 1 | <?hh
+ 2 | 
  3 | interface »I« {}
  4 | class A {}
  5 | class C extends A {}
 
 The supertype is the same as before.
 
-File "refinment_is.php", line 7, character 32 - line 7, character 32:
+File refinment_is.php, line 7, character 32 - line 7, character 32:
 
+ 3 | interface I {}
  4 | class A {}
  5 | class C extends A {}
  6 | 
  7 | function inter_is(A $a, C $c): »C« {
  8 |   if($a is I) {
  9 |     $z = $a;
+10 |   } else {
 
 3 errors found

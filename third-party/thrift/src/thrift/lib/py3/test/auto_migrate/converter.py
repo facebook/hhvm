@@ -16,6 +16,7 @@
 # pyre-strict
 
 import unittest
+from typing import cast
 
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
@@ -199,7 +200,7 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         )._to_py3()
         self.assertIsInstance(simple.color, BadEnum)
         self.assertEqual(
-            simple.color.enum,
+            cast(BadEnum, simple.color).enum,
             py3_types.Color,
         )
 

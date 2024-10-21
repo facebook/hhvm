@@ -164,7 +164,7 @@ class EnumTests(unittest.TestCase):
     def assertBadEnum(self, e: BadEnum | Enum, cls: Type[_E], val: int) -> None:
         self.assertIsInstance(e, BadEnum)
         self.assertEqual(e.value, val)
-        self.assertEqual(e.enum, cls)
+        self.assertEqual(cast(BadEnum, e).enum, cls)
         self.assertEqual(int(e), val)
 
     def test_pickle(self) -> None:

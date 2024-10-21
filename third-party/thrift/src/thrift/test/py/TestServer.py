@@ -295,8 +295,6 @@ def main() -> None:
                 ThriftTest.ContextProcessor(TestContextHandler(options.port)),
             )
             processor.registerProcessor(
-                # pyre-fixme[16]: Module `SecondService` has no attribute
-                #  `ContextProcessor`.
                 "SecondService",
                 # pyre-fixme[16]: Module `SecondService` has no attribute
                 #  `ContextProcessor`.

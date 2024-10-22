@@ -15,11 +15,20 @@ type T = int;
 // package pkg1
 
 class Bar {
-  public function bar(mixed $m):void {
+  public function test1(mixed $m): void {
     $m is C;
+    $m as C;
+  }
+  public function test2(mixed $m): void {
     $m is G<_>;
+    $m as G<_>;
+  }
+  public function test3(mixed $m): void {
     $m is (C, int);
-    $m is E;
+    $m as (C, int);
+  }
+  public function test4(mixed $m): void {
     $m is T;
+    $m as T;
   }
 }

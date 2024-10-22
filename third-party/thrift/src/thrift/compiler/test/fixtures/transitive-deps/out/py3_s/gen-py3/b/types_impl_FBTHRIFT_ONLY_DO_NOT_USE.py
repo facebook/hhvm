@@ -7,7 +7,8 @@
 
 import enum
 import thrift.py3.types
-import b.thrift_metadata
+import b.thrift_metadata as _fbthrift_python_metadata
+import b.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "b.types"
 

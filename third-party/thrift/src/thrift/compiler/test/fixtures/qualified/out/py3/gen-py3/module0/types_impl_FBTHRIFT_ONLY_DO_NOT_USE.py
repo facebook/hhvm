@@ -7,7 +7,8 @@
 
 import enum
 import thrift.py3.types
-import module0.thrift_metadata
+import module0.thrift_metadata as _fbthrift_python_metadata
+import module0.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "module0.types"
 
@@ -23,18 +24,14 @@ class Enum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return module0.thrift_metadata.gen_metadata_enum_Enum()
+        return _fbthrift_python_metadata.gen_metadata_enum_Enum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module0.Enum"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module0.thrift_types"
-        )
-        return python_types.Enum(self._fbthrift_value_)
+        return _fbthrift_python_types.Enum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

@@ -7,7 +7,8 @@
 
 import enum
 import thrift.py3.types
-import module.thrift_metadata
+import module.thrift_metadata as _fbthrift_python_metadata
+import module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "module.types"
 
@@ -20,18 +21,14 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
+        return _fbthrift_python_metadata.gen_metadata_enum_EmptyEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.EmptyEnum"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.EmptyEnum(self._fbthrift_value_)
+        return _fbthrift_python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -59,18 +56,14 @@ class City(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_City()
+        return _fbthrift_python_metadata.gen_metadata_enum_City()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.City"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.City(self._fbthrift_value_)
+        return _fbthrift_python_types.City(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -98,18 +91,14 @@ class Company(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_Company()
+        return _fbthrift_python_metadata.gen_metadata_enum_Company()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.Company"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.Company(self._fbthrift_value_)
+        return _fbthrift_python_types.Company(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

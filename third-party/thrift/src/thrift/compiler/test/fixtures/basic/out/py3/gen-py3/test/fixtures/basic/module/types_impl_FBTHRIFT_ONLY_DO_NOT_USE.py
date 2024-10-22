@@ -7,7 +7,8 @@
 
 import enum
 import thrift.py3.types
-import test.fixtures.basic.module.thrift_metadata
+import test.fixtures.basic.module.thrift_metadata as _fbthrift_python_metadata
+import test.fixtures.basic.module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "test.fixtures.basic.module.types"
 
@@ -22,18 +23,14 @@ class MyEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_MyEnum()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnum"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "test.fixtures.basic.module.thrift_types"
-        )
-        return python_types.MyEnum(self._fbthrift_value_)
+        return _fbthrift_python_types.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -59,18 +56,14 @@ class HackEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_HackEnum()
+        return _fbthrift_python_metadata.gen_metadata_enum_HackEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.HackEnum"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "test.fixtures.basic.module.thrift_types"
-        )
-        return python_types.HackEnum(self._fbthrift_value_)
+        return _fbthrift_python_types.HackEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

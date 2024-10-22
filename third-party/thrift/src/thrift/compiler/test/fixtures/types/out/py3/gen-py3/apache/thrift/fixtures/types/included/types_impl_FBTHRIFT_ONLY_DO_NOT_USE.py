@@ -7,7 +7,8 @@
 
 import enum
 import thrift.py3.types
-import apache.thrift.fixtures.types.included.thrift_metadata
+import apache.thrift.fixtures.types.included.thrift_metadata as _fbthrift_python_metadata
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "apache.thrift.fixtures.types.included.types"
 

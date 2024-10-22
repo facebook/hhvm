@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <string>
+#include <string_view>
 #include <boost/algorithm/string.hpp>
 
 namespace apache::thrift::compiler {

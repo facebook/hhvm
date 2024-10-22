@@ -41,9 +41,9 @@
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/lib/reserved_identifier.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
+#include <thrift/compiler/sema/reserved_identifier.h>
 
 namespace apache::thrift::compiler {
 

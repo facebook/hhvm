@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <thrift/compiler/lib/reserved_identifier.h>
+#include <thrift/compiler/sema/reserved_identifier.h>
 
 #include <folly/portability/GTest.h>
 
-namespace apache::thrift::compiler {
+using apache::thrift::compiler::is_reserved_identifier;
 
 TEST(ReservedIdentifierTest, is_reserved_identifier) {
   EXPECT_TRUE(is_reserved_identifier("fbthriftIsReserved"));
@@ -33,5 +33,3 @@ TEST(ReservedIdentifierTest, is_reserved_identifier) {
   EXPECT_FALSE(is_reserved_identifier("___________________fbthrif"));
   EXPECT_FALSE(is_reserved_identifier("NotIt"));
 }
-
-} // namespace apache::thrift::compiler

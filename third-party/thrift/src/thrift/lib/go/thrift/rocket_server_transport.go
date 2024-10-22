@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -89,6 +90,23 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 		}
 
 		go func(ctx context.Context, conn net.Conn) {
+			// Explicitly force TLS handshake protocol to run (if this is a TLS connection).
+			//
+			// Usually, TLS handshake is done implicitly/seamlessly by 'crypto/tls' package,
+			// whenever Read/Write functions are invoked on a connection for the first time.
+			// However, in our case, we require the handshake to be complete ahead of any
+			// Read/Write calls - so that we can access ALPN value and choose the transport.
+			tlsConn, isTLS := conn.(*tls.Conn)
+			if isTLS {
+				err = tlsConn.HandshakeContext(ctx)
+				if err != nil {
+					r.log.Printf("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
+					// Handshake failed, we cannot proceed with this connection - close it and return.
+					tlsConn.Close()
+					return
+				}
+			}
+
 			ctx = r.connContext(ctx, conn)
 			r.processRequests(ctx, conn)
 		}(ctx, conn)
@@ -100,7 +118,20 @@ func (r *rocketServerTransport) Close() (err error) {
 }
 
 func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
-	switch r.transportID {
+	connTransport := r.transportID
+
+	// Use Rocket protocol right away if the server is running
+	// in "UpgradeToRocket" mode and ALPN value is set to "rs".
+	if r.transportID == TransportIDUpgradeToRocket {
+		if connInfo, ok := ConnInfoFromContext(ctx); ok {
+			tlsConnState := connInfo.TLS()
+			if tlsConnState != nil && tlsConnState.NegotiatedProtocol == "rs" {
+				connTransport = TransportIDRocket
+			}
+		}
+	}
+
+	switch connTransport {
 	case TransportIDRocket:
 		r.processRocketRequests(ctx, conn)
 	case TransportIDUpgradeToRocket:

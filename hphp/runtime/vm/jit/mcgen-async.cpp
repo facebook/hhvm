@@ -67,6 +67,7 @@ std::atomic<size_t> s_failSrcRec;
 std::atomic<size_t> s_permFailTrans;
 std::atomic<size_t> s_rejectTrans;
 std::atomic<size_t> s_activeTrans;
+std::atomic<size_t> s_interpTrans;
 
 std::atomic<size_t> s_successPrologue;
 std::atomic<size_t> s_failPrologue;
@@ -76,6 +77,7 @@ std::atomic<size_t> s_activePrologue;
 
 InitFiniNode s_logJitStats([]{
   if (!RO::EvalEnableAsyncJIT ||
+      !isStandardRequest() ||
       !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
   StructuredLogEntry ent;
 
@@ -86,6 +88,7 @@ InitFiniNode s_logJitStats([]{
   ent.setInt("permanent_failed_trans", s_permFailTrans.load(MO));
   ent.setInt("rejected_trans", s_rejectTrans.load(MO));
   ent.setInt("active_trans", s_activeTrans.load(MO));
+  ent.setInt("interp_trans", s_interpTrans.load(MO));
 
   ent.setInt("succeeded_prologue", s_successPrologue.load(MO));
   ent.setInt("failed_prologue", s_failPrologue.load(MO));
@@ -189,6 +192,7 @@ struct AsyncTranslationWorker
                show(translator.region->lastSrcKey()));
         s_successTrans++;
       }
+      if (translator.kind == TransKind::Interp) s_interpTrans++;
       FTRACE(2, "Successfully generated translation for sk {}\n", show(ctx.sk));
     } else {
       FTRACE(2, "Background jitting failed for sk {}\n", show(ctx.sk));

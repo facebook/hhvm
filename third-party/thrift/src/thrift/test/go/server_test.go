@@ -23,9 +23,10 @@ import (
 	"net"
 	"reflect"
 	"testing"
+	"time"
+
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/thrifttest"
-	"time"
 )
 
 const localConnTimeout = time.Second * 1

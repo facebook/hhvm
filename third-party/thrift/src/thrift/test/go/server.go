@@ -18,6 +18,7 @@ package gotest
 
 import (
 	"context"
+
 	"thrift/test/go/if/thrifttest"
 )
 

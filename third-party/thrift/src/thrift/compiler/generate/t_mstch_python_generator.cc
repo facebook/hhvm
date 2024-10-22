@@ -150,6 +150,8 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
+            {"program:generate_abstract_types",
+             &python_mstch_program::generate_abstract_types},
             {"program:generate_mutable_types",
              &python_mstch_program::generate_mutable_types},
             {"program:generate_immutable_types",
@@ -225,6 +227,10 @@ class python_mstch_program : public mstch_program {
 
   mstch::node adapter_type_hint_modules() {
     return module_path_array(adapter_type_hint_modules_);
+  }
+
+  mstch::node generate_abstract_types() {
+    return !get_option("generate_abstract_types").empty();
   }
 
   mstch::node generate_mutable_types() {
@@ -631,6 +637,9 @@ class python_mstch_type : public mstch_type {
 
   mstch::node module_path() {
     std::string_view types_import_path = [this]() {
+      if (!get_option("generate_abstract_types").empty()) {
+        return ".thrift_abstract_types";
+      }
       if (!get_option("generate_mutable_types").empty()) {
         return ".thrift_mutable_types";
       }
@@ -638,7 +647,7 @@ class python_mstch_type : public mstch_type {
         return ".thrift_types";
       }
       throw std::runtime_error(
-          "Expected one option out of generate_mutable_types and generate_immutable_types to be set, and neither is set.");
+          "Expected one option out of generate_abstract_types, generate_immutable_types, or generate_mutable_types to be set, and none are set.");
     }();
 
     return get_py3_namespace_with_name_and_prefix(
@@ -988,7 +997,7 @@ class t_mstch_python_generator : public t_mstch_generator {
   }
 
   enum class IsTypesFile { Yes, No };
-  enum class TypeKind { Immutable, Mutable };
+  enum class TypeKind { Abstract, Immutable, Mutable };
 
  protected:
   bool should_resolve_typedefs() const override { return true; }
@@ -1242,6 +1251,8 @@ void t_mstch_python_generator::generate_file(
       .set_or_erase_option(
           is_types_file == IsTypesFile::Yes, "is_types_file", "")
       .set_or_erase_option(
+          type_kind == TypeKind::Abstract, "generate_abstract_types", "yes")
+      .set_or_erase_option(
           type_kind == TypeKind::Immutable, "generate_immutable_types", "yes")
       .set_or_erase_option(
           type_kind == TypeKind::Mutable, "generate_mutable_types", "yes");
@@ -1258,6 +1269,8 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   const bool experimental_generate_mutable_types =
       has_option("experimental_generate_mutable_types");
+  const bool experimental_unify_thrift_python_type_hints =
+      has_option("experimental_unify_thrift_python_type_hints");
 
   mstch_context_.set_or_erase_option(
       experimental_generate_mutable_types,
@@ -1273,6 +1286,14 @@ void t_mstch_python_generator::generate_types() {
       IsTypesFile::Yes,
       TypeKind::Immutable,
       generate_root_path_);
+
+  if (experimental_unify_thrift_python_type_hints) {
+    generate_file(
+        "thrift_abstract_types.py",
+        IsTypesFile::Yes,
+        TypeKind::Abstract,
+        generate_root_path_);
+  }
   mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
 
   if (experimental_generate_mutable_types) {
@@ -1375,6 +1396,16 @@ THRIFT_REGISTER_GENERATOR(
     "    experimental_generate_mutable_types:\n"
     "      DO NOT USE. Enables the experimental generation of mutable\n"
     "      thrift-python types (i.e., structs and unions). This is for local\n"
+    "      experimentation, development and testing ONLY. When this option is\n"
+    "      enabled, NO GUARANTEE is provided on any output (including any\n"
+    "      seemingly unrelated logic, such as previously existing generated\n"
+    "      code). Any \"new\" behavior (including the existence of this\n"
+    "      option) should be considered UNSTABLE and is subject to arbitrary\n"
+    "      (backwards incompatible) changes and undefined behavior.\n"
+    "      NEVER ENABLE THIS OPTION in production environments.\n"
+    "    experimental_unify_thrift_python_type_hints:\n"
+    "      DO NOT USE. Enables the experimental generation of symbols\n"
+    "      that provide type-hints for thrift-python types. This is for local\n"
     "      experimentation, development and testing ONLY. When this option is\n"
     "      enabled, NO GUARANTEE is provided on any output (including any\n"
     "      seemingly unrelated logic, such as previously existing generated\n"

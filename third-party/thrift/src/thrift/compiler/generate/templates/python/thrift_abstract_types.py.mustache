@@ -1,0 +1,104 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python classes for abstract thrift-python types.
+}}
+
+# EXPERIMENTAL - DO NOT USE !!!
+# See `experimental_unify_thrift_python_type_hints` documentation in thrift compiler
+
+{{> common/auto_generated_py}}
+
+import abc as _abc
+import typing as _typing
+
+import folly.iobuf as _fbthrift_iobuf
+{{#program:include_namespaces}}
+{{#has_types?}}
+import {{included_module_path}}.thrift_abstract_types
+{{/has_types?}}
+{{/program:include_namespaces}}
+{{#program:adapter_type_hint_modules}}
+# TODO: Figure out adapters
+# import {{module_path}}
+{{/program:adapter_type_hint_modules}}
+
+{{#program:structs}}
+
+{{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
+class {{struct:py_name}}({{!
+        }}_abc.ABC):
+    {{#struct:fields_ordered_by_id}}
+    @property
+    @_abc.abstractmethod
+    def {{field:py_name}}(self) -> {{#field:optional?}}_typing.Optional[{{/field:optional?}}{{!
+            Replace #field:type .. /field:type with > fields/adapted_type
+            }}{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}{{!
+            }}{{#field:optional?}}]{{/field:optional?}}: ...
+    {{/struct:fields_ordered_by_id}}
+    {{! Remove once you implement at least one of the commented out methods below.}}
+    {{^struct:fields_ordered_by_id}}
+    pass
+    {{/struct:fields_ordered_by_id}}
+    {{#struct:plain?}}
+#    @_abc.abstractmethod
+#    def __call__(
+#        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
+        {{! Replace #field:type .. /field:type with > fields/compatible_adapted_type }}
+#        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}]=...{{/struct:fields_ordered_by_id}}
+#    ) -> _typing.Self: ...
+    {{/struct:plain?}}
+    {{^struct:union?}}
+#    @_abc.abstractmethod
+#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
+#        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{!
+        Replace #field:type .. /field:type with > fields/adapted_type
+#    }}{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}{{!
+#        }}{{/struct:fields_ordered_by_id}}]]]: ...
+    {{/struct:union?}}
+    {{#struct:legacy_api?}}
+{{#program:generate_to_mutable_python_conversion_methods?}}
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{struct:py_name}}": ...  # type: ignore
+{{/program:generate_to_mutable_python_conversion_methods?}}
+    {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
+#    @_abc.abstractmethod
+#    def _to_python(self) -> "{{program:module_path}}.thrift_types.{{struct:py_name}}": ...  # type: ignore
+    {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
+#    @_abc.abstractmethod
+#    def _to_py3(self) -> "{{program:module_path}}.types.{{struct:py_name}}": ...  # type: ignore
+    {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
+#    @_abc.abstractmethod
+#    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:py_name}}": ...  # type: ignore
+    {{/struct:legacy_api?}}
+{{#struct:has_adapter?}}
+# TODO: Figure out how to handle adapters
+# {{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
+{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}
+{{#program:typedefs?}}
+
+{{#program:typedefs}}
+{{typedef:name}} = {{! TODO: ADAPTER COMMENTED OUT #typedef:has_adapter?}}{{!
+    }}{{! adapter:type_hint}}{{! #adapter:is_generic?}}{{! [ }}{{! #typedef:type}}{{! > types/typedef_const_pep484_type}}{{! /typedef:type}}{{! ] }}{{! /adapter:is_generic?}}{{!
+}}{{! /typedef:has_adapter?}}{{!
+   Uncomment the check for ^typedef:has_adapter when you figure out adapters.
+}}{{! ^typedef:has_adapter?}}{{!
+    }}{{#typedef:type}}{{> types/unadapted_pep484_type}}{{/typedef:type}}{{!
+}}{{! /typedef:has_adapter?}}
+{{/program:typedefs}}
+{{/program:typedefs?}}

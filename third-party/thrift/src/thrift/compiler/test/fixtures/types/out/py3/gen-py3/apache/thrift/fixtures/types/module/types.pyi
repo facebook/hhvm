@@ -8,6 +8,7 @@
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -16,7 +17,7 @@ import itertools
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 
-class has_bitwise_ops(thrift.py3.types.Enum):
+class has_bitwise_ops(thrift.python.types.Enum):
     none: has_bitwise_ops = ...
     zero: has_bitwise_ops = ...
     one: has_bitwise_ops = ...
@@ -29,7 +30,7 @@ class has_bitwise_ops(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class is_unscoped(thrift.py3.types.Enum):
+class is_unscoped(thrift.python.types.Enum):
     hello: is_unscoped = ...
     world: is_unscoped = ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.is_unscoped": ...   # type: ignore
@@ -39,7 +40,7 @@ class is_unscoped(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class MyForwardRefEnum(thrift.py3.types.Enum):
+class MyForwardRefEnum(thrift.python.types.Enum):
     ZERO: MyForwardRefEnum = ...
     NONZERO: MyForwardRefEnum = ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MyForwardRefEnum": ...   # type: ignore

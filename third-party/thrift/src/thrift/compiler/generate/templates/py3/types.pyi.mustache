@@ -24,6 +24,7 @@ This template should always mirror types.pyx but for mypy typing
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -43,7 +44,7 @@ import {{> common/thrift_types_module_path}}
 
 
 {{#program:enums}}
-class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
 }}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...

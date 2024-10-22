@@ -8,6 +8,7 @@
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -15,7 +16,7 @@ import sys
 import itertools
 
 
-class EmptyEnum(thrift.py3.types.Enum):
+class EmptyEnum(thrift.python.types.Enum):
     def _to_python(self) -> "test.fixtures.enumstrict.module.thrift_types.EmptyEnum": ...   # type: ignore
     def _to_py3(self) -> EmptyEnum: ...
     def _to_py_deprecated(self) -> int: ...
@@ -23,7 +24,7 @@ class EmptyEnum(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class MyEnum(thrift.py3.types.Enum):
+class MyEnum(thrift.python.types.Enum):
     ONE: MyEnum = ...
     TWO: MyEnum = ...
     def _to_python(self) -> "test.fixtures.enumstrict.module.thrift_types.MyEnum": ...   # type: ignore
@@ -33,7 +34,7 @@ class MyEnum(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class MyUseIntrinsicDefaultEnum(thrift.py3.types.Enum):
+class MyUseIntrinsicDefaultEnum(thrift.python.types.Enum):
     ZERO: MyUseIntrinsicDefaultEnum = ...
     ONE: MyUseIntrinsicDefaultEnum = ...
     TWO: MyUseIntrinsicDefaultEnum = ...
@@ -44,7 +45,7 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class MyBigEnum(thrift.py3.types.Enum):
+class MyBigEnum(thrift.python.types.Enum):
     UNKNOWN: MyBigEnum = ...
     ONE: MyBigEnum = ...
     TWO: MyBigEnum = ...

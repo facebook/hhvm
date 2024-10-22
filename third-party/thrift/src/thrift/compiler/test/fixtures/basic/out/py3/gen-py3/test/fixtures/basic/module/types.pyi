@@ -8,6 +8,7 @@
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -15,7 +16,7 @@ import sys
 import itertools
 
 
-class MyEnum(thrift.py3.types.Enum):
+class MyEnum(thrift.python.types.Enum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyEnum": ...   # type: ignore
@@ -25,7 +26,7 @@ class MyEnum(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class HackEnum(thrift.py3.types.Enum):
+class HackEnum(thrift.python.types.Enum):
     Value1: HackEnum = ...
     Value2: HackEnum = ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.HackEnum": ...   # type: ignore

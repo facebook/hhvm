@@ -8,6 +8,7 @@
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -15,7 +16,7 @@ import sys
 import itertools
 
 
-class EmptyEnum(thrift.py3.types.Enum):
+class EmptyEnum(thrift.python.types.Enum):
     def _to_python(self) -> "module.thrift_types.EmptyEnum": ...   # type: ignore
     def _to_py3(self) -> EmptyEnum: ...
     def _to_py_deprecated(self) -> int: ...
@@ -23,7 +24,7 @@ class EmptyEnum(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class City(thrift.py3.types.Enum):
+class City(thrift.python.types.Enum):
     NYC: City = ...
     MPK: City = ...
     SEA: City = ...
@@ -35,7 +36,7 @@ class City(thrift.py3.types.Enum):
     def __index__(self) -> int: ...
 
 
-class Company(thrift.py3.types.Enum):
+class Company(thrift.python.types.Enum):
     FACEBOOK: Company = ...
     WHATSAPP: Company = ...
     OCULUS: Company = ...

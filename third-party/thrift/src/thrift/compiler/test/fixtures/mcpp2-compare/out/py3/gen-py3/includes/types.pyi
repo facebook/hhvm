@@ -8,6 +8,7 @@
 import enum as _python_std_enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
+import thrift.python.types
 import thrift.py3.exceptions
 import typing as _typing
 
@@ -15,7 +16,7 @@ import sys
 import itertools
 
 
-class AnEnum(thrift.py3.types.Enum):
+class AnEnum(thrift.python.types.Enum):
     FIELDA: AnEnum = ...
     FIELDB: AnEnum = ...
     def _to_python(self) -> "includes.thrift_types.AnEnum": ...   # type: ignore

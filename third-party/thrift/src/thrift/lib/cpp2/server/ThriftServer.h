@@ -222,10 +222,6 @@ class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
         new typename T::ProcessorType(svIf_.get()));
   }
 
-  CreateMethodMetadataResult createMethodMetadata() override {
-    return svIf_->createMethodMetadata();
-  }
-
   std::vector<ServiceHandlerBase*> getServiceHandlers() override {
     return {svIf_.get()};
   }

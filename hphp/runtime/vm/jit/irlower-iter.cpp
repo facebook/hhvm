@@ -145,31 +145,31 @@ Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
 }
 
 void cgLdIterPos(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::posSize() == 8, "");
+  static_assert(Iter::posSize() == 8, "");
   auto const dst  = dstLoc(env, inst, 0).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<LdIterPos>());
-  vmain(env) << load{iter + IterImpl::posOffset(), dst};
+  vmain(env) << load{iter + Iter::posOffset(), dst};
 }
 
 void cgLdIterEnd(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::endSize() == 8, "");
+  static_assert(Iter::endSize() == 8, "");
   auto const dst  = dstLoc(env, inst, 0).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<LdIterEnd>());
-  vmain(env) << load{iter + IterImpl::endOffset(), dst};
+  vmain(env) << load{iter + Iter::endOffset(), dst};
 }
 
 void cgStIterPos(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::posSize() == 8, "");
+  static_assert(Iter::posSize() == 8, "");
   auto const src  = srcLoc(env, inst, 1).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<StIterPos>());
-  vmain(env) << store{src, iter + IterImpl::posOffset()};
+  vmain(env) << store{src, iter + Iter::posOffset()};
 }
 
 void cgStIterEnd(IRLS& env, const IRInstruction* inst) {
-  static_assert(IterImpl::endSize() == 8, "");
+  static_assert(Iter::endSize() == 8, "");
   auto const src  = srcLoc(env, inst, 1).reg();
   auto const iter = iteratorPtr(env, inst, inst->extra<StIterEnd>());
-  vmain(env) << store{src, iter + IterImpl::endOffset()};
+  vmain(env) << store{src, iter + Iter::endOffset()};
 }
 
 void cgKillIter(IRLS& env, const IRInstruction* inst) {
@@ -180,7 +180,7 @@ void cgKillIter(IRLS& env, const IRInstruction* inst) {
   int32_t trash;
   memset(&trash, kIterTrashFill, sizeof(trash));
   auto const iter = iteratorPtr(env, inst, inst->extra<KillIter>());
-  for (auto i = 0; i < sizeof(IterImpl); i += sizeof(trash)) {
+  for (auto i = 0; i < sizeof(Iter); i += sizeof(trash)) {
     v << storeli{trash, iter + i};
   }
 }

@@ -48,8 +48,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// We don't want JIT iterators to take up too much space on the stack.
-static_assert(sizeof(IterImpl) == 16, "");
+// We don't want iterators to take up too much space on the stack.
 static_assert(sizeof(Iter) == 16, "");
 
 using bespoke::StructDict;
@@ -75,9 +74,9 @@ bool isStructDict(const BespokeArray* bad) {
 
 //////////////////////////////////////////////////////////////////////
 
-void IterImpl::kill() {
+void Iter::kill() {
   if (!debug) return;
-  // IterImpl is not POD, so we memset each POD field separately.
+  // Iter is not POD, so we memset each POD field separately.
   memset(&m_pos, kIterTrashFill, sizeof(m_pos));
   memset(&m_end, kIterTrashFill, sizeof(m_end));
 }
@@ -130,16 +129,6 @@ TypedValue Iter::extractBase(TypedValue base, const Class* ctx) {
   return make_tv<KindOfDict>(iterArray.detach());
 }
 
-/*
- * For the specialized iterator helpers below, we need to peek into the raw
- * IterImpl to manipulate its fields. We could make all of these methods
- * friends of the Iter struct, but that involves listing them in the class.
- *
- * To give us more flexibility to modify these helpers, we instead create this
- * method that exposes the underlying IterImpl by casting.
- */
-IterImpl* unwrap(Iter* iter) { return &iter->m_iter; }
-
 namespace {
 
 NEVER_INLINE void clearOutputLocal(TypedValue* local) {
@@ -150,12 +139,12 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 }
 
 template<bool BaseConst>
-int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
-  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+int64_t new_iter_array(Iter* iter, ArrayData* ad, TypedValue* valOut) {
+  TRACE(2, "%s: I %p, ad %p\n", __func__, iter, ad);
 
   auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
-    dest->kill();
+    iter->kill();
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->type()))) {
@@ -164,14 +153,13 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   // We are transferring ownership of the array to the iterator, therefore
   // we do not need to adjust the refcount.
-  auto& aiter = *unwrap(dest);
 
   if (BaseConst && !ad->isVanilla()) {
     auto const bad = BespokeArray::asBespoke(ad);
     TRACE(2, "%s: Got bespoke array: %s\n", __func__, describe(bad).data());
     if (isStructDict(bad)) {
-      aiter.m_pos = 0;
-      aiter.m_end = size;
+      iter->m_pos = 0;
+      iter->m_end = size;
       auto const sad = StructDict::As(ad);
       tvDup(StructDict::GetPosVal(sad, 0), *valOut);
       return 1;
@@ -182,13 +170,13 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     if (BaseConst && VanillaVec::stores_unaligned_typed_values) {
       // We can use a pointer iterator for vanilla vecs storing unaligned
       // tvs because there is no associated key we need to track.
-      aiter.m_unaligned_elm = VanillaVec::entries(ad);
-      aiter.m_unaligned_end = aiter.m_unaligned_elm + size;
+      iter->m_unaligned_elm = VanillaVec::entries(ad);
+      iter->m_unaligned_end = iter->m_unaligned_elm + size;
       tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
       return 1;
     }
-    aiter.m_pos = 0;
-    aiter.m_end = size;
+    iter->m_pos = 0;
+    iter->m_end = size;
     tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     return 1;
   }
@@ -196,34 +184,34 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   if (LIKELY(ad->isVanillaDict())) {
     auto const dict = VanillaDict::as(ad);
     if (BaseConst) {
-      aiter.m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
-      aiter.m_dict_end = dict->data() + dict->iterLimit();
-      tvDup(*aiter.m_dict_elm->datatv(), *valOut);
+      iter->m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
+      iter->m_dict_end = dict->data() + dict->iterLimit();
+      tvDup(*iter->m_dict_elm->datatv(), *valOut);
       return 1;
     }
-    aiter.m_pos = dict->getIterBeginNotEmpty();
-    aiter.m_end = dict->iterLimit();
-    dict->getArrayElm(aiter.m_pos, valOut);
+    iter->m_pos = dict->getIterBeginNotEmpty();
+    iter->m_end = dict->iterLimit();
+    dict->getArrayElm(iter->m_pos, valOut);
     return 1;
   }
 
   if (LIKELY(ad->isVanillaKeyset())) {
     auto const keyset = VanillaKeyset::asSet(ad);
     if (BaseConst) {
-      aiter.m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
-      aiter.m_keyset_end = keyset->data() + keyset->iterLimit();
-      tvDup(*aiter.m_keyset_elm->datatv(), *valOut);
+      iter->m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
+      iter->m_keyset_end = keyset->data() + keyset->iterLimit();
+      tvDup(*iter->m_keyset_elm->datatv(), *valOut);
       return 1;
     }
-    aiter.m_pos = keyset->getIterBeginNotEmpty();
-    aiter.m_end = keyset->iterLimit();
-    tvDup(*keyset->data()[aiter.m_pos].datatv(), *valOut);
+    iter->m_pos = keyset->getIterBeginNotEmpty();
+    iter->m_end = keyset->iterLimit();
+    tvDup(*keyset->data()[iter->m_pos].datatv(), *valOut);
     return 1;
   }
 
-  aiter.m_pos = ad->iter_begin();
-  aiter.m_end = ad->iter_end();
-  tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
+  iter->m_pos = ad->iter_begin();
+  iter->m_end = ad->iter_end();
+  tvDup(ad->nvGetVal(iter->m_pos), *valOut);
   return 1;
 }
 
@@ -232,15 +220,15 @@ IterInitArr new_iter_array_helper(bool baseConst) {
 }
 
 template<bool BaseConst>
-int64_t new_iter_array_key(Iter*       dest,
+int64_t new_iter_array_key(Iter*       iter,
                            ArrayData*  ad,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
-  TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
+  TRACE(2, "%s: I %p, ad %p\n", __func__, iter, ad);
 
   auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
-    dest->kill();
+    iter->kill();
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->type()))) {
@@ -252,14 +240,13 @@ int64_t new_iter_array_key(Iter*       dest,
 
   // We are transferring ownership of the array to the iterator, therefore
   // we do not need to adjust the refcount.
-  auto& aiter = *unwrap(dest);
 
   if (BaseConst && !ad->isVanilla()) {
     auto const bad = BespokeArray::asBespoke(ad);
     TRACE(2, "%s: Got bespoke array: %s\n", __func__, describe(bad).data());
     if (isStructDict(bad)) {
-      aiter.m_pos = 0;
-      aiter.m_end = size;
+      iter->m_pos = 0;
+      iter->m_end = size;
       auto const sad = StructDict::As(ad);
       tvDup(StructDict::GetPosVal(sad, 0), *valOut);
       tvCopy(StructDict::GetPosKey(sad, 0), *keyOut);
@@ -268,8 +255,8 @@ int64_t new_iter_array_key(Iter*       dest,
   }
 
   if (ad->isVanillaVec()) {
-    aiter.m_pos = 0;
-    aiter.m_end = size;
+    iter->m_pos = 0;
+    iter->m_end = size;
     tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
     tvCopy(make_tv<KindOfInt64>(0), *keyOut);
     return 1;
@@ -278,38 +265,38 @@ int64_t new_iter_array_key(Iter*       dest,
   if (ad->isVanillaDict()) {
     auto const dict = VanillaDict::as(ad);
     if (BaseConst) {
-      aiter.m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
-      aiter.m_dict_end = dict->data() + dict->iterLimit();
-      tvDup(*aiter.m_dict_elm->datatv(), *valOut);
-      tvDup(aiter.m_dict_elm->getKey(), *keyOut);
+      iter->m_dict_elm = dict->data() + dict->getIterBeginNotEmpty();
+      iter->m_dict_end = dict->data() + dict->iterLimit();
+      tvDup(*iter->m_dict_elm->datatv(), *valOut);
+      tvDup(iter->m_dict_elm->getKey(), *keyOut);
       return 1;
     }
-    aiter.m_pos = dict->getIterBeginNotEmpty();
-    aiter.m_end = dict->iterLimit();
-    dict->getArrayElm(aiter.m_pos, valOut, keyOut);
+    iter->m_pos = dict->getIterBeginNotEmpty();
+    iter->m_end = dict->iterLimit();
+    dict->getArrayElm(iter->m_pos, valOut, keyOut);
     return 1;
   }
 
   if (ad->isVanillaKeyset()) {
     auto const keyset = VanillaKeyset::asSet(ad);
     if (BaseConst) {
-      aiter.m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
-      aiter.m_keyset_end = keyset->data() + keyset->iterLimit();
-      tvDup(*aiter.m_keyset_elm->datatv(), *valOut);
+      iter->m_keyset_elm = keyset->data() + keyset->getIterBeginNotEmpty();
+      iter->m_keyset_end = keyset->data() + keyset->iterLimit();
+      tvDup(*iter->m_keyset_elm->datatv(), *valOut);
       tvDup(*valOut, *keyOut);
       return 1;
     }
-    aiter.m_pos = keyset->getIterBeginNotEmpty();
-    aiter.m_end = keyset->iterLimit();
-    tvDup(*keyset->data()[aiter.m_pos].datatv(), *valOut);
+    iter->m_pos = keyset->getIterBeginNotEmpty();
+    iter->m_end = keyset->iterLimit();
+    tvDup(*keyset->data()[iter->m_pos].datatv(), *valOut);
     tvDup(*valOut, *keyOut);
     return 1;
   }
 
-  aiter.m_pos = ad->iter_begin();
-  aiter.m_end = ad->iter_end();
-  tvDup(ad->nvGetVal(aiter.m_pos), *valOut);
-  tvDup(ad->nvGetKey(aiter.m_pos), *keyOut);
+  iter->m_pos = ad->iter_begin();
+  iter->m_end = ad->iter_end();
+  tvDup(ad->nvGetVal(iter->m_pos), *valOut);
+  tvDup(ad->nvGetKey(iter->m_pos), *keyOut);
   return 1;
 }
 
@@ -378,18 +365,17 @@ ALWAYS_INLINE void setOutputLocal(TypedValue tv, TypedValue* out) {
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_vec(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_vec(Iter* iter, ArrayData* ad,
                               TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaVec());
-  auto& iter = *unwrap(it);
 
-  ssize_t pos = iter.getPos() + 1;
-  if (UNLIKELY(pos == iter.getEnd())) {
-    iter.kill();
+  ssize_t pos = iter->getPos() + 1;
+  if (UNLIKELY(pos == iter->getEnd())) {
+    iter->kill();
     return 0;
   }
 
-  iter.setPos(pos);
+  iter->setPos(pos);
   setOutputLocal(VanillaVec::GetPosVal(ad, pos), valOut);
   if constexpr (HasKey) setOutputLocal(make_tv<KindOfInt64>(pos), keyOut);
   return 1;
@@ -403,19 +389,18 @@ int64_t iter_next_vanilla_vec(Iter* it, ArrayData* ad,
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_vec_pointer(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_vec_pointer(Iter* iter, ArrayData* ad,
                                       TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaVec());
   always_assert(!HasKey);
 
-  auto& iter = *unwrap(it);
-  auto const elm = iter.m_unaligned_elm + 1;
-  if (elm == iter.m_unaligned_end) {
-    iter.kill();
+  auto const elm = iter->m_unaligned_elm + 1;
+  if (elm == iter->m_unaligned_end) {
+    iter->kill();
     return 0;
   }
 
-  iter.m_unaligned_elm = elm;
+  iter->m_unaligned_elm = elm;
   setOutputLocal(*elm, valOut);
   return 1;
 }
@@ -428,21 +413,20 @@ int64_t iter_next_vanilla_vec_pointer(Iter* it, ArrayData* ad,
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_dict(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_dict(Iter* iter, ArrayData* ad,
                                TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaDict());
-  auto& iter     = *unwrap(it);
-  ssize_t pos    = iter.getPos();
+  ssize_t pos    = iter->getPos();
   auto const arr = VanillaDict::as(ad);
 
   do {
-    if ((++pos) == iter.getEnd()) {
-      iter.kill();
+    if ((++pos) == iter->getEnd()) {
+      iter->kill();
       return 0;
     }
   } while (UNLIKELY(arr->isTombstone(pos)));
 
-  iter.setPos(pos);
+  iter->setPos(pos);
   decRefOutputLocal(valOut);
 
   if constexpr (HasKey) {
@@ -462,20 +446,19 @@ int64_t iter_next_vanilla_dict(Iter* it, ArrayData* ad,
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_dict_pointer(Iter* iter, ArrayData* ad,
                                        TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaDict());
-  auto& iter = *unwrap(it);
-  auto elm = iter.m_dict_elm;
+  auto elm = iter->m_dict_elm;
 
   do {
-    if ((++elm) == iter.m_dict_end) {
-      iter.kill();
+    if ((++elm) == iter->m_dict_end) {
+      iter->kill();
       return 0;
     }
   } while (UNLIKELY(elm->isTombstone()));
 
-  iter.m_dict_elm = elm;
+  iter->m_dict_elm = elm;
   setOutputLocal(*elm->datatv(), valOut);
   if constexpr (HasKey) setOutputLocal(elm->getKey(), keyOut);
   return 1;
@@ -490,21 +473,20 @@ int64_t iter_next_vanilla_dict_pointer(Iter* it, ArrayData* ad,
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_keyset(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_keyset(Iter* iter, ArrayData* ad,
                                  TypedValue* valOut, TypedValue* keyOut) {
   assertx(ad->isVanillaKeyset());
-  auto& iter     = *unwrap(it);
-  ssize_t pos    = iter.getPos();
+  ssize_t pos    = iter->getPos();
   auto const arr = VanillaKeyset::asSet(ad);
 
   do {
-    if ((++pos) == iter.getEnd()) {
-      iter.kill();
+    if ((++pos) == iter->getEnd()) {
+      iter->kill();
       return 0;
     }
   } while (UNLIKELY(arr->data()[pos].isTombstone()));
 
-  iter.setPos(pos);
+  iter->setPos(pos);
   setOutputLocal(*arr->data()[pos].datatv(), valOut);
   if constexpr (HasKey) setOutputLocal(*valOut, keyOut);
   return 1;
@@ -518,21 +500,20 @@ int64_t iter_next_vanilla_keyset(Iter* it, ArrayData* ad,
 //
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_vanilla_keyset_pointer(Iter* it, ArrayData* ad,
+int64_t iter_next_vanilla_keyset_pointer(Iter* iter, ArrayData* ad,
                                          TypedValue* valOut,
                                          TypedValue* keyOut) {
   assertx(ad->isVanillaKeyset());
-  auto& iter = *unwrap(it);
-  auto elm = iter.m_keyset_elm;
+  auto elm = iter->m_keyset_elm;
 
   do {
-    if ((++elm) == iter.m_keyset_end) {
-      iter.kill();
+    if ((++elm) == iter->m_keyset_end) {
+      iter->kill();
       return 0;
     }
   } while (UNLIKELY(elm->isTombstone()));
 
-  iter.m_keyset_elm = elm;
+  iter->m_keyset_elm = elm;
   setOutputLocal(*elm->datatv(), valOut);
   if constexpr (HasKey) setOutputLocal(*valOut, keyOut);
   return 1;
@@ -540,18 +521,17 @@ int64_t iter_next_vanilla_keyset_pointer(Iter* it, ArrayData* ad,
 
 // "virtual" method implementation of *IterNext* for StructDict iterators.
 template<bool HasKey>
-int64_t iter_next_struct_dict(Iter* it, ArrayData* ad,
+int64_t iter_next_struct_dict(Iter* iter, ArrayData* ad,
                               TypedValue* valOut, TypedValue* keyOut) {
-  auto& iter = *unwrap(it);
   auto const sad = StructDict::As(ad);
 
-  ssize_t pos = iter.getPos() + 1;
-  if (UNLIKELY(pos == iter.getEnd())) {
-    iter.kill();
+  ssize_t pos = iter->getPos() + 1;
+  if (UNLIKELY(pos == iter->getEnd())) {
+    iter->kill();
     return 0;
   }
 
-  iter.setPos(pos);
+  iter->setPos(pos);
   setOutputLocal(StructDict::GetPosVal(sad, pos), valOut);
   if constexpr (HasKey) setOutputLocal(StructDict::GetPosKey(sad, pos), keyOut);
   return 1;
@@ -561,16 +541,15 @@ int64_t iter_next_struct_dict(Iter* it, ArrayData* ad,
 // iterators; for value iterators, keyOut is nullptr.
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey>
-int64_t iter_next_array_generic(Iter* it, const ArrayData* ad,
+int64_t iter_next_array_generic(Iter* iter, const ArrayData* ad,
                                 TypedValue* valOut, TypedValue* keyOut) {
-  auto& iter = *unwrap(it);
-  auto const pos = ad->iter_advance(iter.getPos());
-  if (pos == iter.getEnd()) {
-    iter.kill();
+  auto const pos = ad->iter_advance(iter->getPos());
+  if (pos == iter->getEnd()) {
+    iter->kill();
     return 0;
   }
 
-  iter.setPos(pos);
+  iter->setPos(pos);
   tvSet(ad->nvGetVal(pos), *valOut);
   if constexpr (HasKey) tvSet(ad->nvGetKey(pos), *keyOut);
   return 1;

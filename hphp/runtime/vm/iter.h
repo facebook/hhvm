@@ -33,56 +33,29 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Iter;
-
-enum class IterNextIndex : uint8_t {
-  VanillaVec = 0,
-  VanillaDict,
-  Array,
-
-  // JIT-only "pointer iteration", designed for good specialized code-gen.
-  // In pointer iteration, the iterator has a pointer directly into the base.
-  //
-  // We only use this mode if all the following conditions are met:
-  //  - The array is guaranteed to be unchanged during iteration
-  //  - The array is a VanillaDict or VanillaVec storing unaligned tvs
-  //  - (For dicts) The array is free of tombstones
-  VanillaDictPointer,
-  VanillaVecPointer,
-
-  // Helpers specific to bespoke array-likes.
-  StructDict,
-};
-
 /*
- * Iterator over an array, a collection, or an object implementing the Hack
- * Iterator interface. This iterator is used by the JIT and its usage is
- * mediated through the "Iter" wrapper below.
+ * The iterator stack frame representation used for "foreach" loops over arrays
+ * implemented by *IterInit* and *IterNext* bytecodes.
  *
- * By default, iterators inc-ref their base to ensure that it won't be mutated
- * during the iteration. HHBBC can do an analysis that marks certain iterators
- * as "local" iterators, which means that their base only changes in certain
- * controlled ways during iteration. (Specifically: either the base does not
- * change at all, or the current key is assigned a new value in the loop.)
+ * Iterators store their base in a separate "base" local. By default, this base
+ * local is immutable during the iteration. This is achieved by having an
+ * unnamed local holding a reference, distinct from a local that might have been
+ * specified by the programmer. HHBBC can do an analysis that deduplicates these
+ * locals if it is safe to do so. Specifically: either the base does not change
+ * at all, or the current key is assigned a new value in the loop. The latter
+ * case is represented by the lack of the "BaseConst" flag. The purpose of this
+ * optimization is to try to keep local bases at a refcount of 1, so that they
+ * won't be COWed by the "set the current key" type of mutating operations.
+ * Apparently, this pattern is somewhat common...
  *
- * For local iterators, the base is kept in a frame local and passed to the
- * iterator on each iteration. Local iterators are never used for objects,
- * since we can't constrain writes to them in this way.
- *
- * The purpose of the local iter optimization is to try to keep local bases at
- * a refcount of 1, so that they won't be COWed by the "set the current key"
- * type of mutating operations. Apparently, this pattern is somewhat common...
+ * Iterators store their current and end positions. The representation of these
+ * positions depends on the array type, bespoke layout, whether iterating by
+ * value or key/value pair, and whether the base local is immutable. The correct
+ * flavor of iteration helpers must be used consistently across iteration steps.
  */
-struct alignas(16) IterImpl {
-  /*
-   * Constructors.  Note that sometimes IterImpl objects are created
-   * without running their C++ constructor.  (See new_iter_array.)
-   */
-  IterImpl() = delete;
-
-  // Pass a non-NULL ad to checkInvariants iff this iterator is local.
-  // These invariants hold as long as the iterator hasn't yet reached the end.
-  bool checkInvariants(const ArrayData* ad) const;
+struct alignas(16) Iter {
+  Iter() = delete;
+  ~Iter() = delete;
 
   ssize_t getPos() const {
     return m_pos;
@@ -98,30 +71,22 @@ struct alignas(16) IterImpl {
   // In debug builds, this method will overwrite the iterator with garbage.
   void kill();
 
+  static TypedValue extractBase(TypedValue base, const Class* ctx);
+
   // JIT helpers used for specializing iterators.
   static constexpr size_t posOffset() {
-    return offsetof(IterImpl, m_pos);
+    return offsetof(Iter, m_pos);
   }
   static constexpr size_t posSize() {
     return sizeof(m_pos);
   }
   static constexpr size_t endOffset() {
-    return offsetof(IterImpl, m_end);
+    return offsetof(Iter, m_end);
   }
   static constexpr size_t endSize() {
     return sizeof(m_end);
   }
 
-private:
-  template<bool BaseConst>
-  friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<bool BaseConst>
-  friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
-                                    TypedValue*);
-  friend int64_t new_iter_object(Iter*, ObjectData* obj,
-                                 TypedValue* val, TypedValue* key);
-
-public:
   // Current position.
   // For the pointer iteration types, we use the appropriate pointers instead.
   union {
@@ -149,51 +114,6 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * The iterator API used by the interpreter and the JIT. This API is relatively
- * limited, because there are only two ways to interact with iterators in Hack:
- *  1. In a "foreach" loop, using the *IterInit* / *IterNext* bytecodes.
- *  2. As a delegated generator ("yield from").
- *
- * (*IterInit* here refers to {IterInit, IterInitK, IterInit, IterInitK}).
- *
- * The methods exposed here should be sufficient to implement both kinds of
- * iterator behavior. To speed up "foreach" loops, we also provide helpers
- * implementing *IterInit* / *IterNext* through helpers below.
- *
- * These helpers are faster than using the Iter class's methods directly
- * because they do one vtable lookup on the array type and then execute the
- * advance / bounds check / output key-value sequence based on that lookup,
- * rather than doing a separate vtable lookup for each step.
- *
- * NOTE: If you initialize an iterator using the faster init helpers, you MUST
- * use the faster next helpers for IterNext ops. That's because the helpers may
- * make iterators that use pointer iteration, which Iter::next doesn't handle.
- * doesn't handle. This invariant is checked in debug builds.
- *
- * In practice, this constraint shouldn't be a problem, because we always use
- * the helpers to do IterNext. That's true both in the interpreter and the JIT.
- */
-struct alignas(16) Iter {
-  Iter() = delete;
-  ~Iter() = delete;
-
-  // Validates iterator base and extract the underlying array or iterator.
-  // Assumes the base is not an array.
-  static TypedValue extractBase(TypedValue base, const Class* ctx);
-
-  // It's valid to call end() on a killed iter, but the iter is otherwise dead.
-  // In debug builds, this method will overwrite the iterator with garbage.
-  void kill() { m_iter.kill(); }
-
-private:
-  // Used to implement the separate helper functions below. These functions
-  // peek into the Iter and directly manipulate m_iter's fields.
-  friend IterImpl* unwrap(Iter*);
-
-  IterImpl m_iter;
-};
 
 // Native helpers for the interpreter + JIT used to implement *IterInit* ops.
 // These helpers return 1 if the base has any elements and 0 otherwise.

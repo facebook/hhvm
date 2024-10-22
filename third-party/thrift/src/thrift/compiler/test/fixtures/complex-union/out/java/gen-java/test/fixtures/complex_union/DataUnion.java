@@ -179,15 +179,15 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetBinaryData()) {
-            visitor.visitBinaryData(getBinaryData());
-            return;
+            return visitor.visitBinaryData(getBinaryData());
         }
         if (isSetStringData()) {
-            visitor.visitStringData(getStringData());
-            return;
+            return visitor.visitStringData(getStringData());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -223,9 +223,13 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
         });
     }
 
-    public interface Visitor {
-        void visitBinaryData(byte[] binaryData);
-        void visitStringData(String stringData);
+    public interface Visitor<T> {
+        default T visit(DataUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitBinaryData(byte[] binaryData);
+        T visitStringData(String stringData);
     }
 
     public void write0(TProtocol oprot) throws TException {

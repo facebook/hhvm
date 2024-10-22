@@ -91,7 +91,9 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -127,7 +129,11 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         });
     }
 
-    public interface Visitor {
+    public interface Visitor<T> {
+        default T visit(MyUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
     }
 
     public void write0(TProtocol oprot) throws TException {

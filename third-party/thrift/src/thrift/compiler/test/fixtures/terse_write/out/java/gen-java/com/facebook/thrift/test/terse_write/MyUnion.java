@@ -668,63 +668,51 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetBoolField()) {
-            visitor.visitBoolField(isBoolField());
-            return;
+            return visitor.visitBoolField(isBoolField());
         }
         if (isSetByteField()) {
-            visitor.visitByteField(getByteField());
-            return;
+            return visitor.visitByteField(getByteField());
         }
         if (isSetShortField()) {
-            visitor.visitShortField(getShortField());
-            return;
+            return visitor.visitShortField(getShortField());
         }
         if (isSetIntField()) {
-            visitor.visitIntField(getIntField());
-            return;
+            return visitor.visitIntField(getIntField());
         }
         if (isSetLongField()) {
-            visitor.visitLongField(getLongField());
-            return;
+            return visitor.visitLongField(getLongField());
         }
         if (isSetFloatField()) {
-            visitor.visitFloatField(getFloatField());
-            return;
+            return visitor.visitFloatField(getFloatField());
         }
         if (isSetDoubleField()) {
-            visitor.visitDoubleField(getDoubleField());
-            return;
+            return visitor.visitDoubleField(getDoubleField());
         }
         if (isSetStringField()) {
-            visitor.visitStringField(getStringField());
-            return;
+            return visitor.visitStringField(getStringField());
         }
         if (isSetBinaryField()) {
-            visitor.visitBinaryField(getBinaryField());
-            return;
+            return visitor.visitBinaryField(getBinaryField());
         }
         if (isSetEnumField()) {
-            visitor.visitEnumField(getEnumField());
-            return;
+            return visitor.visitEnumField(getEnumField());
         }
         if (isSetListField()) {
-            visitor.visitListField(getListField());
-            return;
+            return visitor.visitListField(getListField());
         }
         if (isSetSetField()) {
-            visitor.visitSetField(getSetField());
-            return;
+            return visitor.visitSetField(getSetField());
         }
         if (isSetMapField()) {
-            visitor.visitMapField(getMapField());
-            return;
+            return visitor.visitMapField(getMapField());
         }
         if (isSetStructField()) {
-            visitor.visitStructField(getStructField());
-            return;
+            return visitor.visitStructField(getStructField());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -760,21 +748,25 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         });
     }
 
-    public interface Visitor {
-        void visitBoolField(boolean boolField);
-        void visitByteField(byte byteField);
-        void visitShortField(short shortField);
-        void visitIntField(int intField);
-        void visitLongField(long longField);
-        void visitFloatField(float floatField);
-        void visitDoubleField(double doubleField);
-        void visitStringField(String stringField);
-        void visitBinaryField(byte[] binaryField);
-        void visitEnumField(com.facebook.thrift.test.terse_write.MyEnum enumField);
-        void visitListField(List<Short> listField);
-        void visitSetField(Set<Short> setField);
-        void visitMapField(Map<Short, Short> mapField);
-        void visitStructField(com.facebook.thrift.test.terse_write.MyStruct structField);
+    public interface Visitor<T> {
+        default T visit(MyUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitBoolField(boolean boolField);
+        T visitByteField(byte byteField);
+        T visitShortField(short shortField);
+        T visitIntField(int intField);
+        T visitLongField(long longField);
+        T visitFloatField(float floatField);
+        T visitDoubleField(double doubleField);
+        T visitStringField(String stringField);
+        T visitBinaryField(byte[] binaryField);
+        T visitEnumField(com.facebook.thrift.test.terse_write.MyEnum enumField);
+        T visitListField(List<Short> listField);
+        T visitSetField(Set<Short> setField);
+        T visitMapField(Map<Short, Short> mapField);
+        T visitStructField(com.facebook.thrift.test.terse_write.MyStruct structField);
     }
 
     public void write0(TProtocol oprot) throws TException {

@@ -173,15 +173,15 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetIntValue()) {
-            visitor.visitIntValue(getIntValue());
-            return;
+            return visitor.visitIntValue(getIntValue());
         }
         if (isSetStringValue()) {
-            visitor.visitStringValue(getStringValue());
-            return;
+            return visitor.visitStringValue(getStringValue());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -217,9 +217,13 @@ public final class Union implements com.facebook.thrift.payload.ThriftSerializab
         });
     }
 
-    public interface Visitor {
-        void visitIntValue(long intValue);
-        void visitStringValue(String stringValue);
+    public interface Visitor<T> {
+        default T visit(Union acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitIntValue(long intValue);
+        T visitStringValue(String stringValue);
     }
 
     public void write0(TProtocol oprot) throws TException {

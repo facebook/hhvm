@@ -171,15 +171,15 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetThingOne()) {
-            visitor.visitThingOne(getThingOne());
-            return;
+            return visitor.visitThingOne(getThingOne());
         }
         if (isSetThingTwo()) {
-            visitor.visitThingTwo(getThingTwo());
-            return;
+            return visitor.visitThingTwo(getThingTwo());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -215,9 +215,13 @@ public final class VirtualComplexUnion implements com.facebook.thrift.payload.Th
         });
     }
 
-    public interface Visitor {
-        void visitThingOne(String thingOne);
-        void visitThingTwo(String thingTwo);
+    public interface Visitor<T> {
+        default T visit(VirtualComplexUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitThingOne(String thingOne);
+        T visitThingTwo(String thingTwo);
     }
 
     public void write0(TProtocol oprot) throws TException {

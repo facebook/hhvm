@@ -267,23 +267,21 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetMyEnum()) {
-            visitor.visitMyEnum(getMyEnum());
-            return;
+            return visitor.visitMyEnum(getMyEnum());
         }
         if (isSetSetFloat()) {
-            visitor.visitSetFloat(getSetFloat());
-            return;
+            return visitor.visitSetFloat(getSetFloat());
         }
         if (isSetMyDataItem()) {
-            visitor.visitMyDataItem(getMyDataItem());
-            return;
+            return visitor.visitMyDataItem(getMyDataItem());
         }
         if (isSetComplexNestedStruct()) {
-            visitor.visitComplexNestedStruct(getComplexNestedStruct());
-            return;
+            return visitor.visitComplexNestedStruct(getComplexNestedStruct());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -319,11 +317,15 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
         });
     }
 
-    public interface Visitor {
-        void visitMyEnum(test.fixtures.complex_struct.MyEnum myEnum);
-        void visitSetFloat(List<List<Float>> setFloat);
-        void visitMyDataItem(test.fixtures.complex_struct.MyDataItem myDataItem);
-        void visitComplexNestedStruct(test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct);
+    public interface Visitor<T> {
+        default T visit(MyUnionFloatFieldThrowExp acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitMyEnum(test.fixtures.complex_struct.MyEnum myEnum);
+        T visitSetFloat(List<List<Float>> setFloat);
+        T visitMyDataItem(test.fixtures.complex_struct.MyDataItem myDataItem);
+        T visitComplexNestedStruct(test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct);
     }
 
     public void write0(TProtocol oprot) throws TException {

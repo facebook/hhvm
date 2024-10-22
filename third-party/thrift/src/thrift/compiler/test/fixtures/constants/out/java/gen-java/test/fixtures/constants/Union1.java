@@ -167,15 +167,15 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetI()) {
-            visitor.visitI(getI());
-            return;
+            return visitor.visitI(getI());
         }
         if (isSetD()) {
-            visitor.visitD(getD());
-            return;
+            return visitor.visitD(getD());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -211,9 +211,13 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
         });
     }
 
-    public interface Visitor {
-        void visitI(int i);
-        void visitD(double d);
+    public interface Visitor<T> {
+        default T visit(Union1 acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitI(int i);
+        T visitD(double d);
     }
 
     public void write0(TProtocol oprot) throws TException {

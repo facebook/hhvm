@@ -343,31 +343,27 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetMyEnum()) {
-            visitor.visitMyEnum(getMyEnum());
-            return;
+            return visitor.visitMyEnum(getMyEnum());
         }
         if (isSetMyStruct()) {
-            visitor.visitMyStruct(getMyStruct());
-            return;
+            return visitor.visitMyStruct(getMyStruct());
         }
         if (isSetMyDataItem()) {
-            visitor.visitMyDataItem(getMyDataItem());
-            return;
+            return visitor.visitMyDataItem(getMyDataItem());
         }
         if (isSetComplexNestedStruct()) {
-            visitor.visitComplexNestedStruct(getComplexNestedStruct());
-            return;
+            return visitor.visitComplexNestedStruct(getComplexNestedStruct());
         }
         if (isSetLongValue()) {
-            visitor.visitLongValue(getLongValue());
-            return;
+            return visitor.visitLongValue(getLongValue());
         }
         if (isSetIntValue()) {
-            visitor.visitIntValue(getIntValue());
-            return;
+            return visitor.visitIntValue(getIntValue());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -403,13 +399,17 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         });
     }
 
-    public interface Visitor {
-        void visitMyEnum(test.fixtures.complex_struct.MyEnum myEnum);
-        void visitMyStruct(test.fixtures.complex_struct.MyStruct myStruct);
-        void visitMyDataItem(test.fixtures.complex_struct.MyDataItem myDataItem);
-        void visitComplexNestedStruct(test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct);
-        void visitLongValue(long longValue);
-        void visitIntValue(int intValue);
+    public interface Visitor<T> {
+        default T visit(MyUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitMyEnum(test.fixtures.complex_struct.MyEnum myEnum);
+        T visitMyStruct(test.fixtures.complex_struct.MyStruct myStruct);
+        T visitMyDataItem(test.fixtures.complex_struct.MyDataItem myDataItem);
+        T visitComplexNestedStruct(test.fixtures.complex_struct.ComplexNestedStruct complexNestedStruct);
+        T visitLongValue(long longValue);
+        T visitIntValue(int intValue);
     }
 
     public void write0(TProtocol oprot) throws TException {

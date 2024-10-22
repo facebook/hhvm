@@ -171,15 +171,15 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetV1()) {
-            visitor.visitV1(getV1());
-            return;
+            return visitor.visitV1(getV1());
         }
         if (isSetV2()) {
-            visitor.visitV2(getV2());
-            return;
+            return visitor.visitV2(getV2());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -215,9 +215,13 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
         });
     }
 
-    public interface Visitor {
-        void visitV1(test.fixtures.complex_union.Val v1);
-        void visitV2(test.fixtures.complex_union.Val v2);
+    public interface Visitor<T> {
+        default T visit(ValUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitV1(test.fixtures.complex_union.Val v1);
+        T visitV2(test.fixtures.complex_union.Val v2);
     }
 
     public void write0(TProtocol oprot) throws TException {

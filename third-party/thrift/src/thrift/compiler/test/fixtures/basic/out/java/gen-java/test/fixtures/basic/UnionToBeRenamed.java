@@ -132,11 +132,12 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetReservedField()) {
-            visitor.visitReservedField(getReservedField());
-            return;
+            return visitor.visitReservedField(getReservedField());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -172,8 +173,12 @@ public final class UnionToBeRenamed implements com.facebook.thrift.payload.Thrif
         });
     }
 
-    public interface Visitor {
-        void visitReservedField(int reservedField);
+    public interface Visitor<T> {
+        default T visit(UnionToBeRenamed acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitReservedField(int reservedField);
     }
 
     public void write0(TProtocol oprot) throws TException {

@@ -171,15 +171,15 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetIntListValue()) {
-            visitor.visitIntListValue(getIntListValue());
-            return;
+            return visitor.visitIntListValue(getIntListValue());
         }
         if (isSetStringListValue()) {
-            visitor.visitStringListValue(getStringListValue());
-            return;
+            return visitor.visitStringListValue(getStringListValue());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -215,9 +215,13 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         });
     }
 
-    public interface Visitor {
-        void visitIntListValue(List<Long> intListValue);
-        void visitStringListValue(List<String> stringListValue);
+    public interface Visitor<T> {
+        default T visit(ListUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitIntListValue(List<Long> intListValue);
+        T visitStringListValue(List<String> stringListValue);
     }
 
     public void write0(TProtocol oprot) throws TException {

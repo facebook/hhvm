@@ -270,23 +270,21 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetMyEnum()) {
-            visitor.visitMyEnum(getMyEnum());
-            return;
+            return visitor.visitMyEnum(getMyEnum());
         }
         if (isSetMyStruct()) {
-            visitor.visitMyStruct(getMyStruct());
-            return;
+            return visitor.visitMyStruct(getMyStruct());
         }
         if (isSetMyDataItem()) {
-            visitor.visitMyDataItem(getMyDataItem());
-            return;
+            return visitor.visitMyDataItem(getMyDataItem());
         }
         if (isSetFloatSet()) {
-            visitor.visitFloatSet(getFloatSet());
-            return;
+            return visitor.visitFloatSet(getFloatSet());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -322,11 +320,15 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         });
     }
 
-    public interface Visitor {
-        void visitMyEnum(test.fixtures.basic.MyEnum myEnum);
-        void visitMyStruct(test.fixtures.basic.MyStruct myStruct);
-        void visitMyDataItem(test.fixtures.basic.MyDataItem myDataItem);
-        void visitFloatSet(Set<Float> floatSet);
+    public interface Visitor<T> {
+        default T visit(MyUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitMyEnum(test.fixtures.basic.MyEnum myEnum);
+        T visitMyStruct(test.fixtures.basic.MyStruct myStruct);
+        T visitMyDataItem(test.fixtures.basic.MyDataItem myDataItem);
+        T visitFloatSet(Set<Float> floatSet);
     }
 
     public void write0(TProtocol oprot) throws TException {

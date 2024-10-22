@@ -135,11 +135,12 @@ public final class NonCopyableUnion implements com.facebook.thrift.payload.Thrif
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetS()) {
-            visitor.visitS(getS());
-            return;
+            return visitor.visitS(getS());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -175,8 +176,12 @@ public final class NonCopyableUnion implements com.facebook.thrift.payload.Thrif
         });
     }
 
-    public interface Visitor {
-        void visitS(test.fixtures.complex_union.NonCopyableStruct s);
+    public interface Visitor<T> {
+        default T visit(NonCopyableUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitS(test.fixtures.complex_union.NonCopyableStruct s);
     }
 
     public void write0(TProtocol oprot) throws TException {

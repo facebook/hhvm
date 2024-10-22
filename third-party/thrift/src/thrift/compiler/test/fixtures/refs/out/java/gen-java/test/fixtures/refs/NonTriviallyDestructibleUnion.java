@@ -129,11 +129,12 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetIntField()) {
-            visitor.visitIntField(getIntField());
-            return;
+            return visitor.visitIntField(getIntField());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -169,8 +170,12 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
         });
     }
 
-    public interface Visitor {
-        void visitIntField(int intField);
+    public interface Visitor<T> {
+        default T visit(NonTriviallyDestructibleUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitIntField(int intField);
     }
 
     public void write0(TProtocol oprot) throws TException {

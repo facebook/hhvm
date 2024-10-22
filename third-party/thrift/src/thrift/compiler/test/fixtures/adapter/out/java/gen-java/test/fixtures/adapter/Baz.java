@@ -302,27 +302,24 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetIntField()) {
-            visitor.visitIntField(getIntField());
-            return;
+            return visitor.visitIntField(getIntField());
         }
         if (isSetSetField()) {
-            visitor.visitSetField(getSetField());
-            return;
+            return visitor.visitSetField(getSetField());
         }
         if (isSetMapField()) {
-            visitor.visitMapField(getMapField());
-            return;
+            return visitor.visitMapField(getMapField());
         }
         if (isSetBinaryField()) {
-            visitor.visitBinaryField(getBinaryField());
-            return;
+            return visitor.visitBinaryField(getBinaryField());
         }
         if (isSetLongField()) {
-            visitor.visitLongField(getLongField());
-            return;
+            return visitor.visitLongField(getLongField());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -358,12 +355,16 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         });
     }
 
-    public interface Visitor {
-        void visitIntField(int intField);
-        void visitSetField(Set<String> setField);
-        void visitMapField(Map<String, List<String>> mapField);
-        void visitBinaryField(byte[] binaryField);
-        void visitLongField(long longField);
+    public interface Visitor<T> {
+        default T visit(Baz acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitIntField(int intField);
+        T visitSetField(Set<String> setField);
+        T visitMapField(Map<String, List<String>> mapField);
+        T visitBinaryField(byte[] binaryField);
+        T visitLongField(long longField);
     }
 
     public void write0(TProtocol oprot) throws TException {

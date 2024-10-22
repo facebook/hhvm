@@ -255,23 +255,21 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetI()) {
-            visitor.visitI(getI());
-            return;
+            return visitor.visitI(getI());
         }
         if (isSetD()) {
-            visitor.visitD(getD());
-            return;
+            return visitor.visitD(getD());
         }
         if (isSetS()) {
-            visitor.visitS(getS());
-            return;
+            return visitor.visitS(getS());
         }
         if (isSetU()) {
-            visitor.visitU(getU());
-            return;
+            return visitor.visitU(getU());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -307,11 +305,15 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
         });
     }
 
-    public interface Visitor {
-        void visitI(int i);
-        void visitD(double d);
-        void visitS(test.fixtures.constants.Struct1 s);
-        void visitU(test.fixtures.constants.Union1 u);
+    public interface Visitor<T> {
+        default T visit(Union2 acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitI(int i);
+        T visitD(double d);
+        T visitS(test.fixtures.constants.Struct1 s);
+        T visitU(test.fixtures.constants.Union1 u);
     }
 
     public void write0(TProtocol oprot) throws TException {

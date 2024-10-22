@@ -150,13 +150,14 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
     {{#struct:fields}}
         if (isSet{{field:javaCapitalName}}()) {
-            visitor.visit{{field:javaCapitalName}}({{> GetterName}}());
-            return;
+            return visitor.visit{{field:javaCapitalName}}({{> GetterName}}());
         }
     {{/struct:fields}}
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -192,9 +193,13 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
         });
     }
 
-    public interface Visitor {
+    public interface Visitor<T> {
+        default T visit({{struct:javaCapitalName}} acceptor) {
+        return acceptor.accept(this);
+        }
+
     {{#struct:fields}}
-        void visit{{field:javaCapitalName}}({{> FieldType}} {{field:javaName}});
+        T visit{{field:javaCapitalName}}({{> FieldType}} {{field:javaName}});
     {{/struct:fields}}
     }
 

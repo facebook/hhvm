@@ -176,15 +176,15 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetDelay()) {
-            visitor.visitDelay(getDelay());
-            return;
+            return visitor.visitDelay(getDelay());
         }
         if (isSetCustom()) {
-            visitor.visitCustom(getCustom());
-            return;
+            return visitor.visitCustom(getCustom());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -220,9 +220,13 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
         });
     }
 
-    public interface Visitor {
-        void visitDelay(long delay);
-        void visitCustom(byte[] custom);
+    public interface Visitor<T> {
+        default T visit(AdaptTestUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitDelay(long delay);
+        T visitCustom(byte[] custom);
     }
 
     public void write0(TProtocol oprot) throws TException {

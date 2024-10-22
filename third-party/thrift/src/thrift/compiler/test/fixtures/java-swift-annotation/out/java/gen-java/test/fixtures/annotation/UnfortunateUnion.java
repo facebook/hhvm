@@ -173,15 +173,15 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetAnSnakeString()) {
-            visitor.visitAnSnakeString(getAnSnakeString());
-            return;
+            return visitor.visitAnSnakeString(getAnSnakeString());
         }
         if (isSetACamelI32()) {
-            visitor.visitACamelI32(getACamelI32());
-            return;
+            return visitor.visitACamelI32(getACamelI32());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -217,9 +217,13 @@ public final class UnfortunateUnion implements com.facebook.thrift.payload.Thrif
         });
     }
 
-    public interface Visitor {
-        void visitAnSnakeString(String anSnakeString);
-        void visitACamelI32(int aCamelI32);
+    public interface Visitor<T> {
+        default T visit(UnfortunateUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitAnSnakeString(String anSnakeString);
+        T visitACamelI32(int aCamelI32);
     }
 
     public void write0(TProtocol oprot) throws TException {

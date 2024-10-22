@@ -328,31 +328,27 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         }
     }
 
-    public void accept(Visitor visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         if (isSetIntValue()) {
-            visitor.visitIntValue(getIntValue());
-            return;
+            return visitor.visitIntValue(getIntValue());
         }
         if (isSetStringValue()) {
-            visitor.visitStringValue(getStringValue());
-            return;
+            return visitor.visitStringValue(getStringValue());
         }
         if (isSetIntListValue()) {
-            visitor.visitIntListValue(getIntListValue());
-            return;
+            return visitor.visitIntListValue(getIntListValue());
         }
         if (isSetStringListValue()) {
-            visitor.visitStringListValue(getStringListValue());
-            return;
+            return visitor.visitStringListValue(getStringListValue());
         }
         if (isSetTypedefValue()) {
-            visitor.visitTypedefValue(getTypedefValue());
-            return;
+            return visitor.visitTypedefValue(getTypedefValue());
         }
         if (isSetStringRef()) {
-            visitor.visitStringRef(getStringRef());
-            return;
+            return visitor.visitStringRef(getStringRef());
         }
+
+        throw new IllegalStateException("Visitor missing for type " + this.getThriftUnionType());
     }
 
     @java.lang.Override
@@ -388,13 +384,17 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         });
     }
 
-    public interface Visitor {
-        void visitIntValue(long intValue);
-        void visitStringValue(String stringValue);
-        void visitIntListValue(List<Long> intListValue);
-        void visitStringListValue(List<String> stringListValue);
-        void visitTypedefValue(Map<Short, String> typedefValue);
-        void visitStringRef(String stringRef);
+    public interface Visitor<T> {
+        default T visit(ComplexUnion acceptor) {
+        return acceptor.accept(this);
+        }
+
+        T visitIntValue(long intValue);
+        T visitStringValue(String stringValue);
+        T visitIntListValue(List<Long> intListValue);
+        T visitStringListValue(List<String> stringListValue);
+        T visitTypedefValue(Map<Short, String> typedefValue);
+        T visitStringRef(String stringRef);
     }
 
     public void write0(TProtocol oprot) throws TException {

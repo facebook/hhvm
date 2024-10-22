@@ -37,9 +37,6 @@ uint32_t getAdditionalFanout(
       opts.num_proxies,
       kMaxTotalFanout);
 
-  checkLogic(
-      additionalFanout == 0 || !opts.thread_affinity,
-      "additional_fanout is not supported with thread_affinity");
   return additionalFanout;
 }
 

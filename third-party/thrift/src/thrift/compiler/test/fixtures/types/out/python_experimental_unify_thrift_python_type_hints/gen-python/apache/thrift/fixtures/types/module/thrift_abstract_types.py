@@ -17,6 +17,15 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.fixtures.types.included.thrift_abstract_types
 
+class has_bitwise_ops:
+    pass
+
+class is_unscoped:
+    pass
+
+class MyForwardRefEnum:
+    pass
+
 
 class empty_struct(_abc.ABC):
     pass

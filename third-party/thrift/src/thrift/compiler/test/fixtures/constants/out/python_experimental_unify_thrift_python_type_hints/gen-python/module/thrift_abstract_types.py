@@ -16,6 +16,15 @@ import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
 
+class EmptyEnum:
+    pass
+
+class City:
+    pass
+
+class Company:
+    pass
+
 
 class Internship(_abc.ABC):
     @property

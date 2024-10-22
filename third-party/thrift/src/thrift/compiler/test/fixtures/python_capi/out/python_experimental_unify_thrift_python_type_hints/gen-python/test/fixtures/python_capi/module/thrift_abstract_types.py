@@ -20,6 +20,12 @@ import apache.thrift.type.schema.thrift_abstract_types
 import test.fixtures.python_capi.serialized_dep.thrift_abstract_types
 import test.fixtures.python_capi.thrift_dep.thrift_abstract_types
 
+class MyEnum:
+    pass
+
+class AnnoyingEnum:
+    pass
+
 
 class MyStruct(_abc.ABC):
     @property

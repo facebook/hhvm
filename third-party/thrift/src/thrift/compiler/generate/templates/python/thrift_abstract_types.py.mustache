@@ -37,7 +37,12 @@ import {{included_module_path}}.thrift_abstract_types
 # import {{module_path}}
 {{/program:adapter_type_hint_modules}}
 
-{{#program:structs}}
+{{#program:enums}}{{!
+}}class {{enum:name}}:
+    pass
+
+{{/program:enums}}{{!
+}}{{#program:structs}}
 
 {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
 class {{struct:py_name}}({{!

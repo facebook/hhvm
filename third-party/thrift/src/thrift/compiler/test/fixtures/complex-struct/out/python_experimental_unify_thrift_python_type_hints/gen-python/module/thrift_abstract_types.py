@@ -16,6 +16,9 @@ import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
 
+class MyEnum:
+    pass
+
 
 class MyStructFloatFieldThrowExp(_abc.ABC):
     @property

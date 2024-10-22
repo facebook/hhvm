@@ -16,6 +16,27 @@ import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
 
+class Metasyntactic:
+    pass
+
+class MyEnum1:
+    pass
+
+class MyEnum2:
+    pass
+
+class MyEnum3:
+    pass
+
+class MyEnum4:
+    pass
+
+class MyBitmaskEnum1:
+    pass
+
+class MyBitmaskEnum2:
+    pass
+
 
 class SomeStruct(_abc.ABC):
     @property

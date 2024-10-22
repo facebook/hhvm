@@ -16,6 +16,12 @@ import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
 
+class MyEnum:
+    pass
+
+class HackEnum:
+    pass
+
 
 class MyStruct(_abc.ABC):
     @property

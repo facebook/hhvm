@@ -68,6 +68,12 @@ namespace proxygen {
 
 void rfc6724_sort(vector<SocketAddress>& addrs,
                   const SocketAddress* srcAddr /* = nullptr */) {
+  /** 
+   * Some callers require strong exception safety guarentees. If `find_src_addr`
+   * throws an exception, the output (e.g. vector<SocketAddress>& addrs) must 
+   * be left in a valid state; this is a note to prevent future developers from 
+   * breaking this guarantee.
+   */
   vector<SortElement> sortVec;
   for (size_t i = 0; i < addrs.size(); ++i) {
     SortElement elem;

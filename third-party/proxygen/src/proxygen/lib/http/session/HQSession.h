@@ -1821,7 +1821,8 @@ class HQSession
         std::unique_ptr<HTTPMessage> /* promise */) override;
 
     uint16_t getDatagramSizeLimit() const noexcept override;
-    bool sendDatagram(std::unique_ptr<folly::IOBuf> datagram) override;
+    folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
+        std::unique_ptr<folly::IOBuf> datagram) override;
 
     [[nodiscard]] bool supportsWebTransport() const override {
       return session_.supportsWebTransport();
@@ -1831,11 +1832,12 @@ class HQSession
     folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
     newWebTransportUniStream() override;
 
-    folly::Expected<HTTPTransaction::Transport::FCState,
+    folly::Expected<WebTransportImpl::TransportProvider::FCState,
                     WebTransport::ErrorCode>
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
-                               bool /*eof*/) override;
+                               bool /*eof*/,
+                               quic::StreamWriteCallback* wcb) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
         resetWebTransportEgress(HTTPCodec::StreamID /*id*/,
@@ -1844,6 +1846,28 @@ class HQSession
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
     setWebTransportStreamPriority(HTTPCodec::StreamID /*id*/,
                                   HTTPPriority pri) override;
+
+    folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
+                    WebTransport::ErrorCode>
+    readWebTransportData(HTTPCodec::StreamID id, size_t max) override {
+      auto res = session_.sock_->read(id, max);
+      if (res) {
+        return std::move(res.value());
+      } else {
+        return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+      }
+    }
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    initiateReadOnBidiStream(HTTPCodec::StreamID id,
+                             quic::StreamReadCallback* readCallback) override {
+      auto res = session_.sock_->setReadCallback(id, readCallback);
+      if (res) {
+        return folly::unit;
+      } else {
+        return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
+      }
+    }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
         pauseWebTransportIngress(HTTPCodec::StreamID /*id*/) override;
@@ -1855,51 +1879,6 @@ class HQSession
         stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
                                        uint32_t /*errorCode*/) override;
 
-    class WTWriteCallback : public quic::QuicSocket::WriteCallback {
-     public:
-      explicit WTWriteCallback(HTTPTransaction& txn) : txn_(txn) {
-      }
-
-      void onStreamWriteReady(quic::StreamId id, uint64_t) noexcept override {
-        VLOG(4) << "onStreamWriteReady id=" << id;
-        txn_.onWebTransportEgressReady(id);
-      }
-
-     private:
-      HTTPTransaction& txn_;
-    };
-
-    class WTReadCallback : public quic::QuicSocket::ReadCallback {
-     public:
-      explicit WTReadCallback(HTTPTransaction& txn, HQSession& session)
-          : txn_(txn), session_(session) {
-      }
-
-      void readAvailable(quic::StreamId id) noexcept override;
-
-      void readError(quic::StreamId id,
-                     quic::QuicError error) noexcept override;
-
-     private:
-      HTTPTransaction& txn_;
-      HQSession& session_;
-    };
-
-    std::unique_ptr<WTWriteCallback> wtWriteCallback_;
-    std::unique_ptr<WTReadCallback> wtReadCallback_;
-
-    WTWriteCallback* getWTWriteCallback() {
-      if (!wtWriteCallback_) {
-        wtWriteCallback_ = std::make_unique<WTWriteCallback>(txn_);
-      }
-      return wtWriteCallback_.get();
-    }
-    WTReadCallback* getWTReadCallback() {
-      if (!wtReadCallback_) {
-        wtReadCallback_ = std::make_unique<WTReadCallback>(txn_, session_);
-      }
-      return wtReadCallback_.get();
-    }
   }; // HQStreamTransport
 
 #ifdef _MSC_VER

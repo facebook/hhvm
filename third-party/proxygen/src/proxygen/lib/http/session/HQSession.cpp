@@ -3585,9 +3585,8 @@ void HQSession::dispatchUniWTStream(quic::StreamId streamID,
   if (!parent) {
     return;
   }
-  auto streamTransport = static_cast<HQStreamTransport*>(parent);
-  sock_->setReadCallback(streamID, streamTransport->getWTReadCallback());
-  parent->txn_.onWebTransportUniStream(streamID);
+  auto handle = parent->txn_.onWebTransportUniStream(streamID);
+  sock_->setReadCallback(streamID, handle);
 }
 
 // Peer initiated Bidi WT streams
@@ -3605,9 +3604,8 @@ void HQSession::dispatchBidiWTStream(HTTPCodec::StreamID streamID,
     return;
   }
 
-  auto streamTransport = static_cast<HQStreamTransport*>(parent);
-  sock_->setReadCallback(streamID, streamTransport->getWTReadCallback());
-  parent->txn_.onWebTransportBidiStream(streamID);
+  auto handle = parent->txn_.onWebTransportBidiStream(streamID);
+  sock_->setReadCallback(streamID, handle.readHandle);
 }
 
 // Methods specific to StreamTransport subclasses
@@ -3786,10 +3784,11 @@ uint16_t HQSession::HQStreamTransport::getDatagramSizeLimit() const noexcept {
   return session_.sock_->getDatagramSizeLimit() - kMaxDatagramHeaderSize;
 }
 
-bool HQSession::HQStreamTransport::sendDatagram(
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::sendDatagram(
     std::unique_ptr<folly::IOBuf> datagram) {
   if (!streamId_.hasValue() || !session_.datagramEnabled_) {
-    return false;
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
   // Prepend the H3 Datagram header to the datagram payload
   // HTTP/3 Datagram {
@@ -3803,14 +3802,14 @@ bool HQSession::HQStreamTransport::sendDatagram(
   auto streamIdRes = quic::encodeQuicInteger(
       streamId_.value() / 4, [&](auto val) { appender.writeBE(val); });
   if (streamIdRes.hasError()) {
-    return false;
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
   if (!txn_.isWebTransportConnectStream()) {
     // Always use context-id = 0 for now
     auto ctxIdRes =
         quic::encodeQuicInteger(0, [&](auto val) { appender.writeBE(val); });
     if (ctxIdRes.hasError()) {
-      return false;
+      return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }
   }
   VLOG(4) << "Sending datagram for streamId=" << streamId_.value()
@@ -3821,9 +3820,9 @@ bool HQSession::HQStreamTransport::sendDatagram(
   auto writeRes = session_.sock_->writeDatagram(queue.move());
   if (writeRes.hasError()) {
     LOG(ERROR) << "Failed to send datagram for streamId=" << streamId_.value();
-    return false;
+    return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }
-  return true;
+  return folly::unit;
 }
 
 folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
@@ -3843,7 +3842,6 @@ HQSession::HQStreamTransport::newWebTransportBidiStream() {
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
-  session_.sock_->setReadCallback(*id, getWTReadCallback());
   return *id;
 }
 
@@ -3867,9 +3865,13 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
   return *id;
 }
 
-folly::Expected<HTTPTransaction::Transport::FCState, WebTransport::ErrorCode>
+folly::Expected<WebTransportImpl::TransportProvider::FCState,
+                WebTransport::ErrorCode>
 HQSession::HQStreamTransport::sendWebTransportStreamData(
-    HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
+    HTTPCodec::StreamID id,
+    std::unique_ptr<folly::IOBuf> data,
+    bool eof,
+    quic::StreamWriteCallback* writeCallback) {
   auto res = session_.sock_->writeChain(id, std::move(data), eof);
   if (res.hasError()) {
     LOG(ERROR) << "Failed to write WT stream data";
@@ -3881,11 +3883,11 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
   }
   if (!eof && flowControl->sendWindowAvailable == 0) {
-    session_.sock_->notifyPendingWriteOnStream(id, getWTWriteCallback());
+    session_.sock_->notifyPendingWriteOnStream(id, writeCallback);
     VLOG(4) << "Closing fc window";
-    return HTTPTransaction::Transport::FCState::BLOCKED;
+    return WebTransportImpl::TransportProvider::FCState::BLOCKED;
   } else {
-    return HTTPTransaction::Transport::FCState::UNBLOCKED;
+    return WebTransportImpl::TransportProvider::FCState::UNBLOCKED;
   }
 }
 
@@ -3947,38 +3949,6 @@ HQSession::HQStreamTransport::stopReadingWebTransportIngress(
     }
   }
   return folly::unit;
-}
-
-void HQSession::HQStreamTransport::WTReadCallback::readAvailable(
-    quic::StreamId id) noexcept {
-  auto readRes = session_.sock_->read(id, 65535);
-  if (readRes.hasError()) {
-    LOG(ERROR) << "Got synchronous read error=" << readRes.error();
-    readError(id, quic::QuicError(readRes.error(), "sync read error"));
-    return;
-  }
-  quic::Buf data = std::move(readRes.value().first);
-  bool eof = readRes.value().second;
-  if (eof) {
-    session_.sock_->setReadCallback(id, nullptr);
-  }
-  txn_.onWebTransportStreamIngress(id, std::move(data), eof);
-}
-
-void HQSession::HQStreamTransport::WTReadCallback::readError(
-    quic::StreamId id, quic::QuicError error) noexcept {
-  auto quicAppErrorCode = error.code.asApplicationErrorCode();
-  if (quicAppErrorCode) {
-    auto appErrorCode = WebTransport::toApplicationErrorCode(*quicAppErrorCode);
-    if (appErrorCode) {
-      txn_.onWebTransportStreamError(id, *appErrorCode);
-      return;
-    }
-  }
-  // any other error
-  txn_.onWebTransportStreamError(id, WebTransport::kInternalError);
-
-  session_.sock_->setReadCallback(id, nullptr);
 }
 
 std::ostream& operator<<(std::ostream& os, const HQSession& session) {

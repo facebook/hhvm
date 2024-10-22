@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 
 using namespace testing;
-
+using WTFCState = proxygen::WebTransportImpl::TransportProvider::FCState;
 namespace {
 constexpr uint32_t WT_APP_ERROR_1 = 19;
 constexpr uint32_t WT_APP_ERROR_2 = 77;
@@ -107,6 +107,8 @@ class HTTPTransactionWebTransportTest : public testing::Test {
 
 TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
+  EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
+      .WillOnce(Return(folly::unit));
   auto res = wt_->createBidiStream();
   EXPECT_TRUE(res.hasValue());
   EXPECT_CALL(transport_, resetWebTransportEgress(0, WT_APP_ERROR_1))
@@ -120,8 +122,8 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res2 = wt_->createUniStream();
   EXPECT_TRUE(res2.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, true))
-      .WillOnce(Return(HTTPTransaction::Transport::FCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, true, _))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
   res2.value()
       ->writeStreamData(nullptr, true)
       .value()
@@ -150,7 +152,7 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  txn_->onWebTransportUniStream(0);
+  auto implHandle = txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
 
   // read with no data buffered
@@ -161,17 +163,20 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
                  });
   EXPECT_FALSE(fut.isReady());
 
-  txn_->onWebTransportStreamIngress(0, makeBuf(10), false);
+  implHandle->dataAvailable(makeBuf(10), false);
   EXPECT_FALSE(fut.isReady());
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 
   // buffer data with no read
-  txn_->onWebTransportStreamIngress(0, makeBuf(32768), false);
+  implHandle->dataAvailable(makeBuf(32768), false);
 
   // full buffer, blocked
   EXPECT_CALL(transport_, pauseWebTransportIngress(0));
-  txn_->onWebTransportStreamIngress(0, makeBuf(32768), false);
+  EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
+    return std::make_pair(makeBuf(32768), false);
+  }));
+  implHandle->readAvailable(0);
   EXPECT_CALL(transport_, resumeWebTransportIngress(0));
   fut = readHandle->readStreamData()
             .via(&eventBase_)
@@ -190,7 +195,7 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
             });
   EXPECT_FALSE(fut.isReady());
 
-  txn_->onWebTransportStreamIngress(0, nullptr, true);
+  implHandle->dataAvailable(nullptr, true);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 }
@@ -200,10 +205,10 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamBufferedError) {
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  txn_->onWebTransportUniStream(0);
+  auto implHandle = txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
 
-  txn_->onWebTransportStreamError(0, WT_APP_ERROR_2);
+  implHandle->deliverReadError(WT_APP_ERROR_2);
 
   // read with buffered error
   auto fut = readHandle->readStreamData()
@@ -220,7 +225,7 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamError) {
   EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
       .WillOnce(SaveArg<1>(&readHandle));
 
-  txn_->onWebTransportUniStream(0);
+  auto implHandle = txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
 
   // read with nothing queued
@@ -231,7 +236,7 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamError) {
                  });
   EXPECT_FALSE(fut.isReady());
 
-  txn_->onWebTransportStreamError(0, WT_APP_ERROR_2);
+  implHandle->deliverReadError(WT_APP_ERROR_2);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 }
@@ -240,7 +245,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res = wt_->createUniStream();
   EXPECT_TRUE(res.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
       .WillOnce(
           Return(folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR)));
   EXPECT_EQ(res.value()->writeStreamData(makeBuf(10), false).error(),
@@ -254,8 +259,9 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
 
   // Block write, then resume
   bool ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
-      .WillOnce(Return(HTTPTransaction::Transport::FCState::BLOCKED));
+  quic::StreamWriteCallback* wcb{nullptr};
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
+      .WillOnce(DoAll(SaveArg<3>(&wcb), Return(WTFCState::BLOCKED)));
   writeHandle.value()
       ->writeStreamData(makeBuf(10), false)
       .value()
@@ -265,14 +271,14 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
         ready = true;
       });
   EXPECT_FALSE(ready);
-  txn_->onWebTransportEgressReady(1);
+  wcb->onStreamWriteReady(0, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 
   // Block write/stop sending
   ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
-      .WillOnce(Return(HTTPTransaction::Transport::FCState::BLOCKED));
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
+      .WillOnce(DoAll(SaveArg<3>(&wcb), Return(WTFCState::BLOCKED)));
   writeHandle.value()
       ->writeStreamData(makeBuf(10), false)
       .value()
@@ -297,12 +303,12 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
   EXPECT_CALL(handler_, onWebTransportBidiStream(_, _))
       .WillOnce(SaveArg<1>(&streamHandle));
 
-  txn_->onWebTransportBidiStream(0);
+  auto bidiHandle = txn_->onWebTransportBidiStream(0);
   EXPECT_NE(streamHandle.readHandle, nullptr);
   EXPECT_NE(streamHandle.writeHandle, nullptr);
 
   // deliver EOF before read
-  txn_->onWebTransportStreamIngress(0, nullptr, true);
+  bidiHandle.readHandle->dataAvailable(nullptr, true);
 
   auto fut = streamHandle.readHandle->readStreamData()
                  .via(&eventBase_)
@@ -341,6 +347,8 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
 
 TEST_F(HTTPTransactionWebTransportTest, StreamDetachWithOpenStreams) {
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
+  EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
+      .WillOnce(Return(folly::unit));
   auto res = wt_->createBidiStream();
   EXPECT_FALSE(res.hasError());
   bool readCancelled = false;
@@ -389,6 +397,9 @@ TEST_F(HTTPTransactionWebTransportTest, NoHandler) {
 
 TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   EXPECT_CALL(transport_, newWebTransportBidiStream()).WillOnce(Return(0));
+  quic::StreamReadCallback* quicReadCallback{nullptr};
+  EXPECT_CALL(transport_, initiateReadOnBidiStream(_, _))
+      .WillOnce(DoAll(SaveArg<1>(&quicReadCallback), Return(folly::unit)));
   auto res = wt_->createBidiStream();
   auto id = res->readHandle->getID();
 
@@ -400,7 +411,10 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
                    readCallback(std::move(streamData), false, 10, 0);
                  });
   EXPECT_FALSE(fut.isReady());
-  txn_->onWebTransportStreamIngress(id, makeBuf(10), false);
+  EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
+    return std::make_pair(makeBuf(10), false);
+  }));
+  quicReadCallback->readAvailable(id);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 
@@ -411,8 +425,8 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
 
   // write by ID
   bool ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(id, testing::_, false))
-      .WillOnce(Return(HTTPTransaction::Transport::FCState::UNBLOCKED));
+  EXPECT_CALL(transport_, sendWebTransportStreamData(id, testing::_, false, _))
+      .WillOnce(Return(WTFCState::UNBLOCKED));
   wt_->writeStreamData(id, makeBuf(10), false)
       .value()
       .via(&eventBase_)
@@ -442,9 +456,7 @@ TEST_F(HTTPTransactionWebTransportTest, InvalidStreamIDAPIs) {
 }
 
 TEST_F(HTTPTransactionWebTransportTest, SendDatagram) {
-  EXPECT_CALL(transport_, getDatagramSizeLimitNonConst())
-      .WillOnce(Return(1200));
-  EXPECT_CALL(transport_, sendDatagram(_)).WillOnce(Return(true));
+  EXPECT_CALL(transport_, sendDatagram(_)).WillOnce(Return(folly::unit));
   EXPECT_TRUE(wt_->sendDatagram(makeBuf(100)));
 }
 
@@ -485,7 +497,12 @@ TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
   EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, WT_APP_ERROR_2))
       .WillOnce(Return(folly::unit));
   readHandle->stopSending(WT_APP_ERROR_2);
-  txn_->onWebTransportStreamError(0, WT_APP_ERROR_1);
+  // there's no way to abort this stream anymore.  stopSending removes the
+  // read callback.
+  // Questioning my life choices -- there's no way now to get the reset error
+  // code.
+  // 1. Should you be able to resetStream() while write is outstanding? (yes)
+  // 2. Should you be able to stopSending() when read is outstanding?
   eventBase_.loopOnce();
 }
 

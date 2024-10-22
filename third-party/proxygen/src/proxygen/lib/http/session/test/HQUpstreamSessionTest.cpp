@@ -2282,25 +2282,33 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
 
   // Wait for a read
   stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto) {
+    VLOG(4) << "read 1, adding 70k";
     // Now add a big buf, which will pause ingress
     socketDriver_->addReadEvent(
         id, makeBuf(70000), std::chrono::milliseconds(0));
   });
   // add a small read to trigger the above handler
   socketDriver_->addReadEvent(id, makeBuf(10), std::chrono::milliseconds(0));
-  flushAndLoopN(3);
+  VLOG(4) << "flushLoop 1";
+  flushAndLoopN(4);
   EXPECT_TRUE(socketDriver_->isStreamPaused(id));
 
   // Read again
   stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto streamData) {
-    EXPECT_EQ(streamData->data->computeChainDataLength(), 70000);
+    VLOG(4) << "read 2, adding EOF";
+    EXPECT_EQ(streamData->data->computeChainDataLength(), 65535);
     // Add EOF and wait for it
     socketDriver_->addReadEOF(id, std::chrono::milliseconds(0));
-    stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto streamData) {
-      EXPECT_TRUE(streamData->fin);
-    });
   });
+  VLOG(4) << "flushLoop 2";
   flushAndLoopN(2);
+  stream.readHandle->awaitNextRead(&eventBase_, [&](auto, auto streamData) {
+    LOG(INFO) << "read 3";
+    EXPECT_EQ(streamData->data->computeChainDataLength(), 4465);
+    EXPECT_TRUE(streamData->fin);
+  });
+  VLOG(4) << "flushLoop 3";
+  flushAndLoopN(1);
   closeWTSession();
 }
 

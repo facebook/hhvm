@@ -191,6 +191,7 @@ add_library(
     http/structuredheaders/StructuredHeadersDecoder.cpp
     http/structuredheaders/StructuredHeadersEncoder.cpp
     http/structuredheaders/StructuredHeadersUtilities.cpp
+    http/webtransport/WebTransportImpl.cpp
     pools/generators/FileServerListGenerator.cpp
     pools/generators/ServerListGenerator.cpp
     sampling/Sampling.cpp

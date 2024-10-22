@@ -210,11 +210,12 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
         .WillRepeatedly(testing::Return(token));
   }
 
-  MOCK_METHOD((bool),
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
               sendDatagram,
               (std::shared_ptr<folly::IOBuf>),
               (noexcept));
-  bool sendDatagram(std::unique_ptr<folly::IOBuf> datagram) override {
+  folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
+      std::unique_ptr<folly::IOBuf> datagram) override {
     return sendDatagram(std::shared_ptr<folly::IOBuf>(datagram.release()));
   }
 
@@ -232,12 +233,25 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
   MOCK_METHOD((folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>),
               newWebTransportUniStream,
               ());
-  MOCK_METHOD((folly::Expected<FCState, WebTransport::ErrorCode>),
+  MOCK_METHOD((folly::Expected<WebTransportImpl::TransportProvider::FCState,
+                               WebTransport::ErrorCode>),
               sendWebTransportStreamData,
-              (HTTPCodec::StreamID, std::unique_ptr<folly::IOBuf>, bool));
+              (HTTPCodec::StreamID,
+               std::unique_ptr<folly::IOBuf>,
+               bool,
+               quic::StreamWriteCallback*));
   MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
               resetWebTransportEgress,
               (HTTPCodec::StreamID, uint32_t));
+
+  MOCK_METHOD((folly::Expected<std::pair<std::unique_ptr<folly::IOBuf>, bool>,
+                               WebTransport::ErrorCode>),
+              readWebTransportData,
+              (HTTPCodec::StreamID, size_t));
+
+  MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
+              initiateReadOnBidiStream,
+              (HTTPCodec::StreamID, quic::StreamReadCallback*));
 
   MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
               pauseWebTransportIngress,

@@ -8,6 +8,7 @@
 
 #include <folly/Singleton.h>
 #include <folly/io/async/EventBase.h>
+#include <proxygen/lib/http/webtransport/WebTransportImpl.h>
 #include <proxygen/lib/http/webtransport/test/Mocks.h>
 
 namespace proxygen::test {

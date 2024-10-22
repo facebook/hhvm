@@ -33,8 +33,12 @@ from thrift.python.mutable_types cimport (
     MutableStructInfo,
     MutableUnion,
     MutableUnionInfo,
+    _ThriftListWrapper,
 )
-from thrift.python.types cimport getCTypeInfo
+from thrift.python.types cimport (
+    getCTypeInfo,
+    List,
+)
 
 
 @cython.final
@@ -119,12 +123,60 @@ cdef class MutableListTypeInfo(TypeInfoBase):
     """
     def __cinit__(self, val_info):
         self.val_info = val_info
+        # If the element/val_info is a container, we need to handle this case
+        # while 'parsing' the nested containers like [[1], [2]]. We do this by
+        # wrapping the inner value with `_ThriftListWrapper` when calling the
+        # `self.val_info.to_internal_data()`. See `_to_internal_data()`.
+        self.value_type_is_container = isinstance(val_info, MutableListTypeInfo)
         self.cpp_obj = make_unique[cMutableListTypeInfo](getCTypeInfo(val_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
-    cdef to_internal_data(self, object values):
+    cdef to_internal_data(self, object mutableList_or_thriftListWrapper):
+        """
+        Validates the `mutableList_or_thriftListWrapper` and convert it into
+        an internal data representation.
+
+        Args:
+            `mutableList_or_thriftListWrapper`: `MutableList` instance or
+            `_ThriftListWrapper` instance.
+
+        Returns the `MutableList`s internal data or returns a Python list with
+        converted values from `_ThriftListWrapper._list_data`, representing
+        the internal data
+        """
+        if isinstance(mutableList_or_thriftListWrapper, MutableList):
+            mutable_list = <MutableList>mutableList_or_thriftListWrapper
+            # `MutableListTypeInfo`(`self`) represents a `MutableList`, and its
+            # element type (`.val_info`) must match the element type of
+            # `mutable_list` (`._val_typeinfo`) for an exact type match.
+            if self.val_info.same_as(mutable_list._val_typeinfo):
+                return mutable_list._list_data
+
+        # TODO: remove after adapting mutable-constant for `_ThriftListWrapper`
+        #
+        # Mutable types generate constants similar to the example below, and it
+        # uses immutable types for constants. Assigning `List` should be valid
+        # for now.
+        #
+        # struct_constant = Struct(
+        #   unqualified_list_i32=python_types.List(typeinfo_i32, (1, 2, 3))
+        # )
+        if isinstance(mutableList_or_thriftListWrapper, List):
+            return self._to_internal_data(mutableList_or_thriftListWrapper)
+
+        if not isinstance(mutableList_or_thriftListWrapper, _ThriftListWrapper):
+            raise TypeError(
+                "Expected values to be an instance of Thrift mutable list with "
+                "matching element type, or the result of `to_thrift_list()`, "
+                f"but got type {type(mutableList_or_thriftListWrapper)}."
+            )
+
+        return self._to_internal_data(
+            (<_ThriftListWrapper>mutableList_or_thriftListWrapper)._list_data)
+
+    cdef _to_internal_data(self, values):
         """
         Validates the `values` and converts them into an internal data representation.
 
@@ -138,7 +190,10 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         cdef int idx = 0
         cdef list lst = PyList_New(len(values))
         for idx, value in enumerate(values):
-            internal_data = val_type_info.to_internal_data(value)
+            internal_data = val_type_info.to_internal_data(
+                _ThriftListWrapper(value)
+                if self.value_type_is_container
+                else value)
             Py_INCREF(internal_data)
             PyList_SET_ITEM(lst, idx, internal_data)
 

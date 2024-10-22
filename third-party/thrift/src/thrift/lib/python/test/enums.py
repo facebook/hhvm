@@ -39,11 +39,13 @@ from python_test.enums.thrift_types import (
     OptionalFile,
     Perm,
 )
+from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
 
 from thrift.python.types import BadEnum, Enum, Flag
 
 
 _E = TypeVar("_E", bound=Enum)
+ListT = TypeVar("ListT")
 
 
 # tt = test_types, ser = serializer
@@ -72,6 +74,9 @@ class EnumTests(unittest.TestCase):
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
+
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
     def test_bad_member_names(self) -> None:
         self.assertIsInstance(self.BadMembers.name_, self.BadMembers)
@@ -135,7 +140,8 @@ class EnumTests(unittest.TestCase):
         x = self.serializer.deserialize(
             self.ColorGroups,
             self.serializer.serialize_iobuf(
-                self.OptionalColorGroups(color_list=[1, 5, 0])
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                self.OptionalColorGroups(color_list=self.to_list([1, 5, 0]))
             ),
         )
         self.assertEqual(len(x.color_list), 3)
@@ -147,7 +153,8 @@ class EnumTests(unittest.TestCase):
         x = self.serializer.deserialize(
             self.ColorGroups,
             self.serializer.serialize_iobuf(
-                self.OptionalColorGroups(color_list=[1, 5, 0])
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                self.OptionalColorGroups(color_list=self.to_list([1, 5, 0]))
             ),
         )
         for idx, v in enumerate(x.color_list):
@@ -162,7 +169,8 @@ class EnumTests(unittest.TestCase):
         x = self.serializer.deserialize(
             self.ColorGroups,
             self.serializer.serialize_iobuf(
-                self.OptionalColorGroups(color_list=[1, 5, 0])
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                self.OptionalColorGroups(color_list=self.to_list([1, 5, 0]))
             ),
         )
         for idx, v in enumerate(reversed(x.color_list)):
@@ -177,7 +185,8 @@ class EnumTests(unittest.TestCase):
         x = self.serializer.deserialize(
             self.ColorGroups,
             self.serializer.serialize_iobuf(
-                self.OptionalColorGroups(color_list=[1, 5, 0])
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                self.OptionalColorGroups(color_list=self.to_list([1, 5, 0]))
             ),
         )
         for v in x.color_set:

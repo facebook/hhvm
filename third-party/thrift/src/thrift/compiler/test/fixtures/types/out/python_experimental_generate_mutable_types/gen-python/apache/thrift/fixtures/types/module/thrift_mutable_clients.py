@@ -84,7 +84,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def binary_keyed_map(
             self,
-            r: _typing.MutableSequence[int],
+            r: _fbthrift_python_mutable_containers.MutableList[int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.MutableMapping[bytes, int]:
@@ -146,7 +146,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def binary_keyed_map(
             self,
-            r: _typing.MutableSequence[int],
+            r: _fbthrift_python_mutable_containers.MutableList[int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.MutableMapping[bytes, int]:

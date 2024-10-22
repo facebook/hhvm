@@ -29,6 +29,7 @@ from thrift.python.mutable_types import (
     _isset as mutable_isset,
     MutableStruct,
     MutableStructOrUnion,
+    to_thrift_list,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
@@ -228,11 +229,20 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
     @parameterized.expand(
         [
             (TestStructAllThriftContainerTypesMutable(),),
-            (TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3]),),
-            (TestStructAllThriftContainerTypesMutable(optional_list_i32=[11, 22, 33]),),
             (
                 TestStructAllThriftContainerTypesMutable(
-                    unqualified_list_i32=[1, 2], optional_list_i32=[3]
+                    unqualified_list_i32=to_thrift_list([1, 2, 3])
+                ),
+            ),
+            (
+                TestStructAllThriftContainerTypesMutable(
+                    optional_list_i32=to_thrift_list([11, 22, 33])
+                ),
+            ),
+            (
+                TestStructAllThriftContainerTypesMutable(
+                    unqualified_list_i32=to_thrift_list([1, 2]),
+                    optional_list_i32=to_thrift_list([3]),
                 ),
             ),
             (

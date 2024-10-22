@@ -125,6 +125,19 @@ struct TestStructAllThriftContainerTypes {
   6: optional map<string, i32> optional_map_string_i32;
 }
 
+struct TestStructAsListElement {
+  1: string string_field;
+  2: list<i32> list_int;
+}
+
+struct TestStructContainerAssignment {
+  1: list<i32> list_int;
+  2: list<i32> list_int_2;
+  3: list<list<i32>> list_list_int;
+  4: list<list<i32>> list_list_int_2;
+  5: list<TestStructAsListElement> list_struct;
+}
+
 struct TestStructAdaptedTypes {
   @python.Adapter{
     name = "thrift.python.test.adapters.datetime.DatetimeAdapter",

@@ -65,7 +65,7 @@ class SomeServiceInterface(
 
     async def binary_keyed_map(
             self,
-            r: _typing.MutableSequence[int]
+            r: _fbthrift_python_mutable_containers.MutableList[int]
         ) -> _typing.MutableMapping[bytes, int]:
         raise NotImplementedError("async def binary_keyed_map is not implemented")
 

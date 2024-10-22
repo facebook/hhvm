@@ -23,7 +23,7 @@ import sys
 
 import types
 import unittest
-from typing import Any, Type
+from typing import Any, Type, TypeVar
 
 import testing.thrift_mutable_types as mutable_types
 import testing.thrift_types as immutable_types
@@ -33,9 +33,11 @@ import thrift.python.serializer as immutable_serializer
 
 from parameterized import parameterized_class
 from testing.thrift_types import ComplexUnion, Digits, Integers, ReservedUnion
-from thrift.python.mutable_types import MutableUnion
+from thrift.python.mutable_types import _ThriftListWrapper, MutableUnion, to_thrift_list
 from thrift.python.serializer import deserialize, serialize_iobuf
 from thrift.python.types import Union
+
+ListT = TypeVar("ListT")
 
 
 class UnionTestImmutable(unittest.TestCase):
@@ -101,6 +103,9 @@ class UnionTests(unittest.TestCase):
         self.serializer: types.ModuleType = self.serializer_module
         self.maxDiff = None
 
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
     # pyre-ignore[2, 3]: no type sepcified
     def get_type(self, thrift_union):
         """
@@ -148,11 +153,14 @@ class UnionTests(unittest.TestCase):
             self.get_type(
                 self.Integers(
                     digits=self.Digits(
-                        data=[
-                            self.Integers(tiny=1),
-                            self.Integers(small=2),
-                            self.Integers(large=3),
-                        ]
+                        # pyre-ignore[6]: TODO: Thrift-Container init
+                        data=self.to_list(
+                            [
+                                self.Integers(tiny=1),
+                                self.Integers(small=2),
+                                self.Integers(large=3),
+                            ]
+                        )
                     )
                 )
             ),

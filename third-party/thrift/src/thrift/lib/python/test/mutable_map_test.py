@@ -28,6 +28,7 @@ from thrift.python.mutable_containers import (
 )
 
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
+from thrift.python.mutable_types import to_thrift_list
 
 from thrift.python.types import typeinfo_i32, typeinfo_string
 
@@ -521,12 +522,12 @@ class MutableMapTest(unittest.TestCase):
             {},
         )
 
-        value_A = mutable_map.setdefault("A", [1, 2, 3])
+        value_A = mutable_map.setdefault("A", to_thrift_list([1, 2, 3]))
         self.assertIsInstance(value_A, MutableList)
         self.assertEqual([1, 2, 3], value_A)
 
         # key "A" already exists, we should get [1, 2, 3]
-        value_A = mutable_map.setdefault("A", [4, 5, 6])
+        value_A = mutable_map.setdefault("A", to_thrift_list([4, 5, 6]))
         self.assertIsInstance(value_A, MutableList)
         self.assertEqual([1, 2, 3], value_A)
 
@@ -534,11 +535,11 @@ class MutableMapTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
-            mutable_map.setdefault("B", ["1", "2", "3"])
+            mutable_map.setdefault("B", to_thrift_list(["1", "2", "3"]))
 
         # set the key "A" and try to read it back with `setdefault()`
-        mutable_map["A"] = [11, 12, 13]
-        value_A = mutable_map.setdefault("A", [4, 5, 6])
+        mutable_map["A"] = to_thrift_list([11, 12, 13])
+        value_A = mutable_map.setdefault("A", to_thrift_list([4, 5, 6]))
         self.assertIsInstance(value_A, MutableList)
         self.assertEqual([11, 12, 13], value_A)
 

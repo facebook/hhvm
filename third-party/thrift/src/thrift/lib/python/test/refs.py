@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import unittest
 
-from typing import Type
+from typing import Type, TypeVar
 
 import python_test.refs.thrift_mutable_types as mutable_types
 import python_test.refs.thrift_types as immutable_ypes
@@ -28,6 +28,9 @@ import python_test.refs.thrift_types as immutable_ypes
 from parameterized import parameterized_class
 
 from python_test.refs.thrift_types import ComplexRef as ComplexRefType
+from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
+
+ListT = TypeVar("ListT")
 
 
 @parameterized_class(
@@ -46,6 +49,9 @@ class RefTest(unittest.TestCase):
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
+
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
     def test_create_default(self) -> None:
         x = self.ComplexRef()
@@ -68,7 +74,11 @@ class RefTest(unittest.TestCase):
     def test_list(self) -> None:
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
-            name="foo", list_basetype_ref=[1, 2, 3], list_recursive_ref=[bar, baz]
+            name="foo",
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            list_basetype_ref=self.to_list([1, 2, 3]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            list_recursive_ref=self.to_list([bar, baz]),
         )
         self.assertEqual(x.list_basetype_ref, (1, 2, 3))
         self.assertEqual(x.list_recursive_ref, (bar, baz))
@@ -97,7 +107,8 @@ class RefTest(unittest.TestCase):
 
     def test_shared_ref(self) -> None:
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
-        x = self.ComplexRef(name="foo", list_shared_ref=[bar, baz])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        x = self.ComplexRef(name="foo", list_shared_ref=self.to_list([bar, baz]))
         self.assertEqual(x.list_shared_ref, (bar, baz))
 
     def test_const_shared_ref(self) -> None:

@@ -49,6 +49,16 @@ cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
 
 
+@cython.final
+cdef class _ThriftListWrapper:
+    def __cinit__(self, list_data):
+        self._list_data = list_data
+
+
+def to_thrift_list(list_data):
+    return _ThriftListWrapper(list_data)
+
+
 def fill_specs(*structured_thrift_classes):
     """
     Completes the initialization of the given Thrift-generated Struct (and
@@ -528,6 +538,9 @@ cdef class MutableStructInfo:
             type_info = self.type_infos[idx]
             if isinstance(type_info, AdaptedTypeInfo):
                 type_info = (<AdaptedTypeInfo>type_info)._orig_type_info
+
+            if field.idl_type == ThriftIdlType.List:
+                default_value = to_thrift_list(default_value)
 
             default_value = (<TypeInfoBase>type_info).to_internal_data(default_value)
             dynamic_struct_info.addFieldValue(idx, default_value)

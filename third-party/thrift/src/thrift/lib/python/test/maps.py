@@ -21,7 +21,7 @@ from __future__ import annotations
 import unittest
 
 from enum import Enum
-from typing import Dict, Type
+from typing import Dict, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
@@ -48,6 +48,9 @@ from python_test.maps.thrift_types import (
     StrStrIntListMapMap as StrStrIntListMapMapType,
     StrStrMap as StrStrMapType,
 )
+from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
+
+ListT = TypeVar("ListT")
 
 
 class MyStringEnum(str, Enum):
@@ -100,6 +103,9 @@ class MapTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
     def test_recursive_const_map(self) -> None:
         self.assertEqual(self.LocationMap[1][1], 1)
@@ -161,9 +167,14 @@ class MapTests(unittest.TestCase):
         self.StrIntMap({})
         self.StrStrIntListMapMap({})
         self.StrStrIntListMapMap({"foo": {}})
-        self.StrStrIntListMapMap({"foo": {"bar": []}})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        self.StrStrIntListMapMap({"foo": {"bar": self.to_list([])}})
 
     def test_mixed_construction(self) -> None:
+        if self.is_mutable_run:
+            # TODO: remove after implementing `to_thrift_map()`
+            return
+
         s = self.StrI32ListMap({"bar": [0, 1]})
         x = self.StrStrIntListMapMap({"foo": s})
         px = {}
@@ -200,7 +211,8 @@ class MapTests(unittest.TestCase):
         b = self.StrEasyMap({"a": self.easy(val=0)})
         a = self.StrEasyMap({"a": self.easy()})
         c = self.StrEasyMap({"a": self.easy(val=1)})
-        d = self.StrEasyMap({"a": self.easy(val_list=[])})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        d = self.StrEasyMap({"a": self.easy(val_list=self.to_list([]))})
         self.assertEqual(a, b)
         self.assertEqual(a, d)
         self.assertNotEqual(a, c)

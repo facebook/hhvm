@@ -22,6 +22,8 @@ import thrift.test.thrift_python.enum_test.thrift_types as immutable_types
 
 from parameterized import parameterized
 
+from thrift.python.mutable_types import to_thrift_list
+
 
 class ThriftPython_Enum(unittest.TestCase):
     def setUp(self) -> None:
@@ -42,15 +44,18 @@ class ThriftPython_Enum(unittest.TestCase):
 
     @parameterized.expand([immutable_types, mutable_types])
     def test_enum_initialize(self, test_types: types.ModuleType) -> None:
+        is_mutable_run: bool = test_types.__name__.endswith("mutable_types")
+        number_list = [
+            test_types.PositiveNumber.ONE,
+            test_types.PositiveNumber.TWO,
+            test_types.PositiveNumber.THREE,
+        ]
+        color_list = [test_types.Color.blue, test_types.Color.blue]
         s = test_types.TestStruct(
             number=test_types.PositiveNumber.TWO,
-            number_list=[
-                test_types.PositiveNumber.ONE,
-                test_types.PositiveNumber.TWO,
-                test_types.PositiveNumber.THREE,
-            ],
+            number_list=to_thrift_list(number_list) if is_mutable_run else number_list,
             color=test_types.Color.green,
-            color_list=[test_types.Color.blue, test_types.Color.blue],
+            color_list=to_thrift_list(color_list) if is_mutable_run else color_list,
         )
 
         self.assertEqual(test_types.PositiveNumber.TWO, s.number)

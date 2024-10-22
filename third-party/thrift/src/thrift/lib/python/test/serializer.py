@@ -23,7 +23,7 @@ import pickle
 import types
 import unittest
 from collections.abc import Sequence, Set
-from typing import Any, Mapping, Type, Union
+from typing import Any, Mapping, Type, TypeVar, Union
 
 import apache.thrift.test.terse_write.terse_write.thrift_mutable_types as mutable_terse_types
 import apache.thrift.test.terse_write.terse_write.thrift_types as immutable_terse_types
@@ -80,9 +80,15 @@ from testing.thrift_types import (
 )
 from thrift.python.exceptions import Error
 
-from thrift.python.mutable_types import MutableStructOrUnion
+from thrift.python.mutable_types import (
+    _ThriftListWrapper,
+    MutableStructOrUnion,
+    to_thrift_list,
+)
 from thrift.python.serializer import Protocol
 from thrift.python.types import StructOrUnion
+
+ListT = TypeVar("ListT")
 
 
 def thrift_serialization_round_trip(
@@ -151,6 +157,9 @@ class SerializerTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
             self.serializer.serialize(None)
@@ -166,7 +175,8 @@ class SerializerTests(unittest.TestCase):
             self.serializer.deserialize(Protocol, b"")
 
     def test_from_thread_pool(self) -> None:
-        control = self.easy(val=5, val_list=[1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4]))
         loop = asyncio.get_event_loop()
         coro = loop.run_in_executor(None, self.serializer.serialize, control)
         encoded = loop.run_until_complete(coro)
@@ -177,7 +187,8 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(control, decoded)
 
     def test_serialize_iobuf(self) -> None:
-        control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4, 5]))
         iobuf = self.serializer.serialize_iobuf(control)
         decoded = self.serializer.deserialize(type(control), iobuf)
         self.assertEqual(control, decoded)
@@ -210,7 +221,8 @@ class SerializerTests(unittest.TestCase):
         self.assertEqual(control, decoded)
 
     def test_serialize_easy_struct(self) -> None:
-        control = self.easy(val=5, val_list=[1, 2, 3, 4])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4]))
         self.thrift_serialization_round_trip(control)
 
     def test_pickle_easy_struct(self) -> None:
@@ -226,7 +238,11 @@ class SerializerTests(unittest.TestCase):
 
     def test_serialize_hard_struct(self) -> None:
         control = self.hard(
-            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=self.Integers(tiny=1)
+            val=0,
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            val_list=self.to_list([1, 2, 3, 4]),
+            name="foo",
+            an_int=self.Integers(tiny=1),
         )
         self.thrift_serialization_round_trip(control)
 
@@ -310,7 +326,8 @@ class SerializerTests(unittest.TestCase):
                 else {}  # Mutable types are not hashable.
             ),
             val_struct_with_containers=self.ColorGroups(
-                color_list=[self.Color.blue, self.Color.green],
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                color_list=self.to_list([self.Color.blue, self.Color.green]),
                 color_set={self.Color.blue, self.Color.red},
                 color_map={self.Color.blue: self.Color.green},
             ),
@@ -318,21 +335,34 @@ class SerializerTests(unittest.TestCase):
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_iobuf_list_struct(self) -> None:
-        control = self.IOBufListStruct(iobufs=[IOBuf(b"foo"), IOBuf(b"bar")])
+        control = self.IOBufListStruct(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufs=self.to_list([IOBuf(b"foo"), IOBuf(b"bar")])
+        )
         self.thrift_serialization_round_trip(control)
 
     def test_serialize_lists_struct(self) -> None:
         control = self.Lists(
-            boolList=[True, False],
-            byteList=[1, 2, 3],
-            i16List=[4, 5, 6],
-            i64List=[7, 8, 9],
-            doubleList=[1.23, 4.56],
-            floatList=[7.0, 8.0],
-            stringList=["foo", "bar"],
-            binaryList=[b"foo", b"bar"],
-            iobufList=[IOBuf(b"foo"), IOBuf(b"bar")],
-            structList=[self.Foo(value=1), self.Foo(value=2)],
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            boolList=self.to_list([True, False]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            byteList=self.to_list([1, 2, 3]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i16List=self.to_list([4, 5, 6]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i64List=self.to_list([7, 8, 9]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            doubleList=self.to_list([1.23, 4.56]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            floatList=self.to_list([7.0, 8.0]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            stringList=self.to_list(["foo", "bar"]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            binaryList=self.to_list([b"foo", b"bar"]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufList=self.to_list([IOBuf(b"foo"), IOBuf(b"bar")]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            structList=self.to_list([self.Foo(value=1), self.Foo(value=2)]),
         )
         self.thrift_serialization_round_trip(control)
 
@@ -378,7 +408,8 @@ class SerializerTests(unittest.TestCase):
         self.thrift_serialization_round_trip(control)
 
     def test_deserialize_with_length(self) -> None:
-        control = self.easy(val=5, val_list=[1, 2, 3, 4, 5])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        control = self.easy(val=5, val_list=self.to_list([1, 2, 3, 4, 5]))
         for proto in Protocol:
             encoded = self.serializer.serialize(control, protocol=proto)
             decoded, length = self.serializer.deserialize_with_length(
@@ -475,6 +506,9 @@ class SerializerTerseWriteTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
 
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
     def thrift_serialization_round_trip(
         self, control: Union[StructOrUnion, MutableStructOrUnion]
     ) -> None:
@@ -492,7 +526,8 @@ class SerializerTerseWriteTests(unittest.TestCase):
             string_field="7",
             binary_field=b"8",
             enum_field=self.MyEnum.ME1,
-            list_field=[1],
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            list_field=self.to_list([1]),
             set_field={1},
             map_field={1: 1},
             struct_field=self.MyStruct(field1=1),

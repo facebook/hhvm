@@ -20,7 +20,7 @@ from __future__ import annotations
 import itertools
 import unittest
 
-from typing import List, Type
+from typing import List, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
@@ -42,6 +42,9 @@ from python_test.lists.thrift_types import (
     StrList2D,
 )
 from thrift.lib.python.test.testing_utils import Untruthy
+from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
+
+ListT = TypeVar("ListT")
 
 
 class ImmutableListTests(unittest.TestCase):
@@ -76,6 +79,9 @@ class ListTests(unittest.TestCase):
             "thrift_mutable_types"
         )
 
+    def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
+        return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
     def test_negative_indexes(self) -> None:
         length = len(self.int_list)
         for i in range(length):
@@ -90,10 +96,11 @@ class ListTests(unittest.TestCase):
             self.I32List([None, None, None])
 
     def test_list_creation_with_list_items(self) -> None:
-        a = ["one", "two", "three"]
-        b = ["cyan", "magenta", "yellow"]
-        c = ["foo", "bar", "baz"]
-        d = ["I", "II", "III"]
+        a = self.to_list(["one", "two", "three"])
+        b = self.to_list(["cyan", "magenta", "yellow"])
+        c = self.to_list(["foo", "bar", "baz"])
+        d = self.to_list(["I", "II", "III"])
+        # pyre-ignore[6]: TODO: Thrift-Container init
         self.StrList2D([a, b, c, d])
         with self.assertRaises(TypeError):
             # pyre-ignore[6]: purposely use a wrong type to raise a TypeError
@@ -203,7 +210,10 @@ class ListTests(unittest.TestCase):
         self.assertEqual(x.count("str"), 0)
 
     def test_contains_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
+        clist = self.Lists(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            colorList=self.to_list([self.Color.red, self.Color.red, self.Color.blue])
+        )
         self.assertIn(self.Color.red, clist.colorList)
         self.assertIn(self.Color.blue, clist.colorList)
         self.assertNotIn(self.Color.green, clist.colorList)
@@ -244,8 +254,10 @@ class ListTests(unittest.TestCase):
         a = self.EasyList([self.easy()])
         b = self.EasyList([self.easy(val=0)])
         c = self.EasyList([self.easy(val=1)])
-        d = self.EasyList([self.easy(val_list=[])])
-        e = self.EasyList([self.easy(val_list=[1])])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        d = self.EasyList([self.easy(val_list=self.to_list([]))])
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        e = self.EasyList([self.easy(val_list=self.to_list([1]))])
         self.assertEqual(a, b)
         self.assertEqual(a, d)
         self.assertNotEqual(a, c)
@@ -260,16 +272,26 @@ class ListTests(unittest.TestCase):
 
     def test_struct_with_list_fields(self) -> None:
         s = self.Lists(
-            boolList=[True, False],
-            byteList=[1, 2, 3],
-            i16List=[4, 5, 6],
-            i64List=[7, 8, 9],
-            doubleList=[1.23, 4.56],
-            floatList=[7.89, 10.11],
-            stringList=["foo", "bar"],
-            binaryList=[b"foo", b"bar"],
-            iobufList=[IOBuf(b"foo"), IOBuf(b"bar")],
-            structList=[self.Foo(value=1), self.Foo(value=2)],
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            boolList=self.to_list([True, False]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            byteList=self.to_list([1, 2, 3]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i16List=self.to_list([4, 5, 6]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i64List=self.to_list([7, 8, 9]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            doubleList=self.to_list([1.23, 4.56]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            floatList=self.to_list([7.89, 10.11]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            stringList=self.to_list(["foo", "bar"]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            binaryList=self.to_list([b"foo", b"bar"]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufList=self.to_list([IOBuf(b"foo"), IOBuf(b"bar")]),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            structList=self.to_list([self.Foo(value=1), self.Foo(value=2)]),
         )
         self.assertEqual(s.boolList, [True, False])
         self.assertEqual(s.byteList, [1, 2, 3])
@@ -289,7 +311,10 @@ class ListTests(unittest.TestCase):
             self.assertIs(s.structList[1], s.structList[1])
 
     def test_count_enum(self) -> None:
-        clist = self.Lists(colorList=[self.Color.red, self.Color.red, self.Color.blue])
+        clist = self.Lists(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            colorList=self.to_list([self.Color.red, self.Color.red, self.Color.blue])
+        )
         self.assertEqual(clist.colorList.count(self.Color.red), 2)
         self.assertEqual(clist.colorList.count(self.Color.blue), 1)
         self.assertEqual(clist.colorList.count(self.Color.green), 0)

@@ -36,6 +36,7 @@ from thrift.python.mutable_types import (
     MutableStruct,
     MutableStructMeta,
     MutableStructOrUnion,
+    to_thrift_list,
 )
 from thrift.python.types import (
     isset as immutable_isset,
@@ -64,6 +65,8 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
+    TestStructAsListElement as TestStructAsListElementMutable,
+    TestStructContainerAssignment as TestStructContainerAssignmentMutable,
     TestStructCopy as TestStructCopyMutable,
     TestStructEmpty as TestStructEmptyMutable,
     TestStructEmptyAlias as TestStructEmptyAliasMutable,
@@ -709,7 +712,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertIsNone(s.optional_list_i32)
 
         # Set the value and read it back
-        s.optional_list_i32 = [1, 2, 3]
+        s.optional_list_i32 = to_thrift_list([1, 2, 3])
         self.assertEqual([1, 2, 3], s.optional_list_i32)
 
         # `del struct.field_name` raises a `AttributeError`
@@ -719,7 +722,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Assigning a value of the wrong type raises a `TypeError`
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
             # pyre-ignore[8]: Intentional for test
-            s.optional_list_i32 = ["list", "with", "different", "type"]
+            s.optional_list_i32 = to_thrift_list(["list", "with", "different", "type"])
 
         self.assertEqual([1, 2, 3], s.optional_list_i32)
 
@@ -730,11 +733,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # are `None`
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
             # pyre-ignore[8]: Intentional for test
-            s.optional_list_i32 = ["list", "with", "different", "type"]
+            s.optional_list_i32 = to_thrift_list(["list", "with", "different", "type"])
 
         # Boundary check for integral types
         with self.assertRaises(OverflowError):
-            s.optional_list_i32 = [max_i32 + 1]
+            s.optional_list_i32 = to_thrift_list([max_i32 + 1])
 
     def test_serialization_round_trip(self) -> None:
         s = TestStructAllThriftPrimitiveTypesMutable()
@@ -754,15 +757,17 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         _pickle_round_trip(self, s_default_value)
 
     def test_create_and_assign_for_list(self) -> None:
-        s = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
+        s = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([1, 2, 3])
+        )
 
         self.assertEqual(3, len(s.unqualified_list_i32))
         self.assertEqual([1, 2, 3], s.unqualified_list_i32)
 
         # Assigning to a list field
-        s.unqualified_list_i32 = [1, 2, 3, 4, 5]
+        s.unqualified_list_i32 = to_thrift_list([1, 2, 3, 4, 5])
         self.assertEqual([1, 2, 3, 4, 5], s.unqualified_list_i32)
-        s.unqualified_list_i32 = [1, 2, 3]
+        s.unqualified_list_i32 = to_thrift_list([1, 2, 3])
         self.assertEqual([1, 2, 3], s.unqualified_list_i32)
 
         s.unqualified_list_i32[0] = 2
@@ -835,33 +840,39 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13, 14, 15], lst2)
 
     def test_assign_for_list(self) -> None:
-        s1 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
+        s1 = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([1, 2, 3])
+        )
 
         # It is possible to assign any value that supports `len()` and iteration
-        s1.unqualified_list_i32 = [1, 2, 3]
+        s1.unqualified_list_i32 = to_thrift_list([1, 2, 3])
         self.assertEqual([1, 2, 3], s1.unqualified_list_i32)
         # pyre-ignore[8]: Fixme: type error to be addressed later
-        s1.unqualified_list_i32 = {11, 12, 13}
+        s1.unqualified_list_i32 = to_thrift_list({11, 12, 13})
         self.assertEqual([11, 12, 13], s1.unqualified_list_i32)
         # pyre-ignore[8]: Fixme: type error to be addressed later
-        s1.unqualified_list_i32 = (21, 22, 23)
+        s1.unqualified_list_i32 = to_thrift_list((21, 22, 23))
         self.assertEqual([21, 22, 23], s1.unqualified_list_i32)
-        s1.unqualified_list_i32 = []
+        s1.unqualified_list_i32 = to_thrift_list([])
         self.assertEqual([], s1.unqualified_list_i32)
 
-        s2 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[])
+        s2 = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([])
+        )
         # my_list and s2.unqualified_list_i32 are different lists
         my_list = [1, 2, 3]
-        s2.unqualified_list_i32 = my_list
+        s2.unqualified_list_i32 = to_thrift_list(my_list)
         self.assertEqual([1, 2, 3], s2.unqualified_list_i32)
         my_list[0] = 11
         self.assertEqual(1, s2.unqualified_list_i32[0])
 
-        s3 = TestStructAllThriftContainerTypesMutable(unqualified_list_i32=[1, 2, 3])
+        s3 = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([1, 2, 3])
+        )
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
             # pyre-ignore[8]: Intentional for test
-            s3.unqualified_list_i32 = [11, 12, 13, "Not an Integer"]
+            s3.unqualified_list_i32 = to_thrift_list([11, 12, 13, "Not an Integer"])
         self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
 
     def test_assign_for_set(self) -> None:
@@ -1456,7 +1467,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             optional_i32=3,
             unqualified_string="thrift",
             optional_string="python",
-            unqualified_list_i32=[1, 2, 3],
+            unqualified_list_i32=to_thrift_list([1, 2, 3]),
             unqualified_set_string={"1", "2", "3"},
             unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
             unqualified_binary=IOBuf(b"abc"),
@@ -1498,7 +1509,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             optional_i32=3,
             unqualified_string="thrift",
             optional_string="python",
-            unqualified_list_i32=[1, 2, 3],
+            unqualified_list_i32=to_thrift_list([1, 2, 3]),
             unqualified_set_string={"1", "2", "3"},
             unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
         )
@@ -1544,8 +1555,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             optional_i32=3,
             unqualified_string="thrift",
             optional_string="python",
-            unqualified_list_i32=[1, 2, 3],
-            optional_list_i32=[4, 5, 6],
+            unqualified_list_i32=to_thrift_list([1, 2, 3]),
+            optional_list_i32=to_thrift_list([4, 5, 6]),
             unqualified_set_string={"1", "2", "3"},
             unqualified_map_string_i32={"a": 1, "b": 2, "c": 3},
         )
@@ -1613,3 +1624,174 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # It is `const` but it is possible to mutate
         struct_constant.unqualified_list_i32.append(4)
         self.assertEqual([1, 2, 3, 4], struct_constant.unqualified_list_i32)
+
+    def test_list_container_assignment(self) -> None:
+        """
+        struct TestStructAsListElement {
+          1: string string_field;
+          2: list<i32> list_int;
+        }
+
+        struct TestStructContainerAssignment {
+          1: list<i32> list_int;
+          2: list<i32> list_int_2;
+          3: list<list<i32>> list_list_int;
+          4: list<list<i32>> list_list_int_2;
+          5: list<TestStructAsListElement> list_struct;
+        }
+        """
+        TypeErrorMsg = (
+            "Expected values to be an instance of Thrift mutable list with "
+            r"matching element type, or the result of `to_thrift_list\(\)`, "
+            "but got type <class 'list'>."
+        )
+
+        # Cannot initialize a struct with python list.
+        with self.assertRaisesRegex(TypeError, TypeErrorMsg):
+            # pyre-ignore[6]: Intentional for test
+            _ = TestStructContainerAssignmentMutable(list_int=[1, 2, 3])
+
+        my_list = [1, 2, 3]
+        # Valid initialization with `to_thrift_list()`.
+        s1 = TestStructContainerAssignmentMutable(list_int=to_thrift_list(my_list))
+
+        # Initializing with `to_thrift_list()` uses value semantics, so `s` is
+        # initialized with a copy of `my_list`.
+        self.assertEqual([1, 2, 3], s1.list_int)
+        my_list.append(4)
+        self.assertEqual([1, 2, 3], s1.list_int)
+
+        # It is possible to initialize a struct with `MutableList[T]`, but T
+        # must be an `int` and within `i32` boundaries.
+        s2 = TestStructContainerAssignmentMutable(list_int=s1.list_int)
+        self.assertEqual([1, 2, 3], s1.list_int)
+        self.assertEqual([1, 2, 3], s2.list_int)
+
+        # Initializing with `MutableList[T]` uses a reference semantics.
+        s1.list_int.append(4)
+        self.assertEqual([1, 2, 3, 4], s1.list_int)
+        self.assertEqual([1, 2, 3, 4], s2.list_int)
+
+        # Heads-up: Thrift doesn't provide an `is` check guarantee, even though
+        # they are the "same" list.
+        self.assertIsNot(s1.list_int, s2.list_int)
+
+        # `to_thrift_list()` doesn't disable type-checking for element types.
+        # Even though pyre will not emit a type error in the example below,
+        # the runtime will throw a `TypeError`.
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            _ = TestStructContainerAssignmentMutable(
+                list_int=to_thrift_list(["1", "2", "3"])
+            )
+
+        # `__call__()` is similar to `__init__()`, it doesn't accept python list.
+        with self.assertRaisesRegex(TypeError, TypeErrorMsg):
+            # pyre-ignore[6]: Intentional for test
+            _ = s1(list_int=[1, 2, 3])
+
+        # `__call__()` semantics are a deep copy of the object and assign the
+        # fields provided in the argument list.
+        #
+        # my_list = [1]
+        # s2 = s1(list_int=to_thrift_list(my_list))
+        #
+        # can be thought as
+        #
+        # s2 = copy.deepcopy(s1)
+        # s2.list_int = to_thrift_list(my_list)
+        s1 = TestStructContainerAssignmentMutable(list_int=to_thrift_list([1, 2, 3]))
+        my_list = [1]
+        s2 = s1(list_int=to_thrift_list(my_list))
+        self.assertNotEqual(s1, s2)
+        self.assertNotEqual(s1.list_int, s2.list_int)
+        self.assertEqual([1, 2, 3], s1.list_int)
+        self.assertEqual([1], s2.list_int)
+
+        # If `__call__()` argument is `MutableList[T]`, then it uses reference
+        # semantics. Thinking of `__call__()` as a deep copy first and then
+        # assigning the fields provided in the argument list makes the
+        # reasoning easier.
+        s3 = s1(list_int=s2.list_int)
+        self.assertNotEqual(s1.list_int, s3.list_int)
+        self.assertEqual([1, 2, 3], s1.list_int)
+        # At this point, `s2.list_int` and `s3.list_int` are the "same" MutableLists.
+        self.assertEqual([1], s2.list_int)
+        self.assertEqual([1], s3.list_int)
+        s2.list_int.append(2)
+        self.assertEqual([1, 2], s2.list_int)
+        self.assertEqual([1, 2], s3.list_int)
+        s3.list_int.append(3)
+        self.assertEqual([1, 2, 3], s2.list_int)
+        self.assertEqual([1, 2, 3], s3.list_int)
+
+        # Even `[]` is not special, it should be assigned with `to_thrift_list()`.
+        with self.assertRaisesRegex(TypeError, TypeErrorMsg):
+            # pyre-ignore[8]: Intentional for test
+            s3.list_int = []
+
+        # `s2.list_int` and `s3.list_int` are not "same" anymore.
+        s3.list_int = to_thrift_list([])
+        self.assertEqual([1, 2, 3], s2.list_int)
+        self.assertEqual([], s3.list_int)
+
+        # Similar for nested lists, cannot be initialized with a python list.
+        x = [1, 2]
+        y = [3, 4]
+        my_list_of_lists = [x, y, s2.list_int]
+        with self.assertRaisesRegex(TypeError, TypeErrorMsg):
+            # pyre-ignore[8]: Intentional for test
+            s1.list_list_int = my_list_of_lists
+
+        s1.list_list_int = to_thrift_list(my_list_of_lists)
+
+        # Putting `s2.list_int` in `my_list_of_lists` doesn't introduce partial
+        # reference semantics. All the containers inside `to_thrift_list()` are
+        # copied.
+        self.assertEqual([1, 2, 3], s2.list_int)
+        self.assertEqual([[1, 2], [3, 4], [1, 2, 3]], s1.list_list_int)
+
+        s2.list_int.append(4)
+        self.assertEqual([1, 2, 3, 4], s2.list_int)
+        self.assertEqual([[1, 2], [3, 4], [1, 2, 3]], s1.list_list_int)
+
+        # `to_thrift_list()` always copies the containers inside it. However,
+        # if the container element is a Thrift struct, union or exception,
+        # assignment uses reference semantics for them.
+        s_elem1 = TestStructAsListElementMutable(
+            string_field="elem1", list_int=to_thrift_list([1])
+        )
+        s_elem2 = TestStructAsListElementMutable(
+            string_field="elem2", list_int=to_thrift_list([2])
+        )
+        s_elem3 = TestStructAsListElementMutable(
+            string_field="elem3", list_int=to_thrift_list([3])
+        )
+
+        # Cannot initialize a struct with python list.
+        with self.assertRaisesRegex(TypeError, TypeErrorMsg):
+            _ = TestStructContainerAssignmentMutable(
+                # pyre-ignore[6]: Intentional for test
+                list_struct=[s_elem1, s_elem2, s_elem3]
+            )
+
+        s = TestStructContainerAssignmentMutable(
+            list_struct=to_thrift_list([s_elem1, s_elem2, s_elem3])
+        )
+
+        # `s_elem1` and `s.list_struct[0]` are the same structs
+        # `s_elem2` and `s.list_struct[1]` are the same structs
+        # `s_elem3` and `s.list_struct[2]` are the same structs
+        self.assertEqual(s_elem1, s.list_struct[0])
+        self.assertEqual([1], s_elem1.list_int)
+        self.assertEqual([1], s.list_struct[0].list_int)
+        s_elem1.list_int.append(2)
+        self.assertEqual([1, 2], s_elem1.list_int)
+        self.assertEqual([1, 2], s.list_struct[0].list_int)
+        s.list_struct[0].list_int.append(3)
+        self.assertEqual([1, 2, 3], s_elem1.list_int)
+        self.assertEqual([1, 2, 3], s.list_struct[0].list_int)
+
+        # Heads-up: Thrift doesn't provide an `is` check guarantee
+        self.assertIsNot(s_elem1, s.list_struct[0])

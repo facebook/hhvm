@@ -17,9 +17,13 @@ module SN = Naming_special_names
 module Phase = Typing_phase
 module EnvFromDef = Typing_env_from_def
 
-(** [get_cnstr_errs env tcstr super t_pos ty] checks that
-  `ty <: tcstr` if not [super], else if [super] that `ty :> tcstr` *)
-let get_cnstr_errs env tcstr reverse t_pos ty :
+type constraint_direction =
+  | As
+  | Super
+
+(** [get_cnstr_errs env tcstr constraint_direction t_pos ty] checks that
+  `ty <: tcstr` or `tcstr <: ty` depending on [constraint_direction] *)
+let get_cnstr_errs env tcstr (cstr_direction : constraint_direction) t_pos ty :
     Typing_env_types.env * Typing_error.t option =
   match tcstr with
   | Some tcstr ->
@@ -27,18 +31,17 @@ let get_cnstr_errs env tcstr reverse t_pos ty :
       Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
     in
     let (env, ty_err_opt2) =
+      let (ty_sub, ty_super) =
+        match cstr_direction with
+        | As -> (ty, cstr)
+        | Super -> (cstr, ty)
+      in
       Typing_ops.sub_type
         t_pos
         Reason.URnewtype_cstr
         env
-        (if reverse then
-          cstr
-        else
-          ty)
-        (if reverse then
-          ty
-        else
-          cstr)
+        ty_sub
+        ty_super
         Typing_error.Callback.newtype_alias_must_satisfy_constraint
     in
     (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
@@ -189,13 +192,13 @@ let typedef_def ctx typedef =
 
     let (env, ty_err_opt3) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
-          let (env, err) = get_cnstr_errs env t_as_constraint false t_pos ty in
+          let (env, err) = get_cnstr_errs env t_as_constraint As t_pos ty in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in
     let (env, ty_err_opt4) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
           let (env, err) =
-            get_cnstr_errs env t_super_constraint true t_pos ty
+            get_cnstr_errs env t_super_constraint Super t_pos ty
           in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in

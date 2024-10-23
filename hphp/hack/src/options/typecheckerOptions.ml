@@ -323,7 +323,7 @@ let set_package_info t package_info =
   { t with GlobalOptions.po = popt }
 
 let package_v2_support_multifile_tests t =
-  t.GlobalOptions.tco_package_v2_support_multifile_tests
+  t.GlobalOptions.po.ParserOptions.package_v2_support_multifile_tests
 
 let package_v2_bypass_package_check_for_class_const t =
   t.GlobalOptions.tco_package_v2_bypass_package_check_for_class_const

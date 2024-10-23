@@ -43,6 +43,7 @@ type t = {
   consider_unspecified_experimental_features_released: bool;
   package_v2: bool;
   package_info: PackageInfo.t;
+  package_v2_support_multifile_tests: bool;
 }
 [@@deriving show, eq]
 
@@ -82,6 +83,7 @@ let default =
     consider_unspecified_experimental_features_released = true;
     package_v2 = false;
     package_info = PackageInfo.empty;
+    package_v2_support_multifile_tests = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

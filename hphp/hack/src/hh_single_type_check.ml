@@ -871,6 +871,8 @@ let parse_options () =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         package_v2 = default.package_v2;
         package_info = default.package_info;
+        package_v2_support_multifile_tests =
+          default.package_v2_support_multifile_tests;
       }
   in
 

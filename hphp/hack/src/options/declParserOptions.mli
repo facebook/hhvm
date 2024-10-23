@@ -19,6 +19,7 @@ type t = {
   stack_size: int;  (** Stack size to for the parallel workers *)
   deregister_php_stdlib: bool;
   package_info: PackageInfo.t;
+  package_v2_support_multifile_tests: bool;
 }
 [@@deriving show]
 

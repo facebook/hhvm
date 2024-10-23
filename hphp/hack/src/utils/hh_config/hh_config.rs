@@ -314,6 +314,10 @@ impl HhConfig {
             // If there are errors, ignore them for the tcopt, the parser errors will be caught and
             // sent separately.
             package_info: package_info.try_into().unwrap_or_default(),
+            package_v2_support_multifile_tests: hhconfig.get_bool_or(
+                "package_v2_support_multifile_tests",
+                default.package_v2_support_multifile_tests,
+            )?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
@@ -528,10 +532,6 @@ impl HhConfig {
             warnings_default_all: hhconfig
                 .get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2_support_multifile_tests: hhconfig.get_bool_or(
-                "package_v2_support_multifile_tests",
-                default.tco_package_v2_support_multifile_tests,
-            )?,
             tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or(
                 "package_v2_bypass_package_check_for_class_const",
                 default.tco_package_v2_bypass_package_check_for_class_const,

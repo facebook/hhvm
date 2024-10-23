@@ -44,6 +44,7 @@ impl Default for ParserOptions {
             consider_unspecified_experimental_features_released: true,
             package_v2: false,
             package_info: PackageInfo::default(),
+            package_v2_support_multifile_tests: false,
         }
     }
 }

@@ -19,6 +19,7 @@ type t = {
   stack_size: int;
   deregister_php_stdlib: bool;
   package_info: PackageInfo.t;
+  package_v2_support_multifile_tests: bool;
 }
 [@@deriving show]
 
@@ -37,4 +38,5 @@ let from_parser_options (popt : ParserOptions.t) =
     stack_size = popt.stack_size;
     deregister_php_stdlib = popt.deregister_php_stdlib;
     package_info = popt.package_info;
+    package_v2_support_multifile_tests = popt.package_v2_support_multifile_tests;
   }

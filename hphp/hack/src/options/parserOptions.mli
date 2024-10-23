@@ -72,6 +72,9 @@ type t = {
   package_v2: bool;  (** Whether PackageV2 is enabled. *)
   package_info: PackageInfo.t;
       (** Information used to determine which package a file belongs to during typechecking. *)
+  package_v2_support_multifile_tests: bool;
+      (** Option for the package v2 to strip the multifile filename mangling used in Hack tests.
+          Should be set to true only by the unit tests in the Hack test suite *)
 }
 [@@deriving show, eq]
 

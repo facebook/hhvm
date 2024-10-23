@@ -184,7 +184,6 @@ type t = {
   warnings_default_all: bool;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
-  tco_package_v2_support_multifile_tests: bool;
   tco_package_v2_bypass_package_check_for_class_const: bool;
   re_no_cache: bool;
   hh_distc_should_disable_trace_store: bool;
@@ -292,7 +291,6 @@ let default =
     warnings_default_all = false;
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
-    tco_package_v2_support_multifile_tests = false;
     tco_package_v2_bypass_package_check_for_class_const = true;
     re_no_cache = false;
     hh_distc_should_disable_trace_store = false;
@@ -398,7 +396,6 @@ let set
     ?warnings_default_all
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
-    ?tco_package_v2_support_multifile_tests
     ?tco_package_v2_bypass_package_check_for_class_const
     ?re_no_cache
     ?hh_distc_should_disable_trace_store
@@ -666,10 +663,6 @@ let set
       setting
         tco_allowed_files_for_ignore_readonly
         options.tco_allowed_files_for_ignore_readonly;
-    tco_package_v2_support_multifile_tests =
-      setting
-        tco_package_v2_support_multifile_tests
-        options.tco_package_v2_support_multifile_tests;
     tco_package_v2_bypass_package_check_for_class_const =
       setting
         tco_package_v2_bypass_package_check_for_class_const

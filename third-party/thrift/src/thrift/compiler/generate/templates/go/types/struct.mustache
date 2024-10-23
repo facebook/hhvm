@@ -35,16 +35,31 @@
 {{/struct:resp?}}
 
 {{! write (serialize) }}
+{{#program:use_reflect_codec?}}
+{{> types/struct_method_write_v2}}
+{{/program:use_reflect_codec?}}
+{{^program:use_reflect_codec?}}
 {{> types/struct_method_write}}
+{{/program:use_reflect_codec?}}
 
 {{! read (deserialize) }}
+{{#program:use_reflect_codec?}}
+{{> types/struct_method_read_v2}}
+{{/program:use_reflect_codec?}}
+{{^program:use_reflect_codec?}}
 {{> types/struct_method_read}}
+{{/program:use_reflect_codec?}}
 
 {{! string }}
 {{> types/struct_method_string}}
 
 {{! setDefaults }}
 {{> types/struct_method_set_defaults}}
+{{#program:use_reflect_codec?}}
+
+{{! getStructSpec }}
+{{> types/struct_method_get_spec}}
+{{/program:use_reflect_codec?}}
 {{#struct:exception?}}
 
 {{! error }}

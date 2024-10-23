@@ -35,14 +35,19 @@ class {{enum:name}}(thrift.py3.types.{{!
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_{{enum:name}}()
+        return {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
 
     @staticmethod
     def __get_thrift_name__():
         return "{{program:name}}.{{enum:name}}"
 
     def _to_python(self):
-        return _fbthrift_python_types.{{enum:name}}(self._fbthrift_value_)
+        import importlib
+        {{!TODO: accommodate root_module_prefix}}
+        python_types = importlib.import_module(
+            "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types"
+        )
+        return python_types.{{enum:name}}(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

@@ -553,6 +553,18 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 - bool Jit.ProfileGuardTypes = false, UNKNOWN
 - uint32_t Jit.FilterLease = 1, UNKNOWN
 
+- std::string Jit.TraceUploadBucket = "hhvm_jit_trace", paulbiss
+
+  Blob store bucket to upload IR traces to.
+
+- std::string Jit.TraceUploadPath = "", paulbiss
+
+  Blob store directory to upload IR traces to.
+
+- std::set<std::string> Jit.TraceUploadFunctions = {}, paulbiss
+
+  Functions to upload traces from to the blob store.
+
 # PCRE (Eval.PCRE)
 
 - uint32_t PCRE.TableSize = PCRE.TableSize, UNKNOWN, staticdefault(96 * 1024)

@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/blob-store.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
@@ -119,6 +120,8 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
   }
 }
 
+std::atomic<size_t> s_uploadId;
+
 }
 
 void emitVunit(Vunit& vunit, const IRUnit* unit,
@@ -187,8 +190,14 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   DEBUG_ONLY auto cold_start = cold_in.frontier();
   auto frozen_start = frozen->frontier();
 
+  auto const func = unit ? unit->initSrcKey().func() : nullptr;
+  auto const uploadUnit =
+    func &&
+    !Cfg::Jit::TraceUploadBucket.empty() &&
+    Cfg::Jit::TraceUploadFunctions.count(func->fullName()->toCppString());
+
   Optional<AsmInfo> optAI;
-  if (unit && (Cfg::Jit::BuildOutliningHashes ||
+  if (unit && (Cfg::Jit::BuildOutliningHashes || uploadUnit ||
                dumpIREnabled(unit->context().kind))) {
     optAI.emplace(*unit);
   }
@@ -230,6 +239,21 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
              ai, nullptr, annotations);
     if (Cfg::Jit::BuildOutliningHashes) {
       recordIR(*unit, ai);
+    }
+    if (uploadUnit) {
+      BlobStore::Key k;
+      std::ostringstream str;
+      k.name = folly::sformat(
+        "{}:{}:{}",
+        func->fullName()->slice(),
+        unit->initSrcKey().lineNumber(),
+        s_uploadId.fetch_add(1, std::memory_order_relaxed)
+      );
+      k.bucket = Cfg::Jit::TraceUploadBucket;
+      k.dir = Cfg::Jit::TraceUploadPath;
+
+      print(str, *unit, ai, nullptr);
+      BlobStore::put(k, str.str());
     }
   }
 }

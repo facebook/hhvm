@@ -1100,6 +1100,8 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
 bool dumpIREnabled(TransKind kind, int level /* = 1 */) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
          HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level) ||
+         (!Cfg::Jit::TraceUploadBucket.empty() &&
+          !Cfg::Jit::TraceUploadFunctions.empty()) ||
          (dumpRuntimeIR(level) &&
           mcgen::dumpTCAnnotation(kind));
 }

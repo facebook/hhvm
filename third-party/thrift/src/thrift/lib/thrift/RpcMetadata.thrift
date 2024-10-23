@@ -89,6 +89,7 @@ enum CompressionAlgorithm {
   NONE = 0,
   ZLIB = 1,
   ZSTD = 2,
+  CUSTOM = 1000,
 }
 
 enum ErrorKind {
@@ -113,9 +114,14 @@ struct ZlibCompressionCodecConfig {}
 
 struct ZstdCompressionCodecConfig {}
 
+struct CustomCompressionCodecConfig {
+  1: optional binary payload;
+}
+
 union CodecConfig {
   1: ZlibCompressionCodecConfig zlibConfig;
   2: ZstdCompressionCodecConfig zstdConfig;
+  3: CustomCompressionCodecConfig customConfig;
 }
 
 struct CompressionConfig {

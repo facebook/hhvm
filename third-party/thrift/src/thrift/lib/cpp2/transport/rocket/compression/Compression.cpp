@@ -31,6 +31,10 @@ folly::Expected<std::unique_ptr<folly::IOBuf>, std::string> uncompressPayload(
     case CompressionAlgorithm::ZLIB:
       codec = folly::io::CodecType::ZLIB;
       break;
+    case CompressionAlgorithm::CUSTOM:
+      // TODO: use custom compression implementation
+      codec = folly::io::CodecType::NO_COMPRESSION;
+      break;
     case CompressionAlgorithm::NONE:
       codec = folly::io::CodecType::NO_COMPRESSION;
       break;
@@ -58,6 +62,9 @@ void setCompressionCodec(
           break;
         case CodecConfig::Type::zstdConfig:
           metadata.compression_ref() = CompressionAlgorithm::ZSTD;
+          break;
+        case CodecConfig::Type::customConfig:
+          metadata.compression_ref() = CompressionAlgorithm::CUSTOM;
           break;
         default:
           break;
@@ -88,6 +95,10 @@ void compressPayload(
       break;
     case CompressionAlgorithm::ZLIB:
       codec = folly::io::CodecType::ZLIB;
+      break;
+    case CompressionAlgorithm::CUSTOM:
+      // TODO: use custom compression implementation
+      codec = folly::io::CodecType::NO_COMPRESSION;
       break;
     case CompressionAlgorithm::NONE:
       codec = folly::io::CodecType::NO_COMPRESSION;

@@ -78,6 +78,9 @@ RequestRpcMetadata makeRequestRpcMetadata(
           case CodecConfig::Type::zstdConfig:
             metadata.compression() = CompressionAlgorithm::ZSTD;
             break;
+          case CodecConfig::Type::customConfig:
+            metadata.compression() = CompressionAlgorithm::CUSTOM;
+            break;
           case CodecConfig::Type::__EMPTY__:
             break;
         }

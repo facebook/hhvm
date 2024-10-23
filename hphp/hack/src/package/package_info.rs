@@ -51,7 +51,8 @@ impl PackageInfo {
         // absolutize directories relative to config file's parent directory
         for (_, package) in config.packages.iter_mut() {
             if let Some(dirs) = &mut package.include_paths {
-                dirs.clone().iter().for_each(|d| {
+                let dirs_cloned = dirs.clone();
+                dirs_cloned.iter().for_each(|d| {
                     let mut spanned_dir = dirs.take(d).unwrap();
                     let span = spanned_dir.span();
                     let dir = spanned_dir.get_ref();
@@ -89,6 +90,7 @@ impl PackageInfo {
                     *spanned_dir.get_mut() = new_dir.to_string_lossy().into_owned();
                     dirs.insert(spanned_dir);
                 });
+                dirs.sort_by(|a, b| b.get_ref().cmp(a.get_ref()));
             }
         }
 
@@ -378,5 +380,16 @@ mod test {
             "The `include_paths` field is not supported by PackageV1 in package bar",
         )];
         assert!(errors[4] == expected[0]);
+    }
+
+    #[test]
+    fn test_include_paths_is_reverse_sorted_in_package_v2() {
+        let test_path = SRCDIR.as_path().join("tests/package-8.toml");
+        let info = PackageInfo::from_text(true, false, "", test_path.to_str().unwrap()).unwrap();
+        let baz = &info.packages()["baz"];
+        let include_paths = &baz.include_paths.as_ref().unwrap();
+        assert!(include_paths[0].get_ref().ends_with("longest"));
+        assert!(include_paths[1].get_ref().ends_with("longer"));
+        assert!(include_paths[2].get_ref().ends_with("long"));
     }
 }

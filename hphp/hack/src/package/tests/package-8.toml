@@ -1,0 +1,8 @@
+[packages]
+
+[packages.baz]
+include_paths=[
+    "//path/to/long/",
+    "//path/to/longer/",
+    "//path/to/longest/"
+]

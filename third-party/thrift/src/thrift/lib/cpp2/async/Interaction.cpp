@@ -133,15 +133,22 @@ void TilePromise::fulfill(
 
   // Inline destruction of this is possible at the setTile()
   auto continuations = std::move(continuations_);
+  bool firstContinuation = true;
   while (!continuations.empty()) {
+    concurrency::ThreadManager::Source source =
+        concurrency::ThreadManager::Source::EXISTING_INTERACTION;
+    // The first "continuation" for V1 interactions is actually the first
+    // request that created the interaction
+    if (!isFactoryFunction_ && firstContinuation) {
+      source = concurrency::ThreadManager::Source::UPSTREAM;
+      firstContinuation = false;
+    }
     auto& item = continuations.front();
     folly::RequestContextScopeGuard rctx(item.context);
     dynamic_cast<InteractionTask&>(*item.task).setTile({&tile, &eb});
     if (!tile.maybeEnqueue(std::move(item.task), item.scope)) {
       if (tm) {
-        tm->getKeepAlive(
-              std::move(item.scope),
-              concurrency::ThreadManager::Source::EXISTING_INTERACTION)
+        tm->getKeepAlive(std::move(item.scope), source)
             ->add([task = std::move(item.task)]() mutable { task->run(); });
       } else {
         item.task->run();
@@ -215,13 +222,21 @@ void TilePromise::fulfill(
 
   // Inline destruction of this is possible at the setTile()
   auto continuations = std::move(continuations_);
+  bool firstContinuation = true;
   while (!continuations.empty()) {
+    int8_t internalPriority = folly::Executor::MID_PRI;
+    // The first "continuation" for V1 interactions is actually the first
+    // request that created the interaction
+    if (!isFactoryFunction_ && firstContinuation) {
+      internalPriority = folly::Executor::LO_PRI;
+      firstContinuation = false;
+    }
     auto& item = continuations.front();
     folly::RequestContextScopeGuard rctx(item.context);
     auto& serverTask = dynamic_cast<InteractionTask&>(*item.task);
     serverTask.setTile({&tile, &eb});
     if (!tile.maybeEnqueue(std::move(item.task), item.scope)) {
-      serverTask.acceptIntoResourcePool(folly::Executor::MID_PRI);
+      serverTask.acceptIntoResourcePool(internalPriority);
     }
     continuations.pop();
   }

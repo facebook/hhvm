@@ -144,7 +144,8 @@ class EventBaseTile : public Tile {
 class TilePromise final : public Tile {
  public:
   explicit TilePromise(bool isFactoryFunction)
-      : factoryPending_(isFactoryFunction) {}
+      : factoryPending_(isFactoryFunction),
+        isFactoryFunction_(isFactoryFunction) {}
 
   void fulfill(
       Tile& tile, concurrency::ThreadManager* tm, folly::EventBase& eb);
@@ -166,6 +167,7 @@ class TilePromise final : public Tile {
   detail::InteractionTaskQueue continuations_;
   bool terminated_{false};
   bool factoryPending_;
+  const bool isFactoryFunction_;
 
   struct FactoryException {
     folly::exception_wrapper ew;

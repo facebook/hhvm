@@ -26,6 +26,8 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/server/InternalPriorityRequestPile.h>
+#include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Streamer.h>
@@ -304,7 +306,11 @@ TEST(InteractionTest, QueueTimeout) {
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
 
+  // create interaction
   auto adder = client->createAddition();
+  adder.sync_getPrimitive();
+
+  // ensure second request times out in queue
   auto f1 = adder.semifuture_getPrimitive(),
        f2 = adder.semifuture_getPrimitive();
   EXPECT_FALSE(std::move(f1).getTry().hasException());
@@ -717,9 +723,9 @@ TEST(InteractionCodegenTest, SlowConstructor) {
   auto adder = client->createAddition();
   folly::EventBase eb;
 #if FOLLY_HAS_COROUTINES
-  // only release constructor once interaction methods are queued
-  adder.co_accumulatePrimitive(1).scheduleOn(&eb).start();
   adder.co_noop().scheduleOn(&eb).start();
+  adder.co_accumulatePrimitive(1).scheduleOn(&eb).start();
+  // only release constructor once interaction methods are queued
   folly::via(&eb, [&] { handler->b.post(); }).getVia(&eb);
   auto acc = folly::coro::blockingWait(adder.co_getPrimitive());
   EXPECT_EQ(acc, 1);
@@ -1622,4 +1628,73 @@ TEST(InteractionResourcePoolsThriftFlags, CustomAsyncProcessorFactory) {
     ScopedServerInterfaceThread server(handler);
     EXPECT_FALSE(server.getThriftServer().resourcePoolEnabled());
   }
+}
+
+class InternalPriorityTest : public testing::Test {
+ public:
+  class TestRequestPile : public InternalPriorityRequestPile {
+   public:
+    TestRequestPile()
+        : InternalPriorityRequestPile(InternalPriorityRequestPile::Options()) {}
+
+    ~TestRequestPile() override {
+      EXPECT_TRUE(expectedInternalPriorities_.empty());
+    }
+
+    std::optional<ServerRequestRejection> enqueue(
+        ServerRequest&& request) override {
+      auto expectedInternalPriority = expectedInternalPriorities_.front();
+      auto internalPriority =
+          detail::ServerRequestHelper::internalPriority(request);
+      EXPECT_EQ(expectedInternalPriority, internalPriority);
+      expectedInternalPriorities_.pop();
+      return InternalPriorityRequestPile::enqueue(std::move(request));
+    }
+
+   private:
+    // Expect first request to be LO_PRI and subsequent requests to be MID_PRI
+    std::queue<int8_t> expectedInternalPriorities_{
+        {folly::Executor::LO_PRI,
+         folly::Executor::MID_PRI,
+         folly::Executor::MID_PRI}};
+  };
+  void SetUp() override {
+    if (!FLAGS_thrift_experimental_use_resource_pools) {
+      GTEST_SKIP() << "This test is only relevant when resource pools is used";
+    }
+    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
+    THRIFT_FLAG_SET_MOCK(
+        enable_resource_pools_for_interaction_generated_processor_only, true);
+    auto pile = std::make_unique<TestRequestPile>();
+    auto cc = std::make_unique<ParallelConcurrencyController>(
+        *pile.get(), *folly::getGlobalCPUExecutor().get());
+    server_ = std::make_unique<ScopedServerInterfaceThread>(
+        std::make_shared<SemiCalculatorHandler>(),
+        "::1",
+        0,
+        [&](ThriftServer& thriftServer) {
+          thriftServer.resourcePoolSet().setResourcePool(
+              ResourcePoolHandle::defaultAsync(),
+              std::move(pile),
+              folly::getUnsafeMutableGlobalCPUExecutor(),
+              std::move(cc));
+        });
+  }
+
+  std::unique_ptr<ScopedServerInterfaceThread> server_;
+};
+
+CO_TEST_F(InternalPriorityTest, FactoryFunction) {
+  auto client = server_->newClient<Client<Calculator>>();
+  auto [addition, _] = co_await client->co_initializedAddition(0);
+  co_await addition.co_getPrimitive();
+  co_await addition.co_getPrimitive();
+}
+
+CO_TEST_F(InternalPriorityTest, Constructor) {
+  auto client = server_->newClient<Client<Calculator>>();
+  auto addition = client->createAddition();
+  co_await addition.co_getPrimitive();
+  co_await addition.co_getPrimitive();
+  co_await addition.co_getPrimitive();
 }

@@ -21,44 +21,56 @@ type constraint_direction =
   | As
   | Super
 
-let report_cyclic_constraint env cycles cstr_direction =
-  match cstr_direction with
-  | As ->
-    Type_expansions.report cycles
-    |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env)
-  | Super -> ()
-
-(** [get_cnstr_errs env tcstr constraint_direction name ty] checks that
+module Constraints : sig
+  (** [check env tcstr constraint_direction name ty] checks that
   `ty <: tcstr` or `tcstr <: ty` depending on [constraint_direction] *)
-let get_cnstr_errs
-    env tcstr (cstr_direction : constraint_direction) (t_pos, t_name) ty :
-    Typing_env_types.env * Typing_error.t option =
-  match tcstr with
-  | Some tcstr ->
-    let ((env, ty_err_opt1, cycles), cstr) =
-      Phase.localize_hint_no_subst_report_cycles
-        env
-        ~ignore_errors:false
-        tcstr
-        ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name)
+  val check :
+    Typing_env_types.env ->
+    hint option ->
+    constraint_direction ->
+    pos * string ->
+    ty ->
+    Typing_env_types.env * Typing_error.t option
+end = struct
+  let report_cyclic_constraint env cycles cstr_direction =
+    match cstr_direction with
+    | As ->
+      Type_expansions.report cycles
+      |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env)
+    | Super -> ()
+
+  let check_subtype_constraint env ~ty ~cstr_ty t_pos cstr_direction =
+    let (ty_sub, ty_super) =
+      match cstr_direction with
+      | As -> (ty, cstr_ty)
+      | Super -> (cstr_ty, ty)
     in
-    report_cyclic_constraint env cycles cstr_direction;
-    let (env, ty_err_opt2) =
-      let (ty_sub, ty_super) =
-        match cstr_direction with
-        | As -> (ty, cstr)
-        | Super -> (cstr, ty)
+    Typing_ops.sub_type
+      t_pos
+      Reason.URnewtype_cstr
+      env
+      ty_sub
+      ty_super
+      Typing_error.Callback.newtype_alias_must_satisfy_constraint
+
+  let check env tcstr (cstr_direction : constraint_direction) (t_pos, t_name) ty
+      : Typing_env_types.env * Typing_error.t option =
+    match tcstr with
+    | Some tcstr ->
+      let ((env, ty_err_opt1, cycles), cstr_ty) =
+        Phase.localize_hint_no_subst_report_cycles
+          env
+          ~ignore_errors:false
+          tcstr
+          ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name)
       in
-      Typing_ops.sub_type
-        t_pos
-        Reason.URnewtype_cstr
-        env
-        ty_sub
-        ty_super
-        Typing_error.Callback.newtype_alias_must_satisfy_constraint
-    in
-    (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
-  | _ -> (env, None)
+      report_cyclic_constraint env cycles cstr_direction;
+      let (env, ty_err_opt2) =
+        check_subtype_constraint env t_pos ~ty ~cstr_ty cstr_direction
+      in
+      (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
+    | _ -> (env, None)
+end
 
 (** Checks that variants of a case type are disjoint *)
 let casetype_def env typedef =
@@ -205,13 +217,13 @@ let typedef_def ctx typedef =
 
     let (env, ty_err_opt3) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
-          let (env, err) = get_cnstr_errs env t_as_constraint As t_name ty in
+          let (env, err) = Constraints.check env t_as_constraint As t_name ty in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in
     let (env, ty_err_opt4) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
           let (env, err) =
-            get_cnstr_errs env t_super_constraint Super t_name ty
+            Constraints.check env t_super_constraint Super t_name ty
           in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in

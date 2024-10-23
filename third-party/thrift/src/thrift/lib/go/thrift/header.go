@@ -23,6 +23,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strings"
+	"unicode"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -453,6 +455,17 @@ func (hdr *tHeader) Read(buf *bufio.Reader) error {
 	// Check the first word if it matches http/unframed signatures
 	// We don't support non-framed protocols, so bail out
 	switch clientType := analyzeFirst32Bit(firstword); clientType {
+	case HTTPServerType, HTTPClientType, HTTPGetClientType:
+		data, _ := buf.Peek(48)
+		clean := strings.Map(func(r rune) rune {
+			if unicode.IsPrint(r) {
+				return r
+			}
+			return -1
+		}, string(data))
+		return types.NewTransportExceptionFromError(
+			fmt.Errorf("Possible HTTP connection to thrift port: '%s'", clean),
+		)
 	case UnknownClientType:
 		break
 	default:

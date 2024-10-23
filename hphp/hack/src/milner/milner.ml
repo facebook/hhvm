@@ -87,7 +87,7 @@ let add_missing_definitions defs output =
   ^ "\n"
 
 let milner verbose seed template_path destination_path =
-  if verbose then begin
+  if verbose > 0 then begin
     Format.eprintf "Seed: %d\n" seed;
     Format.eprintf "Template: %s\n" template_path;
     Format.eprintf "Destination: %s\n"
@@ -107,8 +107,10 @@ let milner verbose seed template_path destination_path =
   | None -> Format.printf "%s" output
 
 let verbose =
-  let doc = "Print debugging information to STDERR" in
-  Arg.(value & flag & info ["v"; "verbose"] ~doc)
+  let doc =
+    "Print debugging information at a given verbosity level to STDERR"
+  in
+  Arg.(value & opt int 0 & info ["v"; "verbose"] ~docv:"LEVEL" ~doc)
 
 let seed =
   let doc = "Seed for the random nubmer generator" in

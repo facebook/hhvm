@@ -15,7 +15,7 @@ end
 module ReadOnlyEnvironment : sig
   type t
 
-  val default : verbose:bool -> t
+  val default : verbose:int -> t
 end
 
 module Environment : sig

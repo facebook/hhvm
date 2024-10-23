@@ -58,10 +58,20 @@ val filter_variants_using_datatype :
   env -> Typing_reason.t -> locl_ty list -> locl_ty -> env * locl_ty
 
 (**
-   [get_variant_tys env name ty_args] looks up a case type by [name] in the decls.
-   If the case type exists, it returns the list of
-   variant types. If the case type doesn't exist, it returns [None].
-   The result is instantiated with [ty_args].
+  Return whether or not any of the case type variants have a where clause
+*)
+val has_where_clauses : typedef_case_type_variant list -> bool
+
+(**
+   [get_variant_tys env name ty_args] looks up case type via [name].
+  If the case type exists and all variants are unconditional, returns the list
+  of variant types localized using [ty_args]
+  If the case type doesn't exist or any variant has a where clause, returns
+  [None].
+
+  TODO T201569125 - Note: If we could use the ty_args to "evaluate" the where
+  constraints, we could return the variant hints whose constraints are met, but
+  I'm not sure if that's feasible.
 *)
 val get_variant_tys : env -> string -> locl_ty list -> env * locl_ty list option
 

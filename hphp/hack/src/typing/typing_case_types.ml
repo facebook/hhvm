@@ -885,41 +885,54 @@ let filter_variants_using_datatype env reason variants intersecting_ty =
   in
   Typing_utils.union_list env reason tyl
 
-(** Look up case type via [name]. If the case type exist returns the list of
-  variant types. If the case type doesn't exist, returns [None]. *)
+let has_where_clauses variants =
+  List.exists variants ~f:(fun v -> not @@ List.is_empty @@ snd v)
+
+(** Look up case type via [name].
+  If the case type exists and all variants are unconditional, returns the list
+  of variant types localized using [ty_args]
+  If the case type doesn't exist or any variant has a where clause, returns
+  [None].
+
+  TODO T201569125 - Note: If we could use the ty_args to "evaluate" the where
+  constraints, we could return the variant hints whose constraints are met, but
+  I'm not sure if that's feasible.
+*)
 let get_variant_tys env name ty_args :
     Typing_env_types.env * locl_ty list option =
   match Env.get_typedef env name with
   | Decl_entry.Found
       { td_type_assignment = CaseType (variant, variants); td_tparams; _ } ->
-    (* TODO T201569125 - do I need to do something with the where constraints here? *)
-    let single_or_union =
-      match (variant, variants) with
-      | ((hint, _where_constraints), []) -> hint
-      (* we're just going to take this union apart so the reason is irrelevant here *)
-      | ((hint, _where_constraints), rest) ->
-        Typing_make_type.union Reason.none @@ (hint :: List.map rest ~f:fst)
-    in
-    let ((env, _ty_err_opt), variants) =
-      Typing_utils.localize_disjoint_union
-        ~ety_env:
-          {
-            empty_expand_env with
-            substs =
-              (if List.is_empty ty_args then
-                SMap.empty
-              else
-                Decl_subst.make_locl td_tparams ty_args);
-          }
-        env
-        single_or_union
-    in
-    let tyl =
-      match get_node variants with
-      | Tunion tyl -> tyl
-      | _ -> [variants]
-    in
-    (env, Some tyl)
+    if has_where_clauses (variant :: variants) then
+      (env, None)
+    else
+      let single_or_union =
+        match (variant, variants) with
+        | ((hint, _where_constraints), []) -> hint
+        (* we're just going to take this union apart so the reason is irrelevant here *)
+        | ((hint, _where_constraints), rest) ->
+          Typing_make_type.union Reason.none @@ (hint :: List.map rest ~f:fst)
+      in
+      let ((env, _ty_err_opt), variants) =
+        Typing_utils.localize_disjoint_union
+          ~ety_env:
+            {
+              empty_expand_env with
+              substs =
+                (if List.is_empty ty_args then
+                  SMap.empty
+                else
+                  Decl_subst.make_locl td_tparams ty_args);
+            }
+          env
+          single_or_union
+      in
+      let tyl =
+        match get_node variants with
+        | Tunion tyl -> tyl
+        | _ -> [variants]
+      in
+      (env, Some tyl)
   | _ -> (env, None)
 
 module AtomicDataTypes = struct

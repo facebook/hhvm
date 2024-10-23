@@ -132,23 +132,6 @@ class AdapterServiceAsyncClient extends \ThriftClientBase implements AdapterServ
 class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceClientIf {
   use AdapterServiceClientBase;
 
-  /* send and recv functions */
-  public function send_count(): int {
-    $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
-    return $this->sendImplHelper($args, "count", false, "AdapterService" );
-  }
-  public function recv_count(?int $expectedsequenceid = null): \facebook\thrift\test\CountingStruct {
-    return $this->recvImplHelper(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $expectedsequenceid);
-  }
-  public function send_adaptedTypes(?\facebook\thrift\test\HeapAllocated $arg): int {
-    $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
-      'arg' => $arg,
-    ));
-    return $this->sendImplHelper($args, "adaptedTypes", false, "AdapterService" );
-  }
-  public function recv_adaptedTypes(?int $expectedsequenceid = null): \facebook\thrift\test\HeapAllocated {
-    return $this->recvImplHelper(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

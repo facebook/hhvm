@@ -175,33 +175,6 @@ class PrimitivesServiceAsyncClient extends \ThriftClientBase implements Primitiv
 class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesServiceClientIf {
   use PrimitivesServiceClientBase;
 
-  /* send and recv functions */
-  public function send_init(int $param0, int $param1): int {
-    $args = PrimitivesService_init_args::fromShape(shape(
-      'param0' => $param0,
-      'param1' => $param1,
-    ));
-    return $this->sendImplHelper($args, "init", false, "PrimitivesService" );
-  }
-  public function recv_init(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(PrimitivesService_init_result::class, "init", false, $expectedsequenceid);
-  }
-  public function send_method_that_throws(): int {
-    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
-    return $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
-  }
-  public function recv_method_that_throws(?int $expectedsequenceid = null): Result {
-    return $this->recvImplHelper(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $expectedsequenceid);
-  }
-  public function send_return_void_method(int $id): int {
-    $args = PrimitivesService_return_void_method_args::fromShape(shape(
-      'id' => $id,
-    ));
-    return $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
-  }
-  public function recv_return_void_method(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(PrimitivesService_return_void_method_result::class, "return_void_method", true, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

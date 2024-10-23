@@ -53,7 +53,6 @@ class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServ
 class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceClientIf {
   use FooHackServiceClientBase;
 
-  /* send and recv functions */
 }
 
 abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

@@ -93,14 +93,6 @@ class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsync
 class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
   use BadServiceClientBase;
 
-  /* send and recv functions */
-  public function send_bar(): int {
-    $args = BadService_bar_args::withDefaultValues();
-    return $this->sendImplHelper($args, "bar", false, "BadService" );
-  }
-  public function recv_bar(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(BadService_bar_result::class, "bar", false, $expectedsequenceid);
-  }
 }
 
 // INTERACTION HANDLERS

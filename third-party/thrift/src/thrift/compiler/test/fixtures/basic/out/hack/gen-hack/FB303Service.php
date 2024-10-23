@@ -95,16 +95,6 @@ class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceA
 class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClientIf {
   use FB303ServiceClientBase;
 
-  /* send and recv functions */
-  public function send_renamed_rpc(int $renamed_parameter): int {
-    $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
-      'int_parameter' => $int_parameter,
-    ));
-    return $this->sendImplHelper($args, "renamed_rpc", false, "FB303Service" );
-  }
-  public function recv_renamed_rpc(?int $expectedsequenceid = null): \test\fixtures\basic\MyRenamedStruct {
-    return $this->recvImplHelper(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "renamed_rpc", false, $expectedsequenceid);
-  }
 }
 
 abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

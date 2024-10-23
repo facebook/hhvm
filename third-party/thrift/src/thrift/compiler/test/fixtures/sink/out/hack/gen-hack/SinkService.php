@@ -269,7 +269,6 @@ class SinkServiceAsyncClient extends \ThriftClientBase implements SinkServiceAsy
 class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf {
   use SinkServiceClientBase;
 
-  /* send and recv functions */
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

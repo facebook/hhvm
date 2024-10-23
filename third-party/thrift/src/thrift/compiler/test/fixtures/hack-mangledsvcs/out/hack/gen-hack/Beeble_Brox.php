@@ -51,7 +51,6 @@ class Beeble_BroxAsyncClient extends \ThriftClientBase implements Beeble_BroxAsy
 class Beeble_BroxClient extends \ThriftClientBase implements Beeble_BroxClientIf {
   use Beeble_BroxClientBase;
 
-  /* send and recv functions */
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

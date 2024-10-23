@@ -138,27 +138,6 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
-  /* send and recv functions */
-  public function send_func(string $arg1, ?MyStruct $arg2): int {
-    $args = MyService_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    return $this->sendImplHelper($args, "func", false, "MyService" );
-  }
-  public function recv_func(?int $expectedsequenceid = null): MyStruct {
-    return $this->recvImplHelper(MyService_func_result::class, "func", false, $expectedsequenceid);
-  }
-  public function send_func1(string $arg1, ?MyStruct $arg2): int {
-    $args = MyService_func1_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    return $this->sendImplHelper($args, "func1", false, "MyService" );
-  }
-  public function recv_func1(?int $expectedsequenceid = null): MyStruct {
-    return $this->recvImplHelper(MyService_func1_result::class, "func1", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

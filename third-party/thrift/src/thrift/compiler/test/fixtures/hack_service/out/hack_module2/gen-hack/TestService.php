@@ -94,16 +94,6 @@ class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient impl
 class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements TestServiceClientIf {
   use TestServiceClientBase;
 
-  /* send and recv functions */
-  public function send_ping(string $str_arg): int {
-    $args = \hack_ns2\TestService_ping_args::fromShape(shape(
-      'str_arg' => $str_arg,
-    ));
-    return $this->sendImplHelper($args, "ping", false, "TestService" );
-  }
-  public function recv_ping(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(\hack_ns2\TestService_ping_result::class, "ping", false, $expectedsequenceid);
-  }
 }
 
 abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackServiceAsyncProcessorBase {

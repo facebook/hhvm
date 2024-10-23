@@ -88,16 +88,6 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
-  /* send and recv functions */
-  public function send_second(int $count): int {
-    $args = MyService_second_args::fromShape(shape(
-      'count' => $count,
-    ));
-    return $this->sendImplHelper($args, "second", false, "MyService" );
-  }
-  public function recv_second(?int $expectedsequenceid = null): bool {
-    return $this->recvImplHelper(MyService_second_result::class, "second", false, $expectedsequenceid);
-  }
 }
 
 abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

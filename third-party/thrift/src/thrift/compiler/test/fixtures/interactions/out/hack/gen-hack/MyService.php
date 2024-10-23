@@ -105,14 +105,6 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
-  /* send and recv functions */
-  public function send_foo(): int {
-    $args = MyService_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false, "MyService" );
-  }
-  public function recv_foo(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyService_foo_result::class, "foo", true, $expectedsequenceid);
-  }
 }
 
 // INTERACTION HANDLERS

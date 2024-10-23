@@ -105,14 +105,6 @@ class PerformAsyncClient extends \ThriftClientBase implements PerformAsyncClient
 class PerformClient extends \ThriftClientBase implements PerformClientIf {
   use PerformClientBase;
 
-  /* send and recv functions */
-  public function send_foo(): int {
-    $args = Perform_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false, "Perform" );
-  }
-  public function recv_foo(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(Perform_foo_result::class, "foo", true, $expectedsequenceid);
-  }
 }
 
 // INTERACTION HANDLERS

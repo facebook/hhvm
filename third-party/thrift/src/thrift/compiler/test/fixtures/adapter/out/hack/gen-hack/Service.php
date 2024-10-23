@@ -104,18 +104,6 @@ class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClient
 class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
   use ServiceClientBase;
 
-  /* send and recv functions */
-  public function send_func(\facebook\thrift\test\StringWithAdapter_7208 $arg1, string $arg2, ?\facebook\thrift\test\Foo $arg3): int {
-    $args = \facebook\thrift\test\Service_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-      'arg3' => $arg3,
-    ));
-    return $this->sendImplHelper($args, "func", false, "Service" );
-  }
-  public function recv_func(?int $expectedsequenceid = null): \facebook\thrift\test\MyI32_4873 {
-    return $this->recvImplHelper(\facebook\thrift\test\Service_func_result::class, "func", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

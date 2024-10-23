@@ -135,25 +135,6 @@ class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMi
 class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedStackArgumentsClientIf {
   use DbMixedStackArgumentsClientBase;
 
-  /* send and recv functions */
-  public function send_getDataByKey0(string $key): int {
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
-      'key' => $key,
-    ));
-    return $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
-  }
-  public function recv_getDataByKey0(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $expectedsequenceid);
-  }
-  public function send_getDataByKey1(string $key): int {
-    $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
-      'key' => $key,
-    ));
-    return $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
-  }
-  public function recv_getDataByKey1(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $expectedsequenceid);
-  }
 }
 
 abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProcessor {

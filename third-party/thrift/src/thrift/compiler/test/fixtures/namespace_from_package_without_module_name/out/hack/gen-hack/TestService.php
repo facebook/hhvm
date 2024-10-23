@@ -94,16 +94,6 @@ class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsy
 class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf {
   use TestServiceClientBase;
 
-  /* send and recv functions */
-  public function send_init(int $int1): int {
-    $args = \test\namespace_from_package_without_module_name\TestService_init_args::fromShape(shape(
-      'int1' => $int1,
-    ));
-    return $this->sendImplHelper($args, "init", false, "TestService" );
-  }
-  public function recv_init(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $expectedsequenceid);
-  }
 }
 
 abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

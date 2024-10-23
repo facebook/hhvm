@@ -134,25 +134,6 @@ class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsy
 class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf {
   use SomeServiceClientBase;
 
-  /* send and recv functions */
-  public function send_bounce_map(Map<int, string> $m): int {
-    $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
-      'm' => $m,
-    ));
-    return $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
-  }
-  public function recv_bounce_map(?int $expectedsequenceid = null): Map<int, string> {
-    return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $expectedsequenceid);
-  }
-  public function send_binary_keyed_map(KeyedContainer<int, int> $r): int {
-    $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
-      'r' => new Vector($r),
-    ));
-    return $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
-  }
-  public function recv_binary_keyed_map(?int $expectedsequenceid = null): Map<string, int> {
-    return $this->recvImplHelper(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

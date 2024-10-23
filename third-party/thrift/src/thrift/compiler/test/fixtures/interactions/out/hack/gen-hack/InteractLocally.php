@@ -58,7 +58,6 @@ class InteractLocallyAsyncClient extends \ThriftClientBase implements InteractLo
 class InteractLocallyClient extends \ThriftClientBase implements InteractLocallyClientIf {
   use InteractLocallyClientBase;
 
-  /* send and recv functions */
 }
 
 // INTERACTION HANDLERS

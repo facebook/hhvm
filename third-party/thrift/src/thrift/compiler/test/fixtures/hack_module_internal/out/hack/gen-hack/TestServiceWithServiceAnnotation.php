@@ -127,21 +127,6 @@ class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase impl
 class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implements TestServiceWithServiceAnnotationClientIf {
   use TestServiceWithServiceAnnotationClientBase;
 
-  /* send and recv functions */
-  internal function send_testMethodWithServiceAnnotation(): int {
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
-    return $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, "TestServiceWithServiceAnnotation" );
-  }
-  internal function recv_testMethodWithServiceAnnotation(?int $expectedsequenceid = null): int {
-    return $this->recvImplHelper(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $expectedsequenceid);
-  }
-  internal function send_testMethodWithServiceAnnotation2(): int {
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
-    return $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, "TestServiceWithServiceAnnotation" );
-  }
-  internal function recv_testMethodWithServiceAnnotation2(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

@@ -198,25 +198,6 @@ class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
 class CClient extends \ThriftClientBase implements CClientIf {
   use CClientBase;
 
-  /* send and recv functions */
-  public function send_f(): int {
-    $args = C_f_args::withDefaultValues();
-    return $this->sendImplHelper($args, "f", false, "C" );
-  }
-  public function recv_f(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(C_f_result::class, "f", true, $expectedsequenceid);
-  }
-  public function send_thing(int $a, string $b, Set<int> $c): int {
-    $args = C_thing_args::fromShape(shape(
-      'a' => $a,
-      'b' => $b,
-      'c' => $c,
-    ));
-    return $this->sendImplHelper($args, "thing", false, "C" );
-  }
-  public function recv_thing(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(C_thing_result::class, "thing", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

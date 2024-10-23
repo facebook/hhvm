@@ -124,21 +124,6 @@ class MyServicePrioParentAsyncClient extends \ThriftClientBase implements MyServ
 class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePrioParentClientIf {
   use MyServicePrioParentClientBase;
 
-  /* send and recv functions */
-  public function send_ping(): int {
-    $args = MyServicePrioParent_ping_args::withDefaultValues();
-    return $this->sendImplHelper($args, "ping", false, "MyServicePrioParent" );
-  }
-  public function recv_ping(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyServicePrioParent_ping_result::class, "ping", true, $expectedsequenceid);
-  }
-  public function send_pong(): int {
-    $args = MyServicePrioParent_pong_args::withDefaultValues();
-    return $this->sendImplHelper($args, "pong", false, "MyServicePrioParent" );
-  }
-  public function recv_pong(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyServicePrioParent_pong_result::class, "pong", true, $expectedsequenceid);
-  }
 }
 
 abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcessor {

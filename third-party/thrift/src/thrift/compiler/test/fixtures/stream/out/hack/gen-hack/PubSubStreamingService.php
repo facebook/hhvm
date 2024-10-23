@@ -372,7 +372,6 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
 class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubStreamingServiceClientIf {
   use PubSubStreamingServiceClientBase;
 
-  /* send and recv functions */
 }
 
 abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

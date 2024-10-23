@@ -258,62 +258,6 @@ class NestedContainersAsyncClient extends \ThriftClientBase implements NestedCon
 class NestedContainersClient extends \ThriftClientBase implements NestedContainersClientIf {
   use NestedContainersClientBase;
 
-  /* send and recv functions */
-  public function send_mapList(KeyedContainer<int, KeyedContainer<int, int>> $foo): int {
-    $args = NestedContainers_mapList_args::fromShape(shape(
-      'foo' => (new Map($foo))->map(
-        $_val0 ==> new Vector($_val0)
-      ),
-    ));
-    return $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
-  }
-  public function recv_mapList(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(NestedContainers_mapList_result::class, "mapList", true, $expectedsequenceid);
-  }
-  public function send_mapSet(KeyedContainer<int, Set<int>> $foo): int {
-    $args = NestedContainers_mapSet_args::fromShape(shape(
-      'foo' => new Map($foo),
-    ));
-    return $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
-  }
-  public function recv_mapSet(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(NestedContainers_mapSet_result::class, "mapSet", true, $expectedsequenceid);
-  }
-  public function send_listMap(KeyedContainer<int, KeyedContainer<int, int>> $foo): int {
-    $args = NestedContainers_listMap_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-    ));
-    return $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
-  }
-  public function recv_listMap(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(NestedContainers_listMap_result::class, "listMap", true, $expectedsequenceid);
-  }
-  public function send_listSet(KeyedContainer<int, Set<int>> $foo): int {
-    $args = NestedContainers_listSet_args::fromShape(shape(
-      'foo' => new Vector($foo),
-    ));
-    return $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
-  }
-  public function recv_listSet(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(NestedContainers_listSet_result::class, "listSet", true, $expectedsequenceid);
-  }
-  public function send_turtles(KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, KeyedContainer<int, Set<int>>>>> $foo): int {
-    $args = NestedContainers_turtles_args::fromShape(shape(
-      'foo' => (new Vector($foo))->map(
-        $_val0 ==> (new Vector($_val0))->map(
-          $_val1 ==> (new Map($_val1))->map(
-            $_val2 ==> new Map($_val2)
-          )
-        )
-      ),
-    ));
-    return $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
-  }
-  public function recv_turtles(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(NestedContainers_turtles_result::class, "turtles", true, $expectedsequenceid);
-  }
 }
 
 abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor {

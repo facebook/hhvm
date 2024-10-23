@@ -110,22 +110,6 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
 class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
 
-  /* send and recv functions */
-  public function send_baz(Set<int> $a, KeyedContainer<int, KeyedContainer<int, Set<string>>> $b, int $c, ?Foo $d, int $e): int {
-    $args = Bar_baz_args::fromShape(shape(
-      'a' => $a,
-      'b' => (new Vector($b))->map(
-        $_val0 ==> new Map($_val0)
-      ),
-      'c' => $c,
-      'd' => $d,
-      'e' => $e,
-    ));
-    return $this->sendImplHelper($args, "baz", false, "Bar" );
-  }
-  public function recv_baz(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(Bar_baz_result::class, "baz", false, $expectedsequenceid);
-  }
 }
 
 abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {

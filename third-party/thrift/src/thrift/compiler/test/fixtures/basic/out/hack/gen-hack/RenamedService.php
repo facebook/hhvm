@@ -93,14 +93,6 @@ class RenamedServiceAsyncClient extends \ThriftClientBase implements RenamedServ
 class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceClientIf {
   use RenamedServiceClientBase;
 
-  /* send and recv functions */
-  public function send_simple_rpc(): int {
-    $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
-    return $this->sendImplHelper($args, "simple_rpc", false, "FooService" );
-  }
-  public function recv_simple_rpc(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $expectedsequenceid);
-  }
 }
 
 abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

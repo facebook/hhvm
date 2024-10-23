@@ -99,14 +99,6 @@ class InteractWithSharedAsyncClient extends \ThriftClientBase implements Interac
 class InteractWithSharedClient extends \ThriftClientBase implements InteractWithSharedClientIf {
   use InteractWithSharedClientBase;
 
-  /* send and recv functions */
-  public function send_do_some_similar_things(): int {
-    $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
-    return $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
-  }
-  public function recv_do_some_similar_things(?int $expectedsequenceid = null): DoSomethingResult {
-    return $this->recvImplHelper(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $expectedsequenceid);
-  }
 }
 
 // INTERACTION HANDLERS

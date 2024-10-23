@@ -186,40 +186,6 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
 class Service1Client extends \ThriftClientBase implements Service1ClientIf {
   use Service1ClientBase;
 
-  /* send and recv functions */
-  public function send_func(string $arg1, ?MyStruct $arg2): int {
-    $args = Service1_func_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    return $this->sendImplHelper($args, "func", false, "Service1" );
-  }
-  public function recv_func(?int $expectedsequenceid = null): MyStruct {
-    return $this->recvImplHelper(Service1_func_result::class, "func", false, $expectedsequenceid);
-  }
-  public function send_func1(string $arg1, ?MyStruct $arg2): int {
-    $args = Service1_func1_args::fromShape(shape(
-      'arg1' => $arg1,
-      'arg2' => $arg2,
-    ));
-    return $this->sendImplHelper($args, "func1", false, "Service1" );
-  }
-  public function recv_func1(?int $expectedsequenceid = null): MyStruct {
-    return $this->recvImplHelper(Service1_func1_result::class, "func1", false, $expectedsequenceid);
-  }
-  public function send_func2(?StructWithWrapper $arg1, i64WithWrapper $arg2): int {
-    $args = Service1_func2_args::withDefaultValues();
-    if ($arg1 !== null) {
-      $args->arg1 = $arg1;
-    }
-    if ($arg2 !== null) {
-      $args->arg2 = $arg2;
-    }
-    return $this->sendImplHelper($args, "func2", false, "Service1" );
-  }
-  public function recv_func2(?int $expectedsequenceid = null): i64WithWrapper {
-    return $this->recvImplHelper(Service1_func2_result::class, "func2", false, $expectedsequenceid);
-  }
 }
 
 abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {

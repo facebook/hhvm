@@ -86,14 +86,6 @@ class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncCl
 class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
   use FactoriesClientBase;
 
-  /* send and recv functions */
-  public function send_foo(): int {
-    $args = Factories_foo_args::withDefaultValues();
-    return $this->sendImplHelper($args, "foo", false, "Factories" );
-  }
-  public function recv_foo(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(Factories_foo_result::class, "foo", true, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

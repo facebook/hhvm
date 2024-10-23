@@ -224,35 +224,6 @@ class RaiserAsyncClient extends \ThriftClientBase implements RaiserAsyncClientIf
 class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
   use RaiserClientBase;
 
-  /* send and recv functions */
-  public function send_doBland(): int {
-    $args = Raiser_doBland_args::withDefaultValues();
-    return $this->sendImplHelper($args, "doBland", false, "Raiser" );
-  }
-  public function recv_doBland(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(Raiser_doBland_result::class, "doBland", true, $expectedsequenceid);
-  }
-  public function send_doRaise(): int {
-    $args = Raiser_doRaise_args::withDefaultValues();
-    return $this->sendImplHelper($args, "doRaise", false, "Raiser" );
-  }
-  public function recv_doRaise(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(Raiser_doRaise_result::class, "doRaise", true, $expectedsequenceid);
-  }
-  public function send_get200(): int {
-    $args = Raiser_get200_args::withDefaultValues();
-    return $this->sendImplHelper($args, "get200", false, "Raiser" );
-  }
-  public function recv_get200(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(Raiser_get200_result::class, "get200", false, $expectedsequenceid);
-  }
-  public function send_get500(): int {
-    $args = Raiser_get500_args::withDefaultValues();
-    return $this->sendImplHelper($args, "get500", false, "Raiser" );
-  }
-  public function recv_get500(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(Raiser_get500_result::class, "get500", false, $expectedsequenceid);
-  }
 }
 
 // HELPER FUNCTIONS AND STRUCTURES

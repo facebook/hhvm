@@ -7122,55 +7122,6 @@ void t_hack_generator::_generate_service_client_children(
       << "  use " << long_name << "ClientBase;\n\n";
   indent_up();
 
-  if (!async) {
-    out << indent() << "/* send and recv functions */\n";
-
-    for (const auto* function :
-         get_supported_server_functions(tservice, async)) {
-      if (skip_codegen(function)) {
-        continue;
-      }
-      const std::string& funname = find_hack_name(function);
-      std::string return_typehint =
-          type_to_typehint(function->return_type().get_type());
-      auto fqlfr =
-          (has_hack_module_internal(tservice) ||
-                   has_hack_module_internal(function)
-               ? "internal"
-               : "public");
-      out << indent() << fqlfr << " function send_"
-          << function_signature(function, "", "int") << " {\n";
-      indent_up();
-      _generate_args(out, tservice, function);
-      out << indent() << "return ";
-      _generate_sendImplHelper(out, function, tservice);
-      indent_down();
-      out << indent() << "}\n";
-
-      if (function->qualifier() != t_function_qualifier::oneway) {
-        t_function recv_function(
-            program_,
-            function->return_type(),
-            "recv_" + find_hack_name(function));
-        // Open function
-        bool is_void = function->return_type()->is_void();
-        std::string resultname = generate_function_helper_name(
-            tservice, function, PhpFunctionNameSuffix::RESULT);
-        out << indent() << fqlfr << " function "
-            << function_signature(
-                   &recv_function,
-                   "?int $expectedsequenceid = null",
-                   return_typehint)
-            << " {\n"
-            << indent() << "  " << (is_void ? "" : "return ")
-            << "$this->recvImplHelper(" << resultname << "::class, " << "\""
-            << funname << "\", " << (is_void ? "true" : "false")
-            << ", $expectedsequenceid);\n"
-            << indent() << "}\n";
-      }
-    }
-  }
-
   indent_down();
   out << "}\n\n";
 }

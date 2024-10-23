@@ -86,14 +86,6 @@ class MyServicePrioChildAsyncClient extends MyServicePrioParentAsyncClient imple
 class MyServicePrioChildClient extends MyServicePrioParentClient implements MyServicePrioChildClientIf {
   use MyServicePrioChildClientBase;
 
-  /* send and recv functions */
-  public function send_pang(): int {
-    $args = MyServicePrioChild_pang_args::withDefaultValues();
-    return $this->sendImplHelper($args, "pang", false, "MyServicePrioChild" );
-  }
-  public function recv_pang(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyServicePrioChild_pang_result::class, "pang", true, $expectedsequenceid);
-  }
 }
 
 abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentAsyncProcessorBase {

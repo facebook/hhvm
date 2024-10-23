@@ -336,63 +336,6 @@ class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncCl
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
 
-  /* send and recv functions */
-  public function send_ping(): int {
-    $args = MyService_ping_args::withDefaultValues();
-    return $this->sendImplHelper($args, "ping", false, "MyService" );
-  }
-  public function recv_ping(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyService_ping_result::class, "ping", true, $expectedsequenceid);
-  }
-  public function send_getRandomData(): int {
-    $args = MyService_getRandomData_args::withDefaultValues();
-    return $this->sendImplHelper($args, "getRandomData", false, "MyService" );
-  }
-  public function recv_getRandomData(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(MyService_getRandomData_result::class, "getRandomData", false, $expectedsequenceid);
-  }
-  public function send_hasDataById(int $id): int {
-    $args = MyService_hasDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    return $this->sendImplHelper($args, "hasDataById", false, "MyService" );
-  }
-  public function recv_hasDataById(?int $expectedsequenceid = null): bool {
-    return $this->recvImplHelper(MyService_hasDataById_result::class, "hasDataById", false, $expectedsequenceid);
-  }
-  public function send_getDataById(int $id): int {
-    $args = MyService_getDataById_args::fromShape(shape(
-      'id' => $id,
-    ));
-    return $this->sendImplHelper($args, "getDataById", false, "MyService" );
-  }
-  public function recv_getDataById(?int $expectedsequenceid = null): string {
-    return $this->recvImplHelper(MyService_getDataById_result::class, "getDataById", false, $expectedsequenceid);
-  }
-  public function send_putDataById(int $id, string $data): int {
-    $args = MyService_putDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    return $this->sendImplHelper($args, "putDataById", false, "MyService" );
-  }
-  public function recv_putDataById(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyService_putDataById_result::class, "putDataById", true, $expectedsequenceid);
-  }
-  public function send_lobDataById(int $id, string $data): int {
-    $args = MyService_lobDataById_args::fromShape(shape(
-      'id' => $id,
-      'data' => $data,
-    ));
-    return $this->sendImplHelper($args, "lobDataById", true, "MyService" );
-  }
-  public function send_doNothing(): int {
-    $args = MyService_doNothing_args::withDefaultValues();
-    return $this->sendImplHelper($args, "doNothing", false, "MyService" );
-  }
-  public function recv_doNothing(?int $expectedsequenceid = null): void {
-    $this->recvImplHelper(MyService_doNothing_result::class, "doNothing", true, $expectedsequenceid);
-  }
 }
 
 abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {

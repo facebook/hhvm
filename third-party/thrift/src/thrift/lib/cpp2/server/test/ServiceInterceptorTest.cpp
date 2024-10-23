@@ -194,8 +194,7 @@ struct ServiceInterceptorCountWithRequestState
 
   using NamedServiceInterceptor::NamedServiceInterceptor;
 
-  std::optional<ConnectionState> onConnection(
-      ConnectionInfo) noexcept override {
+  std::optional<ConnectionState> onConnection(ConnectionInfo) override {
     onConnectionCount++;
     return 1;
   }
@@ -291,6 +290,36 @@ struct ServiceInterceptorRethrowActiveExceptionOnResponse
 
   int onRequestCount = 0;
   int onResponseCount = 0;
+};
+
+struct ServiceInterceptorThrowOnConnection
+    : public NamedServiceInterceptor<folly::Unit> {
+ public:
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
+  [[noreturn]] std::optional<folly::Unit> onConnection(
+      ConnectionInfo) override {
+    onConnectionCount++;
+    throw std::runtime_error(
+        "Exception from ServiceInterceptorThrowOnConnection::onConnection");
+  }
+
+  void onConnectionClosed(folly::Unit*, ConnectionInfo) noexcept override {
+    onConnectionClosedCount++;
+  }
+
+  folly::coro::Task<std::optional<folly::Unit>> onRequest(
+      folly::Unit*, RequestInfo) override {
+    co_return std::nullopt;
+  }
+
+  folly::coro::Task<void> onResponse(
+      folly::Unit*, folly::Unit*, ResponseInfo) override {
+    co_return;
+  }
+
+  int onConnectionCount = 0;
+  int onConnectionClosedCount = 0;
 };
 
 struct ServiceInterceptorLogResultTypeOnResponse
@@ -862,6 +891,70 @@ CO_TEST_P(
   EXPECT_EQ(interceptor1->onResponseCount, 1);
   EXPECT_EQ(interceptor2->onRequestCount, 1);
   EXPECT_EQ(interceptor2->onResponseCount, 1);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnConnectionException) {
+  auto interceptor1 =
+      std::make_shared<ServiceInterceptorThrowOnConnection>("Interceptor1");
+  auto interceptor2 =
+      std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor2");
+  auto interceptor3 =
+      std::make_shared<ServiceInterceptorThrowOnConnection>("Interceptor3");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(
+            InterceptorList{interceptor1, interceptor2, interceptor3}));
+      });
+
+  if (transportType() == TransportType::HTTP2) {
+    // HTTP2 does not support onConnection
+    auto client =
+        makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(
+            *runner);
+    EXPECT_NO_THROW({ co_await client->co_echo(""); });
+    co_return;
+  }
+
+  EXPECT_THROW(
+      {
+        try {
+          auto client =
+              makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(
+                  *runner);
+          co_await client->co_echo("");
+        } catch (const apache::thrift::transport::TTransportException& ex) {
+          if (transportType() == TransportType::HEADER) {
+            // Header transport does not support any mechanism of communicating
+            // errors on connection creation back to the client.
+            throw;
+          }
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr("ServiceInterceptor::onConnection threw exceptions"));
+          EXPECT_THAT(
+              std::string(ex.what()),
+              HasSubstr(
+                  "Exception from ServiceInterceptorThrowOnConnection::onConnection"));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor1]"));
+          EXPECT_THAT(
+              std::string(ex.what()),
+              Not(HasSubstr("[TestModule.Interceptor2]")));
+          EXPECT_THAT(
+              std::string(ex.what()), HasSubstr("[TestModule.Interceptor3]"));
+          throw;
+        }
+      },
+      apache::thrift::transport::TTransportException);
+
+  runner.reset();
+  EXPECT_EQ(interceptor1->onConnectionCount, 1);
+  EXPECT_EQ(interceptor1->onConnectionClosedCount, 1);
+  // If onConnection throws, then requests should not be processed.
+  EXPECT_EQ(interceptor2->onRequestCount, 0);
+  EXPECT_EQ(interceptor2->onResponseCount, 0);
+  EXPECT_EQ(interceptor3->onConnectionCount, 1);
+  EXPECT_EQ(interceptor3->onConnectionClosedCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, BasicInteraction) {

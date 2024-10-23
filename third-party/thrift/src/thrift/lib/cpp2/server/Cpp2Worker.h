@@ -367,6 +367,8 @@ class Cpp2Worker : public IOWorkerContext,
       wangle::SecureTransportType,
       const wangle::TransportInfo&);
 
+  void invokeServiceInterceptorsOnConnectionForHeader(Cpp2Connection&) noexcept;
+
   /// The mother ship.
   ThriftServer* server_;
 

@@ -130,6 +130,10 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 
   folly::once_flag setupLoggingFlag_;
 
+  bool didExecuteServiceInterceptorsOnConnection_ = false;
+  void invokeServiceInterceptorsOnConnection(RocketServerConnection&) noexcept;
+  void invokeServiceInterceptorsOnConnectionClosed() noexcept;
+
   template <class F>
   void handleRequestCommon(
       Payload&& payload,

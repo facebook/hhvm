@@ -195,6 +195,34 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
   }
 }
 
+void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
+    [[maybe_unused]] Cpp2Connection& connection) noexcept {
+#if FOLLY_HAS_COROUTINES
+  Cpp2ConnContext& context = connection.getContext();
+  const auto& serviceInterceptorsInfo = server_->getServiceInterceptors();
+  bool didServiceInterceptorOnConnectionThrow = false;
+
+  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+    ServiceInterceptorBase::ConnectionInfo connectionInfo{
+        &context,
+        context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
+    try {
+      serviceInterceptorsInfo[i].interceptor->internal_onConnection(
+          std::move(connectionInfo));
+    } catch (...) {
+      didServiceInterceptorOnConnectionThrow = true;
+    }
+  }
+
+  // Unfortunately, header transport does not have a way to provide an error
+  // message on connection creation failure back to the user.
+  if (didServiceInterceptorOnConnectionThrow) {
+    VLOG(4) << "ServiceInterceptor::onConnection() threw exception(s)";
+    connection.stop();
+  }
+#endif // FOLLY_HAS_COROUTINES
+}
+
 void Cpp2Worker::handleHeader(
     folly::AsyncTransport::UniquePtr sock,
     const folly::SocketAddress* addr,
@@ -219,6 +247,8 @@ void Cpp2Worker::handleHeader(
         getConnectionManager()->getNumConnections() *
         server_->getNumIOWorkerThreads());
   }
+
+  invokeServiceInterceptorsOnConnectionForHeader(*connection);
 }
 
 std::shared_ptr<folly::AsyncTransport> Cpp2Worker::createThriftTransport(

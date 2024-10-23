@@ -50,7 +50,7 @@ class ServiceInterceptorBase {
     Cpp2ConnContext* context = nullptr;
     detail::ServiceInterceptorOnConnectionStorage* storage = nullptr;
   };
-  virtual void internal_onConnection(ConnectionInfo) noexcept = 0;
+  virtual void internal_onConnection(ConnectionInfo) = 0;
   virtual void internal_onConnectionClosed(ConnectionInfo) noexcept = 0;
 
   struct RequestInfo {

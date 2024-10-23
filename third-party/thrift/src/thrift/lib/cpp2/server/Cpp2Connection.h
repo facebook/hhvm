@@ -106,6 +106,9 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     }
   }
 
+  Cpp2ConnContext& getContext() noexcept { return context_; }
+  const Cpp2ConnContext& getContext() const noexcept { return context_; }
+
   const folly::SocketAddress& getPeerAddress() const noexcept override {
     return *(context_.getPeerAddress());
   }
@@ -310,6 +313,8 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
 
   void setServerHeaders(transport::THeader::StringToStringMap& writeHeaders);
   void setServerHeaders(HeaderServerChannel::HeaderRequest& request);
+
+  void invokeServiceInterceptorsOnConnectionClosed() noexcept;
 
   friend class Cpp2Request;
 

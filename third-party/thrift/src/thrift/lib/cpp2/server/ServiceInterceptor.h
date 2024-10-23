@@ -44,13 +44,13 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     co_return;
   }
 
-  virtual std::optional<ConnectionState> onConnection(ConnectionInfo) noexcept {
+  virtual std::optional<ConnectionState> onConnection(ConnectionInfo) {
     return std::nullopt;
   }
   virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
 
  private:
-  void internal_onConnection(ConnectionInfo connectionInfo) noexcept final {
+  void internal_onConnection(ConnectionInfo connectionInfo) final {
     auto* storage = connectionInfo.storage;
     if (auto value = onConnection(std::move(connectionInfo))) {
       storage->emplace<ConnectionState>(std::move(*value));

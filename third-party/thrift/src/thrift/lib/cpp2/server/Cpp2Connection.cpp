@@ -160,21 +160,13 @@ Cpp2Connection::Cpp2Connection(
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->newConnection(&context_);
   }
-
-#if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptorsInfo =
-      worker_->getServer()->getServiceInterceptors();
-  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
-    ServiceInterceptorBase::ConnectionInfo connectionInfo{
-        &context_,
-        context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    serviceInterceptorsInfo[i].interceptor->internal_onConnection(
-        connectionInfo);
-  }
-#endif // FOLLY_HAS_COROUTINES
 }
 
 Cpp2Connection::~Cpp2Connection() {
+  channel_.reset();
+}
+
+void Cpp2Connection::invokeServiceInterceptorsOnConnectionClosed() noexcept {
 #if FOLLY_HAS_COROUTINES
   const auto& serviceInterceptorsInfo =
       worker_->getServer()->getServiceInterceptors();
@@ -186,15 +178,15 @@ Cpp2Connection::~Cpp2Connection() {
         connectionInfo);
   }
 #endif // FOLLY_HAS_COROUTINES
+}
+
+void Cpp2Connection::stop() {
+  invokeServiceInterceptorsOnConnectionClosed();
 
   for (const auto& handler : worker_->getServer()->getEventHandlersUnsafe()) {
     handler->connectionDestroyed(&context_);
   }
 
-  channel_.reset();
-}
-
-void Cpp2Connection::stop() {
   if (getConnectionManager()) {
     getConnectionManager()->removeConnection(this);
   }

@@ -2328,7 +2328,7 @@ class Enum(metaclass=EnumMeta):
 
     def __eq__(self, other):
         if isinstance(other, Enum):
-            return self is other or self._to_python() is other._to_python()
+            return self is other
         if cFollyIsDebug and isinstance(other, (bool, float)):
             warnings.warn(
                 f"Did you really mean to compare {type(self)} and {type(other)}?",

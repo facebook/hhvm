@@ -233,32 +233,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
     def test_simple(self) -> None:
         self.assert_simple(self.make_simple_python()._to_py3())
 
-    def test_enum_eq(self) -> None:
-        self.assertEqual(
-            py3_types.Color.GREEN.value,
-            python_types.Color.GREEN,
-        )
-        self.assertEqual(
-            python_types.Color.GREEN,
-            py3_types.Color.GREEN.value,
-        )
-        self.assertEqual(
-            python_types.Color.GREEN.value,
-            py3_types.Color.GREEN,
-        )
-        self.assertEqual(
-            py3_types.Color.GREEN,
-            python_types.Color.GREEN.value,
-        )
-        self.assertEqual(
-            python_types.Color.GREEN,
-            py3_types.Color.GREEN,
-        )
-        self.assertEqual(
-            py3_types.Color.GREEN,
-            python_types.Color.GREEN,
-        )
-
     @brokenInAutoMigrate()
     def test_simple_capi(self) -> None:
         self.assert_simple(py3_types.Simple.from_python(self.make_simple_python()))

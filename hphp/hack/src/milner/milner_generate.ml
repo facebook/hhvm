@@ -8,6 +8,8 @@
 
 open Hh_prelude
 
+let default_complexity = 5
+
 let max_hierarchy_depth = 2
 
 let max_branching_factor = 2
@@ -234,7 +236,16 @@ and Kind : sig
     | Like
   [@@deriving show { with_path = false }]
 
-  val pick : ReadOnlyEnvironment.t -> t
+  (** Picks a kind that conforms to the constraints in the ReadOnlyEnvironment
+      and the complexity budget.
+
+      If the complexity budget is at 0 (or less), it will only pick kinds that
+      lead to types with no other types in its structure. For example, we can
+      pick a primitive or an alias because these don't have type arguments (in
+      primitive case, this is inherent and in the alias case, it is a detail of
+      the current implementation), but not a class because it can have a generic
+      or a nullable type which always have a type under `?`. *)
+  val pick : complexity:int -> ReadOnlyEnvironment.t -> t
 
   type classish =
     | Class
@@ -266,6 +277,7 @@ end = struct
   let _ = to_enum
 
   let pick
+      ~complexity
       ReadOnlyEnvironment.{ for_alias_def; for_reified_ty; for_option_ty; _ } =
     let kinds =
       List.range ~start:`inclusive ~stop:`inclusive min max
@@ -277,7 +289,30 @@ end = struct
       | TypeConst -> not for_alias_def
       | _ -> true
     in
-    let kinds = List.filter ~f:kind_filter kinds in
+    (* Complexity filter ensures that we don't generate heavily nested types
+       which make program generation expensive. *)
+    let complexity_filter = function
+      | Mixed
+      | Primitive
+      | Alias
+      | Newtype
+      | TypeConst
+      | Case
+      | Enum ->
+        true
+      | Option
+      | Classish
+      | Container
+      | Tuple
+      | Shape
+      | Awaitable
+      | Function
+      | Like ->
+        complexity > 0
+    in
+    let kinds =
+      List.filter ~f:(fun ty -> kind_filter ty && complexity_filter ty) kinds
+    in
     select kinds
 
   type classish =
@@ -416,11 +451,7 @@ and Type : sig
 
   val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
-  val mk :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    depth:int option ->
-    Environment.t * t
+  val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 end = struct
   type field = {
     key: string;
@@ -1030,6 +1061,7 @@ end = struct
       (renv : ReadOnlyEnvironment.t)
       (env : Environment.t)
       ~(parent : (Kind.classish * string * generic option) option)
+      ~(complexity : int)
       ~(depth : int) =
     ReadOnlyEnvironment.debug
       ~level:2
@@ -1055,7 +1087,9 @@ end = struct
       |> List.fold ~init:env ~f:(fun env _ ->
              let parent = Some parent in
              let depth = depth + 1 in
-             let (env, child) = mk_classish renv env ~parent ~depth in
+             let (env, child) =
+               mk_classish renv env ~parent ~complexity ~depth
+             in
              Environment.record_subtype env ~super ~sub:child)
     in
     let (name, num_of_children) =
@@ -1099,7 +1133,7 @@ end = struct
                 for_enum_def = false;
               }
           in
-          mk renv env ~depth:(Some depth)
+          mk renv env ~complexity ~depth:(Some depth)
         in
         (env, Some { instantiation; is_reified })
       else
@@ -1113,16 +1147,18 @@ end = struct
     (env, Classish { kind; name; generic })
 
   and mk
-      (renv : ReadOnlyEnvironment.t) (env : Environment.t) ~(depth : int option)
-      : Environment.t * t =
+      (renv : ReadOnlyEnvironment.t)
+      (env : Environment.t)
+      ~(complexity : int)
+      ~(depth : int option) : Environment.t * t =
     let depth = Option.value ~default:0 depth in
+    let kind = Kind.pick ~complexity renv in
     let mk ?(for_alias_def = false) renv env =
       mk ReadOnlyEnvironment.{ renv with for_alias_def } env ~depth:(Some depth)
     in
     let subtype_of ?(for_alias_def = false) renv env =
       subtype_of ReadOnlyEnvironment.{ renv with for_alias_def } env
     in
-    let kind = Kind.pick renv in
     ReadOnlyEnvironment.debug
       ~level:1
       renv
@@ -1134,7 +1170,12 @@ end = struct
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))
     | Kind.Option ->
       let rec candidate () =
-        match mk ReadOnlyEnvironment.{ renv with for_option_ty = true } env with
+        match
+          mk
+            ~complexity:(complexity - 1)
+            ReadOnlyEnvironment.{ renv with for_option_ty = true }
+            env
+        with
         | (_, Mixed) -> candidate ()
         | (_, Option _) as res ->
           res
@@ -1145,14 +1186,19 @@ end = struct
       candidate ()
     | Kind.Awaitable ->
       let (env, ty) =
-        mk ReadOnlyEnvironment.{ renv with for_option_ty = false } env
+        mk
+          ~complexity:(complexity - 1)
+          ReadOnlyEnvironment.{ renv with for_option_ty = false }
+          env
       in
       (env, Awaitable ty)
-    | Kind.Classish -> mk_classish renv env ~parent:None ~depth
+    | Kind.Classish -> mk_classish renv env ~parent:None ~complexity ~depth
     | Kind.Alias ->
       let name = fresh "A" in
       let ty = Alias { name } in
-      let (env, aliased) = mk renv env ~for_alias_def:true in
+      let (env, aliased) =
+        mk ~complexity:default_complexity renv env ~for_alias_def:true
+      in
       let env = Environment.record_subtype env ~super:ty ~sub:aliased in
       let env =
         Environment.add_definition env @@ Definition.alias ~name aliased
@@ -1163,11 +1209,13 @@ end = struct
       let ty = Newtype { name } in
       let (env, aliased, bound) =
         if Random.bool () then
-          let (env, bound) = mk renv env in
+          let (env, bound) = mk ~complexity:default_complexity renv env in
           let aliased = subtype_of ~for_alias_def:true renv env bound in
           (env, aliased, Some bound)
         else
-          let (env, aliased) = mk ~for_alias_def:true renv env in
+          let (env, aliased) =
+            mk ~complexity:default_complexity ~for_alias_def:true renv env
+          in
           (env, aliased, None)
       in
       let env = Environment.record_subtype env ~super:ty ~sub:aliased in
@@ -1178,7 +1226,7 @@ end = struct
       (env, ty)
     | Kind.TypeConst ->
       let tc_name = fresh "TC" in
-      let (env, aliased) = mk renv env in
+      let (env, aliased) = mk ~complexity:default_complexity renv env in
       let typeconst_def = Definition.typeconst ~name:tc_name aliased in
       let class_name = fresh "CTC" in
       let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
@@ -1198,7 +1246,7 @@ end = struct
       let name = fresh "CT" in
       let (env, bound) =
         if Random.bool () then
-          let (env, bound) = mk renv env in
+          let (env, bound) = mk ~complexity:default_complexity renv env in
           (env, Some bound)
         else
           (env, None)
@@ -1208,7 +1256,7 @@ end = struct
         | Some bound ->
           let ty = subtype_of renv env ~for_alias_def:true bound in
           (env, ty)
-        | None -> mk renv env ~for_alias_def:true
+        | None -> mk ~complexity:default_complexity renv env ~for_alias_def:true
       in
       let rec add_disjuncts (env, disjuncts) =
         if Random.bool () then
@@ -1274,11 +1322,11 @@ end = struct
       let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       match Container.pick () with
       | Container.Vec ->
-        let (env, ty) = mk renv env in
+        let (env, ty) = mk ~complexity:(complexity - 1) renv env in
         (env, Vec ty)
       | Container.Dict ->
         let key = mk_arraykey renv env in
-        let (env, value) = mk renv env in
+        let (env, value) = mk ~complexity:(complexity - 1) renv env in
         (env, Dict { key; value })
       | Container.Keyset ->
         let ty = mk_arraykey renv env in
@@ -1291,14 +1339,15 @@ end = struct
       let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let (env, conjuncts) =
         List.init n ~f:(fun _ -> ())
-        |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)
+        |> List.fold_map ~init:env ~f:(fun env _ ->
+               mk ~complexity:(complexity - 1) renv env)
       in
       (env, Tuple { conjuncts; open_ = false })
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
       let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let mk_field env key =
-        let (env, ty) = mk renv env in
+        let (env, ty) = mk ~complexity:(complexity - 1) renv env in
         let optional = Random.bool () in
         (env, { key; optional; ty })
       in
@@ -1309,20 +1358,23 @@ end = struct
       let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
       let (env, parameters) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
-        |> List.fold_map ~init:env ~f:(fun env _ -> mk renv env)
+        |> List.fold_map ~init:env ~f:(fun env _ ->
+               mk ~complexity:(complexity - 1) renv env)
       in
-      let (env, return_) = mk renv env in
+      let (env, return_) = mk ~complexity:(complexity - 1) renv env in
       let (env, variadic) =
         if Random.bool () then
           (env, None)
         else
-          let (env, ty) = mk renv env in
+          let (env, ty) = mk ~complexity:(complexity - 1) renv env in
           (env, Some ty)
       in
       (env, Function { parameters; variadic; return_ })
     | Kind.Like ->
-      let (env, ty) = mk renv env in
+      let (env, ty) = mk ~complexity:(complexity - 1) renv env in
       (env, Like ty)
+
+  let mk = mk ~depth:None ~complexity:default_complexity
 end
 
 and TypeMap : (WrappedMap.S with type key = Type.t) = WrappedMap.Make (Type)

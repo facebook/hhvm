@@ -36,7 +36,7 @@ let init_table contents placeholder =
 let generate_tables ~verbose template =
   let renv = Gen.ReadOnlyEnvironment.default ~verbose in
   let env = Gen.Environment.default in
-  let mk_type () = Gen.Type.mk renv env ~depth:None in
+  let mk_type () = Gen.Type.mk renv env in
   (* Farm the type placeholders from the template and randomly generate types *)
   let ty_table = init_table template type_regexp in
   let ty_table = Hashtbl.map ty_table ~f:mk_type in

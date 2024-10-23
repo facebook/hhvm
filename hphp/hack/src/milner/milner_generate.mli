@@ -33,9 +33,5 @@ module Type : sig
 
   val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
-  val mk :
-    ReadOnlyEnvironment.t ->
-    Environment.t ->
-    depth:int option ->
-    Environment.t * t
+  val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 end

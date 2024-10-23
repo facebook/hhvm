@@ -1,3 +1,7 @@
+ERROR: File "cyclic_typedef_bound.php--defines.php", line 3, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "cyclic_typedef_bound.php--defines.php", line 3, characters 14-14:
+  Cyclic use is here
 ERROR: File "cyclic_typedef_bound.php--uses.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
   File "cyclic_typedef_bound.php--uses.php", line 3, characters 24-29:

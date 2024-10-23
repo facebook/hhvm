@@ -1,3 +1,11 @@
+ERROR: File "subtyping_mutual3c.php", line 4, characters 11-11:
+Cyclic type definition (Typing[4014])
+  File "subtyping_mutual3c.php", line 6, characters 20-20:
+  Cyclic use is here
+ERROR: File "subtyping_mutual3c.php", line 6, characters 11-11:
+Cyclic type definition (Typing[4014])
+  File "subtyping_mutual3c.php", line 4, characters 16-16:
+  Cyclic use is here
 ERROR: File "subtyping_mutual3c.php", line 29, characters 5-6:
 Invalid argument (Typing[4110])
   File "subtyping_mutual3c.php", line 10, characters 26-26:

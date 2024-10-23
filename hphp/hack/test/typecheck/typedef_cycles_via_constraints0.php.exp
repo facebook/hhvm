@@ -1,2 +1,38 @@
 ERROR: File "typedef_cycles_via_constraints0.php", line 21, characters 14-17:
 Cannot use `this` outside of a class (Naming[2045])
+ERROR: File "typedef_cycles_via_constraints0.php", line 6, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 6, characters 16-16:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 11, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 9, characters 18-18:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 16, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
+Invalid type hint (Typing[4062])
+  File "typedef_cycles_via_constraints0.php", line 16, characters 17-17:
+  You are trying to access the type constant `T` but this is a mixed value
+  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
+  Definition is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 18, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 18, characters 15-15:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 19, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 19, characters 18-18:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 20, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints0.php", line 20, characters 28-28:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 22, characters 9-9:
+Invalid constraint on `newtype` (Typing[4332])
+  File "typedef_cycles_via_constraints0.php", line 22, characters 21-23:
+  Expected `int`
+  File "typedef_cycles_via_constraints0.php", line 22, characters 17-17:
+  But got `mixed`. Using `mixed` instead of M because this is an illegal recursive use of M in the definition of M

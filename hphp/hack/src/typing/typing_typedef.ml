@@ -21,15 +21,28 @@ type constraint_direction =
   | As
   | Super
 
-(** [get_cnstr_errs env tcstr constraint_direction t_pos ty] checks that
+let report_cyclic_constraint env cycles cstr_direction =
+  match cstr_direction with
+  | As ->
+    Type_expansions.report cycles
+    |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env)
+  | Super -> ()
+
+(** [get_cnstr_errs env tcstr constraint_direction name ty] checks that
   `ty <: tcstr` or `tcstr <: ty` depending on [constraint_direction] *)
-let get_cnstr_errs env tcstr (cstr_direction : constraint_direction) t_pos ty :
+let get_cnstr_errs
+    env tcstr (cstr_direction : constraint_direction) (t_pos, t_name) ty :
     Typing_env_types.env * Typing_error.t option =
   match tcstr with
   | Some tcstr ->
-    let ((env, ty_err_opt1), cstr) =
-      Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
+    let ((env, ty_err_opt1, cycles), cstr) =
+      Phase.localize_hint_no_subst_report_cycles
+        env
+        ~ignore_errors:false
+        tcstr
+        ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name)
     in
+    report_cyclic_constraint env cycles cstr_direction;
     let (env, ty_err_opt2) =
       let (ty_sub, ty_super) =
         match cstr_direction with
@@ -192,13 +205,13 @@ let typedef_def ctx typedef =
 
     let (env, ty_err_opt3) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
-          let (env, err) = get_cnstr_errs env t_as_constraint As t_pos ty in
+          let (env, err) = get_cnstr_errs env t_as_constraint As t_name ty in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in
     let (env, ty_err_opt4) =
       List.fold_left_env env tys ~init:None ~f:(fun env acc_err ty ->
           let (env, err) =
-            get_cnstr_errs env t_super_constraint Super t_pos ty
+            get_cnstr_errs env t_super_constraint Super t_name ty
           in
           (env, Option.merge ~f:Typing_error.both acc_err err))
     in

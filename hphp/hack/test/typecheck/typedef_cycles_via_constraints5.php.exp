@@ -1,3 +1,11 @@
+ERROR: File "typedef_cycles_via_constraints5.php--defs.php", line 3, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints5.php--defs.php", line 3, characters 19-22:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints5.php--defs.php", line 4, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints5.php--defs.php", line 4, characters 19-22:
+  Cyclic use is here
 ERROR: File "typedef_cycles_via_constraints5.php--uses.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints5.php--uses.php", line 3, characters 24-29:

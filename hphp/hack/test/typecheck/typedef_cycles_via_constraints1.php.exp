@@ -1,5 +1,13 @@
 ERROR: File "typedef_cycles_via_constraints1.php--defs.php", line 7, characters 1-23:
 Cannot use unstable feature: `case_types` (Parsing[1002])
+ERROR: File "typedef_cycles_via_constraints1.php--defs.php", line 5, characters 9-9:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints1.php--defs.php", line 5, characters 14-14:
+  Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints1.php--defs.php", line 7, characters 11-11:
+Cyclic type definition (Typing[4014])
+  File "typedef_cycles_via_constraints1.php--defs.php", line 7, characters 16-16:
+  Cyclic use is here
 ERROR: File "typedef_cycles_via_constraints1.php--uses.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
   File "typedef_cycles_via_constraints1.php--uses.php", line 3, characters 24-29:

@@ -1,3 +1,7 @@
+ERROR: File "case_type_cyclic_new_type.php--file1.php", line 3, characters 9-17:
+Cyclic type definition (Typing[4014])
+  File "case_type_cyclic_new_type.php--file1.php", line 3, characters 22-30:
+  Cyclic use is here
 ERROR: File "case_type_cyclic_new_type.php--file2.php", line 4, characters 11-12:
 Invalid case type declaration. More than one variant of `CT` could contain values with the same runtime tag (Typing[4475])
   File "case_type_cyclic_new_type.php--file2.php", line 4, characters 16-24:

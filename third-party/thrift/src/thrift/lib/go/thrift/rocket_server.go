@@ -60,7 +60,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *Se
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID), nil
+		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log), nil
 	}
 	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
 	return r.Serve(ctx)

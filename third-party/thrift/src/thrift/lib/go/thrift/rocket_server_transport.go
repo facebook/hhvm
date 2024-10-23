@@ -22,9 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
-	"os"
 	"runtime/debug"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -36,15 +34,15 @@ type rocketServerTransport struct {
 	processor   Processor
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
-	log         *log.Logger
+	log         func(format string, args ...interface{})
 	connContext ConnContextFunc
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{})) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,
-		log:         log.New(os.Stderr, "", log.LstdFlags),
+		log:         log,
 		transportID: transportID,
 		connContext: connContext,
 	}
@@ -100,7 +98,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 			if isTLS {
 				err = tlsConn.HandshakeContext(ctx)
 				if err != nil {
-					r.log.Printf("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
+					r.log("thrift: error performing TLS handshake with %s: %s\n", conn.RemoteAddr(), err)
 					// Handshake failed, we cannot proceed with this connection - close it and return.
 					tlsConn.Close()
 					return
@@ -138,28 +136,28 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 		processor := newRocketUpgradeProcessor(r.processor)
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
-			r.log.Printf("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
 		if err := r.processHeaderRequest(ctx, headerProtocol, processor); err != nil {
-			r.log.Printf("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
 		if processor.upgraded {
 			r.processRocketRequests(ctx, conn)
 		} else {
 			if err := r.processHeaderRequests(ctx, headerProtocol, processor); err != nil {
-				r.log.Printf("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+				r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
 			}
 		}
 	case TransportIDHeader:
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
-			r.log.Printf("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
 		if err := r.processHeaderRequests(ctx, headerProtocol, r.processor); err != nil {
-			r.log.Printf("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
 		}
 	}
 }
@@ -183,7 +181,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol types.Protocol, processor Processor) error {
 	defer func() {
 		if err := recover(); err != nil {
-			r.log.Printf("panic in processor: %v: %s", err, debug.Stack())
+			r.log("panic in processor: %v: %s", err, debug.Stack())
 		}
 	}()
 	defer protocol.Close()

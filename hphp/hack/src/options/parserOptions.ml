@@ -42,6 +42,7 @@ type t = {
   experimental_features: Experimental_features.feature_status SMap.t;
   consider_unspecified_experimental_features_released: bool;
   package_v2: bool;
+  package_info: PackageInfo.t;
 }
 [@@deriving show, eq]
 
@@ -80,6 +81,7 @@ let default =
     experimental_features = SMap.empty;
     consider_unspecified_experimental_features_released = true;
     package_v2 = false;
+    package_info = PackageInfo.empty;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

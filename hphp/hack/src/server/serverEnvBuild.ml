@@ -43,16 +43,15 @@ let default_genv =
   }
 
 let make_env ~init_id ~deps_mode ?errorl ?package_info config : ServerEnv.env =
-  let tcopt = ServerConfig.typechecker_options config in
-  let tcopt =
+  let popt = ServerConfig.parser_options config in
+  let popt =
     match package_info with
-    | None -> tcopt
-    | Some package_info ->
-      { tcopt with GlobalOptions.tco_package_info = package_info }
+    | None -> popt
+    | Some package_info -> { popt with ParserOptions.package_info }
   in
   {
-    tcopt;
-    popt = ServerConfig.parser_options config;
+    tcopt = ServerConfig.typechecker_options config;
+    popt;
     gleanopt = ServerConfig.glean_options config;
     swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;

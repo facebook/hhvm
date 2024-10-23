@@ -299,7 +299,7 @@ let tco_autocomplete_mode t = t.GlobalOptions.tco_autocomplete_mode
 let set_tco_autocomplete_mode t =
   { t with GlobalOptions.tco_autocomplete_mode = true }
 
-let package_info t = t.GlobalOptions.tco_package_info
+let package_info t = t.GlobalOptions.po.ParserOptions.package_info
 
 let tco_log_exhaustivity_check t = t.GlobalOptions.tco_log_exhaustivity_check
 
@@ -317,6 +317,10 @@ let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality
 let hack_warnings t = t.GlobalOptions.hack_warnings
 
 let package_v2 t = t.GlobalOptions.po.ParserOptions.package_v2
+
+let set_package_info t package_info =
+  let popt = { t.GlobalOptions.po with ParserOptions.package_info } in
+  { t with GlobalOptions.po = popt }
 
 let package_v2_support_multifile_tests t =
   t.GlobalOptions.tco_package_v2_support_multifile_tests

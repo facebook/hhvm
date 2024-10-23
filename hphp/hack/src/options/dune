@@ -80,7 +80,7 @@
  (name parser_options)
  (wrapped false)
  (modules parserOptions experimental_features)
- (libraries collections utils_core)
+ (libraries collections package_info utils_core)
  (foreign_archives options_ffi)
  (preprocess
   (pps ppx_deriving.std)))

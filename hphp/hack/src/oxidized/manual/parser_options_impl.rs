@@ -5,6 +5,7 @@
 
 use crate::gen::parser_options::ParserOptions;
 use crate::i_set;
+use crate::package_info::PackageInfo;
 
 impl Default for ParserOptions {
     fn default() -> Self {
@@ -42,6 +43,7 @@ impl Default for ParserOptions {
             experimental_features: std::collections::BTreeMap::default(),
             consider_unspecified_experimental_features_released: true,
             package_v2: false,
+            package_info: PackageInfo::default(),
         }
     }
 }

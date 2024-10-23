@@ -174,7 +174,6 @@ type t = {
   dump_tast_hashes: bool;
   dump_tasts: string list;
   tco_autocomplete_mode: bool;
-  tco_package_info: PackageInfo.t;
   tco_log_exhaustivity_check: bool;
   tco_sticky_quarantine: bool;
   tco_lsp_invalidation: bool;
@@ -283,7 +282,6 @@ let default =
     dump_tast_hashes = false;
     dump_tasts = [];
     tco_autocomplete_mode = false;
-    tco_package_info = PackageInfo.empty;
     tco_log_exhaustivity_check = false;
     tco_sticky_quarantine = false;
     tco_lsp_invalidation = false;
@@ -390,7 +388,6 @@ let set
     ?dump_tast_hashes
     ?dump_tasts
     ?tco_autocomplete_mode
-    ?tco_package_info
     ?tco_log_exhaustivity_check
     ?tco_sticky_quarantine
     ?tco_lsp_invalidation
@@ -647,7 +644,6 @@ let set
     dump_tasts = setting dump_tasts options.dump_tasts;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
-    tco_package_info = setting tco_package_info options.tco_package_info;
     tco_log_exhaustivity_check =
       setting tco_log_exhaustivity_check options.tco_log_exhaustivity_check;
     tco_sticky_quarantine =

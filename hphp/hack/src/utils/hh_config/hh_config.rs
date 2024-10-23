@@ -311,29 +311,52 @@ impl HhConfig {
             // existing experimental features to be released and hence usable.
             consider_unspecified_experimental_features_released: experimental_features.is_none(),
             package_v2: hhconfig.get_bool_or("package_v2", default.package_v2)?,
+            // If there are errors, ignore them for the tcopt, the parser errors will be caught and
+            // sent separately.
+            package_info: package_info.try_into().unwrap_or_default(),
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
             po,
             tco_saved_state: local_config.saved_state.clone(),
-            tco_experimental_features: hhconfig
-                .get_string_set_or("enable_experimental_tc_features", default.tco_experimental_features),
+            tco_experimental_features: hhconfig.get_string_set_or(
+                "enable_experimental_tc_features",
+                default.tco_experimental_features,
+            ),
             tco_migration_flags: default.tco_migration_flags,
             tco_num_local_workers: default.tco_num_local_workers,
             tco_defer_class_declaration_threshold: default.tco_defer_class_declaration_threshold,
-            tco_locl_cache_capacity: hhconfig.get_int_or("locl_cache_capacity", default.tco_locl_cache_capacity)?,
-            tco_locl_cache_node_threshold: hhconfig.get_int_or("locl_cache_node_threshold", default.tco_locl_cache_node_threshold)?,
+            tco_locl_cache_capacity: hhconfig
+                .get_int_or("locl_cache_capacity", default.tco_locl_cache_capacity)?,
+            tco_locl_cache_node_threshold: hhconfig.get_int_or(
+                "locl_cache_node_threshold",
+                default.tco_locl_cache_node_threshold,
+            )?,
             so_naming_sqlite_path: default.so_naming_sqlite_path,
-            po_disallow_toplevel_requires: hhconfig.get_bool_or("disallow_toplevel_requires", default.po_disallow_toplevel_requires)?,
+            po_disallow_toplevel_requires: hhconfig.get_bool_or(
+                "disallow_toplevel_requires",
+                default.po_disallow_toplevel_requires,
+            )?,
             tco_log_large_fanouts_threshold: default.tco_log_large_fanouts_threshold,
             tco_log_inference_constraints: default.tco_log_inference_constraints,
             tco_language_feature_logging: default.tco_language_feature_logging,
             tco_timeout: hhconfig.get_int_or("timeout", default.tco_timeout)?,
-            tco_disallow_invalid_arraykey: hhconfig.get_bool_or("disallow_invalid_arraykey", default.tco_disallow_invalid_arraykey)?,
-            code_agnostic_fixme: hhconfig.get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
-            allowed_fixme_codes_strict: hhconfig.get_int_set_or("allowed_fixme_codes_strict", default.allowed_fixme_codes_strict)?,
-            log_levels: hhconfig.get_str("log_levels").map_or(Ok(default.log_levels), parse_json)?,
-            class_pointer_levels: hhconfig.get_str("class_pointer_levels").map_or(Ok(default.class_pointer_levels), parse_json)?,
+            tco_disallow_invalid_arraykey: hhconfig.get_bool_or(
+                "disallow_invalid_arraykey",
+                default.tco_disallow_invalid_arraykey,
+            )?,
+            code_agnostic_fixme: hhconfig
+                .get_bool_or("code_agnostic_fixme", default.code_agnostic_fixme)?,
+            allowed_fixme_codes_strict: hhconfig.get_int_set_or(
+                "allowed_fixme_codes_strict",
+                default.allowed_fixme_codes_strict,
+            )?,
+            log_levels: hhconfig
+                .get_str("log_levels")
+                .map_or(Ok(default.log_levels), parse_json)?,
+            class_pointer_levels: hhconfig
+                .get_str("class_pointer_levels")
+                .map_or(Ok(default.class_pointer_levels), parse_json)?,
             tco_remote_old_decls_no_limit: default.tco_remote_old_decls_no_limit,
             tco_fetch_remote_old_decls: default.tco_fetch_remote_old_decls,
             tco_populate_member_heaps: default.tco_populate_member_heaps,
@@ -343,10 +366,13 @@ impl HhConfig {
             tco_coeffects_local: default.tco_coeffects_local,
             tco_strict_contexts: default.tco_strict_contexts,
             tco_like_casts: hhconfig.get_bool_or("like_casts", default.tco_like_casts)?,
-            tco_check_xhp_attribute: hhconfig.get_bool_or("check_xhp_attribute", default.tco_check_xhp_attribute)?,
-            tco_check_redundant_generics: hhconfig.get_bool_or("check_redundant_generics", default.tco_check_redundant_generics)?,
-            tco_disallow_unresolved_type_variables: default
-                .tco_disallow_unresolved_type_variables,
+            tco_check_xhp_attribute: hhconfig
+                .get_bool_or("check_xhp_attribute", default.tco_check_xhp_attribute)?,
+            tco_check_redundant_generics: hhconfig.get_bool_or(
+                "check_redundant_generics",
+                default.tco_check_redundant_generics,
+            )?,
+            tco_disallow_unresolved_type_variables: default.tco_disallow_unresolved_type_variables,
             tco_custom_error_config: custom_error_config,
             tco_const_attribute: default.tco_const_attribute,
             tco_check_attribute_locations: default.tco_check_attribute_locations,
@@ -371,50 +397,86 @@ impl HhConfig {
                 .tco_disallow_discarded_nullable_awaitables,
             tco_higher_kinded_types: default.tco_higher_kinded_types,
             tco_report_pos_from_reason: default.tco_report_pos_from_reason,
-            tco_typecheck_sample_rate: hhconfig.get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
-            tco_enable_sound_dynamic: hhconfig.get_bool_or("enable_sound_dynamic_type", default.tco_enable_sound_dynamic)?,
-            tco_pessimise_builtins: hhconfig.get_bool_or("pessimise_builtins", default.tco_pessimise_builtins)?,
-            tco_enable_no_auto_dynamic: hhconfig.get_bool_or("enable_no_auto_dynamic", default.tco_enable_no_auto_dynamic)?,
-            tco_skip_check_under_dynamic: hhconfig.get_bool_or("skip_check_under_dynamic", default.tco_skip_check_under_dynamic)?,
-            tco_global_access_check_enabled: hhconfig.get_bool_or("tco_global_access_check_enabled", default.tco_global_access_check_enabled)?,
-            tco_enable_strict_string_concat_interp: hhconfig.get_bool_or("enable_strict_string_concat_interp", default
-                .tco_enable_strict_string_concat_interp)?,
+            tco_typecheck_sample_rate: hhconfig
+                .get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
+            tco_enable_sound_dynamic: hhconfig.get_bool_or(
+                "enable_sound_dynamic_type",
+                default.tco_enable_sound_dynamic,
+            )?,
+            tco_pessimise_builtins: hhconfig
+                .get_bool_or("pessimise_builtins", default.tco_pessimise_builtins)?,
+            tco_enable_no_auto_dynamic: hhconfig
+                .get_bool_or("enable_no_auto_dynamic", default.tco_enable_no_auto_dynamic)?,
+            tco_skip_check_under_dynamic: hhconfig.get_bool_or(
+                "skip_check_under_dynamic",
+                default.tco_skip_check_under_dynamic,
+            )?,
+            tco_global_access_check_enabled: hhconfig.get_bool_or(
+                "tco_global_access_check_enabled",
+                default.tco_global_access_check_enabled,
+            )?,
+            tco_enable_strict_string_concat_interp: hhconfig.get_bool_or(
+                "enable_strict_string_concat_interp",
+                default.tco_enable_strict_string_concat_interp,
+            )?,
             tco_ignore_unsafe_cast: default.tco_ignore_unsafe_cast,
             tco_enable_expression_trees: default.tco_enable_expression_trees,
-            tco_enable_function_references: hhconfig.get_bool_or("enable_function_references", default.tco_enable_function_references)?,
-            tco_allowed_expression_tree_visitors:
-                hhconfig
-                    .get_str("allowed_expression_tree_visitors")
-                    .map_or(default.tco_allowed_expression_tree_visitors, |s| {
-                        let mut allowed_expression_tree_visitors = parse_svec(s);
-                        // Fix up type names so they will match with elaborated names.
-                        // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
-                        for ty in &mut allowed_expression_tree_visitors {
-                            if !ty.starts_with('\\') {
-                                *ty = format!("\\{}", ty)
-                            }
-                        };
-                        allowed_expression_tree_visitors
-                    }),
+            tco_enable_function_references: hhconfig.get_bool_or(
+                "enable_function_references",
+                default.tco_enable_function_references,
+            )?,
+            tco_allowed_expression_tree_visitors: hhconfig
+                .get_str("allowed_expression_tree_visitors")
+                .map_or(default.tco_allowed_expression_tree_visitors, |s| {
+                    let mut allowed_expression_tree_visitors = parse_svec(s);
+                    // Fix up type names so they will match with elaborated names.
+                    // Keep this in sync with the Utils.add_ns loop in server/serverConfig.ml
+                    for ty in &mut allowed_expression_tree_visitors {
+                        if !ty.starts_with('\\') {
+                            *ty = format!("\\{}", ty)
+                        }
+                    }
+                    allowed_expression_tree_visitors
+                }),
             tco_typeconst_concrete_concrete_error: default.tco_typeconst_concrete_concrete_error,
-            tco_enable_strict_const_semantics: hhconfig.get_int_or("enable_strict_const_semantics", default.tco_enable_strict_const_semantics)?,
-            tco_strict_wellformedness: hhconfig.get_int_or("strict_wellformedness", default.tco_strict_wellformedness)?,
-            tco_meth_caller_only_public_visibility: default
-                .tco_meth_caller_only_public_visibility,
+            tco_enable_strict_const_semantics: hhconfig.get_int_or(
+                "enable_strict_const_semantics",
+                default.tco_enable_strict_const_semantics,
+            )?,
+            tco_strict_wellformedness: hhconfig
+                .get_int_or("strict_wellformedness", default.tco_strict_wellformedness)?,
+            tco_meth_caller_only_public_visibility: default.tco_meth_caller_only_public_visibility,
             tco_require_extends_implements_ancestors: default
                 .tco_require_extends_implements_ancestors,
             tco_strict_value_equality: default.tco_strict_value_equality,
             tco_enforce_sealed_subclasses: default.tco_enforce_sealed_subclasses,
             tco_implicit_inherit_sdt: default.tco_implicit_inherit_sdt,
-            tco_explicit_consistent_constructors: hhconfig.get_int_or("explicit_consistent_constructors", default.tco_explicit_consistent_constructors)?,
-            tco_require_types_class_consts: hhconfig.get_int_or("require_types_tco_require_types_class_consts", default.tco_require_types_class_consts)?,
-            tco_type_printer_fuel: hhconfig.get_int_or("type_printer_fuel", default.tco_type_printer_fuel)?,
+            tco_explicit_consistent_constructors: hhconfig.get_int_or(
+                "explicit_consistent_constructors",
+                default.tco_explicit_consistent_constructors,
+            )?,
+            tco_require_types_class_consts: hhconfig.get_int_or(
+                "require_types_tco_require_types_class_consts",
+                default.tco_require_types_class_consts,
+            )?,
+            tco_type_printer_fuel: hhconfig
+                .get_int_or("type_printer_fuel", default.tco_type_printer_fuel)?,
             tco_specify_manifold_api_key: default.tco_specify_manifold_api_key,
-            tco_profile_top_level_definitions: hhconfig.get_bool_or("profile_top_level_definitions", default.tco_profile_top_level_definitions)?,
+            tco_profile_top_level_definitions: hhconfig.get_bool_or(
+                "profile_top_level_definitions",
+                default.tco_profile_top_level_definitions,
+            )?,
             tco_allow_all_files_for_module_declarations: default
                 .tco_allow_all_files_for_module_declarations,
-            tco_allowed_files_for_module_declarations: hhconfig.get_str("allowed_files_for_module_declarations").map_or(default.tco_allowed_files_for_module_declarations, parse_svec),
-            tco_allowed_files_for_ignore_readonly: hhconfig.get_str("allowed_files_for_ignore_readonly").map_or(default.tco_allowed_files_for_ignore_readonly, parse_svec),
+            tco_allowed_files_for_module_declarations: hhconfig
+                .get_str("allowed_files_for_module_declarations")
+                .map_or(
+                    default.tco_allowed_files_for_module_declarations,
+                    parse_svec,
+                ),
+            tco_allowed_files_for_ignore_readonly: hhconfig
+                .get_str("allowed_files_for_ignore_readonly")
+                .map_or(default.tco_allowed_files_for_ignore_readonly, parse_svec),
             tco_record_fine_grained_dependencies: default.tco_record_fine_grained_dependencies,
             tco_loop_iteration_upper_bound: default.tco_loop_iteration_upper_bound,
             tco_populate_dead_unsafe_cast_heap: default.tco_populate_dead_unsafe_cast_heap,
@@ -431,23 +493,29 @@ impl HhConfig {
                 }
             },
             tco_autocomplete_mode: default.tco_autocomplete_mode,
-            tco_package_info:
-                // If there are errors, ignore them for the tcopt, the parser errors will be caught and
-                // sent separately.
-                package_info.try_into().unwrap_or_default(),
-            tco_log_exhaustivity_check: hhconfig.get_bool_or("log_exhaustivity_check", default.tco_log_exhaustivity_check)?,
+            tco_log_exhaustivity_check: hhconfig
+                .get_bool_or("log_exhaustivity_check", default.tco_log_exhaustivity_check)?,
             tco_sticky_quarantine: default.tco_sticky_quarantine,
             tco_lsp_invalidation: default.tco_lsp_invalidation,
             tco_autocomplete_sort_text: default.tco_autocomplete_sort_text,
-            tco_extended_reasons:  hhconfig.get_either_int_or_str("extended_reasons").and_then(|res| match res  {
-                Ok (n) => Some(ExtendedReasonsConfig::Extended(n)),
-                Err(data) => {
-                    if data.eq("debug") { Some(ExtendedReasonsConfig::Debug) }
-                    else if data.eq("legacy") { Some(ExtendedReasonsConfig::Legacy) }
-                    else { None }
-                }
-            }),
-            tco_disable_physical_equality: hh_conf.get_bool_or("disable_physical_equality", default.tco_disable_physical_equality)?,
+            tco_extended_reasons: hhconfig.get_either_int_or_str("extended_reasons").and_then(
+                |res| match res {
+                    Ok(n) => Some(ExtendedReasonsConfig::Extended(n)),
+                    Err(data) => {
+                        if data.eq("debug") {
+                            Some(ExtendedReasonsConfig::Debug)
+                        } else if data.eq("legacy") {
+                            Some(ExtendedReasonsConfig::Legacy)
+                        } else {
+                            None
+                        }
+                    }
+                },
+            ),
+            tco_disable_physical_equality: hh_conf.get_bool_or(
+                "disable_physical_equality",
+                default.tco_disable_physical_equality,
+            )?,
             hack_warnings: {
                 let is_on = hh_conf.get_bool_or("hack_warnings", true)?;
                 if is_on {
@@ -457,17 +525,32 @@ impl HhConfig {
                     NoneOrAllExcept::NNone
                 }
             },
-            warnings_default_all: hhconfig.get_bool_or("warnings_default_all", default.warnings_default_all)?,
+            warnings_default_all: hhconfig
+                .get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2_support_multifile_tests: hhconfig.get_bool_or("package_v2_support_multifile_tests", default.tco_package_v2_support_multifile_tests)?,
-            tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or("package_v2_bypass_package_check_for_class_const", default.tco_package_v2_bypass_package_check_for_class_const)?,
+            tco_package_v2_support_multifile_tests: hhconfig.get_bool_or(
+                "package_v2_support_multifile_tests",
+                default.tco_package_v2_support_multifile_tests,
+            )?,
+            tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or(
+                "package_v2_bypass_package_check_for_class_const",
+                default.tco_package_v2_bypass_package_check_for_class_const,
+            )?,
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
-                    "hh_distc_should_disable_trace_store", default.hh_distc_should_disable_trace_store)?,
+                "hh_distc_should_disable_trace_store",
+                default.hh_distc_should_disable_trace_store,
+            )?,
             hh_distc_exponential_backoff_num_retries: hhconfig.get_int_or(
-                    "hh_distc_exponential_backoff_num_retries", default.hh_distc_exponential_backoff_num_retries)?,
-            tco_enable_abstract_method_optional_parameters: hhconfig.get_bool_or("enable_abstract_method_optional_parameters", default.tco_enable_abstract_method_optional_parameters)?,
-            recursive_case_types: hhconfig.get_bool_or("recursive_case_types", default.recursive_case_types)?,
+                "hh_distc_exponential_backoff_num_retries",
+                default.hh_distc_exponential_backoff_num_retries,
+            )?,
+            tco_enable_abstract_method_optional_parameters: hhconfig.get_bool_or(
+                "enable_abstract_method_optional_parameters",
+                default.tco_enable_abstract_method_optional_parameters,
+            )?,
+            recursive_case_types: hhconfig
+                .get_bool_or("recursive_case_types", default.recursive_case_types)?,
         };
         let mut c = Self {
             local_config,

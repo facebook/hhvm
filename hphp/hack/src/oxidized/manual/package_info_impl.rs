@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::borrow::Cow;
 use std::ops::Range;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -14,18 +15,8 @@ use toml::Spanned;
 use crate::gen::package::Package;
 use crate::gen::package::PosId;
 use crate::gen::package_info::PackageInfo;
-use crate::manual::s_map::SMap;
 
 pub type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
-
-impl Default for PackageInfo {
-    fn default() -> Self {
-        Self {
-            glob_to_package: SMap::default(),
-            existing_packages: SMap::default(),
-        }
-    }
-}
 
 pub fn package_info_to_vec(
     filename: &str,
@@ -108,5 +99,37 @@ impl TryFrom<package::PackageInfo> for PackageInfo {
             }),
             Err(err) => Err(err),
         }
+    }
+}
+
+impl PackageInfo {
+    pub fn get_package_for_file(&self, support_multifile_tests: bool, path: &str) -> Option<&str> {
+        let path = if support_multifile_tests {
+            let re = regex::Regex::new(r"/[^/]*--").unwrap();
+            re.replace(path, "/")
+        } else {
+            Cow::Borrowed(path)
+        };
+        let mut matching_includepath_and_package_pairs = Vec::new();
+        for package in self.existing_packages.values() {
+            if let Some(PosId(_, include_path)) = package
+                .include_paths
+                .iter()
+                .find(|PosId(_, prefix)| path.starts_with(prefix))
+            {
+                // If the package's include_path is an exact match,
+                // return the package immediately.
+                if *include_path == path {
+                    return Some(package.name.1.as_str());
+                }
+                matching_includepath_and_package_pairs.push((include_path, package));
+            }
+        }
+        // If there is no exact match, return the package with the longest prefix-matching include_path.
+        matching_includepath_and_package_pairs
+            .sort_by(|(include_path1, _), (include_path2, _)| include_path2.cmp(include_path1));
+        matching_includepath_and_package_pairs
+            .first()
+            .map(|(_, package)| package.name.1.as_str())
     }
 }

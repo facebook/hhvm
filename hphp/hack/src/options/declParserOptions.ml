@@ -18,6 +18,7 @@ type t = {
   include_assignment_values: bool;
   stack_size: int;
   deregister_php_stdlib: bool;
+  package_info: PackageInfo.t;
 }
 [@@deriving show]
 
@@ -35,4 +36,5 @@ let from_parser_options (popt : ParserOptions.t) =
     include_assignment_values = false;
     stack_size = popt.stack_size;
     deregister_php_stdlib = popt.deregister_php_stdlib;
+    package_info = popt.package_info;
   }

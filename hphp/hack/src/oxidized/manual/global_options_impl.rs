@@ -7,7 +7,6 @@ use crate::custom_error_config::CustomErrorConfig;
 use crate::gen::global_options::GlobalOptions;
 use crate::gen::global_options::SavedState;
 use crate::gen::global_options::SavedStateLoading;
-use crate::gen::package_info::PackageInfo;
 use crate::gen::parser_options::ParserOptions;
 use crate::gen::saved_state_rollouts::SavedStateRollouts;
 use crate::global_options::NoneOrAllExcept;
@@ -126,7 +125,6 @@ impl Default for GlobalOptions {
             dump_tast_hashes: false,
             dump_tasts: vec![],
             tco_autocomplete_mode: false,
-            tco_package_info: PackageInfo::default(),
             tco_log_exhaustivity_check: false,
             tco_sticky_quarantine: false,
             tco_lsp_invalidation: false,

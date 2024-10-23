@@ -104,8 +104,7 @@ let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
 
-let get_package_info (t : t) : PackageInfo.t =
-  t.tcopt.GlobalOptions.tco_package_info
+let get_package_info (t : t) : PackageInfo.t = t.popt.ParserOptions.package_info
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
   { t with tcopt = f t.tcopt }

@@ -355,17 +355,15 @@ let initialize1
       ~ai_options:None
   in
   (* Ignore package loading errors for now TODO(jjwu) *)
-  let open GlobalOptions in
   log "Loading package configuration";
   let po = ServerConfig.parser_options config in
-  let tco = ServerConfig.typechecker_options config in
   let (_, package_info) =
     PackageConfig.load_and_parse ~package_v2:po.ParserOptions.package_v2 ()
   in
   let config =
-    ServerConfig.set_tc_options
+    ServerConfig.set_parser_options
       config
-      { tco with tco_package_info = package_info }
+      { po with ParserOptions.package_info }
   in
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);

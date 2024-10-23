@@ -121,6 +121,7 @@ let derive_default (ty : label) =
   List.mem
     [
       "map_reduce_ffi::MapReduceFfi";
+      "package_info::PackageInfo";
       "scoured_comments::ScouredComments";
       "tast_collector::ByNames";
       "tast_hashes::ByNames";

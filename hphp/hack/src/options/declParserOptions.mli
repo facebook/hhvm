@@ -18,6 +18,7 @@ type t = {
   include_assignment_values: bool;
   stack_size: int;  (** Stack size to for the parallel workers *)
   deregister_php_stdlib: bool;
+  package_info: PackageInfo.t;
 }
 [@@deriving show]
 

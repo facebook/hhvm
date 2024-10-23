@@ -870,6 +870,7 @@ let parse_options () =
         allowed_decl_fixme_codes =
           Option.value !allowed_decl_fixme_codes ~default:ISet.empty;
         package_v2 = default.package_v2;
+        package_info = default.package_info;
       }
   in
 
@@ -2508,7 +2509,7 @@ let decl_and_run_mode
       Errors.iter errors ~f:Errors.add_error;
       info
   in
-  let tcopt = { tcopt with GlobalOptions.tco_package_info = package_info } in
+  let tcopt = TypecheckerOptions.set_package_info tcopt package_info in
   let popt = tcopt.GlobalOptions.po in
   let ctx =
     if rust_provider_backend then

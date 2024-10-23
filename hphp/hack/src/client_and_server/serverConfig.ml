@@ -369,6 +369,7 @@ let load_config config options =
         consider_unspecified_experimental_features_released =
           Option.is_none experimental_features;
         package_v2 = bool_opt "package_v2" config >?? po_opt.package_v2;
+        package_info = po_opt.package_info;
       }
   in
   GlobalOptions.set

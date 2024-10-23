@@ -520,9 +520,9 @@ void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
   detail::schematizer::options opts;
   opts.only_root_program_ = true;
   opts.use_hash = true;
-  opts.include.reset(detail::schematizer::included_data::double_writes);
-  opts.include.reset(detail::schematizer::included_data::docs);
-  opts.include.reset(detail::schematizer::included_data::source_ranges);
+  opts.double_writes = false;
+  opts.include_docs = false;
+  opts.include_source_ranges = false;
 
   std::string serialized =
       detail::pluggable_functions().call<detail::get_schema_tag>(

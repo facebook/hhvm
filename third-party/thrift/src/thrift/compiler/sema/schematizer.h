@@ -43,36 +43,25 @@ class schematizer {
   using intern_func = std::function<value_id(
       std::unique_ptr<t_const_value> val, t_program* program)>;
 
-  enum class included_data : uint16_t {
-    double_writes = 1, // Legacy copies of data for backward compatiblity.
-    annotations = 2,
-    docs = 4,
-    source_ranges = 8,
-  };
-
-  struct included_data_set {
-    bool test(included_data item) const {
-      return data & static_cast<storage>(item);
-    }
-    void set(included_data item) { data |= static_cast<storage>(item); }
-    void reset(included_data item) { data &= ~static_cast<storage>(item); }
-
-    // Needed to work around https://github.com/llvm/llvm-project/issues/36032.
-    included_data_set() : data(static_cast<storage>(-1)) {}
-
-   private:
-    using storage = std::underlying_type_t<included_data>;
-    storage data;
-  };
-
   struct options {
-    included_data_set include;
+    bool double_writes : 1; // Legacy copies of data for backward compatiblity.
+
+    bool include_annotations : 1;
+    bool include_docs : 1;
+    bool include_source_ranges : 1;
+
     intern_func intern_value;
     bool use_hash = false; // Uses typeHashPrefixSha2_256 in typeUri and
                            // definitionKey instead of definitionId.
     bool include_generated_ = false;
     bool source_ranges_ = false;
     bool only_root_program_ = false;
+
+    options()
+        : double_writes(true),
+          include_annotations(true),
+          include_docs(true),
+          include_source_ranges(true) {}
   };
 
   explicit schematizer(const t_scope& scope, source_manager& sm, options opts)

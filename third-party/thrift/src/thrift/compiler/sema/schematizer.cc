@@ -97,7 +97,7 @@ void schematizer::add_definition(
   }
 
   if (auto structured = node.structured_annotations();
-      !structured.empty() && opts_.include.test(included_data::annotations)) {
+      !structured.empty() && opts_.include_annotations) {
     auto annots = t_const_value::make_map();
     auto structured_annots = t_const_value::make_list();
 
@@ -116,7 +116,7 @@ void schematizer::add_definition(
       }
 
       // Double write to deprecated externed path. (T161963504)
-      if (opts_.include.test(included_data::double_writes)) {
+      if (opts_.double_writes) {
         auto structured_annot = annot->clone();
         structured_annot->set_ttype(
             std_type("facebook.com/thrift/type/StructuredAnnotation"));
@@ -132,7 +132,7 @@ void schematizer::add_definition(
     }
 
     // Double write to deprecated externed path (T161963504).
-    if (opts_.include.test(included_data::double_writes)) {
+    if (opts_.double_writes) {
       definition->add_map(
           val("structuredAnnotations"), std::move(structured_annots));
     }
@@ -140,7 +140,7 @@ void schematizer::add_definition(
   }
 
   if (auto unstructured = node.annotations();
-      !unstructured.empty() && opts_.include.test(included_data::annotations)) {
+      !unstructured.empty() && opts_.include_annotations) {
     auto annots = t_const_value::make_map();
 
     for (const auto& pair : unstructured) {
@@ -150,7 +150,7 @@ void schematizer::add_definition(
     definition->add_map(val("unstructuredAnnotations"), std::move(annots));
   }
 
-  if (node.has_doc() && opts_.include.test(included_data::docs)) {
+  if (node.has_doc() && opts_.include_docs) {
     auto docs = t_const_value::make_map();
     docs->add_map(val("contents"), val(node.doc()));
     definition->add_map(val("docs"), std::move(docs));
@@ -545,7 +545,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         func_schema->add_map(
             val("returnType"), gen_type(*type, node.program()));
         // Double write of return type for backwards compatibility (T161963504).
-        if (opts_.include.test(included_data::double_writes)) {
+        if (opts_.double_writes) {
           auto return_types_schema = t_const_value::make_list();
           auto schema = t_const_value::make_map();
           schema->add_map(val("thriftType"), gen_type(*type, node.program()));

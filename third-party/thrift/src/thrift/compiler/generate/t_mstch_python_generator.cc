@@ -159,6 +159,8 @@ class python_mstch_program : public mstch_program {
             {"program:generate_to_mutable_python_conversion_methods?",
              &python_mstch_program::
                  generate_to_mutable_python_conversion_methods},
+            {"program:generate_unified_thrift_python_type_hints?",
+             &python_mstch_program::generate_unified_thrift_python_type_hints},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -243,6 +245,10 @@ class python_mstch_program : public mstch_program {
 
   mstch::node generate_to_mutable_python_conversion_methods() {
     return !get_option("generate_to_mutable_python_conversion_methods").empty();
+  }
+
+  mstch::node generate_unified_thrift_python_type_hints() {
+    return !get_option("generate_unified_thrift_python_type_hints").empty();
   }
 
  protected:
@@ -1276,6 +1282,10 @@ void t_mstch_python_generator::generate_types() {
       experimental_generate_mutable_types,
       "generate_to_mutable_python_conversion_methods",
       "true");
+  mstch_context_.set_or_erase_option(
+      experimental_unify_thrift_python_type_hints,
+      "generate_unified_thrift_python_type_hints",
+      "true");
   generate_file(
       "thrift_types.py",
       IsTypesFile::Yes,
@@ -1295,6 +1305,7 @@ void t_mstch_python_generator::generate_types() {
         generate_root_path_);
   }
   mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
+  mstch_context_.options.erase("generate_unified_thrift_python_type_hints");
 
   if (experimental_generate_mutable_types) {
     generate_file(

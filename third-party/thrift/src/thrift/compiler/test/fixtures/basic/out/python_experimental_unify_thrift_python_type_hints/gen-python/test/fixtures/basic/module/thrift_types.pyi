@@ -12,6 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.basic.module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -19,7 +20,7 @@ class _fbthrift_compatible_with_MyEnum:
     pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int, test.fixtures.basic.module.thrift_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
@@ -30,7 +31,7 @@ class _fbthrift_compatible_with_HackEnum:
     pass
 
 
-class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackEnum):
+class HackEnum(_fbthrift_python_types.Enum, int, test.fixtures.basic.module.thrift_abstract_types.HackEnum, _fbthrift_compatible_with_HackEnum):
     Value1: HackEnum = ...
     Value2: HackEnum = ...
     def _to_python(self) -> HackEnum: ...
@@ -42,7 +43,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, test.fixtures.basic.module.thrift_abstract_types.MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     MyDataField: _typing.Final[MyDataItem] = ...
@@ -87,7 +88,7 @@ class _fbthrift_compatible_with_Containers:
     pass
 
 
-class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Containers):
+class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Containers, test.fixtures.basic.module.thrift_abstract_types.Containers):
     I32List: _typing.Final[_typing.Sequence[int]] = ...
     StringSet: _typing.Final[_typing.AbstractSet[str]] = ...
     StringToI64Map: _typing.Final[_typing.Mapping[str, int]] = ...
@@ -114,7 +115,7 @@ class _fbthrift_compatible_with_MyDataItem:
     pass
 
 
-class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem):
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, test.fixtures.basic.module.thrift_abstract_types.MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -132,7 +133,7 @@ class _fbthrift_compatible_with_MyUnion:
     pass
 
 
-class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion):
+class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, test.fixtures.basic.module.thrift_abstract_types.MyUnion):
     myEnum: _typing.Final[MyEnum] = ...
     myStruct: _typing.Final[MyStruct] = ...
     myDataItem: _typing.Final[MyDataItem] = ...
@@ -167,7 +168,7 @@ class _fbthrift_compatible_with_MyException:
     pass
 
 
-class MyException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyException):
+class MyException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyException, test.fixtures.basic.module.thrift_abstract_types.MyException):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     myStruct: _typing.Final[MyStruct] = ...
@@ -190,7 +191,7 @@ class _fbthrift_compatible_with_MyExceptionWithMessage:
     pass
 
 
-class MyExceptionWithMessage(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyExceptionWithMessage):
+class MyExceptionWithMessage(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyExceptionWithMessage, test.fixtures.basic.module.thrift_abstract_types.MyExceptionWithMessage):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     myStruct: _typing.Final[MyStruct] = ...
@@ -213,7 +214,7 @@ class _fbthrift_compatible_with_ReservedKeyword:
     pass
 
 
-class ReservedKeyword(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ReservedKeyword):
+class ReservedKeyword(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ReservedKeyword, test.fixtures.basic.module.thrift_abstract_types.ReservedKeyword):
     reserved_field: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -234,7 +235,7 @@ class _fbthrift_compatible_with_UnionToBeRenamed:
     pass
 
 
-class UnionToBeRenamed(_fbthrift_python_types.Union, _fbthrift_compatible_with_UnionToBeRenamed):
+class UnionToBeRenamed(_fbthrift_python_types.Union, _fbthrift_compatible_with_UnionToBeRenamed, test.fixtures.basic.module.thrift_abstract_types.UnionToBeRenamed):
     reserved_field: _typing.Final[int] = ...
     def __init__(
         self, *,

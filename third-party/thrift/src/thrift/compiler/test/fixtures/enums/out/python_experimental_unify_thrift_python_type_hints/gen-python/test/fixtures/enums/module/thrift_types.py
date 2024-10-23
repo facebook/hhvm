@@ -8,11 +8,13 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.enums.module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
+@test.fixtures.enums.module.thrift_abstract_types.SomeStruct.register
 class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -93,6 +95,7 @@ class SomeStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.SomeStruct, self)
 
 
+@test.fixtures.enums.module.thrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

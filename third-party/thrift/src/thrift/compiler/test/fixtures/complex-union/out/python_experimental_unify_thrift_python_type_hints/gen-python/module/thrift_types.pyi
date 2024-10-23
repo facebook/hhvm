@@ -12,6 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_ComplexUnion:
     pass
 
 
-class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ComplexUnion):
+class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ComplexUnion, module.thrift_abstract_types.ComplexUnion):
     intValue: _typing.Final[int] = ...
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
     stringListValue: _typing.Final[_typing.Sequence[str]] = ...
@@ -61,7 +62,7 @@ class _fbthrift_compatible_with_ListUnion:
     pass
 
 
-class ListUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ListUnion):
+class ListUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ListUnion, module.thrift_abstract_types.ListUnion):
     intListValue: _typing.Final[_typing.Sequence[int]] = ...
     stringListValue: _typing.Final[_typing.Sequence[str]] = ...
     def __init__(
@@ -90,7 +91,7 @@ class _fbthrift_compatible_with_DataUnion:
     pass
 
 
-class DataUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_DataUnion):
+class DataUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_DataUnion, module.thrift_abstract_types.DataUnion):
     binaryData: _typing.Final[bytes] = ...
     stringData: _typing.Final[str] = ...
     def __init__(
@@ -119,7 +120,7 @@ class _fbthrift_compatible_with_Val:
     pass
 
 
-class Val(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Val):
+class Val(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Val, module.thrift_abstract_types.Val):
     strVal: _typing.Final[str] = ...
     intVal: _typing.Final[int] = ...
     typedefValue: _typing.Final[_typing.Mapping[int, str]] = ...
@@ -146,7 +147,7 @@ class _fbthrift_compatible_with_ValUnion:
     pass
 
 
-class ValUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ValUnion):
+class ValUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ValUnion, module.thrift_abstract_types.ValUnion):
     v1: _typing.Final[Val] = ...
     v2: _typing.Final[Val] = ...
     def __init__(
@@ -175,7 +176,7 @@ class _fbthrift_compatible_with_VirtualComplexUnion:
     pass
 
 
-class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_VirtualComplexUnion):
+class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_VirtualComplexUnion, module.thrift_abstract_types.VirtualComplexUnion):
     thingOne: _typing.Final[str] = ...
     thingTwo: _typing.Final[str] = ...
     def __init__(
@@ -204,7 +205,7 @@ class _fbthrift_compatible_with_NonCopyableStruct:
     pass
 
 
-class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_NonCopyableStruct):
+class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_NonCopyableStruct, module.thrift_abstract_types.NonCopyableStruct):
     num: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -225,7 +226,7 @@ class _fbthrift_compatible_with_NonCopyableUnion:
     pass
 
 
-class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_NonCopyableUnion):
+class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_NonCopyableUnion, module.thrift_abstract_types.NonCopyableUnion):
     s: _typing.Final[NonCopyableStruct] = ...
     def __init__(
         self, *,

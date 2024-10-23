@@ -22,6 +22,7 @@ from parameterized import parameterized
 from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesAbstract,
     TestExceptionCopy as TestExceptionCopyAbstract,
+    TestStruct as TestStructAbstract,
     # TODO: Uncomment when adapted types work correctly.
     # TestStructAdaptedTypes as TestStructAdaptedTypesAbstract,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesAbstract,
@@ -36,6 +37,10 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestStructWithExceptionField as TestStructWithExceptionFieldAbstract,
     TestStructWithTypedefField as TestStructWithTypedefFieldAbstract,
     TestStructWithUnionField as TestStructWithUnionFieldAbstract,
+)
+
+from thrift.test.thrift_python.struct_test.thrift_types import (
+    TestStruct as TestStructImmutable,
 )
 
 from thrift.test.thrift_python.union_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
@@ -66,6 +71,57 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
     def setUp(self) -> None:
         # Disable maximum printed diff length.
         self.maxDiff = None
+
+    def test_fn_call_with_read_only_abstract_base_class_with_immutable(self) -> None:
+        """
+        type-check will fail with the error below if
+        TestStructImmutable does not inherit from TestStructAbstract.
+
+        Incompatible parameter type [6]: In call `ThriftPythonAbstractTypesTest.test_fn_call_with_read_only_abstract_base_class_with_immutable.library_fn`, for 1st positional argument, expected `TestStructAbstract` but got `TestStructImmutable`.
+        """
+
+        # GIVEN
+        def library_fn(ts: TestStructAbstract) -> None:
+            # THEN
+            self.assertEqual(ts.unqualified_string, "hello")
+            self.assertIsNone(ts.optional_string)
+
+        # WHEN
+        library_fn(TestStructImmutable(unqualified_string="hello"))
+
+    def test_type_hint_with_read_only_abstract_base_class_with_immutable(self) -> None:
+        """
+        type-check will fail with the error below if
+        TestStructImmutable does not inherit from TestStructAbstract.
+
+        Incompatible variable type [9]: ts is declared to have type `TestStructAbstract` but is used as type `TestStructImmutable`.
+        """
+        # GIVEN
+        # TestStructAbstract
+        # TestStructImmutable
+
+        # WHEN
+        ts: TestStructAbstract = TestStructImmutable(unqualified_string="hello")
+
+        # THEN
+        self.assertEqual(ts.unqualified_string, "hello")
+        self.assertIsNone(ts.optional_string)
+
+    def test_isinstance_with_read_only_abstract_base_class_with_immutable(self) -> None:
+        """ """
+        # GIVEN
+        # TestStructAbstract
+        # TestStructImmutable
+
+        # WHEN
+        ts: TestStructAbstract = TestStructImmutable(unqualified_string="hello")
+
+        # THEN
+        self.assertIsInstance(ts, TestStructAbstract)
+
+    def test_issubclass_with_read_only_abstract_base_class_with_immutable(self) -> None:
+        """ """
+        self.assertTrue(issubclass(TestStructImmutable, TestStructAbstract))
 
     @parameterized.expand(
         [

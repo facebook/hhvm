@@ -20,6 +20,9 @@ Generated Python classes for Thrift types
 {{> common/auto_generated_py}}
 
 import folly.iobuf as _fbthrift_iobuf
+{{#program:generate_unified_thrift_python_type_hints?}}
+import {{program:module_path}}.thrift_abstract_types
+{{/program:generate_unified_thrift_python_type_hints?}}
 import {{program:base_library_package}}.types as _fbthrift_python_types
 {{#program:generate_immutable_types}}
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
@@ -42,7 +45,17 @@ import {{module_path}}
 {{#program:structs}}
 
 
-class {{> structs/unadapted_name}}(metaclass={{!
+{{#program:generate_unified_thrift_python_type_hints?}}{{!
+If the class uses the abstract class as a direct baseclass, it results in the error below.
+       TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
+       subclass of the metaclasses of all its bases
+
+Until we resolve the above error, register the class as virtual subclass of the abstract class.
+}}
+@{{program:module_path}}.thrift_abstract_types.{{struct:py_name}}.register
+{{/program:generate_unified_thrift_python_type_hints?}}{{!
+}}class {{> structs/unadapted_name}}{{!
+}}(metaclass={{!
         }}{{#struct:union?}}{{> types/union_metaclass}}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
         }}{{#struct:exception?}}{{> types/exception_metaclass}}{{/struct:exception?}}{{!

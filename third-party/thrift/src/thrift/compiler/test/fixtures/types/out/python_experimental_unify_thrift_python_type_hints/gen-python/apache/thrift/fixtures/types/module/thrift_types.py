@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+import apache.thrift.fixtures.types.module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -15,6 +16,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import apache.thrift.fixtures.types.included.thrift_types
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.empty_struct.register
 class empty_struct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -51,6 +53,7 @@ class empty_struct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.empty_struct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.decorated_struct.register
 class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -98,6 +101,7 @@ class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.decorated_struct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ContainerStruct.register
 class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -222,6 +226,7 @@ class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ContainerStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.CppTypeStruct.register
 class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -269,6 +274,7 @@ class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.CppTypeStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.VirtualStruct.register
 class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -316,6 +322,7 @@ class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.MyStructWithForwardRefEnum.register
 class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -374,6 +381,7 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructWithForwardRefEnum, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.TrivialNumeric.register
 class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -432,6 +440,7 @@ class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNumeric, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.TrivialNestedWithDefault.register
 class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -490,6 +499,7 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNestedWithDefault, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ComplexString.register
 class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -548,6 +558,7 @@ class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexString, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ComplexNestedWithDefault.register
 class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -606,6 +617,7 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexNestedWithDefault, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.MinPadding.register
 class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -697,6 +709,7 @@ class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MinPadding, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.MinPaddingWithCustomType.register
 class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -788,6 +801,7 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MinPaddingWithCustomType, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -868,6 +882,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.MyDataItem.register
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -904,6 +919,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.Renaming.register
 class Renaming(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -951,6 +967,7 @@ class Renaming(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Renaming, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.AnnotatedTypes.register
 class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1009,6 +1026,7 @@ class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AnnotatedTypes, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageRoot.register
 class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1067,6 +1085,7 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageRoot, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageStruct.register
 class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1114,6 +1133,7 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageByRef.register
 class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1161,6 +1181,7 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageByRef, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteMap.register
 class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1208,6 +1229,7 @@ class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMap, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteMapDep.register
 class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -1244,6 +1266,7 @@ class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMapDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteMap.register
 class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1291,6 +1314,7 @@ class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMap, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteMapDep.register
 class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -1327,6 +1351,7 @@ class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMapDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteList.register
 class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1374,6 +1399,7 @@ class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteList, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteListDep.register
 class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -1410,6 +1436,7 @@ class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteListDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteList.register
 class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1457,6 +1484,7 @@ class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteList, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteListDep.register
 class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -1493,6 +1521,7 @@ class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteListDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.AdaptedList.register
 class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1540,6 +1569,7 @@ class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedList, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.AdaptedListDep.register
 class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1587,6 +1617,7 @@ class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedListDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.DependentAdaptedList.register
 class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1634,6 +1665,7 @@ class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedList, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.DependentAdaptedListDep.register
 class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1681,6 +1713,7 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedListDep, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.AllocatorAware.register
 class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1794,6 +1827,7 @@ class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.AllocatorAware2.register
 class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1852,6 +1886,7 @@ class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware2, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.TypedefStruct.register
 class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1921,6 +1956,7 @@ class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.TypedefStruct, self)
 
 
+@apache.thrift.fixtures.types.module.thrift_abstract_types.StructWithDoubleUnderscores.register
 class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

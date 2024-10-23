@@ -12,6 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -19,7 +20,7 @@ class _fbthrift_compatible_with_EmptyEnum:
     pass
 
 
-class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_EmptyEnum):
+class EmptyEnum(_fbthrift_python_types.Enum, int, module.thrift_abstract_types.EmptyEnum, _fbthrift_compatible_with_EmptyEnum):
     def _to_python(self) -> EmptyEnum: ...
     def _to_py3(self) -> "module.types.EmptyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
@@ -28,7 +29,7 @@ class _fbthrift_compatible_with_City:
     pass
 
 
-class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
+class City(_fbthrift_python_types.Enum, int, module.thrift_abstract_types.City, _fbthrift_compatible_with_City):
     NYC: City = ...
     MPK: City = ...
     SEA: City = ...
@@ -41,7 +42,7 @@ class _fbthrift_compatible_with_Company:
     pass
 
 
-class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Company):
+class Company(_fbthrift_python_types.Enum, int, module.thrift_abstract_types.Company, _fbthrift_compatible_with_Company):
     FACEBOOK: Company = ...
     WHATSAPP: Company = ...
     OCULUS: Company = ...
@@ -55,7 +56,7 @@ class _fbthrift_compatible_with_Internship:
     pass
 
 
-class Internship(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Internship):
+class Internship(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Internship, module.thrift_abstract_types.Internship):
     weeks: _typing.Final[int] = ...
     title: _typing.Final[str] = ...
     employer: _typing.Final[_typing.Optional[Company]] = ...
@@ -88,7 +89,7 @@ class _fbthrift_compatible_with_Range:
     pass
 
 
-class Range(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Range):
+class Range(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Range, module.thrift_abstract_types.Range):
     min: _typing.Final[int] = ...
     max: _typing.Final[int] = ...
     def __init__(
@@ -112,7 +113,7 @@ class _fbthrift_compatible_with_struct1:
     pass
 
 
-class struct1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct1):
+class struct1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct1, module.thrift_abstract_types.struct1):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     def __init__(
@@ -136,7 +137,7 @@ class _fbthrift_compatible_with_struct2:
     pass
 
 
-class struct2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct2):
+class struct2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct2, module.thrift_abstract_types.struct2):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     c: _typing.Final[struct1] = ...
@@ -166,7 +167,7 @@ class _fbthrift_compatible_with_struct3:
     pass
 
 
-class struct3(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct3):
+class struct3(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct3, module.thrift_abstract_types.struct3):
     a: _typing.Final[str] = ...
     b: _typing.Final[int] = ...
     c: _typing.Final[struct2] = ...
@@ -193,7 +194,7 @@ class _fbthrift_compatible_with_struct4:
     pass
 
 
-class struct4(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct4):
+class struct4(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct4, module.thrift_abstract_types.struct4):
     a: _typing.Final[int] = ...
     b: _typing.Final[_typing.Optional[float]] = ...
     c: _typing.Final[_typing.Optional[int]] = ...
@@ -220,7 +221,7 @@ class _fbthrift_compatible_with_union1:
     pass
 
 
-class union1(_fbthrift_python_types.Union, _fbthrift_compatible_with_union1):
+class union1(_fbthrift_python_types.Union, _fbthrift_compatible_with_union1, module.thrift_abstract_types.union1):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     def __init__(
@@ -249,7 +250,7 @@ class _fbthrift_compatible_with_union2:
     pass
 
 
-class union2(_fbthrift_python_types.Union, _fbthrift_compatible_with_union2):
+class union2(_fbthrift_python_types.Union, _fbthrift_compatible_with_union2, module.thrift_abstract_types.union2):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     s: _typing.Final[struct1] = ...

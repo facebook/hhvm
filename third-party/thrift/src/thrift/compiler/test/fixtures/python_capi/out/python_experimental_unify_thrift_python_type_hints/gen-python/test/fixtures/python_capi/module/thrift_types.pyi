@@ -12,6 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.python_capi.module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -27,7 +28,7 @@ class _fbthrift_compatible_with_MyEnum:
     pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int, test.fixtures.python_capi.module.thrift_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
@@ -38,7 +39,7 @@ class _fbthrift_compatible_with_AnnoyingEnum:
     pass
 
 
-class AnnoyingEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnnoyingEnum):
+class AnnoyingEnum(_fbthrift_python_types.Enum, int, test.fixtures.python_capi.module.thrift_abstract_types.AnnoyingEnum, _fbthrift_compatible_with_AnnoyingEnum):
     FOO: AnnoyingEnum = ...
     BAR: AnnoyingEnum = ...
     def _to_python(self) -> AnnoyingEnum: ...
@@ -50,7 +51,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, test.fixtures.python_capi.module.thrift_abstract_types.MyStruct):
     inty: _typing.Final[int] = ...
     stringy: _typing.Final[str] = ...
     myItemy: _typing.Final[MyDataItem] = ...
@@ -92,7 +93,7 @@ class _fbthrift_compatible_with_MyDataItem:
     pass
 
 
-class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem):
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, test.fixtures.python_capi.module.thrift_abstract_types.MyDataItem):
     s: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -113,7 +114,7 @@ class _fbthrift_compatible_with_TransitiveDoubler:
     pass
 
 
-class TransitiveDoubler(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TransitiveDoubler):
+class TransitiveDoubler(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TransitiveDoubler, test.fixtures.python_capi.module.thrift_abstract_types.TransitiveDoubler):
     def __init__(
         self,
     ) -> None: ...
@@ -131,7 +132,7 @@ class _fbthrift_compatible_with_DoubledPair:
     pass
 
 
-class DoubledPair(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DoubledPair):
+class DoubledPair(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DoubledPair, test.fixtures.python_capi.module.thrift_abstract_types.DoubledPair):
     s: _typing.Final[str] = ...
     x: _typing.Final[int] = ...
     def __init__(
@@ -155,7 +156,7 @@ class _fbthrift_compatible_with_StringPair:
     pass
 
 
-class StringPair(_fbthrift_python_types.Struct, _fbthrift_compatible_with_StringPair):
+class StringPair(_fbthrift_python_types.Struct, _fbthrift_compatible_with_StringPair, test.fixtures.python_capi.module.thrift_abstract_types.StringPair):
     normal: _typing.Final[str] = ...
     doubled: _typing.Final[str] = ...
     def __init__(
@@ -179,7 +180,7 @@ class _fbthrift_compatible_with_EmptyStruct:
     pass
 
 
-class EmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EmptyStruct):
+class EmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EmptyStruct, test.fixtures.python_capi.module.thrift_abstract_types.EmptyStruct):
     def __init__(
         self,
     ) -> None: ...
@@ -197,7 +198,7 @@ class _fbthrift_compatible_with_PrimitiveStruct:
     pass
 
 
-class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_PrimitiveStruct):
+class PrimitiveStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_PrimitiveStruct, test.fixtures.python_capi.module.thrift_abstract_types.PrimitiveStruct):
     booly: _typing.Final[bool] = ...
     charry: _typing.Final[int] = ...
     shorty: _typing.Final[int] = ...
@@ -263,7 +264,7 @@ class _fbthrift_compatible_with_AdaptedFields:
     pass
 
 
-class AdaptedFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedFields):
+class AdaptedFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedFields, test.fixtures.python_capi.module.thrift_abstract_types.AdaptedFields):
     adapted_int: _typing.Final[int] = ...
     list_adapted_int: _typing.Final[_typing.Sequence[int]] = ...
     set_adapted_int: _typing.Final[_typing.AbstractSet[int]] = ...
@@ -293,7 +294,7 @@ class _fbthrift_compatible_with_ListStruct:
     pass
 
 
-class ListStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ListStruct):
+class ListStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ListStruct, test.fixtures.python_capi.module.thrift_abstract_types.ListStruct):
     boolz: _typing.Final[_typing.Sequence[bool]] = ...
     intz: _typing.Final[_typing.Optional[_typing.Sequence[int]]] = ...
     stringz: _typing.Final[_typing.Optional[_typing.Sequence[str]]] = ...
@@ -338,7 +339,7 @@ class _fbthrift_compatible_with_SetStruct:
     pass
 
 
-class SetStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SetStruct):
+class SetStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SetStruct, test.fixtures.python_capi.module.thrift_abstract_types.SetStruct):
     enumz: _typing.Final[_typing.AbstractSet[MyEnum]] = ...
     intz: _typing.Final[_typing.Optional[_typing.AbstractSet[int]]] = ...
     binnaz: _typing.Final[_typing.Optional[_typing.AbstractSet[bytes]]] = ...
@@ -377,7 +378,7 @@ class _fbthrift_compatible_with_MapStruct:
     pass
 
 
-class MapStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MapStruct):
+class MapStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MapStruct, test.fixtures.python_capi.module.thrift_abstract_types.MapStruct):
     enumz: _typing.Final[_typing.Mapping[MyEnum, str]] = ...
     intz: _typing.Final[_typing.Optional[_typing.Mapping[int, str]]] = ...
     binnaz: _typing.Final[_typing.Optional[_typing.Mapping[bytes, PrimitiveStruct]]] = ...
@@ -425,7 +426,7 @@ class _fbthrift_compatible_with_ComposeStruct:
     pass
 
 
-class ComposeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComposeStruct):
+class ComposeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComposeStruct, test.fixtures.python_capi.module.thrift_abstract_types.ComposeStruct):
     enum_: _typing.Final[MyEnum] = ...
     renamed_: _typing.Final[AnnoyingEnum] = ...
     primitive: _typing.Final[PrimitiveStruct] = ...
@@ -473,7 +474,7 @@ class _fbthrift_compatible_with_Onion:
     pass
 
 
-class Onion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Onion):
+class Onion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Onion, test.fixtures.python_capi.module.thrift_abstract_types.Onion):
     myEnum: _typing.Final[MyEnum] = ...
     myStruct: _typing.Final[PrimitiveStruct] = ...
     myString: _typing.Final[str] = ...

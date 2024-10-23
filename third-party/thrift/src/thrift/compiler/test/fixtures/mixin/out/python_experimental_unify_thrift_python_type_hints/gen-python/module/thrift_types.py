@@ -8,11 +8,13 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
+@module.thrift_abstract_types.Mixin1.register
 class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -60,6 +62,7 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin1, self)
 
 
+@module.thrift_abstract_types.Mixin2.register
 class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -118,6 +121,7 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin2, self)
 
 
+@module.thrift_abstract_types.Mixin3Base.register
 class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -165,6 +169,7 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin3Base, self)
 
 
+@module.thrift_abstract_types.Foo.register
 class Foo(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

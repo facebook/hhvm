@@ -109,6 +109,7 @@ struct TypeToPatchMapAdapter {
   }
 
   static bool equal(const AdaptedType&, const AdaptedType&);
+  static bool isEmpty(const AdaptedType& map) { return map.empty(); }
 
  private:
   static bool addDynamicPatchToMap(

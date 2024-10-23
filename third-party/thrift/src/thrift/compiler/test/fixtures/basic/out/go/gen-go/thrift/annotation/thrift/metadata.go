@@ -7,6 +7,7 @@ package thrift
 
 import (
     "maps"
+    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -19,6 +20,33 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_thrift_RpcPriority *metadata.ThriftType = nil
+    premadeThriftType_thrift_Experimental *metadata.ThriftType = nil
+    premadeThriftType_i32 *metadata.ThriftType = nil
+    premadeThriftType_list_i32 *metadata.ThriftType = nil
+    premadeThriftType_map_i32_i32 *metadata.ThriftType = nil
+    premadeThriftType_thrift_ReserveIds *metadata.ThriftType = nil
+    premadeThriftType_bool *metadata.ThriftType = nil
+    premadeThriftType_thrift_RequiresBackwardCompatibility *metadata.ThriftType = nil
+    premadeThriftType_thrift_TerseWrite *metadata.ThriftType = nil
+    premadeThriftType_thrift_Box *metadata.ThriftType = nil
+    premadeThriftType_thrift_Mixin *metadata.ThriftType = nil
+    premadeThriftType_thrift_SerializeInFieldIdOrder *metadata.ThriftType = nil
+    premadeThriftType_thrift_BitmaskEnum *metadata.ThriftType = nil
+    premadeThriftType_thrift_ExceptionMessage *metadata.ThriftType = nil
+    premadeThriftType_thrift_InternBox *metadata.ThriftType = nil
+    premadeThriftType_thrift_Serial *metadata.ThriftType = nil
+    premadeThriftType_string *metadata.ThriftType = nil
+    premadeThriftType_thrift_Uri *metadata.ThriftType = nil
+    premadeThriftType_thrift_Priority *metadata.ThriftType = nil
+    premadeThriftType_map_string_string *metadata.ThriftType = nil
+    premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations *metadata.ThriftType = nil
+    premadeThriftType_thrift_AllowReservedIdentifier *metadata.ThriftType = nil
+    premadeThriftType_thrift_AllowReservedFilename *metadata.ThriftType = nil
+)
+
+// Premade Thrift type initializer
+var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_thrift_RpcPriority = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("thrift.RpcPriority"),
@@ -110,36 +138,46 @@ var (
         metadata.NewThriftStructType().
             SetName("thrift.AllowReservedFilename"),
             )
+})
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return map[string]*metadata.ThriftType{
+            "thrift.RpcPriority": premadeThriftType_thrift_RpcPriority,
+            "thrift.Experimental": premadeThriftType_thrift_Experimental,
+            "i32": premadeThriftType_i32,
+            "thrift.ReserveIds": premadeThriftType_thrift_ReserveIds,
+            "bool": premadeThriftType_bool,
+            "thrift.RequiresBackwardCompatibility": premadeThriftType_thrift_RequiresBackwardCompatibility,
+            "thrift.TerseWrite": premadeThriftType_thrift_TerseWrite,
+            "thrift.Box": premadeThriftType_thrift_Box,
+            "thrift.Mixin": premadeThriftType_thrift_Mixin,
+            "thrift.SerializeInFieldIdOrder": premadeThriftType_thrift_SerializeInFieldIdOrder,
+            "thrift.BitmaskEnum": premadeThriftType_thrift_BitmaskEnum,
+            "thrift.ExceptionMessage": premadeThriftType_thrift_ExceptionMessage,
+            "thrift.InternBox": premadeThriftType_thrift_InternBox,
+            "thrift.Serial": premadeThriftType_thrift_Serial,
+            "string": premadeThriftType_string,
+            "thrift.Uri": premadeThriftType_thrift_Uri,
+            "thrift.Priority": premadeThriftType_thrift_Priority,
+            "thrift.DeprecatedUnvalidatedAnnotations": premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations,
+            "thrift.AllowReservedIdentifier": premadeThriftType_thrift_AllowReservedIdentifier,
+            "thrift.AllowReservedFilename": premadeThriftType_thrift_AllowReservedFilename,
+        }
+    },
 )
 
-var premadeThriftTypesMap = map[string]*metadata.ThriftType{
-    "thrift.RpcPriority": premadeThriftType_thrift_RpcPriority,
-    "thrift.Experimental": premadeThriftType_thrift_Experimental,
-    "i32": premadeThriftType_i32,
-    "thrift.ReserveIds": premadeThriftType_thrift_ReserveIds,
-    "bool": premadeThriftType_bool,
-    "thrift.RequiresBackwardCompatibility": premadeThriftType_thrift_RequiresBackwardCompatibility,
-    "thrift.TerseWrite": premadeThriftType_thrift_TerseWrite,
-    "thrift.Box": premadeThriftType_thrift_Box,
-    "thrift.Mixin": premadeThriftType_thrift_Mixin,
-    "thrift.SerializeInFieldIdOrder": premadeThriftType_thrift_SerializeInFieldIdOrder,
-    "thrift.BitmaskEnum": premadeThriftType_thrift_BitmaskEnum,
-    "thrift.ExceptionMessage": premadeThriftType_thrift_ExceptionMessage,
-    "thrift.InternBox": premadeThriftType_thrift_InternBox,
-    "thrift.Serial": premadeThriftType_thrift_Serial,
-    "string": premadeThriftType_string,
-    "thrift.Uri": premadeThriftType_thrift_Uri,
-    "thrift.Priority": premadeThriftType_thrift_Priority,
-    "thrift.DeprecatedUnvalidatedAnnotations": premadeThriftType_thrift_DeprecatedUnvalidatedAnnotations,
-    "thrift.AllowReservedIdentifier": premadeThriftType_thrift_AllowReservedIdentifier,
-    "thrift.AllowReservedFilename": premadeThriftType_thrift_AllowReservedFilename,
-}
-
-var structMetadatas = []*metadata.ThriftStruct{
-    metadata.NewThriftStruct().
+var structMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftStruct {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftStruct{
+            metadata.NewThriftStruct().
     SetName("thrift.Experimental").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.ReserveIds").
     SetIsUnion(false).
     SetFields(
@@ -156,7 +194,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_map_i32_i32),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.RequiresBackwardCompatibility").
     SetIsUnion(false).
     SetFields(
@@ -168,31 +206,31 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_bool),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.TerseWrite").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.Box").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.Mixin").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.SerializeInFieldIdOrder").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.BitmaskEnum").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.ExceptionMessage").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.InternBox").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.Serial").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.Uri").
     SetIsUnion(false).
     SetFields(
@@ -204,7 +242,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.Priority").
     SetIsUnion(false).
     SetFields(
@@ -216,7 +254,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_thrift_RpcPriority),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.DeprecatedUnvalidatedAnnotations").
     SetIsUnion(false).
     SetFields(
@@ -228,19 +266,31 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_map_string_string),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.AllowReservedIdentifier").
     SetIsUnion(false),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("thrift.AllowReservedFilename").
     SetIsUnion(false),
-}
+        }
+    },
+)
 
-var exceptionMetadatas = []*metadata.ThriftException{
-}
+var exceptionMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftException {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftException{
+        }
+    },
+)
 
-var enumMetadatas = []*metadata.ThriftEnum{
-    metadata.NewThriftEnum().
+var enumMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftEnum {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftEnum{
+            metadata.NewThriftEnum().
     SetName("thrift.RpcPriority").
     SetElements(
         map[int32]string{
@@ -251,15 +301,23 @@ var enumMetadatas = []*metadata.ThriftEnum{
             4: "BEST_EFFORT",
         },
     ),
-}
+        }
+    },
+)
 
-var serviceMetadatas = []*metadata.ThriftService{
-}
+var serviceMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftService {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftService{
+        }
+    },
+)
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *metadata.ThriftType {
-    return premadeThriftTypesMap[fullName]
+    return premadeThriftTypesMapOnce()[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -270,19 +328,19 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
     allServicesMap := make(map[string]*metadata.ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatas {
+    for _, enumMetadata := range enumMetadatasOnce() {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatas {
+    for _, structMetadata := range structMetadatasOnce() {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatas {
+    for _, exceptionMetadata := range exceptionMetadatasOnce() {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatas {
+    for _, serviceMetadata := range serviceMetadatasOnce() {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

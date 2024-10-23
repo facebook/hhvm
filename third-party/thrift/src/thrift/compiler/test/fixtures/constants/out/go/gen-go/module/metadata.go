@@ -7,6 +7,7 @@ package module
 
 import (
     "maps"
+    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -19,6 +20,31 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module_EmptyEnum *metadata.ThriftType = nil
+    premadeThriftType_module_City *metadata.ThriftType = nil
+    premadeThriftType_module_Company *metadata.ThriftType = nil
+    premadeThriftType_i32 *metadata.ThriftType = nil
+    premadeThriftType_string *metadata.ThriftType = nil
+    premadeThriftType_double *metadata.ThriftType = nil
+    premadeThriftType_module_Internship *metadata.ThriftType = nil
+    premadeThriftType_module_Range *metadata.ThriftType = nil
+    premadeThriftType_module_struct1 *metadata.ThriftType = nil
+    premadeThriftType_list_i32 *metadata.ThriftType = nil
+    premadeThriftType_module_struct2 *metadata.ThriftType = nil
+    premadeThriftType_module_struct3 *metadata.ThriftType = nil
+    premadeThriftType_byte *metadata.ThriftType = nil
+    premadeThriftType_module_struct4 *metadata.ThriftType = nil
+    premadeThriftType_module_union1 *metadata.ThriftType = nil
+    premadeThriftType_module_union2 *metadata.ThriftType = nil
+    premadeThriftType_module_MyCompany *metadata.ThriftType = nil
+    premadeThriftType_module_MyStringIdentifier *metadata.ThriftType = nil
+    premadeThriftType_module_MyIntIdentifier *metadata.ThriftType = nil
+    premadeThriftType_map_string_string *metadata.ThriftType = nil
+    premadeThriftType_module_MyMapIdentifier *metadata.ThriftType = nil
+)
+
+// Premade Thrift type initializer
+var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module_EmptyEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.EmptyEnum"),
@@ -104,32 +130,42 @@ var (
             SetName("module.MyMapIdentifier").
             SetUnderlyingType(premadeThriftType_map_string_string),
             )
+})
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return map[string]*metadata.ThriftType{
+            "module.EmptyEnum": premadeThriftType_module_EmptyEnum,
+            "module.City": premadeThriftType_module_City,
+            "module.Company": premadeThriftType_module_Company,
+            "i32": premadeThriftType_i32,
+            "string": premadeThriftType_string,
+            "double": premadeThriftType_double,
+            "module.Internship": premadeThriftType_module_Internship,
+            "module.Range": premadeThriftType_module_Range,
+            "module.struct1": premadeThriftType_module_struct1,
+            "module.struct2": premadeThriftType_module_struct2,
+            "module.struct3": premadeThriftType_module_struct3,
+            "byte": premadeThriftType_byte,
+            "module.struct4": premadeThriftType_module_struct4,
+            "module.union1": premadeThriftType_module_union1,
+            "module.union2": premadeThriftType_module_union2,
+            "module.MyCompany": premadeThriftType_module_MyCompany,
+            "module.MyStringIdentifier": premadeThriftType_module_MyStringIdentifier,
+            "module.MyIntIdentifier": premadeThriftType_module_MyIntIdentifier,
+            "module.MyMapIdentifier": premadeThriftType_module_MyMapIdentifier,
+        }
+    },
 )
 
-var premadeThriftTypesMap = map[string]*metadata.ThriftType{
-    "module.EmptyEnum": premadeThriftType_module_EmptyEnum,
-    "module.City": premadeThriftType_module_City,
-    "module.Company": premadeThriftType_module_Company,
-    "i32": premadeThriftType_i32,
-    "string": premadeThriftType_string,
-    "double": premadeThriftType_double,
-    "module.Internship": premadeThriftType_module_Internship,
-    "module.Range": premadeThriftType_module_Range,
-    "module.struct1": premadeThriftType_module_struct1,
-    "module.struct2": premadeThriftType_module_struct2,
-    "module.struct3": premadeThriftType_module_struct3,
-    "byte": premadeThriftType_byte,
-    "module.struct4": premadeThriftType_module_struct4,
-    "module.union1": premadeThriftType_module_union1,
-    "module.union2": premadeThriftType_module_union2,
-    "module.MyCompany": premadeThriftType_module_MyCompany,
-    "module.MyStringIdentifier": premadeThriftType_module_MyStringIdentifier,
-    "module.MyIntIdentifier": premadeThriftType_module_MyIntIdentifier,
-    "module.MyMapIdentifier": premadeThriftType_module_MyMapIdentifier,
-}
-
-var structMetadatas = []*metadata.ThriftStruct{
-    metadata.NewThriftStruct().
+var structMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftStruct {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftStruct{
+            metadata.NewThriftStruct().
     SetName("module.Internship").
     SetIsUnion(false).
     SetFields(
@@ -161,7 +197,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.Range").
     SetIsUnion(false).
     SetFields(
@@ -178,7 +214,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_i32),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.struct1").
     SetIsUnion(false).
     SetFields(
@@ -195,7 +231,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_string),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.struct2").
     SetIsUnion(false).
     SetFields(
@@ -222,7 +258,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_list_i32),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.struct3").
     SetIsUnion(false).
     SetFields(
@@ -244,7 +280,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_module_struct2),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.struct4").
     SetIsUnion(false).
     SetFields(
@@ -266,7 +302,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_byte),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.union1").
     SetIsUnion(true).
     SetFields(
@@ -283,7 +319,7 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_double),
         },
     ),
-    metadata.NewThriftStruct().
+            metadata.NewThriftStruct().
     SetName("module.union2").
     SetIsUnion(true).
     SetFields(
@@ -310,19 +346,31 @@ var structMetadatas = []*metadata.ThriftStruct{
     SetType(premadeThriftType_module_union1),
         },
     ),
-}
+        }
+    },
+)
 
-var exceptionMetadatas = []*metadata.ThriftException{
-}
+var exceptionMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftException {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftException{
+        }
+    },
+)
 
-var enumMetadatas = []*metadata.ThriftEnum{
-    metadata.NewThriftEnum().
+var enumMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftEnum {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftEnum{
+            metadata.NewThriftEnum().
     SetName("module.EmptyEnum").
     SetElements(
         map[int32]string{
         },
     ),
-    metadata.NewThriftEnum().
+            metadata.NewThriftEnum().
     SetName("module.City").
     SetElements(
         map[int32]string{
@@ -332,7 +380,7 @@ var enumMetadatas = []*metadata.ThriftEnum{
             3: "LON",
         },
     ),
-    metadata.NewThriftEnum().
+            metadata.NewThriftEnum().
     SetName("module.Company").
     SetElements(
         map[int32]string{
@@ -342,15 +390,23 @@ var enumMetadatas = []*metadata.ThriftEnum{
             3: "INSTAGRAM",
         },
     ),
-}
+        }
+    },
+)
 
-var serviceMetadatas = []*metadata.ThriftService{
-}
+var serviceMetadatasOnce = sync.OnceValue(
+    func() []*metadata.ThriftService {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*metadata.ThriftService{
+        }
+    },
+)
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *metadata.ThriftType {
-    return premadeThriftTypesMap[fullName]
+    return premadeThriftTypesMapOnce()[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -361,19 +417,19 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
     allServicesMap := make(map[string]*metadata.ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatas {
+    for _, enumMetadata := range enumMetadatasOnce() {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatas {
+    for _, structMetadata := range structMetadatasOnce() {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatas {
+    for _, exceptionMetadata := range exceptionMetadatasOnce() {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatas {
+    for _, serviceMetadata := range serviceMetadatasOnce() {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

@@ -26,6 +26,7 @@
 
 import (
     "maps"
+    "sync"
 
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
@@ -47,52 +48,89 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     {{#program:thrift_metadata_types}}
+    {{type:metadata_name}} *{{program:metadata_qualifier}}ThriftType = nil
+    {{/program:thrift_metadata_types}}
+)
+
+// Premade Thrift type initializer
+var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
+    {{#program:thrift_metadata_types}}
     {{type:metadata_name}} = {{program:metadata_qualifier}}NewThriftType().{{> metadata/thrift_type_setter}}(
         {{> metadata/thrift_type_instance}}
     )
     {{/program:thrift_metadata_types}}
+})
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*{{program:metadata_qualifier}}ThriftType {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return map[string]*{{program:metadata_qualifier}}ThriftType{
+            {{#program:thrift_metadata_types}}
+            {{#type:named?}}
+            "{{type:full_name}}": {{type:metadata_name}},
+            {{/type:named?}}
+            {{/program:thrift_metadata_types}}
+        }
+    },
 )
 
-var premadeThriftTypesMap = map[string]*{{program:metadata_qualifier}}ThriftType{
-    {{#program:thrift_metadata_types}}
-    {{#type:named?}}
-    "{{type:full_name}}": {{type:metadata_name}},
-    {{/type:named?}}
-    {{/program:thrift_metadata_types}}
-}
+var structMetadatasOnce = sync.OnceValue(
+    func() []*{{program:metadata_qualifier}}ThriftStruct {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*{{program:metadata_qualifier}}ThriftStruct{
+            {{#program:structs}}
+            {{^struct:exception?}}
+            {{> metadata/thrift_metadata_struct}},
+            {{/struct:exception?}}
+            {{/program:structs}}
+        }
+    },
+)
 
-var structMetadatas = []*{{program:metadata_qualifier}}ThriftStruct{
-    {{#program:structs}}
-    {{^struct:exception?}}
-    {{> metadata/thrift_metadata_struct}},
-    {{/struct:exception?}}
-    {{/program:structs}}
-}
+var exceptionMetadatasOnce = sync.OnceValue(
+    func() []*{{program:metadata_qualifier}}ThriftException {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*{{program:metadata_qualifier}}ThriftException{
+            {{#program:structs}}
+            {{#struct:exception?}}
+            {{> metadata/thrift_metadata_exception}},
+            {{/struct:exception?}}
+            {{/program:structs}}
+        }
+    },
+)
 
-var exceptionMetadatas = []*{{program:metadata_qualifier}}ThriftException{
-    {{#program:structs}}
-    {{#struct:exception?}}
-    {{> metadata/thrift_metadata_exception}},
-    {{/struct:exception?}}
-    {{/program:structs}}
-}
+var enumMetadatasOnce = sync.OnceValue(
+    func() []*{{program:metadata_qualifier}}ThriftEnum {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*{{program:metadata_qualifier}}ThriftEnum{
+            {{#program:enums}}
+            {{> metadata/thrift_metadata_enum}},
+            {{/program:enums}}
+        }
+    },
+)
 
-var enumMetadatas = []*{{program:metadata_qualifier}}ThriftEnum{
-    {{#program:enums}}
-    {{> metadata/thrift_metadata_enum}},
-    {{/program:enums}}
-}
-
-var serviceMetadatas = []*{{program:metadata_qualifier}}ThriftService{
-    {{#program:services}}
-    {{> metadata/thrift_metadata_service}},
-    {{/program:services}}
-}
+var serviceMetadatasOnce = sync.OnceValue(
+    func() []*{{program:metadata_qualifier}}ThriftService {
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+        return []*{{program:metadata_qualifier}}ThriftService{
+            {{#program:services}}
+            {{> metadata/thrift_metadata_service}},
+            {{/program:services}}
+        }
+    },
+)
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *{{program:metadata_qualifier}}ThriftType {
-    return premadeThriftTypesMap[fullName]
+    return premadeThriftTypesMapOnce()[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -103,19 +141,19 @@ func GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
     allServicesMap := make(map[string]*{{program:metadata_qualifier}}ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatas {
+    for _, enumMetadata := range enumMetadatasOnce() {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatas {
+    for _, structMetadata := range structMetadatasOnce() {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatas {
+    for _, exceptionMetadata := range exceptionMetadatasOnce() {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatas {
+    for _, serviceMetadata := range serviceMetadatasOnce() {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

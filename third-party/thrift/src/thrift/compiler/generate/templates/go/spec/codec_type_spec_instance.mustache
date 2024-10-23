@@ -46,7 +46,9 @@
 {{/type:enum?}}
 {{#type:struct?}}
 {{#type:struct}}
-&thrift.CodecStructSpec{},
+&thrift.CodecStructSpec{
+    NewFunc: func() thrift.Struct { return {{struct:go_qualified_new_func}}() },
+},
 {{/type:struct}}
 {{/type:struct?}}
 {{#type:list?}}

@@ -85,7 +85,9 @@ type CodecMapSpec struct {
 }
 
 // CodecStructSpec is a spec for a struct type.
-type CodecStructSpec struct{}
+type CodecStructSpec struct {
+	NewFunc func() Struct
+}
 
 // CodecTypedefSpec is a spec for a typedef type.
 type CodecTypedefSpec struct {

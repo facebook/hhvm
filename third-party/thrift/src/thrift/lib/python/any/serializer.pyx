@@ -198,3 +198,7 @@ def deserialize_map(key_cls, value_cls, Buf buf, Protocol protocol=Protocol.COMP
         _infer_type_info_from_cls(value_cls),
     )
     return _deserialize_with_type_info(buf, protocol, type_info)
+
+
+def serialize_with_type_info(obj, protocol, type_info):
+    return _serialize_with_type_info(obj, protocol, type_info)

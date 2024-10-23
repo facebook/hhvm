@@ -34,6 +34,7 @@ import enum
 import functools
 import itertools
 import threading
+import typing
 
 from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
@@ -323,6 +324,18 @@ StructOrError = cython.fused_type(Struct, GeneratedError)
 #         "thrift.python.adapter.Adapter", typing.Callable[[], typing.Optional[Struct]]
 #     ]
 # )
+
+
+AnyTypeInfo = typing.Union[
+    StructTypeInfo,
+    ListTypeInfo,
+    SetTypeInfo,
+    MapTypeInfo,
+    EnumTypeInfo,
+    TypeInfo,
+    IntegerTypeInfo,
+    StringTypeInfo,
+]
 
 cdef class FieldInfo:
     def __cinit__(self, id, qualifier, name, py_name, type_info, default_value, adapter_info, is_primitive, idl_type = -1):
@@ -755,6 +768,12 @@ cdef class MapTypeInfo(TypeInfoBase):
 
     def is_container(self):
         return True
+
+    def get_key_info(self):
+        return self.key_info
+
+    def get_val_info(self):
+        return self.val_info
 
     def __reduce__(self):
         return (MapTypeInfo, (self.key_info, self.val_info))

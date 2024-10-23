@@ -21,6 +21,7 @@ from folly.iobuf import IOBuf
 from thrift.python.any.typestub import (
     PrimitiveType,
     SerializableType,
+    SerializableTypeOrContainers,
     StructOrUnionOrException,
     TKey,
     TPrimitive,
@@ -29,7 +30,7 @@ from thrift.python.any.typestub import (
 )
 from thrift.python.exceptions import GeneratedError
 from thrift.python.serializer import Protocol
-from thrift.python.types import Enum, StructOrUnion
+from thrift.python.types import AnyTypeInfo, Enum, StructOrUnion
 
 def serialize_primitive(
     obj: TPrimitive,
@@ -70,3 +71,8 @@ def deserialize_map(
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = ...,
 ) -> typing.Mapping[TKey, TValue]: ...
+def serialize_with_type_info(
+    obj: SerializableTypeOrContainers,
+    protocol: Protocol,
+    type_info: AnyTypeInfo,
+) -> IOBuf: ...

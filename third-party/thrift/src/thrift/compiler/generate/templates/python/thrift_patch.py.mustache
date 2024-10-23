@@ -38,6 +38,8 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     BinaryPatch,
 )
 
+import thrift.python.types as _fbthrift_python_types
+
 import {{program:module_path}}.thrift_types
 from {{program:module_path}}.thrift_types import (
 {{#program:structs}}
@@ -57,6 +59,7 @@ class {{struct:py_name}}Patch(BaseStructPatch[{{struct:py_name}}]):
         return OptionalFieldPatch(
             {{#field:type}}{{> common/thrift_patch_callback}}{{/field:type}},
             self._patch,
-            {{field:key}})
+            {{field:key}},
+            {{#field:type}}{{ >types/typeinfo }}{{/field:type}})
 {{/struct:fields_ordered_by_id}}
 {{/program:structs}}

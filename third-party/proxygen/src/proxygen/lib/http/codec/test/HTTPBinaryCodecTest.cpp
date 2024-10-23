@@ -606,4 +606,56 @@ TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequest) {
             "test-trailer-value");
 }
 
+TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequestEmptyBody) {
+  // Create full request encode it to a buffer
+  folly::IOBufQueue writeBuffer;
+
+  // Encode Framing Indicator, Control Data, and Headers
+  HTTPMessage msgEncoded;
+  msgEncoded.setMethod("POST");
+  msgEncoded.setSecure(false);
+  msgEncoded.setURL("/hello.txt");
+  HTTPHeaders& headersEncoded = msgEncoded.getHeaders();
+  headersEncoded.set("user-agent",
+                     "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  headersEncoded.set("host", "www.example.com");
+  headersEncoded.set("accept-language", "en, mi");
+  upstreamBinaryCodec_->generateHeader(writeBuffer, 0, msgEncoded);
+
+  // Encode Empty Body
+  std::unique_ptr<folly::IOBuf> emptyBody;
+  upstreamBinaryCodec_->generateBody(writeBuffer, 0, std::move(emptyBody));
+
+  // Encode Trailing Headers
+  std::unique_ptr<HTTPHeaders> trailersEncoded =
+      std::make_unique<HTTPHeaders>();
+  trailersEncoded->set("test-trailer", "test-trailer-value");
+  msgEncoded.setTrailers(std::move(trailersEncoded));
+  upstreamBinaryCodec_->generateTrailers(
+      writeBuffer, 0, *msgEncoded.getTrailers());
+
+  // Now, decode the request and check values
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodec_->setCallback(&callback);
+  upstreamBinaryCodec_->onIngress(*writeBuffer.front());
+  upstreamBinaryCodec_->onIngressEOF();
+
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
+  EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
+  headersEncoded.forEach([&headersDecoded](const std::string& headerName,
+                                           const std::string& headerValue) {
+    EXPECT_EQ(headersDecoded.exists(headerName), true);
+    EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
+  });
+
+  auto trailersDecoded = *callback.msg->getTrailers();
+  EXPECT_EQ(trailersDecoded.size(), 1);
+  EXPECT_EQ(trailersDecoded.exists("test-trailer"), true);
+  EXPECT_EQ(trailersDecoded.getSingleOrEmpty("test-trailer"),
+            "test-trailer-value");
+}
+
 } // namespace proxygen::test

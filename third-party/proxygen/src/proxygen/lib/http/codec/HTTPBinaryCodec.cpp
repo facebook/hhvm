@@ -520,6 +520,8 @@ size_t HTTPBinaryCodec::generateBody(folly::IOBufQueue& writeBuf,
     lengthWritten = chain->computeChainDataLength();
     encodeInteger(lengthWritten, appender);
     appender.insert(std::move(chain));
+  } else {
+    encodeInteger(0, appender);
   }
   if (eom) {
     lengthWritten += generateEOM(writeBuf, txn);

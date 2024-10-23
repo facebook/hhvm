@@ -140,14 +140,14 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 			return
 		}
 		if err := r.processHeaderRequest(ctx, headerProtocol, processor); err != nil {
-			r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error processing first header request from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
 		if processor.upgraded {
 			r.processRocketRequests(ctx, conn)
 		} else {
 			if err := r.processHeaderRequests(ctx, headerProtocol, processor); err != nil {
-				r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+				r.log("thrift: error processing additional header request from %s: %s\n", conn.RemoteAddr(), err)
 			}
 		}
 	case TransportIDHeader:
@@ -157,7 +157,7 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 			return
 		}
 		if err := r.processHeaderRequests(ctx, headerProtocol, r.processor); err != nil {
-			r.log("thrift: error processing request from %s: %s\n", conn.RemoteAddr(), err)
+			r.log("thrift: error processing header request from %s: %s\n", conn.RemoteAddr(), err)
 		}
 	}
 }

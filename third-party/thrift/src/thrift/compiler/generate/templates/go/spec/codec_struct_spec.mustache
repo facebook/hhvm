@@ -20,12 +20,17 @@
 
 }}
 &thrift.StructSpec{
-    Name:           "{{struct:name}}",
-    IsUnion:        {{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}},
-    IsException:    {{#struct:exception?}}true{{/struct:exception?}}{{^struct:exception?}}false{{/struct:exception?}},
-    FieldSpecsByID: map[int16]*thrift.FieldSpec{
+    Name:               "{{struct:name}}",
+    IsUnion:            {{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}},
+    IsException:        {{#struct:exception?}}true{{/struct:exception?}}{{^struct:exception?}}false{{/struct:exception?}},
+    FieldSpecs:         []*thrift.FieldSpec{
         {{#struct:fields_sorted}}
-        {{field:key}}: {{> spec/codec_field_spec}}
+        {{> spec/codec_field_spec}}
+        {{/struct:fields_sorted}}
+    },
+    FieldSpecIDToIndex: map[int16]int{
+        {{#struct:fields_sorted}}
+        {{field:key}}: {{field:index}},
         {{/struct:fields_sorted}}
     },
 }

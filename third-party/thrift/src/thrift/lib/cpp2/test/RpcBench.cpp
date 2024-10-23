@@ -24,7 +24,7 @@ using namespace apache::thrift::test;
 
 struct Handler : TestServiceSvNull {
   void async_eb_eventBaseAsync(
-      HandlerCallbackPtr<std::unique_ptr<std::string>> cb) {
+      HandlerCallbackPtr<std::unique_ptr<std::string>> cb) override {
     cb->result(std::make_unique<std::string>());
   }
 };

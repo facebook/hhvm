@@ -41,13 +41,13 @@ class SingleRpcChannel : public H2Channel {
       folly::Function<proxygen::HTTPTransaction*(SingleRpcChannel*)>
           transactionFactory);
 
-  virtual ~SingleRpcChannel() override;
+  ~SingleRpcChannel() override;
 
   void sendThriftResponse(
       ResponseRpcMetadata&& metadata,
       std::unique_ptr<folly::IOBuf> payload) noexcept override;
 
-  virtual void sendThriftRequest(
+  void sendThriftRequest(
       RequestMetadata&& metadata,
       std::unique_ptr<folly::IOBuf> payload,
       std::unique_ptr<ThriftClientCallback> callback) noexcept override;

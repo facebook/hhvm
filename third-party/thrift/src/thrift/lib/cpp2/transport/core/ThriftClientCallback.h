@@ -41,7 +41,7 @@ class ThriftClientCallback final : public folly::HHWheelTimer::Callback {
       RequestClientCallback::Ptr cb,
       std::chrono::milliseconds timeout);
 
-  virtual ~ThriftClientCallback();
+  ~ThriftClientCallback() override;
 
   ThriftClientCallback(const ThriftClientCallback&) = delete;
   ThriftClientCallback& operator=(const ThriftClientCallback&) = delete;

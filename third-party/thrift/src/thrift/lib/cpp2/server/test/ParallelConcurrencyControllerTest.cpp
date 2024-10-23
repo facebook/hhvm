@@ -94,7 +94,7 @@ class FIFORequestPile : public RequestPileInterface {
 
   uint64_t requestCount() const override { return queue_.size(); }
 
-  virtual std::string describe() const override { return "{FIFORequestPile}"; }
+  std::string describe() const override { return "{FIFORequestPile}"; }
 
  private:
   folly::UMPMCQueue<

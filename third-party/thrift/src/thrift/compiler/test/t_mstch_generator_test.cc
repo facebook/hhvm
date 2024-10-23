@@ -34,7 +34,7 @@ TEST(MstchGeneratorTest, cache_leaks) {
         : mstch_program(program, ctx, pos), object_count_(object_count) {
       ++*object_count_;
     }
-    virtual ~leaky_program() override { --*object_count_; }
+    ~leaky_program() override { --*object_count_; }
 
    private:
     int* object_count_;

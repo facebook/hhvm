@@ -146,12 +146,12 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendReply(
       ResponsePayload&& response,
       MessageChannel::SendCallback* cb,
-      folly::Optional<uint32_t> crc32c) override final;
+      folly::Optional<uint32_t> crc32c) final;
 
   bool sendStreamReply(
       ResponsePayload&& response,
       StreamServerCallbackPtr stream,
-      folly::Optional<uint32_t> crc32c) override final {
+      folly::Optional<uint32_t> crc32c) final {
     if (tryCancel()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
@@ -175,7 +175,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendStreamReply(
       ResponsePayload&& response,
       apache::thrift::detail::ServerStreamFactory&& stream,
-      folly::Optional<uint32_t> crc32c) override final {
+      folly::Optional<uint32_t> crc32c) final {
     if (tryCancel()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
@@ -198,7 +198,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendSinkReply(
       ResponsePayload&& response,
       apache::thrift::detail::SinkConsumerImpl&& consumerImpl,
-      folly::Optional<uint32_t> crc32c) override final {
+      folly::Optional<uint32_t> crc32c) final {
     if (tryCancel()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
@@ -222,7 +222,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   bool sendSinkReply(
       ResponsePayload&& response,
       SinkServerCallbackPtr callback,
-      folly::Optional<uint32_t> crc32c) override final {
+      folly::Optional<uint32_t> crc32c) final {
     if (tryCancel()) {
       cancelTimeout();
       auto metadata = makeResponseRpcMetadata(
@@ -292,8 +292,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   }
 
   void sendException(
-      ResponsePayload&& response,
-      MessageChannel::SendCallback* cb) override final;
+      ResponsePayload&& response, MessageChannel::SendCallback* cb) final;
 
   void sendQueueTimeoutResponse() final {
     if (tryCancel() && !isOneway()) {

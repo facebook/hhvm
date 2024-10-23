@@ -1073,7 +1073,7 @@ TEST(InteractionCodegenTest, StreamExtendsInteractionLifetime) {
             streamBaton(streamBaton_),
             publisherStreamRef(publisherStream) {}
 
-      ~StreamTile() {
+      ~StreamTile() override {
         tileBaton.post();
         tileBaton2.post();
         EXPECT_TRUE(streamBaton.try_wait_for(std::chrono::milliseconds(100)));

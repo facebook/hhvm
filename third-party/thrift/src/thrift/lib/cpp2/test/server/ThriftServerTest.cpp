@@ -300,9 +300,9 @@ TEST(ThriftServer, ServerEventHandlerTest) {
 
   class TestEventHandler : public server::TServerEventHandler {
    public:
-    void preServe(const folly::SocketAddress*) { ++preServeCalls; }
-    void newConnection(TConnectionContext*) { ++newConnectionCalls; }
-    void connectionDestroyed(TConnectionContext*) {
+    void preServe(const folly::SocketAddress*) override { ++preServeCalls; }
+    void newConnection(TConnectionContext*) override { ++newConnectionCalls; }
+    void connectionDestroyed(TConnectionContext*) override {
       ++connectionDestroyedCalls;
     }
 
@@ -4034,7 +4034,8 @@ TEST_P(HeaderOrRocket, OnStartStopServingTest) {
 
     void voidResponse() override {}
 
-    void echoRequest(std::string& result, std::unique_ptr<std::string> req) {
+    void echoRequest(
+        std::string& result, std::unique_ptr<std::string> req) override {
       result = std::move(*req);
     }
 

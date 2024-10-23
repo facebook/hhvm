@@ -36,7 +36,7 @@ class ManagedConnectionIf : public wangle::ManagedConnection {
   virtual size_t getNumActiveRequests() const = 0;
   virtual size_t getNumPendingWrites() const = 0;
 
-  virtual ~ManagedConnectionIf() = default;
+  ~ManagedConnectionIf() override = default;
 };
 
 } // namespace apache::thrift

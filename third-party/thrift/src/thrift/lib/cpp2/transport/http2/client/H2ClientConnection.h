@@ -74,7 +74,7 @@ class H2ClientConnection : public ClientConnectionIf,
       folly::AsyncTransport::UniquePtr transport,
       FlowControlSettings flowControlSettings = FlowControlSettings());
 
-  virtual ~H2ClientConnection() override;
+  ~H2ClientConnection() override;
 
   H2ClientConnection(const H2ClientConnection&) = delete;
   H2ClientConnection& operator=(const H2ClientConnection&) = delete;

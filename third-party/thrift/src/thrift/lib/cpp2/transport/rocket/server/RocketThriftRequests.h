@@ -209,7 +209,7 @@ class ThriftServerRequestStream final : public RocketThriftRequest {
       std::unique_ptr<folly::IOBuf>,
       StreamServerCallbackPtr) noexcept override;
 
-  virtual void sendStreamThriftResponse(
+  void sendStreamThriftResponse(
       ResponseRpcMetadata&&,
       std::unique_ptr<folly::IOBuf>,
       ::apache::thrift::detail::ServerStreamFactory&&) noexcept override;

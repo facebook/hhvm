@@ -397,7 +397,7 @@ struct ScopedServerInterfaceThreadTest : public testing::Test {
 
   static bool isH2Transport() { return ChannelAndServiceT::isH2Transport(); }
 
-  void SetUp() {
+  void SetUp() override {
     // By default, ThriftServer aborts the process if unable to shutdown
     // on deadline. Since client and server are running in the same process,
     // this also would crash the tests.
@@ -431,7 +431,7 @@ class SlowSimpleServiceImpl
   }
 
   folly::Future<apache::thrift::ServerStream<int64_t>> future_emptyStreamSlow(
-      int64_t sleepMs) {
+      int64_t sleepMs) override {
     requestSem_.post();
     return folly::futures::sleep(std::chrono::milliseconds(sleepMs))
         .via(folly::getGlobalCPUExecutor())
@@ -468,7 +468,7 @@ class SlowSimpleServiceImplSemiFuture
   }
 
   folly::SemiFuture<apache::thrift::ServerStream<int64_t>>
-  semifuture_emptyStreamSlow(int64_t sleepMs) {
+  semifuture_emptyStreamSlow(int64_t sleepMs) override {
     requestSem_.post();
     return folly::futures::sleep(std::chrono::milliseconds(sleepMs))
         .deferValue([](auto&&) {

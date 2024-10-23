@@ -61,7 +61,7 @@ class FlushManager : private folly::EventBase::LoopCallback,
   void resetFlushPolicy();
 
  private:
-  void runLoopCallback() noexcept override final;
+  void runLoopCallback() noexcept final;
   static folly::EventBaseLocal<FlushManager>& getEventBaseLocal();
 
   folly::EventBase& evb_;

@@ -600,7 +600,7 @@ class mstch_service : public mstch_base {
   }
   mstch::node definition_key();
 
-  virtual ~mstch_service() = default;
+  ~mstch_service() override = default;
 
  protected:
   const t_service* service_;

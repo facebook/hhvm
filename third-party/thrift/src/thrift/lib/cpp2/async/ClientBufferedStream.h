@@ -505,7 +505,7 @@ class ClientBufferedStream {
       outstanding_ = chunkBufferSize_;
     }
 
-    ~Continuation() { state_->promise.setValue(); }
+    ~Continuation() override { state_->promise.setValue(); }
 
     // takes ownership of pointer on success
     static bool wait(std::unique_ptr<Continuation>& cb) {

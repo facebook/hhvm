@@ -34,29 +34,29 @@ class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
   explicit ParallelConcurrencyControllerBase(RequestPileInterface& pile)
       : pile_(pile) {}
 
-  void setExecutionLimitRequests(uint64_t limit) override final;
+  void setExecutionLimitRequests(uint64_t limit) final;
 
   using ConcurrencyControllerBase::setObserver;
 
-  uint64_t getExecutionLimitRequests() const override final {
+  uint64_t getExecutionLimitRequests() const final {
     return executionLimit_.load();
   }
 
-  void setQpsLimit(uint64_t) override final {}
+  void setQpsLimit(uint64_t) final {}
 
-  uint64_t getQpsLimit() const override final { return 0; }
+  uint64_t getQpsLimit() const final { return 0; }
 
-  uint64_t requestCount() const override final {
+  uint64_t requestCount() const final {
     return counters_.load().requestInExecution;
   }
 
-  void onEnqueued() override final;
+  void onEnqueued() final;
 
   void onRequestFinished(ServerRequestData&) override;
 
-  void stop() override final;
+  void stop() final;
 
-  uint64_t numPendingDequeRequest() const override final {
+  uint64_t numPendingDequeRequest() const final {
     return counters_.load().pendingDequeCalls;
   }
 

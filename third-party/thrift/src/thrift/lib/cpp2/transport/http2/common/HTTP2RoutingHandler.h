@@ -37,7 +37,7 @@ class HTTP2RoutingHandler : public TransportRoutingHandler {
       : options_(std::move(options)),
         processor_(processor),
         serverConfigs_(serverConfigs) {}
-  virtual ~HTTP2RoutingHandler() = default;
+  ~HTTP2RoutingHandler() override = default;
   HTTP2RoutingHandler(const HTTP2RoutingHandler&) = delete;
 
   void stopListening() override;

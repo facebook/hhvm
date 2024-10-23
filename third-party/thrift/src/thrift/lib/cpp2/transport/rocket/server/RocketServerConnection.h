@@ -564,7 +564,7 @@ class RocketServerConnection final
   MemoryTracker& egressMemoryTracker_;
   StreamMetricCallback& streamMetricCallback_;
 
-  ~RocketServerConnection();
+  ~RocketServerConnection() override;
 
   void closeIfNeeded();
   void flushWrites(

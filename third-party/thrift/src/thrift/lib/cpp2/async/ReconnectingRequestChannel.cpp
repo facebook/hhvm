@@ -71,11 +71,9 @@ class ChannelKeepAliveStream : public StreamClientCallback {
     return clientCallback_.onFirstResponseError(std::move(ew));
   }
 
-  virtual bool onStreamNext(StreamPayload&&) override { std::terminate(); }
-  virtual void onStreamError(folly::exception_wrapper) override {
-    std::terminate();
-  }
-  virtual void onStreamComplete() override { std::terminate(); }
+  bool onStreamNext(StreamPayload&&) override { std::terminate(); }
+  void onStreamError(folly::exception_wrapper) override { std::terminate(); }
+  void onStreamComplete() override { std::terminate(); }
   void resetServerCallback(StreamServerCallback&) override { std::terminate(); }
 
  private:
@@ -108,11 +106,11 @@ class ChannelKeepAliveSink : public SinkClientCallback {
     return clientCallback_.onFirstResponseError(std::move(ew));
   }
 
-  virtual void onFinalResponse(StreamPayload&&) override { std::terminate(); }
-  virtual void onFinalResponseError(folly::exception_wrapper) override {
+  void onFinalResponse(StreamPayload&&) override { std::terminate(); }
+  void onFinalResponseError(folly::exception_wrapper) override {
     std::terminate();
   }
-  virtual bool onSinkRequestN(uint64_t) override { std::terminate(); }
+  bool onSinkRequestN(uint64_t) override { std::terminate(); }
   void resetServerCallback(SinkServerCallback&) override { std::terminate(); }
 
  private:

@@ -62,7 +62,7 @@ class H2Channel : public ThriftChannelIf {
   static constexpr folly::StringPiece RPC_KIND = "rpckind";
 
   H2Channel() = default;
-  virtual ~H2Channel() = default;
+  ~H2Channel() override = default;
 
   // Called from Proxygen at the beginning of the stream.
   virtual void onH2StreamBegin(

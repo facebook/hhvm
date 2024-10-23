@@ -429,7 +429,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
     explicit OnEventBaseDestructionCallback(RocketClient& client)
         : client_(client) {}
 
-    void onEventBaseDestruction() noexcept override final;
+    void onEventBaseDestruction() noexcept final;
 
    private:
     RocketClient& client_;

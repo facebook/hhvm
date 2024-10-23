@@ -607,7 +607,7 @@ TEST_F(MultiplexAsyncProcessorServerTest, Interaction) {
       delegate_->executeRequest(std::move(request), methodMetadata);
     }
 
-    virtual void terminateInteraction(
+    void terminateInteraction(
         int64_t id,
         Cpp2ConnContext& ctx,
         folly::EventBase& eb) noexcept override {

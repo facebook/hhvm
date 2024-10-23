@@ -104,15 +104,15 @@ class VirtualReader : public VirtualReaderBase {
 
   bool kUsesFieldNames() const override { return protocol_.kUsesFieldNames(); }
 
-  virtual bool kOmitsContainerSizes() const override {
+  bool kOmitsContainerSizes() const override {
     return protocol_.kOmitsContainerSizes();
   }
 
-  virtual bool kOmitsStringSizes() const override {
+  bool kOmitsStringSizes() const override {
     return protocol_.kOmitsStringSizes();
   }
 
-  virtual bool kHasDeferredRead() const override {
+  bool kHasDeferredRead() const override {
     return protocol_.kHasDeferredRead();
   }
 
@@ -161,8 +161,7 @@ class VirtualReader : public VirtualReaderBase {
   void readString(folly::fbstring& str) override { protocol_.readString(str); }
   void readBinary(std::string& str) override { protocol_.readBinary(str); }
   void readBinary(folly::fbstring& str) override { protocol_.readBinary(str); }
-  virtual void readBinary(
-      apache::thrift::detail::SkipNoopString& str) override {
+  void readBinary(apache::thrift::detail::SkipNoopString& str) override {
     protocol_.readBinary(str);
   }
   void readBinary(std::unique_ptr<folly::IOBuf>& str) override {

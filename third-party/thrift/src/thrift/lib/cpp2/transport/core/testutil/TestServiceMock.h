@@ -72,7 +72,7 @@ class IntermHeaderService
     : public apache::thrift::ServiceHandler<IntermHeaderService> {
  public:
   IntermHeaderService(const std::string& host, int16_t port);
-  virtual ~IntermHeaderService();
+  ~IntermHeaderService() override;
 
   int32_t callAdd(int32_t) override;
 

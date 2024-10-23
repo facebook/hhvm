@@ -38,7 +38,7 @@ namespace apache::thrift {
 class ConnectionThread : public folly::ScopedEventBaseThread {
  public:
   ConnectionThread() = default;
-  ~ConnectionThread();
+  ~ConnectionThread() override;
 
   // Returns a connection that may be used to talk to a server at
   // "addr:port".

@@ -86,13 +86,13 @@ class LoggingEventHandler {
 class ServerEventHandler : public LoggingEventHandler {
  public:
   virtual void log(const ThriftServer&, DynamicFieldsCallback = {}) {}
-  virtual ~ServerEventHandler() override {}
+  ~ServerEventHandler() override {}
 };
 
 using ConnectionLoggingContext = Cpp2ConnContext;
 class ConnectionEventHandler : public LoggingEventHandler {
  public:
-  virtual ~ConnectionEventHandler() override {}
+  ~ConnectionEventHandler() override {}
 
   virtual void log(
       const ConnectionLoggingContext&, DynamicFieldsCallback = {}) {}
@@ -118,7 +118,7 @@ class ConnectionEventHandler : public LoggingEventHandler {
 class ApplicationEventHandler : public LoggingEventHandler {
  public:
   virtual void log(DynamicFieldsCallback = {}) {}
-  virtual ~ApplicationEventHandler() override {}
+  ~ApplicationEventHandler() override {}
 };
 
 class ServerTrackerHandler {
@@ -184,7 +184,7 @@ class RequestEventHandler : public LoggingEventHandler {
    */
   virtual SamplingRate shouldLog() { return 0; }
 
-  virtual ~RequestEventHandler() override {}
+  ~RequestEventHandler() override {}
 };
 
 class LoggingEventRegistry {

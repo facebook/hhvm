@@ -87,7 +87,7 @@ func (c ClientType) String() string {
 	case UnknownClientType:
 		fallthrough
 	default:
-		return "Unknown"
+		return fmt.Sprintf("Unknown (Value = %d)", c)
 	}
 }
 

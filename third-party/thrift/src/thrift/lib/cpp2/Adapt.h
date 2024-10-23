@@ -82,6 +82,34 @@ template <typename Adapter, typename AdaptedT, typename Context>
 using if_not_ctor_adapter =
     std::enable_if_t<!is_ctor_adapter_v<Adapter, AdaptedT, Context>>;
 
+// Used to detect if Adapter has an equal override.
+template <typename Adapter, typename AdaptedT>
+using EqualType = decltype(Adapter::equal(
+    std::declval<const AdaptedT&>(), std::declval<const AdaptedT&>()));
+template <typename Adapter, typename AdaptedT>
+constexpr bool is_equal_adapter_v =
+    folly::is_detected_v<EqualType, Adapter, AdaptedT>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_equal_adapter =
+    std::enable_if_t<is_equal_adapter_v<Adapter, AdaptedT>, R>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_not_equal_adapter =
+    std::enable_if_t<!is_equal_adapter_v<Adapter, AdaptedT>, R>;
+
+// Used to detect if Adapter has a less override.
+template <typename Adapter, typename AdaptedT>
+using LessType = decltype(Adapter::less(
+    std::declval<AdaptedT&>(), std::declval<const AdaptedT&>()));
+template <typename Adapter, typename AdaptedT>
+constexpr bool is_less_adapter_v =
+    folly::is_detected_v<LessType, Adapter, AdaptedT>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_less_adapter =
+    std::enable_if_t<is_less_adapter_v<Adapter, AdaptedT>, R>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_not_less_adapter =
+    std::enable_if_t<!is_less_adapter_v<Adapter, AdaptedT>, R>;
+
 // Used to detect if Adapter has a clear function override.
 template <typename Adapter, typename AdaptedT>
 using ClearType = decltype(Adapter::clear(std::declval<AdaptedT&>()));
@@ -215,7 +243,7 @@ template <typename Adapter, typename AdaptedT>
 struct adapter_equal<
     Adapter,
     AdaptedT,
-    folly::void_t<decltype(Adapter::equal(cr<AdaptedT>(), cr<AdaptedT>()))>> {
+    folly::void_t<EqualType<Adapter, AdaptedT>>> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::equal(lhs, rhs);
   }
@@ -249,7 +277,7 @@ template <typename Adapter, typename AdaptedT>
 struct adapter_less<
     Adapter,
     AdaptedT,
-    folly::void_t<decltype(Adapter::less(cr<AdaptedT>(), cr<AdaptedT>()))>> {
+    folly::void_t<LessType<Adapter, AdaptedT>>> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::less(lhs, rhs);
   }

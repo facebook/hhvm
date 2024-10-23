@@ -610,9 +610,7 @@ struct EqualTo<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>, "");
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
-    auto useAdapter =
-        [](auto adapter) -> folly::void_t<decltype(adapter.equal(lhs, rhs))> {};
-    if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
+    if constexpr (adapt_detail::is_equal_adapter_v<Adapter, T>) {
       return Adapter::equal(lhs, rhs);
     } else if constexpr (folly::is_invocable_v<
                              std::equal_to<>,
@@ -630,9 +628,7 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>, "");
   template <typename T>
   constexpr bool operator()(const T& lhs, const T& rhs) const {
-    auto useAdapter =
-        [](auto adapter) -> folly::void_t<decltype(adapter.less(lhs, rhs))> {};
-    if constexpr (folly::is_invocable_v<decltype(useAdapter), Adapter>) {
+    if constexpr (adapt_detail::is_less_adapter_v<Adapter, T>) {
       return Adapter::less(lhs, rhs);
     } else if constexpr (folly::
                              is_invocable_v<std::less<>, const T&, const T&>) {

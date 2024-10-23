@@ -103,7 +103,7 @@ module ReadOnlyEnvironment : sig
 
   val default : verbose:int -> t
 
-  val debug : level:int -> t -> string Lazy.t -> unit
+  val debug : level:int -> t -> string Lazy.t -> (unit -> 'a) -> 'a
 end = struct
   type t = {
     for_option_ty: bool;
@@ -141,12 +141,21 @@ end = struct
       for_enum_def
       pick_immediately_inhabited
 
-  let debug ~level ({ verbose; _ } as renv) str =
+  let debug ~level ({ verbose; _ } as renv) str f =
     if verbose >= level then begin
-      Format.eprintf "%s\n" (Lazy.force str);
+      let start_time = Sys.time () in
+      let str = Lazy.force str in
+      Format.eprintf "[START] %s\n" str;
       Format.eprintf "  %s\n" (show renv);
-      Out_channel.flush Out_channel.stderr
-    end
+      Out_channel.flush Out_channel.stderr;
+      let res = f () in
+      let duration = Sys.time () -. start_time in
+      Format.eprintf "[END][%.3fs] %s\n" duration str;
+      Format.eprintf "  %s\n" (show renv);
+      Out_channel.flush Out_channel.stderr;
+      res
+    end else
+      f ()
 end
 
 module rec Environment : sig
@@ -658,14 +667,20 @@ end = struct
       without a concrete class extending it somewhere down the hierarchy.
       *)
   let subtype_of (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty =
-    ReadOnlyEnvironment.debug ~level:1 renv
-    @@ lazy (Format.sprintf "subtype_of: %s" (Type.show ty));
+    ReadOnlyEnvironment.debug
+      ~level:1
+      renv
+      (lazy (Format.sprintf "subtype_of: %s" (Type.show ty)))
+    @@ fun () ->
     (* select_step makes sure we don't get into infinite loops by randomly being
        an identity function and otherwise recursive via step. *)
     let rec subfield_of renv { key; ty; optional } =
-      ReadOnlyEnvironment.debug ~level:3 renv
-      @@ lazy
-           (Format.sprintf "subtype_of subfield_of %s: %s" key (Type.show ty));
+      ReadOnlyEnvironment.debug
+        ~level:3
+        renv
+        (lazy
+          (Format.sprintf "subtype_of subfield_of %s: %s" key (Type.show ty)))
+      @@ fun () ->
       let ty =
         driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
       in
@@ -677,8 +692,11 @@ end = struct
       in
       { key; ty; optional }
     and step renv ty =
-      ReadOnlyEnvironment.debug ~level:3 renv
-      @@ lazy (Format.sprintf "subtype_of step: %s" (Type.show ty));
+      ReadOnlyEnvironment.debug
+        ~level:3
+        renv
+        (lazy (Format.sprintf "subtype_of step: %s" (Type.show ty)))
+      @@ fun () ->
       ty
       :: begin
            Environment.get_subtypes env ty
@@ -808,8 +826,11 @@ end = struct
          end
     and driver renv candidate =
       try
-        ReadOnlyEnvironment.debug ~level:2 renv
-        @@ lazy (Format.sprintf "subtype_of driver: %s" (Type.show candidate));
+        ReadOnlyEnvironment.debug
+          ~level:2
+          renv
+          (lazy (Format.sprintf "subtype_of driver: %s" (Type.show candidate)))
+        @@ fun () ->
         let candidates = step renv candidate in
         if Random.bool () then
           (* Go down on a stochastic walk and explore further subtypes. *)
@@ -841,9 +862,12 @@ end = struct
     retry ()
 
   let are_disjoint (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty ty' =
-    ReadOnlyEnvironment.debug ~level:1 renv
-    @@ lazy
-         (Format.sprintf "are_disjoint: %s %s" (Type.show ty) (Type.show ty'));
+    ReadOnlyEnvironment.debug
+      ~level:1
+      renv
+      (lazy
+        (Format.sprintf "are_disjoint: %s %s" (Type.show ty) (Type.show ty')))
+    @@ fun () ->
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
        it can only make disjointness more conservative.
@@ -858,12 +882,18 @@ end = struct
        we pay the price.
     *)
     let weaken_for_disjointness ty : t list =
-      ReadOnlyEnvironment.debug ~level:2 renv
-      @@ lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty));
+      ReadOnlyEnvironment.debug
+        ~level:2
+        renv
+        (lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty)))
+      @@ fun () ->
       let step ty =
-        ReadOnlyEnvironment.debug ~level:4 renv
-        @@ lazy
-             (Format.sprintf "weaken_for_disjointness step: %s" (Type.show ty));
+        ReadOnlyEnvironment.debug
+          ~level:4
+          renv
+          (lazy
+            (Format.sprintf "weaken_for_disjointness step: %s" (Type.show ty)))
+        @@ fun () ->
         match ty with
         | Classish info when Kind.equal_classish info.kind Kind.Interface ->
           (* This can be improved on if we introduce an internal Object type which
@@ -901,13 +931,16 @@ end = struct
         | Like _ -> [Mixed]
       in
       let rec driver acc =
-        ReadOnlyEnvironment.debug ~level:3 renv
-        @@ lazy
-             (Format.sprintf
-                "weaken_for_disjointness driver: %s"
-                (TypeSet.to_list acc
-                |> List.map ~f:Type.show
-                |> String.concat ~sep:","));
+        ReadOnlyEnvironment.debug
+          ~level:3
+          renv
+          (lazy
+            (Format.sprintf
+               "weaken_for_disjointness driver: %s"
+               (TypeSet.to_list acc
+               |> List.map ~f:Type.show
+               |> String.concat ~sep:",")))
+        @@ fun () ->
         let acc' =
           TypeSet.to_list acc
           |> List.concat_map ~f:step
@@ -970,7 +1003,7 @@ end = struct
       (env : Environment.t)
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
-    ReadOnlyEnvironment.debug ~level:2 renv @@ lazy "mk_classish";
+    ReadOnlyEnvironment.debug ~level:2 renv (lazy "mk_classish") @@ fun () ->
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
@@ -1057,8 +1090,11 @@ end = struct
       subtype_of ReadOnlyEnvironment.{ renv with for_alias_def } env
     in
     let kind = Kind.pick renv in
-    ReadOnlyEnvironment.debug ~level:1 renv
-    @@ lazy (Format.sprintf "mk %s" (Kind.show kind));
+    ReadOnlyEnvironment.debug
+      ~level:1
+      renv
+      (lazy (Format.sprintf "mk %s" (Kind.show kind)))
+    @@ fun () ->
     match kind with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))

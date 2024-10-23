@@ -379,6 +379,7 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
   init_stats(stats);
 
   uint64_t config_last_success = 0;
+  uint64_t config_last_sr_update = 0;
   uint64_t destinationBatchesSum = 0;
   uint64_t destinationRequestsSum = 0;
   uint64_t outstandingGetReqsTotal = 0;
@@ -396,6 +397,10 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
     auto proxy = router.getProxyBase(i);
     config_last_success = std::max(
         config_last_success, proxy->stats().getValue(config_last_success_stat));
+    config_last_sr_update = std::max(
+        config_last_sr_update,
+        proxy->stats().getValue(config_last_sr_update_stat));
+
     destinationBatchesSum +=
         proxy->stats().getStatValueWithinWindow(destination_batches_sum_stat);
     destinationRequestsSum +=
@@ -486,6 +491,8 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
   stat_set(stats, time_stat, now);
   stat_set(stats, uptime_stat, now - router.startTime());
   stat_set(stats, config_age_stat, now - config_last_success);
+  stat_set(stats, config_age_sr_stat, now - config_last_sr_update);
+  stat_set(stats, config_last_sr_update_stat, config_last_sr_update);
   stat_set(stats, config_last_success_stat, config_last_success);
   stat_set(
       stats,

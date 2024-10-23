@@ -1442,6 +1442,25 @@ class HandlerCallbackBase {
       std::move(task).scheduleOn(std::move(executor)).start();
     }
   }
+
+  template <class ExceptionHandler>
+  static folly::coro::Task<void>
+  doInvokeServiceInterceptorsOnResponseWithException(
+      Ptr callback, ExceptionHandler handler) {
+    folly::exception_wrapper ew = std::move(handler).exception();
+    folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+        callback->processServiceInterceptorsOnResponse(ew));
+    // When both user code and ServiceInterceptor::onResponse have exceptions,
+    // the ServiceInterceptor wins. This is because
+    // ServiceInterceptor::onResponse has access to the user-thrown exception
+    // and can choose to either swallow it or not.
+    if (onResponseResult.hasException()) {
+      ExceptionHandler::handle(
+          *callback, std::move(onResponseResult).exception());
+    } else {
+      ExceptionHandler::handle(*callback, std::move(ew));
+    }
+  }
 #endif // FOLLY_HAS_COROUTINES
 
   template <class ExceptionHandler>
@@ -1451,24 +1470,8 @@ class HandlerCallbackBase {
       ExceptionHandler::handle(*this, std::move(handler).exception());
       return;
     }
-    const auto doProcess =
-        [](Ptr callback,
-           ExceptionHandler handler_1) -> folly::coro::Task<void> {
-      folly::exception_wrapper ew = std::move(handler_1).exception();
-      folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
-          callback->processServiceInterceptorsOnResponse(ew));
-      // When both user code and ServiceInterceptor::onResponse have exceptions,
-      // the ServiceInterceptor wins. This is because
-      // ServiceInterceptor::onResponse has access to the user-thrown exception
-      // and can choose to either swallow it or not.
-      if (onResponseResult.hasException()) {
-        ExceptionHandler::handle(
-            *callback, std::move(onResponseResult).exception());
-      } else {
-        ExceptionHandler::handle(*callback, std::move(ew));
-      }
-    };
-    startOnExecutor(doProcess(sharedFromThis(), std::move(handler)));
+    startOnExecutor(doInvokeServiceInterceptorsOnResponseWithException(
+        sharedFromThis(), std::move(handler)));
 #else
     ExceptionHandler::handle(*this, std::move(handler).exception());
 #endif // FOLLY_HAS_COROUTINES
@@ -1648,6 +1651,20 @@ class HandlerCallback : public HandlerCallbackBase {
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
+#if FOLLY_HAS_COROUTINES
+  static folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(
+      Ptr callback, std::decay_t<InputType> result) {
+    folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+        callback->processServiceInterceptorsOnResponse(
+            apache::thrift::util::TypeErasedRef::of<InnerType>(result)));
+    if (onResponseResult.hasException()) {
+      callback->doException(onResponseResult.exception().to_exception_ptr());
+    } else {
+      callback->doResult(std::move(result));
+    }
+  }
+#endif
+
   void result(InnerType r) {
 #if FOLLY_HAS_COROUTINES
     if (!shouldProcessServiceInterceptorsOnResponse()) {
@@ -1658,20 +1675,8 @@ class HandlerCallback : public HandlerCallbackBase {
       // where they will be unused.
       doResult(std::forward<InputType>(r));
     } else {
-      const auto doProcess = [](Ptr callback,
-                                auto result) -> folly::coro::Task<void> {
-        folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
-            callback->processServiceInterceptorsOnResponse(
-                apache::thrift::util::TypeErasedRef::of<InnerType>(result)));
-        if (onResponseResult.hasException()) {
-          callback->doException(
-              onResponseResult.exception().to_exception_ptr());
-        } else {
-          callback->doResult(std::move(result));
-        }
-      };
-      startOnExecutor(
-          doProcess(sharedFromThis(), std::decay_t<InputType>(std::move(r))));
+      startOnExecutor(doInvokeServiceInterceptorsOnResponse(
+          sharedFromThis(), std::decay_t<InputType>(std::move(r))));
     }
 #else
     doResult(std::forward<InputType>(r));
@@ -1736,6 +1741,19 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
+#if FOLLY_HAS_COROUTINES
+  folly::coro::Task<void> doInvokeServiceInterceptorsOnResponse(Ptr callback) {
+    folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
+        callback->processServiceInterceptorsOnResponse(
+            apache::thrift::util::TypeErasedRef::of<folly::Unit>(folly::unit)));
+    if (onResponseResult.hasException()) {
+      callback->doException(onResponseResult.exception().to_exception_ptr());
+    } else {
+      callback->doDone();
+    }
+  }
+#endif // FOLLY_HAS_COROUTINES
+
   void done() {
 #if FOLLY_HAS_COROUTINES
     if (!shouldProcessServiceInterceptorsOnResponse()) {
@@ -1746,19 +1764,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       // where they will be unused.
       doDone();
     } else {
-      const auto doProcess = [](Ptr callback) -> folly::coro::Task<void> {
-        folly::Try<void> onResponseResult = co_await folly::coro::co_awaitTry(
-            callback->processServiceInterceptorsOnResponse(
-                apache::thrift::util::TypeErasedRef::of<folly::Unit>(
-                    folly::unit)));
-        if (onResponseResult.hasException()) {
-          callback->doException(
-              onResponseResult.exception().to_exception_ptr());
-        } else {
-          callback->doDone();
-        }
-      };
-      startOnExecutor(doProcess(sharedFromThis()));
+      startOnExecutor(doInvokeServiceInterceptorsOnResponse(sharedFromThis()));
     }
 #else
     doDone();

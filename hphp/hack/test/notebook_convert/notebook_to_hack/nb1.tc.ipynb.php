@@ -6,23 +6,20 @@
 
 I am a *markdown* **cell**
 */
-/*@bento-cell-end*/
+
 /*@bento-cell:{"id": 4, "cell_type": "code"}*/
 class MyClass {}
-/*bento-cell-end*/
+
 
 function notebook_main_n1234(): void {
     /*@bento-cell:{"id": 1, "cell_type": "code"}*/
     new MyClass();
     echo "hi3";
-    /*bento-cell-end*/
     /*@bento-cell:{"id": 4, "cell_type": "code"}*/
     echo "hi2";
     $x = 3;
     echo $x + 1;
     echo "hi0";
-    /*bento-cell-end*/
     /*@bento-cell:{"id": 4, "cell_type": "code"}*/
     echo "hi1";
-    /*bento-cell-end*/
 }

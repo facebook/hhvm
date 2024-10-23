@@ -117,7 +117,7 @@ reconstruct the notebook from the generated Hack (with some loss of position inf
 *)
 let string_of_hack_chunk id contents =
   Printf.sprintf
-    "/*@bento-cell:{\"id\": %d, \"cell_type\": \"code\"}*/\n%s\n/*bento-cell-end*/"
+    "/*@bento-cell:{\"id\": %d, \"cell_type\": \"code\"}*/\n%s\n"
     (Id.to_int id)
     contents
 
@@ -133,7 +133,7 @@ let hack_of_cells ~(notebook_name : string) (cells : Ipynb.cell list) : string =
            | { chunk_kind = Non_hack { cell_type }; id; contents } ->
              Either.First
                (Printf.sprintf
-                  "/*@bento-cell:{\"id\": %d, \"cell_type\": \"%s\"}*/\n/*\n%s\n*/\n/*@bento-cell-end*/"
+                  "/*@bento-cell:{\"id\": %d, \"cell_type\": \"%s\"}*/\n/*\n%s\n*/\n"
                   (Id.to_int id)
                   cell_type
                   contents)

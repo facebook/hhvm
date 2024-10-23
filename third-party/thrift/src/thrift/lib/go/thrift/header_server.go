@@ -82,6 +82,10 @@ func (p *headerServer) acceptLoop(ctx context.Context) error {
 			ctx = p.connContext(ctx, conn)
 			if err := p.processRequests(ctx, conn); err != nil {
 				p.log("error processing request from %s: %s\n", conn.RemoteAddr(), err)
+				cerror := conn.Close()
+				if cerror != nil {
+					p.log("error closing connection to %s: %s\n", conn.RemoteAddr(), cerror)
+				}
 			}
 		}(ctx, conn)
 	}

@@ -209,12 +209,10 @@ class AstVisitorTest : public base_program_test {
   OverloadedVisitor overload_visitor_;
 };
 
-using AstVisitorTypes = ::testing::Types<ast_visitor, const_ast_visitor>;
-TYPED_TEST_SUITE(AstVisitorTest, AstVisitorTypes);
+using ast_visitor_types = ::testing::Types<ast_visitor, const_ast_visitor>;
+TYPED_TEST_SUITE(AstVisitorTest, ast_visitor_types);
 
-TYPED_TEST(AstVisitorTest, EmptyProgram) {}
-
-TYPED_TEST(AstVisitorTest, Interaction) {
+TYPED_TEST(AstVisitorTest, interaction) {
   auto interaction =
       std::make_unique<t_interaction>(&this->program_, "Interaction");
   auto void_ref = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
@@ -248,7 +246,7 @@ TYPED_TEST(AstVisitorTest, Interaction) {
   this->program_.add_definition(std::move(interaction));
 }
 
-TYPED_TEST(AstVisitorTest, Service) {
+TYPED_TEST(AstVisitorTest, service) {
   auto service = std::make_unique<t_service>(&this->program_, "Service");
   auto void_ref = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
   auto func1 =
@@ -280,7 +278,7 @@ TYPED_TEST(AstVisitorTest, Service) {
   this->program_.add_definition(std::move(service));
 }
 
-TYPED_TEST(AstVisitorTest, Struct) {
+TYPED_TEST(AstVisitorTest, struct) {
   auto tstruct = std::make_unique<t_struct>(&this->program_, "Struct");
   auto field =
       std::make_unique<t_field>(&t_primitive_type::t_i32(), "struct_field", 1);
@@ -301,7 +299,7 @@ TYPED_TEST(AstVisitorTest, Struct) {
   this->program_.add_definition(std::move(tstruct));
 }
 
-TYPED_TEST(AstVisitorTest, Union) {
+TYPED_TEST(AstVisitorTest, union) {
   auto tunion = std::make_unique<t_union>(&this->program_, "Union");
   auto field =
       std::make_unique<t_field>(&t_primitive_type::t_i32(), "union_field", 1);
@@ -322,7 +320,7 @@ TYPED_TEST(AstVisitorTest, Union) {
   this->program_.add_definition(std::move(tunion));
 }
 
-TYPED_TEST(AstVisitorTest, Exception) {
+TYPED_TEST(AstVisitorTest, exception) {
   auto except = std::make_unique<t_exception>(&this->program_, "Exception");
   auto field = std::make_unique<t_field>(
       &t_primitive_type::t_i32(), "exception_field", 1);
@@ -343,7 +341,7 @@ TYPED_TEST(AstVisitorTest, Exception) {
   this->program_.add_definition(std::move(except));
 }
 
-TYPED_TEST(AstVisitorTest, Enum) {
+TYPED_TEST(AstVisitorTest, enum) {
   auto tenum = std::make_unique<t_enum>(&this->program_, "Enum");
   auto tenum_value = std::make_unique<t_enum_value>("EnumValue");
   EXPECT_CALL(this->mock_, visit_enum_value(tenum_value.get()));
@@ -363,7 +361,7 @@ TYPED_TEST(AstVisitorTest, Enum) {
   this->program_.add_definition(std::move(tenum));
 }
 
-TYPED_TEST(AstVisitorTest, Const) {
+TYPED_TEST(AstVisitorTest, constant) {
   auto tconst = std::make_unique<t_const>(
       &this->program_, &t_primitive_type::t_i32(), "Const", nullptr);
   EXPECT_CALL(this->mock_, visit_const(tconst.get()));
@@ -375,7 +373,7 @@ TYPED_TEST(AstVisitorTest, Const) {
   this->program_.add_definition(std::move(tconst));
 }
 
-TYPED_TEST(AstVisitorTest, Typedef) {
+TYPED_TEST(AstVisitorTest, typedef) {
   auto ttypedef = std::make_unique<t_typedef>(
       &this->program_, &t_primitive_type::t_i32(), "Typedef", nullptr);
   EXPECT_CALL(this->mock_, visit_typedef(ttypedef.get()));
@@ -387,7 +385,7 @@ TYPED_TEST(AstVisitorTest, Typedef) {
   this->program_.add_definition(std::move(ttypedef));
 }
 
-TYPED_TEST(AstVisitorTest, Set) {
+TYPED_TEST(AstVisitorTest, set) {
   auto set = std::make_unique<t_set>(&t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_set(set.get()));
   EXPECT_CALL(this->mock_, visit_container(set.get()));
@@ -395,7 +393,7 @@ TYPED_TEST(AstVisitorTest, Set) {
   this->program_.add_type_instantiation(std::move(set));
 }
 
-TYPED_TEST(AstVisitorTest, List) {
+TYPED_TEST(AstVisitorTest, list) {
   auto list = std::make_unique<t_list>(&t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_list(list.get()));
   EXPECT_CALL(this->mock_, visit_container(list.get()));
@@ -403,7 +401,7 @@ TYPED_TEST(AstVisitorTest, List) {
   this->program_.add_type_instantiation(std::move(list));
 }
 
-TYPED_TEST(AstVisitorTest, Map) {
+TYPED_TEST(AstVisitorTest, map) {
   auto map = std::make_unique<t_map>(
       &t_primitive_type::t_i32(), &t_primitive_type::t_i32());
   EXPECT_CALL(this->mock_, visit_map(map.get()));
@@ -412,7 +410,7 @@ TYPED_TEST(AstVisitorTest, Map) {
   this->program_.add_type_instantiation(std::move(map));
 }
 
-TEST(AstVisitorTest, Sink) {
+TEST(AstVisitorTest, sink) {
   auto sink1 = std::make_unique<t_sink>(
       t_primitive_type::t_i32(), t_primitive_type::t_i32());
   auto sink1ptr = sink1.get();
@@ -447,7 +445,7 @@ TEST(AstVisitorTest, Sink) {
           sink1ptr->sink_exceptions(), sink2ptr->final_response_exceptions()));
 }
 
-TEST(AstVisitorTest, StreamResponse) {
+TEST(AstVisitorTest, stream) {
   auto stream1 = std::make_unique<t_stream>(t_primitive_type::t_i32());
   auto stream1ptr = stream1.get();
   stream1->set_exceptions(std::make_unique<t_throws>());
@@ -476,7 +474,7 @@ TEST(AstVisitorTest, StreamResponse) {
   EXPECT_THAT(throws, ::testing::ElementsAre(stream1ptr->exceptions()));
 }
 
-TEST(AstVisitorTest, Modifications) {
+TEST(AstVisitorTest, modifications) {
   t_program program("path/to/program.thrift");
   program.create_def<t_union>(&program, "Union1");
   program.create_def<t_union>(&program, "Union2");
@@ -500,7 +498,7 @@ TEST(AstVisitorTest, Modifications) {
           "Union1", "Union2", "Union1a", "Union1b", "Union2a", "Union2b"));
 }
 
-class MockObserver {
+class mock_visitor {
  public:
   MOCK_METHOD(void, begin_visit, (t_node&));
   MOCK_METHOD(void, end_visit, (t_node&));
@@ -508,15 +506,15 @@ class MockObserver {
 
 class ObserverTest : public base_program_test {};
 
-TEST_F(ObserverTest, OrderOfCalls) {
-  static_assert(ast_detail::is_observer<MockObserver&>::value, "");
+TEST_F(ObserverTest, order_of_calls) {
+  static_assert(ast_detail::has_visit_methods<mock_visitor&>::value, "");
   using test_ast_visitor =
-      basic_ast_visitor<false, MockObserver&, int, MockObserver&>;
+      basic_ast_visitor<false, mock_visitor&, int, mock_visitor&>;
 
   auto& tunion = create_def<t_union>("Union");
   auto& field =
       tunion.create_field(&t_primitive_type::t_i32(), "union_field", 1);
-  MockObserver m1, m2;
+  mock_visitor m1, m2;
   {
     ::testing::InSequence ins;
     EXPECT_CALL(m1, begin_visit(::testing::Ref(program_)));
@@ -538,8 +536,8 @@ TEST_F(ObserverTest, OrderOfCalls) {
   visitor(m1, 1, m2, program_);
 }
 
-TEST_F(ObserverTest, VisitContext) {
-  static_assert(ast_detail::is_observer<visitor_context&>::value, "");
+TEST_F(ObserverTest, visit_context) {
+  static_assert(ast_detail::has_visit_methods<visitor_context&>::value, "");
   using ctx_ast_visitor = basic_ast_visitor<false, visitor_context&>;
 
   auto& tunion = create_def<t_union>("Union");

@@ -22,7 +22,7 @@ import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.py3.converter import to_py3_struct
-from thrift.py3.types import BadEnum, Struct
+from thrift.py3.types import BadEnum, Enum, Struct
 
 
 # Reimplementing brokenInAutoMigrate using convertible because including testing.thrift and
@@ -232,6 +232,72 @@ class PythonToPy3ConverterTest(unittest.TestCase):
 
     def test_simple(self) -> None:
         self.assert_simple(self.make_simple_python()._to_py3())
+
+    def test_enum_eq(self) -> None:
+        self.assertEqual(
+            py3_types.Color.GREEN.value,
+            python_types.Color.GREEN,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN,
+            py3_types.Color.GREEN.value,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN.value,
+            py3_types.Color.GREEN,
+        )
+        self.assertEqual(
+            py3_types.Color.GREEN,
+            python_types.Color.GREEN.value,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN,
+            py3_types.Color.GREEN,
+        )
+        self.assertEqual(
+            py3_types.Color.GREEN,
+            python_types.Color.GREEN,
+        )
+        self.assertNotEqual(
+            py3_types.Color.NONE,
+            py3_types.Union.Type.EMPTY,
+        )
+        self.assertNotEqual(
+            py3_types.Union.Type.EMPTY,
+            py3_types.Color.NONE,
+        )
+        self.assertNotEqual(
+            py3_types.Color.NONE,
+            py3_types.Shade.NONE,
+        )
+        self.assertNotEqual(
+            py3_types.Color.RED,
+            py3_types.Shade.CRIMSON,
+        )
+
+    def test_enum_eq_user_abusing_base_class(self) -> None:
+        class Evil(Enum):
+            NONE = 0
+            RED = 1
+            GREEN = 2
+            BLUE = 3
+
+        self.assertEqual(
+            Evil.RED,
+            Evil(1),
+        )
+        self.assertNotEqual(
+            Evil.RED,
+            Evil.GREEN,
+        )
+        self.assertNotEqual(
+            py3_types.Color.GREEN,
+            Evil.GREEN,
+        )
+        self.assertNotEqual(
+            Evil.GREEN,
+            python_types.Color.GREEN,
+        )
 
     @brokenInAutoMigrate()
     def test_simple_capi(self) -> None:

@@ -48,7 +48,7 @@ cdef extern from *:
 
 
 def _is_py3_struct(obj):
-    try: 
+    try:
         import thrift.py3.types
         return isinstance(obj, thrift.py3.types.Struct)
     except ImportError:
@@ -973,7 +973,7 @@ cdef class AdaptedTypeInfo(TypeInfoBase):
         # dependent of the TAdaptFrom (the thrift Type) and the TAdaptTo (the python type)
         # The transitive annotation has no part in the type calculus and should not
         # appear in the comparison.
-        # 
+        #
         return (self._orig_type_info.same_as(other_typeinfo._orig_type_info) and
             self._adapter_class == other_typeinfo._adapter_class)
 
@@ -2353,7 +2353,10 @@ class Enum(metaclass=EnumMeta):
 
     def __eq__(self, other):
         if isinstance(other, Enum):
-            return self is other
+            try:
+                return self is other or self._to_python() is other._to_python()
+            except AttributeError:
+                return False
         if cFollyIsDebug and isinstance(other, (bool, float)):
             warnings.warn(
                 f"Did you really mean to compare {type(self)} and {type(other)}?",

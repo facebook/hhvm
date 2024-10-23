@@ -5,6 +5,7 @@ import typing as _typing
 
 from common.thrift.patch.detail.dynamic_patch import (
     BaseStructPatch,
+    ListPatch,
     MapPatch,
     OptionalFieldPatch,
 )
@@ -135,7 +136,7 @@ class ContainersPatch(BaseStructPatch[Containers]):
             ListPatch[int]]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: patch.as_list_patch(),
+            lambda patch, type_info: ListPatch(patch.as_list_patch(), type_info),
             self._patch,
             1,
             _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32))

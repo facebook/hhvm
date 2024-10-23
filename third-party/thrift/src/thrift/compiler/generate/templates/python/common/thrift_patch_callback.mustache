@@ -27,7 +27,7 @@
 }}{{#type:string?}}patch.as_string_patch(){{/type:string?}}{{!
 }}{{#type:binary?}}patch.as_binary_patch(){{/type:binary?}}{{!
 }}{{#type:enum}}patch.as_enum_patch(){{/type:enum}}{{!
-}}{{#type:list?}}patch.as_list_patch(){{/type:list?}}{{!
+}}{{#type:list?}}ListPatch(patch.as_list_patch(), type_info){{/type:list?}}{{!
 }}{{#type:set?}}patch.as_set_patch(){{/type:set?}}{{!
 }}{{#type:map?}}{{#type:value_type}}{{!
 }}MapPatch({{> common/thrift_patch_callback}}, patch.as_map_patch(), type_info){{!

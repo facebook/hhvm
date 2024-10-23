@@ -24,6 +24,12 @@ type FieldSpec struct {
 	ReflectIndex  int
 	IsOptional    bool
 	ValueTypeSpec *TypeSpec
+	// Whether the field must be set (non-nil) in order to serialize:
+	//  * Struct type fields must be set (to avoid nil pointer dereference)
+	//  * Fields inside a union must be set (that's the point of a union)
+	//  * Optional fields must be set ("unset" optional fields must not be
+	//  serailized as per Thrift-spec)
+	MustBeSetToSerialize bool
 }
 
 // StructSpec is a spec for a stuct.

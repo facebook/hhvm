@@ -1,27 +1,11 @@
 [cells]
-root = .
-prelude = prelude
-toolchains = shim
-shim = shim
-none = none
-folly = folly
+gh_facebookincubator_fizz = .
+gh_facebook_buck2_shims_meta = shim
 
 [cell_aliases]
-config = prelude
-ovr_config = prelude
-fbcode = shim
-fbsource = shim
-fbcode_macros = shim
-bazel_skylib = shim
-buck = none
-
-[parser]
-target_platform_detector_spec = target:root//...->prelude//platforms:default
-
-[external_cells]
-prelude = bundled
+root = gh_facebookincubator_fizz
 
 [oss]
 internal_cell = fbcode
 project_dirs = fizz
-prefix_mappings = fbcode//folly->folly//folly
+prefix_mappings = fbcode//folly->gh_facebook_folly//folly

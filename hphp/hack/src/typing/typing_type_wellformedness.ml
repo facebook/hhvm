@@ -327,7 +327,8 @@ let enum_opt env =
   in
   Option.value_map ~default:[] ~f
 
-let const env { Aast.cc_type; _ } = hint_opt env cc_type
+let const env { Aast.cc_type; _ } =
+  hint_opt ~ignore_package_errors:true env cc_type
 
 let consts env cs = List.concat_map ~f:(const env) cs
 
@@ -584,7 +585,7 @@ let global_constant tenv gconst =
   } =
     gconst
   in
-  hint_opt env cst_type
+  hint_opt ~ignore_package_errors:true env cst_type
 
 let hint ?(ignore_package_errors = false) tenv h =
   let env = { typedef_tparams = []; tenv } in

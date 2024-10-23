@@ -702,6 +702,9 @@ cdef class SetTypeInfo(TypeInfoBase):
     def is_container(self):
         return True
 
+    def get_val_info(self):
+        return self.val_info
+
     def __reduce__(self):
         return (SetTypeInfo, (self.val_info,))
 

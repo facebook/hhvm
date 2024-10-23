@@ -6,6 +6,7 @@ import typing as _typing
 from common.thrift.patch.detail.dynamic_patch import (
     BaseStructPatch,
     ListPatch,
+    SetPatch,
     MapPatch,
     OptionalFieldPatch,
 )
@@ -114,7 +115,7 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             SetPatch[float]]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: patch.as_set_patch(),
+            lambda patch, type_info: SetPatch(patch.as_set_patch(), type_info),
             self._patch,
             8,
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float))
@@ -146,7 +147,7 @@ class ContainersPatch(BaseStructPatch[Containers]):
             SetPatch[str]]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: patch.as_set_patch(),
+            lambda patch, type_info: SetPatch(patch.as_set_patch(), type_info),
             self._patch,
             2,
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_string))
@@ -200,7 +201,7 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             SetPatch[float]]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: patch.as_set_patch(),
+            lambda patch, type_info: SetPatch(patch.as_set_patch(), type_info),
             self._patch,
             4,
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float))

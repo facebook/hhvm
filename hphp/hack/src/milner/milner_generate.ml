@@ -99,11 +99,15 @@ module ReadOnlyEnvironment : sig
             This option guides the search so that `subtype_of` produces an
             immediately inhabited type. *)
     verbose: int;
+    nesting: int;
+        (** Used for keeping track of indentation of nested debug output. It
+            increases each time we go under a debug frame where the log level is
+            greater than that of the debug frame.. *)
   }
 
   val default : verbose:int -> t
 
-  val debug : level:int -> t -> string Lazy.t -> (unit -> 'a) -> 'a
+  val debug : level:int -> t -> string Lazy.t -> (t -> 'a) -> 'a
 end = struct
   type t = {
     for_option_ty: bool;
@@ -112,6 +116,7 @@ end = struct
     for_enum_def: bool;
     pick_immediately_inhabited: bool;
     verbose: int;
+    nesting: int;
   }
 
   let default ~verbose =
@@ -122,6 +127,7 @@ end = struct
       for_enum_def = false;
       pick_immediately_inhabited = false;
       verbose;
+      nesting = 0;
     }
 
   let show
@@ -141,21 +147,27 @@ end = struct
       for_enum_def
       pick_immediately_inhabited
 
-  let debug ~level ({ verbose; _ } as renv) str f =
+  let debug ~level ({ verbose; nesting; _ } as renv) str f =
     if verbose >= level then begin
+      let renv = { renv with nesting = nesting + 1 } in
+      let indentation = String.make (nesting * 2) ' ' in
       let start_time = Sys.time () in
       let str = Lazy.force str in
-      Format.eprintf "[START] %s\n" str;
-      Format.eprintf "  %s\n" (show renv);
+      Format.eprintf "%s[START][%d] %s\n" indentation nesting str;
+      Format.eprintf "%s  %s\n" indentation (show renv);
       Out_channel.flush Out_channel.stderr;
-      let res = f () in
+      let res = f renv in
       let duration = Sys.time () -. start_time in
-      Format.eprintf "[END][%.3fs] %s\n" duration str;
-      Format.eprintf "  %s\n" (show renv);
+      Format.eprintf
+        "%s[ END ][%d][%.3fs] %s\n"
+        indentation
+        nesting
+        duration
+        str;
       Out_channel.flush Out_channel.stderr;
       res
     end else
-      f ()
+      f renv
 end
 
 module rec Environment : sig
@@ -241,7 +253,7 @@ end = struct
     | Awaitable
     | Function
     | Like
-  [@@deriving show, enum, eq]
+  [@@deriving show { with_path = false }, enum, eq]
 
   (* suppress warning about to_enum not used *)
   let _ = to_enum
@@ -671,16 +683,15 @@ end = struct
       ~level:1
       renv
       (lazy (Format.sprintf "subtype_of: %s" (Type.show ty)))
-    @@ fun () ->
+    @@ fun renv ->
     (* select_step makes sure we don't get into infinite loops by randomly being
        an identity function and otherwise recursive via step. *)
     let rec subfield_of renv { key; ty; optional } =
       ReadOnlyEnvironment.debug
         ~level:3
         renv
-        (lazy
-          (Format.sprintf "subtype_of subfield_of %s: %s" key (Type.show ty)))
-      @@ fun () ->
+        (lazy (Format.sprintf "subfield_of %s: %s" key (Type.show ty)))
+      @@ fun renv ->
       let ty =
         driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
       in
@@ -695,8 +706,8 @@ end = struct
       ReadOnlyEnvironment.debug
         ~level:3
         renv
-        (lazy (Format.sprintf "subtype_of step: %s" (Type.show ty)))
-      @@ fun () ->
+        (lazy (Format.sprintf "step: %s" (Type.show ty)))
+      @@ fun renv ->
       ty
       :: begin
            Environment.get_subtypes env ty
@@ -829,8 +840,8 @@ end = struct
         ReadOnlyEnvironment.debug
           ~level:2
           renv
-          (lazy (Format.sprintf "subtype_of driver: %s" (Type.show candidate)))
-        @@ fun () ->
+          (lazy (Format.sprintf "driver: %s" (Type.show candidate)))
+        @@ fun renv ->
         let candidates = step renv candidate in
         if Random.bool () then
           (* Go down on a stochastic walk and explore further subtypes. *)
@@ -867,7 +878,7 @@ end = struct
       renv
       (lazy
         (Format.sprintf "are_disjoint: %s %s" (Type.show ty) (Type.show ty')))
-    @@ fun () ->
+    @@ fun renv ->
     (* For the purposes of disjointness we can go higher up in the typing
        hierarchy so that it is easy to enumerate subtypes. This is fine because
        it can only make disjointness more conservative.
@@ -886,14 +897,14 @@ end = struct
         ~level:2
         renv
         (lazy (Format.sprintf "weaken_for_disjointness: %s" (Type.show ty)))
-      @@ fun () ->
+      @@ fun renv ->
       let step ty =
         ReadOnlyEnvironment.debug
           ~level:4
           renv
           (lazy
             (Format.sprintf "weaken_for_disjointness step: %s" (Type.show ty)))
-        @@ fun () ->
+        @@ fun _renv ->
         match ty with
         | Classish info when Kind.equal_classish info.kind Kind.Interface ->
           (* This can be improved on if we introduce an internal Object type which
@@ -936,11 +947,11 @@ end = struct
           renv
           (lazy
             (Format.sprintf
-               "weaken_for_disjointness driver: %s"
+               "driver: %s"
                (TypeSet.to_list acc
                |> List.map ~f:Type.show
                |> String.concat ~sep:",")))
-        @@ fun () ->
+        @@ fun _renv ->
         let acc' =
           TypeSet.to_list acc
           |> List.concat_map ~f:step
@@ -1003,7 +1014,7 @@ end = struct
       (env : Environment.t)
       ~(parent : (Kind.classish * string * generic option) option)
       ~(depth : int) =
-    ReadOnlyEnvironment.debug ~level:2 renv (lazy "mk_classish") @@ fun () ->
+    ReadOnlyEnvironment.debug ~level:2 renv (lazy "mk_classish") @@ fun renv ->
     let kind =
       if depth > max_hierarchy_depth then
         Kind.Class
@@ -1094,7 +1105,7 @@ end = struct
       ~level:1
       renv
       (lazy (Format.sprintf "mk %s" (Kind.show kind)))
-    @@ fun () ->
+    @@ fun renv ->
     match kind with
     | Kind.Mixed -> (env, Mixed)
     | Kind.Primitive -> (env, Primitive (Primitive.pick ()))

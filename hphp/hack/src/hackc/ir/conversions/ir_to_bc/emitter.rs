@@ -222,8 +222,7 @@ impl<'b> InstrEmitter<'b> {
             .repr
             .params
             .iter()
-            .enumerate()
-            .map(|(_, (param, _))| {
+            .map(|(param, _)| {
                 let name = LocalId::Named(param.name);
                 let local = hhbc::Local::new(next_local_idx);
                 next_local_idx += 1;

@@ -1286,6 +1286,7 @@ end = struct
       (env, TypeConst { name = qualified_name })
     | Kind.Case ->
       let name = fresh "CT" in
+      let ty = Case { name } in
       let (env, bound) =
         if Random.bool () then
           let (env, bound) = mk ~complexity:default_complexity renv env in
@@ -1301,29 +1302,38 @@ end = struct
         | None -> mk ~complexity:default_complexity renv env ~for_alias_def:true
       in
       let rec add_disjuncts (env, disjuncts) =
-        if Random.bool () then
-          let (env, disjunct) = mk renv env in
-          if List.for_all disjuncts ~f:(are_disjoint renv env disjunct) then
-            add_disjuncts @@ (env, disjunct :: disjuncts)
+        (* 2/3 odds for to add more disjuncts. Disjointness check is not
+           guaranteed to succeed, so we tilt the odds of creating an interesting
+           like type by trying hard. *)
+        if Random.int_incl 1 4 = 1 then
+          (env, disjuncts)
+        else
+          (* We are not guaranteed to use this disjunct if it fails the
+             disjointness check, so we speculatively modify the environment and
+             discard it if disjointness fails. *)
+          let (env_with_disjunct, disjunct) = mk renv env in
+          let env_with_disjunct =
+            Environment.record_subtype env_with_disjunct ~super:ty ~sub:disjunct
+          in
+          if
+            List.for_all
+              disjuncts
+              ~f:(are_disjoint renv env_with_disjunct disjunct)
+          then
+            add_disjuncts @@ (env_with_disjunct, disjunct :: disjuncts)
           else
             add_disjuncts (env, disjuncts)
-        else
-          (env, disjuncts)
       in
-      let (env, ty) = mk renv env in
-      let (env, disjuncts) = add_disjuncts (env, [ty]) in
+      let (env, disjunct) = mk renv env in
+      let env = Environment.record_subtype env ~super:ty ~sub:disjunct in
+      let (env, disjuncts) = add_disjuncts (env, [disjunct]) in
       let env =
         Environment.add_definition env
         @@ Definition.case_type ~name ~bound disjuncts
       in
-      let ty = Case { name } in
       let env =
         Option.fold bound ~init:env ~f:(fun env bound ->
             Environment.record_subtype env ~super:bound ~sub:ty)
-      in
-      let env =
-        List.fold disjuncts ~init:env ~f:(fun env disjunct ->
-            Environment.record_subtype env ~super:ty ~sub:disjunct)
       in
       (env, ty)
     | Kind.Enum ->

@@ -4,8 +4,6 @@ ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
 Unbound name: `...` (a global constant) (Naming[2049])
 ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
 Unbound name: `==>` (a global constant) (Naming[2049])
-ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:
-Cannot use `[]` for reading (NastCheck[3047])
 ERROR: File "ellipsis_lambda.php", line 4, characters 9-11:
 Unbound global constant (Typing) (Typing[4106])
 ERROR: File "ellipsis_lambda.php", line 4, characters 14-16:

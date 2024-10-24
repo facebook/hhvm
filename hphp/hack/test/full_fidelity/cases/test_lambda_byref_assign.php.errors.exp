@@ -1,10 +1,6 @@
 (3,7)-(3,7) An expression is expected here.
 (3,10)-(3,10) A semicolon `;` is expected here.
-(3,10)-(3,22) Use of the `{}` subscript operator is deprecated;  use `[]` instead.
 (3,14)-(3,14) An expression is expected here.
-(3,16)-(3,18) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
-(3,22)-(3,22) A right brace `}` is expected here.
-(3,36)-(3,36) An expression is expected here.
 (4,7)-(4,7) An expression is expected here.
 (5,7)-(5,7) An expression is expected here.
 (5,7)-(5,9) Encountered unexpected token `$x`.

@@ -2,9 +2,8 @@
 (5,6)-(5,15) A variadic parameter `...` may only appear at the end of a parameter list.
 (7,9)-(7,9) An expression is expected here.
 (7,15)-(7,15) A semicolon `;` is expected here.
-(7,15)-(7,21) Use of the `{}` subscript operator is deprecated;  use `[]` instead.
 (7,19)-(7,19) An expression is expected here.
-(7,21)-(7,22) Encountered unexpected token `)`.
+(7,22)-(7,22) An expression is expected here.
 (9,15)-(9,16) A variadic parameter `...` may not be followed by a comma.
 (11,15)-(11,24) A variadic parameter `...` may only appear at the end of a parameter list.
 (13,15)-(13,20) A variadic parameter `...` may only appear at the end of a parameter list.

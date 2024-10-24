@@ -1,13 +1,9 @@
-ERROR: File "elseif2.php", line 15, characters 5-5:
+ERROR: File "elseif2.php", line 14, characters 20-20:
 A semicolon `;` is expected here. (Parsing[1002])
 ERROR: File "elseif2.php", line 14, characters 5-10:
 Unbound name: `elseif` (a global function) (Naming[2049])
 ERROR: File "elseif2.php", line 15, characters 5-8:
 Unbound name: `else` (a global constant) (Naming[2049])
-ERROR: File "elseif2.php", line 14, characters 5-18:
-Cannot use `[]` for reading (NastCheck[3047])
-ERROR: File "elseif2.php", line 15, characters 5-8:
-Cannot use `[]` for reading (NastCheck[3047])
 ERROR: File "elseif2.php", line 14, characters 5-10:
 Unbound name (typing): `elseif` (Typing[4107])
 ERROR: File "elseif2.php", line 15, characters 5-8:

@@ -171,7 +171,6 @@ impl Operator {
             | TokenKind::MinusMinus
             | TokenKind::LeftParen
             | TokenKind::LeftBracket
-            | TokenKind::LeftBrace
             | TokenKind::Plus
             | TokenKind::Minus
             | TokenKind::Ampersand

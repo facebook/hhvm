@@ -3216,10 +3216,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
 
-            SubscriptExpression(x) if x.left_bracket.is_left_brace() => self
-                .errors
-                .push(make_error_from_node(node, errors::error2020)),
-
             FunctionCallExpression(x) => {
                 let arg_list = &x.argument_list;
                 if let Some(h) = misplaced_variadic_arg(arg_list) {

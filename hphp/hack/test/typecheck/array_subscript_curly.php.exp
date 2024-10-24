@@ -1,2 +1,2 @@
-ERROR: File "array_subscript_curly.php", line 4, characters 10-14:
-Use of the `{}` subscript operator is deprecated;  use `[]` instead. (Parsing[1002])
+ERROR: File "array_subscript_curly.php", line 4, characters 12-12:
+A semicolon `;` is expected here. (Parsing[1002])

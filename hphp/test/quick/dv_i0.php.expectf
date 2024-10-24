@@ -1,2 +1,2 @@
 
-Fatal error: Use of the `{}` subscript operator is deprecated;  use `[]` instead. in %s/dv_i0.php on line 3
+Fatal error: An expression is expected here. in %s/dv_i0.php on line 3

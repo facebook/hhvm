@@ -1451,7 +1451,7 @@ where
                             let result = self.parse_function_call(term);
                             ParseContinuation::Reparse(result)
                         }
-                        TokenKind::LeftBracket | TokenKind::LeftBrace => {
+                        TokenKind::LeftBracket => {
                             let result = self.parse_subscript(term);
                             ParseContinuation::Reparse(result)
                         }
@@ -1535,13 +1535,9 @@ where
         // SPEC
         // subscript-expression:
         //   postfix-expression  [  expression-opt  ]
-        //   postfix-expression  {  expression-opt  }   [Deprecated form]
-        //
-        // TODO: Produce an error for brace case in a later pass
         let left = self.next_token();
         match (left.kind(), self.peek_token_kind()) {
-            (TokenKind::LeftBracket, TokenKind::RightBracket)
-            | (TokenKind::LeftBrace, TokenKind::RightBrace) => {
+            (TokenKind::LeftBracket, TokenKind::RightBracket) => {
                 let right = self.next_token();
                 let left = self.sc_mut().make_token(left);
                 let pos = self.pos();
@@ -1550,15 +1546,12 @@ where
                 self.sc_mut()
                     .make_subscript_expression(term, left, missing, right)
             }
-            (left_kind, _) => {
+            _ => {
                 let left_token = self.sc_mut().make_token(left);
                 let index = self.with_as_expressions(/* enabled :*/ true, |x| {
                     x.with_reset_precedence(|x| x.parse_expression())
                 });
-                let right = match left_kind {
-                    TokenKind::LeftBracket => self.require_right_bracket(),
-                    _ => self.require_right_brace(),
-                };
+                let right = self.require_right_bracket();
                 self.sc_mut()
                     .make_subscript_expression(term, left_token, index, right)
             }

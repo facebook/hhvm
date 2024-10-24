@@ -261,10 +261,6 @@ pub fn error2019(class_name: &str, method_name: &str) -> Error {
         class_name, method_name,
     ))
 }
-pub const error2020: Error = Cow::Borrowed(concat!(
-    "Use of the `{}` subscript operator is deprecated; ",
-    " use `[]` instead."
-));
 pub const error2021: Error = Cow::Borrowed(concat!(
     "A variadic parameter `...` may only appear at the end of ",
     "a parameter list."

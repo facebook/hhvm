@@ -19,4 +19,4 @@ type t = cell list
 (** Expects JSON matching schema:
 * https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.schema.json
 *)
-val ipynb_of_json : Hh_json.json -> (t, string) Result.t
+val ipynb_of_json : Hh_json.json -> (t, string) result

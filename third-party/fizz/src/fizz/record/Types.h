@@ -345,6 +345,8 @@ enum class NamedGroup : uint16_t {
   secp384r1 = 24,
   secp521r1 = 25,
   x25519 = 29,
+  SecP256r1MLKEM768 = 4587,
+  X25519MLKEM768 = 4588,
 
   /**
    * x25519 and secp256r1 hybrids with NIST Round 3 version of Kyber, see

@@ -36,6 +36,29 @@ let split_by_chunk_comments
                 ~is_from_toplevel_statements
            |> Option.some)
 
+let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
+  let contents =
+    (* Hackfmt refuses to format code unless it starts with "<?hh" *)
+    let prefix = "<?hh\n" in
+    let unformatted =
+      let raw_contents = chunk.Notebook_chunk.contents in
+      if String.is_prefix ~prefix raw_contents then
+        raw_contents
+      else
+        prefix ^ raw_contents
+    in
+    unformatted
+    |> Notebook_convert_util.hackfmt
+    (*
+    * We strip the leading <?hh regardless of whether we added it
+    * or the user wrote it.
+    * While <?hh is technically allowed in the first notebook cell,
+    * it's unidiomatic.
+    *)
+    |> String.chop_prefix_if_exists ~prefix
+  in
+  Notebook_chunk.{ chunk with contents }
+
 let hack_to_notebook_exn (hack : string) : Hh_json.json =
   let script_children =
     match Notebook_convert_util.parse hack with
@@ -100,7 +123,10 @@ let hack_to_notebook_exn (hack : string) : Hh_json.json =
     in
     other_chunks @ top_level_statements_chunks
   in
-  chunks |> Ipynb.ipynb_of_chunks_exn |> Ipynb.ipynb_to_json
+  chunks
+  |> List.map ~f:format_chunk
+  |> Ipynb.ipynb_of_chunks_exn
+  |> Ipynb.ipynb_to_json
 
 let hack_to_notebook (hack : string) : (Hh_json.json, string) result =
   try Ok (hack_to_notebook_exn hack) with

@@ -5,11 +5,23 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
+module Tree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
-let parse hack : Full_fidelity_positioned_syntax.t =
+let tree_of_code (hack : string) : Tree.t =
   let env = Full_fidelity_parser_env.make () in
   let source_text = Full_fidelity_source_text.make Relative_path.default hack in
+  Tree.make ~env source_text
+
+let parse (hack : string) : Full_fidelity_positioned_syntax.t =
+  Tree.root @@ tree_of_code hack
+
+let hackfmt (hack : string) : string =
   let module Tree =
     Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax) in
-  let positioned_syntax_tree = Tree.make ~env source_text in
-  Tree.root positioned_syntax_tree
+  let tree = tree_of_code hack in
+  if List.is_empty (Tree.all_errors tree) then
+    Libhackfmt.format_tree tree
+  else
+    hack

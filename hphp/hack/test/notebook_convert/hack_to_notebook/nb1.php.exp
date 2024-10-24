@@ -7,13 +7,13 @@
       "outputs":[],
       "source":[
         "class MyClass {",
-        "    public function hello(): void {",
-        "        echo \"hello\";",
-        "    }",
+        "  public function hello(): void {",
+        "    echo \"hello\";",
+        "  }",
         "}",
-        "    $m = new MyClass();",
+        "$m = new MyClass();",
         "",
-        "    echo \"hi1\";"
+        "echo \"hi1\";"
       ]
     },
     {
@@ -28,7 +28,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["    echo \"hi2\";","","    $m->hello();"]
+      "source":["echo \"hi2\";","","$m->hello();"]
     }
   ],
   "metadata":{

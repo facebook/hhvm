@@ -6,3 +6,5 @@
  *
  *)
 val parse : string -> Full_fidelity_positioned_syntax.t
+
+val hackfmt : string -> string

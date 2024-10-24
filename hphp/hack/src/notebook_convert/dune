@@ -3,6 +3,7 @@
  (libraries
   full_fidelity
   hh_json
+  hackfmt
   relative_path
   sys_utils
   utils_core)

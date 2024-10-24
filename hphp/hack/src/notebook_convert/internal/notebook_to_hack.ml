@@ -101,7 +101,10 @@ let hack_of_cells ~(notebook_name : string) (cells : Ipynb.cell list) : string =
     |> String.concat ~sep:"\n"
     |> Printf.sprintf "function notebook_main_%s(): void {\n%s\n}" notebook_name
   in
-  Printf.sprintf "<?hh\n\n%s\n\n%s\n" non_stmts_code main_fn_code
+  let unformatted =
+    Printf.sprintf "<?hh\n\n%s\n\n%s\n" non_stmts_code main_fn_code
+  in
+  Notebook_convert_util.hackfmt unformatted
 
 let notebook_to_hack ~(notebook_name : string) (ipynb_json : Hh_json.json) :
     (string, string) Result.t =

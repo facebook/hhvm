@@ -15,7 +15,7 @@ end
 module ReadOnlyEnvironment : sig
   type t
 
-  val default : verbose:int -> t
+  val default : verbose:int -> debug_pattern:string option -> t
 end
 
 module Environment : sig

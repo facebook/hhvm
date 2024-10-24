@@ -74,6 +74,21 @@ module Container = struct
 end
 
 module ReadOnlyEnvironment : sig
+  type debug_info = {
+    verbose: int;
+    nesting: int;
+        (** Used for keeping track of indentation of nested debug output. It
+            increases each time we go under a debug frame where the log level is
+            greater than that of the debug frame.. *)
+    debug_pattern: string option;
+        (** When there is a debug pattern, debug logs are only activated if that
+            pattern appears as a substring in the log. This allows hiding unneeded
+            output. *)
+    in_debug_mode: bool;
+        (** When set to true, debug outputs with appropriate log level will be
+            logged to STDERR. *)
+  }
+
   (** Read-only environment primarily contains contextual information that
       prevents generation of certain types due to various restrictions in the
       language. This in turn allows us to keep generating well-typed programs.
@@ -100,14 +115,10 @@ module ReadOnlyEnvironment : sig
 
             This option guides the search so that `subtype_of` produces an
             immediately inhabited type. *)
-    verbose: int;
-    nesting: int;
-        (** Used for keeping track of indentation of nested debug output. It
-            increases each time we go under a debug frame where the log level is
-            greater than that of the debug frame.. *)
+    debug_info: debug_info;
   }
 
-  val default : verbose:int -> t
+  val default : verbose:int -> debug_pattern:string option -> t
 
   val debug :
     level:int ->
@@ -117,25 +128,39 @@ module ReadOnlyEnvironment : sig
     (t -> 'a) ->
     'a
 end = struct
+  type debug_info = {
+    verbose: int;
+    nesting: int;
+    debug_pattern: string option;
+    in_debug_mode: bool;
+  }
+
   type t = {
     for_option_ty: bool;
     for_reified_ty: bool;
     for_alias_def: bool;
     for_enum_def: bool;
     pick_immediately_inhabited: bool;
-    verbose: int;
-    nesting: int;
+    debug_info: debug_info;
   }
 
-  let default ~verbose =
+  let default ~verbose ~debug_pattern =
     {
       for_option_ty = false;
       for_reified_ty = false;
       for_alias_def = false;
       for_enum_def = false;
       pick_immediately_inhabited = false;
-      verbose;
-      nesting = 0;
+      debug_info =
+        {
+          verbose;
+          nesting = 0;
+          debug_pattern;
+          in_debug_mode =
+            (* If there is a debug pattern in effect, then by default we are not in
+               debug mode. This changes once the debug pattern starts matching. *)
+            Option.is_none debug_pattern;
+        };
     }
 
   let show
@@ -145,7 +170,7 @@ end = struct
         for_alias_def;
         for_enum_def;
         pick_immediately_inhabited;
-        _;
+        debug_info = _;
       } =
     Format.sprintf
       "{for_option_ty: %b, for_reified_ty: %b, for_alias_def: %b; for_enum_def: %b; pick_immediately_inhabited: %b}"
@@ -155,26 +180,40 @@ end = struct
       for_enum_def
       pick_immediately_inhabited
 
-  let debug ~level ({ verbose; nesting; _ } as renv) ~start ~end_ f =
-    if verbose >= level then begin
-      let renv = { renv with nesting = nesting + 1 } in
-      let indentation = String.make (nesting * 2) ' ' in
-      let start_time = Sys.time () in
+  let debug ~level ({ debug_info; _ } as renv) ~start ~end_ f =
+    if debug_info.verbose >= level then begin
       let start = Lazy.force start in
-      Format.eprintf "%s[START][%d] %s\n" indentation nesting start;
-      Format.eprintf "%s  %s\n" indentation (show renv);
-      Out_channel.flush Out_channel.stderr;
-      let res = f renv in
-      let duration = Sys.time () -. start_time in
-      Format.eprintf
-        "%s[ END ][%d][%.3fs] %s -> %s\n"
-        indentation
-        nesting
-        duration
-        start
-        (end_ res);
-      Out_channel.flush Out_channel.stderr;
-      res
+      if
+        debug_info.in_debug_mode
+        || Option.value_map debug_info.debug_pattern ~default:false ~f:(fun p ->
+               String.is_substring start ~substring:p)
+      then begin
+        let debug_info =
+          {
+            debug_info with
+            nesting = debug_info.nesting + 1;
+            in_debug_mode = true;
+          }
+        in
+        let renv = { renv with debug_info } in
+        let indentation = String.make (debug_info.nesting * 2) ' ' in
+        Format.eprintf "%s[START][%d] %s\n" indentation debug_info.nesting start;
+        Format.eprintf "%s  %s\n" indentation (show renv);
+        Out_channel.flush Out_channel.stderr;
+        let start_time = Sys.time () in
+        let res = f renv in
+        let duration = Sys.time () -. start_time in
+        Format.eprintf
+          "%s[ END ][%d][%.3fs] %s -> %s\n"
+          indentation
+          debug_info.nesting
+          duration
+          start
+          (end_ res);
+        Out_channel.flush Out_channel.stderr;
+        res
+      end else
+        f renv
     end else
       f renv
 end

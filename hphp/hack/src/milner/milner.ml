@@ -33,8 +33,8 @@ let init_table contents placeholder =
 
 (* Generate types and conforming expressions for all placeholders in the
    template *)
-let generate_tables ~verbose template =
-  let renv = Gen.ReadOnlyEnvironment.default ~verbose in
+let generate_tables ~verbose ~debug_pattern template =
+  let renv = Gen.ReadOnlyEnvironment.default ~verbose ~debug_pattern in
   let env = Gen.Environment.default in
   let mk_type () = Gen.Type.mk renv env in
   (* Farm the type placeholders from the template and randomly generate types *)
@@ -86,7 +86,7 @@ let add_missing_definitions defs output =
   ^ String.concat ~sep:"\n" (List.map ~f:Gen.Definition.show defs)
   ^ "\n"
 
-let milner verbose seed template_path destination_path =
+let milner verbose debug_pattern seed template_path destination_path =
   if verbose > 0 then begin
     Format.eprintf "Seed: %d\n" seed;
     Format.eprintf "Template: %s\n" template_path;
@@ -97,7 +97,9 @@ let milner verbose seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (defs, ty_table, expr_table) = generate_tables ~verbose template in
+  let (defs, ty_table, expr_table) =
+    generate_tables ~verbose ~debug_pattern template
+  in
   let output =
     fill_in_template ty_table expr_table template
     |> add_missing_definitions defs
@@ -112,6 +114,11 @@ let verbose =
   in
   Arg.(value & opt int 0 & info ["v"; "verbose"] ~docv:"LEVEL" ~doc)
 
+let debug_pattern =
+  let doc = "Fixed string used to activate debug logging" in
+  Arg.(
+    value & opt (some string) None & info ["debug-pattern"] ~docv:"PATTERN" ~doc)
+
 let seed =
   let doc = "Seed for the random nubmer generator" in
   Arg.(value & opt int 0 & info ["s"; "seed"] ~docv:"SEED" ~doc)
@@ -125,7 +132,8 @@ let destination =
   Arg.(
     value & opt (some string) None & info ["d"; "destination"] ~docv:"PATH" ~doc)
 
-let milner_t = Term.(const milner $ verbose $ seed $ template $ destination)
+let milner_t =
+  Term.(const milner $ verbose $ debug_pattern $ seed $ template $ destination)
 
 let cmd =
   let doc = "a random well-typed program generator for Hack" in

@@ -7,7 +7,11 @@
 
 import enum
 import thrift.py3.types
-import includes.thrift_metadata
+import includes.thrift_metadata as _fbthrift_python_metadata
+try:
+    import includes.thrift_types as _fbthrift_python_types
+except Exception: # TODO(T205494848): fix thrift-python import failures
+    _fbthrift_python_types = None
 
 _fbthrift__module_name__ = "includes.types"
 
@@ -22,18 +26,19 @@ class AnEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return includes.thrift_metadata.gen_metadata_enum_AnEnum()
+        return _fbthrift_python_metadata.gen_metadata_enum_AnEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "includes.AnEnum"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.AnEnum(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum AnEnum doesn't define `_to_python` because couldn't import "
             "includes.thrift_types"
         )
-        return python_types.AnEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

@@ -7,7 +7,11 @@
 
 import enum
 import thrift.py3.types
-import test.fixtures.enums.module.thrift_metadata
+import test.fixtures.enums.module.thrift_metadata as _fbthrift_python_metadata
+try:
+    import test.fixtures.enums.module.thrift_types as _fbthrift_python_types
+except Exception: # TODO(T205494848): fix thrift-python import failures
+    _fbthrift_python_types = None
 
 _fbthrift__module_name__ = "test.fixtures.enums.module.types"
 
@@ -24,18 +28,19 @@ class Metasyntactic(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_Metasyntactic()
+        return _fbthrift_python_metadata.gen_metadata_enum_Metasyntactic()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.Metasyntactic"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.Metasyntactic(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum Metasyntactic doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.Metasyntactic(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -65,18 +70,19 @@ class MyEnum1(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum1()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum1()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnum1"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyEnum1(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyEnum1 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum1(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -103,18 +109,19 @@ class MyEnum2(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum2()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum2()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnum2"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyEnum2(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyEnum2 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -144,18 +151,19 @@ class MyEnum3(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum3()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum3()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnum3"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyEnum3(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyEnum3 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum3(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -183,18 +191,19 @@ class MyEnum4(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum4()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum4()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnum4"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyEnum4(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyEnum4 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyEnum4(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -221,18 +230,19 @@ class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyBitmaskEnum1()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyBitmaskEnum1()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyBitmaskEnum1"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyBitmaskEnum1(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyBitmaskEnum1 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyBitmaskEnum1(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -259,18 +269,19 @@ class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyBitmaskEnum2()
+        return _fbthrift_python_metadata.gen_metadata_enum_MyBitmaskEnum2()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyBitmaskEnum2"
 
     def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
+        if _fbthrift_python_types is not None:
+            return _fbthrift_python_types.MyBitmaskEnum2(self._fbthrift_value_)
+        raise AttributeError(
+            "Enum MyBitmaskEnum2 doesn't define `_to_python` because couldn't import "
             "test.fixtures.enums.module.thrift_types"
         )
-        return python_types.MyBitmaskEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

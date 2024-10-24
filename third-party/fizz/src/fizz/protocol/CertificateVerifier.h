@@ -13,6 +13,12 @@
 
 namespace fizz {
 
+/**
+ * Which context we are verifying in (eg client context means we are a client
+ * verifying server certificates).
+ */
+enum class VerificationContext { Client, Server };
+
 class FizzVerificationException : public FizzException {
  public:
   FizzVerificationException(

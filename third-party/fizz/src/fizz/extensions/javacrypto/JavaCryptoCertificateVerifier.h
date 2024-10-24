@@ -13,12 +13,6 @@
 namespace fizz {
 
 /**
- * Which context we are verifying in (ie client context means we are a client
- * verifying server certificates).
- */
-enum class VerificationContext { Client, Server };
-
-/**
  * Certificate verifier that verifies a certificate against a trusted
  * certificate store
  *

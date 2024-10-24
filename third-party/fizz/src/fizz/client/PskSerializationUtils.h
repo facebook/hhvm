@@ -12,6 +12,6 @@ std::string serializePsk(
     const fizz::client::CachedPsk& psk);
 fizz::client::CachedPsk deserializePsk(
     const CertificateSerialization& serializer,
-    const std::string& str);
+    folly::ByteRange psk);
 } // namespace client
 } // namespace fizz

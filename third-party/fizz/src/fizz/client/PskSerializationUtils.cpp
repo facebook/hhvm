@@ -112,8 +112,8 @@ std::string serializePsk(
 
 fizz::client::CachedPsk deserializePsk(
     const CertificateSerialization& serializer,
-    const std::string& str) {
-  auto buf = IOBuf::wrapBuffer(str.data(), str.length());
+    folly::ByteRange serializedPsk) {
+  auto buf = IOBuf::wrapBuffer(serializedPsk.data(), serializedPsk.size());
   io::Cursor cursor(buf.get());
   fizz::client::CachedPsk psk;
   psk.type = fizz::PskType::Resumption;

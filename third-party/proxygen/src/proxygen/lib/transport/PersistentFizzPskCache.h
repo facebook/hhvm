@@ -50,7 +50,8 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     if (serialized) {
       try {
         auto deserialized = fizz::client::deserializePsk(
-            fizz::openssl::certificateSerializer(), serialized->serialized);
+            fizz::openssl::certificateSerializer(),
+            folly::ByteRange(serialized->serialized));
         serialized->uses++;
         if (maxPskUses_ != 0 && serialized->uses >= maxPskUses_) {
           cache_.remove(identity);

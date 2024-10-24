@@ -8,6 +8,7 @@
 include "eden/fs/config/eden_config.thrift"
 include "fb303/thrift/fb303_core.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 facebook.eden
 namespace java com.facebook.eden.thrift
@@ -125,10 +126,11 @@ enum EdenErrorType {
 }
 
 exception EdenError {
+  @thrift.ExceptionMessage
   1: string message;
   2: optional i32 errorCode;
   3: EdenErrorType errorType;
-} (message = 'message')
+}
 
 exception NoValueForKeyError {
   1: string key;
@@ -175,6 +177,7 @@ struct PrivHelperInfo {
 /**
  * The current running state of an EdenMount.
  */
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum MountState {
   /**
    * The EdenMount object has been constructed but has not started
@@ -232,7 +235,7 @@ enum MountState {
    * before we have attempted to start the user-space filesystem mount.
    */
   INIT_ERROR = 9,
-} (cpp2.enum_type = 'uint32_t')
+}
 
 struct MountInfo {
   1: PathString mountPoint;
@@ -361,7 +364,7 @@ enum FileAttributes {
    */
   DIGEST_HASH = 64,
 /* NEXT_ATTR = 2^x */
-} (cpp2.enum_type = 'uint64_t')
+}
 
 typedef unsigned64 RequestedAttributes
 
@@ -885,7 +888,7 @@ enum DataFetchOrigin {
   LOCAL_BACKING_STORE = 8,
   REMOTE_BACKING_STORE = 16,
 /* NEXT_WHERE = 2^x */
-} (cpp2.enum_type = 'uint64_t')
+}
 
 struct DebugGetScmBlobRequest {
   1: MountId mountId;
@@ -2089,9 +2092,8 @@ service EdenService extends fb303_core.BaseService {
    * for optimization and the result not relied on for operations. This command does not
    * return the list of prefetched files.
    */
-  void prefetchFiles(1: PrefetchParams params) throws (1: EdenError ex) (
-    priority = 'BEST_EFFORT',
-  );
+  @thrift.Priority{level = thrift.RpcPriority.BEST_EFFORT}
+  void prefetchFiles(1: PrefetchParams params) throws (1: EdenError ex);
 
   /**
    * Has the same behavior as globFiles, but should be called in the case of a prefetch.
@@ -2189,7 +2191,8 @@ service EdenService extends fb303_core.BaseService {
    * Returns information about the running process, including pid and command
    * line.
    */
-  DaemonInfo getDaemonInfo() throws (1: EdenError ex) (priority = 'IMPORTANT');
+  @thrift.Priority{level = thrift.RpcPriority.IMPORTANT}
+  DaemonInfo getDaemonInfo() throws (1: EdenError ex);
 
   /**
   * Returns information about the privhelper process, including accesibility.

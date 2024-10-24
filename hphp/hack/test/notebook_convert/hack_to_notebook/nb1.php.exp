@@ -1,0 +1,38 @@
+{
+  "cells":[
+    {
+      "cell_type":"code",
+      "execution_count":null,
+      "metadata":{},
+      "outputs":[],
+      "source":[
+        "class MyClass {",
+        "    public function hello(): void {",
+        "        echo \"hello\";",
+        "    }",
+        "}",
+        "    $m = new MyClass();",
+        "",
+        "    echo \"hi1\";"
+      ]
+    },
+    {
+      "cell_type":"markdown",
+      "execution_count":null,
+      "metadata":{},
+      "outputs":[],
+      "source":["","# Check it out","","I am a *markdown* **cell**"]
+    },
+    {
+      "cell_type":"code",
+      "execution_count":null,
+      "metadata":{},
+      "outputs":[],
+      "source":["    echo \"hi2\";","","    $m->hello();"]
+    }
+  ],
+  "metadata":{
+    "kernelspec":{"display_name":"hack","language":"hack","name":"bento_kernel_hack"},
+    "orig_nbformat":4
+  }
+}

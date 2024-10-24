@@ -20,3 +20,7 @@ type t = cell list
 * https://github.com/jupyter/nbformat/blob/main/nbformat/v4/nbformat.v4.schema.json
 *)
 val ipynb_of_json : Hh_json.json -> (t, string) result
+
+val ipynb_to_json : t -> Hh_json.json
+
+val ipynb_of_chunks_exn : Notebook_chunk.t list -> t

@@ -25,3 +25,24 @@ Error:
         err
     in
     Exit_status.Input_error
+
+let hack_to_notebook () : Exit_status.t =
+  let hack = Sys_utils.read_stdin_to_string () in
+  match Hack_to_notebook.hack_to_notebook hack with
+  | Ok ipynb_json ->
+    let json_string =
+      Hh_json.json_to_string ~sort_keys:true ~pretty:true ipynb_json
+    in
+    let () = print_endline json_string in
+    Exit_status.No_error
+  | Error err ->
+    let () =
+      Printf.eprintf
+        {| Received input that was not in the expected format.
+Expected a valid Hack file with special comments for notebook cell information.
+Such files should only be created via `hh --notebook-to-hack`. Error:
+%s
+|}
+        err
+    in
+    Exit_status.Input_error

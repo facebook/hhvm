@@ -19,7 +19,7 @@ type chunk_kind =
   | Top_level
   | Stmt
   | Non_hack of { cell_type: string }
-[@@deriving ord, eq]
+[@@deriving eq, ord]
 
 type t = {
   id: Id.t;
@@ -28,7 +28,12 @@ type t = {
 }
 [@@deriving ord]
 
+val is_chunk_start_comment : string -> bool
+
 (** Prepend a magic comment that preserves information about cells. This will enable us to
 reconstruct the notebook from the generated Hack (with some loss of position information).
 *)
 val to_hack : t -> string
+
+val of_hack_exn :
+  comment:string -> is_from_toplevel_statements:bool -> string -> t

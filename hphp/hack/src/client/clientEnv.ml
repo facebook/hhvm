@@ -28,6 +28,7 @@ type client_mode =
   | MODE_FULL_FIDELITY_SCHEMA
   | MODE_GO_TO_IMPL_CLASS of string
   | MODE_GO_TO_IMPL_METHOD of string
+  | MODE_HACK_TO_NOTEBOOK
   | MODE_IDE_FIND_REFS_BY_SYMBOL of FindRefsWireFormat.CliArgs.t
   | MODE_IDE_GO_TO_IMPL_BY_SYMBOL of FindRefsWireFormat.CliArgs.t
   | MODE_IDE_RENAME_BY_SYMBOL of string

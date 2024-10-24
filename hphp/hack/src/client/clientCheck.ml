@@ -328,6 +328,9 @@ let main_internal
     | _ ->
       Printf.eprintf "Invalid input\n";
       Lwt.return (Exit_status.Input_error, Telemetry.create ()))
+  | ClientEnv.MODE_HACK_TO_NOTEBOOK ->
+    let exit_status = Notebook_convert.hack_to_notebook () in
+    Lwt.return (exit_status, Telemetry.create ())
   | ClientEnv.MODE_IDE_FIND_REFS_BY_SYMBOL arg ->
     let%lwt results =
       rpc_with_retry args @@ ServerCommandTypes.IDE_FIND_REFS_BY_SYMBOL arg

@@ -16,3 +16,6 @@
  * - Moving top-level statements into a function body.
  *)
 val notebook_to_hack : notebook_name:string -> Exit_status.t
+
+(* Convert a Hack (.php) file (passed via stdin) back to a notebook *)
+val hack_to_notebook : unit -> Exit_status.t

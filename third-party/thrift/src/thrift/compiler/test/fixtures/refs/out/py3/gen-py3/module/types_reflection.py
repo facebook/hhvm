@@ -629,32 +629,6 @@ def get_reflection__AdaptedStructWithInternBox() -> __StructSpec:
         annotations={
         },
     )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=1,
-            name="field1",
-            py_name="field1",
-            type=_module_types.Empty,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=2,
-            name="field2",
-            py_name="field2",
-            type=_module_types.MyField,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
     return spec
 def get_reflection__AdaptedStructWithTerseInternBox() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
@@ -662,32 +636,6 @@ def get_reflection__AdaptedStructWithTerseInternBox() -> __StructSpec:
         kind=__StructType.STRUCT,
         annotations={
         },
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=1,
-            name="field1",
-            py_name="field1",
-            type=_module_types.Empty,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=2,
-            name="field2",
-            py_name="field2",
-            type=_module_types.MyField,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
     )
     return spec
 def get_reflection__StructWithRefTypeUnique() -> __StructSpec:

@@ -1547,13 +1547,6 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def big(self):
         return self.big_impl()
 
-    cdef inline medium_impl(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).medium_ref().value()
-
-    @property
-    def medium(self):
-        return self.medium_impl()
-
     cdef inline biggish_impl(self):
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).biggish_ref().value()
 
@@ -1607,13 +1600,20 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MinPaddingWithCustomType"
 
+    __fbthrift_field_name_list = [
+        'small',
+        'big',
+        'biggish',
+        'tiny',
+    ]
+
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMinPaddingWithCustomType](idx))
+        return cls.__fbthrift_field_name_list[idx]
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 5
+        return 4
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MinPaddingWithCustomType self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

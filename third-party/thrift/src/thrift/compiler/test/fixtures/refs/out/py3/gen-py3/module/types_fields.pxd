@@ -196,8 +196,6 @@ cdef class __AdaptedStructWithInternBox_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
     cdef __AdaptedStructWithInternBox_FieldsSetter _fbthrift_create(_module_types.cAdaptedStructWithInternBox* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
 
 
 ctypedef void (*__AdaptedStructWithTerseInternBox_FieldsSetterFunc)(__AdaptedStructWithTerseInternBox_FieldsSetter, object) except *
@@ -208,8 +206,6 @@ cdef class __AdaptedStructWithTerseInternBox_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
     cdef __AdaptedStructWithTerseInternBox_FieldsSetter _fbthrift_create(_module_types.cAdaptedStructWithTerseInternBox* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
 
 
 ctypedef void (*__StructWithRefTypeUnique_FieldsSetterFunc)(__StructWithRefTypeUnique_FieldsSetter, object) except *

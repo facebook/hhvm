@@ -607,7 +607,6 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types_cust
         bint operator>=(cMinPaddingWithCustomType&)
         __terse_field_ref[cint8_t] small_ref "small_ref" ()
         __terse_field_ref[cint64_t] big_ref "big_ref" ()
-        __terse_field_ref[cint16_t] medium_ref "medium_ref" ()
         __terse_field_ref[cint32_t] biggish_ref "biggish_ref" ()
         __terse_field_ref[cint8_t] tiny_ref "tiny_ref" ()
 
@@ -1007,7 +1006,6 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter _fields_setter
     cdef inline object small_impl(self)
     cdef inline object big_impl(self)
-    cdef inline object medium_impl(self)
     cdef inline object biggish_impl(self)
     cdef inline object tiny_impl(self)
 

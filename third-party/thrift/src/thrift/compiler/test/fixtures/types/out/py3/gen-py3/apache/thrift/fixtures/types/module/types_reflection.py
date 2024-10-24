@@ -489,19 +489,6 @@ def get_reflection__MinPaddingWithCustomType() -> __StructSpec:
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=3,
-            name="medium",
-            py_name="medium",
-            type=int,
-            kind=__NumberType.I16,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
             id=4,
             name="biggish",
             py_name="biggish",

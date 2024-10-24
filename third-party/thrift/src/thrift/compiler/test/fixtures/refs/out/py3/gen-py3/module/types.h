@@ -204,12 +204,6 @@ template<>
 inline void reset_field<::cpp2::AdaptedStructWithInternBox>(
     ::cpp2::AdaptedStructWithInternBox& obj, uint16_t index) {
   switch (index) {
-    case 0:
-      obj.field1_ref().copy_from(default_inst<::cpp2::AdaptedStructWithInternBox>().field1_ref());
-      return;
-    case 1:
-      obj.field2_ref().copy_from(default_inst<::cpp2::AdaptedStructWithInternBox>().field2_ref());
-      return;
   }
 }
 
@@ -217,12 +211,6 @@ template<>
 inline void reset_field<::cpp2::AdaptedStructWithTerseInternBox>(
     ::cpp2::AdaptedStructWithTerseInternBox& obj, uint16_t index) {
   switch (index) {
-    case 0:
-      obj.field1_ref().copy_from(default_inst<::cpp2::AdaptedStructWithTerseInternBox>().field1_ref());
-      return;
-    case 1:
-      obj.field2_ref().copy_from(default_inst<::cpp2::AdaptedStructWithTerseInternBox>().field2_ref());
-      return;
   }
 }
 

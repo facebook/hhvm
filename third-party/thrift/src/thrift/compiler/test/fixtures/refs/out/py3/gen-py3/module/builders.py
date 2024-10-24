@@ -200,24 +200,20 @@ class AdaptedStructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__AdaptedStructWithInternBox
 
     def __init__(self):
-        self.field1: _typing.Any = None
-        self.field2: _typing.Any = None
+        pass
 
     def __iter__(self):
-        yield "field1", self.field1
-        yield "field2", self.field2
+        pass
 
 _fbthrift_struct_type__AdaptedStructWithTerseInternBox = _module_types.AdaptedStructWithTerseInternBox
 class AdaptedStructWithTerseInternBox_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__AdaptedStructWithTerseInternBox
 
     def __init__(self):
-        self.field1: _typing.Any = None
-        self.field2: _typing.Any = None
+        pass
 
     def __iter__(self):
-        yield "field1", self.field1
-        yield "field2", self.field2
+        pass
 
 _fbthrift_struct_type__StructWithRefTypeUnique = _module_types.StructWithRefTypeUnique
 class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):

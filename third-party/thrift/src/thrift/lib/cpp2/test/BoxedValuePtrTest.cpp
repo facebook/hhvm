@@ -373,6 +373,14 @@ TEST(BoxedValueTest, Mut) {
   std::move(b).mut().set_a(2);
 
   EXPECT_EQ(a.value(), 1);
+
+  // The following statement technically accesses a moved-from object (`b`),
+  // but is nevertheless valid: it effectively asserts that given that both
+  // `mut()` and `set_a()` do not invalidate the state of any r-value object
+  // they are called on, then the following assertion still stands.
+  // Note that this does not violate the typical expectation that "moved-from
+  // objects shall be placed in a valid but unspecified state": it merely goes
+  // further by specifying said state.
   EXPECT_EQ(b.value(), 2);
 }
 
@@ -474,7 +482,12 @@ TEST(BoxedValueTest, Ensure) {
   EXPECT_EQ(a, c);
 }
 
-class LifecycleTester {
+// Why alignas(2)? Without it, the (natural) alignment of LifecycleTester is 1.
+// However, in order for values of LifecycleTester to be usable with boxed_value
+// below, they cannot be single-byte aligned, as that would prevent
+// boxed_value_ptr fom using the least-significant bits of their address to
+// capture ownership information (a fundamental requirement).
+class alignas(2) LifecycleTester {
  public:
   using __fbthrift_cpp2_type = LifecycleTester;
 

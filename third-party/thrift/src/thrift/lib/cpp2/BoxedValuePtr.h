@@ -22,6 +22,7 @@
 #include <boost/operators.hpp>
 
 #include <folly/CPortability.h>
+#include <folly/ConstexprMath.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
@@ -213,14 +214,21 @@ class boxed_ptr {
   FOLLY_ERASE constexpr T* get() const noexcept { return ptr_.get(); }
 
  private:
-  static constexpr int kModeBits = 3;
-  using aligned_pointer_type =
-      type::detail::AlignedPtr<T, kModeBits, kModeBits>;
-
   enum Mode : std::uintptr_t {
     MutOwned = 0, // Unique ownership
     ConstUnowned = 1,
+    _NUM_MODE_VALUES, // Keep last, to ensure static checks below are correct.
   };
+
+  // Number of bits to reserve (in the AlignedPtr below) for enum Mode values.
+  static constexpr int kModeBits = 1;
+  using aligned_pointer_type = type::detail::
+      AlignedPtr<T, /*TagBits=*/kModeBits, /*MaxTagBits=*/kModeBits>;
+
+  static_assert(
+      folly::constexpr_log2_ceil(
+          static_cast<std::uintptr_t>(_NUM_MODE_VALUES)) <= kModeBits,
+      "The number of tag bits is insufficient to hold all Mode values.");
 
   FOLLY_ERASE constexpr explicit boxed_ptr(const T* p) noexcept
       : ptr_(

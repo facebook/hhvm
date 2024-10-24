@@ -21,8 +21,17 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
+	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
+)
+
+const (
+	defaultStatsPeriod = 1 * time.Minute
+	// GoroutinePerRequest is a special value to use in SetNumWorkers to enable
+	// a goroutine per request (instead of a worker pool of goroutines)
+	GoroutinePerRequest = -1
 )
 
 // ServerOption is the option for the thrift server.
@@ -40,6 +49,45 @@ type serverOptions struct {
 	connContext       ConnContextFunc
 	serverStats       *stats.ServerStats
 	processorStats    map[string]*stats.TimingSeries
+}
+
+func defaultServerOptions() *serverOptions {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+	return &serverOptions{
+		pipeliningEnabled: true,
+		numWorkers:        runtime.NumCPU(),
+		log:               logger.Printf,
+		interceptor:       nil,
+		connContext:       WithConnInfo,
+		processorStats:    make(map[string]*stats.TimingSeries),
+		serverStats:       stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
+	}
+}
+
+func newServerOptions(options ...ServerOption) *serverOptions {
+	opts := defaultServerOptions()
+	for _, option := range options {
+		option(opts)
+	}
+	return opts
+}
+
+// WithoutPipelining disables pipelining for the thrift server.
+func WithoutPipelining() ServerOption {
+	return func(server *serverOptions) {
+		server.pipeliningEnabled = false
+	}
+}
+
+// WithNumWorkers sets the number of concurrent workers for the thrift server.
+// These workers are responsible for executing client requests.
+// This should be tuned based on the nature of the application using the framework.
+// if special value of thrift.GoroutinePerRequest (-1) is passed, thrift will not use
+// a pool of workers and instead launch a goroutine per request.
+func WithNumWorkers(num int) ServerOption {
+	return func(server *serverOptions) {
+		server.numWorkers = num
+	}
 }
 
 // Deprecated: use WrapInterceptor
@@ -68,18 +116,16 @@ func WithLog(log func(format string, args ...interface{})) func(*serverOptions) 
 	}
 }
 
-func defaultServerOptions() *serverOptions {
-	logger := log.New(os.Stderr, "", log.LstdFlags)
-	return &serverOptions{
-		connContext: WithConnInfo,
-		log:         logger.Printf,
+// WithServerStats allows the user to provide stats for the server to update.
+func WithServerStats(serverStats *stats.ServerStats) ServerOption {
+	return func(server *serverOptions) {
+		server.serverStats = serverStats
 	}
 }
 
-func newServerOptions(options ...ServerOption) *serverOptions {
-	opts := defaultServerOptions()
-	for _, option := range options {
-		option(opts)
+// WithProcessorStats allows the user to provide stats for the server to update for each processor function.
+func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOption {
+	return func(server *serverOptions) {
+		server.processorStats = processorStats
 	}
-	return opts
 }

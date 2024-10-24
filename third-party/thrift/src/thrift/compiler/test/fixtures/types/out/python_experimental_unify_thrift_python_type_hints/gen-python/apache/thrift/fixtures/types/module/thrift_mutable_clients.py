@@ -59,10 +59,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         async def bounce_map(
             self,
-            m: _typing.MutableMapping[int, str],
+            m: _fbthrift_python_mutable_containers.MutableMap[int, str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableMapping[int, str]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[int, str]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -87,7 +87,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             r: _fbthrift_python_mutable_containers.MutableList[int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableMapping[bytes, int]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[bytes, int]:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "binary_keyed_map",
@@ -122,10 +122,10 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
     
         def bounce_map(
             self,
-            m: _typing.MutableMapping[int, str],
+            m: _fbthrift_python_mutable_containers.MutableMap[int, str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableMapping[int, str]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[int, str]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -149,7 +149,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             r: _fbthrift_python_mutable_containers.MutableList[int],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableMapping[bytes, int]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[bytes, int]:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "binary_keyed_map",

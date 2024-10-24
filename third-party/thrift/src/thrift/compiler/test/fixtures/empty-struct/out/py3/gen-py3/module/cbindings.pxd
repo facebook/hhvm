@@ -7,4 +7,6 @@
 from module.types cimport (
     cEmpty,
     cNada,
+    cNada__type,
+    cNada__type___EMPTY__,
     )

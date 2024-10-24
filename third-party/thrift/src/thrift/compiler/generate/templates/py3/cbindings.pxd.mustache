@@ -20,7 +20,11 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
     {{#program:enums}}c{{enum:name}},
     {{/program:enums}}{{!
     }}{{#program:filtered_structs}}c{{struct:name}},
-    {{/program:filtered_structs}}{{!
+    {{#struct:union?}}c{{struct:name}}__type,
+    c{{struct:name}}__type___EMPTY__,
+    {{#struct:py3_fields}}c{{struct:name}}__type_{{field:py_name}},
+    {{/struct:py3_fields}}{{/struct:union?}}{{!
+    }}{{/program:filtered_structs}}{{!
     }}{{#program:constants}}c{{constant:name}},
     {{/program:constants}}
 )

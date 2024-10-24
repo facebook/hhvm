@@ -23,27 +23,30 @@ import (
 	"os"
 )
 
+// ServerOption is the option for the thrift server.
+type ServerOption func(*serverOptions)
+
 // ConnContextFunc is the type for connection context modifier functions.
 type ConnContextFunc func(context.Context, net.Conn) context.Context
 
-// ServerOptions is options needed to run a thrift server
-type ServerOptions struct {
+// serverOptions is options needed to run a thrift server
+type serverOptions struct {
 	interceptor Interceptor
 	connContext ConnContextFunc
 	log         func(format string, args ...interface{})
 }
 
 // Deprecated: use WrapInterceptor
-func WithInterceptor(interceptor Interceptor) func(*ServerOptions) {
-	return func(server *ServerOptions) {
+func WithInterceptor(interceptor Interceptor) func(*serverOptions) {
+	return func(server *serverOptions) {
 		server.interceptor = interceptor
 	}
 }
 
 // WithConnContext adds connContext option
 // that specifies a function that modifies the context passed to procedures per connection.
-func WithConnContext(connContext ConnContextFunc) func(*ServerOptions) {
-	return func(server *ServerOptions) {
+func WithConnContext(connContext ConnContextFunc) func(*serverOptions) {
+	return func(server *serverOptions) {
 		server.connContext = func(ctx context.Context, conn net.Conn) context.Context {
 			ctx = WithConnInfo(ctx, conn)
 			return connContext(ctx, conn)
@@ -53,21 +56,21 @@ func WithConnContext(connContext ConnContextFunc) func(*ServerOptions) {
 
 // WithLog allows you to over-ride the location that exceptional server events are logged.
 // The default is stderr.
-func WithLog(log func(format string, args ...interface{})) func(*ServerOptions) {
-	return func(server *ServerOptions) {
+func WithLog(log func(format string, args ...interface{})) func(*serverOptions) {
+	return func(server *serverOptions) {
 		server.log = log
 	}
 }
 
-func defaultServerOptions() *ServerOptions {
+func defaultServerOptions() *serverOptions {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
-	return &ServerOptions{
+	return &serverOptions{
 		connContext: WithConnInfo,
 		log:         logger.Printf,
 	}
 }
 
-func simpleServerOptions(options ...func(*ServerOptions)) *ServerOptions {
+func newServerOptions(options ...ServerOption) *serverOptions {
 	opts := defaultServerOptions()
 	for _, option := range options {
 		option(opts)

@@ -36,7 +36,7 @@ type rocketServer struct {
 	connContext   ConnContextFunc
 }
 
-func newRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
+func newRocketServer(proc Processor, listener net.Listener, options *serverOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,
@@ -47,7 +47,7 @@ func newRocketServer(proc Processor, listener net.Listener, options *ServerOptio
 	}
 }
 
-func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *ServerOptions) Server {
+func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *serverOptions) Server {
 	return &rocketServer{
 		proc:          proc,
 		listener:      listener,

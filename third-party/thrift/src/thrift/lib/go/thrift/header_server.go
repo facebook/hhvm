@@ -39,7 +39,7 @@ type headerServer struct {
 }
 
 // newHeaderServer creates a new server that only supports Header Transport.
-func newHeaderServer(processor Processor, listener net.Listener, options *ServerOptions) Server {
+func newHeaderServer(processor Processor, listener net.Listener, options *serverOptions) Server {
 	return &headerServer{
 		processor:   processor,
 		listener:    listener,

@@ -30,7 +30,8 @@ func resolveAddr(hostPort string) (net.Addr, error) {
 	return addr, nil
 }
 
-// DialHostPort creates a net.Conn, given a host and port combination, for example "127.0.0.1:8080".
+// Deprecated: DialHostPort creates a net.Conn, given a host and port combination, for example "127.0.0.1:8080".
+// This logic does not belong in thrift and rather in a common netutil library.
 func DialHostPort(hostPort string) (net.Conn, error) {
 	addr, err := resolveAddr(hostPort)
 	if err != nil {

@@ -21,6 +21,8 @@ import (
 	"log"
 	"net"
 	"os"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
 
 // ServerOption is the option for the thrift server.
@@ -31,9 +33,13 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 
 // serverOptions is options needed to run a thrift server
 type serverOptions struct {
-	interceptor Interceptor
-	connContext ConnContextFunc
-	log         func(format string, args ...interface{})
+	pipeliningEnabled bool
+	numWorkers        int
+	log               func(format string, args ...interface{})
+	interceptor       Interceptor
+	connContext       ConnContextFunc
+	serverStats       *stats.ServerStats
+	processorStats    map[string]*stats.TimingSeries
 }
 
 // Deprecated: use WrapInterceptor

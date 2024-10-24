@@ -790,133 +790,134 @@ end = struct
         ~start:(lazy (Format.sprintf "step: %s" (Type.show ty)))
         ~end_:show_tys
       @@ fun renv ->
-      ty
-      :: begin
-           Environment.get_subtypes env ty
-           @
-           match ty with
-           | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
-           | Primitive prim -> begin
-             let open Primitive in
-             match prim with
-             | Null
-             | Int
-             | String
-             | Float
-             | Bool ->
-               []
-             | Arraykey -> [Primitive Int; Primitive String]
-             | Num -> [Primitive Int; Primitive Float]
+      (* This choice point can early circuit a lot of recursive calls by
+         selecting constant time subtypes half the time. This is either through
+         reflexivity, subtyping environment, or types with fixed builtin subtypes. *)
+      if Random.bool () then
+        ty
+        :: begin
+             Environment.get_subtypes env ty
+             @
+             match ty with
+             | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
+             | Primitive prim -> begin
+               let open Primitive in
+               match prim with
+               | Arraykey -> [Primitive Int; Primitive String]
+               | Num -> [Primitive Int; Primitive Float]
+               | _ -> []
+             end
+             | _ -> []
            end
-           | Option ty -> [Primitive Primitive.Null; ty]
-           | Awaitable ty ->
-             let ty =
-               driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
-             in
-             [Awaitable ty]
-           | TypeConst _
-           | Newtype _
-           | Alias _
-           | Classish _
-           | Case _
-           | Enum _ ->
-             (* These cases either have no proper subtypes (e.g., Enum) or their
-                subtypes are covered by the subtyping relationship in the
-                environment. *)
-             []
-           | Vec ty ->
-             let renv =
-               ReadOnlyEnvironment.
-                 {
-                   renv with
-                   pick_immediately_inhabited = false;
-                   for_alias_def = false;
-                 }
-             in
-             let ty = driver renv ty in
-             [Vec ty]
-           | Dict { key; value } ->
-             let renv =
-               ReadOnlyEnvironment.
-                 {
-                   renv with
-                   pick_immediately_inhabited = false;
-                   for_alias_def = false;
-                 }
-             in
-             let key = driver renv key in
-             let value = driver renv value in
-             [Dict { key; value }]
-           | Keyset ty ->
-             let renv =
-               ReadOnlyEnvironment.
-                 {
-                   renv with
-                   pick_immediately_inhabited = false;
-                   for_alias_def = false;
-                 }
-             in
-             let ty = driver renv ty in
-             [Keyset ty]
-           | Tuple { conjuncts; open_ } ->
-             let conjuncts =
-               List.map
-                 ~f:
-                   (driver
-                      ReadOnlyEnvironment.{ renv with for_alias_def = false })
-                 conjuncts
-             in
-             let open_ =
-               if open_ then
-                 (* Here we should be adding new conjuncts, but with the current setup
-                    that's too expensive. Need memoization to make it more affordable. *)
-                 select [true; false]
-               else
-                 false
-             in
-             [Tuple { conjuncts; open_ }]
-           | Shape { fields; open_ } ->
-             let fields = List.map ~f:(subfield_of renv) fields in
-             let open_ =
-               if open_ then
-                 (* Here we should be adding new fields, but with the current setup
-                    that's too expensive. Need memoization to make it more affordable. *)
-                 select [true; false]
-               else
-                 false
-             in
-             [Shape { fields; open_ }]
-           | Function { parameters; variadic; return_ } ->
-             let return_ =
-               driver
-                 ReadOnlyEnvironment.{ renv with for_alias_def = false }
-                 return_
-             in
-             let variadic =
-               match variadic with
-               | None ->
-                 Lazy.force
-                 @@ select
-                      [
-                        lazy None;
-                        lazy
-                          (Some
-                             (driver
-                                ReadOnlyEnvironment.
-                                  {
-                                    renv with
-                                    pick_immediately_inhabited = false;
-                                    for_alias_def = false;
-                                  }
-                                Mixed));
-                      ]
-               | Some ty -> Some ty
-             in
-             [Function { parameters; variadic; return_ }]
-           | Like ty ->
-             (* TODO: dynamic here when it is supported *)
-             [driver renv ty]
-         end
+      else begin
+        match ty with
+        | Mixed
+        | Primitive _
+        | TypeConst _
+        | Newtype _
+        | Alias _
+        | Classish _
+        | Case _
+        | Enum _ ->
+          []
+        | Option ty -> [Primitive Primitive.Null; ty]
+        | Awaitable ty ->
+          let ty =
+            driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
+          in
+          [Awaitable ty]
+        | Vec ty ->
+          let renv =
+            ReadOnlyEnvironment.
+              {
+                renv with
+                pick_immediately_inhabited = false;
+                for_alias_def = false;
+              }
+          in
+          let ty = driver renv ty in
+          [Vec ty]
+        | Dict { key; value } ->
+          let renv =
+            ReadOnlyEnvironment.
+              {
+                renv with
+                pick_immediately_inhabited = false;
+                for_alias_def = false;
+              }
+          in
+          let key = driver renv key in
+          let value = driver renv value in
+          [Dict { key; value }]
+        | Keyset ty ->
+          let renv =
+            ReadOnlyEnvironment.
+              {
+                renv with
+                pick_immediately_inhabited = false;
+                for_alias_def = false;
+              }
+          in
+          let ty = driver renv ty in
+          [Keyset ty]
+        | Tuple { conjuncts; open_ } ->
+          let conjuncts =
+            List.map
+              ~f:
+                (driver ReadOnlyEnvironment.{ renv with for_alias_def = false })
+              conjuncts
+          in
+          let open_ =
+            if open_ then
+              (* Here we should be adding new conjuncts, but with the current setup
+                 that's too expensive. Need memoization to make it more affordable. *)
+              select [true; false]
+            else
+              false
+          in
+          [Tuple { conjuncts; open_ }]
+        | Shape { fields; open_ } ->
+          let fields = List.map ~f:(subfield_of renv) fields in
+          let open_ =
+            if open_ then
+              (* Here we should be adding new fields, but with the current setup
+                 that's too expensive. Need memoization to make it more affordable. *)
+              select [true; false]
+            else
+              false
+          in
+          [Shape { fields; open_ }]
+        | Function { parameters; variadic; return_ } ->
+          let return_ =
+            driver
+              ReadOnlyEnvironment.{ renv with for_alias_def = false }
+              return_
+          in
+          let variadic =
+            match variadic with
+            | None ->
+              Lazy.force
+              @@ select
+                   [
+                     lazy None;
+                     lazy
+                       (Some
+                          (driver
+                             ReadOnlyEnvironment.
+                               {
+                                 renv with
+                                 pick_immediately_inhabited = false;
+                                 for_alias_def = false;
+                               }
+                             Mixed));
+                   ]
+            | Some ty -> Some ty
+          in
+          [Function { parameters; variadic; return_ }]
+        | Like ty ->
+          (* TODO: dynamic here when it is supported *)
+          [driver renv ty]
+      end
     and driver renv candidate =
       try
         ReadOnlyEnvironment.debug
@@ -926,7 +927,9 @@ end = struct
           ~end_:show
         @@ fun renv ->
         let candidates = step renv candidate in
-        if Random.bool () then
+        if List.is_empty candidates then
+          raise Backtrack
+        else if Random.bool () then
           (* Go down on a stochastic walk and explore further subtypes. *)
           driver renv @@ select candidates
         else

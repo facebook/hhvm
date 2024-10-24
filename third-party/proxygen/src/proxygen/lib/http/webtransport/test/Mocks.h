@@ -112,4 +112,24 @@ class MockWebTransport : public WebTransport {
   std::map<uint64_t, StreamHandleBase*> readHandles_;
 };
 
+class MockWebTransportHandler : public WebTransportHandler {
+ public:
+  MOCK_METHOD(void,
+              onNewUniStream,
+              (WebTransport::StreamReadHandle * readHandle),
+              (override));
+  MOCK_METHOD(void,
+              onNewBidiStream,
+              (WebTransport::BidiStreamHandle bidiHandle),
+              (override));
+  MOCK_METHOD(void,
+              onDatagram,
+              (std::unique_ptr<folly::IOBuf> datagram),
+              (override));
+  MOCK_METHOD(void,
+              onSessionEnd,
+              (folly::Optional<uint32_t> error),
+              (override));
+};
+
 } // namespace proxygen::test

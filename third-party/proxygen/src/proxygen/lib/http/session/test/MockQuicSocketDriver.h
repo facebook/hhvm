@@ -1034,6 +1034,9 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         cb->onConnectionError(std::move(error));
       }
     }
+    auto& connState = streams_[kConnectionStreamId];
+    connState.readState = CLOSED;
+    connState.writeState = CLOSED;
   }
 
   void deliverWriteError(quic::StreamId id,

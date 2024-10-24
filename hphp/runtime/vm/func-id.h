@@ -54,7 +54,7 @@ struct FuncId {
 #else
   using Id = uint32_t;
   Int toInt() const { return m_id; }
-  static FuncId fromInt(Int num) {
+  constexpr static FuncId fromInt(Int num) {
     return FuncId{num};
   }
 #endif

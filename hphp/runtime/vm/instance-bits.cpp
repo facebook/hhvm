@@ -155,9 +155,9 @@ void init() {
       }
       // Print out stats about what we ended up using
       if (Trace::moduleEnabledRelease(Trace::instancebits, 1)) {
-        Trace::traceRelease("%s: %u classes, %" PRIu64 " (%.2f%%) of warmup"
-                            " checks\n",
-                            __FUNCTION__, i-1, accum, 100.0 * accum / total);
+        Trace::traceRelease("InstanceBits: %u classes, %" PRIu64
+                            " (%.2f%%) of warmup checks\n",
+                             i - 1, accum, 100.0 * accum / total);
         if (Trace::moduleEnabledRelease(Trace::instancebits, 2)) {
           accum = 0;
           i = 1;
@@ -222,7 +222,12 @@ void serialize(jit::ProfDataSerializer& ser) {
 void deserialize(jit::ProfDataDeserializer& ser) {
   size_t elems;
   read_raw(ser, elems);
+  if (Trace::moduleEnabledRelease(Trace::instancebits, 1)) {
+    Trace::traceRelease("InstanceBits: %zu classes from deserialization\n",
+                        elems);
+  }
   if (!elems) return;
+
   auto DEBUG_ONLY done = false;
   initImpl(
     [&] {

@@ -63,28 +63,28 @@ const N* as(const t_node* node) {
   return dynamic_cast<const N*>(node);
 }
 
-// Checks if V has begin/end_visit methods.
-template <typename V, typename = void>
+// Checks if the context type Context has begin/end_visit methods.
+template <typename Context, typename = void>
 struct has_visit_methods : std::false_type {};
-template <typename V>
+template <typename Context>
 struct has_visit_methods<
-    V,
+    Context,
     std::void_t<
-        decltype(std::declval<V>().begin_visit(std::declval<t_node&>())),
-        decltype(std::declval<V>().end_visit(std::declval<t_node&>()))>>
+        decltype(std::declval<Context>().begin_visit(std::declval<t_node&>())),
+        decltype(std::declval<Context>().end_visit(std::declval<t_node&>()))>>
     : std::true_type {};
 
-// Helper to call begin/end_visit if supported on the given argument.
-template <typename Node, typename V>
-void begin_visit(Node& node, V& visitor) {
-  if constexpr (has_visit_methods<V>::value) {
-    visitor.begin_visit(node);
+// Helper to call begin/end_visit if supported by the visitation context C.
+template <typename Node, typename C>
+void begin_visit(Node& node, C& context) {
+  if constexpr (has_visit_methods<C>::value) {
+    context.begin_visit(node);
   }
 }
-template <typename Node, typename V>
-void end_visit(Node& node, V& visitor) {
-  if constexpr (has_visit_methods<V>::value) {
-    visitor.end_visit(node);
+template <typename Node, typename C>
+void end_visit(Node& node, C& context) {
+  if constexpr (has_visit_methods<C>::value) {
+    context.end_visit(node);
   }
 }
 
@@ -93,29 +93,6 @@ template <typename... Args>
 using visitor_list = std::vector<std::function<void(Args...)>>;
 
 } // namespace ast_detail
-
-template <bool is_const, typename... Args>
-class basic_ast_visitor;
-
-// A class that can traverse ast nodes, invoking registered visitors for each
-// node visited.
-//
-// Visits AST nodes in 'preorder', visiting the parent node before children
-// nodes.
-//
-// For each concrete node type, provides the following functions:
-// - an operator() overload for visiting the node:
-//     void operator()(args..., t_{name}&) const;
-// - a function to add a node-specific visitor:
-//     void add_{name}_visitor(std::function<void(args..., t_{name}&)>);
-//
-// Also provides helper functions for registering a visitor for multiple node
-// types. For example: all interface, structured_declaration, and
-// declaration visitors.
-using ast_visitor = basic_ast_visitor<false>;
-
-// Same as ast_visitor, except traverse a const AST.
-using const_ast_visitor = basic_ast_visitor<true>;
 
 // A class that can traverse an AST, calling registered visitors.
 // See ast_visitor.
@@ -181,8 +158,7 @@ class basic_ast_visitor {
     begin_visit(program_visitors_, node, args...);
     visit_children_ptrs(node.services(), args...);
     visit_children_ptrs(node.interactions(), args...);
-    // TODO(afuller): Split structs and unions in t_program accessors.
-    // Note: Loop must be resilient to visitor causing push_back calls.
+    // Loop must be resilient to visitor calling push_back.
     for (size_t i = 0; i < node.structs_and_unions().size(); ++i) {
       t_structured* struct_or_union = node.structs_and_unions()[i];
       if (auto* tunion = ast_detail::as<t_union>(struct_or_union)) {
@@ -190,7 +166,7 @@ class basic_ast_visitor {
         continue;
       }
 
-      // if node is not a union, then it must be a struct
+      // If node is not a union, then it must be a struct.
       auto* tstruct = ast_detail::as<t_struct>(struct_or_union);
       assert(tstruct != nullptr);
       (*this)(args..., *tstruct);
@@ -199,7 +175,7 @@ class basic_ast_visitor {
     visit_children_ptrs(node.typedefs(), args...);
     visit_children_ptrs(node.enums(), args...);
     visit_children_ptrs(node.consts(), args...);
-    // Note: Loop must be resilient to visitor causing push_back calls.
+    // Loop must be resilient to visitor calling push_back.
     for (size_t i = 0; i < node.type_instantiations().size(); ++i) {
       auto& type_inst = node.type_instantiations()[i];
       if (auto* set_node = ast_detail::as<t_set>(&type_inst)) {
@@ -353,14 +329,14 @@ class basic_ast_visitor {
 
   template <typename C>
   void visit_children(const C& children, Args... args) const {
-    // Note: Loop must be resilient to visitor causing push_back calls.
+    // Loop must be resilient to visitor calling push_back.
     for (size_t i = 0; i < children.size(); ++i) {
       (*this)(args..., children[i]);
     }
   }
   template <typename C>
   void visit_children_ptrs(const C& children, Args... args) const {
-    // Note: Loop must be resilient to visitor causing push_back calls.
+    // Loop must be resilient to visitor calling push_back.
     for (size_t i = 0; i < children.size(); ++i) {
       (*this)(args..., *children[i]);
     }
@@ -411,6 +387,26 @@ class basic_visitor_context {
  private:
   std::vector<node_type*> context_;
 };
+
+// A class that can traverse ast nodes, invoking registered visitors for each
+// node visited.
+//
+// Visits AST nodes in 'preorder', visiting the parent node before children
+// nodes.
+//
+// For each concrete node type, provides the following functions:
+// - an operator() overload for visiting the node:
+//     void operator()(args..., t_{name}&) const;
+// - a function to add a node-specific visitor:
+//     void add_{name}_visitor(std::function<void(args..., t_{name}&)>);
+//
+// Also provides helper functions for registering a visitor for multiple node
+// types. For example: all interface, structured_declaration, and
+// declaration visitors.
+using ast_visitor = basic_ast_visitor<false>;
+
+// Same as ast_visitor, except traverse a const AST.
+using const_ast_visitor = basic_ast_visitor<true>;
 
 using visitor_context = basic_visitor_context<false>;
 using const_visitor_context = basic_visitor_context<true>;

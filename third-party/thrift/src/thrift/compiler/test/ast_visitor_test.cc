@@ -200,8 +200,8 @@ class AstVisitorTest : public base_program_test {
   void TearDown() override { visitor_(program_); }
 
  protected:
-  ::testing::StrictMock<MockAstVisitor> mock_;
-  ::testing::StrictMock<MockAstVisitor> overload_mock_;
+  testing::StrictMock<MockAstVisitor> mock_;
+  testing::StrictMock<MockAstVisitor> overload_mock_;
   t_scope scope_;
 
  private:
@@ -209,7 +209,7 @@ class AstVisitorTest : public base_program_test {
   OverloadedVisitor overload_visitor_;
 };
 
-using ast_visitor_types = ::testing::Types<ast_visitor, const_ast_visitor>;
+using ast_visitor_types = testing::Types<ast_visitor, const_ast_visitor>;
 TYPED_TEST_SUITE(AstVisitorTest, ast_visitor_types);
 
 TYPED_TEST(AstVisitorTest, interaction) {
@@ -438,10 +438,10 @@ TEST(AstVisitorTest, sink) {
       [&](const t_throws& node) { throws.push_back(&node); });
   visitor(program);
 
-  EXPECT_THAT(responses, ::testing::ElementsAre(sink1ptr, sink2ptr));
+  EXPECT_THAT(responses, testing::ElementsAre(sink1ptr, sink2ptr));
   EXPECT_THAT(
       throws,
-      ::testing::ElementsAre(
+      testing::ElementsAre(
           sink1ptr->sink_exceptions(), sink2ptr->final_response_exceptions()));
 }
 
@@ -470,8 +470,8 @@ TEST(AstVisitorTest, stream) {
       [&](const t_throws& node) { throws.push_back(&node); });
   visitor(program);
 
-  EXPECT_THAT(responses, ::testing::ElementsAre(stream1ptr, stream2ptr));
-  EXPECT_THAT(throws, ::testing::ElementsAre(stream1ptr->exceptions()));
+  EXPECT_THAT(responses, testing::ElementsAre(stream1ptr, stream2ptr));
+  EXPECT_THAT(throws, testing::ElementsAre(stream1ptr->exceptions()));
 }
 
 TEST(AstVisitorTest, modifications) {
@@ -494,7 +494,7 @@ TEST(AstVisitorTest, modifications) {
 
   EXPECT_THAT(
       seen,
-      ::testing::ElementsAre(
+      testing::ElementsAre(
           "Union1", "Union2", "Union1a", "Union1b", "Union2a", "Union2b"));
 }
 
@@ -504,9 +504,9 @@ class mock_visitor {
   MOCK_METHOD(void, end_visit, (t_node&));
 };
 
-class ObserverTest : public base_program_test {};
+class ContextTest : public base_program_test {};
 
-TEST_F(ObserverTest, order_of_calls) {
+TEST_F(ContextTest, order_of_calls) {
   static_assert(ast_detail::has_visit_methods<mock_visitor&>::value, "");
   using test_ast_visitor =
       basic_ast_visitor<false, mock_visitor&, int, mock_visitor&>;
@@ -516,27 +516,27 @@ TEST_F(ObserverTest, order_of_calls) {
       tunion.create_field(&t_primitive_type::t_i32(), "union_field", 1);
   mock_visitor m1, m2;
   {
-    ::testing::InSequence ins;
-    EXPECT_CALL(m1, begin_visit(::testing::Ref(program_)));
-    EXPECT_CALL(m2, begin_visit(::testing::Ref(program_)));
-    EXPECT_CALL(m1, begin_visit(::testing::Ref(tunion)));
-    EXPECT_CALL(m2, begin_visit(::testing::Ref(tunion)));
-    EXPECT_CALL(m1, begin_visit(::testing::Ref(field)));
-    EXPECT_CALL(m2, begin_visit(::testing::Ref(field)));
+    testing::InSequence ins;
+    EXPECT_CALL(m1, begin_visit(testing::Ref(program_)));
+    EXPECT_CALL(m2, begin_visit(testing::Ref(program_)));
+    EXPECT_CALL(m1, begin_visit(testing::Ref(tunion)));
+    EXPECT_CALL(m2, begin_visit(testing::Ref(tunion)));
+    EXPECT_CALL(m1, begin_visit(testing::Ref(field)));
+    EXPECT_CALL(m2, begin_visit(testing::Ref(field)));
 
     // End is called in reverse order.
-    EXPECT_CALL(m2, end_visit(::testing::Ref(field)));
-    EXPECT_CALL(m1, end_visit(::testing::Ref(field)));
-    EXPECT_CALL(m2, end_visit(::testing::Ref(tunion)));
-    EXPECT_CALL(m1, end_visit(::testing::Ref(tunion)));
-    EXPECT_CALL(m2, end_visit(::testing::Ref(program_)));
-    EXPECT_CALL(m1, end_visit(::testing::Ref(program_)));
+    EXPECT_CALL(m2, end_visit(testing::Ref(field)));
+    EXPECT_CALL(m1, end_visit(testing::Ref(field)));
+    EXPECT_CALL(m2, end_visit(testing::Ref(tunion)));
+    EXPECT_CALL(m1, end_visit(testing::Ref(tunion)));
+    EXPECT_CALL(m2, end_visit(testing::Ref(program_)));
+    EXPECT_CALL(m1, end_visit(testing::Ref(program_)));
   }
   test_ast_visitor visitor;
   visitor(m1, 1, m2, program_);
 }
 
-TEST_F(ObserverTest, visit_context) {
+TEST_F(ContextTest, visit_context) {
   static_assert(ast_detail::has_visit_methods<visitor_context&>::value, "");
   using ctx_ast_visitor = basic_ast_visitor<false, visitor_context&>;
 

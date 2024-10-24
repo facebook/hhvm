@@ -1,5 +1,5 @@
 File "perf_bad_smells_sgrep.php", line 3, characters 10-13:
-perf_bad_smells_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in perf_bad_smells_sgrep.php, so that file should be named test.php instead. (Lint[5564])
 File "perf_bad_smells_sgrep.php", line 4, characters 3-12:
 consider keys_with_truthy_values from core/utils. array_keys(array_filter(X)) === keys_with_truthy_values(X), but keys_with_truthy_values is faster. (Lint[5542])
 File "perf_bad_smells_sgrep.php", line 5, characters 3-13:

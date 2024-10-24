@@ -1,5 +1,5 @@
 File "stdlib_str_usage.php", line 3, characters 10-10:
-stdlib_str_usage.php only declares `f`, it should be named f.php instead. (Lint[5564])
+f is the only function declared in stdlib_str_usage.php, so that file should be named f.php instead. (Lint[5564])
 File "stdlib_str_usage.php", line 4, characters 7-35:
 There are no statements in the body of this `if` branch. (Lint[5556])
 File "stdlib_str_usage.php", line 5, characters 7-31:

@@ -1,5 +1,5 @@
 File "classname_sgrep.php", line 3, characters 10-13:
-classname_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in classname_sgrep.php, so that file should be named test.php instead. (Lint[5564])
 File "classname_sgrep.php", line 4, characters 3-14:
 Write Foo::class instead of 'Foo' inside calls to Classes::get(), Classes::newMock(), etc. This improves the static analysis of your code. For example: Classes::newMock(ViewerContext::class) (Lint[5542])
 File "classname_sgrep.php", line 5, characters 3-5:

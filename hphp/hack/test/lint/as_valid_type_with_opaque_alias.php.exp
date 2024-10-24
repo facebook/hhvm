@@ -1,4 +1,4 @@
 File "as_valid_type_with_opaque_alias.php--use_it.php", line 3, characters 10-12:
-as_valid_type_with_opaque_alias.php--use_it.php only declares `foo`, it should be named foo.php instead. (Lint[5564])
+foo is the only function declared in as_valid_type_with_opaque_alias.php--use_it.php, so that file should be named foo.php instead. (Lint[5564])
 File "as_valid_type_with_opaque_alias.php--use_it.php", line 6, characters 3-11:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])

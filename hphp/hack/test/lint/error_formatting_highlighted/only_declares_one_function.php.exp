@@ -1,4 +1,4 @@
-warning: Lint[5564] only_declares_one_function.php only declares f, it should be named f.php instead. [1]
+warning: Lint[5564] f is the only function declared in only_declares_one_function.php, so that file should be named f.php instead. [1]
 
 only_declares_one_function.php:3:10
     1 | <?hh

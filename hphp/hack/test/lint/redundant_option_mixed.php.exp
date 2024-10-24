@@ -1,5 +1,5 @@
 File "redundant_option_mixed.php", line 3, characters 7-7:
-redundant_option_mixed.php only declares `C`, it should be named C.php instead. (Lint[5564])
+C is the only class declared in redundant_option_mixed.php, so that file should be named C.php instead. (Lint[5564])
 File "redundant_option_mixed.php", line 5, characters 12-12:
 The generic parameter `T` is unused. (Lint[5624])
 File "redundant_option_mixed.php", line 7, characters 12-12:

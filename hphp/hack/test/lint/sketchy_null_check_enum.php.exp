@@ -1,7 +1,7 @@
 File "sketchy_null_check_enum.php--file1.php", line 3, characters 6-8:
-sketchy_null_check_enum.php--file1.php only declares `Foo`, it should be named Foo.php instead. (Lint[5564])
+Foo is the only class declared in sketchy_null_check_enum.php--file1.php, so that file should be named Foo.php instead. (Lint[5564])
 File "sketchy_null_check_enum.php--file2.php", line 3, characters 10-13:
-sketchy_null_check_enum.php--file2.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in sketchy_null_check_enum.php--file2.php, so that file should be named test.php instead. (Lint[5564])
 File "sketchy_null_check_enum.php--file2.php", line 4, characters 7-8:
 There are no statements in the body of this `if` branch. (Lint[5556])
 File "sketchy_null_check_enum.php--file2.php", line 4, characters 7-8:

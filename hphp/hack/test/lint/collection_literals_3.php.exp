@@ -1,2 +1,2 @@
 File "collection_literals_3.php", line 3, characters 10-10:
-collection_literals_3.php only declares `f`, it should be named f.php instead. (Lint[5564])
+f is the only function declared in collection_literals_3.php, so that file should be named f.php instead. (Lint[5564])

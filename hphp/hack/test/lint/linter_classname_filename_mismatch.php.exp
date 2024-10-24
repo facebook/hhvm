@@ -1,2 +1,2 @@
 File "linter_classname_filename_mismatch.php", line 3, characters 7-10:
-linter_classname_filename_mismatch.php only declares `Test`, it should be named Test.php instead. (Lint[5564])
+Test is the only class declared in linter_classname_filename_mismatch.php, so that file should be named Test.php instead. (Lint[5564])

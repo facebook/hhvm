@@ -1,7 +1,7 @@
 {
   "errors":[
     {
-      "descr":"test_capitalised.php only declares `f`, it should be named f.php instead.",
+      "descr":"f is the only function declared in test_capitalised.php, so that file should be named f.php instead.",
       "severity":"warning",
       "path":"test_capitalised.php",
       "line":3,

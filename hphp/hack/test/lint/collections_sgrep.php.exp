@@ -1,5 +1,5 @@
 File "collections_sgrep.php", line 3, characters 10-13:
-collections_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in collections_sgrep.php, so that file should be named test.php instead. (Lint[5564])
 File "collections_sgrep.php", line 4, characters 7-12:
 Use 'Vector {}' instead of 'new Vector(null)'. (Lint[5542])
 File "collections_sgrep.php", line 5, characters 7-9:

@@ -1,4 +1,4 @@
 File "call_user_func_array_sgrep.php", line 3, characters 10-13:
-call_user_func_array_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in call_user_func_array_sgrep.php, so that file should be named test.php instead. (Lint[5564])
 File "call_user_func_array_sgrep.php", line 4, characters 3-22:
 Use argument unpacking instead. See https://www.facebook.com/groups/hackforhiphop/permalink/762166013832016/ (Lint[5542])

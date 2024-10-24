@@ -1,5 +1,5 @@
 File "null_check_strict3.php", line 3, characters 10-10:
-null_check_strict3.php only declares `f`, it should be named f.php instead. (Lint[5564])
+f is the only function declared in null_check_strict3.php, so that file should be named f.php instead. (Lint[5564])
 File "null_check_strict3.php", line 4, characters 7-8:
 There are no statements in the body of this `if` branch. (Lint[5556])
 File "null_check_strict3.php", line 6, characters 8-9:

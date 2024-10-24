@@ -1,5 +1,5 @@
 File "null_check_strict2.php", line 12, characters 7-7:
-null_check_strict2.php only declares `X`, it should be named X.php instead. (Lint[5564])
+X is the only class declared in null_check_strict2.php, so that file should be named X.php instead. (Lint[5564])
 File "null_check_strict2.php", line 17, characters 8-14:
 This is a sketchy null check on an expression of type ?int.
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.

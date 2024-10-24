@@ -1,2 +1,2 @@
 File "cleanup_sgrep.php", line 3, characters 10-13:
-cleanup_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+test is the only function declared in cleanup_sgrep.php, so that file should be named test.php instead. (Lint[5564])

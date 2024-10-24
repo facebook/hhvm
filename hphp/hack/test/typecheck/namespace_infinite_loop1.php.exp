@@ -1,7 +1,11 @@
+ERROR: File "namespace_infinite_loop1.php", line 2, characters 26-26:
+A name is expected here. (Parsing[1002])
 ERROR: File "namespace_infinite_loop1.php", line 2, characters 28-28:
 An expression is expected here. (Parsing[1002])
 ERROR: File "namespace_infinite_loop1.php", line 3, characters 1-1:
 Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
+ERROR: File "namespace_infinite_loop1.php", line 7, characters 53-53:
+A method must have a body or be marked `abstract`. (Parsing[1002])
 ERROR: File "namespace_infinite_loop1.php", line 2, characters 26-27:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "namespace_infinite_loop1.php", line 7, characters 28-38:

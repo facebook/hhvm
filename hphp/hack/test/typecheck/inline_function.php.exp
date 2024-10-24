@@ -1,3 +1,5 @@
+ERROR: File "inline_function.php", line 4, characters 5-18:
+Declarations are not supported outside global scope (Parsing[1002])
 ERROR: File "inline_function.php", line 4, characters 5-21:
 Encountered unexpected text `function bar() {}`, was expecting a statement. (Parsing[1002])
 ERROR: File "inline_function.php", line 4, characters 22-22:

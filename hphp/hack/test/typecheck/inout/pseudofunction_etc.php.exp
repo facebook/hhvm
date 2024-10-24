@@ -1,5 +1,13 @@
+ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 6, characters 15-15:
 An expression is expected here. (Parsing[1002])
+ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+ERROR: File "pseudofunction_etc.php", line 9, characters 9-13:
+You cannot use this syntax in an `unset()` expression. (Parsing[1002])
+ERROR: File "pseudofunction_etc.php", line 14, characters 31-35:
+Parameters may not be marked `inout` on constructors (Parsing[1002])
 ERROR: File "pseudofunction_etc.php", line 6, characters 9-13:
 Unbound name: `inout` (a global constant) (Naming[2049])
 ERROR: File "pseudofunction_etc.php", line 8, characters 9-13:

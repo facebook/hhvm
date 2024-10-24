@@ -1,3 +1,5 @@
+ERROR: File "decl_unclosed_xhp_nested.php", line 14, characters 12-22:
+XHP: mismatched tag: `` not the same as `a` (Parsing[1002])
 ERROR: File "decl_unclosed_xhp_nested.php", line 17, characters 1-1:
 A closing XHP tag is expected here. (Parsing[1002])
 ERROR: File "decl_unclosed_xhp_nested.php", line 14, characters 13-13:

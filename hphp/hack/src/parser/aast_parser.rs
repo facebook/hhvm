@@ -240,8 +240,30 @@ impl<'src> AastParser {
         aast: Option<&mut Program<(), ()>>,
         default_experimental_features: HashSet<experimental_features::FeatureName>,
     ) -> Vec<SyntaxError> {
-        let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
-            let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
+        let mut hhi_mode = false;
+        let (should_check_for_extra_errors, mut errors) = match env.mode {
+            NamespaceMode::ForCodegen => {
+                (true, tree.errors().into_iter().cloned().collect::<Vec<_>>())
+            }
+            NamespaceMode::ForTypecheck => {
+                let first_error = tree
+                    .errors()
+                    .into_iter()
+                    .take(1)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                if env.quick_mode {
+                    (false, first_error)
+                } else {
+                    hhi_mode = indexed_source_text
+                        .source_text()
+                        .file_path()
+                        .has_extension("hhi");
+                    (true, first_error)
+                }
+            }
+        };
+        if should_check_for_extra_errors {
             let (parse_errors, uses_readonly) = parse_errors_with_text(
                 tree,
                 indexed_source_text.clone(),
@@ -255,7 +277,6 @@ impl<'src> AastParser {
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
-
             let mut empty_program = Program(vec![]);
             let aast = aast.unwrap_or(&mut empty_program);
             if uses_readonly && !env.parser_options.no_parser_readonly_check {
@@ -269,23 +290,8 @@ impl<'src> AastParser {
             errors.extend(expression_tree_check::check_splices(aast));
             errors.extend(coeffects_check::check_program(aast, env.mode));
             errors
-        };
-        match env.mode {
-            NamespaceMode::ForCodegen => find_errors(false /* hhi_mode */),
-            NamespaceMode::ForTypecheck => {
-                let first_error = tree.errors().into_iter().next();
-                match first_error {
-                    None if !env.quick_mode => {
-                        let is_hhi = indexed_source_text
-                            .source_text()
-                            .file_path()
-                            .has_extension("hhi");
-                        find_errors(is_hhi)
-                    }
-                    None => vec![],
-                    Some(e) => vec![e.clone()],
-                }
-            }
+        } else {
+            errors
         }
     }
 

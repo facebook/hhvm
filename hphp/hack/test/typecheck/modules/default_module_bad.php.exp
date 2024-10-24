@@ -1,2 +1,4 @@
 ERROR: File "default_module_bad.php--modules.php", line 4, characters 20-20:
 The `default` module name cannot appear in a compound module name. (Parsing[1002])
+ERROR: File "default_module_bad.php--modules.php", line 5, characters 12-22:
+You cannot declare more than one module within a file (Parsing[1002])

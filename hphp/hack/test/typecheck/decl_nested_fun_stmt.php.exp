@@ -1,3 +1,5 @@
+ERROR: File "decl_nested_fun_stmt.php", line 13, characters 3-16:
+Declarations are not supported outside global scope (Parsing[1002])
 ERROR: File "decl_nested_fun_stmt.php", line 13, characters 3-20:
 Encountered unexpected text `function g($a) { }`, was expecting a statement. (Parsing[1002])
 ERROR: File "decl_nested_fun_stmt.php", line 13, characters 21-21:

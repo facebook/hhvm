@@ -2,6 +2,8 @@ ERROR: File "newtype.php--Arraykey.php", line 2, characters 9-16:
 Cannot use `Arraykey` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Bool.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Bool.php", line 2, characters 9-12:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Bool.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Bool.php", line 2, characters 9-19:
@@ -14,6 +16,8 @@ ERROR: File "newtype.php--Dynamic.php", line 2, characters 9-15:
 Cannot use `Dynamic` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--False.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--False.php", line 2, characters 9-13:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--False.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--False.php", line 2, characters 9-20:
@@ -22,6 +26,8 @@ ERROR: File "newtype.php--Float.php", line 2, characters 9-13:
 Cannot use `Float` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Int.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Int.php", line 2, characters 9-11:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Int.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Int.php", line 2, characters 9-18:
@@ -36,6 +42,8 @@ ERROR: File "newtype.php--Nothing.php", line 2, characters 9-15:
 Cannot use `Nothing` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Null.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Null.php", line 2, characters 9-12:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Null.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Null.php", line 2, characters 9-19:
@@ -44,6 +52,8 @@ ERROR: File "newtype.php--Num.php", line 2, characters 9-11:
 Cannot use `Num` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Parent.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Parent.php", line 2, characters 9-14:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Parent.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Parent.php", line 2, characters 9-21:
@@ -52,18 +62,24 @@ ERROR: File "newtype.php--Resource.php", line 2, characters 9-16:
 Cannot use `Resource` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Self.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Self.php", line 2, characters 9-12:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Self.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Self.php", line 2, characters 9-19:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Static.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Static.php", line 2, characters 9-14:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Static.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Static.php", line 2, characters 9-21:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--String.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--String.php", line 2, characters 9-14:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--String.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--String.php", line 2, characters 9-21:
@@ -72,6 +88,8 @@ ERROR: File "newtype.php--This.php", line 2, characters 9-12:
 Cannot use `This` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--True.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--True.php", line 2, characters 9-12:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--True.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--True.php", line 2, characters 9-19:
@@ -80,6 +98,8 @@ ERROR: File "newtype.php--Varray.php", line 2, characters 9-14:
 Cannot use `Varray` as a type name as it is reserved (Parsing[1002])
 ERROR: File "newtype.php--Void.php", line 2, characters 9-9:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "newtype.php--Void.php", line 2, characters 9-12:
+You cannot use this syntax on the left-hand side of an assignment. (Parsing[1002])
 ERROR: File "newtype.php--Void.php", line 2, characters 1-7:
 Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
 ERROR: File "newtype.php--Void.php", line 2, characters 9-19:

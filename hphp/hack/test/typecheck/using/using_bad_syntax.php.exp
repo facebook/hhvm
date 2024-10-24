@@ -1,2 +1,4 @@
 ERROR: File "using_bad_syntax.php", line 12, characters 9-9:
 A left parenthesis `(` is expected here. (Parsing[1002])
+ERROR: File "using_bad_syntax.php", line 17, characters 5-28:
+Using statement in function scoped form may only be used at the top level of a function or a method (Parsing[1002])

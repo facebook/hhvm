@@ -1,5 +1,7 @@
 ERROR: File "generic_visitor.php", line 7, characters 18-18:
 A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "generic_visitor.php", line 7, characters 18-20:
+Expression trees must provide the DSL name. (Parsing[1002])
 ERROR: File "generic_visitor.php", line 7, characters 3-12:
 Unbound name: `ExampleDsl` (a global function) (Naming[2049])
 ERROR: File "generic_visitor.php", line 7, characters 18-18:

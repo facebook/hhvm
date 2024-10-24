@@ -1,5 +1,7 @@
 ERROR: File "string_expressions17.php", line 14, characters 17-24:
 The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
+ERROR: File "string_expressions17.php", line 14, characters 18-24:
+Cannot use collection initialization for non-collection class. (Parsing[1002])
 ERROR: File "string_expressions17.php", line 14, characters 25-25:
 A right brace `}` is expected here. (Parsing[1002])
 ERROR: File "string_expressions17.php", line 14, characters 18-22:

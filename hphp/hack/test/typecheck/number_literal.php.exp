@@ -1,5 +1,7 @@
 ERROR: File "number_literal.php", line 13, characters 10-28:
 9223372036854775808 is out of the range of 64-bit float values (Parsing[1002])
+ERROR: File "number_literal.php", line 13, characters 10-28:
+Decimal number is too big: `9223372036854775808` (Parsing[1002])
 ERROR: File "number_literal.php", line 14, characters 10-27:
 0x8000000000000000 is out of the range of 64-bit float values (Parsing[1002])
 ERROR: File "number_literal.php", line 15, characters 10-75:

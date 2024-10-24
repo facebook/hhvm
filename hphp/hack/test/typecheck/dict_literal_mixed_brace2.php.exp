@@ -1,2 +1,4 @@
+ERROR: File "dict_literal_mixed_brace2.php", line 4, characters 8-30:
+Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`. (Parsing[1002])
 ERROR: File "dict_literal_mixed_brace2.php", line 4, characters 31-31:
 A right brace `}` is expected here. (Parsing[1002])

@@ -131,7 +131,11 @@ GlobalOff DWARFContextManager::getGlobalOffset(uint64_t offset, bool isInfo) con
 GlobalOff DWARFContextManager::getTypeUnitOffset(uint64_t sig8) const {
   // Use the TU index to retrieve type information, if it exists
   if (dwoContext_ && dwoContext_->getTUIndex()) {
+#if LLVM_VERSION_MAJOR >= 20
+    llvm::DWARFTypeUnit* tu = dwoContext_->getTypeUnitForHash(sig8, true);
+#else
     llvm::DWARFTypeUnit* tu = dwoContext_->getTypeUnitForHash(5, sig8, true);
+#endif
     if (tu) {
       return getGlobalOffset(tu->getOffset() + tu->getTypeOffset(), true);
     }

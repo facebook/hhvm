@@ -169,24 +169,24 @@ type naming_result = {
 }
 
 (** Updates the naming_table, which is a map from filename to the names of
-        toplevel symbols declared in that file: at any given point in time, we want
-        to know what each file defines. The updated naming table is returned
-        in the return value.
-        Also runs [Naming_global.ndecl_file_and_get_conflict_files] which updates
-        the global reverse naming table.
+  toplevel symbols declared in that file: at any given point in time, we want
+  to know what each file defines. The updated naming table is returned
+  in the return value.
+  Also runs [Naming_global.ndecl_file_and_get_conflict_files] which updates
+  the global reverse naming table.
 
-        The "winner" in case of duplicate definitions? All filenames involved in any
-        duplicate definition were stored by the caller in [env.failed_parsing], and
-        the caller includes then in [defs_per_file_parsed]. We iterate over them
-        in alphabetical order. Thus, the winner definition will be the one from the
-        alphabetically first file. (Within a file, classes win over types, and
-        after that the lexically first definition wins).
+  The "winner" in case of duplicate definitions? All filenames involved in any
+  duplicate definition were stored by the caller in [env.failed_parsing], and
+  the caller includes then in [defs_per_file_parsed]. We iterate over them
+  in alphabetical order. Thus, the winner definition will be the one from the
+  alphabetically first file. (Within a file, classes win over types, and
+  after that the lexically first definition wins).
 
-        Note that on the first typecheck after a duplicate definition has been introduced,
-        then [env.failed_parsing] doesn't yet contain all filenames involved, so the
-        winner in this first typecheck is non-determnistic -- it's simply previous
-        definition. We only get the alphabetically first filename as winner on subsequent
-        typechecks. Yuck. *)
+  Note that on the first typecheck after a duplicate definition has been introduced,
+  then [env.failed_parsing] doesn't yet contain all filenames involved, so the
+  winner in this first typecheck is non-determnistic -- it's simply previous
+  definition. We only get the alphabetically first filename as winner on subsequent
+  typechecks. Yuck. *)
 let do_naming
     (env : env)
     (ctx : Provider_context.t)

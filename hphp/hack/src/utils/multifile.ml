@@ -144,17 +144,27 @@ module States = struct
 
   type repo_change = change Relative_path.Map.t [@@deriving show]
 
+  type repo_changes = repo_change list [@@deriving show]
+
   type t = {
     base: repo;
-    changes: repo_change list;
+    changes: repo_changes;
   }
   [@@deriving show]
 
-  let apply_repo_change (base : repo) (repo_change : repo_change) : repo =
-    Relative_path.Map.fold repo_change ~init:base ~f:(fun path change repo ->
+  (** Returns new repo and list of deleted files *)
+  let apply_repo_change (base : repo) (repo_change : repo_change) :
+      repo * Relative_path.Set.t =
+    Relative_path.Map.fold
+      repo_change
+      ~init:(base, Relative_path.Set.empty)
+      ~f:(fun path change (repo, deleted) ->
         match change with
-        | Deleted -> Relative_path.Map.remove repo path
-        | Modified content -> Relative_path.Map.add repo ~key:path ~data:content)
+        | Deleted ->
+          ( Relative_path.Map.remove repo path,
+            Relative_path.Set.add deleted path )
+        | Modified content ->
+          (Relative_path.Map.add repo ~key:path ~data:content, deleted))
 
   let is_only_slashes s = String.to_list s |> List.for_all ~f:(Char.equal '/')
 

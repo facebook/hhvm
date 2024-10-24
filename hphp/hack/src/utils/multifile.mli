@@ -62,15 +62,18 @@ module States : sig
     | Modified of content
     | Deleted
 
-  type repo_change = change Relative_path.Map.t
+  type repo_change = change Relative_path.Map.t [@@deriving show]
+
+  type repo_changes = repo_change list [@@deriving show]
 
   type t = {
     base: repo;
-    changes: repo_change list;
+    changes: repo_changes;
   }
   [@@deriving show]
 
-  val apply_repo_change : repo -> repo_change -> repo
+  (** Returns new repo and list of deleted files *)
+  val apply_repo_change : repo -> repo_change -> repo * Relative_path.Set.t
 
   val parse : path -> t
 end

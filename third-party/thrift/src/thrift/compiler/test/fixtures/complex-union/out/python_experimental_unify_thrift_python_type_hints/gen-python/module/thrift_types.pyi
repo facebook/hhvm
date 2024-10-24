@@ -54,6 +54,7 @@ class ComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Compl
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.ComplexUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...  # type: ignore
 
@@ -83,6 +84,7 @@ class ListUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ListUnio
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ListUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.ListUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ListUnion": ...  # type: ignore
 
@@ -112,6 +114,7 @@ class DataUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_DataUnio
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.DataUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.DataUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...  # type: ignore
 
@@ -139,6 +142,7 @@ class Val(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Val, module.t
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _typing.Mapping[int, str]]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Val": ...  # type: ignore
     def _to_py3(self) -> "module.types.Val": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
 
@@ -168,6 +172,7 @@ class ValUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_ValUnion,
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ValUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.ValUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ValUnion": ...  # type: ignore
 
@@ -197,6 +202,7 @@ class VirtualComplexUnion(_fbthrift_python_types.Union, _fbthrift_compatible_wit
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.VirtualComplexUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.VirtualComplexUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...  # type: ignore
 
@@ -218,6 +224,7 @@ class NonCopyableStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableStruct": ...  # type: ignore
     def _to_py3(self) -> "module.types.NonCopyableStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
 
@@ -244,6 +251,7 @@ class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_N
     type: _typing.Final[Type]
     def get_type(self) -> Type:...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.NonCopyableUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableUnion": ...  # type: ignore
 

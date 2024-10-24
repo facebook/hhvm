@@ -1305,7 +1305,6 @@ void t_mstch_python_generator::generate_types() {
         generate_root_path_);
   }
   mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
-  mstch_context_.options.erase("generate_unified_thrift_python_type_hints");
 
   if (experimental_generate_mutable_types) {
     generate_file(
@@ -1319,6 +1318,7 @@ void t_mstch_python_generator::generate_types() {
         TypeKind::Mutable,
         generate_root_path_);
   }
+  mstch_context_.options.erase("generate_unified_thrift_python_type_hints");
 }
 
 void t_mstch_python_generator::generate_metadata() {

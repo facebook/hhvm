@@ -38,6 +38,8 @@ class MyStruct(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[includes.thrift_abstract_types.Included, includes.thrift_abstract_types.Included, int]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.MyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.MyStruct": ...  # type: ignore

@@ -29,6 +29,8 @@ class Mixin1(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.Mixin1": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.Mixin1": ...  # type: ignore
@@ -51,6 +53,8 @@ class Mixin2(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.Mixin2": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.Mixin2": ...  # type: ignore
@@ -68,6 +72,8 @@ class Mixin3Base(_abc.ABC):
 #    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.Mixin3Base": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -94,6 +100,8 @@ class Foo(_abc.ABC):
 #    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.Foo": ...  # type: ignore
 #    @_abc.abstractmethod

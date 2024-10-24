@@ -9,5 +9,5 @@ pyi: mstch_pyi src/module.thrift
 py: py:json src/module.thrift
 rust: mstch_rust src/module.thrift
 go: mstch_go src/module.thrift
-python_experimental_unify_thrift_python_type_hints: mstch_python:experimental_unify_thrift_python_type_hints src/module.thrift
+python_experimental_unify_thrift_python_type_hints: mstch_python:experimental_unify_thrift_python_type_hints,experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types src/module.thrift

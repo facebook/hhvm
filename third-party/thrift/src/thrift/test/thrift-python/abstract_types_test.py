@@ -39,6 +39,10 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestStructWithUnionField as TestStructWithUnionFieldAbstract,
 )
 
+from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
+    TestStruct as TestStructMutable,
+)
+
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
 )
@@ -114,6 +118,7 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # TestStructImmutable
 
         # WHEN
+        # This assignment is here to validate type-checking.
         ts: TestStructAbstract = TestStructImmutable(unqualified_string="hello")
 
         # THEN
@@ -122,6 +127,57 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
     def test_issubclass_with_read_only_abstract_base_class_with_immutable(self) -> None:
         """ """
         self.assertTrue(issubclass(TestStructImmutable, TestStructAbstract))
+
+    def test_fn_call_with_read_only_abstract_base_class_with_mutable(self) -> None:
+        """
+        type-check will fail with the error below if
+        TestStructMutable does not inherit from TestStructAbstract.
+
+        Incompatible parameter type [6]: In call `ThriftPythonAbstractTypesTest.test_fn_call_with_read_only_abstract_base_class_with_mutable.library_fn`, for 1st positional argument, expected `TestStructAbstract` but got `TestStructMutable`.
+        """
+
+        # GIVEN
+        def library_fn(ts: TestStructAbstract) -> None:
+            # THEN
+            self.assertEqual(ts.unqualified_string, "hello")
+            self.assertIsNone(ts.optional_string)
+
+        # WHEN
+        library_fn(TestStructMutable(unqualified_string="hello"))
+
+    def test_type_hint_with_read_only_abstract_base_class_with_mutable(self) -> None:
+        """
+        type-check will fail with the error below if
+        TestStructMutable does not inherit from TestStructAbstract.
+
+        Incompatible variable type [9]: ts is declared to have type `TestStructAbstract` but is used as type `TestStructMutable`.
+        """
+        # GIVEN
+        # TestStructAbstract
+        # TestStructMutable
+
+        # WHEN
+        ts: TestStructAbstract = TestStructMutable(unqualified_string="hello")
+
+        # THEN
+        self.assertEqual(ts.unqualified_string, "hello")
+        self.assertIsNone(ts.optional_string)
+
+    def test_isinstance_with_read_only_abstract_base_class_with_mutable(self) -> None:
+        """ """
+        # GIVEN
+        # TestStructAbstract
+        # TestStructMutable
+
+        # WHEN
+        ts: TestStructAbstract = TestStructMutable(unqualified_string="hello")
+
+        # THEN
+        self.assertIsInstance(ts, TestStructAbstract)
+
+    def test_issubclass_with_read_only_abstract_base_class_with_mutable(self) -> None:
+        """ """
+        self.assertTrue(issubclass(TestStructMutable, TestStructAbstract))
 
     @parameterized.expand(
         [

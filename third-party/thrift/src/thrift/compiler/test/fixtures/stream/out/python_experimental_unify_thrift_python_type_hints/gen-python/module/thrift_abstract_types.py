@@ -22,6 +22,8 @@ class FooStreamEx(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooStreamEx": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FooStreamEx": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.FooStreamEx": ...  # type: ignore
@@ -33,6 +35,8 @@ class FooEx(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooEx": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FooEx": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.FooEx": ...  # type: ignore
@@ -43,6 +47,8 @@ class FooEx2(_abc.ABC):
     pass
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooEx2": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FooEx2": ...  # type: ignore
 #    @_abc.abstractmethod

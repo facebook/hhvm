@@ -30,6 +30,8 @@ class Fields(_abc.ABC):
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fields": ...  # type: ignore
+#    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.Fields": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_py3(self) -> "module.types.Fields": ...  # type: ignore
@@ -47,6 +49,8 @@ class FieldsInjectedToEmptyStruct(_abc.ABC):
 #    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -69,6 +73,8 @@ class FieldsInjectedToStruct(_abc.ABC):
 #    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToStruct": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FieldsInjectedToStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -99,6 +105,8 @@ class FieldsInjectedWithIncludedStruct(_abc.ABC):
 #    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str, str]]]: ...
+#    @_abc.abstractmethod
+#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
 #    @_abc.abstractmethod
 #    def _to_python(self) -> "module.thrift_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
 #    @_abc.abstractmethod

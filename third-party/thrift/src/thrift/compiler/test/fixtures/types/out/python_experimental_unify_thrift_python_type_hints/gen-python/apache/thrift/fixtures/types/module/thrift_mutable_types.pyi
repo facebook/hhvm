@@ -140,9 +140,9 @@ class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
 
 
     @property
-    def fieldF(self) -> _typing.MutableSet[int]: ...
+    def fieldF(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
     @fieldF.setter
-    def fieldF(self, value: _typing.MutableSet[int]): ...
+    def fieldF(self, value: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper): ...
 
 
     @property
@@ -168,7 +168,7 @@ class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
         fieldC: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         fieldD: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         fieldE: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        fieldF: _typing.Optional[_typing.MutableSet[int]]=...,
+        fieldF: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         fieldG: _typing.Optional[_typing.MutableMapping[int, str]]=...,
         fieldH: _typing.Optional[_typing.MutableMapping[int, str]]=...,
         fieldA: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
@@ -180,12 +180,12 @@ class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
         fieldC: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         fieldD: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
         fieldE: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        fieldF: _typing.Optional[_typing.MutableSet[int]]=...,
+        fieldF: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         fieldG: _typing.Optional[_typing.MutableMapping[int, str]]=...,
         fieldH: _typing.Optional[_typing.MutableMapping[int, str]]=...,
         fieldA: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _typing.MutableSet[int], _typing.MutableMapping[int, str], _typing.MutableMapping[int, str], _fbthrift_python_mutable_containers.MutableList[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableSet[int], _typing.MutableMapping[int, str], _typing.MutableMapping[int, str], _fbthrift_python_mutable_containers.MutableList[int]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ContainerStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ContainerStruct": ...  # type: ignore
@@ -905,9 +905,9 @@ class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
 
 
     @property
-    def aa_set(self) -> _typing.MutableSet[int]: ...
+    def aa_set(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
     @aa_set.setter
-    def aa_set(self, value: _typing.MutableSet[int]): ...
+    def aa_set(self, value: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper): ...
 
 
     @property
@@ -922,7 +922,7 @@ class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def __init__(
         self, *,
         aa_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        aa_set: _typing.Optional[_typing.MutableSet[int]]=...,
+        aa_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         aa_map: _typing.Optional[_typing.MutableMapping[int, int]]=...,
         aa_string: _typing.Optional[str]=...,
         not_a_container: _typing.Optional[int]=...,
@@ -933,14 +933,14 @@ class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def __call__(
         self, *,
         aa_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
-        aa_set: _typing.Optional[_typing.MutableSet[int]]=...,
+        aa_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         aa_map: _typing.Optional[_typing.MutableMapping[int, int]]=...,
         aa_string: _typing.Optional[str]=...,
         not_a_container: _typing.Optional[int]=...,
         aa_unique: _typing.Optional[int]=...,
         aa_shared: _typing.Optional[int]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[int], _typing.MutableSet[int], _typing.MutableMapping[int, int], str, int, int, int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[int], _fbthrift_python_mutable_containers.MutableSet[int], _typing.MutableMapping[int, int], str, int, int, int]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AllocatorAware": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AllocatorAware": ...  # type: ignore

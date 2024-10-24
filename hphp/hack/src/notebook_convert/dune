@@ -1,7 +1,11 @@
 (library
  (name notebook_convert)
  (libraries
+  full_fidelity
   hh_json
-  notebook_to_hack
+  relative_path
   sys_utils
-  utils_core))
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
+(include_subdirs unqualified)

@@ -19,10 +19,10 @@ $breakpoints = vec[
 $testProcess = vsDebugLaunch(ExtVsdebugStep::$path, true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Step over.
 stepCommand("next");
@@ -60,7 +60,7 @@ setBreakpoints($breakpoints);
 resumeTarget();
 
 // Hit breakpoint on baz
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Set breakpoint on main after returning from the current function
 $breakpoints = vec[
@@ -78,7 +78,7 @@ stepCommand("stepOut");
 verifyStopLine(3, 7, __FILE__.".test");
 resumeTarget();
 
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 resumeTarget();
 
 checkForOutput($testProcess, "hello world 104\n", "stdout");
@@ -86,4 +86,3 @@ vsDebugCleanup($testProcess);
 
 echo "OK!\n";
 }
-

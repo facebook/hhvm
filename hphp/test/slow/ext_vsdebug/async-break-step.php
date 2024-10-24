@@ -12,10 +12,10 @@ $breakpoints = vec[
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Hit breakpoint in foo
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // async step-over
 stepCommand("next");
@@ -29,7 +29,7 @@ stepCommand("next");
 verifyStopLine(5, 16, __FILE__.".test");
 resumeTarget();
 
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 2);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0], 2);
 // step-out before suspend.
 stepCommand("stepOut");
 verifyStopLine(5, 21, __FILE__.".test");
@@ -37,7 +37,7 @@ resumeTarget();
 checkForOutput($testProcess, "bar\n", "stdout");
 checkForOutput($testProcess, "foo\n", "stdout");
 
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 3);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0], 3);
 // Set breakpoints after await in foo
 $breakpoints = vec[
   dict[
@@ -50,14 +50,14 @@ $breakpoints = vec[
 setBreakpoints($breakpoints);
 resumeTarget();
 checkForOutput($testProcess, "bar\n", "stdout");
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 stepCommand("stepOut");
 checkForOutput($testProcess, "foo\n", "stdout");
 verifyStopLine(5, 31, __FILE__.".test");
 resumeTarget();
 
 checkForOutput($testProcess, "bar\n", "stdout");
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 2);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0], 2);
 // Set breakpoints after call to foo
 $breakpoints = vec[
   dict[
@@ -71,7 +71,7 @@ setBreakpoints($breakpoints);
 resumeTarget();
 checkForOutput($testProcess, "foo\n", "stdout");
 
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 resumeTarget();
 
 checkForOutput($testProcess, "Done\n", "stdout");

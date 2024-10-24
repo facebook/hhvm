@@ -69,7 +69,7 @@ function checkObjEqualRecursively($msg, $expected) {
 
   foreach ($expected as $key => $value) {
     $expectedValue = $value;
-    $actualValue = $msg{$key};
+    $actualValue = $msg[$key];
 
     if (is_array($expectedValue)) {
       checkArrayEqualRecursively($expectedValue, $actualValue);
@@ -84,10 +84,10 @@ function checkObjEqualRecursively($msg, $expected) {
 
 function sendVsCommand($commandMsg) {
   $client = Data::$client;
-  $commandMsg{'seq'} = ++Data::$seq;
+  $commandMsg['seq'] = ++Data::$seq;
   fwrite($client, json_encode($commandMsg));
   fwrite($client, chr(0));
-  return $commandMsg{'seq'};
+  return $commandMsg['seq'];
 }
 
 function resumeTarget() {
@@ -127,10 +127,10 @@ function verifyBpHit($path, $breakpoint, $hitCount = 1, $relative = false) {
           "reason" => "changed",
           "breakpoint" => dict[
             "source" => dict["path" => $path],
-            "originalLine" => $breakpoint{'line'},
+            "originalLine" => $breakpoint['line'],
             "nuclide_hitCount" => $hitCount,
             "verified" => true,
-            "endLine" => $breakpoint{'calibratedLine'}
+            "endLine" => $breakpoint['calibratedLine']
       ]]]);
   } else {
     checkObjEqualRecursively($msg, dict[
@@ -139,10 +139,10 @@ function verifyBpHit($path, $breakpoint, $hitCount = 1, $relative = false) {
       "body" => dict[
           "reason" => "changed",
           "breakpoint" => dict[
-            "originalLine" => $breakpoint{'line'},
+            "originalLine" => $breakpoint['line'],
             "nuclide_hitCount" => $hitCount,
             "verified" => true,
-            "endLine" => $breakpoint{'calibratedLine'}
+            "endLine" => $breakpoint['calibratedLine']
       ]]]);
   }
 
@@ -171,7 +171,7 @@ function checkForOutput($testProcess, $expectedOutput, $expectedCategory, $error
   $pipes = $testProcess[1];
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, dict["type" => "event", "event" => "output"]);
-  checkObjEqualRecursively($msg{'body'}, dict["output" => $expectedOutput, "category" => $expectedCategory]);
+  checkObjEqualRecursively($msg['body'], dict["output" => $expectedOutput, "category" => $expectedCategory]);
 
   // Verify the message was actually written to the output stream.
   if (!$error) {
@@ -191,7 +191,7 @@ function setBreakpoints($breakpoints, $verify = true) {
       "arguments" => dict[
         "source" =>
           dict[
-            "path" => $bpsForFile{'path'},
+            "path" => $bpsForFile['path'],
             "name" => "test"
           ],
         "breakpoints" => vec[]
@@ -199,10 +199,10 @@ function setBreakpoints($breakpoints, $verify = true) {
 
     $responseBps = vec[];
     $responseLines = dict[];
-    foreach ($bpsForFile{'breakpoints'} as $bp) {
-      $setBreakpointsCommand['arguments']['breakpoints'][] = dict["line" => $bp{'line'}, "condition" => $bp{'condition'}];
+    foreach ($bpsForFile['breakpoints'] as $bp) {
+      $setBreakpointsCommand['arguments']['breakpoints'][] = dict["line" => $bp['line'], "condition" => $bp['condition']];
       $responseBps[] = dict["id" => ++ExtVsdebugCommonInc::$bpId, "verified" => true];
-      $responseLines{ExtVsdebugCommonInc::$bpId} = $bp{'calibratedLine'};
+      $responseLines[ExtVsdebugCommonInc::$bpId] = $bp['calibratedLine'];
     }
 
     $seq = sendVsCommand($setBreakpointsCommand);
@@ -222,9 +222,9 @@ function setBreakpoints($breakpoints, $verify = true) {
     for ($i = 0; $i < count($responseLines); $i++) {
       $msg = json_decode(getNextVsDebugMessage(), true);
       checkObjEqualRecursively($msg, dict["type" => "event","event" => "breakpoint"]);
-      checkObjEqualRecursively($msg{'body'}, dict["reason" => "new"]);
-      checkObjEqualRecursively($msg{'body'}{'breakpoint'},
-        dict["verified" => false, "line" => $setBreakpointsCommand{'arguments'}{'breakpoints'}[$i]{'line'}]
+      checkObjEqualRecursively($msg['body'], dict["reason" => "new"]);
+      checkObjEqualRecursively($msg['body']['breakpoint'],
+        dict["verified" => false, "line" => $setBreakpointsCommand['arguments']['breakpoints'][$i]['line']]
       );
     }
 
@@ -233,11 +233,11 @@ function setBreakpoints($breakpoints, $verify = true) {
       for ($i = 0; $i < count($responseLines); $i++) {
         $msg = json_decode(getNextVsDebugMessage(), true);
         checkObjEqualRecursively($msg, dict["type" => "event","event" => "breakpoint"]);
-        checkObjEqualRecursively($msg{'body'}, dict["reason" => "changed"]);
-        checkObjEqualRecursively($msg{'body'}{'breakpoint'},
+        checkObjEqualRecursively($msg['body'], dict["reason" => "changed"]);
+        checkObjEqualRecursively($msg['body']['breakpoint'],
           dict[
             "verified" => true,
-            "endLine" => $responseLines[$msg{'body'}{'breakpoint'}{'id'}]
+            "endLine" => $responseLines[$msg['body']['breakpoint']['id']]
           ]
         );
       }
@@ -405,7 +405,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = vec[
         "command" => "initialize",
         "success" => true,
         "request_seq" => $seq]);
-    checkObjEqualRecursively($msg{'body'},
+    checkObjEqualRecursively($msg['body'],
       dict[
         "supportsLoadedSourcesRequest" => false,
         "supportTerminateDebuggee" => false,
@@ -447,16 +447,16 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = vec[
     // Expect an output event about the console being prepared.
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, dict["type" => "event", "event" => "output"]);
-    checkObjEqualRecursively($msg{'body'}, dict["category" => "console"]);
+    checkObjEqualRecursively($msg['body'], dict["category" => "console"]);
     // The exact text of the message is allowed to change, we don't need to enforce that in test code here.
     // But it should not be empty.
-    assertIsNotEmpty($msg{'body'}{'output'});
+    assertIsNotEmpty($msg['body']['output']);
 
     // Verify once the dummy is started it prints a hello message, so we know it's running.
     $dummyMsg = "I am the dummy!\n";
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, dict["type" => "event", "event" => "output"]);
-    checkObjEqualRecursively($msg{'body'}, dict["output" => $dummyMsg, "category" => "stdout"]);
+    checkObjEqualRecursively($msg['body'], dict["output" => $dummyMsg, "category" => "stdout"]);
 
     // Verify that the dummy actually printed its message to stdout successfully, in addition
     // to the debugger informing the client of the output.
@@ -469,7 +469,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = vec[
     // followed by a readyForEvaluations event.
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, dict["type" => "event", "event" => "output"]);
-    checkObjEqualRecursively($msg{'body'}, dict["category" => "success"]);
+    checkObjEqualRecursively($msg['body'], dict["category" => "success"]);
 
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, dict["type" => "event", "event" => "readyForEvaluations"]);
@@ -491,7 +491,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = vec[
     // The debugger sends a contiued event indicating the target resumed.
     $msg = json_decode(getNextVsDebugMessage(), true);
     checkObjEqualRecursively($msg, dict["type" => "event", "event" => "continued"]);
-    checkObjEqualRecursively($msg{'body'}, dict["allThreadsContinued" => false]);
+    checkObjEqualRecursively($msg['body'], dict["allThreadsContinued" => false]);
   }
 
   return vec[$process, $pipes, $client];
@@ -505,7 +505,7 @@ function pollForExit($process) {
 
   while ($tries < 10) {
     $status = proc_get_status($process);
-    if ($status{'running'} !== false) {
+    if ($status['running'] !== false) {
      sleep(1);
     } else {
      return true;
@@ -514,7 +514,7 @@ function pollForExit($process) {
   }
 
   $status = proc_get_status($process);
-  return $status{'running'} === false;
+  return $status['running'] === false;
 }
 
 function vsDebugCleanup($testProcess, $expectedExitCode = 0) {

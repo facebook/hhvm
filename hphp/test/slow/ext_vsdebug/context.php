@@ -18,10 +18,10 @@ $breakpoints = vec[
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Check thread stacks.
 $seq = sendVsCommand(dict[
@@ -121,22 +121,22 @@ checkObjEqualRecursively($msg, dict[
   ]]
   ]);
 
-if (count($msg{"body"}{"variables"}) != 1) {
+if (count($msg["body"]["variables"]) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
 resumeTarget();
 
 // Verify we hit breakpoint 2.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][1]);
 resumeTarget();
 
 // Verify we hit breakpoint 3.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[2]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][2]);
 resumeTarget();
 
 // Verify we hit breakpoint 4.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[3]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][3]);
 
 $seq = sendVsCommand(dict[
   "command" => "stackTrace",
@@ -200,7 +200,7 @@ checkObjEqualRecursively($msg, dict[
     ]]
     ]);
 
-if (count($msg{"body"}{"variables"}) != 6) {
+if (count($msg["body"]["variables"]) != 6) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -329,7 +329,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 4) {
+if (count($msg["body"]["variables"]) != 4) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -357,7 +357,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 1) {
+if (count($msg["body"]["variables"]) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -385,7 +385,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 1) {
+if (count($msg["body"]["variables"]) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -429,7 +429,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 3) {
+if (count($msg["body"]["variables"]) != 3) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -464,7 +464,7 @@ $seq = sendVsCommand(dict[
         ]
       ]]);
 
-if (count($msg{"body"}{"variables"}) != 3) {
+if (count($msg["body"]["variables"]) != 3) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -494,7 +494,7 @@ $seq = sendVsCommand(dict[
         ]
       ]]);
 
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -525,7 +525,7 @@ $seq = sendVsCommand(dict[
         ]
       ]]);
 
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -555,7 +555,7 @@ $seq = sendVsCommand(dict[
         ]
       ]]);
 
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -587,7 +587,7 @@ $seq = sendVsCommand(dict[
         ]
       ]]);
 
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -692,7 +692,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 1) {
+if (count($msg["body"]["variables"]) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -733,7 +733,7 @@ checkObjEqualRecursively($msg, dict[
       ]
     ]]);
 
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -765,7 +765,7 @@ checkObjEqualRecursively($msg, dict[
         ],
       ]
     ]]);
-if (count($msg{"body"}{"variables"}) != 1) {
+if (count($msg["body"]["variables"]) != 1) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 
@@ -804,7 +804,7 @@ checkObjEqualRecursively($msg, dict[
         ]
       ]
     ]]);
-if (count($msg{"body"}{"variables"}) != 2) {
+if (count($msg["body"]["variables"]) != 2) {
   throw new UnexpectedValueException("Unexpected variable count");
 }
 

@@ -38,10 +38,10 @@ $breakpoints = vec[
 $testProcess = vsDebugLaunch($path, true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Expect info for a class named "A"
 getInfo('A');
@@ -55,7 +55,7 @@ getInfo('');
 resumeTarget();
 
 // Verify we hit breakpoint 2.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][1]);
 
 // Expect info about the current stop location of thread 1.
 getInfo('');

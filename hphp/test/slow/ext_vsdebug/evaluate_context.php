@@ -15,10 +15,10 @@ $breakpoints = vec[
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 // Check thread stacks.
 $seq = sendVsCommand(dict[

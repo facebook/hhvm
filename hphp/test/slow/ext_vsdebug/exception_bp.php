@@ -12,9 +12,9 @@ $breakpoints = vec[
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 
 $exnBpCommand = dict[
   "command" => "setExceptionBreakpoints",
@@ -135,7 +135,7 @@ checkObjEqualRecursively($msg, dict[
 
 $expected = "\nFatal error: Uncaught exception 'UnexpectedValueException' "
   . "with message 'Exn thrown!'";
-if (substr($msg{'body'}{'output'}, 0, strlen($expected)) !== $expected) {
+if (substr($msg['body']['output'], 0, strlen($expected)) !== $expected) {
   throw new UnexpectedValueException("Unexpected warning message");
 }
 

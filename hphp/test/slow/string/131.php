@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_131() :mixed{
 $a = 'test';
- print $a{
-0}
+ print $a[
+0]
 ;
 }

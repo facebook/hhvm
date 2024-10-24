@@ -14,24 +14,24 @@ $breakpoints = vec[
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 // Skip breakpoint resolution messages.
-skipMessages(count($breakpoints[0]{'breakpoints'}));
+skipMessages(count($breakpoints[0]['breakpoints']));
 
 checkForOutput($testProcess, "Hello world.\n", "stdout");
 checkForOutput($testProcess, "\n", "stdout");
 
 // Verify we hit breakpoint 1.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 resumeTarget();
 
 // Verify we hit breakpoint 2.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][1]);
 resumeTarget();
 
 checkForOutput($testProcess, "1\n", "stdout");
 
 
 // Verify we hit breakpoint 3.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[2]);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][2]);
 
 // Set a breakpoint past the end of the file. This breakpoint will never verify.
 $breakpoints = vec[
@@ -120,11 +120,11 @@ checkForOutput($testProcess, "12", "stdout");
 checkForOutput($testProcess, "\n", "stdout");
 
 // Hit the breakpoint inside the loop on line 29
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 1);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0], 1);
 resumeTarget();
 
 // Hit the breakpoint inside the loop again.
-verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[0], 2);
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0], 2);
 
 // Remove the breakpoint and resume, it should not hit again now even
 // though the loop has 8 more iterations.
@@ -186,12 +186,12 @@ checkObjEqualRecursively($msg, dict[
   ]]);
 
 checkForOutput($testProcess, "hello\n", "stdout");
-verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 1, true);
+verifyBpHit("test.php", $breakpoints[0]['breakpoints'][0], 1, true);
 resumeTarget();
 checkForOutput($testProcess, "world\n", "stdout");
 
 checkForOutput($testProcess, "hello\n", "stdout");
-verifyBpHit("test.php", $breakpoints[0]{'breakpoints'}[0], 2, true);
+verifyBpHit("test.php", $breakpoints[0]['breakpoints'][0], 2, true);
 
 //Verify removing relative breakpoints works
 $seq = sendVsCommand(dict[

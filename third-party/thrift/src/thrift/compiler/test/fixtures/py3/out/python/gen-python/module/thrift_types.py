@@ -205,6 +205,17 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
             True, # field type is primitive
             3, # IDL type (see BaseTypeEnum)
         ),
+        _fbthrift_python_types.FieldInfo(
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "something",  # name
+            "something",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
     )
 
     @staticmethod

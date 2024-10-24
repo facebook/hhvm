@@ -22,6 +22,7 @@ struct nice_sized_int;
 struct big_int;
 struct real;
 struct smaller_real;
+struct something;
 struct hidden_field;
 struct field1;
 struct field2;
@@ -76,6 +77,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(real);
 #ifndef APACHE_THRIFT_ACCESSOR_smaller_real
 #define APACHE_THRIFT_ACCESSOR_smaller_real
 APACHE_THRIFT_DEFINE_ACCESSOR(smaller_real);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_something
+#define APACHE_THRIFT_ACCESSOR_something
+APACHE_THRIFT_DEFINE_ACCESSOR(something);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_hidden_field
 #define APACHE_THRIFT_ACCESSOR_hidden_field
@@ -337,10 +342,11 @@ class SimpleStruct final  {
     ::apache::thrift::ident::big_int,
     ::apache::thrift::ident::real,
     ::apache::thrift::ident::smaller_real,
+    ::apache::thrift::ident::something,
     ::apache::thrift::ident::hidden_field
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,9,8};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -349,10 +355,11 @@ class SimpleStruct final  {
     ::apache::thrift::type::i64_t,
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::float_t,
+    ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::i16_t
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 8;
+  static constexpr std::size_t __fbthrift_field_size_v = 9;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -384,19 +391,11 @@ class SimpleStruct final  {
 
  public:
 
-  SimpleStruct() :
-      __fbthrift_field_is_on(),
-      __fbthrift_field_tiny_int(),
-      __fbthrift_field_small_int(),
-      __fbthrift_field_nice_sized_int(),
-      __fbthrift_field_big_int(),
-      __fbthrift_field_real(),
-      __fbthrift_field_smaller_real(),
-      __fbthrift_field_hidden_field() {
-  }
+  SimpleStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::int16_t hidden_field__arg);
+  SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg);
 
   SimpleStruct(SimpleStruct&&) noexcept;
 
@@ -405,6 +404,9 @@ class SimpleStruct final  {
 
   SimpleStruct& operator=(SimpleStruct&&) noexcept;
   SimpleStruct& operator=(const SimpleStruct& src);
+
+  ~SimpleStruct();
+
  private:
   bool __fbthrift_field_is_on;
  private:
@@ -420,9 +422,11 @@ class SimpleStruct final  {
  private:
   float __fbthrift_field_smaller_real;
  private:
+  ::std::unordered_map<::std::int32_t, ::std::int32_t> __fbthrift_field_something;
+ private:
   ::std::int16_t __fbthrift_field_hidden_field;
  private:
-  apache::thrift::detail::isset_bitset<8, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<9, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -765,52 +769,100 @@ class SimpleStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_smaller_real), __isset.at(6), __isset.bit(6)};
   }
 
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> something_ref() const& {
+    return {this->__fbthrift_field_something, __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> something_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_something), __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> something_ref() & {
+    return {this->__fbthrift_field_something, __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> something_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_something), __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> something() const& {
+    return {this->__fbthrift_field_something, __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> something() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_something), __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> something() & {
+    return {this->__fbthrift_field_something, __isset.at(7), __isset.bit(7)};
+  }
+
+  /** Glean { "field": "something" } */
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> something() && {
+    return {static_cast<T&&>(this->__fbthrift_field_something), __isset.at(7), __isset.bit(7)};
+  }
+
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> hidden_field_ref() const& {
-    return {this->__fbthrift_field_hidden_field, __isset.at(7), __isset.bit(7)};
+    return {this->__fbthrift_field_hidden_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hidden_field_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_hidden_field), __isset.at(7), __isset.bit(7)};
+    return {static_cast<const T&&>(this->__fbthrift_field_hidden_field), __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> hidden_field_ref() & {
-    return {this->__fbthrift_field_hidden_field, __isset.at(7), __isset.bit(7)};
+    return {this->__fbthrift_field_hidden_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> hidden_field_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_hidden_field), __isset.at(7), __isset.bit(7)};
+    return {static_cast<T&&>(this->__fbthrift_field_hidden_field), __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> hidden_field() const& {
-    return {this->__fbthrift_field_hidden_field, __isset.at(7), __isset.bit(7)};
+    return {this->__fbthrift_field_hidden_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hidden_field() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_hidden_field), __isset.at(7), __isset.bit(7)};
+    return {static_cast<const T&&>(this->__fbthrift_field_hidden_field), __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> hidden_field() & {
-    return {this->__fbthrift_field_hidden_field, __isset.at(7), __isset.bit(7)};
+    return {this->__fbthrift_field_hidden_field, __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "hidden_field" } */
   template <typename..., typename T = ::std::int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> hidden_field() && {
-    return {static_cast<T&&>(this->__fbthrift_field_hidden_field), __isset.at(7), __isset.bit(7)};
+    return {static_cast<T&&>(this->__fbthrift_field_hidden_field), __isset.at(8), __isset.bit(8)};
   }
 
   /** Glean { "field": "is_on" } */
@@ -895,6 +947,18 @@ class SimpleStruct final  {
   float& set_smaller_real(float smaller_real_) {
     smaller_real_ref() = smaller_real_;
     return __fbthrift_field_smaller_real;
+  }
+  /** Glean { "field": "something" } */
+  const ::std::unordered_map<::std::int32_t, ::std::int32_t>& get_something() const&;
+  /** Glean { "field": "something" } */
+  ::std::unordered_map<::std::int32_t, ::std::int32_t> get_something() &&;
+
+  /** Glean { "field": "something" } */
+  template <typename T_SimpleStruct_something_struct_setter = ::std::unordered_map<::std::int32_t, ::std::int32_t>>
+  [[deprecated("Use `FOO.something() = BAR;` instead of `FOO.set_something(BAR);`")]]
+  ::std::unordered_map<::std::int32_t, ::std::int32_t>& set_something(T_SimpleStruct_something_struct_setter&& something_) {
+    something_ref() = std::forward<T_SimpleStruct_something_struct_setter>(something_);
+    return __fbthrift_field_something;
   }
 
   /** Glean { "field": "hidden_field" } */

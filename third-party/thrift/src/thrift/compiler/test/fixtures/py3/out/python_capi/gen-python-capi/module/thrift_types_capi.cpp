@@ -31,8 +31,8 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__OptionalRefStruct__tuple_pos[1] = {
     1
   };
-  static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[8] = {
-    1, 2, 3, 4, 5, 6, 7, 8
+  static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[9] = {
+    1, 2, 3, 4, 5, 6, 7, 9, 8
   };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     1
@@ -255,9 +255,13 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.smaller_real_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[6]),
       error);
+  Extractor<map<int32_t, int32_t, ::std::unordered_map<native_t<int32_t>, native_t<int32_t>>>>{}.extractInto(
+      cpp.something_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[7]),
+      error);
   Extractor<int16_t>{}.extractInto(
       cpp.hidden_field_ref(),
-      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[7]),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[8]),
       error);
   if (error) {
     return folly::makeUnexpected(*error);
@@ -299,7 +303,7 @@ PyObject* Constructor<::py3::simple::SimpleStruct>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::py3::simple::SimpleStruct>>::operator()(
     [[maybe_unused]] const ::py3::simple::SimpleStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(8));
+  StrongRef fbthrift_data(createStructTuple(9));
   StrongRef _fbthrift__is_on(
     Constructor<bool>{}
     .constructFrom(val.is_on_ref()));
@@ -370,13 +374,23 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *_fbthrift__smaller_real) == -1) {
     return nullptr;
   }
+  StrongRef _fbthrift__something(
+    Constructor<map<int32_t, int32_t, ::std::unordered_map<native_t<int32_t>, native_t<int32_t>>>>{}
+    .constructFrom(val.something_ref()));
+  if (!_fbthrift__something ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__SimpleStruct__tuple_pos[7],
+          *_fbthrift__something) == -1) {
+    return nullptr;
+  }
   StrongRef _fbthrift__hidden_field(
     Constructor<int16_t>{}
     .constructFrom(val.hidden_field_ref()));
   if (!_fbthrift__hidden_field ||
       setStructField(
           *fbthrift_data,
-          _fbthrift__SimpleStruct__tuple_pos[7],
+          _fbthrift__SimpleStruct__tuple_pos[8],
           *_fbthrift__hidden_field) == -1) {
     return nullptr;
   }

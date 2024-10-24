@@ -80,6 +80,7 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_4(self, _fbthrift_value) except *
     cdef void _set_field_5(self, _fbthrift_value) except *
     cdef void _set_field_6(self, _fbthrift_value) except *
+    cdef void _set_field_7(self, _fbthrift_value) except *
 
 
 ctypedef void (*__HiddenTypeFieldsStruct_FieldsSetterFunc)(__HiddenTypeFieldsStruct_FieldsSetter, object) except *

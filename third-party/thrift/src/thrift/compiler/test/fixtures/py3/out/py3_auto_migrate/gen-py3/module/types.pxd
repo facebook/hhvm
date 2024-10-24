@@ -33,6 +33,46 @@ from thrift.py3.types cimport (
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 
+cdef extern from * nogil:
+    cdef cppclass _std_unordered_map "::std::unordered_map"[T, U]:
+        ctypedef T key_type
+        ctypedef U mapped_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cpair[T, U]& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cpair[T, U]& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _std_unordered_map() except +
+        _std_unordered_map(_std_unordered_map&) except +
+
+        U& operator[](T&)
+        iterator find(const T&)
+        const_iterator const_find "find"(const T&)
+        size_type count(const T&)
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
 cdef extern from *:
     ctypedef bstring foo_Bar "foo::Bar"
 
@@ -89,10 +129,6 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         cSimpleStruct(const cSimpleStruct&) except +
         bint operator==(cSimpleStruct&)
         bint operator!=(cSimpleStruct&)
-        bint operator<(cSimpleStruct&)
-        bint operator>(cSimpleStruct&)
-        bint operator<=(cSimpleStruct&)
-        bint operator>=(cSimpleStruct&)
         __field_ref[cbool] is_on_ref "is_on_ref" ()
         __field_ref[cint8_t] tiny_int_ref "tiny_int_ref" ()
         __field_ref[cint16_t] small_int_ref "small_int_ref" ()
@@ -100,6 +136,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         __field_ref[cint64_t] big_int_ref "big_int_ref" ()
         __field_ref[double] real_ref "real_ref" ()
         __field_ref[float] smaller_real_ref "smaller_real_ref" ()
+        __field_ref[_std_unordered_map[cint32_t,cint32_t]] something_ref "something_ref" ()
 
 
     cdef cppclass cHiddenTypeFieldsStruct "::py3::simple::HiddenTypeFieldsStruct":
@@ -114,10 +151,6 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         cComplexStruct(const cComplexStruct&) except +
         bint operator==(cComplexStruct&)
         bint operator!=(cComplexStruct&)
-        bint operator<(cComplexStruct&)
-        bint operator>(cComplexStruct&)
-        bint operator<=(cComplexStruct&)
-        bint operator>=(cComplexStruct&)
         __field_ref[cSimpleStruct] structOne_ref "structOne_ref" ()
         __field_ref[cSimpleStruct] structTwo_ref "structTwo_ref" ()
         __field_ref[cint32_t] an_integer_ref "an_integer_ref" ()

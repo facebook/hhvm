@@ -345,6 +345,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
           "big_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).big_int_ref().has_value(),
           "real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).real_ref().has_value(),
           "smaller_real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).smaller_real_ref().has_value(),
+          "something": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).something_ref().has_value(),
         })
 
     @staticmethod
@@ -402,6 +403,15 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
     def smaller_real(self):
         return self.smaller_real_impl()
 
+    cdef inline something_impl(self):
+        if self.__fbthrift_cached_something is None:
+            self.__fbthrift_cached_something = _std_unordered_map__Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).something_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_something
+
+    @property
+    def something(self):
+        return self.something_impl()
+
 
     def __hash__(SimpleStruct self):
         return super().__hash__()
@@ -419,13 +429,15 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         )
         return SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
-    def __richcmp__(self, other, int op):
-        r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cSimpleStruct](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<SimpleStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ) if r is None else r
+    def __eq__(SimpleStruct self, other):
+        if not isinstance(other, SimpleStruct):
+            return False
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get()) == deref((<SimpleStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+
+    def __ne__(SimpleStruct self, other):
+        if not isinstance(other, SimpleStruct):
+            return True
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE) != deref((<SimpleStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     @staticmethod
     def __get_reflection__():
@@ -449,6 +461,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         'big_int',
         'real',
         'smaller_real',
+        'something',
     ]
 
     @classmethod
@@ -457,7 +470,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 7
+        return 8
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(SimpleStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -721,13 +734,15 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         )
         return ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
-    def __richcmp__(self, other, int op):
-        r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cComplexStruct](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<ComplexStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ) if r is None else r
+    def __eq__(ComplexStruct self, other):
+        if not isinstance(other, ComplexStruct):
+            return False
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get()) == deref((<ComplexStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+
+    def __ne__(ComplexStruct self, other):
+        if not isinstance(other, ComplexStruct):
+            return True
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE) != deref((<ComplexStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     @staticmethod
     def __get_reflection__():
@@ -2082,6 +2097,104 @@ cdef object List__AnEnum__from_cpp(const vector[cAnEnum]& c_vec) except *:
     for idx in range(c_vec.size()):
         py_list.append(translate_cpp_enum_to_python(AnEnum, <int> c_vec[idx]))
     return List__AnEnum(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, _std_unordered_map__Map__i32_i32):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<_std_unordered_map__Map__i32_i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = _std_unordered_map__Map__i32_i32__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_std_unordered_map[cint32_t,cint32_t]] c_items):
+        __fbthrift_inst = <_std_unordered_map__Map__i32_i32>_std_unordered_map__Map__i32_i32.__new__(_std_unordered_map__Map__i32_i32)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(_std_unordered_map__Map__i32_i32 self):
+        cdef shared_ptr[_std_unordered_map[cint32_t,cint32_t]] cpp_obj = make_shared[_std_unordered_map[cint32_t,cint32_t]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return _std_unordered_map__Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
+            raise err
+        cdef cint32_t citem = 0
+        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
+        return citem
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cint32_t]] itr = __map_iter[_std_unordered_map[cint32_t,cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cint32_t]] itr = __map_iter[_std_unordered_map[cint32_t,cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cint32_t]] itr = __map_iter[_std_unordered_map[cint32_t,cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t ckey = 0
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
+            yield (ckey, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___std_unordered_map__Map__i32_i32()
+
+Mapping.register(_std_unordered_map__Map__i32_i32)
+
+cdef shared_ptr[_std_unordered_map[cint32_t,cint32_t]] _std_unordered_map__Map__i32_i32__make_instance(object items) except *:
+    cdef shared_ptr[_std_unordered_map[cint32_t,cint32_t]] c_inst = make_shared[_std_unordered_map[cint32_t,cint32_t]]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, int):
+                raise TypeError(f"{key!r} is not of type int")
+            key = <cint32_t> key
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+
+            deref(c_inst)[key] = item
+    return cmove(c_inst)
+
 
 @__cython.auto_pickle(False)
 @__cython.final

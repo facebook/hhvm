@@ -164,6 +164,19 @@ def get_reflection__SimpleStruct() -> __StructSpec:
             },
         ),
     )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=9,
+            name="something",
+            py_name="something",
+            type=_module_types._std_unordered_map__Map__i32_i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
     return spec
 def get_reflection__HiddenTypeFieldsStruct() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
@@ -476,6 +489,14 @@ def get_reflection__List__AnEnum() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=_module_types.AnEnum,
         kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection___std_unordered_map__Map__i32_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=int,
+        value_kind=__NumberType.I32,
     )
 
 def get_reflection__Map__i32_double() -> __MapSpec:

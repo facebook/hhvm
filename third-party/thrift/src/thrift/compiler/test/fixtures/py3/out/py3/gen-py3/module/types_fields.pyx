@@ -99,6 +99,7 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"big_int")] = __SimpleStruct_FieldsSetter._set_field_4
         __fbthrift_inst._setters[__cstring_view(<const char*>"real")] = __SimpleStruct_FieldsSetter._set_field_5
         __fbthrift_inst._setters[__cstring_view(<const char*>"smaller_real")] = __SimpleStruct_FieldsSetter._set_field_6
+        __fbthrift_inst._setters[__cstring_view(<const char*>"something")] = __SimpleStruct_FieldsSetter._set_field_7
         return __fbthrift_inst
 
     cdef void set_field(__SimpleStruct_FieldsSetter self, const char* name, object value) except *:
@@ -174,6 +175,13 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
         if not isinstance(_fbthrift_value, (float, int)):
             raise TypeError(f'smaller_real is not a { float !r}.')
         deref(self._struct_cpp_obj).smaller_real_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_7(self, _fbthrift_value) except *:
+        # for field something
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cSimpleStruct](deref(self._struct_cpp_obj), 7)
+            return
+        deref(self._struct_cpp_obj).something_ref().assign(deref(_module_types._std_unordered_map__Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)

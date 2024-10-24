@@ -63,6 +63,9 @@ inline void reset_field<::py3::simple::SimpleStruct>(
     case 6:
       obj.smaller_real_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().smaller_real_ref());
       return;
+    case 7:
+      obj.something_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().something_ref());
+      return;
   }
 }
 

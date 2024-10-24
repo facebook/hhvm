@@ -58,8 +58,10 @@ struct VisitByFieldId<::py3::simple::SimpleStruct> {
       return f(5, static_cast<T&&>(t).real_ref());
     case 7:
       return f(6, static_cast<T&&>(t).smaller_real_ref());
+    case 9:
+      return f(7, static_cast<T&&>(t).something_ref());
     case 8:
-      return f(7, static_cast<T&&>(t).hidden_field_ref());
+      return f(8, static_cast<T&&>(t).hidden_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::py3::simple::SimpleStruct");
     }

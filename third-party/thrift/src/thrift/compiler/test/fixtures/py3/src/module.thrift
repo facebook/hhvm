@@ -66,6 +66,8 @@ struct SimpleStruct {
   5: i64 big_int;
   6: double real;
   7: float smaller_real;
+  @cpp.Type{template = "::std::unordered_map"}
+  9: map<i32, i32> something;
   // The next field should not show up anywhere in the generated code.
   @python.Py3Hidden{}
   8: i16 hidden_field;

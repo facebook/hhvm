@@ -40,7 +40,8 @@ struct ForEachField<::py3::simple::SimpleStruct> {
     f(4, static_cast<T&&>(t).big_int_ref()...);
     f(5, static_cast<T&&>(t).real_ref()...);
     f(6, static_cast<T&&>(t).smaller_real_ref()...);
-    f(7, static_cast<T&&>(t).hidden_field_ref()...);
+    f(7, static_cast<T&&>(t).something_ref()...);
+    f(8, static_cast<T&&>(t).hidden_field_ref()...);
   }
 };
 

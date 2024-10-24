@@ -430,6 +430,22 @@ _readField_smaller_real:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           7,
+          9,
+          apache::thrift::protocol::T_MAP))) {
+    goto _advance_failure;
+  }
+_readField_something:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_something = ::std::unordered_map<::std::int32_t, ::std::int32_t>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::unordered_map<::std::int32_t, ::std::int32_t>>::readWithContext(*iprot, this->__fbthrift_field_something, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(7, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          9,
           8,
           apache::thrift::protocol::T_I16))) {
     goto _advance_failure;
@@ -438,7 +454,7 @@ _readField_hidden_field:
   {
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->__fbthrift_field_hidden_field, _readState);
   }
- this->__isset.set(7, true);
+ this->__isset.set(8, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -521,6 +537,14 @@ _loop:
         goto _skip;
       }
     }
+    case 9:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP))) {
+        goto _readField_something;
+      } else {
+        goto _skip;
+      }
+    }
     case 8:
     {
       if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I16))) {
@@ -573,6 +597,10 @@ uint32_t SimpleStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float>::serializedSize<false>(*prot_, this->__fbthrift_field_smaller_real);
   }
   {
+    xfer += prot_->serializedFieldSize("something", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::unordered_map<::std::int32_t, ::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_something);
+  }
+  {
     xfer += prot_->serializedFieldSize("hidden_field", apache::thrift::protocol::T_I16, 8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, this->__fbthrift_field_hidden_field);
   }
@@ -611,6 +639,10 @@ uint32_t SimpleStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("smaller_real", apache::thrift::protocol::T_FLOAT, 7);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::floating_point, float>::serializedSize<false>(*prot_, this->__fbthrift_field_smaller_real);
+  }
+  {
+    xfer += prot_->serializedFieldSize("something", apache::thrift::protocol::T_MAP, 9);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::unordered_map<::std::int32_t, ::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_something);
   }
   {
     xfer += prot_->serializedFieldSize("hidden_field", apache::thrift::protocol::T_I16, 8);
@@ -676,6 +708,13 @@ uint32_t SimpleStruct::write(Protocol_* prot_) const {
   }
   {
     constexpr int16_t kPrevFieldId = 7;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 9, kPrevFieldId>(*prot_, "something", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>, ::std::unordered_map<::std::int32_t, ::std::int32_t>>::write(*prot_, this->__fbthrift_field_something);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 9;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I16, 8, kPrevFieldId>(*prot_, "hidden_field", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::write(*prot_, this->__fbthrift_field_hidden_field);

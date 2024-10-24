@@ -45,6 +45,7 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         self.big_int: _typing.Optional[int] = None
         self.real: _typing.Optional[float] = None
         self.smaller_real: _typing.Optional[float] = None
+        self.something: _typing.Optional[dict] = None
 
     def __iter__(self):
         yield "is_on", self.is_on
@@ -54,6 +55,7 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "big_int", self.big_int
         yield "real", self.real
         yield "smaller_real", self.smaller_real
+        yield "something", self.something
 
 _fbthrift_struct_type__HiddenTypeFieldsStruct = _module_types.HiddenTypeFieldsStruct
 class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):

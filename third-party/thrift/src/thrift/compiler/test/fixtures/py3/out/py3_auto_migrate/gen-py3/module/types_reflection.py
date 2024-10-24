@@ -164,6 +164,19 @@ def get_reflection__SimpleStruct() -> __StructSpec:
             },
         ),
     )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=9,
+            name="something",
+            py_name="something",
+            type=_module_types._std_unordered_map__Map__i32_i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
     return spec
 def get_reflection__HiddenTypeFieldsStruct() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(

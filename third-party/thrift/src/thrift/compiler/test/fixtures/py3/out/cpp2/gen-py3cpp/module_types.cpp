@@ -303,6 +303,20 @@ std::string_view SimpleStruct::__fbthrift_get_class_name() {
 
 SimpleStruct::SimpleStruct(const SimpleStruct&) = default;
 SimpleStruct& SimpleStruct::operator=(const SimpleStruct&) = default;
+SimpleStruct::SimpleStruct() :
+    __fbthrift_field_is_on(),
+    __fbthrift_field_tiny_int(),
+    __fbthrift_field_small_int(),
+    __fbthrift_field_nice_sized_int(),
+    __fbthrift_field_big_int(),
+    __fbthrift_field_real(),
+    __fbthrift_field_smaller_real(),
+    __fbthrift_field_hidden_field() {
+}
+
+
+SimpleStruct::~SimpleStruct() {}
+
 SimpleStruct::SimpleStruct([[maybe_unused]] SimpleStruct&& other) noexcept :
     __fbthrift_field_is_on(std::move(other.__fbthrift_field_is_on)),
     __fbthrift_field_tiny_int(std::move(other.__fbthrift_field_tiny_int)),
@@ -311,6 +325,7 @@ SimpleStruct::SimpleStruct([[maybe_unused]] SimpleStruct&& other) noexcept :
     __fbthrift_field_big_int(std::move(other.__fbthrift_field_big_int)),
     __fbthrift_field_real(std::move(other.__fbthrift_field_real)),
     __fbthrift_field_smaller_real(std::move(other.__fbthrift_field_smaller_real)),
+    __fbthrift_field_something(std::move(other.__fbthrift_field_something)),
     __fbthrift_field_hidden_field(std::move(other.__fbthrift_field_hidden_field)),
     __isset(other.__isset) {
 }
@@ -323,13 +338,14 @@ SimpleStruct& SimpleStruct::operator=([[maybe_unused]] SimpleStruct&& other) noe
     this->__fbthrift_field_big_int = std::move(other.__fbthrift_field_big_int);
     this->__fbthrift_field_real = std::move(other.__fbthrift_field_real);
     this->__fbthrift_field_smaller_real = std::move(other.__fbthrift_field_smaller_real);
+    this->__fbthrift_field_something = std::move(other.__fbthrift_field_something);
     this->__fbthrift_field_hidden_field = std::move(other.__fbthrift_field_hidden_field);
     __isset = other.__isset;
     return *this;
 }
 
 
-SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::int16_t hidden_field__arg) :
+SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg) :
     __fbthrift_field_is_on(std::move(is_on__arg)),
     __fbthrift_field_tiny_int(std::move(tiny_int__arg)),
     __fbthrift_field_small_int(std::move(small_int__arg)),
@@ -337,6 +353,7 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
     __fbthrift_field_big_int(std::move(big_int__arg)),
     __fbthrift_field_real(std::move(real__arg)),
     __fbthrift_field_smaller_real(std::move(smaller_real__arg)),
+    __fbthrift_field_something(std::move(something__arg)),
     __fbthrift_field_hidden_field(std::move(hidden_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -346,6 +363,7 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
   __isset.set(folly::index_constant<5>(), true);
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
 }
 
 
@@ -358,6 +376,7 @@ void SimpleStruct::__fbthrift_clear() {
   this->__fbthrift_field_big_int = ::std::int64_t();
   this->__fbthrift_field_real = double();
   this->__fbthrift_field_smaller_real = float();
+  this->__fbthrift_field_something.clear();
   this->__fbthrift_field_hidden_field = ::std::int16_t();
   __isset = {};
 }
@@ -373,8 +392,12 @@ bool SimpleStruct::operator==([[maybe_unused]] const SimpleStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-bool SimpleStruct::operator<([[maybe_unused]] const SimpleStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_something() const& {
+  return __fbthrift_field_something;
+}
+
+::std::unordered_map<::std::int32_t, ::std::int32_t> SimpleStruct::get_something() && {
+  return std::move(__fbthrift_field_something);
 }
 
 
@@ -387,6 +410,7 @@ void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   swap(a.__fbthrift_field_big_int, b.__fbthrift_field_big_int);
   swap(a.__fbthrift_field_real, b.__fbthrift_field_real);
   swap(a.__fbthrift_field_smaller_real, b.__fbthrift_field_smaller_real);
+  swap(a.__fbthrift_field_something, b.__fbthrift_field_something);
   swap(a.__fbthrift_field_hidden_field, b.__fbthrift_field_hidden_field);
   swap(a.__isset, b.__isset);
 }
@@ -882,10 +906,6 @@ bool ComplexStruct::__fbthrift_is_empty() const {
 
 bool ComplexStruct::operator==([[maybe_unused]] const ComplexStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
-}
-
-bool ComplexStruct::operator<([[maybe_unused]] const ComplexStruct& rhs) const {
-  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& {

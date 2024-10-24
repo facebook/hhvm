@@ -1,2 +1,0 @@
-
-Fatal error: `await` cannot be used as an expression right of a pipe operator, unless unstable feature: `pipe_await` is enabled. in %s/pipe1.php on line 5

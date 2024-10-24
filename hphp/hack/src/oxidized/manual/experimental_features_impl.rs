@@ -36,7 +36,7 @@ impl FeatureName {
             ModuleLevelTraits => OngoingRelease,
             ModuleLevelTraitsExtensions => OngoingRelease,
             TypedLocalVariables => Preview,
-            PipeAwait => Preview,
+            PipeAwait => OngoingRelease,
             MatchStatements => Unstable,
             StrictSwitch => Unstable,
             ClassType => Unstable,

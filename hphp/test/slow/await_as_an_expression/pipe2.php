@@ -1,8 +1,13 @@
 <?hh
 
+async function f(): Awaitable<int> {
+  return 1;
+}
+
 async function async_main(): Awaitable<void> {
+  $x = f();
   echo "--- a\n";
-  (await $x) |> (await $$);
+  var_dump ($x |> (await $$));
   echo "--- d\n";
 }
 

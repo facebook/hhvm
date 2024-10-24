@@ -81,6 +81,7 @@ template <typename KTag, typename VTag>
 struct ContainerTraits<type::map<KTag, VTag>> {
   using ElementType =
       std::pair<type::native_type<KTag>, type::native_type<VTag>>;
+  using ElementTag = KTag;
   using KeyTag = KTag;
   using ValueTag = VTag;
   static constexpr std::initializer_list<protocol::TType> wireTypes = {

@@ -87,7 +87,7 @@ let add_files_with_stale_errors ctx ~reparsed errors files_acc =
       else
         acc)
 
-let resolve_files ctx env fanout =
+let resolve_files ctx env (fanout : Fanout.t) : Relative_path.Set.t =
   Server_progress.with_message "resolving files" @@ fun () ->
   let { Fanout.changed = _; to_recheck; to_recheck_if_errors } = fanout in
   let files_to_recheck = Naming_provider.get_files ctx to_recheck in
@@ -98,7 +98,20 @@ let resolve_files ctx env fanout =
     in
     Relative_path.Set.inter files_with_errors files_to_recheck_if_errors
   in
-  Relative_path.Set.union files_to_recheck files_with_errors_to_recheck
+  let files =
+    Relative_path.Set.union files_to_recheck files_with_errors_to_recheck
+  in
+  Hh_logger.log
+    "%s:\n%s"
+    (if Relative_path.Set.cardinal files <= 10 then
+      "Files to recheck"
+    else
+      "First 10 files to recheck")
+    (Relative_path.Set.elements files
+    |> (fun l -> List.take l 10)
+    |> List.map ~f:Relative_path.suffix
+    |> String.concat ~sep:"\n");
+  files
 
 let get_files_to_recheck ctx env fanout ~reparsed ~errors =
   resolve_files ctx env fanout

@@ -617,7 +617,8 @@ let children_cardinal mode class_name : int =
   Typing_deps.get_ideps mode (Dep.Extends class_name) |> DepSet.cardinal
 
 module Log : sig
-  val log_class_fanout : Provider_context.t -> changed_class -> Fanout.t -> unit
+  val log_class_fanout :
+    Provider_context.t -> class_cnt:int -> changed_class -> Fanout.t -> unit
 
   val log_fanout :
     Provider_context.t ->
@@ -630,10 +631,29 @@ end = struct
     TypecheckerOptions.log_fanout ~fanout_cardinal
     @@ Provider_context.get_tcopt ctx
 
-  let log_class_fanout ctx (changed_class : changed_class) (fanout : Fanout.t) :
-      unit =
+  let max_class_cnt = 10
+
+  let log_class_fanout
+      ctx ~class_cnt (changed_class : changed_class) (fanout : Fanout.t) : unit
+      =
     let { name; diff; dep; descendant_deps } = changed_class in
     let fanout_cardinal = Fanout.cardinal fanout in
+    if class_cnt < max_class_cnt then
+      Hh_logger.log
+        "Fanout of %s (hash: %s) is %d deps: %s%s"
+        name
+        (Dep.to_hex_string dep)
+        fanout_cardinal
+        ( fanout.Fanout.to_recheck |> DepSet.elements |> fun l ->
+          List.take l 5
+          |> List.map ~f:Dep.to_hex_string
+          |> String.concat ~sep:", " )
+        (if fanout_cardinal > 5 then
+          " (truncated)"
+        else
+          "")
+    else if class_cnt = max_class_cnt then
+      Hh_logger.log "(truncated)";
     if do_log ~fanout_cardinal ctx then
       let mode = Provider_context.get_deps_mode ctx in
       HackEventLogger.Fanouts.log_class
@@ -657,13 +677,14 @@ end = struct
 end
 
 let add_fanout
+    class_cnt
     ~ctx
     ((fanout_acc, max_class_fanout_cardinal) : Fanout.t * int)
     (changed_class : changed_class) : Fanout.t * int =
   let fanout =
     get_fanout ~ctx changed_class |> FM.to_fanout ctx changed_class
   in
-  Log.log_class_fanout ctx changed_class fanout;
+  Log.log_class_fanout ctx ~class_cnt changed_class fanout;
   let fanout_acc = Fanout.union fanout_acc fanout in
   let max_class_fanout_cardinal =
     Int.max max_class_fanout_cardinal (Fanout.cardinal fanout)
@@ -673,7 +694,7 @@ let add_fanout
 let fanout_of_changes ~(ctx : Provider_context.t) (changes : changed_class list)
     : Fanout.t =
   let (fanout, max_class_fanout_cardinal) =
-    List.fold changes ~init:(Fanout.empty, 0) ~f:(add_fanout ~ctx)
+    List.foldi changes ~init:(Fanout.empty, 0) ~f:(add_fanout ~ctx)
   in
   Log.log_fanout ctx changes fanout ~max_class_fanout_cardinal;
   fanout

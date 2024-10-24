@@ -213,13 +213,15 @@ typedef std::function<void(
 template <typename T>
 class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
  public:
-  explicit ThriftServerAsyncProcessorFactory(std::shared_ptr<T> t) {
-    svIf_ = t;
-  }
+  explicit ThriftServerAsyncProcessorFactory(std::shared_ptr<T> t) : svIf_(t) {}
 
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::unique_ptr<apache::thrift::AsyncProcessor>(
         new typename T::ProcessorType(svIf_.get()));
+  }
+
+  CreateMethodMetadataResult createMethodMetadata() override {
+    return svIf_->T::createMethodMetadata();
   }
 
   std::vector<ServiceHandlerBase*> getServiceHandlers() override {

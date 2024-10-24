@@ -67,6 +67,15 @@ def to_thrift_set(set_data):
 
 
 @cython.final
+cdef class _ThriftMapWrapper:
+    def __cinit__(self, map_data):
+        self._map_data = map_data
+
+def to_thrift_map(map_data):
+    return _ThriftMapWrapper(map_data)
+
+
+@cython.final
 cdef class _ThriftContainerWrapper:
     def __cinit__(self, container_data):
         self._container_data = container_data

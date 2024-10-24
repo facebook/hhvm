@@ -82,9 +82,11 @@ from thrift.python.exceptions import Error
 
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
+    _ThriftMapWrapper,
     _ThriftSetWrapper,
     MutableStructOrUnion,
     to_thrift_list,
+    to_thrift_map,
     to_thrift_set,
 )
 from thrift.python.serializer import Protocol
@@ -92,6 +94,8 @@ from thrift.python.types import StructOrUnion
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
+MapKey = TypeVar("MapKey")
+MapValue = TypeVar("MapValue")
 
 
 def thrift_serialization_round_trip(
@@ -165,6 +169,11 @@ class SerializerTests(unittest.TestCase):
 
     def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
         return to_thrift_set(set_data) if self.is_mutable_run else set_data
+
+    def to_map(
+        self, map_data: dict[MapKey, MapValue]
+    ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
+        return to_thrift_map(map_data) if self.is_mutable_run else map_data
 
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
@@ -326,18 +335,21 @@ class SerializerTests(unittest.TestCase):
                 if not self.is_mutable_run
                 else to_thrift_set(set())  # Mutable types are not hashable.
             ),
-            val_map={"foo": b"foovalue"},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            val_map=self.to_map({"foo": b"foovalue"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
             val_complex_map=(
                 {"bar": [{self.easy(val=42), self.easy(val_list=[1, 2, 3])}]}
                 if not self.is_mutable_run
-                else {}  # Mutable types are not hashable.
+                else to_thrift_map({})  # Mutable types are not hashable.
             ),
             val_struct_with_containers=self.ColorGroups(
                 # pyre-ignore[6]: TODO: Thrift-Container init
                 color_list=self.to_list([self.Color.blue, self.Color.green]),
                 # pyre-ignore[6]: TODO: Thrift-Container init
                 color_set=self.to_set({self.Color.blue, self.Color.red}),
-                color_map={self.Color.blue: self.Color.green},
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                color_map=self.to_map({self.Color.blue: self.Color.green}),
             ),
         )
         self.thrift_serialization_round_trip(control)
@@ -405,22 +417,34 @@ class SerializerTests(unittest.TestCase):
 
     def test_serialize_map_struct(self) -> None:
         control = self.Maps(
-            boolMap={True: 1, False: 0},
-            byteMap={1: 1, 2: 2, 3: 3},
-            i16Map={4: 4, 5: 5, 6: 6},
-            i64Map={7: 7, 8: 8, 9: 9},
-            doubleMap={1.23: 1.23, 4.56: 4.56},
-            floatMap={7.0: 7.0, 8.0: 8.0},
-            stringMap={"foo": "foo", "bar": "bar"},
-            binaryMap={b"foo": b"foo", b"bar": b"bar"},
-            iobufMap={IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            boolMap=self.to_map({True: 1, False: 0}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            byteMap=self.to_map({1: 1, 2: 2, 3: 3}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i16Map=self.to_map({4: 4, 5: 5, 6: 6}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i64Map=self.to_map({7: 7, 8: 8, 9: 9}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            doubleMap=self.to_map({1.23: 1.23, 4.56: 4.56}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            floatMap=self.to_map({7.0: 7.0, 8.0: 8.0}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            stringMap=self.to_map({"foo": "foo", "bar": "bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            binaryMap=self.to_map({b"foo": b"foo", b"bar": b"bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufMap=self.to_map(
+                {IOBuf(b"foo"): IOBuf(b"foo"), IOBuf(b"bar"): IOBuf(b"bar")}
+            ),
+            # pyre-ignore[6]: TODO: Thrift-Container init
             structMap=(
                 {
                     self.Foo(value=1): self.Foo(value=1),
                     self.Foo(value=2): self.Foo(value=2),
                 }
                 if not self.is_mutable_run
-                else {}  # Mutable types are not hashable.
+                else to_thrift_map({})  # Mutable types are not hashable.
             ),
         )
         self.thrift_serialization_round_trip(control)
@@ -530,6 +554,11 @@ class SerializerTerseWriteTests(unittest.TestCase):
     def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
         return to_thrift_set(set_data) if self.is_mutable_run else set_data
 
+    def to_map(
+        self, map_data: dict[MapKey, MapValue]
+    ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
+        return to_thrift_map(map_data) if self.is_mutable_run else map_data
+
     def thrift_serialization_round_trip(
         self, control: Union[StructOrUnion, MutableStructOrUnion]
     ) -> None:
@@ -551,7 +580,8 @@ class SerializerTerseWriteTests(unittest.TestCase):
             list_field=self.to_list([1]),
             # pyre-ignore[6]: TODO: Thrift-Container init
             set_field=self.to_set({1}),
-            map_field={1: 1},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            map_field=self.to_map({1: 1}),
             struct_field=self.MyStruct(field1=1),
             union_field=self.MyUnion(struct_field=self.MyStruct(field1=1)),
         )

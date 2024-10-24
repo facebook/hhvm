@@ -28,7 +28,7 @@
         }}{{> fields/compatible_adapted_type}}]=...{{!
         }}{{/field:is_container_type}}{{!
         }}{{#field:is_container_type}}{{!
-        }}{{> fields/compatible_adapted_type}}{{> types/thrift_container_wrapper}}]=...{{!
+        }}{{> fields/compatible_adapted_type}} | {{> types/thrift_container_wrapper}}]=...{{!
         }}{{/field:is_container_type}}{{!
         }}{{/struct:fields_ordered_by_id}}{{!
         }}{{/program:generate_mutable_types}}

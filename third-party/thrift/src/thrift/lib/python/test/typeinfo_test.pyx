@@ -62,7 +62,11 @@ from python_test.containers.thrift_mutable_types import (
 )
 from thrift.python.test.adapters.atoi import AtoiAdapter
 from thrift.python.test.adapters.datetime import DatetimeAdapter
-from thrift.python.mutable_types import _ThriftListWrapper, _ThriftSetWrapper
+from thrift.python.mutable_types import (
+    _ThriftListWrapper,
+    _ThriftSetWrapper,
+    _ThriftMapWrapper,
+)
 
 cdef class TypeInfoTests():
     def __cinit__(self, unit_test):
@@ -400,7 +404,7 @@ cdef class TypeInfoTests():
         with self.ut.assertRaises(TypeError):
             map_type_info.to_internal_data(None)
 
-        data = map_type_info.to_internal_data({"a":1, "b":2})
+        data = map_type_info.to_internal_data(_ThriftMapWrapper({"a":1, "b":2}))
         self.ut.assertEqual(data, {b"a":1, b"b":2})
         expected_python_val = MutableMap(typeinfo_string, typeinfo_i64, {b"a": 1, b"b":2})
         self.ut.assertEqual(map_type_info.to_python_value(data), expected_python_val)

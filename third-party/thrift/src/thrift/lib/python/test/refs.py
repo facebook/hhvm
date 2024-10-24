@@ -30,11 +30,15 @@ from parameterized import parameterized_class
 from python_test.refs.thrift_types import ComplexRef as ComplexRefType
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
+    _ThriftMapWrapper,
     to_thrift_list,
+    to_thrift_map,
     to_thrift_set,
 )
 
 ListT = TypeVar("ListT")
+MapKey = TypeVar("MapKey")
+MapValue = TypeVar("MapValue")
 
 
 @parameterized_class(
@@ -56,6 +60,11 @@ class RefTest(unittest.TestCase):
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
+    def to_map(
+        self, map_data: dict[MapKey, MapValue]
+    ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
+        return to_thrift_map(map_data) if self.is_mutable_run else map_data
 
     def test_create_default(self) -> None:
         x = self.ComplexRef()
@@ -109,8 +118,10 @@ class RefTest(unittest.TestCase):
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
             name="foo",
-            map_basetype_ref={1: 1, 2: 2, 3: 3},
-            map_recursive_ref={1: bar, 2: baz},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            map_basetype_ref=self.to_map({1: 1, 2: 2, 3: 3}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            map_recursive_ref=self.to_map({1: bar, 2: baz}),
         )
         self.assertEqual(x.map_basetype_ref, {1: 1, 2: 2, 3: 3})
         self.assertEqual(x.map_recursive_ref, {1: bar, 2: baz})

@@ -35,12 +35,14 @@ from thrift.python.mutable_types cimport (
     MutableUnionInfo,
     _ThriftListWrapper,
     _ThriftSetWrapper,
+    _ThriftMapWrapper,
     _ThriftContainerWrapper,
 )
 from thrift.python.types cimport (
     getCTypeInfo,
     List,
     Set,
+    Map,
 )
 
 
@@ -130,8 +132,10 @@ cdef class MutableListTypeInfo(TypeInfoBase):
         # while 'parsing' the nested containers like [[1], [2]]. We do this by
         # wrapping the inner value with `_ThriftContainerWrapper` when calling
         # the `self.val_info.to_internal_data()`. See `from_python_values()`.
-        self.value_type_is_container = (
-            isinstance(val_info, (MutableListTypeInfo, MutableSetTypeInfo)))
+        self.value_type_is_container = isinstance(
+            val_info,
+            (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo),
+        )
         self.cpp_obj = make_unique[cMutableListTypeInfo](getCTypeInfo(val_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
@@ -268,8 +272,10 @@ cdef class MutableSetTypeInfo(TypeInfoBase):
         # while 'parsing' the nested containers like [{1}, {2}]. We do this by
         # wrapping the inner value with `_ThriftContainerWrapper` when calling
         # the `self.val_info.to_internal_data()`. See `from_python_values()`.
-        self.value_type_is_container = (
-            isinstance(val_info, (MutableListTypeInfo, MutableSetTypeInfo)))
+        self.value_type_is_container = isinstance(
+            val_info,
+            (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo),
+        )
         self.cpp_obj = make_unique[cMutableSetTypeInfo](getCTypeInfo(val_info))
 
     cdef const cTypeInfo* get_cTypeInfo(self):
@@ -384,6 +390,19 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
     def __cinit__(self, key_info, val_info):
         self.key_info = key_info
         self.val_info = val_info
+        # If the key or value is a container, we need to handle this case while
+        # 'parsing' nested containers like {"key": [1, 2]}. We achieve this by
+        # wrapping the key/value with `_ThriftContainerWrapper` when calling
+        # `self.{key_info,val_info}.to_internal_data()`.
+        # See `from_python_values()`.
+        self.key_type_is_container = isinstance(
+            key_info,
+            (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo)
+        )
+        self.value_type_is_container = isinstance(
+            val_info,
+            (MutableListTypeInfo, MutableSetTypeInfo, MutableMapTypeInfo)
+        )
         self.cpp_obj = make_unique[cMutableMapTypeInfo](
             getCTypeInfo(key_info),
             getCTypeInfo(val_info),
@@ -392,7 +411,48 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
     cdef const cTypeInfo* get_cTypeInfo(self):
         return self.cpp_obj.get().get()
 
-    cdef to_internal_data(self, object values):
+    cdef to_internal_data(self, object mutableMap_or_thriftMapWrapper):
+        """
+        Validates the `mutableMap_or_thriftMapWrapper` and convert it into
+        an internal data representation.
+
+        Args:
+            `mutableMap_or_thriftMapWrapper`: `MutableMap` instance or
+            `_ThriftMapWrapper` instance.
+
+        Returns the `MutableMap`s internal data or returns a Python map with
+        converted values from `_ThriftMapWrapper._map_data`, representing the
+        internal data
+        """
+        if isinstance(mutableMap_or_thriftMapWrapper, MutableMap):
+            mutable_map = <MutableMap>mutableMap_or_thriftMapWrapper
+            # `MutableMapTypeInfo` (`self`) represents a `MutableMap`, and its
+            # key and value types (`.key_info`, `.val_info`) must match the key
+            # and value types of `mutable_map` (`._key_typeinfo`, `._val_typeinfo`)
+            # for an exact type match.
+            if (self.key_info.same_as(mutable_map._key_typeinfo) and
+                    self.val_info.same_as(mutable_map._val_typeinfo)):
+                return mutable_map._map_data
+
+        # TODO: remove after adapting mutable-constant for `_ThriftMapWrapper`
+        if isinstance(mutableMap_or_thriftMapWrapper, Map):
+            return self.from_python_values(mutableMap_or_thriftMapWrapper)
+
+        if isinstance(mutableMap_or_thriftMapWrapper, _ThriftContainerWrapper):
+            return self.from_python_values(
+                (<_ThriftContainerWrapper>mutableMap_or_thriftMapWrapper)._container_data)
+
+        if not isinstance(mutableMap_or_thriftMapWrapper, _ThriftMapWrapper):
+            raise TypeError(
+                "Expected values to be an instance of Thrift mutable map with "
+                "matching key type and value type, or the result of `to_thrift_map()`, "
+                f"but got type {type(mutableMap_or_thriftMapWrapper)}."
+            )
+
+        return self.from_python_values(
+            (<_ThriftMapWrapper>mutableMap_or_thriftMapWrapper)._map_data)
+
+    cdef from_python_values(self, object values):
         """
         Validates the `values` and converts them into an internal data representation.
 
@@ -409,7 +469,12 @@ cdef class MutableMapTypeInfo(TypeInfoBase):
         cdef TypeInfoBase key_type_info = self.key_info
         cdef TypeInfoBase val_type_info = self.val_info
         return {
-            key_type_info.to_internal_data(k): val_type_info.to_internal_data(v) for k, v in values.items()
+            key_type_info.to_internal_data(
+                _ThriftContainerWrapper(k) if self.key_type_is_container else k
+            ): val_type_info.to_internal_data(
+                _ThriftContainerWrapper(v) if self.value_type_is_container else v
+            )
+            for k, v in values.items()
         }
 
     cdef to_python_value(self, object value):

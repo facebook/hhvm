@@ -25,6 +25,7 @@ from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 import copy
 import itertools
 
+from thrift.python.mutable_types cimport _ThriftContainerWrapper
 from thrift.python.types cimport (
     TypeInfoBase,
     list_compare,
@@ -458,6 +459,8 @@ cdef class MutableMap:
         """
         self._key_typeinfo = key_typeinfo
         self._val_typeinfo = value_typeinfo
+        self._key_type_is_container = key_typeinfo.is_container()
+        self._value_type_is_container = value_typeinfo.is_container()
         self._map_data = map_data
 
     def __len__(self):
@@ -479,11 +482,11 @@ cdef class MutableMap:
             return False
 
         for other_key, other_value in other.items():
-            other_internal_key = self._key_typeinfo.to_internal_data(other_key)
+            other_internal_key = self._key_to_internal_data(other_key)
             self_internal_value = self._map_data.get(other_internal_key, None)
             if self_internal_value is None:
                 return False
-            other_internal_value = self._val_typeinfo.to_internal_data(other_value)
+            other_internal_value = self._value_to_internal_data(other_value)
             if self_internal_value != other_internal_value:
                 return False
 
@@ -592,6 +595,30 @@ cdef class MutableMap:
 
         return (self._key_typeinfo.same_as((<MutableMap>other)._key_typeinfo)
             and self._val_typeinfo.same_as((<MutableMap>other)._val_typeinfo))
+
+    # The `_{key,value}_to_internal_data()` methods are internal and used to wrap
+    # the value or key when they are containers. This should be done implicitly
+    # in some cases. For example, for a given map field (map<int, list<int>>),
+    # the user must use `to_thrift_map()` for assignment:
+    #
+    # s.map_field = to_thrift_map({1: [1]})
+    #
+    # However, for comparison, it is implicit:
+    #
+    # s.map_field == {1: [1]}
+    #
+    # These methods are called when an implicit wrapper is needed.
+    cdef _key_to_internal_data(self, value):
+        return self._key_typeinfo.to_internal_data(
+                _ThriftContainerWrapper(value)
+                if self._key_type_is_container
+                else value)
+
+    cdef _value_to_internal_data(self, value):
+        return self._val_typeinfo.to_internal_data(
+                _ThriftContainerWrapper(value)
+                if self._value_type_is_container
+                else value)
 
     def __repr__(self):
         if not self:

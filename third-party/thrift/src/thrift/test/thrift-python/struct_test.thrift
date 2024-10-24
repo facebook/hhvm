@@ -139,6 +139,8 @@ struct TestStructContainerAssignment {
 
   6: set<string> set_string;
   7: set<string> set_string_2;
+
+  8: map<i32, list<i32>> map_int_to_list_int;
 }
 
 struct TestStructAdaptedTypes {

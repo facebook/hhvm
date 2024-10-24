@@ -64,8 +64,10 @@ from testing.thrift_types import (
 from thrift.python.mutable_types import (
     _isset as mutable_isset,
     _ThriftListWrapper,
+    _ThriftMapWrapper,
     _ThriftSetWrapper,
     to_thrift_list,
+    to_thrift_map,
     to_thrift_set,
 )
 
@@ -74,6 +76,8 @@ from thrift.python.types import isset, update_nested_field
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
+MapKey = TypeVar("MapKey")
+MapValue = TypeVar("MapValue")
 
 
 @parameterized_class(
@@ -531,6 +535,11 @@ class StructDeepcopyTests(unittest.TestCase):
     def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
         return to_thrift_set(set_data) if self.is_mutable_run else set_data
 
+    def to_map(
+        self, map_data: dict[MapKey, MapValue]
+    ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
+        return to_thrift_map(map_data) if self.is_mutable_run else map_data
+
     def test_deepcopy(self) -> None:
         x = self.easy(
             val=1,
@@ -564,7 +573,8 @@ class StructDeepcopyTests(unittest.TestCase):
             list_template=self.to_list([1, 2, 3, 4]),
             # pyre-ignore[6]: TODO: Thrift-Container init
             set_template=self.to_set({1, 2, 3}),
-            map_template={0: 1, 2: 3},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            map_template=self.to_map({0: 1, 2: 3}),
         )
         dif = copy.deepcopy(custom)
         if self.is_mutable_run:

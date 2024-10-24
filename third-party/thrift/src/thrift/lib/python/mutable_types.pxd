@@ -92,6 +92,9 @@ cdef class _ThriftListWrapper:
 cdef class _ThriftSetWrapper:
     cdef object _set_data
 
+cdef class _ThriftMapWrapper:
+    cdef object _map_data
+
 cdef class _ThriftContainerWrapper:
     cdef object _container_data
 

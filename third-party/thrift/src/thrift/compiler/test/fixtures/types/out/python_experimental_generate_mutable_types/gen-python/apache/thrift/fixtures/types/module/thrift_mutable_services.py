@@ -52,8 +52,8 @@ class SomeServiceInterface(
 
     async def bounce_map(
             self,
-            m: _typing.MutableMapping[int, str]
-        ) -> _typing.MutableMapping[int, str]:
+            m: _fbthrift_python_mutable_containers.MutableMap[int, str]
+        ) -> _fbthrift_python_mutable_containers.MutableMap[int, str]:
         raise NotImplementedError("async def bounce_map is not implemented")
 
     async def _fbthrift__handler_bounce_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
@@ -66,7 +66,7 @@ class SomeServiceInterface(
     async def binary_keyed_map(
             self,
             r: _fbthrift_python_mutable_containers.MutableList[int]
-        ) -> _typing.MutableMapping[bytes, int]:
+        ) -> _fbthrift_python_mutable_containers.MutableMap[bytes, int]:
         raise NotImplementedError("async def binary_keyed_map is not implemented")
 
     async def _fbthrift__handler_binary_keyed_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

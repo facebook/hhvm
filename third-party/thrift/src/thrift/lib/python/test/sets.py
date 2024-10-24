@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import copy
 import unittest
-from typing import AbstractSet, Sequence, Tuple, Type
+from typing import AbstractSet, Sequence, Tuple, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
@@ -41,6 +41,9 @@ from python_test.sets.thrift_types import (
     SetSetI32Lists,
 )
 from thrift.lib.python.test.testing_utils import Untruthy
+from thrift.python.mutable_types import _ThriftSetWrapper, to_thrift_set
+
+SetT = TypeVar("SetT")
 
 
 @parameterized_class(
@@ -66,6 +69,9 @@ class SetTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+
+    def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
+        return to_thrift_set(set_data) if self.is_mutable_run else set_data
 
     def test_and(self) -> None:
         x = self.SetI32({1, 3, 4, 5})
@@ -108,7 +114,8 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x.difference(y), set(x) - set(y))
 
     def test_contains_enum(self) -> None:
-        cset = self.Sets(colorSet={self.Color.red, self.Color.blue})
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        cset = self.Sets(colorSet=self.to_set({self.Color.red, self.Color.blue}))
         self.assertIn(self.Color.red, cset.colorSet)
         self.assertIn(self.Color.blue, cset.colorSet)
         self.assertNotIn(self.Color.green, cset.colorSet)
@@ -190,17 +197,29 @@ class SetTests(unittest.TestCase):
 
     def test_struct_with_set_fields(self) -> None:
         s = self.Sets(
-            boolSet={True, False},
-            byteSet={1, 2, 3},
-            i16Set={4, 5, 6},
-            i64Set={7, 8, 9},
-            doubleSet={1.23, 4.56},
-            floatSet={7.89, 10.11},
-            stringSet={"foo", "bar"},
-            binarySet={b"foo", b"bar"},
-            iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            boolSet=self.to_set({True, False}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            byteSet=self.to_set({1, 2, 3}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i16Set=self.to_set({4, 5, 6}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i64Set=self.to_set({7, 8, 9}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            doubleSet=self.to_set({1.23, 4.56}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            floatSet=self.to_set({7.89, 10.11}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            stringSet=self.to_set({"foo", "bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            binarySet=self.to_set({b"foo", b"bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
-                set() if self.is_mutable_run else {self.Foo(value=1), self.Foo(value=2)}
+                to_thrift_set(set())
+                if self.is_mutable_run
+                else {self.Foo(value=1), self.Foo(value=2)}
             ),
         )
         self.assertEqual(s.boolSet, {True, False})

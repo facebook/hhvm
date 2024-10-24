@@ -28,7 +28,11 @@ import python_test.refs.thrift_types as immutable_ypes
 from parameterized import parameterized_class
 
 from python_test.refs.thrift_types import ComplexRef as ComplexRefType
-from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
+from thrift.python.mutable_types import (
+    _ThriftListWrapper,
+    to_thrift_list,
+    to_thrift_set,
+)
 
 ListT = TypeVar("ListT")
 
@@ -87,8 +91,14 @@ class RefTest(unittest.TestCase):
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
             name="foo",
-            set_basetype_ref={1, 2, 3},
-            set_recursive_ref=set() if self.is_mutable_run else {bar, baz},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            set_basetype_ref=to_thrift_set({1, 2, 3})
+            if self.is_mutable_run
+            else {1, 2, 3},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            set_recursive_ref=to_thrift_set(set())  # mutable-types not hashable
+            if self.is_mutable_run
+            else {bar, baz},
         )
         self.assertEqual(x.set_basetype_ref, {1, 2, 3})
         self.assertEqual(
@@ -115,7 +125,10 @@ class RefTest(unittest.TestCase):
         bar, baz = self.ComplexRef(name="bar"), self.ComplexRef(name="baz")
         x = self.ComplexRef(
             name="foo",
-            set_const_shared_ref=set() if self.is_mutable_run else {bar, baz},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            set_const_shared_ref=to_thrift_set(set())
+            if self.is_mutable_run
+            else {bar, baz},
         )
         self.assertEqual(
             x.set_const_shared_ref, set() if self.is_mutable_run else {bar, baz}

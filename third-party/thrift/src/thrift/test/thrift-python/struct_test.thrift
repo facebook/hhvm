@@ -136,6 +136,9 @@ struct TestStructContainerAssignment {
   3: list<list<i32>> list_list_int;
   4: list<list<i32>> list_list_int_2;
   5: list<TestStructAsListElement> list_struct;
+
+  6: set<string> set_string;
+  7: set<string> set_string_2;
 }
 
 struct TestStructAdaptedTypes {

@@ -395,7 +395,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableSet[float]:
+        ) -> _fbthrift_python_mutable_containers.MutableSet[float]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
@@ -604,7 +604,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _typing.MutableSet[float]:
+        ) -> _fbthrift_python_mutable_containers.MutableSet[float]:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "invalid_return_for_hack",

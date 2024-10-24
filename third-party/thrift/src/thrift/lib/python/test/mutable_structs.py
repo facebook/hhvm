@@ -30,6 +30,7 @@ from thrift.python.mutable_types import (
     MutableStruct,
     MutableStructOrUnion,
     to_thrift_list,
+    to_thrift_set,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
@@ -247,22 +248,18 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
-                    # pyre-ignore[6]: Fixme: type error to be addressed later
-                    unqualified_set_string=["1", "2", "3"]
+                    unqualified_set_string=to_thrift_set({"1", "2", "3"})
                 ),
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
-                    # pyre-ignore[6]: Fixme: type error to be addressed later
-                    optional_set_string=["11", "22", "33"]
+                    optional_set_string=to_thrift_set({"11", "22", "33"})
                 ),
             ),
             (
                 TestStructAllThriftContainerTypesMutable(
-                    # pyre-ignore[6]: Fixme: type error to be addressed later
-                    unqualified_set_string=["1", "2", "3"],
-                    # pyre-ignore[6]: Fixme: type error to be addressed later
-                    optional_set_string=["11", "22", "33"],
+                    unqualified_set_string=to_thrift_set({"1", "2", "3"}),
+                    optional_set_string=to_thrift_set({"11", "22", "33"}),
                 ),
             ),
         ]

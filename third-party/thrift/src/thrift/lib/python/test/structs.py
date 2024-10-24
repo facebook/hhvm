@@ -64,13 +64,16 @@ from testing.thrift_types import (
 from thrift.python.mutable_types import (
     _isset as mutable_isset,
     _ThriftListWrapper,
+    _ThriftSetWrapper,
     to_thrift_list,
+    to_thrift_set,
 )
 
 from thrift.python.serializer import deserialize, serialize_iobuf
 from thrift.python.types import isset, update_nested_field
 
 ListT = TypeVar("ListT")
+SetT = TypeVar("SetT")
 
 
 @parameterized_class(
@@ -525,6 +528,9 @@ class StructDeepcopyTests(unittest.TestCase):
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
+    def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
+        return to_thrift_set(set_data) if self.is_mutable_run else set_data
+
     def test_deepcopy(self) -> None:
         x = self.easy(
             val=1,
@@ -556,7 +562,8 @@ class StructDeepcopyTests(unittest.TestCase):
         custom = self.customized(
             # pyre-ignore[6]: TODO: Thrift-Container init
             list_template=self.to_list([1, 2, 3, 4]),
-            set_template={1, 2, 3},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            set_template=self.to_set({1, 2, 3}),
             map_template={0: 1, 2: 3},
         )
         dif = copy.deepcopy(custom)

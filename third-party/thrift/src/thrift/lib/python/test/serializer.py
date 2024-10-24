@@ -82,13 +82,16 @@ from thrift.python.exceptions import Error
 
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
+    _ThriftSetWrapper,
     MutableStructOrUnion,
     to_thrift_list,
+    to_thrift_set,
 )
 from thrift.python.serializer import Protocol
 from thrift.python.types import StructOrUnion
 
 ListT = TypeVar("ListT")
+SetT = TypeVar("SetT")
 
 
 def thrift_serialization_round_trip(
@@ -159,6 +162,9 @@ class SerializerTests(unittest.TestCase):
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
+    def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
+        return to_thrift_set(set_data) if self.is_mutable_run else set_data
 
     def test_None(self) -> None:
         with self.assertRaises(TypeError):
@@ -314,10 +320,11 @@ class SerializerTests(unittest.TestCase):
             val_iobuf=IOBuf(b"\xe5\x9b\x9b\xe5\x8d\x81\xe4\xba\x8c"),
             val_enum=self.Color.green,
             val_union=self.ComplexUnion(double_val=1.234),
+            # pyre-ignore[6]: TODO: Thrift-Container init
             val_set=(
                 {easy(val=42)}
                 if not self.is_mutable_run
-                else set()  # Mutable types are not hashable.
+                else to_thrift_set(set())  # Mutable types are not hashable.
             ),
             val_map={"foo": b"foovalue"},
             val_complex_map=(
@@ -328,7 +335,8 @@ class SerializerTests(unittest.TestCase):
             val_struct_with_containers=self.ColorGroups(
                 # pyre-ignore[6]: TODO: Thrift-Container init
                 color_list=self.to_list([self.Color.blue, self.Color.green]),
-                color_set={self.Color.blue, self.Color.red},
+                # pyre-ignore[6]: TODO: Thrift-Container init
+                color_set=self.to_set({self.Color.blue, self.Color.red}),
                 color_map={self.Color.blue: self.Color.green},
             ),
         )
@@ -368,19 +376,29 @@ class SerializerTests(unittest.TestCase):
 
     def test_serialize_set_struct(self) -> None:
         control = self.Sets(
-            boolSet={True, False},
-            byteSet={1, 2, 3},
-            i16Set={4, 5, 6},
-            i64Set={7, 8, 9},
-            doubleSet={1.23, 4.56},
-            floatSet={7, 8},
-            stringSet={"foo", "bar"},
-            binarySet={b"foo", b"bar"},
-            iobufSet={IOBuf(b"foo"), IOBuf(b"bar")},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            boolSet=self.to_set({True, False}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            byteSet=self.to_set({1, 2, 3}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i16Set=self.to_set({4, 5, 6}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            i64Set=self.to_set({7, 8, 9}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            doubleSet=self.to_set({1.23, 4.56}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            floatSet=self.to_set({7, 8}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            stringSet=self.to_set({"foo", "bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            binarySet=self.to_set({b"foo", b"bar"}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            iobufSet=self.to_set({IOBuf(b"foo"), IOBuf(b"bar")}),
+            # pyre-ignore[6]: TODO: Thrift-Container init
             structSet=(
                 {self.Foo(value=1), self.Foo(value=2)}
                 if not self.is_mutable_run
-                else set()  # Mutable types are not hashable.
+                else to_thrift_set(set())  # Mutable types are not hashable.
             ),
         )
         self.thrift_serialization_round_trip(control)
@@ -509,6 +527,9 @@ class SerializerTerseWriteTests(unittest.TestCase):
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
 
+    def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
+        return to_thrift_set(set_data) if self.is_mutable_run else set_data
+
     def thrift_serialization_round_trip(
         self, control: Union[StructOrUnion, MutableStructOrUnion]
     ) -> None:
@@ -528,7 +549,8 @@ class SerializerTerseWriteTests(unittest.TestCase):
             enum_field=self.MyEnum.ME1,
             # pyre-ignore[6]: TODO: Thrift-Container init
             list_field=self.to_list([1]),
-            set_field={1},
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            set_field=self.to_set({1}),
             map_field={1: 1},
             struct_field=self.MyStruct(field1=1),
             union_field=self.MyUnion(struct_field=self.MyStruct(field1=1)),

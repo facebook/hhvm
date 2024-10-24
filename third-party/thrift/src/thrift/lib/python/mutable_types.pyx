@@ -48,15 +48,28 @@ import cython
 cdef extern from "<Python.h>":
     cdef const char * PyUnicode_AsUTF8(object unicode)
 
-
 @cython.final
 cdef class _ThriftListWrapper:
     def __cinit__(self, list_data):
         self._list_data = list_data
 
-
 def to_thrift_list(list_data):
     return _ThriftListWrapper(list_data)
+
+
+@cython.final
+cdef class _ThriftSetWrapper:
+    def __cinit__(self, set_data):
+        self._set_data = set_data
+
+def to_thrift_set(set_data):
+    return _ThriftSetWrapper(set_data)
+
+
+@cython.final
+cdef class _ThriftContainerWrapper:
+    def __cinit__(self, container_data):
+        self._container_data = container_data
 
 
 def fill_specs(*structured_thrift_classes):

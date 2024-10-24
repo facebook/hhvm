@@ -55,9 +55,6 @@ void processInit() {
 
   Debug::initDebugInfo();
   tc::processInit();
-  if (RuntimeOption::EvalEnableAsyncJIT) {
-    initAsyncTranslationDispatcher();
-  }
 
   if (Trace::moduleEnabledRelease(Trace::printir) &&
       !Cfg::Jit::Enabled) {

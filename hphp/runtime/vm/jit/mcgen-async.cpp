@@ -285,34 +285,24 @@ struct AsyncTranslationWorker
   static constexpr int initialSize = 4096;
   std::unique_ptr<uint8_t[]> m_codeBuffer;
 };
-
-using AsyncTranslationDispatcher = JobQueueDispatcher<AsyncTranslationWorker>;
-std::atomic<AsyncTranslationDispatcher*> s_asyncTranslationDispatcher;
-
-AsyncTranslationDispatcher& asyncTranslationDispatcher() {
-  auto const dispatcher = s_asyncTranslationDispatcher.load(std::memory_order_acquire);
-  assertx(dispatcher);
-  return *dispatcher;
-}
 } // namespace
 
-void initAsyncTranslationDispatcher() {
-  auto const dispatcher = new AsyncTranslationDispatcher(
-    RuntimeOption::EvalAsyncJitWorkerThreads,
-    RuntimeOption::EvalAsyncJitWorkerThreads, 0, false, nullptr
-  );
-  dispatcher->start();
-  s_asyncTranslationDispatcher.store(dispatcher, std::memory_order_release);
+using AsyncTranslationDispatcher = JobQueueDispatcher<AsyncTranslationWorker>;
+AsyncTranslationDispatcher& dispatcher() {
+  static const auto dispatcher = [] {
+    auto d = std::make_unique<AsyncTranslationDispatcher>(
+      RuntimeOption::EvalAsyncJitWorkerThreads,
+      RuntimeOption::EvalAsyncJitWorkerThreads, 0, false, nullptr
+    );
+    d->start();
+    return d;
+  }();
+  return *dispatcher;
 }
 
 void joinAsyncTranslationWorkerThreads() {
-  auto const dispatcher =
-    s_asyncTranslationDispatcher.load(std::memory_order_acquire);
-  if (!dispatcher) return;
-  s_asyncTranslationDispatcher.store(nullptr, std::memory_order_release);
   FTRACE(2, "Waiting for background jit worker threads\n");
-  dispatcher->waitEmpty(true);
-  delete dispatcher;
+  dispatcher().waitEmpty(true);
   // Clearing the ConcurrentHashMap here avoids a crash in the destructor.
   s_enqueuedSKs.clear();
 }
@@ -326,8 +316,7 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
       show(ctx.sk)
     );
   } else {
-    auto& dispatcher = asyncTranslationDispatcher();
-    dispatcher.enqueue(
+    dispatcher().enqueue(
       AsyncRegionTranslationContext {ctx, currNumTranslations}
     );
     FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
@@ -336,12 +325,11 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
 
 void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
   if (!func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
-    auto& dispatcher = asyncTranslationDispatcher();
-    dispatcher.enqueue(AsyncPrologueContext {func->getFuncId(), nPassed});
+    dispatcher().enqueue(AsyncPrologueContext {func->getFuncId(), nPassed});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,
-      "In progress prologue genertion, skipping enqueue for func {}\n",
+      "In progress prologue generation, skipping enqueue for func {}\n",
       func->name()
     );
   }

@@ -21,7 +21,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-namespace apache::thrift::type {
+namespace apache::thrift::type::detail {
 namespace {
 
 std::uintptr_t nBitMask(int bits) {
@@ -36,66 +36,100 @@ std::unique_ptr<T, decltype(folly::aligned_free)*> alignedUniquePtr(
       folly::aligned_free);
 }
 
-TEST(AlignedPtr, ImplicitAlignment) {
-  detail::AlignedPtr<int16_t> i16;
-  EXPECT_EQ(~i16.kMask, nBitMask(1));
+TEST(AlignedPtrDeathTest, PtrConflictsWithTagBits) {
+  // Check that program terminates if trying to assign a pointer that conflicts
+  // with the reserved lower "tag bits".
 
-  detail::AlignedPtr<int32_t> i32;
-  EXPECT_EQ(~i32.kMask, nBitMask(2));
+  static constexpr std::size_t kMaxTagBits = (sizeof(std::uintptr_t) * 8) - 1;
+  int i = 0;
+  using AlignedPtrT =
+      AlignedPtr<int32_t, /*TagBits=*/kMaxTagBits, /*MaxTagBits=*/kMaxTagBits>;
+  ASSERT_DEATH(
+      AlignedPtrT(/*ptr=*/&i, /*tagBits=*/0),
+      "Cannot initialize AlignPtr: ptr uses lower (.+) tag bits:");
 
-  detail::AlignedPtr<int64_t> i64;
-  EXPECT_EQ(~i64.kMask, nBitMask(3));
+  AlignedPtrT p;
+  ASSERT_DEATH(
+      p.set(&i), "Cannot initialize AlignPtr: ptr uses lower (.+) tag bits:");
+}
+
+TEST(AlignedPtrDeathTest, TagBitsExceedNumTagBits) {
+  // Trying to initialize an AlignedPtr with (or set) tagBits that do not fit
+  // within the TagBits limit should fail (i.e., terminate the process)
+  using AlignedPtrT = AlignedPtr<int32_t, /*TagBits=*/1>;
+  ASSERT_DEATH(
+      AlignedPtrT(/*ptr=*/nullptr, /*tagBits=*/0xff),
+      "Cannot initialize AlignPtr: tagBits exceeds (.+) TagBits:");
+
+  // Same failure, on `set()`
+  AlignedPtrT p;
+  ASSERT_DEATH(
+      p.set(/*ptr=*/nullptr, /*tagBits=*/0xff),
+      "Cannot initialize AlignPtr: tagBits exceeds (.+) TagBits:");
+
+  // Same failure, on `setTag()`
+  AlignedPtrT p2;
+  ASSERT_DEATH(
+      p2.setTag(0xff),
+      "Cannot initialize AlignPtr: tagBits exceeds (.+) TagBits:");
+}
+
+TEST(AlignedPtrTest, ImplicitAlignment) {
+  EXPECT_EQ((~AlignedPtr<int16_t>::kPointerMask), nBitMask(1));
+
+  EXPECT_EQ(~AlignedPtr<int32_t>::kPointerMask, nBitMask(2));
+
+  EXPECT_EQ(~AlignedPtr<int64_t>::kPointerMask, nBitMask(3));
 
   struct alignas(16) SixteenByteStruct {
     uint8_t __padding[16];
   };
   EXPECT_EQ(alignof(SixteenByteStruct), 16);
-  detail::AlignedPtr<SixteenByteStruct> sixteen;
-  EXPECT_EQ(~sixteen.kMask, nBitMask(4));
+  EXPECT_EQ(~AlignedPtr<SixteenByteStruct>::kPointerMask, nBitMask(4));
 }
 
-TEST(AlignedPtr, OverAlignment) {
-  detail::AlignedPtr<int16_t, /*Bits=*/3, /*MaxBits=*/3> i16;
-  EXPECT_EQ(~i16.kMask, nBitMask(3));
+TEST(AlignedPtrTest, OverAlignment) {
+  EXPECT_EQ(
+      (~AlignedPtr<int16_t, /*Bits=*/3, /*MaxBits=*/3>::kPointerMask),
+      nBitMask(3));
 
-  detail::AlignedPtr<int32_t, /*Bits=*/3, /*MaxBits=*/3> i32;
-  EXPECT_EQ(~i32.kMask, nBitMask(3));
+  EXPECT_EQ(
+      (~AlignedPtr<int32_t, /*Bits=*/3, /*MaxBits=*/3>::kPointerMask),
+      nBitMask(3));
 
-  detail::AlignedPtr<int64_t, /*Bits=*/3, /*MaxBits=*/4> i64;
-  EXPECT_EQ(~i64.kMask, nBitMask(3));
+  EXPECT_EQ(
+      (~AlignedPtr<int64_t, /*Bits=*/3, /*MaxBits=*/4>::kPointerMask),
+      nBitMask(3));
 
-  detail::AlignedPtr<
+  using AlignedUintPtr = AlignedPtr<
       unsigned int,
       /*Bits=*/3,
-      /*MaxBits=*/std::max(3UL, folly::constexpr_log2(alignof(unsigned int)))>
-      uint;
-  EXPECT_EQ(~uint.kMask, nBitMask(3));
+      /*MaxBits=*/std::max(3UL, folly::constexpr_log2(alignof(unsigned int)))>;
+  EXPECT_EQ(~AlignedUintPtr::kPointerMask, nBitMask(3));
 
   struct alignas(16) SixteenByteStruct {
     uint8_t __padding[16];
   };
-  detail::AlignedPtr<SixteenByteStruct, /*Bits=*/5, /*MaxBits=*/5> sixteen;
-  EXPECT_EQ(~sixteen.kMask, nBitMask(5));
+  EXPECT_EQ(
+      (~AlignedPtr<SixteenByteStruct, /*Bits=*/5, /*MaxBits=*/5>::kPointerMask),
+      nBitMask(5));
 }
 
-TEST(AlignedPtr, UnderAlignment) {
-  detail::AlignedPtr<int32_t, 2> i32;
-  EXPECT_EQ(~i32.kMask, nBitMask(2));
+TEST(AlignedPtrTest, UnderAlignment) {
+  EXPECT_EQ((~AlignedPtr<int32_t, 2>::kPointerMask), nBitMask(2));
 
-  detail::AlignedPtr<int64_t, 1> i64;
-  EXPECT_EQ(~i64.kMask, nBitMask(1));
+  EXPECT_EQ((~AlignedPtr<int64_t, 1>::kPointerMask), nBitMask(1));
 
   struct alignas(16) SixteenByteStruct {
     uint8_t __padding[16];
   };
-  detail::AlignedPtr<SixteenByteStruct, 3> sixteen;
-  EXPECT_EQ(~sixteen.kMask, nBitMask(3));
+  EXPECT_EQ((~AlignedPtr<SixteenByteStruct, 3>::kPointerMask), nBitMask(3));
 }
 
-TEST(AlignedPtr, set) {
+TEST(AlignedPtrTest, set) {
   static constexpr size_t kBits = 3;
   auto a = alignedUniquePtr<int32_t>(kBits);
-  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 2};
+  AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 2};
 
   EXPECT_EQ(uut.get(), a.get());
   EXPECT_EQ(uut.getTag(), 2);
@@ -111,10 +145,10 @@ TEST(AlignedPtr, set) {
   EXPECT_EQ(uut.getTag(), 0);
 }
 
-TEST(AlignedPtr, setTag) {
+TEST(AlignedPtrTest, setTag) {
   static constexpr size_t kBits = 3;
   auto a = alignedUniquePtr<int32_t>(kBits);
-  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get()};
+  AlignedPtr<int32_t, kBits, kBits> uut{a.get()};
 
   EXPECT_EQ(uut.getTag(), 0);
   for (int i = 0; i < 8; i++) {
@@ -123,10 +157,10 @@ TEST(AlignedPtr, setTag) {
   }
 }
 
-TEST(AlignedPtr, clear) {
+TEST(AlignedPtrTest, clear) {
   static constexpr size_t kBits = 3;
   auto a = alignedUniquePtr<int32_t>(kBits);
-  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), (1 << kBits) - 1};
+  AlignedPtr<int32_t, kBits, kBits> uut{a.get(), (1 << kBits) - 1};
 
   EXPECT_EQ(uut.get(), a.get());
   EXPECT_EQ(uut.getTag(), (1 << kBits) - 1);
@@ -136,10 +170,10 @@ TEST(AlignedPtr, clear) {
   EXPECT_EQ(uut.getTag(), 0);
 }
 
-TEST(AlignedPtr, clearTag) {
+TEST(AlignedPtrTest, clearTag) {
   static constexpr size_t kBits = 3;
   auto a = alignedUniquePtr<int32_t>(kBits);
-  detail::AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 5};
+  AlignedPtr<int32_t, kBits, kBits> uut{a.get(), 5};
 
   EXPECT_EQ(uut.get(), a.get());
   EXPECT_EQ(uut.getTag(), 5);
@@ -150,4 +184,4 @@ TEST(AlignedPtr, clearTag) {
 }
 
 } // namespace
-} // namespace apache::thrift::type
+} // namespace apache::thrift::type::detail

@@ -73,3 +73,29 @@ func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, erro
 	}
 	return payload.New(nil, metadataBytes), nil
 }
+
+type clientMetadataPayload struct {
+	transportMetadata map[string]string
+}
+
+func decodeClientMetadataPush(msg payload.Payload) *clientMetadataPayload {
+	msg = payload.Clone(msg)
+	metadataBytes, ok := msg.Metadata()
+	if !ok {
+		panic("no metadata in client metadata push")
+	}
+	// Use ClientPushMetadata{} and do not use &ClientPushMetadata{} to ensure stack and avoid heap allocation.
+	metadata := rpcmetadata.ClientPushMetadata{}
+	if err := deserializeCompact(metadataBytes, &metadata); err != nil {
+		panic(fmt.Errorf("unable to deserialize metadata push into ClientPushMetadata %w", err))
+	}
+	res := &clientMetadataPayload{}
+	if metadata.InteractionTerminate != nil {
+		panic("client metadata push: InteractionTerminate not implemented")
+	} else if metadata.StreamHeadersPush != nil {
+		panic("client metadata push: StreamHeadersPush not implemented")
+	} else if metadata.TransportMetadataPush != nil {
+		res.transportMetadata = metadata.GetTransportMetadataPush().GetTransportMetadata()
+	}
+	return res
+}

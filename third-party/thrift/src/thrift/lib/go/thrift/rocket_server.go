@@ -77,6 +77,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 	sendingSocket.MetadataPush(serverMetadataPush)
 	conn := newRocketServerSocket(ctx, s.proc, s.log)
 	return rsocket.NewAbstractSocket(
+		rsocket.MetadataPush(conn.metadataPush),
 		rsocket.RequestResponse(conn.requestResonse),
 		rsocket.FireAndForget(conn.fireAndForget),
 	), nil
@@ -90,6 +91,11 @@ type rocketServerSocket struct {
 
 func newRocketServerSocket(ctx context.Context, proc Processor, log func(format string, args ...interface{})) *rocketServerSocket {
 	return &rocketServerSocket{ctx: ctx, proc: proc, log: log}
+}
+
+func (r *rocketServerSocket) metadataPush(msg payload.Payload) {
+	clientMetadataPush := decodeClientMetadataPush(msg)
+	r.log("received metadata push from client: %v\n", clientMetadataPush.transportMetadata)
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {

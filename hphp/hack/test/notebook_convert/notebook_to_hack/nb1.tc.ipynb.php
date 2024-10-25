@@ -1,5 +1,5 @@
 <?hh
-
+// copyright header here
 //@bento-cell:{"id": 2, "cell_type": "markdown"}
 /*
 # Check it out

@@ -29,12 +29,15 @@ let split_by_chunk_comments
   |> List.filter_map ~f:(function
          | [] -> None
          | chunk_start_comment :: hack_lines_rev ->
-           hack_lines_rev
-           |> String.concat ~sep:"\n"
-           |> Notebook_chunk.of_hack_exn
-                ~comment:chunk_start_comment
-                ~is_from_toplevel_statements
-           |> Option.some)
+           if Notebook_chunk.is_chunk_start_comment chunk_start_comment then
+             Some
+               (hack_lines_rev
+               |> String.concat ~sep:"\n"
+               |> Notebook_chunk.of_hack_exn
+                    ~comment:chunk_start_comment
+                    ~is_from_toplevel_statements)
+           else
+             None)
 
 let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   let contents =

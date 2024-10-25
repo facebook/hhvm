@@ -84,7 +84,8 @@ let chunks_of_cells_exn (cells : Ipynb.cell list) : Notebook_chunk.t list =
 * - We preserve metadata so we can reconstruct the notebook structure
 * - We convert top-level statements into a single top-level function
 *)
-let hack_of_cells_exn ~(notebook_name : string) (cells : Ipynb.cell list) :
+let hack_of_cells_exn
+    ~(notebook_name : string) ~(header : string) (cells : Ipynb.cell list) :
     string =
   let (non_stmts, stmts) =
     cells
@@ -106,15 +107,16 @@ let hack_of_cells_exn ~(notebook_name : string) (cells : Ipynb.cell list) :
     |> Printf.sprintf "function notebook_main_%s(): void {\n%s\n}" notebook_name
   in
   let unformatted =
-    Printf.sprintf "<?hh\n\n%s\n\n%s\n" non_stmts_code main_fn_code
+    Printf.sprintf "<?hh\n%s\n%s\n\n%s\n" header non_stmts_code main_fn_code
   in
   Notebook_convert_util.hackfmt unformatted
 
-let notebook_to_hack ~(notebook_name : string) (ipynb_json : Hh_json.json) :
+let notebook_to_hack
+    ~(notebook_name : string) ~(header : string) (ipynb_json : Hh_json.json) :
     (string, string) Result.t =
   try
     ipynb_json
     |> Ipynb.ipynb_of_json
-    |> Result.map ~f:(hack_of_cells_exn ~notebook_name)
+    |> Result.map ~f:(hack_of_cells_exn ~notebook_name ~header)
   with
   | e -> Error (Exn.to_string e)

@@ -535,9 +535,18 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         " (mode) show client lsp log filename and exit" );
       ("--no-load", Arg.Set no_load, " start from a fresh state");
       ( "--notebook-to-hack",
-        Arg.String
-          (fun notebook_name -> set_mode (MODE_NOTEBOOK_TO_HACK notebook_name)),
-        "Convert notebook to a Hack file. Arg: notebook_name. Pass notebook in .ipynb format to stdin"
+        (let notebook_name = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) notebook_name);
+             Arg.String
+               (fun notebook_header ->
+                 set_mode
+                   (MODE_NOTEBOOK_TO_HACK
+                      { notebook_name = !notebook_name; notebook_header }));
+           ]),
+        "Convert notebook to a Hack file. Arg: notebook_name. "
+        ^ "Pass notebook in .ipynb format to stdin and a header (such as a copyright notice comment)"
       );
       ( "--outline",
         Arg.Unit (fun () -> set_mode MODE_OUTLINE),

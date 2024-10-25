@@ -558,6 +558,7 @@ function find_test_files(string $file): vec<string>{
     'zend_ext'    => 'hphp/test/zend/good/ext',
     'zend_Zend'   => 'hphp/test/zend/good/Zend',
     'zend_tests'  => 'hphp/test/zend/good/tests',
+    'cryptonative' => 'hphp/facebook/extensions/cryptonative/test'
   ];
 
   $pattern = $mappage[$file] ?? null;

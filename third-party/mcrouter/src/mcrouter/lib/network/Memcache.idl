@@ -257,6 +257,7 @@ request McIncrRequest with 1: MemcacheRequestCommon {
 
   1: carbon::Keys<folly::IOBuf> key;
   2: int64_t delta;
+  3: uint64_t flags;
 };
 
 reply McIncrReply with 1: MemcacheReplyCommon {
@@ -279,6 +280,7 @@ request McDecrRequest with 1: MemcacheRequestCommon {
 
   1: carbon::Keys<folly::IOBuf> key;
   2: int64_t delta;
+  3: uint64_t flags;
 };
 
 reply McDecrReply with 1: MemcacheReplyCommon {

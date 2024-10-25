@@ -1124,6 +1124,7 @@ void McIncrRequest::serialize(Writer&& writer) const {
   writer.writeField(-1 /* field id */, memcacheRequestCommon_ref());
   writer.writeField(1 /* field id */, key_ref());
   writer.writeField(2 /* field id */, delta_ref());
+  writer.writeField(3 /* field id */, flags_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -1142,6 +1143,9 @@ void McIncrRequest::visitFields(V&& v) {
   if (!v.visitField(2, "delta", *this->delta_ref())) {
     return;
   }
+  if (!v.visitField(3, "flags", *this->flags_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -1156,6 +1160,9 @@ void McIncrRequest::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(2, "delta", *this->delta_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "flags", *this->flags_ref())) {
     return;
   }
 }
@@ -1222,6 +1229,7 @@ void McDecrRequest::serialize(Writer&& writer) const {
   writer.writeField(-1 /* field id */, memcacheRequestCommon_ref());
   writer.writeField(1 /* field id */, key_ref());
   writer.writeField(2 /* field id */, delta_ref());
+  writer.writeField(3 /* field id */, flags_ref());
   writer.writeFieldStop();
   writer.writeStructEnd();
 }
@@ -1240,6 +1248,9 @@ void McDecrRequest::visitFields(V&& v) {
   if (!v.visitField(2, "delta", *this->delta_ref())) {
     return;
   }
+  if (!v.visitField(3, "flags", *this->flags_ref())) {
+    return;
+  }
 }
 
 template <class V>
@@ -1254,6 +1265,9 @@ void McDecrRequest::visitFields(V&& v) const {
     return;
   }
   if (!v.visitField(2, "delta", *this->delta_ref())) {
+    return;
+  }
+  if (!v.visitField(3, "flags", *this->flags_ref())) {
     return;
   }
 }

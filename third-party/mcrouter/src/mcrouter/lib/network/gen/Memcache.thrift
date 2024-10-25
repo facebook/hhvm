@@ -420,6 +420,7 @@ struct McIncrRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i64 delta
+  3: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -458,6 +459,7 @@ struct McDecrRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
   2: i64 delta
+  3: i64_8073 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

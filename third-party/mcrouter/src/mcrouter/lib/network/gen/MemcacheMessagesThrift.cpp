@@ -860,6 +860,10 @@ void McIncrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
         reader.readField(delta_ref(), fieldType);
         break;
       }
+      case 3: {
+        reader.readField(flags_ref(), fieldType);
+        break;
+      }
       default: {
         reader.skip(fieldType);
         break;
@@ -932,6 +936,10 @@ void McDecrRequest::deserialize(carbon::CarbonProtocolReader& reader) {
       }
       case 2: {
         reader.readField(delta_ref(), fieldType);
+        break;
+      }
+      case 3: {
+        reader.readField(flags_ref(), fieldType);
         break;
       }
       default: {

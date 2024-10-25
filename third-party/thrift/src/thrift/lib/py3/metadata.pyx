@@ -33,7 +33,7 @@ from thrift.python.types import (
     ServiceInterface as PyServiceInterface,
     StructOrUnion as PyStructOrUnion,
 )
-from apache.thrift.metadata.types cimport (
+from apache.thrift.metadata.cbindings cimport (
     cThriftMetadata,
     cThriftStruct,
     cThriftException,

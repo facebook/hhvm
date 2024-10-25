@@ -16,7 +16,7 @@ from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
-from convertible.types cimport cSimple, cNested, cUnion
+from convertible.cbindings cimport cSimple, cNested, cUnion
 cimport convertible.converter as converter
 
 cdef extern from *:

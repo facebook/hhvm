@@ -15,7 +15,7 @@
 from cython.operator cimport dereference as deref
 from libc.stdint cimport int32_t
 from libcpp.memory cimport shared_ptr, make_shared
-from testing.types cimport cHardError, cUnusedError
+from testing.cbindings cimport cHardError, cUnusedError
 from testing.converter cimport (
     HardError_from_cpp,
     UnusedError_from_cpp,

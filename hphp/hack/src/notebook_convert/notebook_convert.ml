@@ -26,23 +26,61 @@ Error:
     in
     Exit_status.Input_error
 
+let string_of_syntax_errors (syntax_errors : Full_fidelity_syntax_error.t list)
+    : string =
+  syntax_errors
+  |> List.map ~f:Full_fidelity_syntax_error.show
+  |> String.concat ~sep:", "
+
+(* Assumes we only try to convert syntactically valid Hack into ipynb_json *)
+let validate_hack_to_notebook_exn ipynb_json : unit =
+  match
+    Notebook_to_hack.notebook_to_hack ~notebook_name:"N12345" ipynb_json
+  with
+  | Ok hack2 ->
+    let syntax_errors = snd @@ Notebook_convert_util.parse hack2 in
+    if not @@ List.is_empty syntax_errors then
+      let excerpt = String.sub hack2 ~pos:0 ~len:200 in
+      failwith
+      @@ Printf.sprintf
+           {|Internal error: converting to hack notebook produced ipynb that can no longer be converted back to syntactically valid hack.
+Excerpt:\n%s\nErrors: %s"|}
+           excerpt
+           (string_of_syntax_errors syntax_errors)
+  | Error err ->
+    failwith
+    @@ Printf.sprintf
+         "Internal error: converting to notebook produced ipynb json that can't be converted back into hack. Error: %s\nipynb_json:\n%s"
+         err
+         (Hh_json.json_to_string ~sort_keys:true ~pretty:true ipynb_json)
+
 let hack_to_notebook () : Exit_status.t =
   let hack = Sys_utils.read_stdin_to_string () in
-  match Hack_to_notebook.hack_to_notebook hack with
-  | Ok ipynb_json ->
-    let json_string =
-      Hh_json.json_to_string ~sort_keys:true ~pretty:true ipynb_json
-    in
-    let () = print_endline json_string in
-    Exit_status.No_error
-  | Error err ->
+  let (tree, syntax_errors) = Notebook_convert_util.parse hack in
+  if not @@ List.is_empty syntax_errors then
     let () =
       Printf.eprintf
-        {| Received input that was not in the expected format.
+        "Received syntactically invalid Hack: %s"
+        (string_of_syntax_errors syntax_errors)
+    in
+    Exit_status.Input_error
+  else
+    match Hack_to_notebook.hack_to_notebook tree with
+    | Ok ipynb_json ->
+      let () = validate_hack_to_notebook_exn ipynb_json in
+      let ipynb_json_string =
+        Hh_json.json_to_string ~sort_keys:true ~pretty:true ipynb_json
+      in
+      let () = print_endline ipynb_json_string in
+      Exit_status.No_error
+    | Error err ->
+      let () =
+        Printf.eprintf
+          {| Received input that was not in the expected format.
 Expected a valid Hack file with special comments for notebook cell information.
 Such files should only be created via `hh --notebook-to-hack`. Error:
 %s
 |}
-        err
-    in
-    Exit_status.Input_error
+          err
+      in
+      Exit_status.Input_error

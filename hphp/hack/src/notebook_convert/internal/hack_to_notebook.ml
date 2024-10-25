@@ -59,12 +59,15 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   in
   Notebook_chunk.{ chunk with contents }
 
-let hack_to_notebook_exn (hack : string) : Hh_json.json =
+let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
+    Hh_json.json =
   let script_children =
-    match Notebook_convert_util.parse hack with
+    match syntax with
     | Syn.{ syntax = Script { script_declarations }; _ } ->
       Syn.children script_declarations
-    | _ -> failwith "Expected Hack script"
+    | _ ->
+      failwith
+        "Internal error: expected Hack script. This should be unreachable since we validate inputs are well-formed Hack."
   in
   let decls =
     match script_children with
@@ -128,6 +131,7 @@ let hack_to_notebook_exn (hack : string) : Hh_json.json =
   |> Ipynb.ipynb_of_chunks_exn
   |> Ipynb.ipynb_to_json
 
-let hack_to_notebook (hack : string) : (Hh_json.json, string) result =
-  try Ok (hack_to_notebook_exn hack) with
+let hack_to_notebook (syntax : Full_fidelity_positioned_syntax.t) :
+    (Hh_json.json, string) result =
+  try Ok (hack_to_notebook_exn syntax) with
   | e -> Error (Exn.to_string e)

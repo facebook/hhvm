@@ -5,6 +5,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val parse : string -> Full_fidelity_positioned_syntax.t
+val parse :
+  string ->
+  Full_fidelity_positioned_syntax.t * Full_fidelity_syntax_error.t list
 
 val hackfmt : string -> string

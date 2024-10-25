@@ -23,9 +23,12 @@ let head_id (chunks : Notebook_chunk.t list) : Notebook_chunk.Id.t =
 * We build the list up in reverse to stay O(n) and merge
 * chunks where we can to avoid redundant comments.
 *)
-let chunks_of_hack ~(acc : Notebook_chunk.t list) id (source : string) :
+let chunks_of_hack_exn ~(acc : Notebook_chunk.t list) id (source : string) :
     Notebook_chunk.t list =
-  let syn = Notebook_convert_util.parse source in
+  let (syn, errors) = Notebook_convert_util.parse source in
+  let () =
+    if not @@ List.is_empty errors then failwith "Hack input has syntax errors"
+  in
   match Syn.syntax syn with
   | Syn.(Script { script_declarations }) ->
     List.fold ~init:acc (Syn.children script_declarations) ~f:(fun acc syn ->
@@ -63,12 +66,12 @@ let chunks_of_hack ~(acc : Notebook_chunk.t list) id (source : string) :
 
 (** Massage the cells from the ipynb into an internal format more amenable
 * to generating Hack. *)
-let chunks_of_cells (cells : Ipynb.cell list) : Notebook_chunk.t list =
+let chunks_of_cells_exn (cells : Ipynb.cell list) : Notebook_chunk.t list =
   cells
   |> List.fold ~init:[] ~f:(fun chunks cell ->
          let id = Notebook_chunk.Id.next (head_id chunks) in
          match cell with
-         | Ipynb.Hack source -> chunks_of_hack ~acc:chunks id source
+         | Ipynb.Hack source -> chunks_of_hack_exn ~acc:chunks id source
          | Ipynb.(Non_hack { cell_type; contents : string }) ->
            let chunk =
              Notebook_chunk.
@@ -81,10 +84,11 @@ let chunks_of_cells (cells : Ipynb.cell list) : Notebook_chunk.t list =
 * - We preserve metadata so we can reconstruct the notebook structure
 * - We convert top-level statements into a single top-level function
 *)
-let hack_of_cells ~(notebook_name : string) (cells : Ipynb.cell list) : string =
+let hack_of_cells_exn ~(notebook_name : string) (cells : Ipynb.cell list) :
+    string =
   let (non_stmts, stmts) =
     cells
-    |> chunks_of_cells
+    |> chunks_of_cells_exn
     |> List.partition_map ~f:(fun chunk ->
            let hack = Notebook_chunk.to_hack chunk in
            match chunk.Notebook_chunk.chunk_kind with
@@ -108,6 +112,9 @@ let hack_of_cells ~(notebook_name : string) (cells : Ipynb.cell list) : string =
 
 let notebook_to_hack ~(notebook_name : string) (ipynb_json : Hh_json.json) :
     (string, string) Result.t =
-  ipynb_json
-  |> Ipynb.ipynb_of_json
-  |> Result.map ~f:(hack_of_cells ~notebook_name)
+  try
+    ipynb_json
+    |> Ipynb.ipynb_of_json
+    |> Result.map ~f:(hack_of_cells_exn ~notebook_name)
+  with
+  | e -> Error (Exn.to_string e)

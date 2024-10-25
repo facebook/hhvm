@@ -14,14 +14,16 @@ let tree_of_code (hack : string) : Tree.t =
   let source_text = Full_fidelity_source_text.make Relative_path.default hack in
   Tree.make ~env source_text
 
-let parse (hack : string) : Full_fidelity_positioned_syntax.t =
-  Tree.root @@ tree_of_code hack
+let parse (hack : string) :
+    Full_fidelity_positioned_syntax.t * Full_fidelity_syntax_error.t list =
+  let tree = tree_of_code hack in
+  (Tree.root tree, Tree.all_errors tree)
 
 let hackfmt (hack : string) : string =
   let module Tree =
     Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax) in
   let tree = tree_of_code hack in
-  if List.is_empty (Tree.all_errors tree) then
+  if List.is_empty @@ Tree.all_errors tree then
     Libhackfmt.format_tree tree
   else
     hack

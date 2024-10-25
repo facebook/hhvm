@@ -7,4 +7,5 @@
  *)
 open Hh_prelude
 
-val hack_to_notebook : string -> (Hh_json.json, string) result
+val hack_to_notebook :
+  Full_fidelity_positioned_syntax.t -> (Hh_json.json, string) result

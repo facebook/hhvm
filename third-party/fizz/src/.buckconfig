@@ -1,6 +1,6 @@
 [cells]
 gh_facebookincubator_fizz = .
-gh_facebook_buck2_shims_meta = shim
+shim_DISABLED = shim
 
 [cell_aliases]
 root = gh_facebookincubator_fizz

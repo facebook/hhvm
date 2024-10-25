@@ -6431,7 +6431,7 @@ end = struct
     Markdown_lite.md_codify (ty_descr ^ ty_constraints)
 
   let explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env =
-    let r_super = Typing_defs.reason ty_sup in
+    let r_super = Typing_reason.reverse_flow @@ Typing_defs.reason ty_sup in
     let r_sub = Typing_defs.reason ty_sub in
     let reasons =
       lazy
@@ -6445,8 +6445,7 @@ end = struct
              (ty_super_descr, ty_sub_descr)
          in
          let left =
-           Typing_reason.to_string ("Expected " ^ ty_super_descr)
-           @@ Typing_reason.reverse_flow r_super
+           Typing_reason.to_string ("Expected " ^ ty_super_descr) r_super
          in
          let right =
            Typing_reason.to_string ("But got " ^ ty_sub_descr) r_sub
@@ -6594,6 +6593,7 @@ end = struct
           (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
         ]
     in
+    let reason_super = Typing_reason.reverse_flow reason_super in
     let lod =
       Option.value ~default:GlobalOptions.Legacy
       @@ TypecheckerOptions.tco_extended_reasons
@@ -6778,6 +6778,7 @@ end = struct
           (def_pos, Markdown_lite.md_codify name ^ " is defined here");
         ]
     in
+    let r_super = Typing_reason.reverse_flow r_super in
     let lod =
       Option.value ~default:GlobalOptions.Legacy
       @@ TypecheckerOptions.tco_extended_reasons

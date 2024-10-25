@@ -168,19 +168,7 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  6 |   f(inout tuple($x, $y));
  7 | }
 
-The supertype comes from this element (Rpessimised_inout)
-
-File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
-
- 1 | <?hh
- 2 | 
- 3 | function f(inout varray<int> »$a«): void {}
- 4 | 
- 5 | function test(int $x, int $y): void {
- 6 |   f(inout tuple($x, $y));
- 7 | }
-
-and flows into this expression
+The supertype comes from this expression
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -190,6 +178,18 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  4 | 
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
+ 7 | }
+
+and flows into this element (Rpessimised_inout)
+
+File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(inout varray<int> »$a«): void {}
+ 4 | 
+ 5 | function test(int $x, int $y): void {
+ 6 |   f(inout tuple($x, $y));
  7 | }
 
 via an assignment
@@ -223,14 +223,14 @@ File hackarray.hhi, line 52, character 24 - line 52, character 26:
 
 The supertype is the same as before.
 
-File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
  1 | <?hh
  2 | 
- 3 | function f(inout varray<int> »$a«): void {}
+ 3 | function f(inout varray<int> $a): void {}
  4 | 
  5 | function test(int $x, int $y): void {
- 6 |   f(inout tuple($x, $y));
+ 6 |   f(inout »tuple($x, $y)«);
  7 | }
 
 error: Typing[4110] Invalid argument to an inout parameter
@@ -288,19 +288,7 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
  6 |   f(inout tuple($x, $y));
  7 | }
 
-The supertype comes from this element (Rpessimised_inout)
-
-File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
-
- 1 | <?hh
- 2 | 
- 3 | function f(inout varray<int> »$a«): void {}
- 4 | 
- 5 | function test(int $x, int $y): void {
- 6 |   f(inout tuple($x, $y));
- 7 | }
-
-and flows into this expression
+The supertype comes from this expression
 
 File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
@@ -310,6 +298,18 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  4 | 
  5 | function test(int $x, int $y): void {
  6 |   f(inout »tuple($x, $y)«);
+ 7 | }
+
+and flows into this element (Rpessimised_inout)
+
+File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+
+ 1 | <?hh
+ 2 | 
+ 3 | function f(inout varray<int> »$a«): void {}
+ 4 | 
+ 5 | function test(int $x, int $y): void {
+ 6 |   f(inout tuple($x, $y));
  7 | }
 
 via an assignment
@@ -333,14 +333,14 @@ File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 
 The supertype is the same as before.
 
-File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
+File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
 
  1 | <?hh
  2 | 
- 3 | function f(inout varray<int> »$a«): void {}
+ 3 | function f(inout varray<int> $a): void {}
  4 | 
  5 | function test(int $x, int $y): void {
- 6 |   f(inout tuple($x, $y));
+ 6 |   f(inout »tuple($x, $y)«);
  7 | }
 
 4 errors found

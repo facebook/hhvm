@@ -3775,7 +3775,8 @@ module Derivation = struct
       | Flow_fun_return -> "as the return hint"
       | Flow_param_hint -> "as the parameter hint"
       | Flow_return_expr -> "because it is used in a return position"
-      | Flow_instantiate nm -> Format.sprintf "via the generic `%s`" nm
+      | Flow_instantiate nm ->
+        Format.sprintf "as the instantiation of the generic `%s`" nm
 
     let rec explain t ~st ~cfg ~ctxt =
       match t with
@@ -4159,7 +4160,7 @@ module Derivation = struct
       (expl_in @ expl_solution, st)
 
     and explain_instantiate (r1, nm, r2) ~st ~cfg ~ctxt =
-      explain_flow (r2, r1, Flow_instantiate nm) ~st ~cfg ~ctxt
+      explain_flow (r1, r2, Flow_instantiate nm) ~st ~cfg ~ctxt
 
     and explain_idx (pos, _r) ~st ~cfg:_ ~ctxt:_ =
       ( [Explanation.Witness (Pos_or_decl.of_raw_pos pos, "index expression")],

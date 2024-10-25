@@ -235,18 +235,6 @@ File class_subtyping_contravariant.php, line 7, character 7 - line 7, character 
 
 The supertype comes from this hint
 
-File class_subtyping_contravariant.php, line 5, character 37 - line 5, character 38:
-
- 1 | <?hh
- 2 | 
- 3 | class MyA<+Tco, -Tcontra, Tinv> {}
- 4 | 
- 5 | class MyB<-T1, T2> extends MyA<Sub, »T1«, T2> {}
- 6 | 
- 7 | class Super {}
-
-and flows into this hint
-
 File class_subtyping_contravariant.php, line 14, character 40 - line 14, character 42:
 
  10 | class Sub extends Super {}
@@ -256,8 +244,6 @@ File class_subtyping_contravariant.php, line 14, character 40 - line 14, charact
  14 | function subtype_bad_contravariant(MyB<»Sub«, Super> $x): void {
  15 |   takes_my_a($x);
  16 | }
-
-via the generic T1
 
 which is defined here
 
@@ -271,5 +257,19 @@ File class_subtyping_contravariant.php, line 10, character 7 - line 10, characte
 10 | class »Sub« extends Super {}
 11 | 
 12 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+
+and flows into this hint
+
+File class_subtyping_contravariant.php, line 5, character 37 - line 5, character 38:
+
+ 1 | <?hh
+ 2 | 
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends MyA<Sub, »T1«, T2> {}
+ 6 | 
+ 7 | class Super {}
+
+as the instantiation of the generic T1
 
 1 error found

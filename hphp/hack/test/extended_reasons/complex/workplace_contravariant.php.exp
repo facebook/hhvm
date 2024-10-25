@@ -30,7 +30,7 @@ File workplace_contravariant.php, line 12, character 39 - line 12, character 44:
 
 Here's why:
 
-I checked the subtype constraint in [Main] because it was implied by the other constraints on the hint.
+I checked the subtype constraint in [Main] because it was implied by the other constraints on the generic parameter TB of TestServiceBase.
 
   [Main] Step 1 of 2                                                            
 
@@ -176,7 +176,17 @@ File workplace_contravariant.php, line 13, character 29 - line 13, character 30:
 
 as the type of the local variable
 
-The supertype comes from this hint
+The supertype comes from this generic parameter TB of TestServiceBase
+
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
+
+ 11 | final class TestServiceWA extends TestServiceBase<int, string> {
+ 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
+ 13 |     »parent::__construct($a, $b, $sender)«;
+ 14 |   }
+ 15 | }
+
+and flows into this hint
 
 File workplace_contravariant.php, line 6, character 15 - line 6, character 16:
 
@@ -188,17 +198,7 @@ File workplace_contravariant.php, line 6, character 15 - line 6, character 16:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter TB of TestServiceBase
-
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
- 14 |   }
- 15 | }
-
-via the generic TB
+as the instantiation of the generic TB
 
 I found the supertype for [Main] when I checked the subtype constraint in [Upper].
 
@@ -323,7 +323,17 @@ File workplace_contravariant.php, line 12, character 63 - line 12, character 66:
 
 The subtype is a nullable type so next I checked the subtype constraint is satisfied for both the null & non-null parts.
 
-The subtype comes from this hint
+The subtype comes from this generic parameter TB of TestServiceBase
+
+File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
+
+ 11 | final class TestServiceWA extends TestServiceBase<int, string> {
+ 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
+ 13 |     »parent::__construct($a, $b, $sender)«;
+ 14 |   }
+ 15 | }
+
+and flows into this hint
 
 File workplace_contravariant.php, line 7, character 18 - line 7, character 19:
 
@@ -335,17 +345,7 @@ File workplace_contravariant.php, line 7, character 18 - line 7, character 19:
  8 |   ) {}
  9 | }
 
-and flows into this generic parameter TB of TestServiceBase
-
-File workplace_contravariant.php, line 13, character 5 - line 13, character 40:
-
- 11 | final class TestServiceWA extends TestServiceBase<int, string> {
- 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {
- 13 |     »parent::__construct($a, $b, $sender)«;
- 14 |   }
- 15 | }
-
-via the generic TB
+as the instantiation of the generic TB
 
 The supertype is the same as before.
 

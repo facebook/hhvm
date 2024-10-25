@@ -81,7 +81,16 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 
 classname is a newtype so next I checked the 1st type arguments.
 
-The subtype comes from this implicitly defined constant ::class of class \foo
+The subtype comes from this expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 14:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo«::class;
+ 17 | }
+
+and flows into this implicitly defined constant ::class of class \foo
 
 File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 
@@ -91,16 +100,7 @@ File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 10 |     return 1;
 11 |   }
 
-and flows into this expression
-
-File workplace_invariant.php, line 16, character 12 - line 16, character 14:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
- 16 |     return »foo«::class;
- 17 | }
-
-via the generic this
+as the instantiation of the generic this
 
 The supertype comes from this hint
 
@@ -289,7 +289,16 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 
 classname is a newtype so next I checked the 1st type arguments.
 
-The subtype comes from this implicitly defined constant ::class of class \foo
+The subtype comes from this expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 14:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo«::class;
+ 17 | }
+
+and flows into this implicitly defined constant ::class of class \foo
 
 File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 
@@ -299,16 +308,7 @@ File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 10 |     return 1;
 11 |   }
 
-and flows into this expression
-
-File workplace_invariant.php, line 16, character 12 - line 16, character 14:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
- 16 |     return »foo«::class;
- 17 | }
-
-via the generic this
+as the instantiation of the generic this
 
 The supertype comes from this hint
 
@@ -474,7 +474,16 @@ File workplace_invariant.php, line 15, character 33 - line 15, character 50:
 
 classname is a newtype so next I checked the 1st type arguments.
 
-The subtype comes from this implicitly defined constant ::class of class \foo
+The subtype comes from this expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 14:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo«::class;
+ 17 | }
+
+and flows into this implicitly defined constant ::class of class \foo
 
 File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 
@@ -484,16 +493,7 @@ File workplace_invariant.php, line 8, character 13 - line 8, character 15:
 10 |     return 1;
 11 |   }
 
-and flows into this expression
-
-File workplace_invariant.php, line 16, character 12 - line 16, character 14:
-
- 14 | 
- 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
- 16 |     return »foo«::class;
- 17 | }
-
-via the generic this
+as the instantiation of the generic this
 
 The supertype comes from this hint
 

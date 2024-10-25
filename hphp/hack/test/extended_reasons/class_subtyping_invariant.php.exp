@@ -235,18 +235,6 @@ File class_subtyping_invariant.php, line 7, character 7 - line 7, character 11:
 
 The supertype comes from this hint
 
-File class_subtyping_invariant.php, line 5, character 41 - line 5, character 42:
-
- 1 | <?hh
- 2 | 
- 3 | class MyA<+Tco, -Tcontra, Tinv> {}
- 4 | 
- 5 | class MyB<-T1, T2> extends MyA<Sub, T1, »T2«> {}
- 6 | 
- 7 | class Super {}
-
-and flows into this hint
-
 File class_subtyping_invariant.php, line 13, character 43 - line 13, character 45:
 
   9 | class Sub extends Super {}
@@ -256,8 +244,6 @@ File class_subtyping_invariant.php, line 13, character 43 - line 13, character 4
  13 | function subtype_bad_invariant(MyB<Super, »Sub«> $x): void {
  14 |   takes_my_a($x);
  15 | }
-
-via the generic T2
 
 which is defined here
 
@@ -270,5 +256,19 @@ File class_subtyping_invariant.php, line 9, character 7 - line 9, character 9:
  9 | class »Sub« extends Super {}
 10 | 
 11 | function takes_my_a(MyA<Sub, Super, Super> $_): void {}
+
+and flows into this hint
+
+File class_subtyping_invariant.php, line 5, character 41 - line 5, character 42:
+
+ 1 | <?hh
+ 2 | 
+ 3 | class MyA<+Tco, -Tcontra, Tinv> {}
+ 4 | 
+ 5 | class MyB<-T1, T2> extends MyA<Sub, T1, »T2«> {}
+ 6 | 
+ 7 | class Super {}
+
+as the instantiation of the generic T2
 
 1 error found

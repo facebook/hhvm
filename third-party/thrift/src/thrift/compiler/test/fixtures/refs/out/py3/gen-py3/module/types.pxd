@@ -271,6 +271,8 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custo
         bint operator>(cAdaptedStructWithInternBox&)
         bint operator<=(cAdaptedStructWithInternBox&)
         bint operator>=(cAdaptedStructWithInternBox&)
+        __field_ref[cEmpty] field1_ref "field1_ref" ()
+        __field_ref[cMyField] field2_ref "field2_ref" ()
 
 
     cdef cppclass cAdaptedStructWithTerseInternBox "::cpp2::AdaptedStructWithTerseInternBox":
@@ -282,6 +284,8 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custo
         bint operator>(cAdaptedStructWithTerseInternBox&)
         bint operator<=(cAdaptedStructWithTerseInternBox&)
         bint operator>=(cAdaptedStructWithTerseInternBox&)
+        __terse_field_ref[cEmpty] field1_ref "field1_ref" ()
+        __terse_field_ref[cMyField] field2_ref "field2_ref" ()
 
 
     cdef cppclass cStructWithRefTypeUnique "::cpp2::StructWithRefTypeUnique":
@@ -555,6 +559,10 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     cdef shared_ptr[cAdaptedStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithInternBox_FieldsSetter _fields_setter
+    cdef inline object field1_impl(self)
+    cdef inline object field2_impl(self)
+    cdef Empty __fbthrift_cached_field1
+    cdef MyField __fbthrift_cached_field2
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAdaptedStructWithInternBox])
@@ -564,6 +572,10 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     cdef shared_ptr[cAdaptedStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter _fields_setter
+    cdef inline object field1_impl(self)
+    cdef inline object field2_impl(self)
+    cdef Empty __fbthrift_cached_field1
+    cdef MyField __fbthrift_cached_field2
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAdaptedStructWithTerseInternBox])

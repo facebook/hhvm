@@ -509,15 +509,23 @@ class StructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
 class AdaptedStructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
+        field1: bool
+        field2: bool
         pass
 
+    field1: _typing.Final[Empty] = ...
+    field2: _typing.Final[MyField] = ...
 
     def __init__(
-        self, 
+        self, *,
+        field1: _typing.Optional[Empty]=None,
+        field2: _typing.Optional[MyField]=None
     ) -> None: ...
 
     def __call__(
-        self, 
+        self, *,
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> AdaptedStructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithInternBox'], bytes]]: ...
@@ -537,13 +545,19 @@ class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct, _typing.Hashable)
     class __fbthrift_IsSet:
         pass
 
+    field1: _typing.Final[Empty] = ...
+    field2: _typing.Final[MyField] = ...
 
     def __init__(
-        self, 
+        self, *,
+        field1: _typing.Optional[Empty]=None,
+        field2: _typing.Optional[MyField]=None
     ) -> None: ...
 
     def __call__(
-        self, 
+        self, *,
+        field1: _typing.Union[Empty, None]=None,
+        field2: _typing.Union[MyField, None]=None
     ) -> AdaptedStructWithTerseInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['AdaptedStructWithTerseInternBox'], bytes]]: ...

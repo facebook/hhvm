@@ -240,6 +240,12 @@ inline void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
     case 0:
       obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field1_ref());
       return;
+    case 1:
+      obj.field2_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field2_ref());
+      return;
+    case 2:
+      obj.field3_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field3_ref());
+      return;
   }
 }
 

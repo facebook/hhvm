@@ -1963,13 +1963,22 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         super().__init__(**kwargs)
 
     def __call__(AdaptedStructWithInternBox self, **kwargs):
-        return self
+        if not kwargs:
+            return self
+        cdef AdaptedStructWithInternBox __fbthrift_inst = AdaptedStructWithInternBox.__new__(AdaptedStructWithInternBox)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAdaptedStructWithInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedStructWithInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
         return _fbthrift_IsSet("AdaptedStructWithInternBox", {
+          "field1": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().has_value(),
+          "field2": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().has_value(),
         })
 
     @staticmethod
@@ -1977,6 +1986,24 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         __fbthrift_inst = <AdaptedStructWithInternBox>AdaptedStructWithInternBox.__new__(AdaptedStructWithInternBox)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
+
+    cdef inline field1_impl(self):
+        if self.__fbthrift_cached_field1 is None:
+            self.__fbthrift_cached_field1 = Empty._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_field1
+
+    @property
+    def field1(self):
+        return self.field1_impl()
+
+    cdef inline field2_impl(self):
+        if self.__fbthrift_cached_field2 is None:
+            self.__fbthrift_cached_field2 = MyField._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_field2
+
+    @property
+    def field2(self):
+        return self.field2_impl()
 
 
     def __hash__(AdaptedStructWithInternBox self):
@@ -2017,16 +2044,13 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AdaptedStructWithInternBox"
 
-    __fbthrift_field_name_list = [
-    ]
-
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return cls.__fbthrift_field_name_list[idx]
+        return __sv_to_str(__get_field_name_by_index[cAdaptedStructWithInternBox](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 0
+        return 2
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AdaptedStructWithInternBox self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -2067,7 +2091,14 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         super().__init__(**kwargs)
 
     def __call__(AdaptedStructWithTerseInternBox self, **kwargs):
-        return self
+        if not kwargs:
+            return self
+        cdef AdaptedStructWithTerseInternBox __fbthrift_inst = AdaptedStructWithTerseInternBox.__new__(AdaptedStructWithTerseInternBox)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cAdaptedStructWithTerseInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
@@ -2081,6 +2112,24 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         __fbthrift_inst = <AdaptedStructWithTerseInternBox>AdaptedStructWithTerseInternBox.__new__(AdaptedStructWithTerseInternBox)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
+
+    cdef inline field1_impl(self):
+        if self.__fbthrift_cached_field1 is None:
+            self.__fbthrift_cached_field1 = Empty._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field1_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_field1
+
+    @property
+    def field1(self):
+        return self.field1_impl()
+
+    cdef inline field2_impl(self):
+        if self.__fbthrift_cached_field2 is None:
+            self.__fbthrift_cached_field2 = MyField._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).field2_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_field2
+
+    @property
+    def field2(self):
+        return self.field2_impl()
 
 
     def __hash__(AdaptedStructWithTerseInternBox self):
@@ -2121,16 +2170,13 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AdaptedStructWithTerseInternBox"
 
-    __fbthrift_field_name_list = [
-    ]
-
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return cls.__fbthrift_field_name_list[idx]
+        return __sv_to_str(__get_field_name_by_index[cAdaptedStructWithTerseInternBox](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 0
+        return 2
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AdaptedStructWithTerseInternBox self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

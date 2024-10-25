@@ -4039,18 +4039,13 @@ module Derivation = struct
       | No_return pos ->
         Explanation.Witness (Pos_or_decl.of_raw_pos pos, "declaration")
       | Shape_literal pos ->
-        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "shape literal")
+        Explanation.Witness (Pos_or_decl.of_raw_pos pos, "`shape` literal")
       | Destructure pos ->
         Explanation.Witness
           (Pos_or_decl.of_raw_pos pos, "destructure expression")
       | Join_point pos ->
         Explanation.Witness (Pos_or_decl.of_raw_pos pos, "join point")
-      | _ ->
-        Explanation.Witness
-          ( witness_locl_to_raw_pos witness,
-            Format.sprintf
-              "element (`%s`)"
-              (constructor_string_of_witness_locl witness) )
+      | _ -> Explanation.Witness (witness_locl_to_raw_pos witness, "element")
 
     and explain_witness_decl witness =
       match witness with
@@ -4058,6 +4053,9 @@ module Derivation = struct
       | Witness_from_decl pos -> Explanation.Witness (pos, "declaration")
       | Support_dynamic_type pos ->
         Explanation.Witness (pos, "function or method declaration")
+      | Pessimised_inout pos -> Explanation.Witness (pos, "`inout` parameter")
+      | Pessimised_prop pos -> Explanation.Witness (pos, "property")
+      | Pessimised_this pos -> Explanation.Witness (pos, "`this` hint")
       | Pessimised_return pos -> Explanation.Witness (pos, "return hint")
       | Var_param_from_decl pos ->
         Explanation.Witness (pos, "variadic parameter declaration")
@@ -4079,10 +4077,7 @@ module Derivation = struct
               nm )
       | _ ->
         Explanation.Witness
-          ( witness_decl_to_raw_pos witness,
-            Format.sprintf
-              "element (`%s`)"
-              (constructor_string_of_witness_decl witness) )
+          (witness_decl_to_raw_pos witness, Format.sprintf "declaration")
 
     and explain_def (pos, reason) ~st ~cfg ~ctxt =
       let (expl_reason, st) = explain_reason reason ~st ~cfg ~ctxt in

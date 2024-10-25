@@ -156,7 +156,7 @@ Here's why:
 
 I started by checking this subtype relationship.
 
-The subtype comes from this element (Rpessimised_inout)
+The subtype comes from this inout parameter
 
 File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 
@@ -180,7 +180,7 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  6 |   f(inout »tuple($x, $y)«);
  7 | }
 
-and flows into this element (Rpessimised_inout)
+and flows into this inout parameter
 
 File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 
@@ -276,7 +276,7 @@ Here's why:
 
 I started by checking this subtype relationship.
 
-The subtype comes from this element (Rpessimised_inout)
+The subtype comes from this inout parameter
 
 File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 
@@ -300,7 +300,7 @@ File bad_inout_lvalue9.php, line 6, character 11 - line 6, character 23:
  6 |   f(inout »tuple($x, $y)«);
  7 | }
 
-and flows into this element (Rpessimised_inout)
+and flows into this inout parameter
 
 File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 
@@ -319,7 +319,7 @@ via an assignment
 
 The subtype is a union type so next I checked the subtype constraint is satisfied for all its elements.
 
-The subtype comes from this element (Rpessimised_inout)
+The subtype comes from this inout parameter
 
 File bad_inout_lvalue9.php, line 3, character 30 - line 3, character 31:
 

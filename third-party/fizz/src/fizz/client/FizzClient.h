@@ -11,7 +11,7 @@
 #include <fizz/client/ClientProtocol.h>
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/client/PskCache.h>
-#include <fizz/protocol/DefaultCertificateVerifier.h>
+#include <fizz/protocol/CertificateVerifier.h>
 #include <fizz/protocol/FizzBase.h>
 
 namespace fizz {

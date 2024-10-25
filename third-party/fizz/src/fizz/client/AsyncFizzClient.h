@@ -14,6 +14,7 @@
 #include <fizz/client/FizzClient.h>
 #include <fizz/client/FizzClientContext.h>
 #include <fizz/protocol/AsyncFizzBase.h>
+#include <fizz/protocol/DefaultCertificateVerifier.h>
 #include <fizz/protocol/Exporter.h>
 #include <fizz/util/Tracing.h>
 #include <folly/io/SocketOptionMap.h>

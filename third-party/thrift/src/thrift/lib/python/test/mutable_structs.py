@@ -39,6 +39,8 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesMutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
+    TestStructAsListElement as TestStructAsListElementMutable,
+    TestStructContainerAssignment as TestStructContainerAssignmentMutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
@@ -428,3 +430,67 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(42, mutable_s2.unqualified_integer)
         self.assertEqual("hello", mutable_s2.unqualified_struct.unqualified_string)
         self.assertEqual([1, 2, 3], mutable_s2.unqualified_list_i32)
+
+    def test_struct_attribute_cache(self) -> None:
+        """
+        struct TestStructAsListElement {
+          1: string string_field;
+          2: list<i32> list_int;
+        }
+
+        struct TestStructContainerAssignment {
+          ...
+          5: list<TestStructAsListElement> list_struct;
+          ...
+        }
+        """
+        s_elem = TestStructAsListElementMutable(
+            string_field="elem", list_int=to_thrift_list([1])
+        )
+
+        s = TestStructContainerAssignmentMutable(
+            list_struct=to_thrift_list([s_elem, s_elem])
+        )
+
+        # `to_thrift_list()` always copies the containers inside it. However,
+        # if the container element is a Thrift struct, union or exception,
+        # assignment uses reference semantics for them.
+        self.assertEqual(s_elem, s.list_struct[0])
+        self.assertEqual(s_elem, s.list_struct[1])
+
+        # `s_elem`, `s.list_struct[0]` and  `s.list_struct[1]` are the "same"
+        # structs
+
+        # Demonstrate that they are the "same" structs by updating the `list_int`.
+        self.assertEqual([1], s_elem.list_int)
+        self.assertEqual([1], s.list_struct[0].list_int)
+        self.assertEqual([1], s.list_struct[1].list_int)
+        s.list_struct[0].list_int.append(2)
+        self.assertEqual([1, 2], s_elem.list_int)
+        self.assertEqual([1, 2], s.list_struct[0].list_int)
+        self.assertEqual([1, 2], s.list_struct[1].list_int)
+
+        # Demonstrate that they are the "same" structs by updating the `string_field`.
+        # String fields are unique because when they are first accessed, they are
+        # read from `struct._fbthrift_data`, converted to a Python type, and cached.
+        # On subsequent accesses, the underlying `struct._fbthrift_data` is not
+        # accessed again; the cached value is used. When we say structs are the "same,"
+        # it means they share the same `_fbthrift_data` list data structure, but the
+        # cache is not part of the `_fbthrift_data`. Therefore, if the cached field
+        # is updated by a name that refers to the same struct, it only updates the
+        # `struct._fbthrift_data`. All other names that refer to the same struct
+        # might not reflect this change because they continue to read from their
+        # own cache.
+        self.assertEqual("elem", s_elem.string_field)
+        self.assertEqual("elem", s.list_struct[0].string_field)
+        self.assertEqual("elem", s.list_struct[1].string_field)
+        s.list_struct[1].string_field = "updated"
+
+        # TODO: Fix-me
+        # `s_elem.string_field` is not "updated" because `s_elem` reads it from
+        # its own cache, while the underlying `_fbthrift_data` is updated by
+        # `s.list_struct[1]`. The commented assert below would fail.
+
+        # self.assertEqual("updated", s_elem.string_field)
+        self.assertEqual("updated", s.list_struct[0].string_field)
+        self.assertEqual("updated", s.list_struct[1].string_field)

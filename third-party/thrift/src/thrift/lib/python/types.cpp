@@ -60,175 +60,11 @@ void ensureImportOrThrow() {
 using GetStandardDefaultValueForTypeFunc =
     std::tuple<UniquePyObjectPtr, bool>(const detail::TypeInfo&);
 
-PyObject* createStructTupleWithDefaultValues(
-    const detail::StructInfo&, GetStandardDefaultValueForTypeFunc);
-
-PyObject* createStructListWithDefaultValues(
-    const detail::StructInfo&, GetStandardDefaultValueForTypeFunc);
-
 std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
     const detail::TypeInfo& typeInfo);
 
 std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
     const detail::TypeInfo& typeInfo);
-
-/**
- * Returns the appropriate standard default value for the given `typeInfo`,
- * along with a boolean indicating whether it should be added to the cache.
- *
- * The standard default values are as follows:
- *   * `0L` for integral numbers.
- *   * `0d` for floating-point numbers.
- *   * `false` for booleans.
- *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
- *      empty `IOBuf` if applicable).
- *
- * The default value for container types chang based if they are mutable or
- * not:
- *  Mutable:
- *    * An empty `list` for lists.
- *    * An empty `dict` for maps.
- *    * An empty `set` for sets.
- *    * A recursively default-initialized instance for structs and unions.
- *  Immutable:
- *    * An empty `tuple` for lists and maps.
- *    * An empty `frozenset` for sets.
- *    * A recursively default-initialized instance for structs and unions.
- *
- * @throws if there is no standard default value
- */
-std::tuple<UniquePyObjectPtr, bool> getStandardDefaultValueForType(
-    const detail::TypeInfo& typeInfo, bool isMutable) {
-  UniquePyObjectPtr value = nullptr;
-  // Immutable types use a default-value cache and initialize the fields with
-  // the same cached Python object repeatedly. However, this approach does not
-  // work well with mutable types when there is no copy-on-write mechanism in
-  // place. The issue is particularly problematic with container types and
-  // structs/unions. However, since we deep copy the default values for mutable
-  // types above the cache layer, it is fine to keep `addValueToCache = true`
-  // even for containers.
-  bool addValueToCache = true;
-  switch (typeInfo.type) {
-    case protocol::TType::T_BYTE:
-    case protocol::TType::T_I16:
-    case protocol::TType::T_I32:
-    case protocol::TType::T_I64:
-      // For integral values, the default is `0L`.
-      value = UniquePyObjectPtr(PyLong_FromLong(0));
-      break;
-    case protocol::TType::T_DOUBLE:
-    case protocol::TType::T_FLOAT:
-      // For floating point values, the default is `0d`.
-      value = UniquePyObjectPtr(PyFloat_FromDouble(0));
-      break;
-    case protocol::TType::T_BOOL:
-      // For booleans, the default is `false`.
-      value = UniquePyObjectPtr(Py_False);
-      Py_INCREF(Py_False);
-      break;
-    case protocol::TType::T_STRING:
-      // For strings, the default value is the empty string (or, if `IOBuf`s are
-      // used, an empty `IOBuf`).
-      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
-        case detail::StringFieldType::String:
-        case detail::StringFieldType::StringView:
-        case detail::StringFieldType::Binary:
-        case detail::StringFieldType::BinaryStringView:
-          value = UniquePyObjectPtr(PyBytes_FromString(""));
-          break;
-        case detail::StringFieldType::IOBuf:
-        case detail::StringFieldType::IOBufPtr:
-        case detail::StringFieldType::IOBufObj:
-          PyObject* buf = create_IOBuf(folly::IOBuf::create(0));
-          value = UniquePyObjectPtr(buf);
-          addValueToCache = false;
-          break;
-      }
-      break;
-    case protocol::TType::T_LIST:
-      value = UniquePyObjectPtr(isMutable ? PyList_New(0) : PyTuple_New(0));
-      break;
-    case protocol::TType::T_MAP:
-      value = UniquePyObjectPtr(isMutable ? PyDict_New() : PyTuple_New(0));
-      break;
-    case protocol::TType::T_SET:
-      // For sets, the default value is an empty `frozenset`.
-      value = UniquePyObjectPtr(
-          isMutable ? PySet_New(nullptr) : PyFrozenSet_New(nullptr));
-      break;
-    case protocol::TType::T_STRUCT: {
-      // For struct and unions, the default value is a (recursively)
-      // default-initialized instance.
-      auto structInfo =
-          static_cast<const detail::StructInfo*>(typeInfo.typeExt);
-      if (isMutable) {
-        value = UniquePyObjectPtr(
-            structInfo->unionExt != nullptr
-                ? createMutableUnionDataHolder()
-                : createStructListWithDefaultValues(
-                      *structInfo, getStandardMutableDefaultValueForType));
-      } else {
-        value = UniquePyObjectPtr(
-            structInfo->unionExt != nullptr
-                ? createUnionTuple()
-                : createStructTupleWithDefaultValues(
-                      *structInfo, getStandardImmutableDefaultValueForType));
-      }
-      break;
-    }
-    default:
-      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
-  }
-  if (value == nullptr) {
-    THRIFT_PY3_CHECK_ERROR();
-  }
-  return std::tuple(std::move(value), addValueToCache);
-}
-
-/**
- * Returns the appropriate standard immutable default value for the given
- * `typeInfo`, along with a boolean indicating whether it should be added to
- * the cache.
- *
- * The standard default values are as follows:
- *   * `0L` for integral numbers.
- *   * `0d` for floating-point numbers.
- *   * `false` for booleans.
- *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
- *      empty `IOBuf` if applicable).
- *   * An empty `tuple` for lists and maps.
- *   * An empty `frozenset` for sets.
- *   * A recursively default-initialized instance for structs and unions.
- *
- * @throws if there is no standard default value
- */
-std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
-    const detail::TypeInfo& typeInfo) {
-  return getStandardDefaultValueForType(typeInfo, false);
-}
-
-/**
- * Returns the appropriate standard mutable default value for the given
- * `typeInfo`, along with a boolean indicating whether it should be added to
- * the cache.
- *
- * The standard default values are as follows:
- *   * `0L` for integral numbers.
- *   * `0d` for floating-point numbers.
- *   * `false` for booleans.
- *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
- *      empty `IOBuf` if applicable).
- *   * An empty `list` for lists.
- *   * An empty `dict` for maps.
- *   * An empty `set` for sets.
- *   * A recursively default-initialized instance for structs and unions.
- *
- * @throws if there is no standard default value
- */
-std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
-    const detail::TypeInfo& typeInfo) {
-  return getStandardDefaultValueForType(typeInfo, true);
-}
 
 /**
  * Returns the standard default value for a thrift field of the given type.
@@ -453,20 +289,174 @@ PyObject* createStructContainerWithDefaultValues(
  * Returns a new "struct list" with all its elements initialized.
  */
 PyObject* createStructListWithDefaultValues(
-    const detail::StructInfo& structInfo,
-    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+    const detail::StructInfo& structInfo) {
   return createStructContainerWithDefaultValues<ListContainer>(
-      structInfo, getStandardDefaultValueForTypeFunc);
+      structInfo, getStandardMutableDefaultValueForType);
 }
 
 /**
  * Returns a new "struct tuple" with all its elements initialized.
  */
 PyObject* createStructTupleWithDefaultValues(
-    const detail::StructInfo& structInfo,
-    GetStandardDefaultValueForTypeFunc getStandardDefaultValueForTypeFunc) {
+    const detail::StructInfo& structInfo) {
   return createStructContainerWithDefaultValues<TupleContainer>(
-      structInfo, getStandardDefaultValueForTypeFunc);
+      structInfo, getStandardImmutableDefaultValueForType);
+}
+
+/**
+ * Returns the appropriate standard default value for the given `typeInfo`,
+ * along with a boolean indicating whether it should be added to the cache.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *
+ * The default value for container types chang based if they are mutable or
+ * not:
+ *  Mutable:
+ *    * An empty `list` for lists.
+ *    * An empty `dict` for maps.
+ *    * An empty `set` for sets.
+ *    * A recursively default-initialized instance for structs and unions.
+ *  Immutable:
+ *    * An empty `tuple` for lists and maps.
+ *    * An empty `frozenset` for sets.
+ *    * A recursively default-initialized instance for structs and unions.
+ *
+ * @throws if there is no standard default value
+ */
+std::tuple<UniquePyObjectPtr, bool> getStandardDefaultValueForType(
+    const detail::TypeInfo& typeInfo, bool isMutable) {
+  UniquePyObjectPtr value = nullptr;
+  // Immutable types use a default-value cache and initialize the fields with
+  // the same cached Python object repeatedly. However, this approach does not
+  // work well with mutable types when there is no copy-on-write mechanism in
+  // place. The issue is particularly problematic with container types and
+  // structs/unions. However, since we deep copy the default values for mutable
+  // types above the cache layer, it is fine to keep `addValueToCache = true`
+  // even for containers.
+  bool addValueToCache = true;
+  switch (typeInfo.type) {
+    case protocol::TType::T_BYTE:
+    case protocol::TType::T_I16:
+    case protocol::TType::T_I32:
+    case protocol::TType::T_I64:
+      // For integral values, the default is `0L`.
+      value = UniquePyObjectPtr(PyLong_FromLong(0));
+      break;
+    case protocol::TType::T_DOUBLE:
+    case protocol::TType::T_FLOAT:
+      // For floating point values, the default is `0d`.
+      value = UniquePyObjectPtr(PyFloat_FromDouble(0));
+      break;
+    case protocol::TType::T_BOOL:
+      // For booleans, the default is `false`.
+      value = UniquePyObjectPtr(Py_False);
+      Py_INCREF(Py_False);
+      break;
+    case protocol::TType::T_STRING:
+      // For strings, the default value is the empty string (or, if `IOBuf`s are
+      // used, an empty `IOBuf`).
+      switch (*static_cast<const detail::StringFieldType*>(typeInfo.typeExt)) {
+        case detail::StringFieldType::String:
+        case detail::StringFieldType::StringView:
+        case detail::StringFieldType::Binary:
+        case detail::StringFieldType::BinaryStringView:
+          value = UniquePyObjectPtr(PyBytes_FromString(""));
+          break;
+        case detail::StringFieldType::IOBuf:
+        case detail::StringFieldType::IOBufPtr:
+        case detail::StringFieldType::IOBufObj:
+          PyObject* buf = create_IOBuf(folly::IOBuf::create(0));
+          value = UniquePyObjectPtr(buf);
+          addValueToCache = false;
+          break;
+      }
+      break;
+    case protocol::TType::T_LIST:
+      value = UniquePyObjectPtr(isMutable ? PyList_New(0) : PyTuple_New(0));
+      break;
+    case protocol::TType::T_MAP:
+      value = UniquePyObjectPtr(isMutable ? PyDict_New() : PyTuple_New(0));
+      break;
+    case protocol::TType::T_SET:
+      // For sets, the default value is an empty `frozenset`.
+      value = UniquePyObjectPtr(
+          isMutable ? PySet_New(nullptr) : PyFrozenSet_New(nullptr));
+      break;
+    case protocol::TType::T_STRUCT: {
+      // For struct and unions, the default value is a (recursively)
+      // default-initialized instance.
+      auto structInfo =
+          static_cast<const detail::StructInfo*>(typeInfo.typeExt);
+      if (isMutable) {
+        value = UniquePyObjectPtr(
+            structInfo->unionExt != nullptr
+                ? createMutableUnionDataHolder()
+                : createStructListWithDefaultValues(*structInfo));
+      } else {
+        value = UniquePyObjectPtr(
+            structInfo->unionExt != nullptr
+                ? createUnionTuple()
+                : createStructTupleWithDefaultValues(*structInfo));
+      }
+      break;
+    }
+    default:
+      LOG(FATAL) << "invalid typeInfo TType " << typeInfo.type;
+  }
+  if (value == nullptr) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  return std::tuple(std::move(value), addValueToCache);
+}
+
+/**
+ * Returns the appropriate standard immutable default value for the given
+ * `typeInfo`, along with a boolean indicating whether it should be added to
+ * the cache.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *   * An empty `tuple` for lists and maps.
+ *   * An empty `frozenset` for sets.
+ *   * A recursively default-initialized instance for structs and unions.
+ *
+ * @throws if there is no standard default value
+ */
+std::tuple<UniquePyObjectPtr, bool> getStandardImmutableDefaultValueForType(
+    const detail::TypeInfo& typeInfo) {
+  return getStandardDefaultValueForType(typeInfo, false);
+}
+
+/**
+ * Returns the appropriate standard mutable default value for the given
+ * `typeInfo`, along with a boolean indicating whether it should be added to
+ * the cache.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *   * An empty `list` for lists.
+ *   * An empty `dict` for maps.
+ *   * An empty `set` for sets.
+ *   * A recursively default-initialized instance for structs and unions.
+ *
+ * @throws if there is no standard default value
+ */
+std::tuple<UniquePyObjectPtr, bool> getStandardMutableDefaultValueForType(
+    const detail::TypeInfo& typeInfo) {
+  return getStandardDefaultValueForType(typeInfo, true);
 }
 
 /**
@@ -555,16 +545,14 @@ void* setImmutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
   return setPyObject(
       objectPtr,
       UniquePyObjectPtr{createStructTupleWithDefaultValues(
-          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
-          getStandardImmutableDefaultValueForType)});
+          *static_cast<const detail::StructInfo*>(typeInfo.typeExt))});
 }
 
 void* setMutableStruct(void* objectPtr, const detail::TypeInfo& typeInfo) {
   PyObject* list = setPyObject(
       objectPtr,
       UniquePyObjectPtr{createStructListWithDefaultValues(
-          *static_cast<const detail::StructInfo*>(typeInfo.typeExt),
-          getStandardMutableDefaultValueForType)});
+          *static_cast<const detail::StructInfo*>(typeInfo.typeExt))});
 
   return getListObjectItemBase(list);
 }
@@ -1164,14 +1152,12 @@ PyObject* createStructList(int16_t numFields) {
 
 PyObject* createImmutableStructTupleWithDefaultValues(
     const detail::StructInfo& structInfo) {
-  return createStructTupleWithDefaultValues(
-      structInfo, getStandardImmutableDefaultValueForType);
+  return createStructTupleWithDefaultValues(structInfo);
 }
 
 PyObject* createMutableStructListWithDefaultValues(
     const detail::StructInfo& structInfo) {
-  return createStructListWithDefaultValues(
-      structInfo, getStandardMutableDefaultValueForType);
+  return createStructListWithDefaultValues(structInfo);
 }
 
 template <typename Container>

@@ -19,13 +19,11 @@
   This template generates a thrift typedef
 
 }}
-{{^enum:empty?}}
 const (
 {{#enum:values}}
     {{typedef:go_name}}_{{enum_value:name}} {{typedef:go_name}} = {{> types/typedef_enum_go_qualified_name }}_{{enum_value:name}}
 {{/enum:values}}
 )
-{{/enum:empty?}}
 
 // Enum value maps for {{enum:go_name}}
 var (

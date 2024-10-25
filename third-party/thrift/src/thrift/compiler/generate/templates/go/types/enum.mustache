@@ -20,14 +20,12 @@
 
 }}
 type {{enum:go_name}} int32
-{{^enum:empty?}}
 
 const (
 {{#enum:values}}
     {{enum:go_name}}_{{enum_value:name}} {{enum:go_name}} = {{enum_value:value}}
 {{/enum:values}}
 )
-{{/enum:empty?}}
 
 // Enum value maps for {{enum:go_name}}
 var (

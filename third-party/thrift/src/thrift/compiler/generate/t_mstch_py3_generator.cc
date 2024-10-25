@@ -136,6 +136,7 @@ class py3_mstch_program : public mstch_program {
         {
             {"program:unique_functions_by_return_type",
              &py3_mstch_program::unique_functions_by_return_type},
+            {"program:has_types?", &py3_mstch_program::program_has_types},
             {"program:cppNamespaces", &py3_mstch_program::getCpp2Namespace},
             {"program:py3Namespaces", &py3_mstch_program::getPy3Namespace},
             {"program:includeNamespaces",
@@ -182,6 +183,8 @@ class py3_mstch_program : public mstch_program {
   mstch::node getCppGenPath() {
     return std::string(has_option("py3cpp") ? "gen-py3cpp" : "gen-cpp2");
   }
+
+  mstch::node program_has_types() { return has_types(program_); }
 
   mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 

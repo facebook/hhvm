@@ -16,6 +16,7 @@
 
 }}
 {{> common/auto_generated_py}}
+{{#program:has_types?}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types cimport (
     {{#program:enums}}c{{enum:name}},
     {{/program:enums}}{{!
@@ -28,3 +29,4 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
     }}{{#program:constants}}c{{constant:name}},
     {{/program:constants}}
 )
+{{/program:has_types?}}

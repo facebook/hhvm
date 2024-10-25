@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f84feb37db358624cbafdf719a24b5d>>
+// @generated SignedSource<<703ecca18a92b8d3f89ef09a9c4ece90>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2244,6 +2244,8 @@ pub struct Class_<'a, Ex, En> {
     pub internal: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<Sid<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub package: Option<&'a str>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Class_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Class_<'arena, Ex, En>);
@@ -2797,6 +2799,8 @@ pub struct Typedef<'a, Ex, En> {
     pub docs_url: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub package: Option<&'a str>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Typedef<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Typedef<'arena, Ex, En>);
@@ -2886,6 +2890,8 @@ pub struct FunDef<'a, Ex, En> {
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub package: Option<&'a str>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunDef<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, En>);

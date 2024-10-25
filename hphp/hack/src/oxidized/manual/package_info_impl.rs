@@ -105,8 +105,8 @@ impl TryFrom<package::PackageInfo> for PackageInfo {
 impl PackageInfo {
     pub fn get_package_for_file(&self, support_multifile_tests: bool, path: &str) -> Option<&str> {
         let path = if support_multifile_tests {
-            let re = regex::Regex::new(r"/[^/]*--").unwrap();
-            re.replace(path, "/")
+            let re = regex::Regex::new(r"[^/]*--").unwrap();
+            re.replace(path, "")
         } else {
             Cow::Borrowed(path)
         };

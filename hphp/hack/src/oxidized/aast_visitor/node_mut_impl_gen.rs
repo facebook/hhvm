@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8591ca64fda9e39eb10b09bceb6eb2af>>
+// @generated SignedSource<<fcc2581496b538001807abc8c409a4d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -516,7 +516,8 @@ impl<P: Params> NodeMut<P> for Class_<P::Ex, P::En> {
         self.doc_comment.accept(c, v)?;
         self.emit_id.accept(c, v)?;
         self.internal.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.package.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassishKind {
@@ -1170,7 +1171,8 @@ impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
         self.internal.accept(c, v)?;
         self.module.accept(c, v)?;
         self.tparams.accept(c, v)?;
-        self.where_constraints.accept(c, v)
+        self.where_constraints.accept(c, v)?;
+        self.package.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for FunKind {
@@ -2337,7 +2339,8 @@ impl<P: Params> NodeMut<P> for Typedef<P::Ex, P::En> {
         self.internal.accept(c, v)?;
         self.module.accept(c, v)?;
         self.docs_url.accept(c, v)?;
-        self.doc_comment.accept(c, v)
+        self.doc_comment.accept(c, v)?;
+        self.package.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for TypedefAssignment {

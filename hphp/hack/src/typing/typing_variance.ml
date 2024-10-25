@@ -1062,6 +1062,7 @@ let class_def : Typing_env_types.env -> Nast.class_ -> unit =
     c_emit_id = _;
     c_internal = _;
     c_docs_url = _;
+    c_package = _;
   } =
     class_
   in
@@ -1133,6 +1134,7 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_module = _;
     t_docs_url = _;
     t_doc_comment = _;
+    t_package = _;
   } =
     typedef
   in

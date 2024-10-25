@@ -43,4 +43,4 @@ If you only meant to test for `null`, use `$x is nonnull` instead
       c_doc_comment =
       (Some ([2:1-10:4],
              "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
-      c_emit_id = None; c_internal = false; c_module = None })
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None })

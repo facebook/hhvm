@@ -9,5 +9,5 @@
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       t_span = [3:1-4:19]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
       t_module = None; t_docs_url = (Some "http://example.com/foo?bar#baz"); 
-      t_doc_comment = None })
+      t_doc_comment = None; t_package = None })
   ]

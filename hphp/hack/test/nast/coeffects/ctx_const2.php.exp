@@ -30,5 +30,5 @@
          }
         ];
       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
-      c_internal = false; c_module = None })
+      c_internal = false; c_module = None; c_package = None })
   ]

@@ -42,7 +42,7 @@ Errors:
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:16-32], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-      c_emit_id = None; c_internal = false; c_module = None });
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -83,7 +83,8 @@ Errors:
            tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))] });
+       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -160,7 +161,8 @@ Errors:
            tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))] });
+       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -220,7 +222,8 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([20:10-18], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Class
      { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
@@ -255,7 +258,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([3:16-32], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -295,7 +298,8 @@ Errors:
            tp_constraints = [(Constraint_as, ([10:40-42], (Happly (([10:40-42], "\\HH\\supportdyn"), [([10:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))] });
+       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -336,4 +340,5 @@ Errors:
            tp_constraints = [(Constraint_as, ([14:40-42], (Happly (([14:40-42], "\\HH\\supportdyn"), [([14:40-42], Hmixed)]))))]; 
            tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))] })
+       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
+       fd_package = None })

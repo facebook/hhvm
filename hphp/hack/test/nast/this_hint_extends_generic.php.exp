@@ -20,7 +20,7 @@ Errors:
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:7-8], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-      c_emit_id = None; c_internal = false; c_module = None });
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [5:1-27]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -34,7 +34,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([5:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [8:1-33]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -48,7 +48,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([8:13-14], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [11:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -68,7 +68,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([11:13-14], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [14:1-37]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -88,7 +88,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([14:13-14], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [17:1-19:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -114,5 +114,5 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([17:13-14], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None })
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None })
   ]

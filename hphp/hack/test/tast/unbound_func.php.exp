@@ -14,4 +14,5 @@ Errors:
         f_body = { fb_ast = [([4:3-18], (Expr ((nothing), [4:3-17], (Call { func = ((nothing), [4:3-15], (Id ([4:3-15], "\\unbound_func"))); targs = []; args = []; unpacked_arg = None }))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

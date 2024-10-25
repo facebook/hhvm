@@ -84,11 +84,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   in
   let env = Env.set_current_module env fd.fd_module in
   let env = Env.set_internal env fd.fd_internal in
-  let env =
-    Env.set_current_package_override_from_file_attributes
-      env
-      fd.fd_file_attributes
-  in
+  let env = Env.set_current_package env fd.fd_package in
   let env =
     if
       Naming_attributes.mem
@@ -254,6 +250,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
       Aast.fd_module = fd.fd_module;
       Aast.fd_tparams = tparams;
       Aast.fd_where_constraints = fd.fd_where_constraints;
+      Aast.fd_package = fd.fd_package;
     }
   in
   let fundef_of_dynamic

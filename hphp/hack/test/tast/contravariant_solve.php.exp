@@ -16,7 +16,7 @@
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([4:11-12], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-      c_emit_id = None; c_internal = false; c_module = None });
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [6:1-30]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -36,7 +36,7 @@
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([6:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -74,7 +74,7 @@
           tp_constraints = [(Constraint_as, ([8:12-13], (Happly (([8:12-13], "\\HH\\supportdyn"), [([8:12-13], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [] });
+       fd_where_constraints = []; fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -108,7 +108,7 @@
           tp_constraints = [(Constraint_as, ([12:12-13], (Happly (([12:12-13], "\\HH\\supportdyn"), [([12:12-13], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [] });
+       fd_where_constraints = []; fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -153,7 +153,8 @@
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -191,7 +192,7 @@
           tp_constraints = [(Constraint_as, ([8:12-13], (Happly (([8:12-13], "\\HH\\supportdyn"), [([8:12-13], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [] });
+       fd_where_constraints = []; fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -225,4 +226,4 @@
           tp_constraints = [(Constraint_as, ([12:12-13], (Happly (([12:12-13], "\\HH\\supportdyn"), [([12:12-13], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [] })
+       fd_where_constraints = []; fd_package = None })

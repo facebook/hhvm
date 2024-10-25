@@ -357,6 +357,7 @@ let fun_def_of_stmts ctx stmts : Nast.fun_def option =
           fd_module = None;
           fd_tparams = [];
           fd_where_constraints = [];
+          fd_package = None;
         }
 
 (** Return an updated [Nast.program] where top-level statements

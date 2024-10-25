@@ -961,6 +961,7 @@ and ('ex, 'en) class_ = {
   c_emit_id: emit_id option;
   c_internal: bool;
   c_module: sid option;
+  c_package: string option;
 }
 
 and class_req = class_hint * require_kind
@@ -1114,6 +1115,7 @@ and ('ex, 'en) typedef = {
   t_module: sid option;
   t_docs_url: string option;
   t_doc_comment: doc_comment option;
+  t_package: string option;
 }
 
 and ('ex, 'en) gconst = {
@@ -1138,6 +1140,7 @@ and ('ex, 'en) fun_def = {
   fd_module: sid option;
   fd_tparams: ('ex, 'en) tparam list;
   fd_where_constraints: where_constraint_hint list;
+  fd_package: string option;
 }
 
 and ('ex, 'en) module_def = {

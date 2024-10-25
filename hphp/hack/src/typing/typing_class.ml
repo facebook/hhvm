@@ -1924,6 +1924,7 @@ let class_def_ env c tc =
       Aast.c_internal = c.c_internal;
       Aast.c_module = c.c_module;
       Aast.c_docs_url = c.c_docs_url;
+      Aast.c_package = c.c_package;
     }
   in
   {
@@ -1939,11 +1940,7 @@ let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
   let env = Env.set_current_module env c.c_module in
   let env = Env.set_internal env c.c_internal in
-  let env =
-    Env.set_current_package_override_from_file_attributes
-      env
-      c.c_file_attributes
-  in
+  let env = Env.set_current_package env c.c_package in
   env
 
 let class_def ctx (c : _ class_) =

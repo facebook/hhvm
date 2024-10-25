@@ -428,6 +428,7 @@ let class_ tenv c =
     c_internal = _;
     c_module = _;
     c_docs_url = _;
+    c_package = _;
   } =
     c
   in
@@ -498,6 +499,7 @@ let typedef tenv (t : (_, _) typedef) =
     t_module = _;
     t_docs_url = _;
     t_doc_comment = _;
+    t_package = _;
   } =
     t
   in
@@ -670,6 +672,7 @@ let _toplevel_def tenv = function
       fd_module = _;
       fd_tparams = _;
       fd_where_constraints = _;
+      fd_package = _;
     } =
       f
     in

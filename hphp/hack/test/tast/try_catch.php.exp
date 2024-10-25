@@ -14,7 +14,8 @@
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
         };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -42,7 +43,8 @@
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-40], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Class
      { c_span = [33:1-41]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -56,7 +58,7 @@
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([33:7-20], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [34:1-39]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -70,4 +72,4 @@
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([34:7-18], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None })
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None })

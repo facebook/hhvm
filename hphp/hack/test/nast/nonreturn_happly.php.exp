@@ -16,7 +16,8 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-31], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -35,5 +36,6 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-31], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
   ]

@@ -18,7 +18,8 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-19], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -37,7 +38,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-20], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -56,7 +58,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-21], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -75,7 +78,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-22], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -94,7 +98,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-22], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -113,7 +118,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-22], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -132,7 +138,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([15:10-33], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -151,7 +158,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([17:10-33], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -170,7 +178,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([19:10-27], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -189,7 +198,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-28], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -208,7 +218,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([23:10-20], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -227,7 +238,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([25:10-19], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -246,7 +258,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([27:10-24], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -265,7 +278,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([29:10-24], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -284,7 +298,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([31:10-21], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -303,7 +318,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([33:10-23], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -322,7 +338,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([35:10-23], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -341,7 +358,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([37:10-23], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -360,7 +378,8 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([39:10-25], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
   (Class
      { c_span = [41:1-43:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -389,7 +408,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([41:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [45:1-47:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -425,7 +444,7 @@ Errors:
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([45:7-8], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -450,5 +469,5 @@ Errors:
           tp_constraints = [(Constraint_as, ([49:33-34], (Happly (([49:33-34], "\\HH\\supportdyn"), [([49:33-34], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [] })
+       fd_where_constraints = []; fd_package = None })
   ]

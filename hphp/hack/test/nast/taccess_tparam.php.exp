@@ -18,7 +18,7 @@ Errors:
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:16-17], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-      c_emit_id = None; c_internal = false; c_module = None });
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -47,5 +47,6 @@ Errors:
           tp_constraints = [(Constraint_as, ([7:25-26], (Happly (([7:25-26], "\\HH\\supportdyn"), [([7:25-26], Hmixed)]))))]; 
           tp_reified = Erased; tp_user_attributes = [] }
          ];
-       fd_where_constraints = [(([9:3-5], (Happly (([9:3-5], "\\T1"), []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))))] })
+       fd_where_constraints = [(([9:3-5], (Happly (([9:3-5], "\\T1"), []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))))]; 
+       fd_package = None })
   ]

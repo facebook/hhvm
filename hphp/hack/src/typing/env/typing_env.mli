@@ -278,6 +278,8 @@ val get_current_module : env -> string option
 val set_current_package_override_from_file_attributes :
   env -> ('ex, 'en) Aast_defs.file_attribute list -> env
 
+val set_current_package : env -> string option -> env
+
 val get_current_package_override : env -> string option
 
 (** Register the current top-level structure as being dependent on the current

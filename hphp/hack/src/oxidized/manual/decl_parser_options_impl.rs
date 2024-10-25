@@ -29,6 +29,7 @@ impl DeclParserOptions {
             stack_size: opts.stack_size,
             deregister_php_stdlib: opts.deregister_php_stdlib,
             package_info: opts.package_info.clone(),
+            package_v2: opts.package_v2,
             package_v2_support_multifile_tests: opts.package_v2_support_multifile_tests,
         }
     }

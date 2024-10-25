@@ -26,7 +26,7 @@
         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:7-10], "__SupportDynamicType"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-      c_emit_id = None; c_internal = false; c_module = None });
+      c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [4:1-46]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -41,7 +41,7 @@
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([4:7-10], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [5:1-58]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -56,7 +56,7 @@
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([5:7-22], "__SupportDynamicType"); ua_params = [] }]; 
        c_file_attributes = []; c_docs_url = None; c_enum = None; c_doc_comment = None; 
-       c_emit_id = None; c_internal = false; c_module = None });
+       c_emit_id = None; c_internal = false; c_module = None; c_package = None });
   (Typedef
      { t_annotation = (); t_name = ([8:6-8], "\\T1"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Transparent; tvh_hint = ([8:11-14], (Hprim Tint)) }); 
@@ -69,7 +69,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        t_span = [7:1-8:15]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None; t_doc_comment = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None; t_package = None });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T2"); t_tparams = []; 
        t_as_constraint = None; t_super_constraint = None; t_assignment = (SimpleTypeDef { tvh_vis = Transparent; tvh_hint = ([11:11-18], (Hoption ([11:12-18], (Hprim Tstring)))) });
@@ -81,7 +81,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        t_span = [10:1-11:19]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None; t_doc_comment = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None; t_package = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
        t_tparams =
@@ -97,7 +97,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        t_span = [13:1-37]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None; t_doc_comment = None });
+       t_module = None; t_docs_url = None; t_doc_comment = None; t_package = None });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
        t_tparams =
@@ -113,4 +113,4 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
        t_span = [14:1-33]; t_emit_id = None; t_is_ctx = false; t_internal = false; 
-       t_module = None; t_docs_url = None; t_doc_comment = None })
+       t_module = None; t_docs_url = None; t_doc_comment = None; t_package = None })

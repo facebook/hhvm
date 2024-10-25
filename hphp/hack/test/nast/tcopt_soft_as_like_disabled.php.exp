@@ -18,5 +18,6 @@
         f_body = { fb_ast = [([4:3-17], (Return (Some ((), [4:10-16], (Binop { bop = Plus; lhs = ((), [4:10-12], (Lvar ([4:10-12], $x))); rhs = ((), [4:15-16], (Int "1")) })))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-37], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })
   ]

@@ -607,6 +607,9 @@ let set_current_package_override_from_file_attributes env file_attributes =
 
 let get_current_package_override env = env.genv.current_package_override
 
+let set_current_package env package =
+  { env with genv = { env.genv with current_package_override = package } }
+
 (** Register the current top-level structure as being dependent on the current
     module *)
 let make_depend_on_current_module env =
@@ -646,6 +649,7 @@ let mark_members_declared_in_depgraph env (c : _ Aast.class_) =
     c_emit_id = _;
     c_internal = _;
     c_module = _;
+    c_package = _;
   } =
     c
   in

@@ -634,6 +634,7 @@ fn make_closure(
         // TODO: closures should have the visibility of the module they are defined in
         module: None,
         docs_url: None,
+        package: None,
     }
 }
 

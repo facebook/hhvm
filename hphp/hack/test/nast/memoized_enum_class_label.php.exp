@@ -13,5 +13,6 @@
         [{ ua_name = ([4:10-13], "__SupportDynamicType"); ua_params = [] };
           { ua_name = ([3:3-12], "__Memoize"); ua_params = [((), [3:13-23], (EnumClassLabel ((Some ([Pos.none], "\\HH\\MemoizeOption")), "KeyedByIC")))] }];
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })
   ]

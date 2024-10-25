@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb5e81b8de85b2b88859fde289b32b27>>
+// @generated SignedSource<<43ee19efd6f7c9eafd62ac38d5a73fe6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1331,6 +1331,7 @@ impl Transform for Class_ {
                 emit_id: ref mut __binding_27,
                 internal: ref mut __binding_28,
                 module: ref mut __binding_29,
+                package: ref mut __binding_30,
                 ..
             } => {
                 {
@@ -1486,7 +1487,10 @@ impl Transform for Class_ {
                 {
                     __binding_28.transform(env, &mut pass.clone())
                 }
-                { __binding_29.transform(env, &mut pass.clone()) }
+                {
+                    __binding_29.transform(env, &mut pass.clone())
+                }
+                { __binding_30.transform(env, &mut pass.clone()) }
             }
         }
     }
@@ -1985,6 +1989,7 @@ impl Transform for Typedef {
                 module: ref mut __binding_15,
                 docs_url: ref mut __binding_16,
                 doc_comment: ref mut __binding_17,
+                package: ref mut __binding_18,
                 ..
             } => {
                 {
@@ -2032,7 +2037,10 @@ impl Transform for Typedef {
                 {
                     __binding_16.transform(env, &mut pass.clone())
                 }
-                { __binding_17.transform(env, &mut pass.clone()) }
+                {
+                    __binding_17.transform(env, &mut pass.clone())
+                }
+                { __binding_18.transform(env, &mut pass.clone()) }
             }
         }
     }
@@ -2109,6 +2117,7 @@ impl Transform for FunDef {
                 module: ref mut __binding_6,
                 tparams: ref mut __binding_7,
                 where_constraints: ref mut __binding_8,
+                package: ref mut __binding_9,
                 ..
             } => {
                 {
@@ -2132,7 +2141,10 @@ impl Transform for FunDef {
                 {
                     __binding_7.transform(env, &mut pass.clone())
                 }
-                { __binding_8.transform(env, &mut pass.clone()) }
+                {
+                    __binding_8.transform(env, &mut pass.clone())
+                }
+                { __binding_9.transform(env, &mut pass.clone()) }
             }
         }
     }

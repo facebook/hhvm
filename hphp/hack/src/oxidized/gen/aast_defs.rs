@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<246c9a0a03c9af934f72620470fed7b2>>
+// @generated SignedSource<<7b921979f0742b58b70d1330aed00de6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1788,6 +1788,7 @@ pub struct Class_<Ex, En> {
     pub emit_id: Option<EmitId>,
     pub internal: bool,
     pub module: Option<Sid>,
+    pub package: Option<String>,
 }
 
 #[derive(
@@ -2237,6 +2238,7 @@ pub struct Typedef<Ex, En> {
     pub module: Option<Sid>,
     pub docs_url: Option<String>,
     pub doc_comment: Option<DocComment>,
+    pub package: Option<String>,
 }
 
 #[derive(
@@ -2301,6 +2303,7 @@ pub struct FunDef<Ex, En> {
     pub module: Option<Sid>,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
+    pub package: Option<String>,
 }
 
 #[derive(

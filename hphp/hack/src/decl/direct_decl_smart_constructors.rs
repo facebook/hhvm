@@ -155,6 +155,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
+        let package_override = if opts.package_v2 {
+            match opts
+                .package_info
+                .get_package_for_file(opts.package_v2_support_multifile_tests, path)
+            {
+                Some(s) => {
+                    let package = bump::String::from_str_in(s, arena).into_bump_str();
+                    Some(package)
+                }
+                None => None,
+            }
+        } else {
+            None
+        };
         let filename = RelativePath::make(prefix, path);
         Self {
             state: Rc::new(Impl {
@@ -179,7 +193,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 under_no_auto_likes: false,
                 inside_no_auto_dynamic_class: false,
                 module: None,
-                package_override: None,
+                package_override,
             }),
             token_factory: SimpleTokenFactoryImpl::new(),
             // EndOfFile is used here as a None value (signifying "beginning of
@@ -3787,7 +3801,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             attributes: user_attributes,
             internal: false,
             docs_url: None,
-            package_override: None,
+            package_override: self.package_override,
         });
 
         let this = Rc::make_mut(&mut self.state);

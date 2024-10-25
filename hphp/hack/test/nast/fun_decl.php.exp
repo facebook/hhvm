@@ -20,5 +20,6 @@
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
         };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })
   ]

@@ -452,8 +452,11 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
       if not is_package_v2 then
         Option.bind ~f:(Env.get_package_for_module env) current_module
       else
-        let current_file = Env.get_file env in
-        Env.get_package_for_file env current_file
+        Option.bind
+          ~f:
+            (PackageInfo.get_package
+               (TypecheckerOptions.package_info @@ Env.get_tcopt env))
+          (Env.get_current_package_override env)
     in
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_packages.get_package_violation env current_pkg target_pkg with

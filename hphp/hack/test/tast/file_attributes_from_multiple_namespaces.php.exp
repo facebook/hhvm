@@ -26,7 +26,7 @@
           }
         ];
       c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
-      c_internal = false; c_module = None });
+      c_internal = false; c_module = None; c_package = None });
   (Class
      { c_span = [13:1-45]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -55,4 +55,4 @@
            }
          ];
        c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
-       c_internal = false; c_module = None })
+       c_internal = false; c_module = None; c_package = None })

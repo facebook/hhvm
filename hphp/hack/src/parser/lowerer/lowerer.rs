@@ -200,6 +200,8 @@ pub struct Env<'a> {
     expression_tree_class: Option<ClassName>,
 
     state: Rc<RefCell<State>>,
+
+    package: Option<String>,
 }
 
 impl<'a> Env<'a> {
@@ -230,6 +232,7 @@ impl<'a> Env<'a> {
             token_factory,
             arena,
             expression_tree_class: None,
+            package: None,
 
             state: Rc::new(RefCell::new(State {
                 cls_generics: HashMap::default(),
@@ -5770,6 +5773,26 @@ fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result
     }
 }
 
+fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<String> {
+    if env.package.is_some() {
+        return env.package.clone();
+    }
+    let span = p_pos(node, env);
+    let filepath = span.filename().path_str();
+    let parser_options = env.parser_options;
+
+    let package = if parser_options.package_v2 {
+        parser_options
+            .package_info
+            .get_package_for_file(parser_options.package_v2_support_multifile_tests, filepath)
+            .map(String::from)
+    } else {
+        None
+    };
+    env.package = package.clone();
+    package
+}
+
 fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
     let doc_comment_opt = extract_docblock(node, env);
     match &node.children {
@@ -5819,6 +5842,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 module: None,
                 tparams: hdr.type_parameters,
                 where_constraints: hdr.constrs,
+                package: get_current_package(env, node),
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {
@@ -5887,6 +5911,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
                 docs_url,
+                package: get_current_package(env, node),
             };
             match &c.body.children {
                 ClassishBody(c1) => {
@@ -5986,6 +6011,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 module: None,
                 docs_url,
                 doc_comment: doc_comment_opt,
+                package: get_current_package(env, node),
             })])
         }
         CaseTypeDeclaration(c) => {
@@ -6104,6 +6130,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                     module: None,
                     docs_url,
                     doc_comment: doc_comment_opt,
+                    package: get_current_package(env, node),
                 })])
             } else {
                 missing_syntax("case type variant", node, env)
@@ -6173,6 +6200,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 module: None,
                 docs_url: None,
                 doc_comment: doc_comment_opt,
+                package: get_current_package(env, node),
             })])
         }
         EnumDeclaration(c) => {
@@ -6247,6 +6275,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
                 docs_url,
+                package: get_current_package(env, node),
             })])
         }
 
@@ -6323,6 +6352,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 internal: kinds.has(modifier::INTERNAL),
                 module: None,
                 docs_url,
+                package: get_current_package(env, node),
             };
 
             for n in c.elements.syntax_node_to_list_skip_separator() {
@@ -6425,8 +6455,18 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             Ok(vec![ast::Def::mk_namespace_use(uses?)])
         }
         FileAttributeSpecification(_) => {
+            let user_attributes = p_user_attribute(node, env)?;
+            for attr in &user_attributes {
+                if attr.name.1 == sn::user_attributes::PACKAGE_OVERRIDE {
+                    if let [aast::Expr(_, _, ast::Expr_::String(s))] = attr.params.as_slice() {
+                        if let Ok(s) = String::from_utf8(s.to_vec()) {
+                            env.package = Some(s)
+                        }
+                    }
+                }
+            }
             Ok(vec![ast::Def::mk_file_attributes(ast::FileAttribute {
-                user_attributes: p_user_attribute(node, env)?,
+                user_attributes,
                 namespace: mk_empty_ns_env(env),
             })])
         }

@@ -93,6 +93,7 @@ let casetype_def env typedef =
     t_module = _;
     t_docs_url = _;
     t_doc_comment = _;
+    t_package = _;
   } =
     typedef
   in
@@ -155,6 +156,7 @@ let typedef_def ctx typedef =
     t_module;
     t_docs_url;
     t_doc_comment;
+    t_package;
   } =
     typedef
   in
@@ -173,9 +175,7 @@ let typedef_def ctx typedef =
   let (t_pos, t_name_) = t_name in
   let env = Env.set_current_module env t_module in
   let env = Env.set_internal env t_internal in
-  let env =
-    Env.set_current_package_override_from_file_attributes env t_file_attributes
-  in
+  let env = Env.set_current_package env t_package in
   let (env, ty_err_opt1) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -270,4 +270,5 @@ let typedef_def ctx typedef =
     Aast.t_module;
     Aast.t_docs_url;
     Aast.t_doc_comment;
+    Aast.t_package;
   }

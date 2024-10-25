@@ -18,4 +18,5 @@
         { fb_ast = [([4:3-18], (Return (Some ((int), [4:10-17], (Binop { bop = QuestionQuestion; lhs = ((?int), [4:10-12], (Lvar ([4:10-12], $x))); rhs = ((int), [4:16-17], (Int "0")) })))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None })

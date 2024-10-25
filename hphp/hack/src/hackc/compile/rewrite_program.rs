@@ -293,6 +293,7 @@ fn extract_debugger_main(
         module: None,
         tparams: vec![],
         where_constraints: vec![],
+        package: None,
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);
@@ -300,8 +301,8 @@ fn extract_debugger_main(
     Ok(())
 }
 
-fn flatten_ns(defs: impl Iterator<Item = Def> + ExactSizeIterator) -> Vec<Def> {
-    fn helper(out: &mut Vec<Def>, defs: impl Iterator<Item = Def> + ExactSizeIterator) {
+fn flatten_ns(defs: impl ExactSizeIterator<Item = Def>) -> Vec<Def> {
+    fn helper(out: &mut Vec<Def>, defs: impl ExactSizeIterator<Item = Def>) {
         out.reserve(defs.len());
         for def in defs {
             match def {

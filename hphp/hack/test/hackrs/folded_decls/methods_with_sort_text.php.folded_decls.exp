@@ -18,7 +18,7 @@ FoldedClass {
 FunElt {
     deprecated: None,
     module: None,
-    package_override: None,
+    package: None,
     internal: false,
     ty: (function(): void),
     pos: NPos,

@@ -30,7 +30,7 @@
        (Some { Typing_defs.te_base = (Rhint ([3:13-19]), (Tprim Tstring));
                te_constraint = (Some (Rhint ([3:23-29]), (Tprim Tstring)));
                te_includes = [] });
-       sc_docs_url = None; sc_package_override = None }));
+       sc_docs_url = None; sc_package = None }));
   ("\\TestClassConstReferencingEnum",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -63,5 +63,5 @@
         [{ Typing_defs_core.ua_name = ([8:3-24], "__ConsistentConstruct");
            ua_params = []; ua_raw_val = None }
           ];
-        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]

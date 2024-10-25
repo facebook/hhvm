@@ -223,7 +223,7 @@ pub struct FoldedClass<R: Reason> {
     pub allow_multiple_instantiations: bool,
     /// The string provided by the <<__AutocompleteSortText>> attribute.
     pub sort_text: Option<String>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
 }
 
 impl<R: Reason> FoldedClass<R> {

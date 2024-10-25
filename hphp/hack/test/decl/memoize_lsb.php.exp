@@ -33,5 +33,5 @@
           sm_attributes = []; sm_sort_text = None }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-       sc_docs_url = None; sc_package_override = None }))
+       sc_docs_url = None; sc_package = None }))
   ]

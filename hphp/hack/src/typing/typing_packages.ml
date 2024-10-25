@@ -64,8 +64,7 @@ let is_calling_from_tests env =
  * If `package_v2` is set, use the file paths instead of modules to calculate the
  * package membership, optionally overridden by the __PackageOverride attribute.
  *)
-let satisfies_pkg_rules
-    env current_md target_md target_pos target_package_override :
+let satisfies_pkg_rules env current_md target_md target_pos target_package :
     (package_error_info * Package.package_relationship) option =
   (* If `package_v2` is set in [env], we bypass package checks for test files to
      allow them to access any other package. *)
@@ -94,12 +93,12 @@ let satisfies_pkg_rules
       let (current_pkg, target_pkg) =
         if Env.package_v2 env then
           let current_pkg =
-            match Env.get_current_package_override env with
+            match Env.get_current_package env with
             | Some pkg -> Env.get_package_by_name env pkg
             | None -> Env.get_package_for_file env current_file
           in
           let target_pkg =
-            match target_package_override with
+            match target_package with
             | None -> Env.get_package_for_file env target_file
             | Some pkg -> Env.get_package_by_name env pkg
           in
@@ -140,7 +139,7 @@ let can_access
     ~(env : Typing_env_types.env)
     ~(current_module : string option)
     ~(target_module : string option)
-    ~(target_package_override : string option)
+    ~(target_package : string option)
     (target_pos : Pos_or_decl.t) =
   match
     satisfies_pkg_rules
@@ -148,7 +147,7 @@ let can_access
       current_module
       target_module
       target_pos
-      target_package_override
+      target_package
   with
   | Some (err_info, Package.Soft_includes) -> `PackageSoftIncludes err_info
   | Some (err_info, Package.Unrelated) -> `PackageNotSatisfied err_info

@@ -6,7 +6,7 @@
        (Typing_defs.SimpleTypeDef (Transparent,
           (Rhint ([7:19-25]), (Tprim Tstring))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
-       td_docs_url = None; td_package_override = None }));
+       td_docs_url = None; td_package = None }));
   ("\\MyArray1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [11:6-14];
@@ -23,7 +23,7 @@
                [(Rhint ([11:27-28]), (Tgeneric ("T", [])))])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyArray2",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [12:6-14];
@@ -47,7 +47,7 @@
                )))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyDarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [13:6-14];
@@ -71,7 +71,7 @@
                )))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyVarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [14:6-14];
@@ -88,7 +88,7 @@
                [(Rhint ([14:27-28]), (Tgeneric ("T", [])))])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyVarrayOrDarray",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [15:6-22];
@@ -110,7 +110,7 @@
                (Rhint ([15:54-56]), (Tgeneric ("TV", [])))))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyString",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [16:6-14]; td_tparams = [];
@@ -119,7 +119,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([16:17-23]), (Tprim Tstring))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyInt",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [17:6-11]; td_tparams = [];
@@ -128,7 +128,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([17:14-17]), (Tprim Tint))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyFloat",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [18:6-13]; td_tparams = [];
@@ -137,7 +137,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([18:16-21]), (Tprim Tfloat))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNum",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [19:6-11]; td_tparams = [];
@@ -146,7 +146,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([19:14-17]), (Tprim Tnum))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyBool",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [20:6-12]; td_tparams = [];
@@ -155,7 +155,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([20:15-19]), (Tprim Tbool))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyMixed",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [21:6-13]; td_tparams = [];
@@ -164,7 +164,7 @@
         (Typing_defs.SimpleTypeDef (Transparent, (Rhint ([21:16-21]), Tmixed)
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNothing",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [22:6-15]; td_tparams = [];
@@ -173,7 +173,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([22:18-25]), (Tunion []))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNonnull",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [23:6-15]; td_tparams = [];
@@ -182,7 +182,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([23:18-25]), Tnonnull)));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyDynamic",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [24:6-15]; td_tparams = [];
@@ -191,7 +191,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([24:18-25]), Tdynamic)));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyArrayKey",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [25:6-16]; td_tparams = [];
@@ -200,7 +200,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([25:19-27]), (Tprim Tarraykey))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNamespacedType",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [27:6-22]; td_tparams = [];
@@ -211,7 +211,7 @@
             (Tapply (([27:25-46], "\\MyNamespace\\MyString"), [])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNewtype",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [29:9-18]; td_tparams = [];
@@ -221,7 +221,7 @@
         (Typing_defs.SimpleTypeDef (Opaque,
            (Rhint ([29:28-31]), (Tprim Tint))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyNewtypeWithoutConstraint",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [30:9-35]; td_tparams = [];
@@ -230,5 +230,5 @@
         (Typing_defs.SimpleTypeDef (Opaque,
            (Rhint ([30:38-41]), (Tprim Tint))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }))
+        td_docs_url = None; td_package = None }))
   ]

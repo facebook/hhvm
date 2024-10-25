@@ -8,7 +8,7 @@
            (Tapply (([3:20-32], "\\HH\\Rx\\Exception"), [])))
           ));
        td_is_ctx = false; td_attributes = []; td_internal = false;
-       td_docs_url = None; td_package_override = None }));
+       td_docs_url = None; td_package = None }));
   ("\\BackslashRxException",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:6-26]; td_tparams = [];
@@ -18,7 +18,7 @@
            (Rhint ([5:29-42]), (Tapply (([5:29-42], "\\Rx\\Exception"), [])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\RxRxException",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [7:6-19]; td_tparams = [];
@@ -29,7 +29,7 @@
             (Tapply (([7:22-36], "\\RxRx\\Exception"), [])))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MyRx",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [9:6-10]; td_tparams = [];
@@ -38,5 +38,5 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([9:13-15]), (Tapply (([9:13-15], "\\Rx"), [])))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }))
+        td_docs_url = None; td_package = None }))
   ]

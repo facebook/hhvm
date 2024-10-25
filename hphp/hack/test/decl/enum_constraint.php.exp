@@ -26,7 +26,7 @@
        (Some { Typing_defs.te_base = (Rhint ([3:10-16]), (Tprim Tstring));
                te_constraint = (Some (Rhint ([3:20-26]), (Tprim Tstring)));
                te_includes = [] });
-       sc_docs_url = None; sc_package_override = None }));
+       sc_docs_url = None; sc_package = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -60,7 +60,7 @@
                             (Tapply (([5:22-23], "\\X"), [])))]
                           ))));
                 te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -89,7 +89,7 @@
         (Some { Typing_defs.te_base = (Rhint ([7:10-13]), (Tprim Tint));
                 te_constraint = (Some (Rhint ([7:17-25]), (Tprim Tarraykey)));
                 te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\N",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [9:9-10]; td_tparams = [];
@@ -99,7 +99,7 @@
         (Typing_defs.SimpleTypeDef (Opaque, (Rhint ([9:25-28]), (Tprim Tint))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -133,7 +133,7 @@
                 te_constraint =
                 (Some (Rhint ([11:17-18]), (Tapply (([11:17-18], "\\N"), []))));
                 te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -164,5 +164,5 @@
                 te_constraint =
                 (Some (Rhint ([13:15-16]), (Tapply (([13:15-16], "\\C"), []))));
                 te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }))
+        sc_docs_url = None; sc_package = None }))
   ]

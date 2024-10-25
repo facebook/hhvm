@@ -1,7 +1,7 @@
 [("\\foo",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_package_override = None; fe_internal = false;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-13]),
         (Tfun
@@ -30,7 +30,7 @@
   ("\\bar",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([6:10-13]),
          (Tfun
@@ -115,5 +115,5 @@
                   support_dynamic_type = false };
                 sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]

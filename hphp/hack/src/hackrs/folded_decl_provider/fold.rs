@@ -991,7 +991,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             docs_url: self.child.docs_url.clone(),
             allow_multiple_instantiations,
             sort_text,
-            package_override: self.child.package_override.clone(),
+            package: self.child.package.clone(),
         });
 
         Ok(fc)

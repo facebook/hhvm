@@ -83,7 +83,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
   {
     fe_pos;
     fe_module = None;
-    fe_package_override = None;
+    fe_package = None;
     fe_internal = false;
     fe_type;
     fe_deprecated;

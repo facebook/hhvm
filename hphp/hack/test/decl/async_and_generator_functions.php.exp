@@ -1,7 +1,7 @@
 [("\\sync_function",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_package_override = None; fe_internal = false;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-23]),
         (Tfun
@@ -21,7 +21,7 @@
   ("\\async_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:16-30]),
          (Tfun
@@ -44,7 +44,7 @@
   ("\\generator_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([10:10-28]),
          (Tfun
@@ -70,7 +70,7 @@
   ("\\generator_function_implicit_key",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([14:10-41]),
          (Tfun
@@ -96,7 +96,7 @@
   ("\\async_generator",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([18:16-31]),
          (Tfun

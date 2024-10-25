@@ -40,5 +40,5 @@
        (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
                te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
                te_includes = [] });
-       sc_docs_url = None; sc_package_override = None }))
+       sc_docs_url = None; sc_package = None }))
   ]

@@ -148,18 +148,13 @@ let check_internal_access ~in_signature env target pos decl_pos =
   Option.map ~f:Typing_error.modules module_err_opt
 
 let check_package_access
-    ~ignore_package_errors
-    env
-    use_pos
-    def_pos
-    target_module
-    target_package_override =
+    ~ignore_package_errors env use_pos def_pos target_module target_package =
   match
     Typing_packages.can_access
       ~env
       ~current_module:(Env.get_current_module env)
       ~target_module
-      ~target_package_override
+      ~target_package
       def_pos
   with
   | `Yes -> None
@@ -337,7 +332,7 @@ let is_visible_for_top_level
     env
     is_internal
     target_module
-    target_package_override
+    target_package
     pos
     decl_pos =
   let module_error =
@@ -353,7 +348,7 @@ let is_visible_for_top_level
       pos
       decl_pos
       target_module
-      target_package_override
+      target_package
   in
   match (module_error, package_error) with
   | (Some e1, Some e2) -> [e1; e2]
@@ -392,14 +387,14 @@ let check_top_level_access
     env
     is_internal
     target_module
-    target_package_override =
+    target_package =
   is_visible_for_top_level
     ~in_signature
     ~ignore_package_errors
     env
     is_internal
     target_module
-    target_package_override
+    target_package
     use_pos
     def_pos
 
@@ -456,7 +451,7 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
           ~f:
             (PackageInfo.get_package
                (TypecheckerOptions.package_info @@ Env.get_tcopt env))
-          (Env.get_current_package_override env)
+          (Env.get_current_package env)
     in
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_packages.get_package_violation env current_pkg target_pkg with

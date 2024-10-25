@@ -17,11 +17,11 @@
                 s_unknown_value = (Rhint ([3:53-56]), Tmixed) }))
           ));
        td_is_ctx = false; td_attributes = []; td_internal = false;
-       td_docs_url = None; td_package_override = None }));
+       td_docs_url = None; td_package = None }));
   ("\\takes_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-21]),
          (Tfun
@@ -62,7 +62,7 @@
   ("\\returns_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([9:10-23]),
          (Tfun
@@ -104,7 +104,7 @@
   ("\\generic_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:10-23]),
          (Tfun
@@ -184,5 +184,5 @@
                  s_unknown_value = (Rhint ([Pos.none]), (Tunion [])) }))
            ));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }))
+        td_docs_url = None; td_package = None }))
   ]

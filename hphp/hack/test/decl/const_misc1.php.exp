@@ -48,7 +48,7 @@
        sc_enum_type =
        (Some { Typing_defs.te_base = (Rhint ([3:14-22]), (Tprim Tarraykey));
                te_constraint = None; te_includes = [] });
-       sc_docs_url = None; sc_package_override = None }));
+       sc_docs_url = None; sc_package = None }));
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -85,7 +85,7 @@
         (Some { Typing_defs.te_base = (Rhint ([8:8-11]), (Tprim Tint));
                 te_constraint = (Some (Rhint ([8:15-23]), (Tprim Tarraykey)));
                 te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\I",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [14:1-22];
@@ -135,5 +135,5 @@
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }))
+        sc_package = None }))
   ]

@@ -58,7 +58,7 @@
        [{ Typing_defs_core.ua_name = ([2:3-25], "__AutocompleteSortText");
           ua_params = [(Typing_defs_core.String "XYZ")]; ua_raw_val = None }
          ];
-       sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\DEF",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -97,5 +97,5 @@
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }))
+        sc_package = None }))
   ]

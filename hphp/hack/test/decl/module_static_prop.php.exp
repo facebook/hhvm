@@ -37,11 +37,11 @@ File root|module_static_prop.php--A.php
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package_override = None }));
+       sc_package = None }));
   ("\\a",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ([5:8-9], "A"));
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([12:10-11]),
          (Tfun
@@ -64,7 +64,7 @@ File root|module_static_prop.php--B.php
 [("\\b",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None; fe_module = (Some ([5:8-9], "B"));
-       fe_package_override = None; fe_internal = false;
+       fe_package = None; fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([8:10-11]),
         (Tfun
@@ -86,8 +86,8 @@ File root|module_static_prop.php--B.php
 File root|module_static_prop.php--no-module.php
 [("\\none",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_package_override = None; fe_internal = false;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([4:10-14]),
         (Tfun

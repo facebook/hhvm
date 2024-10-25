@@ -115,7 +115,7 @@ class virtual type_validator =
             td_attributes = _;
             td_internal = _;
             td_docs_url = _;
-            td_package_override = _;
+            td_package = _;
           } =
             td
           in

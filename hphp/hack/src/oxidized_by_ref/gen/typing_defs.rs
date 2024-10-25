@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb3e303d4ab0d48be26225ee1888951a>>
+// @generated SignedSource<<4a2bc9db9bebf9dcbe521e03c6f44b42>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -192,7 +192,7 @@ pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<ast_defs::Id<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub package_override: Option<&'a str>,
+    pub package: Option<&'a str>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -626,7 +626,7 @@ pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub docs_url: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub package_override: Option<&'a str>,
+    pub package: Option<&'a str>,
 }
 impl<'a> TrivialDrop for TypedefType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);

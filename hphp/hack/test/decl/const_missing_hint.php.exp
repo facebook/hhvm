@@ -57,5 +57,5 @@
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([23:10-13]), (Tprim Tint));
                 te_constraint = None; te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }))
+        sc_docs_url = None; sc_package = None }))
   ]

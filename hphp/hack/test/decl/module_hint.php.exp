@@ -57,7 +57,7 @@ File root|module_hint.php--here.php
           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package_override = None }))
+       sc_package = None }))
   ]
 
 File root|module_hint.php--there.php
@@ -74,7 +74,7 @@ File root|module_hint.php--there.php
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package_override = None }));
+       sc_package = None }));
   ("\\G",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -93,7 +93,7 @@ File root|module_hint.php--there.php
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }));
+        sc_package = None }));
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -122,14 +122,14 @@ File root|module_hint.php--there.php
         sc_enum_type =
         (Some { Typing_defs.te_base = (Rhint ([9:19-22]), (Tprim Tint));
                 te_constraint = None; te_includes = [] });
-        sc_docs_url = None; sc_package_override = None }))
+        sc_docs_url = None; sc_package = None }))
   ]
 
 File root|module_hint.php--everywhere.php
 [("\\genfun",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = None;
-       fe_package_override = None; fe_internal = false;
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+       fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([3:10-16]),
         (Tfun
@@ -183,5 +183,5 @@ File root|module_hint.php--everywhere.php
         sc_typeconsts = []; sc_props = []; sc_sprops = [];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }))
+        sc_package = None }))
   ]

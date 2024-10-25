@@ -99,7 +99,7 @@ type class_elt = {
 type fun_elt = {
   fe_deprecated: string option;
   fe_module: Ast_defs.id option;
-  fe_package_override: string option;
+  fe_package: string option;
   fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
@@ -237,7 +237,7 @@ type typedef_type = {
   td_attributes: user_attribute list;
   td_internal: bool;
   td_docs_url: string option;
-  td_package_override: string option;
+  td_package: string option;
 }
 [@@deriving eq, show]
 

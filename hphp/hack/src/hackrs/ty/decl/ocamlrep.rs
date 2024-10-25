@@ -80,7 +80,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
             docs_url,
             allow_multiple_instantiations,
             sort_text,
-            package_override,
+            package,
         } = self;
         let need_init = self.has_concrete_constructor();
         let abstract_ = self.is_abstract();
@@ -122,7 +122,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         alloc.set_field(&mut block, 34, alloc.add(docs_url));
         alloc.set_field(&mut block, 35, alloc.add(allow_multiple_instantiations));
         alloc.set_field(&mut block, 36, alloc.add(sort_text));
-        alloc.set_field(&mut block, 37, alloc.add(package_override));
+        alloc.set_field(&mut block, 37, alloc.add(package));
         block.build()
     }
 }
@@ -168,7 +168,7 @@ impl<R: Reason> FromOcamlRep for FoldedClass<R> {
             docs_url: ocamlrep::from::field(block, 34)?,
             allow_multiple_instantiations: ocamlrep::from::field(block, 35)?,
             sort_text: ocamlrep::from::field(block, 36)?,
-            package_override: ocamlrep::from::field(block, 37)?,
+            package: ocamlrep::from::field(block, 37)?,
         })
     }
 }

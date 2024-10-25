@@ -657,7 +657,7 @@ walkable!(ConstDecl<R> => [ty]);
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub ty: Ty<R>,
@@ -737,7 +737,7 @@ pub struct TypedefType<R: Reason> {
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub internal: bool,
     pub docs_url: Option<String>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
 }
 
 walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, type_assignment]);

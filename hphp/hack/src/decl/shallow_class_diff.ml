@@ -57,7 +57,7 @@ module Parents = struct
       sc_user_attributes = _;
       sc_enum_type = _;
       sc_docs_url = _;
-      sc_package_override = _;
+      sc_package = _;
     } =
       c
     in

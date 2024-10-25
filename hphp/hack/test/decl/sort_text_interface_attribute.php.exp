@@ -53,7 +53,7 @@
            sm_attributes = []; sm_sort_text = (Some "1getBar") }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-       sc_docs_url = None; sc_package_override = None }));
+       sc_docs_url = None; sc_package = None }));
   ("\\IBaz",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -110,7 +110,7 @@
             sm_attributes = []; sm_sort_text = None }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\ABC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -170,7 +170,7 @@
             sm_attributes = []; sm_sort_text = None }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-        sc_docs_url = None; sc_package_override = None }));
+        sc_docs_url = None; sc_package = None }));
   ("\\DEF",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -253,5 +253,5 @@
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }))
+        sc_package = None }))
   ]

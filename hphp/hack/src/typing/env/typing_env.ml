@@ -594,21 +594,10 @@ let set_current_module env m =
 
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
-let set_current_package_override_from_file_attributes env file_attributes =
-  match
-    List.find_map file_attributes ~f:(fun { fa_user_attributes; _ } ->
-        Naming_attributes.find
-          Naming_special_names.UserAttributes.uaPackageOverride
-          fa_user_attributes)
-  with
-  | Some { ua_params = [(_, _, Aast.String pkg)]; _ } ->
-    { env with genv = { env.genv with current_package_override = Some pkg } }
-  | _ -> env
-
-let get_current_package_override env = env.genv.current_package_override
+let get_current_package env = env.genv.current_package
 
 let set_current_package env package =
-  { env with genv = { env.genv with current_package_override = package } }
+  { env with genv = { env.genv with current_package = package } }
 
 (** Register the current top-level structure as being dependent on the current
     module *)

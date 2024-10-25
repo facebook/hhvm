@@ -33,7 +33,7 @@
           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package_override = None }));
+       sc_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -71,5 +71,5 @@
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package_override = None }))
+        sc_package = None }))
   ]

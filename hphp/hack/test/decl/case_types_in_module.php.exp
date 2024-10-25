@@ -6,7 +6,7 @@
        td_type_assignment =
        (Typing_defs.CaseType (((Rhint ([6:26-29]), (Tprim Tint)), []), []));
        td_is_ctx = false; td_attributes = []; td_internal = true;
-       td_docs_url = None; td_package_override = None }));
+       td_docs_url = None; td_package = None }));
   ("\\CT2",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([4:8-16], "some.mod"));
@@ -15,7 +15,7 @@
         td_type_assignment =
         (Typing_defs.CaseType (((Rhint ([8:24-27]), (Tprim Tint)), []), []));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\CT3",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([4:8-16], "some.mod"));
@@ -24,5 +24,5 @@
         td_type_assignment =
         (Typing_defs.CaseType (((Rhint ([11:17-20]), (Tprim Tint)), []), []));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }))
+        td_docs_url = None; td_package = None }))
   ]

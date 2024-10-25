@@ -11,11 +11,11 @@
        sc_typeconsts = []; sc_props = []; sc_sprops = [];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package_override = None }));
+       sc_package = None }));
   ("\\my_partial_function",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([5:10-29]),
          (Tfun
@@ -40,7 +40,7 @@
         (Typing_defs.SimpleTypeDef (Transparent,
            (Rhint ([7:22-28]), (Tprim Tstring))));
         td_is_ctx = false; td_attributes = []; td_internal = false;
-        td_docs_url = None; td_package_override = None }));
+        td_docs_url = None; td_package = None }));
   ("\\MY_PARTIAL_CONST",
    (Shallow_decl_defs.Const
       { Typing_defs.cd_pos = [9:1-10:53];

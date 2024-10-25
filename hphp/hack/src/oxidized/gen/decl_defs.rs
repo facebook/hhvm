@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7067d9108380da30b212991d958569f7>>
+// @generated SignedSource<<40648717a105ef9fbef059e83485b24b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -244,5 +244,5 @@ pub struct DeclClassType {
     /// The string provided by the __AutocompleteSortText attribute used for sorting
     /// autocomplete results.
     pub sort_text: Option<String>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
 }

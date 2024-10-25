@@ -206,7 +206,7 @@ struct
       dc_docs_url = dc.dc_docs_url;
       dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
       dc_sort_text = dc.dc_sort_text;
-      dc_package_override = dc.dc_package_override;
+      dc_package = dc.dc_package;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
@@ -235,7 +235,7 @@ struct
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;
       td_internal = tdef.td_internal;
       td_docs_url = tdef.td_docs_url;
-      td_package_override = tdef.td_package_override;
+      td_package = tdef.td_package;
     }
 
   and shallow_class sc =
@@ -270,7 +270,7 @@ struct
       sc_user_attributes = List.map sc.sc_user_attributes ~f:user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type ~f:enum_type;
       sc_docs_url = sc.sc_docs_url;
-      sc_package_override = sc.sc_package_override;
+      sc_package = sc.sc_package;
     }
 
   and shallow_class_const scc =

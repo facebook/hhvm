@@ -181,7 +181,7 @@ pub struct ShallowClass<R: Reason> {
     pub user_attributes: Box<[UserAttribute<R::Pos>]>,
     pub enum_type: Option<EnumType<R>>,
     pub docs_url: Option<String>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
 }
 
 walkable!(ShallowClass<R> as visit_shallow_class => [
@@ -189,7 +189,7 @@ walkable!(ShallowClass<R> as visit_shallow_class => [
     module, name, tparams, extends, uses, xhp_attr_uses,
     xhp_enum_values, req_extends, req_implements, req_class, implements,
     support_dynamic_type, consts, typeconsts, props, static_props, constructor,
-    static_methods, methods, user_attributes, enum_type, docs_url, package_override,
+    static_methods, methods, user_attributes, enum_type, docs_url, package,
 ]);
 
 pub type FunDecl<R> = FunElt<R>;

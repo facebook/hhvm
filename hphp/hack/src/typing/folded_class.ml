@@ -90,10 +90,10 @@ module ApiShallow = struct
     let (c, _) = t in
     Option.map c.Decl_defs.dc_module ~f:snd
 
-  let get_package_override (decl, t, _ctx) =
+  let get_package (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Module @@ fun () ->
     let (c, _) = t in
-    c.Decl_defs.dc_package_override
+    c.Decl_defs.dc_package
 
   let internal (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Internal @@ fun () ->

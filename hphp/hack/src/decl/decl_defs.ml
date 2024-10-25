@@ -162,7 +162,7 @@ type decl_class_type = {
   dc_sort_text: string option;
       (** The string provided by the __AutocompleteSortText attribute used for sorting
           autocomplete results. *)
-  dc_package_override: string option;
+  dc_package: string option;
 }
 [@@deriving show]
 

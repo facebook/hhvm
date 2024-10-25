@@ -46,7 +46,7 @@ let expand_typedef_decl
     td_attributes = _;
     td_internal = _;
     td_docs_url = _;
-    td_package_override = _;
+    td_package = _;
   } =
     td
   in

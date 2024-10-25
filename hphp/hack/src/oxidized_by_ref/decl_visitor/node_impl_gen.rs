@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e69e9766b2fcb8bc223ec107f8f2ac8>>
+// @generated SignedSource<<133b175eb9d66d6666685e88422736bd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -222,7 +222,7 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 user_attributes: ref __binding_27,
                 enum_type: ref __binding_28,
                 docs_url: ref __binding_29,
-                package_override: ref __binding_30,
+                package: ref __binding_30,
             } => {
                 {
                     __binding_0.accept(v)
@@ -924,7 +924,7 @@ impl<'a> Node<'a> for FunElt<'a> {
             FunElt {
                 deprecated: ref __binding_0,
                 module: ref __binding_1,
-                package_override: ref __binding_2,
+                package: ref __binding_2,
                 internal: ref __binding_3,
                 type_: ref __binding_4,
                 pos: ref __binding_5,
@@ -1109,7 +1109,7 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 attributes: ref __binding_7,
                 internal: ref __binding_8,
                 docs_url: ref __binding_9,
-                package_override: ref __binding_10,
+                package: ref __binding_10,
             } => {
                 {
                     __binding_0.accept(v)

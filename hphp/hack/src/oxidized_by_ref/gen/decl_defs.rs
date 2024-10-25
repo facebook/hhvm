@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d8bb7eb000a39c649d4ff48e7f33df51>>
+// @generated SignedSource<<a71895fa1c6ceaa2b6bcd0cf7fbe3904>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -265,7 +265,7 @@ pub struct DeclClassType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub sort_text: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub package_override: Option<&'a str>,
+    pub package: Option<&'a str>,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);

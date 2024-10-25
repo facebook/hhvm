@@ -1360,7 +1360,7 @@ let fun_type_of_id env x tal el =
            env
            fd.fe_internal
            (Option.map fd.fe_module ~f:snd)
-           fd.fe_package_override);
+           fd.fe_package);
       (env, fty, tal)
     | _ -> failwith "Expected function type")
 
@@ -9503,7 +9503,7 @@ end = struct
                  env
                  (Cls.internal class_)
                  (Cls.get_module class_)
-                 (Cls.get_package_override class_)));
+                 (Cls.get_package class_)));
 
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =

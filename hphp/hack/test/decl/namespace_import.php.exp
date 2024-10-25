@@ -6,7 +6,7 @@
        (Typing_defs.SimpleTypeDef (Transparent,
           (Rhint ([6:16-19]), (Tprim Tint))));
        td_is_ctx = false; td_attributes = []; td_internal = false;
-       td_docs_url = None; td_package_override = None }));
+       td_docs_url = None; td_package = None }));
   ("\\NS1\\NS2\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -20,11 +20,11 @@
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }));
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\test",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_package_override = None; fe_internal = false;
+        fe_package = None; fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:12-16]),
          (Tfun
@@ -60,5 +60,5 @@
            ua_params = [(Typing_defs_core.Classname "\\NS1\\NS2\\C")];
            ua_raw_val = None }
           ];
-        sc_enum_type = None; sc_docs_url = None; sc_package_override = None }))
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]

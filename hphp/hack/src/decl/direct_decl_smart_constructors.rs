@@ -139,7 +139,7 @@ pub struct Impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> {
     inside_no_auto_dynamic_class: bool,
     source_text_allocator: S,
     pub module: Option<Id<'a>>,
-    package_override: Option<&'a str>,
+    package: Option<&'a str>,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a, 'o, 't, S> {
@@ -155,7 +155,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
         let path = bump::String::from_str_in(path.path_str(), arena).into_bump_str();
-        let package_override = if opts.package_v2 {
+        let package = if opts.package_v2 {
             match opts
                 .package_info
                 .get_package_for_file(opts.package_v2_support_multifile_tests, path)
@@ -193,7 +193,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                 under_no_auto_likes: false,
                 inside_no_auto_dynamic_class: false,
                 module: None,
-                package_override,
+                package,
             }),
             token_factory: SimpleTokenFactoryImpl::new(),
             // EndOfFile is used here as a None value (signifying "beginning of
@@ -3727,7 +3727,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             attributes: user_attributes,
             internal,
             docs_url,
-            package_override: self.package_override,
+            package: self.package,
         });
 
         let this = Rc::make_mut(&mut self.state);
@@ -3801,7 +3801,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             attributes: user_attributes,
             internal: false,
             docs_url: None,
-            package_override: self.package_override,
+            package: self.package,
         });
 
         let this = Rc::make_mut(&mut self.state);
@@ -3909,7 +3909,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             attributes: user_attributes,
             internal,
             docs_url,
-            package_override: self.package_override,
+            package: self.package,
         });
 
         let this = Rc::make_mut(&mut self.state);
@@ -4176,7 +4176,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         || parsed_attributes.dynamically_callable,
                     no_auto_dynamic: self.under_no_auto_dynamic,
                     no_auto_likes: parsed_attributes.no_auto_likes,
-                    package_override: self.package_override,
+                    package: self.package,
                 });
                 let this = Rc::make_mut(&mut self.state);
                 this.add_fun(name, fun_elt);
@@ -4866,7 +4866,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             user_attributes,
             enum_type: None,
             docs_url,
-            package_override: self.package_override,
+            package: self.package,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name, cls);
@@ -5346,7 +5346,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 includes,
             })),
             docs_url,
-            package_override: self.package_override,
+            package: self.package,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(key, cls);
@@ -5563,7 +5563,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 includes,
             })),
             docs_url,
-            package_override: self.package_override,
+            package: self.package,
         });
         let this = Rc::make_mut(&mut self.state);
         this.add_class(name.1, cls);
@@ -6657,7 +6657,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 Node::Attribute(attr) => {
                     if attr.name.1 == naming_special_names::user_attributes::PACKAGE_OVERRIDE {
                         if let [AttributeParam::String(_, s)] = &attr.params {
-                            this.package_override = Some(
+                            this.package = Some(
                                 std::str::from_utf8(s).expect("Unable to parse package override"),
                             );
                         }

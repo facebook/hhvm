@@ -468,7 +468,7 @@ module Simple = struct
           env
           (Cls.internal class_info)
           (Cls.get_module class_info)
-          (Cls.get_package_override class_info)
+          (Cls.get_package class_info)
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
         let tparams = Cls.tparams class_info in
         check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
@@ -481,7 +481,7 @@ module Simple = struct
           env
           typedef.td_internal
           (Option.map typedef.td_module ~f:snd)
-          typedef.td_package_override
+          typedef.td_package
         |> List.iter ~f:(Typing_error_utils.add_typing_error ~env);
         check_against_tparams
           ~in_signature

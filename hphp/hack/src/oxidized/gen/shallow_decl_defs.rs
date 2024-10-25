@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<79d683ddf30b5763361438223ac3de52>>
+// @generated SignedSource<<296c1c155d9bc34a6aeacfc7401019c6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -187,7 +187,7 @@ pub struct ShallowClass {
     pub user_attributes: Vec<UserAttribute>,
     pub enum_type: Option<EnumType>,
     pub docs_url: Option<String>,
-    pub package_override: Option<String>,
+    pub package: Option<String>,
 }
 
 #[rust_to_ocaml(attr = "deriving show")]

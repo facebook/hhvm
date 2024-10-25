@@ -18,14 +18,14 @@ type package_error_info = {
   * according to both module visibility rules and package dependency rules.
   * If package_v2 is set in [env], also check that the current file is allowed to access the
   * target file (calculated by [target_pos]) according to package v2 dependency rules. If
-  * [target_package_override] is not None, its value takes precedence over that calculated from the target
+  * [target_package] is not None, its value takes precedence over that calculated from the target
   * file name.
   *)
 val can_access :
   env:Typing_env_types.env ->
   current_module:string option ->
   target_module:string option ->
-  target_package_override:string option ->
+  target_package:string option ->
   Pos_or_decl.t ->
   [ `Yes
   | `PackageNotSatisfied of package_error_info

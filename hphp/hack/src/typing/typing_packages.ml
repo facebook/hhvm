@@ -92,15 +92,9 @@ let satisfies_pkg_rules env current_md target_md target_pos target_package :
     else
       let (current_pkg, target_pkg) =
         if Env.package_v2 env then
-          let current_pkg =
-            match Env.get_current_package env with
-            | Some pkg -> Env.get_package_by_name env pkg
-            | None -> Env.get_package_for_file env current_file
-          in
+          let current_pkg = Env.get_current_package env in
           let target_pkg =
-            match target_package with
-            | None -> Env.get_package_for_file env target_file
-            | Some pkg -> Env.get_package_by_name env pkg
+            Option.bind target_package ~f:(Env.get_package_by_name env)
           in
           (current_pkg, target_pkg)
         else

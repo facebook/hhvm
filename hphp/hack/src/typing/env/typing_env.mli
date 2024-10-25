@@ -275,7 +275,7 @@ val get_module : env -> module_key -> module_decl option
 
 val get_current_module : env -> string option
 
-val get_current_package : env -> string option
+val get_current_package : env -> Package.t option
 
 val set_current_package : env -> string option -> env
 
@@ -553,8 +553,6 @@ val is_consistent : env -> bool
 val mark_inconsistent : env -> env
 
 val get_package_for_module : env -> string -> Package.t option
-
-val get_package_for_file : env -> Relative_path.t -> Package.t option
 
 val get_package_by_name : env -> string -> Package.t option
 

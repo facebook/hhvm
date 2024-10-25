@@ -594,7 +594,10 @@ let set_current_module env m =
 
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
-let get_current_package env = env.genv.current_package
+let get_current_package env =
+  let current_pkg_name = env.genv.current_package in
+  let info = get_tcopt env |> TypecheckerOptions.package_info in
+  Option.bind current_pkg_name ~f:(PackageInfo.get_package info)
 
 let set_current_package env package =
   { env with genv = { env.genv with current_package = package } }
@@ -670,13 +673,6 @@ let get_internal env = env.genv.this_internal
 let get_package_for_module env md =
   let info = get_tcopt env |> TypecheckerOptions.package_info in
   PackageInfo.get_package_for_module info md
-
-let get_package_for_file env file =
-  let info = get_tcopt env |> TypecheckerOptions.package_info in
-  let support_multifile_tests =
-    get_tcopt env |> TypecheckerOptions.package_v2_support_multifile_tests
-  in
-  PackageInfo.get_package_for_file ~support_multifile_tests info file
 
 let get_package_by_name env pkg_name =
   let info = get_tcopt env |> TypecheckerOptions.package_info in

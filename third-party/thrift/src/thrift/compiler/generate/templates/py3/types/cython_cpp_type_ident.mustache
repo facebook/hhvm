@@ -39,7 +39,7 @@ This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
 }}{{#type:binary?}}binary{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}_{{/type:need_module_path?}}{{!
-  }}c{{struct:name}}{{!
+  }}{{> types/c_struct }}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{^type:defaultTemplate?}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}_{{/type:need_module_path?}}{{!
@@ -56,7 +56,7 @@ This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
 }}{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}_{{/type:need_module_path?}}{{!
-  }}c{{enum:name}}{{!
+  }}{{> types/c_enum }}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}cFollyUnit{{/type:void?}}{{!
 }}{{/type:hasCustomType?}}

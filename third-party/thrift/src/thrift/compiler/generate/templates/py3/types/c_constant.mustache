@@ -14,16 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
+}}{{!
+
+This is a template for getting the c binding for an enum
+
 }}
-{{> common/auto_generated_py}}
-
-from libcpp.memory cimport shared_ptr
-
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
-
-
-{{#program:filtered_structs}}
-cdef shared_ptr[_fbthrift_ctypes.{{> types/c_struct }}] {{struct:name}}_convert_to_cpp(object inst) except*
-cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_ctypes.{{> types/c_struct }}]& c_struct)
-
-{{/program:filtered_structs}}
+c{{constant:name}}

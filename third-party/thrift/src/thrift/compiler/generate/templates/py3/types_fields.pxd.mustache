@@ -51,11 +51,11 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 ctypedef void (*__{{struct:name}}_FieldsSetterFunc)(__{{struct:name}}_FieldsSetter, object) except *
 
 cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
-    cdef {{> types/current_module_types}}.c{{struct:name}}* _struct_cpp_obj
+    cdef {{> types/current_module_types}}.{{> types/c_struct }}* _struct_cpp_obj
     cdef cumap[__cstring_view, __{{struct:name}}_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __{{struct:name}}_FieldsSetter _fbthrift_create({{> types/current_module_types}}.c{{struct:name}}* struct_cpp_obj)
+    cdef __{{struct:name}}_FieldsSetter _fbthrift_create({{> types/current_module_types}}.{{> types/c_struct }}* struct_cpp_obj)
     {{#struct:py3_fields}}
     {{#field:type}}
     cdef void _set_field_{{field:index}}(self, _fbthrift_value) except *

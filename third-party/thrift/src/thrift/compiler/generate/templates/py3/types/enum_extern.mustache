@@ -28,7 +28,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
 cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
-    cdef cppclass c{{enum:name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
+    cdef cppclass {{> types/c_enum }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
         pass
 
 {{/program:enums}}

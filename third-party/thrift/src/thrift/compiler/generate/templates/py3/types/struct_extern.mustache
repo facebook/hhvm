@@ -33,26 +33,26 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
 }} namespace "{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#struct:union?}}
-    cdef enum c{{struct:name}}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
-        c{{struct:name}}__type___EMPTY__ "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::__EMPTY__",
+    cdef enum {{> types/c_struct }}__type "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
+        {{> types/c_struct }}__type___EMPTY__ "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::__EMPTY__",
     {{#struct:py3_fields}}
-        c{{struct:name}}__type_{{field:py_name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::{{field:cppName}}",
+        {{> types/c_struct }}__type_{{field:py_name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}::Type::{{field:cppName}}",
     {{/struct:py3_fields}}
     {{/struct:union?}}
 
-    cdef cppclass c{{struct:name}} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
-        c{{struct:name}}() except +
+    cdef cppclass {{> types/c_struct }} "::{{#program:cppNamespaces}}{{value}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
+        {{> types/c_struct }}() except +
         {{^struct:cpp_noncopyable?}}
-        c{{struct:name}}(const c{{struct:name}}&) except +
+        {{> types/c_struct }}(const {{> types/c_struct }}&) except +
         {{/struct:cpp_noncopyable?}}
         {{^struct:cpp_noncomparable}}
-        bint operator==(c{{struct:name}}&)
-        bint operator!=(c{{struct:name}}&)
+        bint operator==({{> types/c_struct }}&)
+        bint operator!=({{> types/c_struct }}&)
         {{#struct:is_struct_orderable?}}
-        bint operator<(c{{struct:name}}&)
-        bint operator>(c{{struct:name}}&)
-        bint operator<=(c{{struct:name}}&)
-        bint operator>=(c{{struct:name}}&)
+        bint operator<({{> types/c_struct }}&)
+        bint operator>({{> types/c_struct }}&)
+        bint operator<=({{> types/c_struct }}&)
+        bint operator>=({{> types/c_struct }}&)
         {{/struct:is_struct_orderable?}}
         {{/struct:cpp_noncomparable}}
     {{^struct:union?}}
@@ -83,7 +83,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
     {{/struct:fields_and_mixin_fields}}
     {{/struct:union?}}
     {{#struct:union?}}
-        c{{struct:name}}__type getType() const
+        {{> types/c_struct }}__type getType() const
     {{#struct:py3_fields}}
         {{^field:has_ref_api?}}
         __union_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!

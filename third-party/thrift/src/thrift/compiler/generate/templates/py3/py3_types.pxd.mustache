@@ -69,7 +69,7 @@ cdef extern from "{{.}}":
 
 
 cdef class {{struct:name}}({{> types/python_struct_class}}):
-    cdef shared_ptr[c{{struct:name}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[{{> types/c_struct }}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     {{^struct:union?}}
     cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
     {{#struct:fields_and_mixin_fields}}
@@ -99,8 +99,8 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{#struct:union?}}
 
     @staticmethod
-    cdef unique_ptr[c{{struct:name}}] _make_instance(
-        c{{struct:name}}* base_instance{{^struct:union?}},
+    cdef unique_ptr[{{> types/c_struct }}] _make_instance(
+        {{> types/c_struct }}* base_instance{{^struct:union?}},
         bint* __isNOTSET{{/struct:union?}}{{#struct:py3_fields}},
         {{#field:type}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
@@ -115,7 +115,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{/struct:union?}}
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[c{{struct:name}}])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/c_struct }}])
 
 {{/program:filtered_structs}}
 

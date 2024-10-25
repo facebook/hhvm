@@ -40,7 +40,7 @@ annotation).
 }}{{#type:binary?}}string{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}c{{struct:name}}{{!
+  }}{{> types/c_struct }}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{^type:defaultTemplate?}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
@@ -57,6 +57,6 @@ annotation).
 }}]{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}c{{enum:name}}{{!
+  }}{{> types/c_enum }}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}cFollyUnit{{/type:void?}}

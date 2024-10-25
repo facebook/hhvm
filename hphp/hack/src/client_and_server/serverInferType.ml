@@ -315,13 +315,15 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
          since the contents of a splice are just plain hack and don't need
          special treatment. If it isn't, use the virtualized expression to
          get the client type focussed view of the expression tree. *)
-      let sp = self#on_block env (Aast_utils.get_splices_from_et et) in
-      if List.for_all ~f:Option.is_none sp then
+      let splice_results =
+        self#on_block env (Aast_utils.get_splices_from_et et)
+      in
+      let virtual_results =
         match Aast_utils.get_virtual_expr_from_et et with
         | Some e -> self#on_expr env e
         | _ -> self#on_expr env et.Aast_defs.et_runtime_expr
-      else
-        sp
+      in
+      List.map2_exn splice_results virtual_results ~f:Option.first_some
   end
 
 (** Return the type of the node associated with exactly the given range.

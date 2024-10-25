@@ -825,6 +825,41 @@ class CommonTests(BarebonesTests):
             options=["--type-at-pos-batch", "{root}foo_optional.php:4:4"],
         )
 
+    def test_type_at_pos_batch_splices(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch for ET splices
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}et_splices.php",'
+                + '"line":7,'
+                + '"character":46}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}et_splices.php","line":74,"char_start":39,"char_end":48}},'
+                + '"kind":"class",'
+                + '"name":"\\\\ExampleInt",'
+                + '"args":[]}}'
+                + "}}",
+                '{{"position":'
+                + '{{"file":"{root}et_splices.php",'
+                + '"line":7,'
+                + '"character":40}}'
+                + ',"type":{{'
+                + '"src_pos":{{"filename":"{root}et_splices.php","line":7,"char_start":40,"char_end":40}},'
+                + '"kind":"primitive",'
+                + '"name":"int"}}'
+                + "}}",
+            ],
+            options=[
+                "--type-at-pos-batch",
+                "{root}et_splices.php:7:40",
+                "{root}et_splices.php:7:46",
+            ],
+        )
+
     def test_ide_get_definition(self) -> None:
         """
         Test hh_client --ide-get-definition

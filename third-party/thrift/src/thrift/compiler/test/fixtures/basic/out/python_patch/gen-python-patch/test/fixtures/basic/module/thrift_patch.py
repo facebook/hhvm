@@ -29,6 +29,7 @@ import folly.iobuf as _fbthrift_iobuf
 import test.fixtures.basic.module.thrift_types
 
 
+
 class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyStruct]):
     pass
 

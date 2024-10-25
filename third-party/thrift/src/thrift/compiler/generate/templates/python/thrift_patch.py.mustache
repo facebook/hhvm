@@ -45,6 +45,14 @@ import folly.iobuf as _fbthrift_iobuf
 
 import {{program:module_path}}.thrift_types
 
+{{#program:include_namespaces}}
+{{#has_types?}}
+
+import {{included_module_path}}.{{> types/types_import_path}}
+import {{included_module_path}}.thrift_patch
+{{/has_types?}}
+{{/program:include_namespaces}}
+
 {{#program:structs}}
 
 class {{struct:py_name}}Patch(BaseStructPatch[{{program:module_path}}.thrift_types.{{struct:py_name}}]):

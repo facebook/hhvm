@@ -638,6 +638,8 @@ class python_mstch_type : public mstch_type {
             {"type:module_path", &python_mstch_type::module_path},
             {"type:patch_module_path", &python_mstch_type::patch_module_path},
             {"type:need_module_path?", &python_mstch_type::need_module_path},
+            {"type:need_patch_module_path?",
+             &python_mstch_type::need_patch_module_path},
         });
   }
 
@@ -686,12 +688,14 @@ class python_mstch_type : public mstch_type {
     if (!has_option("is_types_file")) {
       return true;
     }
-    if (const t_program* prog = type_->program()) {
-      if (prog != prog_) {
-        return true;
-      }
+    return is_type_defined_in_the_current_program();
+  }
+
+  mstch::node need_patch_module_path() {
+    if (!has_option("is_patch_file")) {
+      return true;
     }
-    return false;
+    return is_type_defined_in_the_current_program();
   }
 
   mstch::node is_external_program() {
@@ -714,6 +718,15 @@ class python_mstch_type : public mstch_type {
       return p;
     }
     return prog_;
+  }
+
+  bool is_type_defined_in_the_current_program() {
+    if (const t_program* prog = type_->program()) {
+      if (prog != prog_) {
+        return true;
+      }
+    }
+    return false;
   }
 
   const t_program* prog_;
@@ -965,6 +978,11 @@ bool validate_structured(sema_context& ctx, const t_struct& s) {
 
 } // namespace enum_member_union_field_names_validator
 
+std::filesystem::path program_to_path(const t_program& prog) {
+  auto package = get_py3_namespace(&prog);
+  return fmt::format("{}", fmt::join(package, "/"));
+}
+
 class t_mstch_python_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -981,7 +999,7 @@ class t_mstch_python_generator : public t_mstch_generator {
   std::string template_prefix() const override { return "python"; }
 
   void generate_program() override {
-    generate_root_path_ = package_to_path();
+    generate_root_path_ = program_to_path(*get_program());
     out_dir_base_ = "gen-python";
     auto include_prefix = get_option("include_prefix").value_or("");
     if (!include_prefix.empty()) {
@@ -1018,7 +1036,6 @@ class t_mstch_python_generator : public t_mstch_generator {
   void generate_metadata();
   void generate_clients();
   void generate_services();
-  std::filesystem::path package_to_path();
 
   std::filesystem::path generate_root_path_;
 };
@@ -1241,11 +1258,6 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_deprecated_annotation>();
 }
 
-std::filesystem::path t_mstch_python_generator::package_to_path() {
-  auto package = get_py3_namespace(get_program());
-  return fmt::format("{}", fmt::join(package, "/"));
-}
-
 void t_mstch_python_generator::generate_file(
     const std::string& template_name,
     IsTypesFile is_types_file,
@@ -1381,12 +1393,15 @@ class t_python_patch_generator : public t_mstch_generator {
 
     set_mstch_factories();
     mstch_context_.set_or_erase_option(true, "generate_immutable_types", "yes");
+    mstch_context_.set_or_erase_option(true, "is_patch_file", "");
     const auto* program = get_program();
     auto mstch_program = mstch_context_.program_factory->make_mstch_object(
         program, mstch_context_);
 
     render_to_file(
-        std::move(mstch_program), "thrift_patch.py", "thrift_patch.py");
+        std::move(mstch_program),
+        "thrift_patch.py",
+        program_to_path(*get_program()) / program->name() / "thrift_patch.py");
   }
 
  private:

@@ -94,8 +94,8 @@ func newRocketServerSocket(ctx context.Context, proc Processor, log func(format 
 }
 
 func (r *rocketServerSocket) metadataPush(msg payload.Payload) {
-	clientMetadataPush := decodeClientMetadataPush(msg)
-	r.log("received metadata push from client: %v\n", clientMetadataPush.transportMetadata)
+	_ = decodeClientMetadataPush(msg)
+	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
 }
 
 func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {

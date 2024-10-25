@@ -7,11 +7,7 @@
 
 import enum
 import thrift.py3.types
-import module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import module.thrift_metadata
 
 _fbthrift__module_name__ = "module.types"
 
@@ -24,19 +20,18 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_EmptyEnum()
+        return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.EmptyEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.EmptyEnum(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum EmptyEnum doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -64,19 +59,18 @@ class City(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_City()
+        return module.thrift_metadata.gen_metadata_enum_City()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.City"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.City(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum City doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.City(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -104,19 +98,18 @@ class Company(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_Company()
+        return module.thrift_metadata.gen_metadata_enum_Company()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.Company"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.Company(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum Company doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.Company(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

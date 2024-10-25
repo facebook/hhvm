@@ -7,11 +7,7 @@
 
 import enum
 import thrift.py3.types
-import module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import module.thrift_metadata
 
 _fbthrift__module_name__ = "module.types"
 
@@ -27,19 +23,18 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyEnumA()
+        return module.thrift_metadata.gen_metadata_enum_MyEnumA()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnumA"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.MyEnumA(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum MyEnumA doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.MyEnumA(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -66,19 +61,18 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_AnnotatedEnum()
+        return module.thrift_metadata.gen_metadata_enum_AnnotatedEnum()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.AnnotatedEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.AnnotatedEnum(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum AnnotatedEnum doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.AnnotatedEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -105,19 +99,18 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_AnnotatedEnum2()
+        return module.thrift_metadata.gen_metadata_enum_AnnotatedEnum2()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.AnnotatedEnum2"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.AnnotatedEnum2(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum AnnotatedEnum2 doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.AnnotatedEnum2(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -142,19 +135,18 @@ class MyEnumB(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyEnumB()
+        return module.thrift_metadata.gen_metadata_enum_MyEnumB()
 
     @staticmethod
     def __get_thrift_name__():
         return "module.MyEnumB"
 
     def _to_python(self):
-        if _fbthrift_python_types is not None:
-            return _fbthrift_python_types.MyEnumB(self._fbthrift_value_)
-        raise AttributeError(
-            "Enum MyEnumB doesn't define `_to_python` because couldn't import "
+        import importlib
+        python_types = importlib.import_module(
             "module.thrift_types"
         )
+        return python_types.MyEnumB(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

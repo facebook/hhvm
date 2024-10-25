@@ -143,8 +143,7 @@ BigValueRoute<RouterInfo>::route(const Request& req) const {
     return ch_->route(req);
   }
 
-  auto reqsInfoPair = chunkUpdateRequests<Request>(
-      req.key_ref()->fullKey(), *req.value_ref(), *req.exptime_ref());
+  auto reqsInfoPair = chunkUpdateRequests(req);
   std::vector<std::function<McSetReply()>> fs;
   auto& chunkReqs = reqsInfoPair.first;
   fs.reserve(chunkReqs.size());
@@ -188,7 +187,9 @@ std::vector<McGetRequest> BigValueRoute<RouterInfo>::chunkGetRequests(
   auto baseKey = req.key_ref()->fullKey();
   for (uint32_t i = 0; i < info.numChunks(); i++) {
     // override key with chunk keys
-    bigGetReqs.emplace_back(createChunkKey(baseKey, i, info.suffix()));
+    auto& bigGetReq =
+        bigGetReqs.emplace_back(createChunkKey(baseKey, i, info.suffix()));
+    bigGetReq.usecaseId_ref().copy_from(req.usecaseId_ref());
   }
 
   return bigGetReqs;
@@ -226,10 +227,8 @@ typename std::enable_if_t<
     std::pair<
         std::vector<McSetRequest>,
         typename BigValueRoute<RouterInfo>::ChunksInfo>>
-BigValueRoute<RouterInfo>::chunkUpdateRequests(
-    folly::StringPiece baseKey,
-    const folly::IOBuf& value,
-    int32_t exptime) const {
+BigValueRoute<RouterInfo>::chunkUpdateRequests(const Request& req) const {
+  const folly::IOBuf& value = *req.value_ref();
   int numChunks = (value.computeChainDataLength() + options_.threshold - 1) /
       options_.threshold;
   ChunksInfo info(numChunks, detail::hashBigValue(value));
@@ -241,9 +240,11 @@ BigValueRoute<RouterInfo>::chunkUpdateRequests(
   folly::io::Cursor cursor(&value);
   for (int i = 0; i < numChunks; ++i) {
     cursor.cloneAtMost(chunkValue, options_.threshold);
-    chunkReqs.emplace_back(createChunkKey(baseKey, i, info.suffix()));
-    chunkReqs.back().value_ref() = std::move(chunkValue);
-    chunkReqs.back().exptime_ref() = exptime;
+    auto& chunkReq = chunkReqs.emplace_back(
+        createChunkKey(req.key_ref()->fullKey(), i, info.suffix()));
+    chunkReq.value_ref() = std::move(chunkValue);
+    chunkReq.exptime_ref() = *req.exptime_ref();
+    chunkReq.usecaseId_ref().copy_from(req.usecaseId_ref());
   }
 
   return std::make_pair(std::move(chunkReqs), info);

@@ -127,10 +127,7 @@ class BigValueRoute {
   typename std::enable_if_t<
       MemcacheUpdateLike<Request>::value,
       std::pair<std::vector<McSetRequest>, ChunksInfo>>
-  chunkUpdateRequests(
-      folly::StringPiece baseKey,
-      const folly::IOBuf& value,
-      int32_t exptime) const;
+  chunkUpdateRequests(const Request& req) const;
 
   template <class FromRequest>
   std::vector<McGetRequest> chunkGetRequests(

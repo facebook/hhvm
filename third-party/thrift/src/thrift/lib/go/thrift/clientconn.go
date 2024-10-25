@@ -46,19 +46,19 @@ func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.IReq
 	cc.seqID++
 
 	if err := setRequestHeaders(ctx, cc.proto); err != nil {
-		return err
+		return fmt.Errorf("Failed to set request headers: %w", err)
 	}
 
 	if err := cc.proto.WriteMessageBegin(method, msgType, cc.seqID); err != nil {
-		return err
+		return fmt.Errorf("Failed to write message preamble: %w", err)
 	}
 
 	if err := req.Write(cc.proto); err != nil {
-		return err
+		return fmt.Errorf("Failed to write request body: %w", err)
 	}
 
 	if err := cc.proto.WriteMessageEnd(); err != nil {
-		return err
+		return fmt.Errorf("Failed to write message epilogue: %w", err)
 	}
 
 	return cc.proto.Flush()
@@ -69,7 +69,7 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.IRes
 	recvMethod, mTypeID, seqID, err := cc.proto.ReadMessageBegin()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to read message preamble: %w", err)
 	}
 
 	if method != recvMethod {
@@ -83,7 +83,7 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.IRes
 	switch mTypeID {
 	case types.REPLY:
 		if err := res.Read(cc.proto); err != nil {
-			return err
+			return fmt.Errorf("Failed to read message body: %w", err)
 		}
 
 		return cc.proto.ReadMessageEnd()

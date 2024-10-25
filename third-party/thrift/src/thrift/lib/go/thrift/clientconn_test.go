@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -105,19 +106,19 @@ func TestSendMsgError(t *testing.T) {
 		// Bad WriteMessageBegin
 		{
 			proto:    &fakeProto{errOnMessageBegin: true},
-			expected: errFakeProtoWriteMessageBegin,
+			expected: fmt.Errorf("Failed to write message preamble: %w", errFakeProtoWriteMessageBegin),
 		},
 		// Bad request.Write
 		{
 			proto:    &fakeProto{errOnMessageBegin: true},
 			request:  &fakeRequest{shouldReturnError: true},
-			expected: errFakeProtoWriteMessageBegin,
+			expected: fmt.Errorf("Failed to write message preamble: %w", errFakeProtoWriteMessageBegin),
 		},
 		// Bad WriteMessageEnd
 		{
 			proto:    &fakeProto{errOnMessageEnd: true},
 			request:  &fakeRequest{shouldReturnError: false},
-			expected: errFakeProtoWriteMessageEnd,
+			expected: fmt.Errorf("Failed to write message epilogue: %w", errFakeProtoWriteMessageEnd),
 		},
 		// Bad Flush
 		{
@@ -148,7 +149,7 @@ func TestRecvMsgError(t *testing.T) {
 		// Error reading message begin
 		{
 			proto:    &fakeProto{shouldReturnError: true},
-			expected: errFakeProtoReadMessageBegin,
+			expected: fmt.Errorf("Failed to read message preamble: %w", errFakeProtoReadMessageBegin),
 		},
 
 		// Bad method name in response
@@ -173,7 +174,7 @@ func TestRecvMsgError(t *testing.T) {
 		{
 			proto:    &fakeProto{method: "foobar", seqID: 0, typeID: types.REPLY},
 			response: &fakeResponse{shouldReturnError: true},
-			expected: errFakeResponseRead,
+			expected: fmt.Errorf("Failed to read message body: %w", errFakeResponseRead),
 		},
 	}
 
@@ -184,7 +185,7 @@ func TestRecvMsgError(t *testing.T) {
 		cc := ClientConn{proto: testCase.proto}
 
 		if err := cc.RecvMsg(ctx, "foobar", testCase.response); err.Error() != testCase.expected.Error() {
-			t.Errorf("#%d: expected call to RecvMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected, err)
+			t.Errorf("#%d: expected call to RecvMsg to return \"%+v\"; got \"%+v\"", i, testCase.expected.Error(), err.Error())
 		}
 	}
 }

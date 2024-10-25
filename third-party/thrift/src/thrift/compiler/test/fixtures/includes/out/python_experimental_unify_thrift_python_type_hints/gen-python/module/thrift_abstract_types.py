@@ -29,13 +29,6 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def MyIncludedInt(self) -> int: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        MyIncludedField: _typing.Optional[includes.thrift_abstract_types.Included]=...,
-#        MyOtherIncludedField: _typing.Optional[includes.thrift_abstract_types.Included]=...,
-#        MyIncludedInt: _typing.Optional[int]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[includes.thrift_abstract_types.Included, includes.thrift_abstract_types.Included, int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore

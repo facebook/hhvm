@@ -34,14 +34,6 @@ class MyStructFloatFieldThrowExp(_abc.ABC):
     @_abc.abstractmethod
     def myFloatField(self) -> float: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        myLongField: _typing.Optional[int]=...,
-#        MyByteField: _typing.Optional[int]=...,
-#        myStringField: _typing.Optional[str]=...,
-#        myFloatField: _typing.Optional[float]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, str, float]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStructFloatFieldThrowExp": ...  # type: ignore
@@ -59,12 +51,6 @@ class MyStructMapFloatThrowExp(_abc.ABC):
     @property
     @_abc.abstractmethod
     def mapListOfFloats(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]: ...
-#    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        myLongField: _typing.Optional[int]=...,
-#        mapListOfFloats: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]]=...
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]]]]: ...
 #    @_abc.abstractmethod
@@ -162,38 +148,6 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def mListList(self) -> _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        MyIntField: _typing.Optional[int]=...,
-#        MyStringField: _typing.Optional[str]=...,
-#        MyDataField: _typing.Optional[MyDataItem]=...,
-#        myEnum: _typing.Optional[MyEnum]=...,
-#        MyBoolField: _typing.Optional[bool]=...,
-#        MyByteField: _typing.Optional[int]=...,
-#        MyShortField: _typing.Optional[int]=...,
-#        MyLongField: _typing.Optional[int]=...,
-#        MyDoubleField: _typing.Optional[float]=...,
-#        lDouble: _typing.Optional[_typing.Sequence[float]]=...,
-#        lShort: _typing.Optional[_typing.Sequence[int]]=...,
-#        lInteger: _typing.Optional[_typing.Sequence[int]]=...,
-#        lLong: _typing.Optional[_typing.Sequence[int]]=...,
-#        lString: _typing.Optional[_typing.Sequence[str]]=...,
-#        lBool: _typing.Optional[_typing.Sequence[bool]]=...,
-#        lByte: _typing.Optional[_typing.Sequence[int]]=...,
-#        mShortString: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        mIntegerString: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        mStringMyStruct: _typing.Optional[_typing.Mapping[str, MyStruct]]=...,
-#        mStringBool: _typing.Optional[_typing.Mapping[str, bool]]=...,
-#        mIntegerInteger: _typing.Optional[_typing.Mapping[int, int]]=...,
-#        mIntegerBool: _typing.Optional[_typing.Mapping[int, bool]]=...,
-#        sShort: _typing.Optional[_typing.AbstractSet[int]]=...,
-#        sMyStruct: _typing.Optional[_typing.AbstractSet[MyStruct]]=...,
-#        sLong: _typing.Optional[_typing.AbstractSet[int]]=...,
-#        sString: _typing.Optional[_typing.AbstractSet[str]]=...,
-#        sByte: _typing.Optional[_typing.AbstractSet[int]]=...,
-#        mListList: _typing.Optional[_typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, int, int, int, float, _typing.Sequence[float], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[str], _typing.Sequence[bool], _typing.Sequence[int], _typing.Mapping[int, str], _typing.Mapping[int, str], _typing.Mapping[str, MyStruct], _typing.Mapping[str, bool], _typing.Mapping[int, int], _typing.Mapping[int, bool], _typing.AbstractSet[int], _typing.AbstractSet[MyStruct], _typing.AbstractSet[int], _typing.AbstractSet[str], _typing.AbstractSet[int], _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
@@ -211,12 +165,6 @@ class SimpleStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def name(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        age: _typing.Optional[int]=...,
-#        name: _typing.Optional[str]=...
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str]]]: ...
 #    @_abc.abstractmethod
@@ -296,32 +244,6 @@ class defaultStruct(_abc.ABC):
     @_abc.abstractmethod
     def enumMapDFset(self) -> _typing.Mapping[str, _typing.Mapping[int, MyEnum]]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        myLongDFset: _typing.Optional[int]=...,
-#        myLongDF: _typing.Optional[int]=...,
-#        portDFset: _typing.Optional[int]=...,
-#        portNum: _typing.Optional[int]=...,
-#        myBinaryDFset: _typing.Optional[bytes]=...,
-#        myBinary: _typing.Optional[bytes]=...,
-#        myByteDFSet: _typing.Optional[int]=...,
-#        myByte: _typing.Optional[int]=...,
-#        myDoubleDFset: _typing.Optional[float]=...,
-#        myDoubleDFZero: _typing.Optional[float]=...,
-#        myDouble: _typing.Optional[float]=...,
-#        field3: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        myList: _typing.Optional[_typing.Sequence[MyEnum]]=...,
-#        mySet: _typing.Optional[_typing.AbstractSet[str]]=...,
-#        simpleStruct: _typing.Optional[SimpleStruct]=...,
-#        listStructDFset: _typing.Optional[_typing.Sequence[SimpleStruct]]=...,
-#        myUnion: _typing.Optional[MyUnion]=...,
-#        listUnionDFset: _typing.Optional[_typing.Sequence[MyUnion]]=...,
-#        mapNestlistStructDfSet: _typing.Optional[_typing.Mapping[int, _typing.Sequence[SimpleStruct]]]=...,
-#        mapJavaTypeDFset: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        emptyMap: _typing.Optional[_typing.Mapping[int, int]]=...,
-#        enumMapDFset: _typing.Optional[_typing.Mapping[str, _typing.Mapping[int, MyEnum]]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, bytes, bytes, int, int, float, float, float, _typing.Mapping[int, str], _typing.Sequence[MyEnum], _typing.AbstractSet[str], SimpleStruct, _typing.Sequence[SimpleStruct], MyUnion, _typing.Sequence[MyUnion], _typing.Mapping[int, _typing.Sequence[SimpleStruct]], _typing.Mapping[int, str], _typing.Mapping[int, int], _typing.Mapping[str, _typing.Mapping[int, MyEnum]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.defaultStruct": ...  # type: ignore
@@ -361,19 +283,6 @@ class MyStructTypeDef(_abc.ABC):
     @_abc.abstractmethod
     def myMapListOfTypeDef(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        myLongField: _typing.Optional[int]=...,
-#        myLongTypeDef: _typing.Optional[int]=...,
-#        myStringField: _typing.Optional[str]=...,
-#        myStringTypedef: _typing.Optional[str]=...,
-#        myMapField: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        myMapTypedef: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        myListField: _typing.Optional[_typing.Sequence[float]]=...,
-#        myListTypedef: _typing.Optional[_typing.Sequence[float]]=...,
-#        myMapListOfTypeDef: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, str, str, _typing.Mapping[int, str], _typing.Mapping[int, str], _typing.Sequence[float], _typing.Sequence[float], _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStructTypeDef": ...  # type: ignore
@@ -386,10 +295,6 @@ class MyStructTypeDef(_abc.ABC):
 
 class MyDataItem(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __call__(
-#        self,
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
@@ -507,28 +412,6 @@ class ComplexNestedStruct(_abc.ABC):
     @_abc.abstractmethod
     def mapKeyListValSet(self) -> _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        setOfSetOfInt: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[int]]]=...,
-#        listofListOfListOfListOfEnum: _typing.Optional[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[MyEnum]]]]]=...,
-#        listOfListOfMyStruct: _typing.Optional[_typing.Sequence[_typing.Sequence[MyStruct]]]=...,
-#        setOfListOfListOfLong: _typing.Optional[_typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]]]=...,
-#        setOfSetOfsetOfLong: _typing.Optional[_typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]]]=...,
-#        mapStructListOfListOfLong: _typing.Optional[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[MyStruct]]]]=...,
-#        mKeyStructValInt: _typing.Optional[_typing.Mapping[MyStruct, int]]=...,
-#        listOfMapKeyIntValInt: _typing.Optional[_typing.Sequence[_typing.Mapping[int, int]]]=...,
-#        listOfMapKeyStrValList: _typing.Optional[_typing.Sequence[_typing.Mapping[str, _typing.Sequence[MyStruct]]]]=...,
-#        mapKeySetValLong: _typing.Optional[_typing.Mapping[_typing.AbstractSet[int], int]]=...,
-#        mapKeyListValLong: _typing.Optional[_typing.Mapping[_typing.Sequence[str], int]]=...,
-#        mapKeyMapValMap: _typing.Optional[_typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]]]=...,
-#        mapKeySetValMap: _typing.Optional[_typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]]]=...,
-#        NestedMaps: _typing.Optional[_typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]]]=...,
-#        mapKeyIntValList: _typing.Optional[_typing.Mapping[int, _typing.Sequence[MyStruct]]]=...,
-#        mapKeyIntValSet: _typing.Optional[_typing.Mapping[int, _typing.AbstractSet[bool]]]=...,
-#        mapKeySetValInt: _typing.Optional[_typing.Mapping[_typing.AbstractSet[bool], MyEnum]]=...,
-#        mapKeyListValSet: _typing.Optional[_typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[_typing.AbstractSet[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[MyEnum]]]], _typing.Sequence[_typing.Sequence[MyStruct]], _typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]], _typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]], _typing.Mapping[int, _typing.Sequence[_typing.Sequence[MyStruct]]], _typing.Mapping[MyStruct, int], _typing.Sequence[_typing.Mapping[int, int]], _typing.Sequence[_typing.Mapping[str, _typing.Sequence[MyStruct]]], _typing.Mapping[_typing.AbstractSet[int], int], _typing.Mapping[_typing.Sequence[str], int], _typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]], _typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], _typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]], _typing.Mapping[int, _typing.Sequence[MyStruct]], _typing.Mapping[int, _typing.AbstractSet[bool]], _typing.Mapping[_typing.AbstractSet[bool], MyEnum], _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexNestedStruct": ...  # type: ignore
@@ -552,14 +435,6 @@ class TypeRemapped(_abc.ABC):
     @property
     @_abc.abstractmethod
     def binaryTestBuffer(self) -> bytes: ...
-#    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        lsMap: _typing.Optional[_typing.Mapping[int, str]]=...,
-#        ioMap: _typing.Optional[_typing.Mapping[int, _typing.Mapping[int, int]]]=...,
-#        BigInteger: _typing.Optional[int]=...,
-#        binaryTestBuffer: _typing.Optional[bytes]=...
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[int, str], _typing.Mapping[int, _typing.Mapping[int, int]], int, bytes]]]: ...
 #    @_abc.abstractmethod

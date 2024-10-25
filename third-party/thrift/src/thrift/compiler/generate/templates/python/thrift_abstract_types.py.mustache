@@ -59,14 +59,6 @@ class {{struct:py_name}}({{!
     {{^struct:fields_ordered_by_id}}
     pass
     {{/struct:fields_ordered_by_id}}
-    {{#struct:plain?}}
-#    @_abc.abstractmethod
-#    def __call__(
-#        self,{{#struct:fields?}} *{{/struct:fields?}}{{#struct:fields_ordered_by_id}},
-        {{! Replace #field:type .. /field:type with > fields/compatible_adapted_type }}
-#        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}]=...{{/struct:fields_ordered_by_id}}
-#    ) -> _typing.Self: ...
-    {{/struct:plain?}}
     {{^struct:union?}}
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!

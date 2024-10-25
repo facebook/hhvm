@@ -52,14 +52,6 @@ class SomeStruct(_abc.ABC):
     @_abc.abstractmethod
     def tags(self) -> _typing.AbstractSet[int]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        reasonable: _typing.Optional[Metasyntactic]=...,
-#        fine: _typing.Optional[Metasyntactic]=...,
-#        questionable: _typing.Optional[Metasyntactic]=...,
-#        tags: _typing.Optional[_typing.AbstractSet[int]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Metasyntactic, Metasyntactic, Metasyntactic, _typing.AbstractSet[int]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.SomeStruct": ...  # type: ignore
@@ -83,14 +75,6 @@ class MyStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def me1_t2(self) -> MyEnum1: ...
-#    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        me2_3: _typing.Optional[MyEnum2]=...,
-#        me3_n3: _typing.Optional[MyEnum3]=...,
-#        me1_t1: _typing.Optional[MyEnum1]=...,
-#        me1_t2: _typing.Optional[MyEnum1]=...
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum2, MyEnum3, MyEnum1, MyEnum1]]]: ...
 #    @_abc.abstractmethod

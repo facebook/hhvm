@@ -52,19 +52,6 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        MyIntField: _typing.Optional[int]=...,
-#        MyStringField: _typing.Optional[str]=...,
-#        MyDataField: _typing.Optional[MyDataItem]=...,
-#        myEnum: _typing.Optional[MyEnum]=...,
-#        oneway: _typing.Optional[bool]=...,
-#        readonly: _typing.Optional[bool]=...,
-#        idempotent: _typing.Optional[bool]=...,
-#        floatSet: _typing.Optional[_typing.AbstractSet[float]]=...,
-#        no_hack_codegen_field: _typing.Optional[str]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
@@ -86,13 +73,6 @@ class Containers(_abc.ABC):
     @_abc.abstractmethod
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        I32List: _typing.Optional[_typing.Sequence[int]]=...,
-#        StringSet: _typing.Optional[_typing.AbstractSet[str]]=...,
-#        StringToI64Map: _typing.Optional[_typing.Mapping[str, int]]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
@@ -105,10 +85,6 @@ class Containers(_abc.ABC):
 
 class MyDataItem(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __call__(
-#        self,
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
@@ -194,11 +170,6 @@ class ReservedKeyword(_abc.ABC):
     @property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        reserved_field: _typing.Optional[int]=...
-#    ) -> _typing.Self: ...
 #    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
 #    @_abc.abstractmethod

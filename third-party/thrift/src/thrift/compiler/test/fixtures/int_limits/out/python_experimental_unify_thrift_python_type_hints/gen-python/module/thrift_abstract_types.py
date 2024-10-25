@@ -43,18 +43,6 @@ class Limits(_abc.ABC):
     @_abc.abstractmethod
     def min_byte_field(self) -> int: ...
 #    @_abc.abstractmethod
-#    def __call__(
-#        self, *,
-#        max_i64_field: _typing.Optional[int]=...,
-#        min_i64_field: _typing.Optional[int]=...,
-#        max_i32_field: _typing.Optional[int]=...,
-#        min_i32_field: _typing.Optional[int]=...,
-#        max_i16_field: _typing.Optional[int]=...,
-#        min_i16_field: _typing.Optional[int]=...,
-#        max_byte_field: _typing.Optional[int]=...,
-#        min_byte_field: _typing.Optional[int]=...
-#    ) -> _typing.Self: ...
-#    @_abc.abstractmethod
 #    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, int, int, int, int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Limits": ...  # type: ignore

@@ -193,6 +193,8 @@ libmcroutercore_a_SOURCES = \
   routes/RoutePolicyMap-inl.h \
   routes/RoutePolicyMap.h \
   routes/RouteSelectorMap.h \
+  routes/RoutingUtils.cpp \
+  routes/RoutingUtils.h \
   routes/ShadowRoute.h \
   routes/ShadowRoute-inl.h \
   routes/ShadowRouteIf.h \

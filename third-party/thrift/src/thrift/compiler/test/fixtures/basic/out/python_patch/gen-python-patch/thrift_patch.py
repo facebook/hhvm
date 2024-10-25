@@ -24,6 +24,7 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
 )
 
 import thrift.python.types as _fbthrift_python_types
+import folly.iobuf as _fbthrift_iobuf
 
 import test.fixtures.basic.module.thrift_types
 from test.fixtures.basic.module.thrift_types import (

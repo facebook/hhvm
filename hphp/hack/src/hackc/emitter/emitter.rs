@@ -244,15 +244,6 @@ impl<'d> Emitter<'d> {
         let state = std::mem::take(&mut self.symbol_refs_state);
         state.to_hhas()
     }
-
-    pub fn emit_function_name(&self, s: &str) -> hhbc::FunctionName {
-        let stripped = hhbc_string_utils::strip_global_ns(s);
-        let ret = match self.options().hhvm.trivial_builtins.get(stripped) {
-            Some(v) => v,
-            None => s,
-        };
-        hhbc::FunctionName::from_ast_name(ret)
-    }
 }
 
 impl<'d> print_expr::SpecialClassResolver for Emitter<'d> {

@@ -160,7 +160,6 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Resul
         hhbc_flags,
         hhvm: Hhvm {
             include_roots: Default::default(),
-            trivial_builtins: Default::default(),
             parser_options,
         },
         flags: opts.env_flags.clone(),

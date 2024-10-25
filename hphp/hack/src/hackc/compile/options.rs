@@ -40,7 +40,6 @@ impl Default for CompilerFlags {
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
     pub parser_options: ParserOptions,
-    pub trivial_builtins: BTreeMap<String, String>,
 }
 
 impl Hhvm {

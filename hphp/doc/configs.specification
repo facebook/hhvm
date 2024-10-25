@@ -293,7 +293,6 @@ The format can be found in hphp/tools/configs/generate-configs.rs
   reified generic bytecode, powered by decl directed bytecode
 
 - std::map<std::string,std::string> Hack.Lang.AliasedNamespaces = {}, UNKNOWN, repooptionsflag(Parser)|lookuppath(AliasedNamespaces)
-- std::map<std::string,std::string> Hack.Lang.TrivialBuiltins = {}, UNKNOWN, repooptionsflag(Parser)|lookuppath(TrivialBuiltins)
 
 - bool Hack.Lang.OptimizeParamLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.OptimizeLocalLifetimes = false, paulbiss, repooptionsflag(Parser)|hackc(hhbc)

@@ -225,7 +225,6 @@ impl Opts {
             filepath: relative_path::RelativePath::make(relative_path::Prefix::Dummy, path),
             hhvm: Hhvm {
                 include_roots: Default::default(),
-                trivial_builtins: Default::default(),
                 parser_options,
             },
             flags: self.env_flags.clone(),

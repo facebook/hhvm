@@ -295,13 +295,6 @@ void RepoOptionsFlags::initAliasedNamespaces(hackc::NativeEnv& env) const {
   }
 }
 
-void RepoOptionsFlags::initTrivialBuiltins(hackc::NativeEnv& env) const {
-  if (!RO::EvalReplaceTrivialBuiltins) return;
-  for (auto& [k, v] : TrivialBuiltins) {
-    env.trivial_builtins.emplace_back(hackc::StringMapEntry{k, v});
-  }
-}
-
 void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   for (auto& [k, v] : AliasedNamespaces) {
     config.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});

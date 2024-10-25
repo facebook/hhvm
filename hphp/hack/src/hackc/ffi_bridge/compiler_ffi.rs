@@ -41,7 +41,6 @@ mod ffi {
 
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
-        trivial_builtins: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
 
         hhbc_flags: HhbcFlags,
@@ -541,9 +540,6 @@ impl ffi::NativeEnv {
             hhvm: Hhvm {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
-                    .collect(),
-                trivial_builtins: (self.trivial_builtins.iter())
-                    .map(|e| (e.key.clone(), e.value.clone()))
                     .collect(),
                 parser_options: ParserOptions {
                     auto_namespace_map: (self.aliased_namespaces.iter())

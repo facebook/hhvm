@@ -283,7 +283,7 @@ fn emit_call<'a, 'd>(
         ..
     } = c
     {
-        let ft = e.emit_function_name(&sid.1);
+        let ft = hhbc::FunctionName::from_ast_name(&sid.1);
         let fname = ft.as_str();
         if fname == "unset" {
             Ok(InstrSeq::gather(

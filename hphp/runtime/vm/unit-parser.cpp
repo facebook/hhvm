@@ -134,7 +134,6 @@ CompilerResult hackc_compile(
     }
   };
   options.initAliasedNamespaces(native_env);
-  options.initTrivialBuiltins(native_env);
   options.initHhbcFlags(native_env.hhbc_flags);
   options.initParserFlags(native_env.parser_flags);
   if (RO::EvalHackCompilerInheritConfig) {

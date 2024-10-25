@@ -8,6 +8,8 @@ from concurrent.futures import as_completed
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
+import regex as re
+
 
 @dataclass
 class Failure:
@@ -39,6 +41,7 @@ def milner_and_type_check(
     hhstc_exe: str,
     out_dir: str,
     template_file: str,
+    hhstc_pattern: str,
     seed: int,
     skip_hhstc: bool,
 ) -> Optional[Failure]:
@@ -73,7 +76,10 @@ def milner_and_type_check(
 
         # Check if the verifier found any errors
         stdout = result.stdout.decode()
-        if "No errors" not in stdout:
+        stderr = result.stderr.decode()
+        if (re.search(hhstc_pattern, stdout) is None) and (
+            re.search(hhstc_pattern, stderr) is None
+        ):
             with open(temp_file, "r") as out:
                 contents = out.read()
             return Failure(
@@ -88,6 +94,7 @@ def milner_and_type_check(
 
 def verify_well_typed(
     template_file: str,
+    hhstc_pattern: str,
     out_dir: str,
     seed_range: Tuple[int, int],
     skip_hhstc: bool,
@@ -107,6 +114,7 @@ def verify_well_typed(
                     hhstc_exe,
                     out_dir,
                     template_file,
+                    hhstc_pattern,
                     seed,
                     skip_hhstc,
                 )
@@ -136,7 +144,14 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Verify well-typed templates")
-    parser.add_argument("--template", help="Directory to search for templates")
+    parser.add_argument(
+        "--template", required=True, help="Directory to search for templates"
+    )
+    parser.add_argument(
+        "--hhstc-pattern",
+        required=True,
+        help="Pattern to look for in hh_single_type_check output",
+    )
     parser.add_argument(
         "--seed-range",
         required=True,
@@ -161,6 +176,7 @@ def main() -> None:
     out_dir = tempfile.TemporaryDirectory()
     exit_code = verify_well_typed(
         args.template,
+        args.hhstc_pattern,
         out_dir.name,
         seed_range,
         args.skip_hhstc,

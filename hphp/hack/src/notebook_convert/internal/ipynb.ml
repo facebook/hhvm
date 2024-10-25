@@ -98,17 +98,28 @@ let combine_cells_exn (cell1 : cell) (cell2 : cell) : cell =
          (show_cell cell1)
          (show_cell cell2))
 
-let ipynb_of_chunks_exn (chunks : Notebook_chunk.t list) : t =
-  let chunks_grouped_by_id =
-    List.sort_and_group
-      chunks
-      ~compare:(fun
-                 Notebook_chunk.{ id = id1; _ }
-                 Notebook_chunk.{ id = id2; _ }
-               -> Notebook_chunk.Id.compare id1 id2)
-  in
-  List.map chunks_grouped_by_id ~f:(fun chunks ->
-      chunks
-      |> List.map ~f:cell_of_chunk
-      (* reduce_exn is safe because groups created by sort_and_group are non-empty *)
-      |> List.reduce_exn ~f:combine_cells_exn)
+let ipynb_of_chunks (chunks : Notebook_chunk.t list) :
+    (t, Notebook_convert_error.t) result =
+  try
+    let chunks_grouped_by_id =
+      List.sort_and_group
+        chunks
+        ~compare:(fun
+                   Notebook_chunk.{ id = id1; _ }
+                   Notebook_chunk.{ id = id2; _ }
+                 -> Notebook_chunk.Id.compare id1 id2)
+    in
+    let ipynb =
+      List.map chunks_grouped_by_id ~f:(fun chunks ->
+          chunks
+          |> List.map ~f:cell_of_chunk
+          (* reduce_exn is safe because groups created by sort_and_group are non-empty *)
+          |> List.reduce_exn ~f:combine_cells_exn)
+    in
+    Ok ipynb
+  with
+  | e ->
+    (* blame the user: failure during parsing is almost certainly their fault,
+       such as corrupted //@bento-cell:$JSON_HERE
+    *)
+    Error (Notebook_convert_error.Invalid_input (Exn.to_string e))

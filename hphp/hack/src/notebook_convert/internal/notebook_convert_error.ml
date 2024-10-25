@@ -5,8 +5,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_prelude
-
-val hack_to_notebook :
-  Full_fidelity_positioned_syntax.t ->
-  (Hh_json.json, Notebook_convert_error.t) result
+type t =
+  | Invalid_input of string
+  | Internal of exn

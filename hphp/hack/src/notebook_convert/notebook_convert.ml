@@ -54,6 +54,11 @@ Excerpt:\n%s\nErrors: %s"|}
          err
          (Hh_json.json_to_string ~sort_keys:true ~pretty:true ipynb_json)
 
+(**
+* Note: We're careful to distinguish user errors from internal errors
+* because .php files may be edited in userland.
+* (unlike .ipynb JSON, which is typically not human-edited)
+*)
 let hack_to_notebook () : Exit_status.t =
   let hack = Sys_utils.read_stdin_to_string () in
   let (tree, syntax_errors) = Notebook_convert_util.parse hack in
@@ -73,7 +78,8 @@ let hack_to_notebook () : Exit_status.t =
       in
       let () = print_endline ipynb_json_string in
       Exit_status.No_error
-    | Error err ->
+    | Error (Notebook_convert_error.Internal err) -> raise err
+    | Error (Notebook_convert_error.Invalid_input msg) ->
       let () =
         Printf.eprintf
           {| Received input that was not in the expected format.
@@ -81,6 +87,6 @@ Expected a valid Hack file with special comments for notebook cell information.
 Such files should only be created via `hh --notebook-to-hack`. Error:
 %s
 |}
-          err
+          msg
       in
       Exit_status.Input_error

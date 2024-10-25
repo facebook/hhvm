@@ -60,7 +60,7 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   Notebook_chunk.{ chunk with contents }
 
 let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
-    Hh_json.json =
+    (Hh_json.json, Notebook_convert_error.t) result =
   let script_children =
     match syntax with
     | Syn.{ syntax = Script { script_declarations }; _ } ->
@@ -72,7 +72,9 @@ let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
   let decls =
     match script_children with
     | Syn.{ syntax = MarkupSection _; _ } :: decls -> decls
-    | _ -> failwith "Expected <?hh at top of file"
+    | _ ->
+      failwith
+        "Internal error: expected <?hh at the top of a Hack file. This should be unreachable since we validate inputs are well-formed Hack."
   in
   let (main_function_bodies, other) =
     List.partition_map decls ~f:(function
@@ -101,37 +103,35 @@ let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
           Either.First compound_statements
         | other -> Either.Second other)
   in
-  let top_level_statements_code =
-    begin
-      match main_function_bodies with
-      | body_parts :: [] ->
-        body_parts
+  let open Result.Let_syntax in
+  let* top_level_statements_chunks =
+    match main_function_bodies with
+    | body_parts :: [] ->
+      Ok
+        (body_parts
         |> Syn.children
         |> List.map ~f:Syn.full_text
         |> String.concat ~sep:"\n"
-      | _ -> failwith "Must be exactly one function with prefix notebook_main"
-    end
+        |> split_by_chunk_comments ~is_from_toplevel_statements:true)
+    | _ ->
+      Error
+        (Notebook_convert_error.Invalid_input
+           "Must be exactly one function with prefix notebook_main")
   in
-  let other_code =
-    other |> List.map ~f:Syn.full_text |> String.concat ~sep:"\n"
+  let other_chunks =
+    other
+    |> List.map ~f:Syn.full_text
+    |> String.concat ~sep:"\n"
+    |> split_by_chunk_comments ~is_from_toplevel_statements:false
   in
-  let chunks : Notebook_chunk.t list =
-    let top_level_statements_chunks =
-      split_by_chunk_comments
-        top_level_statements_code
-        ~is_from_toplevel_statements:true
-    in
-    let other_chunks =
-      split_by_chunk_comments other_code ~is_from_toplevel_statements:false
-    in
+  let+ ipynb =
     other_chunks @ top_level_statements_chunks
+    |> List.map ~f:format_chunk
+    |> Ipynb.ipynb_of_chunks
   in
-  chunks
-  |> List.map ~f:format_chunk
-  |> Ipynb.ipynb_of_chunks_exn
-  |> Ipynb.ipynb_to_json
+  Ipynb.ipynb_to_json ipynb
 
 let hack_to_notebook (syntax : Full_fidelity_positioned_syntax.t) :
-    (Hh_json.json, string) result =
-  try Ok (hack_to_notebook_exn syntax) with
-  | e -> Error (Exn.to_string e)
+    (Hh_json.json, Notebook_convert_error.t) result =
+  try hack_to_notebook_exn syntax with
+  | e -> Error (Notebook_convert_error.Internal e)

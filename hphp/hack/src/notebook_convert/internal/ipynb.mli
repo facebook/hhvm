@@ -23,4 +23,5 @@ val ipynb_of_json : Hh_json.json -> (t, string) result
 
 val ipynb_to_json : t -> Hh_json.json
 
-val ipynb_of_chunks_exn : Notebook_chunk.t list -> t
+val ipynb_of_chunks :
+  Notebook_chunk.t list -> (t, Notebook_convert_error.t) result

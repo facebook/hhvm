@@ -26,26 +26,26 @@ func NewContainerTypedef() ContainerTypedef {
 
 func WriteContainerTypedef(item ContainerTypedef, p thrift.Encoder) error {
     if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI16(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing map begin: ", err)
     }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteI16(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
     }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
     return nil
 }
 
@@ -53,37 +53,37 @@ func ReadContainerTypedef(p thrift.Decoder) (ContainerTypedef, error) {
     var decodeResult ContainerTypedef
     decodeErr := func() error {
         _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int16]string, size)
-for i := 0; i < size; i++ {
-    var key int16
-    {
-        result, err := p.ReadI16()
-if err != nil {
-    return err
-}
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
+        if err != nil {
+            return thrift.PrependError("error reading map begin: ", err)
+        }
+        
+        mapResult := make(map[int16]string, size)
+        for i := 0; i < size; i++ {
+            var key int16
+            {
+                result, err := p.ReadI16()
+                if err != nil {
+                    return err
+                }
+                key = result
+            }
+        
+            var value string
+            {
+                result, err := p.ReadString()
+                if err != nil {
+                    return err
+                }
+                value = result
+            }
+        
+            mapResult[key] = value
+        }
+        
+        if err := p.ReadMapEnd(); err != nil {
+            return thrift.PrependError("error reading map end: ", err)
+        }
+        result := mapResult
         decodeResult = result
         return nil
     }()
@@ -241,8 +241,8 @@ func (x *ComplexUnion) writeField1(p thrift.Encoder) error {  // IntValue
 
     item := *x.IntValue
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -261,19 +261,19 @@ func (x *ComplexUnion) writeField2(p thrift.Encoder) error {  // IntListValue
 
     item := x.IntListValue
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI64(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -292,19 +292,19 @@ func (x *ComplexUnion) writeField3(p thrift.Encoder) error {  // StringListValue
 
     item := x.StringListValue
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -323,8 +323,8 @@ func (x *ComplexUnion) writeField5(p thrift.Encoder) error {  // StringValue
 
     item := *x.StringValue
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -343,9 +343,9 @@ func (x *ComplexUnion) writeField9(p thrift.Encoder) error {  // TypedefValue
 
     item := x.TypedefValue
     err := WriteContainerTypedef(item, p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -364,8 +364,8 @@ func (x *ComplexUnion) writeField14(p thrift.Encoder) error {  // StringRef
 
     item := *x.StringRef
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -375,9 +375,9 @@ func (x *ComplexUnion) writeField14(p thrift.Encoder) error {  // StringRef
 
 func (x *ComplexUnion) readField1(p thrift.Decoder) error {  // IntValue
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.IntValue = &result
     return nil
@@ -385,27 +385,27 @@ if err != nil {
 
 func (x *ComplexUnion) readField2(p thrift.Decoder) error {  // IntListValue
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int64, 0, size)
-for i := 0; i < size; i++ {
-    var elem int64
-    {
-        result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]int64, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int64
+        {
+            result, err := p.ReadI64()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.IntListValue = result
     return nil
@@ -413,27 +413,27 @@ result := listResult
 
 func (x *ComplexUnion) readField3(p thrift.Decoder) error {  // StringListValue
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.StringListValue = result
     return nil
@@ -441,9 +441,9 @@ result := listResult
 
 func (x *ComplexUnion) readField5(p thrift.Decoder) error {  // StringValue
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StringValue = &result
     return nil
@@ -451,9 +451,9 @@ if err != nil {
 
 func (x *ComplexUnion) readField9(p thrift.Decoder) error {  // TypedefValue
     result, err := ReadContainerTypedef(p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.TypedefValue = result
     return nil
@@ -461,9 +461,9 @@ if err != nil {
 
 func (x *ComplexUnion) readField14(p thrift.Decoder) error {  // StringRef
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StringRef = &result
     return nil
@@ -659,19 +659,19 @@ func (x *ListUnion) writeField2(p thrift.Encoder) error {  // IntListValue
 
     item := x.IntListValue
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI64(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -690,19 +690,19 @@ func (x *ListUnion) writeField3(p thrift.Encoder) error {  // StringListValue
 
     item := x.StringListValue
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -712,27 +712,27 @@ if err := p.WriteListEnd(); err != nil {
 
 func (x *ListUnion) readField2(p thrift.Decoder) error {  // IntListValue
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]int64, 0, size)
-for i := 0; i < size; i++ {
-    var elem int64
-    {
-        result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]int64, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int64
+        {
+            result, err := p.ReadI64()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.IntListValue = result
     return nil
@@ -740,27 +740,27 @@ result := listResult
 
 func (x *ListUnion) readField3(p thrift.Decoder) error {  // StringListValue
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.StringListValue = result
     return nil
@@ -921,8 +921,8 @@ func (x *DataUnion) writeField1(p thrift.Encoder) error {  // BinaryData
 
     item := x.BinaryData
     if err := p.WriteBinary(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -941,8 +941,8 @@ func (x *DataUnion) writeField2(p thrift.Encoder) error {  // StringData
 
     item := *x.StringData
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -952,9 +952,9 @@ func (x *DataUnion) writeField2(p thrift.Encoder) error {  // StringData
 
 func (x *DataUnion) readField1(p thrift.Decoder) error {  // BinaryData
     result, err := p.ReadBinary()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.BinaryData = result
     return nil
@@ -962,9 +962,9 @@ if err != nil {
 
 func (x *DataUnion) readField2(p thrift.Decoder) error {  // StringData
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StringData = &result
     return nil
@@ -1130,8 +1130,8 @@ func (x *Val) writeField1(p thrift.Encoder) error {  // StrVal
 
     item := x.StrVal
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1146,8 +1146,8 @@ func (x *Val) writeField2(p thrift.Encoder) error {  // IntVal
 
     item := x.IntVal
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1162,9 +1162,9 @@ func (x *Val) writeField9(p thrift.Encoder) error {  // TypedefValue
 
     item := x.TypedefValue
     err := WriteContainerTypedef(item, p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1174,9 +1174,9 @@ if err != nil {
 
 func (x *Val) readField1(p thrift.Decoder) error {  // StrVal
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StrVal = result
     return nil
@@ -1184,9 +1184,9 @@ if err != nil {
 
 func (x *Val) readField2(p thrift.Decoder) error {  // IntVal
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.IntVal = result
     return nil
@@ -1194,9 +1194,9 @@ if err != nil {
 
 func (x *Val) readField9(p thrift.Decoder) error {  // TypedefValue
     result, err := ReadContainerTypedef(p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.TypedefValue = result
     return nil
@@ -1347,8 +1347,8 @@ func (x *ValUnion) writeField1(p thrift.Encoder) error {  // V1
 
     item := x.V1
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1367,8 +1367,8 @@ func (x *ValUnion) writeField2(p thrift.Encoder) error {  // V2
 
     item := x.V2
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1378,10 +1378,10 @@ func (x *ValUnion) writeField2(p thrift.Encoder) error {  // V2
 
 func (x *ValUnion) readField1(p thrift.Decoder) error {  // V1
     result := NewVal()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.V1 = result
     return nil
@@ -1389,10 +1389,10 @@ if err != nil {
 
 func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
     result := NewVal()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.V2 = result
     return nil
@@ -1569,8 +1569,8 @@ func (x *VirtualComplexUnion) writeField1(p thrift.Encoder) error {  // ThingOne
 
     item := *x.ThingOne
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1589,8 +1589,8 @@ func (x *VirtualComplexUnion) writeField2(p thrift.Encoder) error {  // ThingTwo
 
     item := *x.ThingTwo
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1600,9 +1600,9 @@ func (x *VirtualComplexUnion) writeField2(p thrift.Encoder) error {  // ThingTwo
 
 func (x *VirtualComplexUnion) readField1(p thrift.Decoder) error {  // ThingOne
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ThingOne = &result
     return nil
@@ -1610,9 +1610,9 @@ if err != nil {
 
 func (x *VirtualComplexUnion) readField2(p thrift.Decoder) error {  // ThingTwo
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ThingTwo = &result
     return nil
@@ -1742,8 +1742,8 @@ func (x *NonCopyableStruct) writeField1(p thrift.Encoder) error {  // Num
 
     item := x.Num
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1753,9 +1753,9 @@ func (x *NonCopyableStruct) writeField1(p thrift.Encoder) error {  // Num
 
 func (x *NonCopyableStruct) readField1(p thrift.Decoder) error {  // Num
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Num = result
     return nil
@@ -1872,8 +1872,8 @@ func (x *NonCopyableUnion) writeField1(p thrift.Encoder) error {  // S
 
     item := x.S
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1883,10 +1883,10 @@ func (x *NonCopyableUnion) writeField1(p thrift.Encoder) error {  // S
 
 func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
     result := NewNonCopyableStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.S = result
     return nil

@@ -63,8 +63,8 @@ func (x *DoSomethingResult) writeField1(p thrift.Encoder) error {  // SRes
 
     item := x.SRes
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -79,8 +79,8 @@ func (x *DoSomethingResult) writeField2(p thrift.Encoder) error {  // IRes
 
     item := x.IRes
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -90,9 +90,9 @@ func (x *DoSomethingResult) writeField2(p thrift.Encoder) error {  // IRes
 
 func (x *DoSomethingResult) readField1(p thrift.Decoder) error {  // SRes
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.SRes = result
     return nil
@@ -100,9 +100,9 @@ if err != nil {
 
 func (x *DoSomethingResult) readField2(p thrift.Decoder) error {  // IRes
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.IRes = result
     return nil

@@ -28,11 +28,11 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_hsmodule_HsFoo = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("hsmodule.HsFoo"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

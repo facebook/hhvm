@@ -29,11 +29,11 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module_Empty = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Empty"),
-            )
+    )
     premadeThriftType_module_Nada = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.Nada"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

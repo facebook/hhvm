@@ -30,19 +30,19 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_module_TrivialStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.TrivialStruct"),
-            )
+    )
     premadeThriftType_module_StructWithNoCustomDefaultValues = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.StructWithNoCustomDefaultValues"),
-            )
+    )
     premadeThriftType_module_StructWithCustomDefaultValues = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.StructWithCustomDefaultValues"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

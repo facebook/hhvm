@@ -28,11 +28,11 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_foo_Fields = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("foo.Fields"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

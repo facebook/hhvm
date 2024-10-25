@@ -38,46 +38,46 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module_Metasyntactic = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.Metasyntactic"),
-            )
+    )
     premadeThriftType_module_MyEnum1 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum1"),
-            )
+    )
     premadeThriftType_module_MyEnum2 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum2"),
-            )
+    )
     premadeThriftType_module_MyEnum3 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum3"),
-            )
+    )
     premadeThriftType_module_MyEnum4 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum4"),
-            )
+    )
     premadeThriftType_module_MyBitmaskEnum1 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyBitmaskEnum1"),
-            )
+    )
     premadeThriftType_module_MyBitmaskEnum2 = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyBitmaskEnum2"),
-            )
+    )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_i32),
-            )
+    )
     premadeThriftType_module_SomeStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.SomeStruct"),
-            )
+    )
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

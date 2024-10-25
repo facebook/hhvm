@@ -92,8 +92,8 @@ func (x *Fields) writeField100(p thrift.Encoder) error {  // InjectedField
 
     item := x.InjectedField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -112,8 +112,8 @@ func (x *Fields) writeField101(p thrift.Encoder) error {  // InjectedStructuredA
 
     item := *x.InjectedStructuredAnnotationField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -132,8 +132,8 @@ func (x *Fields) writeField102(p thrift.Encoder) error {  // InjectedUnstructure
 
     item := *x.InjectedUnstructuredAnnotationField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -143,9 +143,9 @@ func (x *Fields) writeField102(p thrift.Encoder) error {  // InjectedUnstructure
 
 func (x *Fields) readField100(p thrift.Decoder) error {  // InjectedField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedField = result
     return nil
@@ -153,9 +153,9 @@ if err != nil {
 
 func (x *Fields) readField101(p thrift.Decoder) error {  // InjectedStructuredAnnotationField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedStructuredAnnotationField = &result
     return nil
@@ -163,9 +163,9 @@ if err != nil {
 
 func (x *Fields) readField102(p thrift.Decoder) error {  // InjectedUnstructuredAnnotationField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedUnstructuredAnnotationField = &result
     return nil

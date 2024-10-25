@@ -28,7 +28,7 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module2_Enum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module2.Enum"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

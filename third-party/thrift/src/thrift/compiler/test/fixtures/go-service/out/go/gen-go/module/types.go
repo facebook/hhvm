@@ -48,8 +48,8 @@ func (x *GetEntityRequest) writeField1(p thrift.Encoder) error {  // Id
 
     item := x.Id
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *GetEntityRequest) writeField1(p thrift.Encoder) error {  // Id
 
 func (x *GetEntityRequest) readField1(p thrift.Decoder) error {  // Id
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Id = result
     return nil
@@ -167,8 +167,8 @@ func (x *GetEntityResponse) writeField1(p thrift.Encoder) error {  // Entity
 
     item := x.Entity
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -178,9 +178,9 @@ func (x *GetEntityResponse) writeField1(p thrift.Encoder) error {  // Entity
 
 func (x *GetEntityResponse) readField1(p thrift.Decoder) error {  // Entity
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Entity = result
     return nil
@@ -330,8 +330,8 @@ func (x *NonComparableStruct) writeField1(p thrift.Encoder) error {  // Foo
 
     item := x.Foo
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -346,19 +346,19 @@ func (x *NonComparableStruct) writeField2(p thrift.Encoder) error {  // Bar
 
     item := x.Bar
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -373,30 +373,30 @@ func (x *NonComparableStruct) writeField3(p thrift.Encoder) error {  // Baz
 
     item := x.Baz
     if err := p.WriteMapBegin(thrift.STRUCT, thrift.I64, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    if k == nil {
-        return fmt.Errorf("%T write map: nil key is not allowed.", item)
+        return thrift.PrependError("error writing map begin: ", err)
     }
-
-    {
-        item := k
-        if err := item.Write(p); err != nil {
-    return err
-}
+    for k, v := range item {
+        if k == nil {
+            return fmt.Errorf("%T write map: nil key is not allowed.", item)
+        }
+    
+        {
+            item := k
+            if err := item.Write(p); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteI64(item); err != nil {
+                return err
+            }
+        }
     }
-
-    {
-        item := v
-        if err := p.WriteI64(item); err != nil {
-    return err
-}
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
     }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -406,9 +406,9 @@ if err := p.WriteMapEnd(); err != nil {
 
 func (x *NonComparableStruct) readField1(p thrift.Decoder) error {  // Foo
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Foo = result
     return nil
@@ -416,27 +416,27 @@ if err != nil {
 
 func (x *NonComparableStruct) readField2(p thrift.Decoder) error {  // Bar
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.Bar = result
     return nil
@@ -444,38 +444,38 @@ result := listResult
 
 func (x *NonComparableStruct) readField3(p thrift.Decoder) error {  // Baz
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[*NonComparableStruct]int64, size)
-for i := 0; i < size; i++ {
-    var key *NonComparableStruct
-    {
-        result := NewNonComparableStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-        key = result
+    if err != nil {
+        return thrift.PrependError("error reading map begin: ", err)
     }
-
-    var value int64
-    {
-        result, err := p.ReadI64()
-if err != nil {
-    return err
-}
-        value = result
+    
+    mapResult := make(map[*NonComparableStruct]int64, size)
+    for i := 0; i < size; i++ {
+        var key *NonComparableStruct
+        {
+            result := NewNonComparableStruct()
+            err := result.Read(p)
+            if err != nil {
+                return err
+            }
+            key = result
+        }
+    
+        var value int64
+        {
+            result, err := p.ReadI64()
+            if err != nil {
+                return err
+            }
+            value = result
+        }
+    
+        mapResult[key] = value
     }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
+    
+    if err := p.ReadMapEnd(); err != nil {
+        return thrift.PrependError("error reading map end: ", err)
+    }
+    result := mapResult
 
     x.Baz = result
     return nil
@@ -609,8 +609,8 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Encoder) error {  // R
 
     item := x.R
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -620,10 +620,10 @@ func (x *reqGetEntityGetEntity) writeField1(p thrift.Encoder) error {  // R
 
 func (x *reqGetEntityGetEntity) readField1(p thrift.Decoder) error {  // R
     result := NewGetEntityRequest()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.R = result
     return nil
@@ -752,8 +752,8 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Encoder) error {  // Succe
 
     item := x.Success
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -763,10 +763,10 @@ func (x *respGetEntityGetEntity) writeField0(p thrift.Encoder) error {  // Succe
 
 func (x *respGetEntityGetEntity) readField0(p thrift.Decoder) error {  // Success
     result := NewGetEntityResponse()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.Success = result
     return nil
@@ -973,8 +973,8 @@ func (x *respGetEntityGetBool) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteBool(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -984,9 +984,9 @@ func (x *respGetEntityGetBool) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respGetEntityGetBool) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadBool()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1186,8 +1186,8 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteByte(byte(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1197,10 +1197,10 @@ func (x *respGetEntityGetByte) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respGetEntityGetByte) readField0(p thrift.Decoder) error {  // Success
     resultByte, err := p.ReadByte()
-result := int8(resultByte)
-if err != nil {
-    return err
-}
+    result := int8(resultByte)
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1400,8 +1400,8 @@ func (x *respGetEntityGetI16) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteI16(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1411,9 +1411,9 @@ func (x *respGetEntityGetI16) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respGetEntityGetI16) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI16()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1613,8 +1613,8 @@ func (x *respGetEntityGetI32) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1624,9 +1624,9 @@ func (x *respGetEntityGetI32) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respGetEntityGetI32) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1826,8 +1826,8 @@ func (x *respGetEntityGetI64) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1837,9 +1837,9 @@ func (x *respGetEntityGetI64) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respGetEntityGetI64) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -2039,8 +2039,8 @@ func (x *respGetEntityGetDouble) writeField0(p thrift.Encoder) error {  // Succe
 
     item := *x.Success
     if err := p.WriteDouble(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2050,9 +2050,9 @@ func (x *respGetEntityGetDouble) writeField0(p thrift.Encoder) error {  // Succe
 
 func (x *respGetEntityGetDouble) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadDouble()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -2252,8 +2252,8 @@ func (x *respGetEntityGetString) writeField0(p thrift.Encoder) error {  // Succe
 
     item := *x.Success
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2263,9 +2263,9 @@ func (x *respGetEntityGetString) writeField0(p thrift.Encoder) error {  // Succe
 
 func (x *respGetEntityGetString) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -2465,8 +2465,8 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Encoder) error {  // Succe
 
     item := x.Success
     if err := p.WriteBinary(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2476,9 +2476,9 @@ func (x *respGetEntityGetBinary) writeField0(p thrift.Encoder) error {  // Succe
 
 func (x *respGetEntityGetBinary) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadBinary()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = result
     return nil
@@ -2677,26 +2677,26 @@ func (x *respGetEntityGetMap) writeField0(p thrift.Encoder) error {  // Success
 
     item := x.Success
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing map begin: ", err)
     }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+    for k, v := range item {
+        {
+            item := k
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
     }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
+    if err := p.WriteMapEnd(); err != nil {
+        return thrift.PrependError("error writing map end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2706,37 +2706,37 @@ if err := p.WriteMapEnd(); err != nil {
 
 func (x *respGetEntityGetMap) readField0(p thrift.Decoder) error {  // Success
     _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[string]string, size)
-for i := 0; i < size; i++ {
-    var key string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        key = result
+    if err != nil {
+        return thrift.PrependError("error reading map begin: ", err)
     }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
+    
+    mapResult := make(map[string]string, size)
+    for i := 0; i < size; i++ {
+        var key string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            key = result
+        }
+    
+        var value string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            value = result
+        }
+    
+        mapResult[key] = value
     }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
+    
+    if err := p.ReadMapEnd(); err != nil {
+        return thrift.PrependError("error reading map end: ", err)
+    }
+    result := mapResult
 
     x.Success = result
     return nil
@@ -2935,19 +2935,19 @@ func (x *respGetEntityGetSet) writeField0(p thrift.Encoder) error {  // Success
 
     item := x.Success
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing set begin: ", err)
     }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2957,27 +2957,27 @@ if err := p.WriteSetEnd(); err != nil {
 
 func (x *respGetEntityGetSet) readField0(p thrift.Decoder) error {  // Success
     _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
     }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
+    
+    setResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
 
     x.Success = result
     return nil
@@ -3176,19 +3176,19 @@ func (x *respGetEntityGetList) writeField0(p thrift.Encoder) error {  // Success
 
     item := x.Success
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3198,27 +3198,27 @@ if err := p.WriteListEnd(); err != nil {
 
 func (x *respGetEntityGetList) readField0(p thrift.Decoder) error {  // Success
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.Success = result
     return nil
@@ -3360,8 +3360,8 @@ func (x *reqGetEntityGetLegacyStuff) writeField_2(p thrift.Encoder) error {  // 
 
     item := x.NumNeg2
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3376,8 +3376,8 @@ func (x *reqGetEntityGetLegacyStuff) writeField_1(p thrift.Encoder) error {  // 
 
     item := x.NumNeg1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3392,8 +3392,8 @@ func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Encoder) error {  // N
 
     item := x.NumPos
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3403,9 +3403,9 @@ func (x *reqGetEntityGetLegacyStuff) writeField1(p thrift.Encoder) error {  // N
 
 func (x *reqGetEntityGetLegacyStuff) readField_2(p thrift.Decoder) error {  // NumNeg2
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.NumNeg2 = result
     return nil
@@ -3413,9 +3413,9 @@ if err != nil {
 
 func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Decoder) error {  // NumNeg1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.NumNeg1 = result
     return nil
@@ -3423,9 +3423,9 @@ if err != nil {
 
 func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Decoder) error {  // NumPos
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.NumPos = result
     return nil
@@ -3558,8 +3558,8 @@ func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Encoder) error {  // 
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3569,9 +3569,9 @@ func (x *respGetEntityGetLegacyStuff) writeField0(p thrift.Encoder) error {  // 
 
 func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -3684,8 +3684,8 @@ func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Encoder) error {  // 
 
     item := x.Ctx
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3695,9 +3695,9 @@ func (x *reqGetEntityGetCtxCollision) writeField1(p thrift.Encoder) error {  // 
 
 func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Decoder) error {  // Ctx
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Ctx = result
     return nil
@@ -3818,8 +3818,8 @@ func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Encoder) error {  //
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3829,9 +3829,9 @@ func (x *respGetEntityGetCtxCollision) writeField0(p thrift.Encoder) error {  //
 
 func (x *respGetEntityGetCtxCollision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -3959,8 +3959,8 @@ func (x *reqGetEntityGetCtx1Collision) writeField1(p thrift.Encoder) error {  //
 
     item := x.Ctx
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3975,8 +3975,8 @@ func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Encoder) error {  //
 
     item := x.Ctx1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -3986,9 +3986,9 @@ func (x *reqGetEntityGetCtx1Collision) writeField2(p thrift.Encoder) error {  //
 
 func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Decoder) error {  // Ctx
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Ctx = result
     return nil
@@ -3996,9 +3996,9 @@ if err != nil {
 
 func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Decoder) error {  // Ctx1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Ctx1 = result
     return nil
@@ -4125,8 +4125,8 @@ func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Encoder) error {  /
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4136,9 +4136,9 @@ func (x *respGetEntityGetCtx1Collision) writeField0(p thrift.Encoder) error {  /
 
 func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -4251,8 +4251,8 @@ func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Encoder) error { 
 
     item := x.Context
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4262,9 +4262,9 @@ func (x *reqGetEntityGetContextCollision) writeField1(p thrift.Encoder) error { 
 
 func (x *reqGetEntityGetContextCollision) readField1(p thrift.Decoder) error {  // Context
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Context = result
     return nil
@@ -4385,8 +4385,8 @@ func (x *respGetEntityGetContextCollision) writeField0(p thrift.Encoder) error {
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4396,9 +4396,9 @@ func (x *respGetEntityGetContextCollision) writeField0(p thrift.Encoder) error {
 
 func (x *respGetEntityGetContextCollision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -4511,8 +4511,8 @@ func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Encoder) error {  // 
 
     item := x.Out
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4522,9 +4522,9 @@ func (x *reqGetEntityGetOutCollision) writeField1(p thrift.Encoder) error {  // 
 
 func (x *reqGetEntityGetOutCollision) readField1(p thrift.Decoder) error {  // Out
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Out = result
     return nil
@@ -4645,8 +4645,8 @@ func (x *respGetEntityGetOutCollision) writeField0(p thrift.Encoder) error {  //
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4656,9 +4656,9 @@ func (x *respGetEntityGetOutCollision) writeField0(p thrift.Encoder) error {  //
 
 func (x *respGetEntityGetOutCollision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -4786,8 +4786,8 @@ func (x *reqGetEntityGetOut1Collision) writeField1(p thrift.Encoder) error {  //
 
     item := x.Out
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4802,8 +4802,8 @@ func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Encoder) error {  //
 
     item := x.Out1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4813,9 +4813,9 @@ func (x *reqGetEntityGetOut1Collision) writeField2(p thrift.Encoder) error {  //
 
 func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Decoder) error {  // Out
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Out = result
     return nil
@@ -4823,9 +4823,9 @@ if err != nil {
 
 func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Decoder) error {  // Out1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Out1 = result
     return nil
@@ -4952,8 +4952,8 @@ func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Encoder) error {  /
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -4963,9 +4963,9 @@ func (x *respGetEntityGetOut1Collision) writeField0(p thrift.Encoder) error {  /
 
 func (x *respGetEntityGetOut1Collision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -5078,8 +5078,8 @@ func (x *reqGetEntityGetInCollision) writeField1(p thrift.Encoder) error {  // I
 
     item := x.In
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5089,9 +5089,9 @@ func (x *reqGetEntityGetInCollision) writeField1(p thrift.Encoder) error {  // I
 
 func (x *reqGetEntityGetInCollision) readField1(p thrift.Decoder) error {  // In
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.In = result
     return nil
@@ -5212,8 +5212,8 @@ func (x *respGetEntityGetInCollision) writeField0(p thrift.Encoder) error {  // 
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5223,9 +5223,9 @@ func (x *respGetEntityGetInCollision) writeField0(p thrift.Encoder) error {  // 
 
 func (x *respGetEntityGetInCollision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -5353,8 +5353,8 @@ func (x *reqGetEntityGetIn1Collision) writeField1(p thrift.Encoder) error {  // 
 
     item := x.In
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5369,8 +5369,8 @@ func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Encoder) error {  // 
 
     item := x.In1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5380,9 +5380,9 @@ func (x *reqGetEntityGetIn1Collision) writeField2(p thrift.Encoder) error {  // 
 
 func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Decoder) error {  // In
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.In = result
     return nil
@@ -5390,9 +5390,9 @@ if err != nil {
 
 func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Decoder) error {  // In1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.In1 = result
     return nil
@@ -5519,8 +5519,8 @@ func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Encoder) error {  //
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5530,9 +5530,9 @@ func (x *respGetEntityGetIn1Collision) writeField0(p thrift.Encoder) error {  //
 
 func (x *respGetEntityGetIn1Collision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -5645,8 +5645,8 @@ func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Encoder) error {  // 
 
     item := x.Err
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5656,9 +5656,9 @@ func (x *reqGetEntityGetErrCollision) writeField1(p thrift.Encoder) error {  // 
 
 func (x *reqGetEntityGetErrCollision) readField1(p thrift.Decoder) error {  // Err
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Err = result
     return nil
@@ -5779,8 +5779,8 @@ func (x *respGetEntityGetErrCollision) writeField0(p thrift.Encoder) error {  //
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5790,9 +5790,9 @@ func (x *respGetEntityGetErrCollision) writeField0(p thrift.Encoder) error {  //
 
 func (x *respGetEntityGetErrCollision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -5920,8 +5920,8 @@ func (x *reqGetEntityGetErr1Collision) writeField1(p thrift.Encoder) error {  //
 
     item := x.Err
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5936,8 +5936,8 @@ func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Encoder) error {  //
 
     item := x.Err1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -5947,9 +5947,9 @@ func (x *reqGetEntityGetErr1Collision) writeField2(p thrift.Encoder) error {  //
 
 func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Decoder) error {  // Err
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Err = result
     return nil
@@ -5957,9 +5957,9 @@ if err != nil {
 
 func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Decoder) error {  // Err1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Err1 = result
     return nil
@@ -6086,8 +6086,8 @@ func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Encoder) error {  /
 
     item := *x.Success
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -6097,9 +6097,9 @@ func (x *respGetEntityGetErr1Collision) writeField0(p thrift.Encoder) error {  /
 
 func (x *respGetEntityGetErr1Collision) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil

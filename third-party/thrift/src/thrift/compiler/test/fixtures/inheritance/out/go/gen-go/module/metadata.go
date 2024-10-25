@@ -27,7 +27,7 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

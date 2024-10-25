@@ -63,8 +63,8 @@ func (x *Accessory) writeField1(p thrift.Encoder) error {  // InventoryId
 
     item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -79,8 +79,8 @@ func (x *Accessory) writeField2(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -90,9 +90,9 @@ func (x *Accessory) writeField2(p thrift.Encoder) error {  // Name
 
 func (x *Accessory) readField1(p thrift.Decoder) error {  // InventoryId
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InventoryId = result
     return nil
@@ -100,9 +100,9 @@ if err != nil {
 
 func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -229,8 +229,8 @@ func (x *PartName) writeField1(p thrift.Encoder) error {  // InventoryId
 
     item := x.InventoryId
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -245,8 +245,8 @@ func (x *PartName) writeField2(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -256,9 +256,9 @@ func (x *PartName) writeField2(p thrift.Encoder) error {  // Name
 
 func (x *PartName) readField1(p thrift.Decoder) error {  // InventoryId
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InventoryId = result
     return nil
@@ -266,9 +266,9 @@ if err != nil {
 
 func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil

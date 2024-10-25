@@ -48,8 +48,8 @@ func (x *FieldWrapper) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *FieldWrapper) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *FieldWrapper) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -197,8 +197,8 @@ func (x *Wrapper) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -213,8 +213,8 @@ func (x *Wrapper) writeField2(p thrift.Encoder) error {  // UnderlyingName
 
     item := x.UnderlyingName
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -229,8 +229,8 @@ func (x *Wrapper) writeField3(p thrift.Encoder) error {  // ExtraNamespace
 
     item := x.ExtraNamespace
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -240,9 +240,9 @@ func (x *Wrapper) writeField3(p thrift.Encoder) error {  // ExtraNamespace
 
 func (x *Wrapper) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -250,9 +250,9 @@ if err != nil {
 
 func (x *Wrapper) readField2(p thrift.Decoder) error {  // UnderlyingName
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.UnderlyingName = result
     return nil
@@ -260,9 +260,9 @@ if err != nil {
 
 func (x *Wrapper) readField3(p thrift.Decoder) error {  // ExtraNamespace
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ExtraNamespace = result
     return nil
@@ -380,8 +380,8 @@ func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -391,9 +391,9 @@ func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Adapter) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -499,8 +499,8 @@ func (x *SkipCodegen) writeField1(p thrift.Encoder) error {  // Reason
 
     item := x.Reason
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -510,9 +510,9 @@ func (x *SkipCodegen) writeField1(p thrift.Encoder) error {  // Reason
 
 func (x *SkipCodegen) readField1(p thrift.Decoder) error {  // Reason
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Reason = result
     return nil
@@ -633,8 +633,8 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -649,8 +649,8 @@ func (x *Name) writeField2(p thrift.Encoder) error {  // Reason
 
     item := x.Reason
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -660,9 +660,9 @@ func (x *Name) writeField2(p thrift.Encoder) error {  // Reason
 
 func (x *Name) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -670,9 +670,9 @@ if err != nil {
 
 func (x *Name) readField2(p thrift.Decoder) error {  // Reason
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Reason = result
     return nil
@@ -791,19 +791,19 @@ func (x *UnionEnumAttributes) writeField1(p thrift.Encoder) error {  // Attribut
 
     item := x.Attributes
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -813,27 +813,27 @@ if err := p.WriteListEnd(); err != nil {
 
 func (x *UnionEnumAttributes) readField1(p thrift.Decoder) error {  // Attributes
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.Attributes = result
     return nil
@@ -939,8 +939,8 @@ func (x *StructTrait) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -950,9 +950,9 @@ func (x *StructTrait) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *StructTrait) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -1065,19 +1065,19 @@ func (x *Attributes) writeField1(p thrift.Encoder) error {  // Attributes
 
     item := x.Attributes
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1087,27 +1087,27 @@ if err := p.WriteListEnd(); err != nil {
 
 func (x *Attributes) readField1(p thrift.Decoder) error {  // Attributes
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.Attributes = result
     return nil

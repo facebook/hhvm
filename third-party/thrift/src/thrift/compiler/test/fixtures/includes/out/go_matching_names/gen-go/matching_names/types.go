@@ -61,8 +61,8 @@ func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
 
     item := x.Also
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -72,10 +72,10 @@ func (x *IncludesAlso) writeField1(p thrift.Encoder) error {  // Also
 
 func (x *IncludesAlso) readField1(p thrift.Decoder) error {  // Also
     result := includesAlso.NewAlso()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.Also = result
     return nil

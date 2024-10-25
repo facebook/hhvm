@@ -43,69 +43,69 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_list_i64 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_i64),
-            )
+    )
     premadeThriftType_list_string = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_string),
-            )
+    )
     premadeThriftType_i16 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I16_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_map_i16_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i16).
             SetValueType(premadeThriftType_string),
-            )
+    )
     premadeThriftType_module_containerTypedef = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.containerTypedef").
             SetUnderlyingType(premadeThriftType_map_i16_string),
-            )
+    )
     premadeThriftType_module_ComplexUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.ComplexUnion"),
-            )
+    )
     premadeThriftType_module_ListUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.ListUnion"),
-            )
+    )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_module_DataUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.DataUnion"),
-            )
+    )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_module_Val = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Val"),
-            )
+    )
     premadeThriftType_module_ValUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.ValUnion"),
-            )
+    )
     premadeThriftType_module_VirtualComplexUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.VirtualComplexUnion"),
-            )
+    )
     premadeThriftType_module_NonCopyableStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.NonCopyableStruct"),
-            )
+    )
     premadeThriftType_module_NonCopyableUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.NonCopyableUnion"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

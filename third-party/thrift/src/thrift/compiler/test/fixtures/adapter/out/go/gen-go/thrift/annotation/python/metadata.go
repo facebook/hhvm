@@ -35,33 +35,33 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_python_Py3Hidden = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.Py3Hidden"),
-            )
+    )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_python_PyDeprecatedHidden = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.PyDeprecatedHidden"),
-            )
+    )
     premadeThriftType_python_Flags = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.Flags"),
-            )
+    )
     premadeThriftType_python_Name = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.Name"),
-            )
+    )
     premadeThriftType_python_Adapter = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.Adapter"),
-            )
+    )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_python_UseCAPI = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("python.UseCAPI"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

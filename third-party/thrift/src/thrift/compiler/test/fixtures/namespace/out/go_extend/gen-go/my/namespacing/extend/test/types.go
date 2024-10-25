@@ -66,8 +66,8 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // St
 
     item := x.Struct1
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -77,10 +77,10 @@ func (x *reqExtendTestServiceCheck) writeField1(p thrift.Encoder) error {  // St
 
 func (x *reqExtendTestServiceCheck) readField1(p thrift.Decoder) error {  // Struct1
     result := test0.NewHsFoo()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.Struct1 = result
     return nil
@@ -209,8 +209,8 @@ func (x *respExtendTestServiceCheck) writeField0(p thrift.Encoder) error {  // S
 
     item := *x.Success
     if err := p.WriteBool(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -220,9 +220,9 @@ func (x *respExtendTestServiceCheck) writeField0(p thrift.Encoder) error {  // S
 
 func (x *respExtendTestServiceCheck) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadBool()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil

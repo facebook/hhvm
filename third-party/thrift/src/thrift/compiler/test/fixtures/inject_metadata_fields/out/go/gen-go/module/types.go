@@ -50,8 +50,8 @@ func (x *Fields) writeField100(p thrift.Encoder) error {  // InjectedField
 
     item := x.InjectedField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -61,9 +61,9 @@ func (x *Fields) writeField100(p thrift.Encoder) error {  // InjectedField
 
 func (x *Fields) readField100(p thrift.Decoder) error {  // InjectedField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedField = result
     return nil
@@ -169,8 +169,8 @@ func (x *FieldsInjectedToEmptyStruct) writeField_1100(p thrift.Encoder) error { 
 
     item := x.InjectedField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -180,9 +180,9 @@ func (x *FieldsInjectedToEmptyStruct) writeField_1100(p thrift.Encoder) error { 
 
 func (x *FieldsInjectedToEmptyStruct) readField_1100(p thrift.Decoder) error {  // InjectedField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedField = result
     return nil
@@ -303,8 +303,8 @@ func (x *FieldsInjectedToStruct) writeField_1100(p thrift.Encoder) error {  // I
 
     item := x.InjectedField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -319,8 +319,8 @@ func (x *FieldsInjectedToStruct) writeField1(p thrift.Encoder) error {  // Strin
 
     item := x.StringField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -330,9 +330,9 @@ func (x *FieldsInjectedToStruct) writeField1(p thrift.Encoder) error {  // Strin
 
 func (x *FieldsInjectedToStruct) readField_1100(p thrift.Decoder) error {  // InjectedField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedField = result
     return nil
@@ -340,9 +340,9 @@ if err != nil {
 
 func (x *FieldsInjectedToStruct) readField1(p thrift.Decoder) error {  // StringField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StringField = result
     return nil
@@ -517,8 +517,8 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1102(p thrift.Encoder) err
 
     item := *x.InjectedUnstructuredAnnotationField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -537,8 +537,8 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1101(p thrift.Encoder) err
 
     item := *x.InjectedStructuredAnnotationField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -553,8 +553,8 @@ func (x *FieldsInjectedWithIncludedStruct) writeField_1100(p thrift.Encoder) err
 
     item := x.InjectedField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -569,8 +569,8 @@ func (x *FieldsInjectedWithIncludedStruct) writeField1(p thrift.Encoder) error {
 
     item := x.StringField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -580,9 +580,9 @@ func (x *FieldsInjectedWithIncludedStruct) writeField1(p thrift.Encoder) error {
 
 func (x *FieldsInjectedWithIncludedStruct) readField_1102(p thrift.Decoder) error {  // InjectedUnstructuredAnnotationField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedUnstructuredAnnotationField = &result
     return nil
@@ -590,9 +590,9 @@ if err != nil {
 
 func (x *FieldsInjectedWithIncludedStruct) readField_1101(p thrift.Decoder) error {  // InjectedStructuredAnnotationField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedStructuredAnnotationField = &result
     return nil
@@ -600,9 +600,9 @@ if err != nil {
 
 func (x *FieldsInjectedWithIncludedStruct) readField_1100(p thrift.Decoder) error {  // InjectedField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InjectedField = result
     return nil
@@ -610,9 +610,9 @@ if err != nil {
 
 func (x *FieldsInjectedWithIncludedStruct) readField1(p thrift.Decoder) error {  // StringField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.StringField = result
     return nil

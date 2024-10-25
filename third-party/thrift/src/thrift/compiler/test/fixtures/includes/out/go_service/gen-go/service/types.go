@@ -30,8 +30,8 @@ func NewIncludesIncluded() *IncludesIncluded {
 
 func WriteIncludesIncluded(item *IncludesIncluded, p thrift.Encoder) error {
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
     return nil
 }
 
@@ -39,10 +39,10 @@ func ReadIncludesIncluded(p thrift.Decoder) (*IncludesIncluded, error) {
     var decodeResult *IncludesIncluded
     decodeErr := func() error {
         result := includes.NewIncluded()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+        err := result.Read(p)
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -57,9 +57,9 @@ func NewIncludesTransitiveFoo() *IncludesTransitiveFoo {
 
 func WriteIncludesTransitiveFoo(item *IncludesTransitiveFoo, p thrift.Encoder) error {
     err := includes.WriteTransitiveFoo(item, p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
     return nil
 }
 
@@ -67,9 +67,9 @@ func ReadIncludesTransitiveFoo(p thrift.Decoder) (*IncludesTransitiveFoo, error)
     var decodeResult *IncludesTransitiveFoo
     decodeErr := func() error {
         result, err := includes.ReadTransitiveFoo(p)
-if err != nil {
-    return err
-}
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -144,8 +144,8 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Encoder) error {  // S
 
     item := x.S
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -164,8 +164,8 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
 
     item := x.I
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -175,10 +175,10 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Encoder) error {  // I
 
 func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
     result := module.NewMyStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.S = result
     return nil
@@ -186,10 +186,10 @@ if err != nil {
 
 func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     result := includes.NewIncluded()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.I = result
     return nil
@@ -433,8 +433,8 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Encoder) error {  // S
 
     item := x.S
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -453,8 +453,8 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
 
     item := x.I
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -464,10 +464,10 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Encoder) error {  // I
 
 func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
     result := module.NewMyStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.S = result
     return nil
@@ -475,10 +475,10 @@ if err != nil {
 
 func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     result := includes.NewIncluded()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.I = result
     return nil

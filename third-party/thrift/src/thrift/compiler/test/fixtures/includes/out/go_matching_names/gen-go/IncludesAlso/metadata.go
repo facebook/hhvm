@@ -28,7 +28,7 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_IncludesAlso_Also = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("IncludesAlso.Also"),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

@@ -48,8 +48,8 @@ func (x *Foo) writeField1(p thrift.Encoder) error {  // MyInt
 
     item := x.MyInt
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *Foo) writeField1(p thrift.Encoder) error {  // MyInt
 
 func (x *Foo) readField1(p thrift.Decoder) error {  // MyInt
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.MyInt = result
     return nil
@@ -172,8 +172,8 @@ func (x *reqTestServiceInit) writeField1(p thrift.Encoder) error {  // Int1
 
     item := x.Int1
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -183,9 +183,9 @@ func (x *reqTestServiceInit) writeField1(p thrift.Encoder) error {  // Int1
 
 func (x *reqTestServiceInit) readField1(p thrift.Decoder) error {  // Int1
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Int1 = result
     return nil
@@ -306,8 +306,8 @@ func (x *respTestServiceInit) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -317,9 +317,9 @@ func (x *respTestServiceInit) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respTestServiceInit) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil

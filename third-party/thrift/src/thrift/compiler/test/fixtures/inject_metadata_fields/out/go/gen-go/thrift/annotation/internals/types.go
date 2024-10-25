@@ -48,8 +48,8 @@ func (x *InjectMetadataFields) writeField1(p thrift.Encoder) error {  // Type
 
     item := x.Type
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *InjectMetadataFields) writeField1(p thrift.Encoder) error {  // Type
 
 func (x *InjectMetadataFields) readField1(p thrift.Decoder) error {  // Type
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Type = result
     return nil

@@ -426,8 +426,8 @@ func (x *SomeStruct) writeField1(p thrift.Encoder) error {  // Reasonable
 
     item := x.Reasonable
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -442,8 +442,8 @@ func (x *SomeStruct) writeField2(p thrift.Encoder) error {  // Fine
 
     item := x.Fine
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -458,8 +458,8 @@ func (x *SomeStruct) writeField3(p thrift.Encoder) error {  // Questionable
 
     item := x.Questionable
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -474,19 +474,19 @@ func (x *SomeStruct) writeField4(p thrift.Encoder) error {  // Tags
 
     item := x.Tags
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing set begin: ", err)
     }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -496,10 +496,10 @@ if err := p.WriteSetEnd(); err != nil {
 
 func (x *SomeStruct) readField1(p thrift.Decoder) error {  // Reasonable
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := Metasyntactic(enumResult)
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
 
     x.Reasonable = result
     return nil
@@ -507,10 +507,10 @@ result := Metasyntactic(enumResult)
 
 func (x *SomeStruct) readField2(p thrift.Decoder) error {  // Fine
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := Metasyntactic(enumResult)
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
 
     x.Fine = result
     return nil
@@ -518,10 +518,10 @@ result := Metasyntactic(enumResult)
 
 func (x *SomeStruct) readField3(p thrift.Decoder) error {  // Questionable
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := Metasyntactic(enumResult)
+    if err != nil {
+        return err
+    }
+    result := Metasyntactic(enumResult)
 
     x.Questionable = result
     return nil
@@ -529,27 +529,27 @@ result := Metasyntactic(enumResult)
 
 func (x *SomeStruct) readField4(p thrift.Decoder) error {  // Tags
     _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
     }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
+    
+    setResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
 
     x.Tags = result
     return nil
@@ -727,8 +727,8 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // Me2_3
 
     item := x.Me2_3
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -743,8 +743,8 @@ func (x *MyStruct) writeField2(p thrift.Encoder) error {  // Me3N3
 
     item := x.Me3N3
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -759,8 +759,8 @@ func (x *MyStruct) writeField4(p thrift.Encoder) error {  // Me1T1
 
     item := x.Me1T1
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -775,8 +775,8 @@ func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Me1T2
 
     item := x.Me1T2
     if err := p.WriteI32(int32(item)); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -786,10 +786,10 @@ func (x *MyStruct) writeField6(p thrift.Encoder) error {  // Me1T2
 
 func (x *MyStruct) readField1(p thrift.Decoder) error {  // Me2_3
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum2(enumResult)
+    if err != nil {
+        return err
+    }
+    result := MyEnum2(enumResult)
 
     x.Me2_3 = result
     return nil
@@ -797,10 +797,10 @@ result := MyEnum2(enumResult)
 
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // Me3N3
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum3(enumResult)
+    if err != nil {
+        return err
+    }
+    result := MyEnum3(enumResult)
 
     x.Me3N3 = result
     return nil
@@ -808,10 +808,10 @@ result := MyEnum3(enumResult)
 
 func (x *MyStruct) readField4(p thrift.Decoder) error {  // Me1T1
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum1(enumResult)
+    if err != nil {
+        return err
+    }
+    result := MyEnum1(enumResult)
 
     x.Me1T1 = result
     return nil
@@ -819,10 +819,10 @@ result := MyEnum1(enumResult)
 
 func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     enumResult, err := p.ReadI32()
-if err != nil {
-    return err
-}
-result := MyEnum1(enumResult)
+    if err != nil {
+        return err
+    }
+    result := MyEnum1(enumResult)
 
     x.Me1T2 = result
     return nil

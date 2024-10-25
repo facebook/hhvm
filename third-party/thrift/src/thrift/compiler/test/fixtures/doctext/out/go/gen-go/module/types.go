@@ -26,8 +26,8 @@ func NewLanyard() Lanyard {
 
 func WriteLanyard(item Lanyard, p thrift.Encoder) error {
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
     return nil
 }
 
@@ -35,9 +35,9 @@ func ReadLanyard(p thrift.Decoder) (Lanyard, error) {
     var decodeResult Lanyard
     decodeErr := func() error {
         result, err := p.ReadString()
-if err != nil {
-    return err
-}
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -52,8 +52,8 @@ func NewNumber() Number {
 
 func WriteNumber(item Number, p thrift.Encoder) error {
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
     return nil
 }
 
@@ -61,9 +61,9 @@ func ReadNumber(p thrift.Decoder) (Number, error) {
     var decodeResult Number
     decodeErr := func() error {
         result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -137,8 +137,8 @@ func (x *A) writeField1(p thrift.Encoder) error {  // UselessField
 
     item := x.UselessField
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -148,9 +148,9 @@ func (x *A) writeField1(p thrift.Encoder) error {  // UselessField
 
 func (x *A) readField1(p thrift.Decoder) error {  // UselessField
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.UselessField = result
     return nil
@@ -289,8 +289,8 @@ func (x *U) writeField1(p thrift.Encoder) error {  // I
 
     item := *x.I
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -309,8 +309,8 @@ func (x *U) writeField2(p thrift.Encoder) error {  // S
 
     item := *x.S
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -320,9 +320,9 @@ func (x *U) writeField2(p thrift.Encoder) error {  // S
 
 func (x *U) readField1(p thrift.Decoder) error {  // I
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.I = &result
     return nil
@@ -330,9 +330,9 @@ if err != nil {
 
 func (x *U) readField2(p thrift.Decoder) error {  // S
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.S = &result
     return nil
@@ -462,8 +462,8 @@ func (x *Bang) writeField1(p thrift.Encoder) error {  // Message
 
     item := x.Message
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -473,9 +473,9 @@ func (x *Bang) writeField1(p thrift.Encoder) error {  // Message
 
 func (x *Bang) readField1(p thrift.Decoder) error {  // Message
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Message = result
     return nil
@@ -781,8 +781,8 @@ func (x *reqCThing) writeField1(p thrift.Encoder) error {  // A
 
     item := x.A
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -797,8 +797,8 @@ func (x *reqCThing) writeField2(p thrift.Encoder) error {  // B
 
     item := x.B
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -813,19 +813,19 @@ func (x *reqCThing) writeField3(p thrift.Encoder) error {  // C
 
     item := x.C
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
-    return thrift.PrependError("error writing set begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing set begin: ", err)
     }
-}
-if err := p.WriteSetEnd(); err != nil {
-    return thrift.PrependError("error writing set end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteI32(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteSetEnd(); err != nil {
+        return thrift.PrependError("error writing set end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -835,9 +835,9 @@ if err := p.WriteSetEnd(); err != nil {
 
 func (x *reqCThing) readField1(p thrift.Decoder) error {  // A
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.A = result
     return nil
@@ -845,9 +845,9 @@ if err != nil {
 
 func (x *reqCThing) readField2(p thrift.Decoder) error {  // B
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.B = result
     return nil
@@ -855,27 +855,27 @@ if err != nil {
 
 func (x *reqCThing) readField3(p thrift.Decoder) error {  // C
     _ /* elemType */, size, err := p.ReadSetBegin()
-if err != nil {
-    return thrift.PrependError("error reading set begin: ", err)
-}
-
-setResult := make([]int32, 0, size)
-for i := 0; i < size; i++ {
-    var elem int32
-    {
-        result, err := p.ReadI32()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading set begin: ", err)
     }
-    setResult = append(setResult, elem)
-}
-
-if err := p.ReadSetEnd(); err != nil {
-    return thrift.PrependError("error reading set end: ", err)
-}
-result := setResult
+    
+    setResult := make([]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem int32
+        {
+            result, err := p.ReadI32()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        setResult = append(setResult, elem)
+    }
+    
+    if err := p.ReadSetEnd(); err != nil {
+        return thrift.PrependError("error reading set end: ", err)
+    }
+    result := setResult
 
     x.C = result
     return nil
@@ -1030,8 +1030,8 @@ func (x *respCThing) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1050,8 +1050,8 @@ func (x *respCThing) writeField1(p thrift.Encoder) error {  // Bang
 
     item := x.Bang
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1061,9 +1061,9 @@ func (x *respCThing) writeField1(p thrift.Encoder) error {  // Bang
 
 func (x *respCThing) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1071,10 +1071,10 @@ if err != nil {
 
 func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     result := NewBang()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.Bang = result
     return nil

@@ -35,15 +35,15 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
         metadata.NewThriftTypedefType().
             SetName("service.IncludesIncluded").
             SetUnderlyingType(includes.GetMetadataThriftType("includes.Included")),
-            )
+    )
     premadeThriftType_service_IncludesTransitiveFoo = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("service.IncludesTransitiveFoo").
             SetUnderlyingType(includes.GetMetadataThriftType("includes.TransitiveFoo")),
-            )
+    )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

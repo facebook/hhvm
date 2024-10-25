@@ -50,91 +50,91 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.MyEnum"),
-            )
+    )
     premadeThriftType_module_HackEnum = metadata.NewThriftType().SetTEnum(
         metadata.NewThriftEnumType().
             SetName("module.HackEnum"),
-            )
+    )
     premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_module_MyDataItem = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyDataItem"),
-            )
+    )
     premadeThriftType_module_MyDataItemAlias = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.MyDataItemAlias").
             SetUnderlyingType(premadeThriftType_module_MyDataItem),
-            )
+    )
     premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_float = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_set_float = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_float),
-            )
+    )
     premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyStruct"),
-            )
+    )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_list_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_i32),
-            )
+    )
     premadeThriftType_set_string = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_string),
-            )
+    )
     premadeThriftType_map_string_i64 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_string).
             SetValueType(premadeThriftType_i64),
-            )
+    )
     premadeThriftType_module_Containers = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Containers"),
-            )
+    )
     premadeThriftType_module_MyEnumAlias = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("module.MyEnumAlias").
             SetUnderlyingType(premadeThriftType_module_MyEnum),
-            )
+    )
     premadeThriftType_module_MyUnion = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.MyUnion"),
-            )
+    )
     premadeThriftType_module_ReservedKeyword = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.ReservedKeyword"),
-            )
+    )
     premadeThriftType_module_UnionToBeRenamed = metadata.NewThriftType().SetTUnion(
         metadata.NewThriftUnionType().
             SetName("module.UnionToBeRenamed"),
-            )
+    )
     premadeThriftType_module_MyException = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyException"),
-            )
+    )
     premadeThriftType_module_MyExceptionWithMessage = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.MyExceptionWithMessage"),
-            )
+    )
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_binary = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE.Ptr(),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

@@ -38,54 +38,54 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_list_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_i32),
-            )
+    )
     premadeThriftType_map_i32_list_i32 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_list_i32),
-            )
+    )
     premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
         metadata.NewThriftSetType().
             SetValueType(premadeThriftType_i32),
-            )
+    )
     premadeThriftType_map_i32_set_i32 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_set_i32),
-            )
+    )
     premadeThriftType_map_i32_i32 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_i32),
-            )
+    )
     premadeThriftType_list_map_i32_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_map_i32_i32),
-            )
+    )
     premadeThriftType_list_set_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_set_i32),
-            )
+    )
     premadeThriftType_map_i32_map_i32_set_i32 = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_map_i32_set_i32),
-            )
+    )
     premadeThriftType_list_map_i32_map_i32_set_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_map_i32_map_i32_set_i32),
-            )
+    )
     premadeThriftType_list_list_map_i32_map_i32_set_i32 = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_list_map_i32_map_i32_set_i32),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

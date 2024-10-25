@@ -50,8 +50,8 @@ func (x *CustomException) writeField1(p thrift.Encoder) error {  // Message
 
     item := x.Message
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -61,9 +61,9 @@ func (x *CustomException) writeField1(p thrift.Encoder) error {  // Message
 
 func (x *CustomException) readField1(p thrift.Decoder) error {  // Message
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Message = result
     return nil
@@ -729,8 +729,8 @@ func (x *respInteractWithSharedDoSomeSimilarThings) writeField0(p thrift.Encoder
 
     item := x.Success
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -740,10 +740,10 @@ func (x *respInteractWithSharedDoSomeSimilarThings) writeField0(p thrift.Encoder
 
 func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder) error {  // Success
     result := shared.NewDoSomethingResult()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.Success = result
     return nil

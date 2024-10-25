@@ -48,8 +48,8 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Name) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -671,8 +671,8 @@ func (x *Type) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -682,9 +682,9 @@ func (x *Type) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Type) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -790,8 +790,8 @@ func (x *Serde) writeField1(p thrift.Encoder) error {  // Enabled
 
     item := x.Enabled
     if err := p.WriteBool(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -801,9 +801,9 @@ func (x *Serde) writeField1(p thrift.Encoder) error {  // Enabled
 
 func (x *Serde) readField1(p thrift.Decoder) error {  // Enabled
     result, err := p.ReadBool()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Enabled = result
     return nil
@@ -909,8 +909,8 @@ func (x *Mod) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -920,9 +920,9 @@ func (x *Mod) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Mod) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -1028,8 +1028,8 @@ func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1039,9 +1039,9 @@ func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Adapter) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -1154,19 +1154,19 @@ func (x *Derive) writeField1(p thrift.Encoder) error {  // Derives
 
     item := x.Derives
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
+        return thrift.PrependError("error writing list begin: ", err)
     }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
-}
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteString(item); err != nil {
+                return err
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1176,27 +1176,27 @@ if err := p.WriteListEnd(); err != nil {
 
 func (x *Derive) readField1(p thrift.Decoder) error {  // Derives
     _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        elem = result
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
     }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
+    
+    listResult := make([]string, 0, size)
+    for i := 0; i < size; i++ {
+        var elem string
+        {
+            result, err := p.ReadString()
+            if err != nil {
+                return err
+            }
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
 
     x.Derives = result
     return nil
@@ -1302,8 +1302,8 @@ func (x *ServiceExn) writeField1(p thrift.Encoder) error {  // AnyhowToApplicati
 
     item := x.AnyhowToApplicationExn
     if err := p.WriteBool(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1313,9 +1313,9 @@ func (x *ServiceExn) writeField1(p thrift.Encoder) error {  // AnyhowToApplicati
 
 func (x *ServiceExn) readField1(p thrift.Decoder) error {  // AnyhowToApplicationExn
     result, err := p.ReadBool()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.AnyhowToApplicationExn = result
     return nil

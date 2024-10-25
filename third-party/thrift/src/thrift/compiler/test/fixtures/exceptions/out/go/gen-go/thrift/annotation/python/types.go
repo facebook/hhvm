@@ -120,8 +120,8 @@ func (x *PyDeprecatedHidden) writeField1(p thrift.Encoder) error {  // Reason
 
     item := x.Reason
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -131,9 +131,9 @@ func (x *PyDeprecatedHidden) writeField1(p thrift.Encoder) error {  // Reason
 
 func (x *PyDeprecatedHidden) readField1(p thrift.Decoder) error {  // Reason
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Reason = result
     return nil
@@ -311,8 +311,8 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -322,9 +322,9 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Name) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -445,8 +445,8 @@ func (x *Adapter) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -461,8 +461,8 @@ func (x *Adapter) writeField2(p thrift.Encoder) error {  // TypeHint
 
     item := x.TypeHint
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -472,9 +472,9 @@ func (x *Adapter) writeField2(p thrift.Encoder) error {  // TypeHint
 
 func (x *Adapter) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -482,9 +482,9 @@ if err != nil {
 
 func (x *Adapter) readField2(p thrift.Decoder) error {  // TypeHint
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.TypeHint = result
     return nil
@@ -596,8 +596,8 @@ func (x *UseCAPI) writeField1(p thrift.Encoder) error {  // Serialize
 
     item := x.Serialize
     if err := p.WriteBool(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -607,9 +607,9 @@ func (x *UseCAPI) writeField1(p thrift.Encoder) error {  // Serialize
 
 func (x *UseCAPI) readField1(p thrift.Decoder) error {  // Serialize
     result, err := p.ReadBool()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Serialize = result
     return nil

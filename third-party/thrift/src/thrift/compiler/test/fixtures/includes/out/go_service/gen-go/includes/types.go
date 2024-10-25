@@ -28,8 +28,8 @@ func NewIncludedInt64() IncludedInt64 {
 
 func WriteIncludedInt64(item IncludedInt64, p thrift.Encoder) error {
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
     return nil
 }
 
@@ -37,9 +37,9 @@ func ReadIncludedInt64(p thrift.Decoder) (IncludedInt64, error) {
     var decodeResult IncludedInt64
     decodeErr := func() error {
         result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -54,8 +54,8 @@ func NewTransitiveFoo() *TransitiveFoo {
 
 func WriteTransitiveFoo(item *TransitiveFoo, p thrift.Encoder) error {
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
     return nil
 }
 
@@ -63,10 +63,10 @@ func ReadTransitiveFoo(p thrift.Decoder) (*TransitiveFoo, error) {
     var decodeResult *TransitiveFoo
     decodeErr := func() error {
         result := transitive.NewFoo()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+        err := result.Read(p)
+        if err != nil {
+            return err
+        }
         decodeResult = result
         return nil
     }()
@@ -125,8 +125,8 @@ func (x *Included) writeField1(p thrift.Encoder) error {  // MyIntField
 
     item := x.MyIntField
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -145,8 +145,8 @@ func (x *Included) writeField2(p thrift.Encoder) error {  // MyTransitiveField
 
     item := x.MyTransitiveField
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -156,9 +156,9 @@ func (x *Included) writeField2(p thrift.Encoder) error {  // MyTransitiveField
 
 func (x *Included) readField1(p thrift.Decoder) error {  // MyIntField
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.MyIntField = result
     return nil
@@ -166,10 +166,10 @@ if err != nil {
 
 func (x *Included) readField2(p thrift.Decoder) error {  // MyTransitiveField
     result := transitive.NewFoo()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.MyTransitiveField = result
     return nil

@@ -32,29 +32,29 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-            )
+    )
     premadeThriftType_map_i32_string = metadata.NewThriftType().SetTMap(
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_i32).
             SetValueType(premadeThriftType_string),
-            )
+    )
     premadeThriftType_included_SomeMap = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("included.SomeMap").
             SetUnderlyingType(premadeThriftType_map_i32_string),
-            )
+    )
     premadeThriftType_list_included_SomeMap = metadata.NewThriftType().SetTList(
         metadata.NewThriftListType().
             SetValueType(premadeThriftType_included_SomeMap),
-            )
+    )
     premadeThriftType_included_SomeListOfTypeMap = metadata.NewThriftType().SetTTypedef(
         metadata.NewThriftTypedefType().
             SetName("included.SomeListOfTypeMap").
             SetUnderlyingType(premadeThriftType_list_included_SomeMap),
-            )
+    )
 })
 
 var premadeThriftTypesMapOnce = sync.OnceValue(

@@ -98,8 +98,8 @@ func (x *MyStruct) writeField1(p thrift.Encoder) error {  // MyIncludedField
 
     item := x.MyIncludedField
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -118,8 +118,8 @@ func (x *MyStruct) writeField2(p thrift.Encoder) error {  // MyOtherIncludedFiel
 
     item := x.MyOtherIncludedField
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -134,9 +134,9 @@ func (x *MyStruct) writeField3(p thrift.Encoder) error {  // MyIncludedInt
 
     item := x.MyIncludedInt
     err := includes.WriteIncludedInt64(item, p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -146,10 +146,10 @@ if err != nil {
 
 func (x *MyStruct) readField1(p thrift.Decoder) error {  // MyIncludedField
     result := includes.NewIncluded()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.MyIncludedField = result
     return nil
@@ -157,10 +157,10 @@ if err != nil {
 
 func (x *MyStruct) readField2(p thrift.Decoder) error {  // MyOtherIncludedField
     result := includes.NewIncluded()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.MyOtherIncludedField = result
     return nil
@@ -168,9 +168,9 @@ if err != nil {
 
 func (x *MyStruct) readField3(p thrift.Decoder) error {  // MyIncludedInt
     result, err := includes.ReadIncludedInt64(p)
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.MyIncludedInt = result
     return nil

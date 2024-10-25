@@ -48,8 +48,8 @@ func (x *Fiery) writeField1(p thrift.Encoder) error {  // Message
 
     item := x.Message
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *Fiery) writeField1(p thrift.Encoder) error {  // Message
 
 func (x *Fiery) readField1(p thrift.Decoder) error {  // Message
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Message = result
     return nil
@@ -181,8 +181,8 @@ func (x *Serious) writeField1(p thrift.Encoder) error {  // Sonnet
 
     item := *x.Sonnet
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -192,9 +192,9 @@ func (x *Serious) writeField1(p thrift.Encoder) error {  // Sonnet
 
 func (x *Serious) readField1(p thrift.Decoder) error {  // Sonnet
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Sonnet = &result
     return nil
@@ -318,8 +318,8 @@ func (x *ComplexFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessa
 
     item := x.ErrorMessage
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -334,8 +334,8 @@ func (x *ComplexFieldNames) writeField2(p thrift.Encoder) error {  // InternalEr
 
     item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -345,9 +345,9 @@ func (x *ComplexFieldNames) writeField2(p thrift.Encoder) error {  // InternalEr
 
 func (x *ComplexFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessage
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ErrorMessage = result
     return nil
@@ -355,9 +355,9 @@ if err != nil {
 
 func (x *ComplexFieldNames) readField2(p thrift.Decoder) error {  // InternalErrorMessage
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InternalErrorMessage = result
     return nil
@@ -487,8 +487,8 @@ func (x *CustomFieldNames) writeField1(p thrift.Encoder) error {  // ErrorMessag
 
     item := x.ErrorMessage
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -503,8 +503,8 @@ func (x *CustomFieldNames) writeField2(p thrift.Encoder) error {  // InternalErr
 
     item := x.InternalErrorMessage
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -514,9 +514,9 @@ func (x *CustomFieldNames) writeField2(p thrift.Encoder) error {  // InternalErr
 
 func (x *CustomFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessage
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ErrorMessage = result
     return nil
@@ -524,9 +524,9 @@ if err != nil {
 
 func (x *CustomFieldNames) readField2(p thrift.Decoder) error {  // InternalErrorMessage
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.InternalErrorMessage = result
     return nil
@@ -656,8 +656,8 @@ func (x *ExceptionWithPrimitiveField) writeField1(p thrift.Encoder) error {  // 
 
     item := x.Message
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -672,8 +672,8 @@ func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Encoder) error {  // 
 
     item := x.ErrorCode
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -683,9 +683,9 @@ func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Encoder) error {  // 
 
 func (x *ExceptionWithPrimitiveField) readField1(p thrift.Decoder) error {  // Message
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Message = result
     return nil
@@ -693,9 +693,9 @@ if err != nil {
 
 func (x *ExceptionWithPrimitiveField) readField2(p thrift.Decoder) error {  // ErrorCode
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ErrorCode = result
     return nil
@@ -825,8 +825,8 @@ func (x *ExceptionWithStructuredAnnotation) writeField1(p thrift.Encoder) error 
 
     item := x.MessageField
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -841,8 +841,8 @@ func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Encoder) error 
 
     item := x.ErrorCode
     if err := p.WriteI32(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -852,9 +852,9 @@ func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Encoder) error 
 
 func (x *ExceptionWithStructuredAnnotation) readField1(p thrift.Decoder) error {  // MessageField
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.MessageField = result
     return nil
@@ -862,9 +862,9 @@ if err != nil {
 
 func (x *ExceptionWithStructuredAnnotation) readField2(p thrift.Decoder) error {  // ErrorCode
     result, err := p.ReadI32()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.ErrorCode = result
     return nil
@@ -1345,8 +1345,8 @@ func (x *respRaiserDoRaise) writeField1(p thrift.Encoder) error {  // B
 
     item := x.B
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1365,8 +1365,8 @@ func (x *respRaiserDoRaise) writeField2(p thrift.Encoder) error {  // F
 
     item := x.F
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1385,8 +1385,8 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
 
     item := x.S
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1396,10 +1396,10 @@ func (x *respRaiserDoRaise) writeField3(p thrift.Encoder) error {  // S
 
 func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
     result := NewBanal()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.B = result
     return nil
@@ -1407,10 +1407,10 @@ if err != nil {
 
 func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
     result := NewFiery()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.F = result
     return nil
@@ -1418,10 +1418,10 @@ if err != nil {
 
 func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     result := NewSerious()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.S = result
     return nil
@@ -1663,8 +1663,8 @@ func (x *respRaiserGet200) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1674,9 +1674,9 @@ func (x *respRaiserGet200) writeField0(p thrift.Encoder) error {  // Success
 
 func (x *respRaiserGet200) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -1942,8 +1942,8 @@ func (x *respRaiserGet500) writeField0(p thrift.Encoder) error {  // Success
 
     item := *x.Success
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1962,8 +1962,8 @@ func (x *respRaiserGet500) writeField1(p thrift.Encoder) error {  // F
 
     item := x.F
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -1982,8 +1982,8 @@ func (x *respRaiserGet500) writeField2(p thrift.Encoder) error {  // B
 
     item := x.B
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2002,8 +2002,8 @@ func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
 
     item := x.S
     if err := item.Write(p); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -2013,9 +2013,9 @@ func (x *respRaiserGet500) writeField3(p thrift.Encoder) error {  // S
 
 func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Success = &result
     return nil
@@ -2023,10 +2023,10 @@ if err != nil {
 
 func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
     result := NewFiery()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.F = result
     return nil
@@ -2034,10 +2034,10 @@ if err != nil {
 
 func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
     result := NewBanal()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.B = result
     return nil
@@ -2045,10 +2045,10 @@ if err != nil {
 
 func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     result := NewSerious()
-err := result.Read(p)
-if err != nil {
-    return err
-}
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
 
     x.S = result
     return nil

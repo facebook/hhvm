@@ -48,8 +48,8 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
     item := x.Name
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *Name) writeField1(p thrift.Encoder) error {  // Name
 
 func (x *Name) readField1(p thrift.Decoder) error {  // Name
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Name = result
     return nil
@@ -167,8 +167,8 @@ func (x *Tag) writeField1(p thrift.Encoder) error {  // Tag
 
     item := x.Tag
     if err := p.WriteString(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -178,9 +178,9 @@ func (x *Tag) writeField1(p thrift.Encoder) error {  // Tag
 
 func (x *Tag) readField1(p thrift.Decoder) error {  // Tag
     result, err := p.ReadString()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.Tag = result
     return nil

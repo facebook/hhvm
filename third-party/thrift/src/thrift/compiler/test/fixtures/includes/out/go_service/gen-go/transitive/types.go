@@ -48,8 +48,8 @@ func (x *Foo) writeField1(p thrift.Encoder) error {  // A
 
     item := x.A
     if err := p.WriteI64(item); err != nil {
-    return err
-}
+        return err
+    }
 
     if err := p.WriteFieldEnd(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
@@ -59,9 +59,9 @@ func (x *Foo) writeField1(p thrift.Encoder) error {  // A
 
 func (x *Foo) readField1(p thrift.Decoder) error {  // A
     result, err := p.ReadI64()
-if err != nil {
-    return err
-}
+    if err != nil {
+        return err
+    }
 
     x.A = result
     return nil

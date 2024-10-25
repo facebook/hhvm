@@ -1,4 +1,5 @@
 # @generated
+from __future__ import annotations
 
 import typing
 import typing as _typing
@@ -59,7 +60,7 @@ class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MySt
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyDataItemPatch(patch),
+            lambda patch, type_info: MyDataItemPatch(patch),
             self._patch,
             3,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyDataItem))
@@ -181,7 +182,7 @@ class MyUnionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyUni
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
+            lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             2,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
@@ -191,7 +192,7 @@ class MyUnionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyUni
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyDataItemPatch(patch),
+            lambda patch, type_info: MyDataItemPatch(patch),
             self._patch,
             3,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyDataItem))
@@ -235,7 +236,7 @@ class MyExceptionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.M
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
+            lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
@@ -245,7 +246,7 @@ class MyExceptionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.M
             MyUnionPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyUnionPatch(patch),
+            lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))
@@ -279,7 +280,7 @@ class MyExceptionWithMessagePatch(BaseStructPatch[test.fixtures.basic.module.thr
             MyStructPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyStructPatch(patch),
+            lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
@@ -289,7 +290,7 @@ class MyExceptionWithMessagePatch(BaseStructPatch[test.fixtures.basic.module.thr
             MyUnionPatch]:
 
         return OptionalFieldPatch(
-            lambda patch, type_info: test.fixtures.basic.module.thrift_patch.MyUnionPatch(patch),
+            lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))

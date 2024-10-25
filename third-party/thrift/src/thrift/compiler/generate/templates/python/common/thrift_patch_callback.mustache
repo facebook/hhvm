@@ -33,5 +33,5 @@
 }}MapPatch({{> common/thrift_patch_callback}}, patch.as_map_patch(), type_info){{!
 }}{{/type:value_type}}{{/type:map?}}{{!
 }}{{#type:struct}}{{!
-    }}{{type:patch_module_path}}.{{struct:py_name}}Patch(patch){{!
+    }}{{#type:need_patch_module_path?}}{{type:patch_module_path}}.{{/type:need_patch_module_path?}}{{struct:py_name}}Patch(patch){{!
 }}{{/type:struct}}

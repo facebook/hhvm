@@ -19,7 +19,7 @@ using namespace watchman;
 /* query /root {query} */
 static UntypedResponse cmd_query(Client* client, const json_ref& args) {
   if (json_array_size(args) != 3) {
-    throw ErrorResponse("wrong number of arguments for 'query'");
+    throw ErrorResponse("wrong number of arguments for 'query', expected 3");
   }
 
   auto root = resolveRoot(client, args);

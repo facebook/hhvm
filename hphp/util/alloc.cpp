@@ -39,6 +39,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+HHVM_ATTRIBUTE_WEAK uintptr_t tc_start_address() {
+  return (uintptr_t)sbrk(0);
+}
+
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   mallctlCall<true>("thread.tcache.flush");
@@ -246,7 +250,7 @@ unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
 
 void setup_low_arena(PageSpec s) {
   auto const lowArenaStart = lowArenaMinAddr();
-  assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= lowArenaStart);
+  assert(reinterpret_cast<uintptr_t>(tc_start_address()) <= lowArenaStart);
   always_assert_flog(lowArenaStart <= (2ull << 30),
                      "low arena min addr ({}) must be <= 2GB",
                      lowArenaStart);
@@ -609,16 +613,6 @@ struct JEMallocInitializer {
     lower_arena_flags = low_arena_flags;
     low_cold_arena = low_arena;
     low_cold_arena_flags = low_arena_flags;
-
-    // We normally maintain the invariant that the region surrounding the
-    // current brk is mapped huge, but we don't know yet whether huge pages
-    // are enabled for low memory. Round up to the start of a huge page,
-    // and set the high water mark to one below.
-    constexpr size_t kHugePageSize = size2m;
-    constexpr size_t kHugePageMask = kHugePageSize - 1;
-    unsigned leftInPage = kHugePageSize - (uintptr_t(sbrk(0)) & kHugePageMask);
-    (void) sbrk(leftInPage);
-    assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
 
 #else // USE_JEMALLOC_EXTENT_HOOKS
     unsigned low_1g_pages = 0;

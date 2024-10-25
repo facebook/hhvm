@@ -59,6 +59,11 @@ struct OutOfMemoryException : Exception {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * The address where the TC can start.  This follows the last of the addresses
+ * mapped by the binary loader.
+ */
+uintptr_t tc_start_address();
 
 #ifdef USE_JEMALLOC
 

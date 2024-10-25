@@ -123,8 +123,7 @@ CodeCache::CodeCache() {
     kGDataSize
   );
 
-  auto const currBase = (uintptr_t)sbrk(0);
-  auto const usedBase = shiftTC(ru<size2m>(currBase));
+  auto const usedBase = shiftTC(ru<size2m>(tc_start_address()));
 
   if (m_totalSize > (2ul << 30)) {
     fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize, "
@@ -168,9 +167,8 @@ CodeCache::CodeCache() {
   always_assert_flog(allocBase == usedBase,
                      "mmap failed for translation cache (errno = {})",
                      errno);
-  auto const newBrk = (uintptr_t) sbrk(0);
-  always_assert_flog(allocBase >= (uintptr_t) newBrk,
-                     "unexpected brk movement, we cannot proceed safely");
+  always_assert_flog(allocBase >= tc_start_address(),
+                     "unexpected tc start address movement");
   CodeAddress base = reinterpret_cast<CodeAddress>(usedBase);
   m_base = base;
 

@@ -27,19 +27,11 @@ import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
 import test.fixtures.basic.module.thrift_types
-from test.fixtures.basic.module.thrift_types import (
-    MyStruct,
-    Containers,
-    MyDataItem,
-    MyUnion,
-    MyException,
-    MyExceptionWithMessage,
-    ReservedKeyword,
-    UnionToBeRenamed,
-)
 
 
-class MyStructPatch(BaseStructPatch[MyStruct]):
+class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyStruct]):
+    pass
+
     @property
     def MyIntField(self) -> OptionalFieldPatch[
             int,
@@ -131,7 +123,9 @@ class MyStructPatch(BaseStructPatch[MyStruct]):
             9,
             _fbthrift_python_types.typeinfo_string)
 
-class ContainersPatch(BaseStructPatch[Containers]):
+class ContainersPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.Containers]):
+    pass
+
     @property
     def I32List(self) -> OptionalFieldPatch[
             _typing.Sequence[int],
@@ -163,9 +157,13 @@ class ContainersPatch(BaseStructPatch[Containers]):
             3,
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64))
 
-class MyDataItemPatch(BaseStructPatch[MyDataItem]):
+class MyDataItemPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyDataItem]):
+    pass
 
-class MyUnionPatch(BaseStructPatch[MyUnion]):
+
+class MyUnionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyUnion]):
+    pass
+
     @property
     def myEnum(self) -> OptionalFieldPatch[
             test.fixtures.basic.module.thrift_types.MyEnum,
@@ -207,7 +205,9 @@ class MyUnionPatch(BaseStructPatch[MyUnion]):
             4,
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float))
 
-class MyExceptionPatch(BaseStructPatch[MyException]):
+class MyExceptionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyException]):
+    pass
+
     @property
     def MyIntField(self) -> OptionalFieldPatch[
             int,
@@ -249,7 +249,9 @@ class MyExceptionPatch(BaseStructPatch[MyException]):
             4,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))
 
-class MyExceptionWithMessagePatch(BaseStructPatch[MyExceptionWithMessage]):
+class MyExceptionWithMessagePatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyExceptionWithMessage]):
+    pass
+
     @property
     def MyIntField(self) -> OptionalFieldPatch[
             int,
@@ -291,7 +293,9 @@ class MyExceptionWithMessagePatch(BaseStructPatch[MyExceptionWithMessage]):
             4,
             _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))
 
-class ReservedKeywordPatch(BaseStructPatch[ReservedKeyword]):
+class ReservedKeywordPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.ReservedKeyword]):
+    pass
+
     @property
     def reserved_field(self) -> OptionalFieldPatch[
             int,
@@ -303,7 +307,9 @@ class ReservedKeywordPatch(BaseStructPatch[ReservedKeyword]):
             1,
             _fbthrift_python_types.typeinfo_i32)
 
-class UnionToBeRenamedPatch(BaseStructPatch[UnionToBeRenamed]):
+class UnionToBeRenamedPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.UnionToBeRenamed]):
+    pass
+
     @property
     def reserved_field(self) -> OptionalFieldPatch[
             int,

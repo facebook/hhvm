@@ -44,15 +44,12 @@ import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
 import {{program:module_path}}.thrift_types
-from {{program:module_path}}.thrift_types import (
-{{#program:structs}}
-    {{struct:py_name}},
-{{/program:structs}}
-)
 
 {{#program:structs}}
 
-class {{struct:py_name}}Patch(BaseStructPatch[{{struct:py_name}}]):
+class {{struct:py_name}}Patch(BaseStructPatch[{{program:module_path}}.thrift_types.{{struct:py_name}}]):
+    pass
+
 {{#struct:fields_ordered_by_id}}
     @property
     def {{field:py_name}}(self) -> OptionalFieldPatch[

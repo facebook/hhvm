@@ -19,8 +19,8 @@ import folly.iobuf as _fbthrift_iobuf
 
 class FooStreamEx(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooStreamEx": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -32,8 +32,8 @@ class FooStreamEx(_abc.ABC):
 
 class FooEx(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooEx": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -45,8 +45,8 @@ class FooEx(_abc.ABC):
 
 class FooEx2(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FooEx2": ...  # type: ignore
 #    @_abc.abstractmethod

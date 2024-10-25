@@ -531,3 +531,28 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
         # THEN
         self.assertIs(expected, actual)
+
+    @parameterized.expand(
+        [
+            (
+                # provide a test name for clarity, especially with failures.
+                "immutable_struct",
+                TestStructImmutable(unqualified_string="hello"),
+            ),
+            (
+                "mutable_struct",
+                TestStructMutable(unqualified_string="hello"),
+            ),
+        ],
+    )
+    def test_iteration(self, test_name: str, ts: TestStructAbstract) -> None:
+        # Iterating over an instance yields (field_name, field_value) tuples.
+        self.assertSetEqual(
+            # If TestStructAbstract does not have an __iter__ method,
+            # then the line below will fail with the error:
+            # Incompatible parameter type [6]: In call `set.__init__`,
+            # for 1st positional argument, expected `Iterable[Variable[_T]]`
+            # but got `TestStructAbstract`
+            set(ts),
+            {("unqualified_string", "hello"), ("optional_string", None)},
+        )

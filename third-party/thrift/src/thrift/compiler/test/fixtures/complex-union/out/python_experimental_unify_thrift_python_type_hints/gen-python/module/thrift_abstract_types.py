@@ -87,8 +87,8 @@ class Val(_abc.ABC):
     @property
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _typing.Mapping[int, str]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _typing.Mapping[int, str]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Val": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -134,8 +134,8 @@ class NonCopyableStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def num(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableStruct": ...  # type: ignore
 #    @_abc.abstractmethod

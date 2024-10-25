@@ -21,8 +21,8 @@ class Mixin1(_abc.ABC):
     @property
     @_abc.abstractmethod
     def field1(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -39,8 +39,8 @@ class Mixin2(_abc.ABC):
     @property
     @_abc.abstractmethod
     def field2(self) -> _typing.Optional[str]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -54,8 +54,8 @@ class Mixin3Base(_abc.ABC):
     @property
     @_abc.abstractmethod
     def field3(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -75,8 +75,8 @@ class Foo(_abc.ABC):
     @property
     @_abc.abstractmethod
     def m3(self) -> Mixin3Base: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
 #    @_abc.abstractmethod

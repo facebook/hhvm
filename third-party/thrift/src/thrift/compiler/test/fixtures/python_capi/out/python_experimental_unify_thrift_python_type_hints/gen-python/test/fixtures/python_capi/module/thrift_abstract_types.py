@@ -52,8 +52,8 @@ class MyStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def intSetty(self) -> _typing.AbstractSet[int]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, _typing.Sequence[float], _typing.Mapping[bytes, str], _typing.AbstractSet[int]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, _typing.Sequence[float], _typing.Mapping[bytes, str], _typing.AbstractSet[int]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -67,8 +67,8 @@ class MyDataItem(_abc.ABC):
     @property
     @_abc.abstractmethod
     def s(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -80,8 +80,8 @@ class MyDataItem(_abc.ABC):
 
 class TransitiveDoubler(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.TransitiveDoubler": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -98,8 +98,8 @@ class DoubledPair(_abc.ABC):
     @property
     @_abc.abstractmethod
     def x(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.DoubledPair": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -116,8 +116,8 @@ class StringPair(_abc.ABC):
     @property
     @_abc.abstractmethod
     def doubled(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.StringPair": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -129,8 +129,8 @@ class StringPair(_abc.ABC):
 
 class EmptyStruct(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.EmptyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -189,8 +189,8 @@ class PrimitiveStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def some_error(self) -> test.fixtures.python_capi.thrift_dep.thrift_abstract_types.SomeError: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, MyStruct, EmptyStruct, bytes, str, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.SomeError]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, MyStruct, EmptyStruct, bytes, str, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.SomeError]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.PrimitiveStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -213,8 +213,8 @@ class AdaptedFields(_abc.ABC):
     @property
     @_abc.abstractmethod
     def inline_adapted_int(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _typing.Sequence[int], _typing.AbstractSet[int], int]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _typing.Sequence[int], _typing.AbstractSet[int], int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.AdaptedFields": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -252,8 +252,8 @@ class ListStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def buf_ptrs(self) -> _typing.Sequence[_fbthrift_iobuf.IOBuf]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[bool], _typing.Sequence[int], _typing.Sequence[str], _typing.Sequence[bytes], _typing.Sequence[int], _typing.Sequence[_typing.Sequence[float]], _typing.Sequence[_typing.Sequence[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]], _typing.Sequence[_fbthrift_iobuf.IOBuf]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[bool], _typing.Sequence[int], _typing.Sequence[str], _typing.Sequence[bytes], _typing.Sequence[int], _typing.Sequence[_typing.Sequence[float]], _typing.Sequence[_typing.Sequence[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]], _typing.Sequence[_fbthrift_iobuf.IOBuf]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.ListStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -285,8 +285,8 @@ class SetStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def setz(self) -> _typing.Sequence[_typing.AbstractSet[int]]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[MyEnum], _typing.AbstractSet[int], _typing.AbstractSet[bytes], _typing.AbstractSet[bytes], _typing.AbstractSet[int], _typing.AbstractSet[int], _typing.Sequence[_typing.AbstractSet[int]]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[MyEnum], _typing.AbstractSet[int], _typing.AbstractSet[bytes], _typing.AbstractSet[bytes], _typing.AbstractSet[int], _typing.AbstractSet[int], _typing.Sequence[_typing.AbstractSet[int]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.SetStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -327,8 +327,8 @@ class MapStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def unsigned_list_map(self) -> _typing.Mapping[int, _typing.Sequence[int]]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[MyEnum, str], _typing.Mapping[int, str], _typing.Mapping[bytes, PrimitiveStruct], _typing.Mapping[str, float], _typing.Mapping[int, float], _typing.Sequence[_typing.Mapping[int, int]], _typing.Mapping[int, _typing.Sequence[int]], _typing.Mapping[int, _typing.Sequence[float]], _typing.Mapping[bytes, _fbthrift_iobuf.IOBuf], _typing.Mapping[int, _typing.Sequence[int]]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[MyEnum, str], _typing.Mapping[int, str], _typing.Mapping[bytes, PrimitiveStruct], _typing.Mapping[str, float], _typing.Mapping[int, float], _typing.Sequence[_typing.Mapping[int, int]], _typing.Mapping[int, _typing.Sequence[int]], _typing.Mapping[int, _typing.Sequence[float]], _typing.Mapping[bytes, _fbthrift_iobuf.IOBuf], _typing.Mapping[int, _typing.Sequence[int]]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MapStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -369,8 +369,8 @@ class ComposeStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def serial_error(self) -> test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedError: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum, AnnoyingEnum, PrimitiveStruct, ListStruct, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepEnum, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepStruct, _typing.Sequence[test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepStruct], test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedStruct, test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedUnion, test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedError]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum, AnnoyingEnum, PrimitiveStruct, ListStruct, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepEnum, test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepStruct, _typing.Sequence[test.fixtures.python_capi.thrift_dep.thrift_abstract_types.DepStruct], test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedStruct, test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedUnion, test.fixtures.python_capi.serialized_dep.thrift_abstract_types.SerializedError]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.ComposeStruct": ...  # type: ignore
 #    @_abc.abstractmethod

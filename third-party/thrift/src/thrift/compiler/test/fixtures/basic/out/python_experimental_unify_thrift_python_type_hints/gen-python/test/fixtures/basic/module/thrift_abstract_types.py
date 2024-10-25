@@ -51,8 +51,8 @@ class MyStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -72,8 +72,8 @@ class Containers(_abc.ABC):
     @property
     @_abc.abstractmethod
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -85,8 +85,8 @@ class Containers(_abc.ABC):
 
 class MyDataItem(_abc.ABC):
     pass
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -131,8 +131,8 @@ class MyException(_abc.ABC):
     @property
     @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -155,8 +155,8 @@ class MyExceptionWithMessage(_abc.ABC):
     @property
     @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -170,8 +170,8 @@ class ReservedKeyword(_abc.ABC):
     @property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword": ...  # type: ignore
 #    @_abc.abstractmethod

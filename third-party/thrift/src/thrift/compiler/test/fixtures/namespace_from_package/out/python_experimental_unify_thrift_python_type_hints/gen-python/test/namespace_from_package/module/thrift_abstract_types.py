@@ -21,8 +21,8 @@ class Foo(_abc.ABC):
     @property
     @_abc.abstractmethod
     def MyInt(self) -> int: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.namespace_from_package.module.thrift_mutable_types.Foo": ...  # type: ignore
 #    @_abc.abstractmethod

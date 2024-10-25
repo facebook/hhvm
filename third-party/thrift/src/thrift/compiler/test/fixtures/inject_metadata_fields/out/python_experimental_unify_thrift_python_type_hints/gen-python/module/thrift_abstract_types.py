@@ -22,8 +22,8 @@ class Fields(_abc.ABC):
     @property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fields": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -37,8 +37,8 @@ class FieldsInjectedToEmptyStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -55,8 +55,8 @@ class FieldsInjectedToStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToStruct": ...  # type: ignore
 #    @_abc.abstractmethod
@@ -79,8 +79,8 @@ class FieldsInjectedWithIncludedStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str, str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str, str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
 #    @_abc.abstractmethod

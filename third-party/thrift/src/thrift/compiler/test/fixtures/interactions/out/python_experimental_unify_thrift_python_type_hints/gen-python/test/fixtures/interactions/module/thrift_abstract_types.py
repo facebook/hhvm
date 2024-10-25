@@ -22,8 +22,8 @@ class CustomException(_abc.ABC):
     @property
     @_abc.abstractmethod
     def message(self) -> str: ...
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
 #    @_abc.abstractmethod
 #    def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.CustomException": ...  # type: ignore
 #    @_abc.abstractmethod

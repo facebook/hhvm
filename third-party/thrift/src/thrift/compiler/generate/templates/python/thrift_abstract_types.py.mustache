@@ -60,12 +60,12 @@ class {{struct:py_name}}({{!
     pass
     {{/struct:fields_ordered_by_id}}
     {{^struct:union?}}
-#    @_abc.abstractmethod
-#    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
-#        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{!
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
+        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{!
         Replace #field:type .. /field:type with > fields/adapted_type
-#    }}{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}{{!
-#        }}{{/struct:fields_ordered_by_id}}]]]: ...
+        }}{{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}}{{!
+        }}{{/struct:fields_ordered_by_id}}]]]: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_to_mutable_python_conversion_methods?}}

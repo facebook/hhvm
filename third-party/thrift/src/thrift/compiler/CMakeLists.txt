@@ -200,6 +200,7 @@ add_executable(
   main.cc
   compiler.cc
 )
+target_compile_definitions(thrift1 PRIVATE THRIFT_OSS)
 target_link_libraries(
   thrift1
   compiler_ast

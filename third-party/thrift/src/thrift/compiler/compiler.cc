@@ -38,6 +38,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 
+#include <thrift/annotation/bundled_annotations.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/diagnostic.h>
@@ -50,7 +51,6 @@
 
 namespace apache::thrift::compiler {
 namespace {
-
 /**
  * Flags to control code generation
  */
@@ -733,7 +733,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   }
 
   // Load standard library if available.
-  static const std::string schema_path = "thrift/lib/thrift/schema.thrift";
+  const std::string schema_path = "thrift/lib/thrift/schema.thrift";
   auto found_or_error =
       source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
   if (found_or_error.index() == 0) {
@@ -766,6 +766,19 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
         "Could not load Thrift standard libraries: {}",
         std::get<1>(found_or_error));
   }
+
+#ifndef THRIFT_OSS
+  const std::string scope_path = "thrift/annotation/scope.thrift";
+  found_or_error =
+      source_mgr.find_include_file(scope_path, "", pparams.incl_searchpath);
+  if (found_or_error.index() != 0) {
+    // Fall back to the bundled annotation file.
+    std::string_view content =
+        apache::thrift::detail::bundled_annotations::scope_file_content();
+    source_mgr.add_virtual_file(
+        scope_path, std::string(content.data(), content.size()));
+  }
+#endif
 
   // C++ codegen inserts an empty const if this is false. Other languages may
   // dynamically determine whether the schema const exists.

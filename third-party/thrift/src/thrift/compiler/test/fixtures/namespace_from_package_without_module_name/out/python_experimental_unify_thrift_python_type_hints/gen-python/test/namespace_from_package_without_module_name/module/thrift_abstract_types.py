@@ -23,11 +23,11 @@ class Foo(_abc.ABC):
     def MyInt(self) -> int: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.namespace_from_package_without_module_name.module.thrift_mutable_types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.namespace_from_package_without_module_name.module.thrift_types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.namespace_from_package_without_module_name.module.types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "namespace_from_package_without_module_name.module.ttypes.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.namespace_from_package_without_module_name.module.thrift_mutable_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.namespace_from_package_without_module_name.module.thrift_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.namespace_from_package_without_module_name.module.types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "namespace_from_package_without_module_name.module.ttypes.Foo": ...  # type: ignore

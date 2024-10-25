@@ -54,6 +54,14 @@ from thrift.test.thrift_python.union_test.thrift_abstract_types import (  # @man
     # TestUnionAdaptedTypes as TestUnionAdaptedTypesAbstract,
 )
 
+from thrift.test.thrift_python.union_test.thrift_mutable_types import (
+    TestUnion as TestUnionMutable,
+)
+
+from thrift.test.thrift_python.union_test.thrift_types import (
+    TestUnion as TestUnionImmutable,
+)
+
 
 class ThriftPythonAbstractTypesTest(unittest.TestCase):
     @staticmethod
@@ -556,3 +564,105 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             set(ts),
             {("unqualified_string", "hello"), ("optional_string", None)},
         )
+
+    # Construct immutable and mutable structs to ensure that
+    # the type-check for this file in isolation checks the ability to construct
+    # these types in the face of abstract methods in the abstract base class.
+    @parameterized.expand(
+        [
+            (
+                "immutable_struct",
+                TestStructImmutable(),
+            ),
+            (
+                "mutable_struct",
+                TestStructMutable(),
+            ),
+        ],
+    )
+    def test_structs_to_immutable_python(
+        self, test_name: str, ts: TestStructAbstract
+    ) -> None:
+        # If abstract class does not have a _to_python method,
+        # then the line below will fail with the error:
+        #   Undefined attribute [16]: `TestStructAbstract` has no attribute `_to_python`.
+        ts._to_python()
+
+    # Construct immutable and mutable unions to ensure that
+    # the type-check for this file in isolation checks the ability to construct
+    # these types in the face of abstract methods in the abstract base class.
+    @parameterized.expand(
+        [
+            (
+                "immutable_union",
+                TestUnionImmutable(),
+            ),
+            (
+                "mutable_union",
+                TestUnionMutable(),
+            ),
+        ],
+    )
+    def test_unions_to_immutable_python(
+        self, test_name: str, tu: TestUnionAbstract
+    ) -> None:
+        # If abstract class does not have a _to_python method,
+        # then the line below will fail with the error:
+        #   Undefined attribute [16]: `TestUnionAbstract` has no attribute `_to_python`.
+        tu._to_python()
+
+    # Construct immutable and mutable structs to ensure that
+    # the type-check for this file in isolation checks the ability to construct
+    # these types in the face of abstract methods in the abstract base class.
+    @parameterized.expand(
+        [
+            (
+                "immutable_struct",
+                TestStructImmutable(),
+            ),
+            (
+                "mutable_struct",
+                TestStructMutable(),
+            ),
+        ],
+    )
+    def test_structs_to_mutable_python(
+        self, test_name: str, ts: TestStructAbstract
+    ) -> None:
+        # If abstract class does not have a _to_mutable_python method,
+        # then the line below will fail with the error:
+        #   Undefined attribute [16]: `TestStructAbstract` has no attribute `_to_mutable_python`.
+        ts._to_mutable_python()
+
+    # Construct immutable and mutable unions to ensure that
+    # the type-check for this file in isolation checks the ability to construct
+    # these types in the face of abstract methods in the abstract base class.
+    @parameterized.expand(
+        [
+            (
+                "immutable_union",
+                TestUnionImmutable(),
+            ),
+            (
+                "mutable_union",
+                TestUnionMutable(),
+            ),
+        ],
+    )
+    def test_unions_to_mutable_python(
+        self, test_name: str, tu: TestUnionAbstract
+    ) -> None:
+        # If abstract class does not have a _to_mutable_python method,
+        # then the line below will fail with the error:
+        #   Undefined attribute [16]: `TestUnionAbstract` has no attribute `_to_mutable_python`.
+        tu._to_mutable_python()
+
+    def test_to_py3(self) -> None:
+        # Rather than pull in py3 types, just check that the method exists.
+        self.assertTrue(hasattr(TestStructAbstract, "_to_py3"))
+        self.assertTrue(hasattr(TestUnionAbstract, "_to_py3"))
+
+    def test_to_py_deprecated(self) -> None:
+        # Rather than pull in py-deprecated types, just check that the method exists.
+        self.assertTrue(hasattr(TestStructAbstract, "_to_py_deprecated"))
+        self.assertTrue(hasattr(TestUnionAbstract, "_to_py_deprecated"))

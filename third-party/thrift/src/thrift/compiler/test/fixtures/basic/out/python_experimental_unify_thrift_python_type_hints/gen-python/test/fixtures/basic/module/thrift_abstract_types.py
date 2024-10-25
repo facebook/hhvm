@@ -53,14 +53,14 @@ class MyStruct(_abc.ABC):
     def no_hack_codegen_field(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyDataItem, MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 class Containers(_abc.ABC):
     @property
@@ -74,27 +74,27 @@ class Containers(_abc.ABC):
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.Containers": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 
 class MyDataItem(_abc.ABC):
     pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyDataItem": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.MyDataItem": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyDataItem": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyDataItem": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 
 class MyUnion(_abc.ABC):
     @property
@@ -109,14 +109,14 @@ class MyUnion(_abc.ABC):
     @property
     @_abc.abstractmethod
     def floatSet(self) -> _typing.AbstractSet[float]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyUnion": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyUnion": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.MyUnion": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyUnion": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyUnion": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyUnion": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
 class MyException(_abc.ABC):
     @property
@@ -133,14 +133,14 @@ class MyException(_abc.ABC):
     def myUnion(self) -> MyUnion: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 
 class MyExceptionWithMessage(_abc.ABC):
     @property
@@ -157,14 +157,14 @@ class MyExceptionWithMessage(_abc.ABC):
     def myUnion(self) -> MyUnion: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
 
 class ReservedKeyword(_abc.ABC):
     @property
@@ -172,27 +172,27 @@ class ReservedKeyword(_abc.ABC):
     def reserved_field(self) -> int: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.ReservedKeyword": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.ReservedKeyword": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.ReservedKeyword": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.ReservedKeyword": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
 
 class UnionToBeRenamed(_abc.ABC):
     @property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.UnionToBeRenamed": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.UnionToBeRenamed": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.basic.module.types.UnionToBeRenamed": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.UnionToBeRenamed": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.basic.module.thrift_types.UnionToBeRenamed": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.basic.module.types.UnionToBeRenamed": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
 
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem

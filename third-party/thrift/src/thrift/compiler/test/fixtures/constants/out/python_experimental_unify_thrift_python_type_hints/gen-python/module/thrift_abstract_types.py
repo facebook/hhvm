@@ -44,14 +44,14 @@ class Internship(_abc.ABC):
     def school(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, Company, float, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Internship": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Internship": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Internship": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Internship": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
 
 class Range(_abc.ABC):
     @property
@@ -62,14 +62,14 @@ class Range(_abc.ABC):
     def max(self) -> int: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Range": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Range": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Range": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Range": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Range": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Range": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
 
 class struct1(_abc.ABC):
     @property
@@ -80,14 +80,14 @@ class struct1(_abc.ABC):
     def b(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.struct1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.struct1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.struct1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.struct1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
 
 class struct2(_abc.ABC):
     @property
@@ -104,14 +104,14 @@ class struct2(_abc.ABC):
     def d(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, struct1, _typing.Sequence[int]]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.struct2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.struct2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.struct2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.struct2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
 
 class struct3(_abc.ABC):
     @property
@@ -125,14 +125,14 @@ class struct3(_abc.ABC):
     def c(self) -> struct2: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, struct2]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.struct3": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.struct3": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.struct3": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.struct3": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
 
 class struct4(_abc.ABC):
     @property
@@ -146,14 +146,14 @@ class struct4(_abc.ABC):
     def c(self) -> _typing.Optional[int]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, float, int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct4": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.struct4": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.struct4": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct4": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.struct4": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.struct4": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
 
 class union1(_abc.ABC):
     @property
@@ -162,14 +162,14 @@ class union1(_abc.ABC):
     @property
     @_abc.abstractmethod
     def d(self) -> float: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.union1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.union1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.union1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.union1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.union1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.union1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
 
 class union2(_abc.ABC):
     @property
@@ -184,14 +184,14 @@ class union2(_abc.ABC):
     @property
     @_abc.abstractmethod
     def u(self) -> union1: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.union2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.union2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.union2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.union2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.union2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.union2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.union2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.union2": ...  # type: ignore
 
 MyCompany = Company
 MyStringIdentifier = str

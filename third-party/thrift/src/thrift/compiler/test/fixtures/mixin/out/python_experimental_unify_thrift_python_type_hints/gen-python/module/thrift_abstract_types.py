@@ -23,14 +23,14 @@ class Mixin1(_abc.ABC):
     def field1(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Mixin1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Mixin1": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Mixin1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Mixin1": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...  # type: ignore
 
 class Mixin2(_abc.ABC):
     @property
@@ -41,14 +41,14 @@ class Mixin2(_abc.ABC):
     def field2(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Mixin2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Mixin2": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Mixin2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Mixin2": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...  # type: ignore
 
 class Mixin3Base(_abc.ABC):
     @property
@@ -56,14 +56,14 @@ class Mixin3Base(_abc.ABC):
     def field3(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Mixin3Base": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Mixin3Base": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Mixin3Base": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Mixin3Base": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...  # type: ignore
 
 class Foo(_abc.ABC):
     @property
@@ -77,13 +77,13 @@ class Foo(_abc.ABC):
     def m3(self) -> Mixin3Base: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Foo": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Foo": ...  # type: ignore
 
 Mixin3 = Mixin3Base

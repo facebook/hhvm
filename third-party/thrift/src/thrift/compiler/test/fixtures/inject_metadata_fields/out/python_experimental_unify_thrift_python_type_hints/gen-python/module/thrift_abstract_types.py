@@ -24,14 +24,14 @@ class Fields(_abc.ABC):
     def injected_field(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fields": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Fields": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Fields": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fields": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Fields": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Fields": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 
 class FieldsInjectedToEmptyStruct(_abc.ABC):
     @property
@@ -39,14 +39,14 @@ class FieldsInjectedToEmptyStruct(_abc.ABC):
     def injected_field(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.FieldsInjectedToEmptyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.FieldsInjectedToEmptyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.FieldsInjectedToEmptyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 
 class FieldsInjectedToStruct(_abc.ABC):
     @property
@@ -57,14 +57,14 @@ class FieldsInjectedToStruct(_abc.ABC):
     def string_field(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.FieldsInjectedToStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.FieldsInjectedToStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedToStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.FieldsInjectedToStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.FieldsInjectedToStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 
 class FieldsInjectedWithIncludedStruct(_abc.ABC):
     @property
@@ -81,11 +81,11 @@ class FieldsInjectedWithIncludedStruct(_abc.ABC):
     def string_field(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore

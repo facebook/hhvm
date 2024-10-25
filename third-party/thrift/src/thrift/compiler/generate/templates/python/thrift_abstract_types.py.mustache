@@ -69,18 +69,18 @@ class {{struct:py_name}}({{!
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_to_mutable_python_conversion_methods?}}
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{struct:py_name}}": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{struct:py_name}}": ...  # type: ignore
 {{/program:generate_to_mutable_python_conversion_methods?}}
     {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "{{program:module_path}}.thrift_types.{{struct:py_name}}": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "{{program:module_path}}.thrift_types.{{struct:py_name}}": ...  # type: ignore
     {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "{{program:module_path}}.types.{{struct:py_name}}": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "{{program:module_path}}.types.{{struct:py_name}}": ...  # type: ignore
     {{! Replace struct:py_name with > structs/unadapted_name when you implement adapters}}
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:py_name}}": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:py_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
 # TODO: Figure out how to handle adapters

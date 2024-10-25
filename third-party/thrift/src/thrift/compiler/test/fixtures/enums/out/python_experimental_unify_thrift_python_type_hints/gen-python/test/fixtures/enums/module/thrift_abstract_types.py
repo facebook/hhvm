@@ -53,14 +53,14 @@ class SomeStruct(_abc.ABC):
     def tags(self) -> _typing.AbstractSet[int]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Metasyntactic, Metasyntactic, Metasyntactic, _typing.AbstractSet[int]]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.SomeStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.enums.module.thrift_types.SomeStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.enums.module.types.SomeStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.SomeStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.enums.module.thrift_types.SomeStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.enums.module.types.SomeStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
 
 class MyStruct(_abc.ABC):
     @property
@@ -77,11 +77,11 @@ class MyStruct(_abc.ABC):
     def me1_t2(self) -> MyEnum1: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[MyEnum2, MyEnum3, MyEnum1, MyEnum1]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "test.fixtures.enums.module.thrift_types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "test.fixtures.enums.module.types.MyStruct": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.enums.module.thrift_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore

@@ -23,14 +23,14 @@ class Fiery(_abc.ABC):
     def message(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fiery": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Fiery": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Fiery": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Fiery": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Fiery": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Fiery": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 
 class Serious(_abc.ABC):
     @property
@@ -38,14 +38,14 @@ class Serious(_abc.ABC):
     def not_sonnet(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Serious": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Serious": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Serious": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Serious": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Serious": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Serious": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 
 class ComplexFieldNames(_abc.ABC):
     @property
@@ -56,14 +56,14 @@ class ComplexFieldNames(_abc.ABC):
     def internal_error_message(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.ComplexFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.ComplexFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.ComplexFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.ComplexFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 
 class CustomFieldNames(_abc.ABC):
     @property
@@ -74,14 +74,14 @@ class CustomFieldNames(_abc.ABC):
     def internal_error_message(self) -> str: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.CustomFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.CustomFieldNames": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.CustomFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.CustomFieldNames": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 
 class ExceptionWithPrimitiveField(_abc.ABC):
     @property
@@ -92,14 +92,14 @@ class ExceptionWithPrimitiveField(_abc.ABC):
     def error_code(self) -> int: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithPrimitiveField": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.ExceptionWithPrimitiveField": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.ExceptionWithPrimitiveField": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithPrimitiveField": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.ExceptionWithPrimitiveField": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.ExceptionWithPrimitiveField": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 
 class ExceptionWithStructuredAnnotation(_abc.ABC):
     @property
@@ -110,24 +110,24 @@ class ExceptionWithStructuredAnnotation(_abc.ABC):
     def error_code(self) -> int: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.ExceptionWithStructuredAnnotation": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 
 class Banal(_abc.ABC):
     pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
-#    @_abc.abstractmethod
-#    def _to_mutable_python(self) -> "module.thrift_mutable_types.Banal": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_python(self) -> "module.thrift_types.Banal": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py3(self) -> "module.types.Banal": ...  # type: ignore
-#    @_abc.abstractmethod
-#    def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Banal": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Banal": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Banal": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore

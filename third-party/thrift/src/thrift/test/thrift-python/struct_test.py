@@ -723,7 +723,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # Assigning a value of the wrong type raises a `TypeError`
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
-            # pyre-ignore[8]: Intentional for test
             s.optional_list_i32 = to_thrift_list(["list", "with", "different", "type"])
 
         self.assertEqual([1, 2, 3], s.optional_list_i32)
@@ -734,7 +733,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # Assigning a value of the wrong type raises a `TypeError` when fields
         # are `None`
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
-            # pyre-ignore[8]: Intentional for test
             s.optional_list_i32 = to_thrift_list(["list", "with", "different", "type"])
 
         # Boundary check for integral types
@@ -782,7 +780,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             s.unqualified_list_i32[4] = 2
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_list_i32[4] = "Not integer"
 
         self.assertEqual([2, 2, 3], s.unqualified_list_i32)
@@ -833,7 +830,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13], lst2)
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
-            # pyre-ignore[6]: Intentional for test
             lst2.extend([14, 15, "16", 17])
 
         # basic exception safety
@@ -849,10 +845,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # It is possible to assign any value that supports `len()` and iteration
         s1.unqualified_list_i32 = to_thrift_list([1, 2, 3])
         self.assertEqual([1, 2, 3], s1.unqualified_list_i32)
-        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_list_i32 = to_thrift_list({11, 12, 13})
         self.assertEqual([11, 12, 13], s1.unqualified_list_i32)
-        # pyre-ignore[8]: Fixme: type error to be addressed later
         s1.unqualified_list_i32 = to_thrift_list((21, 22, 23))
         self.assertEqual([21, 22, 23], s1.unqualified_list_i32)
         s1.unqualified_list_i32 = to_thrift_list([])
@@ -873,7 +867,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         )
         # Strong exception safety
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
-            # pyre-ignore[8]: Intentional for test
             s3.unqualified_list_i32 = to_thrift_list([11, 12, 13, "Not an Integer"])
         self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
 
@@ -1043,7 +1036,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.add(999)
 
         # `remove()`
@@ -1053,7 +1045,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.remove(111)
 
         # `remove()` raises a `KeyError` if key is absent
@@ -1066,7 +1057,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `discard()` does not raises a `KeyError` or `TypeError`
         s.unqualified_set_string.discard("111")
-        # pyre-ignore[6]: Intentional for test
         s.unqualified_set_string.discard(111)
 
         set1 = s.unqualified_set_string
@@ -1236,13 +1226,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32["a"] = "Not an integer"
 
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32[999] = 11
 
         # `__iter__()`

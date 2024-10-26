@@ -922,10 +922,14 @@ void Vgen<X64Asm>::emit(const jcc& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const interceptjcc& i) {
   assertx(env.unit.context);
+  assertx(i.cc == CC_AE);
   auto const funcId = env.unit.context->initSrcKey.funcID();
   align(a.code(), &env.meta, Alignment::SmashIntercept, AlignContext::Live);
   env.meta.setInterceptJccTCA(a.frontier(), funcId);
-  emit(jcc{i.cc, i.sf, {i.targets[0], i.targets[1]}, StringTag{}});
+  auto taken = i.targets[1];
+  jccs.push_back({a.frontier(), taken});
+  a.jcc(i.cc, a.frontier());
+  emit(jmp{i.targets[0]});
 }
 
 template<class X64Asm>

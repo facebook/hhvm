@@ -896,7 +896,7 @@ void HTTPSession::onHeadersComplete(HTTPCodec::StreamID streamID,
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
   if (isDownstream()) {
-    if (auto msgPtr = msg.get()) {
+    if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
               .setTimestamp(HTTPSessionObserverInterface::Clock::now())

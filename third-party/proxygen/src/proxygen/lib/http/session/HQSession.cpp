@@ -2553,7 +2553,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   // Inform observers when request headers (i.e. ingress, from downstream
   // client) are processed.
   if (session_.direction_ == TransportDirection::DOWNSTREAM) {
-    if (auto msgPtr = msg.get()) {
+    if (msg.get()) {
       const auto event =
           HTTPSessionObserverInterface::RequestStartedEvent::Builder()
               .setTimestamp(HTTPSessionObserverInterface::Clock::now())

@@ -50,6 +50,7 @@ class EnumTests(unittest.TestCase):
         self.assertNotEqual(x.type, Kind.SOCK)
         self.assertIn(x.type, Kind)
         self.assertEqual(int(x.type), 4)
+        self.assertRaises(ValueError, lambda: Kind(47))
 
     def test_normal_enum_not_int(self) -> None:
         x = File(name="/etc", type=Kind.DIR)

@@ -109,6 +109,7 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(self.Kind.DIR, int, "Enums are Ints")
         self.assertIn(x.type, self.Kind)
         self.assertEqual(x.type.value, 4)
+        self.assertRaises(ValueError, lambda: self.Kind(47))
 
     def test_enum_value_rename(self) -> None:
         """The value name is None but we auto rename it to None_"""

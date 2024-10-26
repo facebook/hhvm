@@ -1990,9 +1990,8 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_accessor_attribute() {
     if (const t_const* annotation = field_->find_structured_annotation_or_null(
             kCppFieldInterceptorUri)) {
-      if (const auto* val =
-              annotation->get_value_from_structured_annotation_or_null(
-                  "noinline")) {
+      if (annotation->get_value_from_structured_annotation_or_null(
+              "noinline")) {
         return std::string("FOLLY_NOINLINE");
       }
     }

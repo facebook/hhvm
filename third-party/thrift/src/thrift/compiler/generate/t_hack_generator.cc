@@ -4878,8 +4878,7 @@ std::string t_hack_generator::render_service_metadata_response(
     } else if (const auto* tmap = dynamic_cast<const t_map*>(next)) {
       queue.push(tmap->get_key_type());
       queue.push(tmap->get_val_type());
-    } else if (
-        const auto* tinteraction = dynamic_cast<const t_interaction*>(next)) {
+    } else if (dynamic_cast<const t_interaction*>(next)) {
       continue;
     } else if (const auto* tservice = dynamic_cast<const t_service*>(next)) {
       if (tservice != service) {

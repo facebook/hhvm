@@ -88,6 +88,7 @@ module TyPredicate = struct
     | Tneg _ -> Result.Error "neg"
     | Tlabel _ -> Result.Error "label"
     | Ttuple _ -> Result.Error "tuple"
+    | Tclass_args _ -> Result.Error "class_args"
 
   let rec to_ty predicate =
     let tag_to_ty reason tag =
@@ -327,6 +328,9 @@ and split_ty
     | Tdynamic
     | Taccess _
     | Tunapplied_alias _ ->
+      (env, TyPartition.mk_span ty)
+    | Tclass_args _ ->
+      (* TODO: need a bespoke DataType to model KindOfClass *)
       (env, TyPartition.mk_span ty)
     (* Types we cannot split *)
     | Tprim

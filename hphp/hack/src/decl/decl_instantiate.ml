@@ -188,6 +188,7 @@ and instantiate_ subst x =
         (* TODO(shapes) s_unknown_value should likely be instantiated *)
         s_fields = fdm;
       }
+  | Tclass_args ty -> Tclass_args (instantiate subst ty)
 
 and instantiate_tuple_extra subst e =
   match e with

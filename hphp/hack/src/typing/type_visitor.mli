@@ -84,6 +84,9 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty ->
       Typing_defs.decl_class_refinement ->
       'a
+
+    method on_tclass_args :
+      'a -> Typing_reason.decl_t -> Typing_defs.decl_ty -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type
@@ -176,6 +179,8 @@ class type ['a] locl_type_visitor_type =
       'a -> Typing_reason.t -> Typing_defs.type_predicate -> 'a
 
     method on_tlabel : 'a -> Typing_reason.t -> string -> 'a
+
+    method on_tclass_args : 'a -> Typing_reason.t -> Typing_defs.locl_ty -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type

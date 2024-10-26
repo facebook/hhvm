@@ -175,6 +175,12 @@ let rec freshen_inside_ty env ty =
     let (env, ty) = freshen_ty env ty in
     (env, mk (r, Taccess (ty, ids)))
   | Tunapplied_alias _ -> default ()
+  | Tclass_args ty ->
+    let (env, ty) = freshen_ty env ty in
+    (* TODO(T199606542) Matches classname but does it actually make sense
+     * to freshen class pointer? This will disappear when we move to direct
+     * strings *)
+    (env, mk (r, Tclass_args ty))
 
 and freshen_ty env ty =
   if TUtils.is_tyvar_error env ty then

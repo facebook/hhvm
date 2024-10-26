@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<133b175eb9d66d6666685e88422736bd>>
+// @generated SignedSource<<32d0815f2fff02434f0e3fc21d8d4ad9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -713,6 +713,7 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Tintersection(ref __binding_0) => __binding_0.accept(v),
             Ty_::TvecOrDict(ref __binding_0) => __binding_0.accept(v),
             Ty_::Taccess(ref __binding_0) => __binding_0.accept(v),
+            Ty_::TclassArgs(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tvar(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tnewtype(ref __binding_0) => __binding_0.accept(v),
             Ty_::TunappliedAlias(ref __binding_0) => __binding_0.accept(v),

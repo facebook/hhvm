@@ -304,7 +304,8 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   | Tfun _
   | Tgeneric _
   | Tdependent _
-  | Taccess _ ->
+  | Taccess _
+  | Tclass_args _ ->
     ValueSet.singleton Value.Unsupported
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()

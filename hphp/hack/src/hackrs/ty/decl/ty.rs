@@ -405,6 +405,8 @@ pub enum Ty_<R: Reason> {
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     TvecOrDict(Box<(Ty<R>, Ty<R>)>),
     Taccess(Box<TaccessType<R, Ty<R>>>),
+    /// Class pointer type, matches classname<T>
+    TclassArgs(Ty<R>),
 }
 
 // We've boxed all variants of Ty_ which are larger than two usizes, so the
@@ -454,6 +456,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
             }
             Taccess(tt) => tt.accept(v),
             Trefinement(tr) => tr.accept(v),
+            TclassArgs(ty) => ty.accept(v),
         }
     }
 }

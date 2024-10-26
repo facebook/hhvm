@@ -59,7 +59,8 @@ let rec enforce_not_awaitable env p ty =
   | Tdynamic
   | Taccess _
   | Tlabel _
-  | Tneg _ ->
+  | Tneg _
+  | Tclass_args _ ->
     ()
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()

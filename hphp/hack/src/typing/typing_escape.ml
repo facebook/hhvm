@@ -340,6 +340,9 @@ and refresh_type renv v ty_orig =
     in
     let (renv, l, ch) = refresh_types_w_variance renv v vl l in
     (renv, mk (r, Tclass ((p, cid), e, l)), ch)
+  | (r, Tclass_args ty1) ->
+    let (renv, ty1, changed) = refresh_type renv v ty1 in
+    (renv, mk (r, Tclass_args ty1), changed)
 
 and refresh_types renv v l =
   let rec go renv changed tl acc =

@@ -68,6 +68,7 @@ let expand_ty ?var_hook ?pos env ty =
       (* TODO(T36532263) see if that needs updating *)
       | (_, Taccess _) -> ety
       | (_, Tunapplied_alias _) -> ety
+      | (p, Tclass_args ty) -> mk (p, Tclass_args (exp_ty ty))
     in
     ety
   and exp_tys tyl = List.map ~f:exp_ty tyl

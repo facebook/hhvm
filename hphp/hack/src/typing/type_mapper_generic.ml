@@ -72,6 +72,8 @@ class type ['env] type_mapper_type =
 
     method on_tlabel : 'env -> Reason.t -> string -> 'env * locl_ty
 
+    method on_tclass_args : 'env -> Reason.t -> locl_ty -> 'env * locl_ty
+
     method on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
   end
 
@@ -131,6 +133,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tlabel env r name = (env, mk (r, Tlabel name))
 
+    method on_tclass_args env r ty = (env, mk (r, Tclass_args ty))
+
     method on_reason env r = (env, r)
 
     method on_type env ty =
@@ -157,6 +161,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Taccess (ty, id) -> this#on_taccess env r ty id
       | Tneg ty -> this#on_neg_type env r ty
       | Tlabel name -> this#on_tlabel env r name
+      | Tclass_args ty -> this#on_tclass_args env r ty
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end

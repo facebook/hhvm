@@ -279,7 +279,8 @@ let rec check_exhaustiveness_
   | Taccess _
   | Tneg _
   | Tlabel _
-  | Tdynamic ->
+  | Tdynamic
+  | Tclass_args _ ->
     if Option.is_none (snd caselist) then
       (`Silently_ends ty :: outcomes, env)
     else

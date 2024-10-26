@@ -164,6 +164,7 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(exact)
                 .field(tys)
                 .finish(),
+            &TclassArgs(ty) => f.debug_tuple("TclassArgs").field(ty).finish(),
         }
     }
 }

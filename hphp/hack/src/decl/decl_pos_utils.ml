@@ -61,6 +61,7 @@ struct
       let rs = Class_refinement.map ty rs in
       Trefinement (ty root_ty, rs)
     | Tshape s -> Tshape (shape_type s)
+    | Tclass_args x -> Tclass_args (ty x)
 
   and tuple_extra e =
     match e with

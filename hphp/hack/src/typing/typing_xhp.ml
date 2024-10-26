@@ -112,6 +112,9 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Taccess _
   | Tunapplied_alias _ ->
     (env, [], [cty])
+  | Tclass_args _ ->
+    (* TODO(T199606542) Does it matter if we have a class pointer to an XHP class? *)
+    (env, [], [cty])
 
 and walk_list_and_gather_xhp env pos tyl =
   List.fold ~init:(env, [], []) tyl ~f:(fun (env, xhp_acc, non_xhp_acc) ty ->

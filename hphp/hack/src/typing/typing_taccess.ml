@@ -596,7 +596,8 @@ let rec expand ctx env root =
     | Tdynamic
     | Toption _
     | Tlabel _
-    | Tneg _ ->
+    | Tneg _
+    | Tclass_args _ ->
       ((env, None, []), Missing err_opt)
 
 (** Expands a type constant access like A::T to its definition. *)

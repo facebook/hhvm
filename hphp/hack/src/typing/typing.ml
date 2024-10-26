@@ -9552,12 +9552,8 @@ end = struct
             p
             ty
         in
-        let base_ty = TUtils.get_base_type env ty in
-        match deref base_ty with
-        | (_, Tnewtype (classname, [the_cls], as_ty))
-          when String.equal classname SN.Classes.cClassname ->
+        let resolve_class_pointer env wrap the_cls =
           let ((env, ty_err2), (ty, err_res)) = resolve_ety env the_cls in
-          let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
           let err_res =
             match err_res with
             | Ok ty -> Ok (wrap ty)
@@ -9565,6 +9561,16 @@ end = struct
           in
           ( (env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both),
             (ty, err_res) )
+        in
+        let base_ty = TUtils.get_base_type env ty in
+        match deref base_ty with
+        | (_, Tnewtype (classname, [the_cls], as_ty))
+          when String.equal classname SN.Classes.cClassname ->
+          let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
+          resolve_class_pointer env wrap the_cls
+        | (_, Tclass_args the_cls) ->
+          let wrap ty = mk (Reason.none, Tclass_args ty) in
+          resolve_class_pointer env wrap the_cls
         | (_, Tgeneric _)
         | (_, Tclass _) ->
           ((env, ty_err1), (ty, Ok ty))
@@ -11340,7 +11346,8 @@ end = struct
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( _,
         ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
-        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ ) ) ->
+        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_args _ )
+      ) ->
       if not (TUtils.is_tyvar_error env cty) then
         Typing_error_utils.add_typing_error
           ~env

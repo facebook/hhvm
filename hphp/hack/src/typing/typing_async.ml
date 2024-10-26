@@ -75,7 +75,8 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
     | Tshape _
     | Taccess _
     | Tlabel _
-    | Tneg _ ->
+    | Tneg _
+    | Tclass_args _ ->
       let (env, type_var) =
         if TUtils.is_tyvar_error env e_opt_ty then
           Env.fresh_type_error env p
@@ -105,7 +106,8 @@ let overload_extract_from_awaitable_with_ty_err env ~p opt_ty_maybe =
         | Tshape _
         | Taccess _
         | Tlabel _
-        | Tneg _ ->
+        | Tneg _
+        | Tclass_args _ ->
           type_var
       in
       let (env, e2) =

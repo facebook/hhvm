@@ -2400,6 +2400,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             }
             Ty_::Tlike(ty) => Ty_::Tlike(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Toption(ty) => Ty_::Toption(self.convert_tapply_to_tgeneric(ty)),
+            Ty_::TclassArgs(ty) => Ty_::TclassArgs(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Tfun(fun_type) => {
                 let convert_param = |param: &'a FunParam<'a>| {
                     self.alloc(FunParam {

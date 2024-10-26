@@ -188,6 +188,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
             Ty_::Trefinement(tr) => typing_defs::Ty_::Trefinement(
                 arena.alloc((tr.ty.to_oxidized(arena), tr.refinement.to_oxidized(arena))),
             ),
+            Ty_::TclassArgs(x) => typing_defs::Ty_::TclassArgs(x.to_oxidized(arena)),
         }
     }
 }

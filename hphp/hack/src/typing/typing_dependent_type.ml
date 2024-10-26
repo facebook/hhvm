@@ -163,6 +163,9 @@ module ExprDepTy = struct
       | (r, Taccess (ty, ids)) ->
         let (env, ty) = make ~seen env ty in
         (env, mk (r, Taccess (ty, ids)))
+      | (r, Tclass_args ty) ->
+        let (env, ty) = make ~seen env ty in
+        (env, mk (r, Tclass_args ty))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic | Tvec_or_dict _

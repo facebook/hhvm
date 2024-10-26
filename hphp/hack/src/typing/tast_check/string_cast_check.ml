@@ -62,6 +62,9 @@ let rec is_stringish env ty =
   | Tlabel _
   | Taccess _ ->
     false
+  | Tclass_args _ ->
+    (* TODO(T199606542) May need to relax this, possibly can use this to drive a codemod *)
+    false
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 

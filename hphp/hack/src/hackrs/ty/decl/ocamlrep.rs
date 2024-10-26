@@ -467,6 +467,11 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 alloc.set_field(&mut block, 0, alloc.add(&**x));
                 block.build()
             }
+            Ty_::TclassArgs(x) => {
+                let mut block = alloc.block_with_size_and_tag(1usize, 14u8);
+                alloc.set_field(&mut block, 0, alloc.add(x));
+                block.build()
+            }
         }
     }
 }
@@ -555,6 +560,10 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                 13 => {
                     ocamlrep::from::expect_block_size(block, 1)?;
                     Ok(Ty_::Taccess(ocamlrep::from::field(block, 0)?))
+                }
+                14 => {
+                    ocamlrep::from::expect_block_size(block, 1)?;
+                    Ok(Ty_::TclassArgs(ocamlrep::from::field(block, 0)?))
                 }
                 t => Err(ocamlrep::FromError::BlockTagOutOfRange { max: 14, actual: t }),
             }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c87dd883ca3ddf67c77d4784646839d5>>
+// @generated SignedSource<<397264fafdfba8849fad187440260932>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -760,6 +760,12 @@ pub enum Ty_ {
     TvecOrDict(Ty, Ty),
     /// Name of class, name of type const, remaining names of type consts
     Taccess(TaccessType),
+    /// A type of a class pointer, class<T>. To be compatible with classname<T>,
+    /// it takes an arbitrary type. In the future, it should only take a string
+    /// that is a class name, and be named Tclass. The current Tclass would be
+    /// renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
+    #[rust_to_ocaml(name = "Tclass_args")]
+    TclassArgs(Ty),
     Tvar(isize),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
@@ -798,6 +804,7 @@ pub enum Ty_ {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
+    /// TODO(T199606542) rename this to Tinstance
     Tclass(PosId, Exact, Vec<Ty>),
     /// The negation of the [type_predicate]
     Tneg(TypePredicate),

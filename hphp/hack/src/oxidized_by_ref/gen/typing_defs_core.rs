@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<217be576677ce11528e6e4242ad71473>>
+// @generated SignedSource<<d24d31773d129a5b045a4e1838791a83>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -781,6 +781,13 @@ pub enum Ty_<'a> {
     /// Name of class, name of type const, remaining names of type consts
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Taccess(&'a TaccessType<'a>),
+    /// A type of a class pointer, class<T>. To be compatible with classname<T>,
+    /// it takes an arbitrary type. In the future, it should only take a string
+    /// that is a class name, and be named Tclass. The current Tclass would be
+    /// renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tclass_args")]
+    TclassArgs(&'a Ty<'a>),
     Tvar(isize),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
@@ -824,6 +831,7 @@ pub enum Ty_<'a> {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
+    /// TODO(T199606542) rename this to Tinstance
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Tclass(&'a (PosId<'a>, Exact<'a>, &'a [&'a Ty<'a>])),

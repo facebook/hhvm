@@ -413,6 +413,7 @@ let rec this_appears_covariantly ~contra env ty =
   | Tprim _
   | Tgeneric _ ->
     false
+  | Tclass_args ty -> this_appears_covariantly ~contra env ty
 
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)

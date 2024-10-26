@@ -108,6 +108,7 @@ let rec strip_ty ty =
     | Tlabel _
     | Tneg _ ->
       ty
+    | Tclass_args ty -> Tclass_args (strip_ty ty)
   in
   mk (reason, ty)
 

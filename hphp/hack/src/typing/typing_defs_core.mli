@@ -348,6 +348,12 @@ and _ ty_ =
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : 'phase taccess_type -> 'phase ty_
+  (* A type of a class pointer, class<T>. To be compatible with classname<T>,
+   * it takes an arbitrary type. In the future, it should only take a string
+   * that is a class name, and be named Tclass. The current Tclass would be
+   * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
+   *)
+  | Tclass_args : 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : Tvid.t -> locl_phase ty_
   (* This represents a type alias that lacks necessary type arguments. Given

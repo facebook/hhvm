@@ -868,6 +868,10 @@ module Full = struct
         tyl
         ")"
     | Tshape s -> tshape ~fuel k to_doc penv s is_open_mixed_decl
+    | Tclass_args x ->
+      let (fuel, ty_doc) = k ~fuel x in
+      let class_args_doc = Concat [text "class<"; ty_doc; text ">"] in
+      (fuel, class_args_doc)
 
   and fun_decl_implicit_params ~fuel ~verbose_fun =
     fun_implicit_params
@@ -1207,6 +1211,9 @@ module Full = struct
     | Tlabel name ->
       let label_doc = Concat [text "#"; text name] in
       (fuel, label_doc)
+    | Tclass_args ty ->
+      let (fuel, ty_doc) = k ~fuel ty in
+      (fuel, Concat [text "class<"; ty_doc; text ">"])
 
   and type_predicate ~fuel ~negate to_doc predicate =
     let tag_doc tag =
@@ -1609,6 +1616,9 @@ module ErrorString = struct
       type_ ~fuel env ty
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
       (fuel, "a classname string")
+    | Tclass_args x ->
+      let (fuel, ty_str) = ety_to_string x in
+      (fuel, "a class pointer for " ^ ty_str)
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
       (fuel, "a typename string")
     | Tnewtype _ ->
@@ -1982,6 +1992,7 @@ module Json = struct
     (* TODO akenn *)
     | (p, Taccess (ty, _id)) -> obj @@ kind p "type_constant" @ args [ty]
     | (p, Tlabel s) -> obj @@ kind p "label" @ name s
+    | (p, Tclass_args ty) -> obj @@ kind p "class_args" @ typ ty
 
   type deserialized_result = (locl_ty, deserialization_error) result
 

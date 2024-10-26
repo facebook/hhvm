@@ -189,6 +189,9 @@ let rec truthiness env ty =
     Unknown
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+  | Tclass_args _ ->
+    (* TODO(T199606542) Check if (non-null) class pointers are ever falsy *)
+    Unknown
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -262,6 +265,9 @@ let rec find_sketchy_types env acc ty =
   | Taccess _
   | Tlabel _
   | Tneg _ ->
+    acc
+  | Tclass_args _ ->
+    (* TODO(T199606542) Extend the sketchy null check to support class pointers *)
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

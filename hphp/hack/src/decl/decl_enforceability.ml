@@ -399,6 +399,11 @@ end = struct
         | Unenforced (Some ety) ->
           Unenforced (Some (mk (get_reason ty, Toption ety)))
         | Unenforced None -> Unenforced None)
+      | Tclass_args _ ->
+        (* TODO(T199606542) See if it is necessary to mimic enforcement of classname<T>
+         * Ultimately, all class<T> types will enforce that at least a class pointer
+         * flowed through them, if not the specific class. *)
+        Unenforced None
     in
 
     if return_from_async then

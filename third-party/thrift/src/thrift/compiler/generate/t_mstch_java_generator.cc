@@ -864,7 +864,7 @@ class mstch_java_field : public mstch_field {
   bool _has_type_adapter() {
     auto type = field_->get_type();
     if (type->is_typedef()) {
-      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+      if (t_typedef::get_first_structured_annotation_or_null(
               type, kJavaAdapterUri)) {
         return true;
       }
@@ -1310,8 +1310,7 @@ class mstch_java_type : public mstch_type {
 
   mstch::node has_structured_annotation(const char* uri) {
     if (type_->is_typedef()) {
-      if (auto annotation =
-              t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
+      if (t_typedef::get_first_structured_annotation_or_null(type_, uri)) {
         return true;
       }
     }

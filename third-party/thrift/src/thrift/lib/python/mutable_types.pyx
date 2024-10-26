@@ -257,6 +257,11 @@ cdef class MutableStruct(MutableStructOrUnion):
     Instance variables:
         _fbthrift_data: "mutable struct list" that holds the "isset" flag array and
             values for all fields. See `createMutableStructListWithDefaultValues()`.
+            A `MutableStruct` instance might be appended to `_fbthrift_data` as the
+            last element. This instance is not considered by the serialization or the
+            deserialization logic; it is used to ensure field-cache consistency in the
+            mutable thrift-python runtime, as `_fbthrift_field_cache` is part of the
+            `MutableStruct` instance rather than `_fbthrift_data`.
 
         _fbthrift_field_cache: This is a list that stores instances of a field's
             Python value. It is especially useful when creating a Python value is
@@ -297,7 +302,10 @@ cdef class MutableStruct(MutableStructOrUnion):
         return self_copy
 
     def __deepcopy__(self, memo):
-        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data, memo))
+        has_instance = self._fbthrift_has_struct_instance(self._fbthrift_data)
+        # we do not need to deep copy the instance and the field-cache (last element)
+        fbthrift_data = self._fbthrift_data[:-1] if has_instance else self._fbthrift_data
+        return self._fbthrift_create(copy.deepcopy(fbthrift_data))
 
     cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
@@ -334,6 +342,9 @@ cdef class MutableStruct(MutableStructOrUnion):
                 self._fbthrift_data,
                 mutable_struct_info.cpp_obj.get().getStructInfo()
         )
+
+        # Append `MutableStruct` instance, see `_fbthrift_has_struct_instance()`
+        self._fbthrift_data.append(self)
 
     cdef _fbthrift_set_field_value(self, int16_t index, object value):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
@@ -461,9 +472,70 @@ cdef class MutableStruct(MutableStructOrUnion):
 
     @classmethod
     def _fbthrift_create(cls, data):
+        if cls._fbthrift_has_struct_instance(data):
+            # An instance of `MutableStruct` has already created for given
+            # `._fbthrift_data`, just return the previous instance.
+            return data[-1]
+
         cdef MutableStruct inst = cls.__new__(cls)
         inst._fbthrift_data = data
+        # Append `MutableStruct` instance, see `_fbthrift_has_struct_instance()`
+        inst._fbthrift_data.append(inst)
         return inst
+
+    @classmethod
+    def _fbthrift_has_struct_instance(cls, list fbthrift_data):
+        """
+        `MutableStruct._fbthrift_data` is populated by multiple sources, such as
+        `MutableStruct.__cinit__()` or `MutableStruct._fbthrift_deserialize()`.
+        It stores the `isset` flags as the first element, followed by the data
+        for each field. If a `MutableStruct` instance is created for a specific
+        `_fbthrift_data`, that instance is appended as the last element. The
+        instance is not considered by the serialization/deserialization logic;
+        it is used to ensure field-cache consistency in the mutable thrift-python
+        runtime.
+
+        For example, consider the following structs:
+
+        struct Struct_A {
+          1: i32 i32_field;
+        }
+
+        struct Struct_B {
+          1: list<Struct_A> list_of_struct_A;
+        }
+
+        =======================================================================
+
+        s1 = Struct_B(list_of_struct_A=to_thrift_list([Struct_A()]))
+
+        # In the code above, there is one `__cinit__()` call for `Struct_A` and
+        # one for `Struct_B`. Since `__cinit__()` populates `_fbthrift_data` with
+        # `MutableStruct` instance, both `_fbthrift_data` lists have their
+        # `MutableStruct` instances populated.
+
+        # However, if we send `s1` over the wire and receive the `Struct_B`
+        # instance after deserialization:
+
+        serialized_data = serialize(s1, COMPACT)
+        s2 = deserialize(Struct_B, serialized_data)
+
+        # At this point, the instance is populated for `s2._fbthrift_data`.
+        # However, the struct in the `s2.list_of_struct_A[0]` has no instance
+        # populated because we never access that struct in the Python runtime
+        # after deserialization.
+
+        # After accessing `s2.list_of_struct_A[0]` in the below, the instance
+        # is populated.
+
+        s2.list_of_struct_A[0]
+
+        =======================================================================
+
+        This function returns `True` if the given `_fbthrift_data` contains a
+        `MutableStruct` instance.
+        """
+        return len(fbthrift_data) and isinstance(fbthrift_data[-1], cls)
 
 
 cdef class MutableStructInfo:

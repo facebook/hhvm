@@ -303,12 +303,8 @@ class ListTests(unittest.TestCase):
         self.assertEqual(s.binaryList, [b"foo", b"bar"])
         self.assertEqual(s.iobufList, [IOBuf(b"foo"), IOBuf(b"bar")])
         self.assertEqual(s.structList, [self.Foo(value=1), self.Foo(value=2)])
-        # test reaccess the list element not recreating the struct
-        # DO_BEFORE(alperyoney,20240701): Figure out whether mutable containers
-        # should cache the instance.
-        if not self.is_mutable_run:
-            self.assertIs(s.structList[0], s.structList[0])
-            self.assertIs(s.structList[1], s.structList[1])
+        self.assertIs(s.structList[0], s.structList[0])
+        self.assertIs(s.structList[1], s.structList[1])
 
     def test_count_enum(self) -> None:
         clist = self.Lists(

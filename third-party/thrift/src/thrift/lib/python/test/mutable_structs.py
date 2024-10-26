@@ -474,23 +474,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         # String fields are unique because when they are first accessed, they are
         # read from `struct._fbthrift_data`, converted to a Python type, and cached.
         # On subsequent accesses, the underlying `struct._fbthrift_data` is not
-        # accessed again; the cached value is used. When we say structs are the "same,"
-        # it means they share the same `_fbthrift_data` list data structure, but the
-        # cache is not part of the `_fbthrift_data`. Therefore, if the cached field
-        # is updated by a name that refers to the same struct, it only updates the
-        # `struct._fbthrift_data`. All other names that refer to the same struct
-        # might not reflect this change because they continue to read from their
-        # own cache.
+        # accessed again; the cached value is used.
         self.assertEqual("elem", s_elem.string_field)
         self.assertEqual("elem", s.list_struct[0].string_field)
         self.assertEqual("elem", s.list_struct[1].string_field)
         s.list_struct[1].string_field = "updated"
-
-        # TODO: Fix-me
-        # `s_elem.string_field` is not "updated" because `s_elem` reads it from
-        # its own cache, while the underlying `_fbthrift_data` is updated by
-        # `s.list_struct[1]`. The commented assert below would fail.
-
-        # self.assertEqual("updated", s_elem.string_field)
+        self.assertEqual("updated", s_elem.string_field)
         self.assertEqual("updated", s.list_struct[0].string_field)
         self.assertEqual("updated", s.list_struct[1].string_field)

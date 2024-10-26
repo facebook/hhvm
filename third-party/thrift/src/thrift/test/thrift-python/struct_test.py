@@ -1779,9 +1779,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([1, 2, 3], s_elem1.list_int)
         self.assertEqual([1, 2, 3], s.list_struct[0].list_int)
 
-        # Heads-up: Thrift doesn't provide an `is` check guarantee
-        self.assertIsNot(s_elem1, s.list_struct[0])
-
     def test_set_container_assignment(self) -> None:
         """
         struct TestStructContainerAssignment {

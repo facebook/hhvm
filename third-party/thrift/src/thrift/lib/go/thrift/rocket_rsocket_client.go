@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"time"
 
@@ -65,6 +66,9 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))
 	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
 	r.client = client
+	if client == nil && err == nil {
+		return fmt.Errorf("rsocket returnen nil client")
+	}
 	return err
 }
 

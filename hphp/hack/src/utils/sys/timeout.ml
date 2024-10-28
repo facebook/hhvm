@@ -82,21 +82,7 @@ let with_timeout ~timeout ~on_timeout ~do_ =
   | Timeout { exn_id; timeout_time; deadline_time } when exn_id = id ->
     on_timeout { start_time; timeout_time; deadline_time }
 
-let check_timeout _ = ()
-
-(** Channel *)
-
 type in_channel = Stdlib.in_channel * int option
-
-let open_in name = (Stdlib.open_in name, None)
-
-let close_in (ic, _) = Stdlib.close_in ic
-
-let close_in_noerr (ic, _) = Stdlib.close_in_noerr ic
-
-let in_channel_of_descr fd = (Unix.in_channel_of_descr fd, None)
-
-let descr_of_in_channel (ic, _) = Unix.descr_of_in_channel ic
 
 let open_process cmd args =
   let (child_in_fd, out_fd) = Unix.pipe () in

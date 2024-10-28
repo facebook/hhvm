@@ -58,10 +58,8 @@ module Client_actual = struct
         Unix.ADDR_UNIX sock_path
     in
     try
-      let (tic, _) = Timeout.open_connection sockaddr in
-      let reader =
-        Buffered_line_reader.create @@ Timeout.descr_of_in_channel @@ tic
-      in
+      let (ic, _oc) = Unix.open_connection sockaddr in
+      let reader = Buffered_line_reader.create @@ Unix.descr_of_in_channel ic in
       Some { state = ref @@ Unknown reader }
     with
     | Unix.Unix_error (Unix.ENOENT, _, _) -> None

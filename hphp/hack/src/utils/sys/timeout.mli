@@ -39,23 +39,15 @@ type t
 val with_timeout :
   timeout:int -> on_timeout:(timings -> 'a) -> do_:(t -> 'a) -> 'a
 
-val check_timeout : t -> unit
-
 type in_channel = Stdlib.in_channel * int option
 
-val open_in : string -> in_channel
+val open_process :
+  Exec_command.t ->
+  string array ->
+  (Stdlib.in_channel * int option) * out_channel
 
-val close_in : in_channel -> unit
-
-val close_in_noerr : in_channel -> unit
-
-val in_channel_of_descr : Unix.file_descr -> in_channel
-
-val descr_of_in_channel : in_channel -> Unix.file_descr
-
-val open_process : Exec_command.t -> string array -> in_channel * out_channel
-
-val open_process_in : Exec_command.t -> string array -> in_channel
+val open_process_in :
+  Exec_command.t -> string array -> Stdlib.in_channel * int option
 
 val close_process_in : in_channel -> Unix.process_status
 
@@ -67,7 +59,8 @@ val read_process :
   string array ->
   'a
 
-val open_connection : ?timeout:t -> Unix.sockaddr -> in_channel * out_channel
+val open_connection :
+  ?timeout:t -> Unix.sockaddr -> (Stdlib.in_channel * int option) * out_channel
 
 val read_connection :
   timeout:int ->

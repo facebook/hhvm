@@ -201,7 +201,7 @@ end = struct
 
   (* Asks watchman for the path to the socket file *)
   let get_sockname timeout =
-    let ic =
+    let (ic, pid) =
       Timeout.open_process_in
         Exec_command.Watchman
         [|
@@ -210,12 +210,10 @@ end = struct
           "--no-pretty";
         |]
     in
-    let reader =
-      Buffered_line_reader.create @@ Timeout.descr_of_in_channel ic
-    in
+    let reader = Buffered_line_reader.create @@ Unix.descr_of_in_channel ic in
     let output = read_with_timeout timeout reader in
     assert (
-      match Timeout.close_process_in ic with
+      match Timeout.close_process_in (ic, pid) with
       | Unix.WEXITED 0 -> true
       | _ -> false);
     let json = Hh_json.json_of_string output in
@@ -228,10 +226,8 @@ end = struct
       | Some sockname -> sockname
       | None -> get_sockname timeout
     in
-    let (tic, oc) = Timeout.open_connection (Unix.ADDR_UNIX sockname) in
-    let reader =
-      Buffered_line_reader.create @@ Timeout.descr_of_in_channel @@ tic
-    in
+    let (ic, oc) = Unix.open_connection (Unix.ADDR_UNIX sockname) in
+    let reader = Buffered_line_reader.create @@ Unix.descr_of_in_channel ic in
     (reader, oc)
 
   let close_connection conn =
@@ -877,7 +873,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           | Sys_error msg when String.equal msg "Bad file descriptor" ->
             (* This happens when watchman is tearing itself down after we
              * retrieved a sock address and connected to the sock address. That's
-             * because Unix.open_connection (via Timeout.open_connection) doesn't
+             * because Unix.open_connection doesn't
              * error even when the sock address is no longer valid and actually -
              * it returns a channel that will error at some later time when you
              * actually try to do anything with it (write to it, or even get the

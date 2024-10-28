@@ -88,23 +88,6 @@ let check_timeout _ = ()
 
 type in_channel = Stdlib.in_channel * int option
 
-let ignore_timeout f ?timeout:_ (ic, _pid) = f ic
-
-let input_value_with_workaround ic =
-  (* OCaml 4.03.0 changed the behavior of input_value to no longer
-   * throw End_of_file when the pipe has closed. We can simulate that
-   * behavior, however, by trying to read a byte afterwards, which WILL
-   * raise End_of_file if the pipe has closed
-   * http://caml.inria.fr/mantis/view.php?id=7142 *)
-  try Stdlib.input_value ic with
-  | Failure msg as exn ->
-    let e = Exception.wrap exn in
-    if String.equal msg "input_value: truncated object" then
-      Stdlib.input_char ic |> ignore;
-    Exception.reraise e
-
-let input_value = ignore_timeout input_value_with_workaround
-
 let open_in name = (Stdlib.open_in name, None)
 
 let close_in (ic, _) = Stdlib.close_in ic

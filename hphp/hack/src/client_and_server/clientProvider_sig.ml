@@ -70,5 +70,5 @@ module type S = sig
   (* TODO: temporary way to break the module abstraction. Remove after
    * converting all the callsites to use methods on this module instead of
    * directly using channels. *)
-  val get_channels : client -> Timeout.in_channel * out_channel
+  val get_channels : client -> in_channel * out_channel
 end

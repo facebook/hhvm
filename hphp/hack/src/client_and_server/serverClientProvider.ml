@@ -49,7 +49,7 @@ type priority =
 
 (** This is an instance of hh_client calling clientConnect.rpc *)
 type client = {
-  ic: Timeout.in_channel;
+  ic: Stdlib.in_channel;
   oc: Out_channel.t;
   priority: priority;
   mutable tracker: Connection_tracker.t;
@@ -110,7 +110,7 @@ let accept_client
   {
     client =
       {
-        ic = Timeout.in_channel_of_descr socket;
+        ic = Unix.in_channel_of_descr socket;
         oc = Unix.out_channel_of_descr socket;
         priority;
         tracker;
@@ -208,14 +208,14 @@ let say_hello oc =
   in
   ()
 
-let read_connection_type_from_channel (ic : Timeout.in_channel) :
-    connection_type =
+let read_connection_type_from_channel (ic : Stdlib.in_channel) : connection_type
+    =
   (* sent by [ClientConnection.connect] *)
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> raise Read_command_timeout)
-    ~do_:(fun timeout ->
-      let connection_type : connection_type = Timeout.input_value ~timeout ic in
+    ~do_:(fun _timeout ->
+      let connection_type : connection_type = Stdlib.input_value ic in
       connection_type)
 
 (* Warning 52 warns about using Sys_error. Here we have no alternative but to depend on Sys_error strings *)
@@ -253,7 +253,7 @@ let read_client_msg client =
     Timeout.with_timeout
       ~timeout:1
       ~on_timeout:(fun _ -> raise Read_command_timeout)
-      ~do_:(fun timeout -> Timeout.input_value ~timeout client.ic)
+      ~do_:(fun _timeout -> Stdlib.input_value client.ic)
   with
   | End_of_file -> raise Client_went_away
 

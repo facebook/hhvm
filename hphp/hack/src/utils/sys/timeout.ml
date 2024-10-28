@@ -148,22 +148,6 @@ let read_process ~timeout ~on_timeout ~reader cmd args =
         terminate_common ();
         Exception.reraise (Exception.wrap exn))
 
-let open_connection ?timeout:_ sockaddr =
-  (* timeout isn't used in this Alarm_timeout implementation, but is used in Select_timeout *)
-  let (ic, oc) = Unix.open_connection sockaddr in
-  ((ic, None), oc)
-
-let shutdown_connection (ic, _) = Unix.shutdown_connection ic
-
 let is_timeout_exn id = function
   | Timeout { exn_id; _ } -> exn_id = id
   | _ -> false
-
-let read_connection ~timeout ~on_timeout ~reader sockaddr =
-  with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
-      let (tic, oc) = open_connection ~timeout sockaddr in
-      try reader timeout tic oc with
-      | exn ->
-        let e = Exception.wrap exn in
-        Out_channel.close oc;
-        Exception.reraise e)

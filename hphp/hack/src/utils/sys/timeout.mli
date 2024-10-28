@@ -59,18 +59,6 @@ val read_process :
   string array ->
   'a
 
-val open_connection :
-  ?timeout:t -> Unix.sockaddr -> (Stdlib.in_channel * int option) * out_channel
-
-val read_connection :
-  timeout:int ->
-  on_timeout:(timings -> 'a) ->
-  reader:(t -> in_channel -> out_channel -> 'a) ->
-  Unix.sockaddr ->
-  'a
-
-val shutdown_connection : in_channel -> unit
-
 (* Some silly people like to catch all exceptions. This means they need to explicitly detect and
  * reraise the timeout exn. *)
 val is_timeout_exn : t -> exn -> bool

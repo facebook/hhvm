@@ -116,16 +116,16 @@ let connection_error_to_telemetry (e : connection_error) :
     let (reason, stack) =
       match failure_reason with
       | Connect_timeout ->
-        (* comes from MonitorConnection.connect_to_monitor [Timeout.open_connection] *)
+        (* comes from MonitorConnection.connect_to_monitor [Unix.open_connection] *)
         ("Connect_timeout", None)
       | Connect_exception e -> begin
         (* comes from MonitorConnection.connect_to_monitor and [phase] says what part *)
         match Exception.to_exn e with
         | Unix.Unix_error (Unix.ECONNREFUSED, "connect", _) ->
-          (* Generally comes from [Timeout.open_connection] *)
+          (* Generally comes from [Unix.open_connection] *)
           ("ECONNREFUSED", None)
         | Unix.Unix_error (Unix.ENOENT, "connect", _) ->
-          (* Generally comes from [Timeout.open_connection] *)
+          (* Generally comes from [Unix.open_connection] *)
           ("ENOENT", None)
         | Unix.Unix_error (Unix.EMFILE, "pipe", _) ->
           (* Usually comes from [Process.exec Exec_command.Pgrep] *)

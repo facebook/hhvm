@@ -1,4 +1,0 @@
-Warning: 3817748706 exceeds array size limit 2147483647 in %s/hphp/test/slow/thrift/missing_input.php on line 14
-
-Warning: 4294967295 exceeds array size limit 2147483647 in %s/hphp/test/slow/thrift/missing_input.php on line 14
-Success

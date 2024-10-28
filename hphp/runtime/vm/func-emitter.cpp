@@ -222,7 +222,7 @@ namespace {
     }();
     if (attrs & AttrBuiltin) {
       if (Cfg::Jit::BuiltinsInterceptableByDefault) {
-        return true;
+        return Cfg::Eval::NonInterceptableFunctions.count(fullname) == 0;
       } else {
         return (Cfg::Eval::InterceptableBuiltins.count(fullname) == 1);
       }

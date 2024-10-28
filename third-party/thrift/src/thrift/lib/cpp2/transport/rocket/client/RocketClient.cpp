@@ -1078,7 +1078,7 @@ bool RocketClient::sendPayload(
           streamId,
           rocket::PayloadSerializer::getInstance().pack(
               std::move(payload),
-              THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding),
+              encodeMetadataUsingBinary(),
               getTransportWrapper()),
           flags),
       [this,

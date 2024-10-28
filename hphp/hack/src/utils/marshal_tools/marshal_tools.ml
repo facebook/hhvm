@@ -119,7 +119,7 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let ( >>= ) a f = f a
 
   let rec write ?timeout fd ~buffer ~offset ~size =
-    match Timeout.select ?timeout [] [fd] [] ~-.1.0 with
+    match Timeout.select ?timeout [] [fd] [] with
     | (_, [], _) -> 0
     | _ ->
       (* Timeout.select handles EINTR, but the Unix.write call can also be interrupted. If the write
@@ -140,7 +140,7 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
    * preamble and one or more for the data). Any read after the first might block.
    *)
   let rec read ?timeout fd ~buffer ~offset ~size =
-    match Timeout.select ?timeout [fd] [] [] ~-.1.0 with
+    match Timeout.select ?timeout [fd] [] [] with
     | ([], _, _) -> 0
     | _ ->
       (* Timeout.select handles EINTR, but the Unix.read call can also be interrupted. If the read

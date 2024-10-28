@@ -54,17 +54,14 @@ val in_channel_of_descr : Unix.file_descr -> in_channel
 val descr_of_in_channel : in_channel -> Unix.file_descr
 
 (** Selects ready file descriptor. Based on Unix.select in Unix.
-    [timeout] is only there to achieve a similar effect as Unix interval
-    timers on Windows, but is ignored on Unix. On Windows,
-    [select ~timeout read write exn select_timeout] runs with a timeout
-    that is the minimum of [timeout and select_timeout] and throws
-    a Timeout exception on timeout.*)
+    [timeout] is in effect only used in Windows. On Windows,
+    [select ~timeout read write exn] runs with a timeout and throws
+    a Timeout exception on timeout. *)
 val select :
   ?timeout:t ->
   Unix.file_descr list ->
   Unix.file_descr list ->
   Unix.file_descr list ->
-  float ->
   Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
 
 val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int

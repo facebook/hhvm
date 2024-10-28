@@ -275,7 +275,8 @@ let remove_hhi (state : state) : unit =
       let e = Exception.wrap exn in
       ClientIdeUtils.log_bug "remove_hhi" ~e ~telemetry:true)
 
-(** Helper called to process a batch of file changes. Updates the naming table, and invalidates the decl and tast caches for the changes. *)
+(** Helper called to process a batch of file changes.
+  Updates the naming table, and invalidates the decl and tast caches for the changes. *)
 let batch_update_naming_table_and_invalidate_caches
     ~(ctx : Provider_context.t)
     ~(naming_table : Naming_table.t)

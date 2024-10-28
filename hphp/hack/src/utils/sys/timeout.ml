@@ -52,6 +52,9 @@ let mk_id () =
   incr id_counter;
   !id_counter
 
+(* A negative timeout for select means block until a fd is ready *)
+let no_select_timeout = ~-.1.0
+
 module Alarm_timeout = struct
   (** Timeout *)
 
@@ -87,7 +90,8 @@ module Alarm_timeout = struct
 
   let check_timeout _ = ()
 
-  let select ?timeout:_ = Sys_utils.select_non_intr
+  let select ?timeout:_ x y z =
+    Sys_utils.select_non_intr x y z no_select_timeout
 
   (** Channel *)
 
@@ -205,8 +209,6 @@ module Alarm_timeout = struct
 end
 
 module Select_timeout = struct
-  (** Timeout *)
-
   type t = {
     timeout: float;
     id: int;
@@ -264,15 +266,12 @@ module Select_timeout = struct
       close_in tic;
       snd (Sys_utils.waitpid_non_intr [] pid)
 
-  (* A negative timeout for select means block until a fd is ready *)
-  let no_select_timeout = ~-.1.0
-
-  let select ?timeout rfds wfds xfds select_timeout =
-    (* A wrapper around Sys_utils.select_non_intr. If timeout would fire before the select's timeout,
-     * then change the select's timeout and throw an exception when it fires *)
+  (** A wrapper around `Sys_utils.select_non_intr`. If timeout would fire before the `select`'s timeout,
+      then change the select's timeout and throw an exception when it fires *)
+  let select ?timeout rfds wfds xfds =
     match timeout with
     (* No timeout set, fallback to Sys_utils.select_non_intr *)
-    | None -> Sys_utils.select_non_intr rfds wfds xfds select_timeout
+    | None -> Sys_utils.select_non_intr rfds wfds xfds no_select_timeout
     | Some { timeout = deadline_time; id } ->
       let now = Unix.gettimeofday () in
       let remaining_time = deadline_time -. now in
@@ -280,30 +279,18 @@ module Select_timeout = struct
       if Float.(remaining_time < 0.) then
         raise (Timeout { exn_id = id; timeout_time = now; deadline_time });
 
-      (* A negative select_timeout would mean wait forever *)
-      if
-        Float.(select_timeout >= 0.0 && select_timeout < remaining_time)
-        (* The select's timeout is smaller than our timeout, so leave it alone *)
-      then
-        Sys_utils.select_non_intr rfds wfds xfds select_timeout
-      else (
-        (* Our timeout is smaller, so use that *)
-        match Sys_utils.select_non_intr rfds wfds xfds remaining_time with
-        (* Timeout hit! Throw an exception! *)
-        | ([], [], []) ->
-          raise
-            (Timeout
-               {
-                 exn_id = id;
-                 timeout_time = Unix.gettimeofday ();
-                 deadline_time;
-               })
-        (* Got a result before the timeout fired, so just return that *)
-        | ret -> ret
-      )
+      (* Our timeout is smaller, so use that *)
+      (match Sys_utils.select_non_intr rfds wfds xfds remaining_time with
+      (* Timeout hit! Throw an exception! *)
+      | ([], [], []) ->
+        raise
+          (Timeout
+             { exn_id = id; timeout_time = Unix.gettimeofday (); deadline_time })
+      (* Got a result before the timeout fired, so just return that *)
+      | ret -> ret)
 
   let do_read ?timeout tic =
-    match select ?timeout [tic.fd] [] [] no_select_timeout with
+    match select ?timeout [tic.fd] [] [] with
     | ([], _, _) ->
       failwith
         "This should be unreachable. How did select return with no fd when there is no timeout?"
@@ -557,7 +544,7 @@ module Select_timeout = struct
        * connect worked. However, this code is only used on Windows, so that's fine *)
       try Unix.connect sock sockaddr with
       | Unix.Unix_error ((Unix.EINPROGRESS | Unix.EWOULDBLOCK), _, _) -> begin
-        match select ?timeout [] [sock] [] no_select_timeout with
+        match select ?timeout [] [sock] [] with
         | (_, [], [exn_sock]) when Poly.(exn_sock = sock) ->
           failwith "Failed to connect to socket"
         | (_, [], _) ->
@@ -614,7 +601,6 @@ module type S = sig
     Unix.file_descr list ->
     Unix.file_descr list ->
     Unix.file_descr list ->
-    float ->
     Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
 
   val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int

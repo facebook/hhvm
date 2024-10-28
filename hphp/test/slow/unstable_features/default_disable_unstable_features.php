@@ -5,4 +5,4 @@
 
 <<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
 
-interface I where this as I {}
+function f(): (int|bool) { return 0; }

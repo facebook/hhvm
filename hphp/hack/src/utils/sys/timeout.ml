@@ -82,7 +82,9 @@ let with_timeout ~timeout ~on_timeout ~do_ =
   | Timeout { exn_id; timeout_time; deadline_time } when exn_id = id ->
     on_timeout { start_time; timeout_time; deadline_time }
 
-type in_channel = Stdlib.in_channel * int option
+type pid = int
+
+type in_channel = Stdlib.in_channel * pid
 
 let open_process cmd args =
   let (child_in_fd, out_fd) = Unix.pipe () in
@@ -100,7 +102,7 @@ let open_process cmd args =
   in
   Unix.close child_out_fd;
   Unix.close child_in_fd;
-  let ic = (Unix.in_channel_of_descr in_fd, Some pid) in
+  let ic = (Unix.in_channel_of_descr in_fd, pid) in
   let oc = Unix.out_channel_of_descr out_fd in
   (ic, oc)
 
@@ -121,15 +123,12 @@ let open_process_in cmd args =
   in
   Unix.close child_out_fd;
   Unix.close child_in_fd;
-  let ic = (Unix.in_channel_of_descr in_fd, Some pid) in
+  let ic = (Unix.in_channel_of_descr in_fd, pid) in
   ic
 
 let close_process_in (ic, pid) =
-  match pid with
-  | None -> invalid_arg "Timeout.close_process_in"
-  | Some pid ->
-    Stdlib.close_in ic;
-    snd (Sys_utils.waitpid_non_intr [] pid)
+  Stdlib.close_in ic;
+  snd (Sys_utils.waitpid_non_intr [] pid)
 
 let read_process ~timeout ~on_timeout ~reader cmd args =
   let ((ic, pid), oc) = open_process cmd args in

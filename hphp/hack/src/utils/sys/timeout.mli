@@ -39,15 +39,13 @@ type t
 val with_timeout :
   timeout:int -> on_timeout:(timings -> 'a) -> do_:(t -> 'a) -> 'a
 
-type in_channel = Stdlib.in_channel * int option
+type pid = int
 
-val open_process :
-  Exec_command.t ->
-  string array ->
-  (Stdlib.in_channel * int option) * out_channel
+type in_channel = Stdlib.in_channel * int
 
-val open_process_in :
-  Exec_command.t -> string array -> Stdlib.in_channel * int option
+val open_process : Exec_command.t -> string array -> in_channel * out_channel
+
+val open_process_in : Exec_command.t -> string array -> in_channel
 
 val close_process_in : in_channel -> Unix.process_status
 

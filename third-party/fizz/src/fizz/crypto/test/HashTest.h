@@ -22,4 +22,5 @@ extern const std::vector<HashTestVector> kHashTestVectors;
 
 void runHashTestWithFizzHasher(
     const fizz::HasherFactoryWithMetadata* makeHasher);
+void runHashTestWithCloning(const fizz::HasherFactoryWithMetadata* makeHasher);
 } // namespace fizz::test

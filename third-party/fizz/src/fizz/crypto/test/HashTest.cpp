@@ -49,6 +49,18 @@ const std::vector<HashTestVector> kHashTestVectors = {
 
 };
 
+void doHashFinal(
+    const std::unique_ptr<Hasher>& hasher,
+    size_t len,
+    const std::string& expectedDigest) {
+  std::vector<unsigned char> out(len, 0);
+  folly::MutableByteRange outRange(out.data(), out.size());
+
+  hasher->hash_final(outRange);
+
+  ASSERT_EQ(folly::hexlify(out), expectedDigest);
+}
+
 void runHashTestWithFizzHasher(
     const fizz::HasherFactoryWithMetadata* makeHasher) {
   size_t hashLen = makeHasher->hashLength();
@@ -65,6 +77,44 @@ void runHashTestWithFizzHasher(
     fizz::hash(makeHasher, messageBuf, outRange);
 
     ASSERT_EQ(folly::hexlify(out), testVector.digest.at(makeHasher->id()));
+  }
+}
+
+void runHashTestWithCloning(const fizz::HasherFactoryWithMetadata* makeHasher) {
+  size_t hashLen = makeHasher->hashLength();
+
+  for (auto& testVector : kHashTestVectors) {
+    std::unique_ptr<Hasher> outlivedHasher;
+    {
+      auto ogHasher = makeHasher->make();
+
+      folly::IOBuf messageBuf(
+          folly::IOBuf::COPY_BUFFER,
+          reinterpret_cast<const uint8_t*>(testVector.message.c_str()),
+          testVector.message.size());
+
+      ogHasher->hash_update(messageBuf);
+
+      {
+        auto hasherCopy = ogHasher->clone();
+        doHashFinal(
+            hasherCopy, hashLen, testVector.digest.at(makeHasher->id()));
+
+        // here the hasherCopy is destroyed
+        // we want to test that the destruction of hasherCopy does not affect
+        // ogHasher
+      }
+
+      outlivedHasher = ogHasher->clone();
+
+      doHashFinal(ogHasher, hashLen, testVector.digest.at(makeHasher->id()));
+
+      // ogHasher is destroyed here
+      // this tests that the destruction of ogHasher also does not affect any
+      // copy of it
+    }
+    doHashFinal(
+        outlivedHasher, hashLen, testVector.digest.at(makeHasher->id()));
   }
 }
 

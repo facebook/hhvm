@@ -26,6 +26,13 @@ enum Color {
   BLUE = 3,
 }
 
+enum Shade {
+  NONE = 0,
+  CRIMSON = 1,
+  EMERALD = 2,
+  AZURE = 3,
+}
+
 struct Simple {
   1: i32 intField;
   2: string strField;

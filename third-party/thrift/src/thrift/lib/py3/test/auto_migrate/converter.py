@@ -22,7 +22,7 @@ import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.py3.converter import to_py3_struct
-from thrift.py3.types import BadEnum, Struct
+from thrift.py3.types import BadEnum, Enum, Struct
 
 
 # Reimplementing brokenInAutoMigrate using convertible because including testing.thrift and
@@ -232,6 +232,89 @@ class PythonToPy3ConverterTest(unittest.TestCase):
 
     def test_simple(self) -> None:
         self.assert_simple(self.make_simple_python()._to_py3())
+
+    def test_enum_eq(self) -> None:
+        self.assertEqual(
+            py3_types.Color.GREEN.value,
+            python_types.Color.GREEN,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN,
+            py3_types.Color.GREEN.value,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN.value,
+            py3_types.Color.GREEN,
+        )
+        self.assertEqual(
+            py3_types.Color.GREEN,
+            python_types.Color.GREEN.value,
+        )
+        self.assertEqual(
+            python_types.Color.GREEN,
+            py3_types.Color.GREEN,
+        )
+        self.assertEqual(
+            py3_types.Color.GREEN,
+            python_types.Color.GREEN,
+        )
+        self.assertNotEqual(
+            py3_types.Color.NONE,
+            py3_types.Union.Type.EMPTY,
+        )
+        self.assertNotEqual(
+            py3_types.Union.Type.EMPTY,
+            py3_types.Color.NONE,
+        )
+        self.assertNotEqual(
+            py3_types.Color.NONE,
+            py3_types.Shade.NONE,
+        )
+        self.assertNotEqual(
+            py3_types.Color.RED,
+            py3_types.Shade.CRIMSON,
+        )
+        # test assumptions in `_fbthrift_enum_equivalent`
+        for e in (py3_types.Color.RED, python_types.Color.RED):
+            e_cls = e.__class__
+            self.assertEqual(e_cls.__name__, "Color")
+            e_mod = e_cls.__module__
+            dot = e_mod.rfind(".")
+            self.assertEqual(e_mod[:dot], "convertible")
+        # test safety for degenerate case
+        empty = ""
+        dot = e_mod.rfind(".")
+        self.assertEqual(empty[:dot], empty)
+
+    def test_enum_eq_user_abusing_base_class(self) -> None:
+        class Evil(Enum):
+            NONE = 0
+            RED = 1
+            GREEN = 2
+            BLUE = 3
+
+        self.assertEqual(
+            Evil.RED,
+            Evil(1),
+        )
+        self.assertNotEqual(
+            Evil.RED,
+            Evil.GREEN,
+        )
+        self.assertNotEqual(
+            py3_types.Color.GREEN,
+            Evil.GREEN,
+        )
+        self.assertNotEqual(
+            Evil.GREEN,
+            python_types.Color.GREEN,
+        )
+        # test assumptions in `_fbthrift_enum_equivalent`
+        evil_cls = Evil.GREEN.__class__
+        self.assertEqual(evil_cls.__name__, "Evil")
+        self.assertEqual(
+            evil_cls.__module__, "thrift.lib.py3.test.auto_migrate.converter"
+        )
 
     @brokenInAutoMigrate()
     def test_simple_capi(self) -> None:

@@ -16,7 +16,7 @@ let log s ~tracker =
 let server_exists lock_file = not (Lock.check lock_file)
 
 let from_channel_without_buffering tic =
-  Marshal_tools.from_fd_with_preamble (Timeout.descr_of_in_channel tic)
+  Marshal_tools.from_fd_with_preamble (Unix.descr_of_in_channel tic)
 
 let hh_monitor_config root =
   MonitorUtils.
@@ -41,7 +41,7 @@ let wait_on_server_restart ic =
    *)
   try
     while true do
-      let (_ : char) = Timeout.input_char ic in
+      let (_ : char) = Stdlib.input_char ic in
       ()
     done
   with
@@ -62,8 +62,8 @@ let get_sockaddr config =
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
-    (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
-    ( Timeout.in_channel
+    (ic : Stdlib.in_channel) (oc : Stdlib.out_channel) :
+    ( Stdlib.in_channel
       * Stdlib.out_channel
       * ServerCommandTypes.server_specific_files,
       MonitorUtils.connection_error )
@@ -185,7 +185,7 @@ let connect_to_monitor
      explanation for these phemona. *)
   let open Connection_tracker in
   let phase = ref MonitorUtils.Connect_open_socket in
-  let finally_close : Timeout.in_channel option ref = ref None in
+  let finally_close : Stdlib.in_channel option ref = ref None in
   let warn_of_busy_server_timer : Timer.t option ref = ref None in
   Utils.try_finally
     ~f:(fun () ->
@@ -194,7 +194,7 @@ let connect_to_monitor
            hence, our "try/with exn ->" catch-all must be outside with_timeout. *)
         Timeout.with_timeout
           ~timeout
-          ~do_:(fun timeout ->
+          ~do_:(fun _timeout ->
             (* 1. open the socket *)
             phase := MonitorUtils.Connect_open_socket;
             let monitor_daemon_is_running =
@@ -222,7 +222,7 @@ let connect_to_monitor
             else
               ();
             let sockaddr = get_sockaddr config in
-            let (ic, oc) = Timeout.open_connection ~timeout sockaddr in
+            let (ic, oc) = Unix.open_connection sockaddr in
             finally_close := Some ic;
             let tracker =
               Connection_tracker.track tracker ~key:Client_opened_socket
@@ -321,8 +321,8 @@ let connect_to_monitor
       match !finally_close with
       | None -> ()
       | Some ic ->
-        Timeout.shutdown_connection ic;
-        Timeout.close_in_noerr ic)
+        Unix.shutdown_connection ic;
+        Stdlib.close_in_noerr ic)
 
 let connect_and_shut_down ~tracker root =
   let open Result.Monad_infix in

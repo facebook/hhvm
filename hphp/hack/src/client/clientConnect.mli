@@ -37,7 +37,7 @@ type conn = {
   t_connected_to_monitor: float;
   t_received_hello: float;
   t_sent_connection_type: float;
-  channels: Timeout.in_channel * out_channel;
+  channels: Stdlib.in_channel * out_channel;
   server_specific_files: ServerCommandTypes.server_specific_files;
   conn_progress_callback: string option -> unit;
   conn_root: Path.t;

@@ -90,8 +90,6 @@ type in_channel = Stdlib.in_channel * int option
 
 let ignore_timeout f ?timeout:_ (ic, _pid) = f ic
 
-let input_char = ignore_timeout Stdlib.input_char
-
 let input_line = ignore_timeout Stdlib.input_line
 
 let input_value_with_workaround ic =

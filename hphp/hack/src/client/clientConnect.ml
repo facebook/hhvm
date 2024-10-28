@@ -48,7 +48,7 @@ type conn = {
   t_connected_to_monitor: float;
   t_received_hello: float;
   t_sent_connection_type: float;
-  channels: Timeout.in_channel * Out_channel.t;
+  channels: Stdlib.in_channel * Out_channel.t;
   server_specific_files: ServerCommandTypes.server_specific_files;
   conn_progress_callback: string option -> unit;
   conn_root: Path.t;
@@ -80,7 +80,7 @@ let check_for_deadline progress_callback deadline_opt =
 let rec wait_for_server_message
     ~(connection_log_id : string)
     ~(expected_message : 'a ServerCommandTypes.message_type option)
-    ~(ic : Timeout.in_channel)
+    ~(ic : Stdlib.in_channel)
     ~(deadline : float option)
     ~(server_specific_files : ServerCommandTypes.server_specific_files)
     ~(progress_callback : string option -> unit)
@@ -88,9 +88,9 @@ let rec wait_for_server_message
   check_for_deadline progress_callback deadline;
   let%lwt (readable, _, _) =
     Lwt_utils.select
-      [Timeout.descr_of_in_channel ic]
+      [Unix.descr_of_in_channel ic]
       []
-      [Timeout.descr_of_in_channel ic]
+      [Unix.descr_of_in_channel ic]
       1.0
   in
   if List.is_empty readable then (
@@ -109,7 +109,7 @@ let rec wait_for_server_message
       exception Monitor_failed_to_handoff
     end in
     try%lwt
-      let fd = Timeout.descr_of_in_channel ic in
+      let fd = Unix.descr_of_in_channel ic in
       let msg : 'a ServerCommandTypes.message_type =
         Marshal_tools.from_fd_with_preamble fd
       in
@@ -201,7 +201,7 @@ let rec wait_for_server_message
 
 let wait_for_server_hello
     (connection_log_id : string)
-    (ic : Timeout.in_channel)
+    (ic : Stdlib.in_channel)
     (deadline : float option)
     (server_specific_files : ServerCommandTypes.server_specific_files)
     (progress_callback : string option -> unit)
@@ -361,9 +361,9 @@ let rec connect
       Printf.eprintf
         "Server connection took over %.1f seconds. Refreshing...\n"
         threshold;
-      (try Timeout.shutdown_connection ic with
+      (try Unix.shutdown_connection ic with
       | _ -> ());
-      Timeout.close_in_noerr ic;
+      Stdlib.close_in_noerr ic;
       Stdlib.close_out_noerr oc;
 
       (* allow_macos_hack:false is a defensive measure against infinite connection loops *)

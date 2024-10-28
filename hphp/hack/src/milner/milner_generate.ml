@@ -490,6 +490,8 @@ and Type : sig
 
   val inhabitant_of : ReadOnlyEnvironment.t -> Environment.t -> t -> string
 
+  val subtype_of : ReadOnlyEnvironment.t -> Environment.t -> t -> t
+
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 end = struct
   type field = {

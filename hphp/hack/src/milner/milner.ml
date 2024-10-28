@@ -14,6 +14,10 @@ let type_prefix = "TYPE"
 
 let type_regexp = Pcre.regexp @@ type_prefix ^ "#([0-9]+)"
 
+let subtype_prefix = "SUBTYPE"
+
+let subtype_regexp = Pcre.regexp @@ subtype_prefix ^ "#([0-9]+)"
+
 let expr_prefix = "expr"
 
 let expr_regexp = Pcre.regexp @@ expr_prefix ^ "#([0-9]+)"
@@ -41,6 +45,15 @@ let generate_tables ~verbose ~debug_pattern template =
   let ty_table = init_table template type_regexp in
   let ty_table = Hashtbl.map ty_table ~f:mk_type in
 
+  let subty_table = init_table template subtype_regexp in
+  let gen_subty_from_ty_table ~key ~data:_ =
+    let (env, ty) =
+      Hashtbl.find ty_table key |> Option.value_or_thunk ~default:mk_type
+    in
+    Gen.Type.subtype_of renv env ty
+  in
+  let subty_table = Hashtbl.mapi subty_table ~f:gen_subty_from_ty_table in
+
   (* Generate expressions that conform to the types in the type table.
      If there are expression placeholders without a corresponding type, generate
      a random type and use that to generate an expression. *)
@@ -60,10 +73,10 @@ let generate_tables ~verbose ~debug_pattern template =
   in
   let ty_table = Hashtbl.map ty_table ~f:(fun (_, ty) -> ty) in
 
-  (defs, ty_table, expr_table)
+  (defs, ty_table, subty_table, expr_table)
 
 (* Add generated types and expressions back in the template *)
-let fill_in_template ty_table expr_table template =
+let fill_in_template ty_table subty_table expr_table template =
   let fill_table table ~prefix contents =
     let replace ~key ~data contents =
       String.substr_replace_all
@@ -75,7 +88,9 @@ let fill_in_template ty_table expr_table template =
   in
 
   let ty_str_table = Hashtbl.map ty_table ~f:Gen.Type.show in
+  let subty_str_table = Hashtbl.map subty_table ~f:Gen.Type.show in
   template
+  |> fill_table subty_str_table ~prefix:subtype_prefix
   |> fill_table ty_str_table ~prefix:type_prefix
   |> fill_table expr_table ~prefix:expr_prefix
 
@@ -97,11 +112,11 @@ let milner verbose debug_pattern seed template_path destination_path =
   end;
   let () = Random.init seed in
   let template = In_channel.read_all template_path in
-  let (defs, ty_table, expr_table) =
+  let (defs, ty_table, subty_table, expr_table) =
     generate_tables ~verbose ~debug_pattern template
   in
   let output =
-    fill_in_template ty_table expr_table template
+    fill_in_template ty_table subty_table expr_table template
     |> add_missing_definitions defs
   in
   match destination_path with

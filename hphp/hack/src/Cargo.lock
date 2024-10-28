@@ -4269,7 +4269,6 @@ dependencies = [
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
- "ast_and_decl_parser",
  "bumpalo",
  "crossbeam",
  "direct_decl_parser",
@@ -4280,7 +4279,6 @@ dependencies = [
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
- "parser_core_types",
  "rayon",
  "relative_path",
 ]

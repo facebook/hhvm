@@ -144,7 +144,6 @@
     serverRpc)
   (libraries
     ast
-    ast_and_decl_service
     ci_util
     cgroupprofiler
     custom_error_config

@@ -194,16 +194,3 @@
  (preprocess
   (pps visitors.ppx ppx_deriving.std))
  (libraries collections core_kernel naming_special_names))
-
-(library
- (name ast_and_decl_service)
- (modules ast_and_decl_service)
- (preprocess
-  (pps ppx_deriving.std))
- (libraries
-  annotated_ast
-  decl
-  parser
-  procs_procs
-  rust_decl_ffi
-  utils_core))

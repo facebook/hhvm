@@ -7,7 +7,6 @@
 use std::cell::RefCell;
 use std::path::PathBuf;
 
-use ast_and_decl_parser::Env;
 use bumpalo::Bump;
 use ocamlrep::bytes_from_ocamlrep;
 use ocamlrep::ptr::UnsafeOcamlPtr;
@@ -18,7 +17,6 @@ use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
-use parser_core_types::indexed_source_text::IndexedSourceText;
 use relative_path::RelativePath;
 
 #[derive(Debug, Clone)]
@@ -110,30 +108,6 @@ ocaml_ffi! {
         let checksum = checksum ^ hh_hash::hash(&(symbol, decl_hash, path));
         Int64(checksum as i64)
     }
-}
-
-#[no_mangle]
-unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) -> usize {
-    fn inner(env: usize, source_text: usize) -> usize {
-        use ocamlrep::FromOcamlRep;
-        use ocamlrep_ocamlpool::to_ocaml;
-        use parser_core_types::source_text::SourceText;
-
-        // SAFETY: We can't call into OCaml while these values created via
-        // `from_ocaml` exist.
-        let env = unsafe { Env::from_ocaml(env).unwrap() };
-        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-        let indexed_source_text = IndexedSourceText::new(source_text);
-
-        let arena = &Bump::new();
-        let (ast_result, decls) = ast_and_decl_parser::from_text(&env, &indexed_source_text, arena);
-        // WARNING! this doesn't respect deregister_php_stdlib and is likely wrong.
-        let decls = ParsedFileWithHashes::new_without_deregistering_do_not_use(decls);
-        let decls = OcamlParsedFileWithHashes::from(decls);
-        // SAFETY: Requires no concurrent interaction with the OCaml runtime
-        unsafe { to_ocaml(&(ast_result, decls)) }
-    }
-    ocamlrep_ocamlpool::catch_unwind(|| inner(env, source_text))
 }
 
 extern "C" {

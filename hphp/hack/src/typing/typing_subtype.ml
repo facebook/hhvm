@@ -6948,25 +6948,6 @@ end = struct
       let (env, partition) =
         Typing_refinement.partition_ty env ty_sub predicate
       in
-      Typing_log.(
-        let from_list kind tyll =
-          List.map tyll ~f:(fun tyl ->
-              Log_type (kind, MakeType.intersection Reason.none tyl))
-        in
-        log_with_level env "partition" ~level:1 (fun () ->
-            let structures =
-              Log_type ("ty_sub", ty_sub)
-              :: from_list "left" partition.Typing_refinement.left
-              @ from_list "span" partition.Typing_refinement.span
-              @ from_list "right" partition.Typing_refinement.right
-            in
-            log_types
-              (Reason.to_pos reason_super)
-              env
-              [
-                Log_head
-                  ("partition " ^ show_type_predicate predicate, structures);
-              ]));
       let intersect tyl = MakeType.intersection reason_super tyl in
       let simplify_subtype ~f tyl ty_super env =
         Subtype.(

@@ -453,10 +453,25 @@ and split_ty
 
 let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
   let (env, partition) = split_ty ~expansions:SSet.empty ~predicate env ty in
-  ( env,
-    {
-      predicate;
-      left = TyPartition.left partition;
-      span = TyPartition.span partition;
-      right = TyPartition.right partition;
-    } )
+  let left = TyPartition.left partition in
+  let span = TyPartition.span partition in
+  let right = TyPartition.right partition in
+  Typing_log.(
+    let from_list kind tyll =
+      List.map tyll ~f:(fun tyl ->
+          Log_type (kind, Typing_make_type.intersection Reason.none tyl))
+    in
+    log_with_level env "partition" ~level:1 (fun () ->
+        let structures =
+          (Log_type ("ty", ty) :: from_list "left" left)
+          @ from_list "span" span
+          @ from_list "right" right
+        in
+        log_types
+          (Reason.to_pos @@ fst predicate)
+          env
+          [
+            Log_head
+              ("partition " ^ show_type_predicate_ @@ snd predicate, structures);
+          ]));
+  (env, { predicate; left; span; right })

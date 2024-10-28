@@ -166,6 +166,14 @@ class ListTests(unittest.TestCase):
         self.assertGreaterEqual(x, x2)
 
     @brokenInAutoMigrate()
+    def test_no_raise_on_type_error(self) -> None:
+        t_list = I32List([1, 2, 3, 4])
+        self.assertFalse(t_list == easy())
+        self.assertFalse(easy() == t_list)
+        self.assertNotEqual(t_list, easy())
+        self.assertNotEqual(easy(), t_list)
+
+    @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(int_list, Container)
         self.assertIsInstance(I32List([1, 2, 3]), Container)

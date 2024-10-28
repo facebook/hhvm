@@ -41,7 +41,7 @@ val with_timeout :
 
 val check_timeout : t -> unit
 
-type in_channel
+type in_channel = Stdlib.in_channel * int option
 
 val open_in : string -> in_channel
 
@@ -52,8 +52,6 @@ val close_in_noerr : in_channel -> unit
 val in_channel_of_descr : Unix.file_descr -> in_channel
 
 val descr_of_in_channel : in_channel -> Unix.file_descr
-
-val input_line : ?timeout:t -> in_channel -> string
 
 val input_value : ?timeout:t -> in_channel -> 'a
 
@@ -66,7 +64,7 @@ val close_process_in : in_channel -> Unix.process_status
 val read_process :
   timeout:int ->
   on_timeout:(timings -> 'a) ->
-  reader:(t -> in_channel -> out_channel -> 'a) ->
+  reader:(t -> in_channel -> Stdlib.out_channel -> 'a) ->
   Exec_command.t ->
   string array ->
   'a

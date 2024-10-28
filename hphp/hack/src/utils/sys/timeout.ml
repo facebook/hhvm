@@ -90,8 +90,6 @@ type in_channel = Stdlib.in_channel * int option
 
 let ignore_timeout f ?timeout:_ (ic, _pid) = f ic
 
-let input_line = ignore_timeout Stdlib.input_line
-
 let input_value_with_workaround ic =
   (* OCaml 4.03.0 changed the behavior of input_value to no longer
    * throw End_of_file when the pipe has closed. We can simulate that
@@ -165,9 +163,9 @@ let close_process_in (ic, pid) =
     snd (Sys_utils.waitpid_non_intr [] pid)
 
 let read_process ~timeout ~on_timeout ~reader cmd args =
-  let (ic, oc) = open_process cmd args in
+  let ((ic, pid), oc) = open_process cmd args in
   let terminate_common () =
-    close_in ic;
+    Stdlib.close_in ic;
     Out_channel.close oc;
     ()
   in
@@ -176,7 +174,7 @@ let read_process ~timeout ~on_timeout ~reader cmd args =
     on_timeout x
   in
   with_timeout ~timeout ~on_timeout ~do_:(fun timeout ->
-      try reader timeout ic oc with
+      try reader timeout (ic, pid) oc with
       | exn ->
         terminate_common ();
         Exception.reraise (Exception.wrap exn))

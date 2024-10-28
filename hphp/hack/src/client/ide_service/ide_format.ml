@@ -14,19 +14,19 @@ let call_external_formatter
     (cmd : Exec_command.t) (content : string) (args : string list) :
     (string list, string) result =
   let args = Array.of_list (Exec_command.to_string cmd :: args) in
-  let reader timeout ic oc =
+  let reader _timeout (ic, pid) oc =
     Out_channel.output_string oc content;
     Out_channel.close oc;
     let lines = ref [] in
     begin
       try
         while true do
-          lines := Timeout.input_line ~timeout ic :: !lines
+          lines := Stdlib.input_line ic :: !lines
         done
       with
       | End_of_file -> ()
     end;
-    match Timeout.close_process_in ic with
+    match Timeout.close_process_in (ic, pid) with
     | Unix.WEXITED 0 -> Ok (List.rev !lines)
     | Unix.WEXITED v -> Error (Hackfmt_error.get_error_string_from_exit_value v)
     | _ -> Error "Call to hackfmt was killed"

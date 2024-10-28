@@ -11,7 +11,7 @@ external disable_ASLR : string array -> unit = "caml_disable_ASLR"
 
 module Option = Base.Option
 
-type 'a in_channel = Timeout.in_channel
+type 'a in_channel = Stdlib.in_channel
 
 type 'a out_channel = Stdlib.out_channel
 
@@ -36,13 +36,12 @@ let to_channel :
   Marshal.to_channel oc v flags;
   if should_flush then flush oc
 
-let from_channel : ?timeout:Timeout.t -> 'a in_channel -> 'a =
- (fun ?timeout ic -> Timeout.input_value ?timeout ic)
+let from_channel : 'a in_channel -> 'a = (fun ic -> Stdlib.input_value ic)
 
 let flush : 'a out_channel -> unit = Stdlib.flush
 
 let descr_of_in_channel : 'a in_channel -> Unix.file_descr =
-  Timeout.descr_of_in_channel
+  Unix.descr_of_in_channel
 
 let descr_of_out_channel : 'a out_channel -> Unix.file_descr =
   Unix.descr_of_out_channel
@@ -194,8 +193,8 @@ end = struct
     in
     ( entry,
       param,
-      ( Timeout.in_channel_of_descr in_handle,
-        Unix.out_channel_of_descr out_handle ) )
+      (Unix.in_channel_of_descr in_handle, Unix.out_channel_of_descr out_handle)
+    )
 
   let clear_context () =
     Unix.putenv "HH_SERVER_DAEMON" "";
@@ -250,7 +249,7 @@ let setup_channels channel_mode =
   ((parent_in, child_out), (child_in, parent_out))
 
 let descr_as_channels (descr_in, descr_out) =
-  let ic = Timeout.in_channel_of_descr descr_in in
+  let ic = Unix.in_channel_of_descr descr_in in
   let oc = Unix.out_channel_of_descr descr_out in
   (ic, oc)
 
@@ -276,7 +275,7 @@ let fork_FOR_TESTING_ON_UNIX_ONLY
     (* child *)
     (try
        ignore (Unix.setsid ());
-       Timeout.close_in parent_in;
+       Stdlib.close_in parent_in;
        close_out parent_out;
        Sys_utils.with_umask 0o111 (fun () ->
            let fd = null_fd () in
@@ -296,7 +295,7 @@ let fork_FOR_TESTING_ON_UNIX_ONLY
       exit 1)
   | pid ->
     (* parent *)
-    Timeout.close_in child_in;
+    Stdlib.close_in child_in;
     close_out child_out;
     { channels = (parent_in, parent_out); pid }
 
@@ -328,14 +327,13 @@ let spawn
   PidLog.log ~reason:(Entry.name_of_entry entry) ~no_fail:true pid;
   {
     channels =
-      ( Timeout.in_channel_of_descr parent_in,
-        Unix.out_channel_of_descr parent_out );
+      (Unix.in_channel_of_descr parent_in, Unix.out_channel_of_descr parent_out);
     pid;
   }
 
 (* for testing code *)
 let devnull () =
-  let ic = Timeout.open_in "/dev/null" in
+  let ic = Stdlib.open_in "/dev/null" in
   let oc = open_out "/dev/null" in
   { channels = (ic, oc); pid = 0 }
 
@@ -361,7 +359,7 @@ let check_entry_point () =
   | Entry.Context_not_found -> ()
 
 let close { channels = (ic, oc); _ } =
-  Timeout.close_in ic;
+  Stdlib.close_in ic;
   close_out oc
 
 let force_quit h =
@@ -374,11 +372,11 @@ let output_string = output_string
 
 let flush = flush
 
-let close_in = Timeout.close_in
+let close_in = Stdlib.close_in
 
-let input_char ic = Timeout.input_char ic
+let input_char ic = Stdlib.input_char ic
 
-let input_value ic = Timeout.input_value ic
+let input_value ic = Stdlib.input_value ic
 
 let start_memtracing filename =
   let _tracer : Memtrace.tracer =

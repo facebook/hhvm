@@ -22,7 +22,7 @@ val to_channel :
   'a ->
   unit
 
-val from_channel : ?timeout:Timeout.t -> 'a in_channel -> 'a
+val from_channel : 'a in_channel -> 'a
 
 val flush : 'a out_channel -> unit
 
@@ -31,7 +31,7 @@ val descr_of_in_channel : 'a in_channel -> Unix.file_descr
 
 val descr_of_out_channel : 'a out_channel -> Unix.file_descr
 
-val cast_in : 'a in_channel -> Timeout.in_channel
+val cast_in : 'a in_channel -> Stdlib.in_channel
 
 val cast_out : 'a out_channel -> Stdlib.out_channel
 

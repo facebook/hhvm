@@ -1,0 +1,10 @@
+ERROR: File "simple.php", line 6, characters 10-11:
+Variable `$i` is undefined, or not always defined. (Naming[2050])
+  File "simple.php", line 4, characters 30-31:
+  Did you mean `$x` instead?
+ERROR: File "simple.php", line 5, characters 3-23:
+Invalid assignment (Typing[4110])
+  File "simple.php", line 5, characters 16-17:
+  Expected `nothing`
+  File "simple.php", line 4, characters 25-27:
+  But got `int`

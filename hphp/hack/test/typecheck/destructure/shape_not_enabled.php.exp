@@ -1,0 +1,24 @@
+ERROR: File "shape_not_enabled.php", line 4, characters 3-18:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 18-33:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 41-56:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 4, characters 3-23:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 4, characters 16-17:
+  Expected `nothing`
+  File "shape_not_enabled.php", line 3, characters 25-27:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 5, characters 3-90:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 5, characters 31-32:
+  Expected `nothing`
+  File "shape_not_enabled.php", line 3, characters 25-27:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 5, characters 3-90:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 5, characters 54-55:
+  Expected `nothing`
+  File "shape_not_enabled.php", line 3, characters 25-27:
+  But got `int`

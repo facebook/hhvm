@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77dafa5a29f52f7f0f694f236ab72bb5>>
+// @generated SignedSource<<d6d60cfb61b08c6fb5392145cb333730>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -112,6 +112,7 @@ pub enum FeatureName {
     TypeSplat,
     ExpressionTreeNestedBindings,
     LikeTypeHints,
+    ShapeDestructure,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

@@ -49,6 +49,7 @@ impl FeatureName {
             TypeSplat => Preview,
             ExpressionTreeNestedBindings => Unstable,
             LikeTypeHints => Unstable,
+            ShapeDestructure => Unstable,
         }
     }
 

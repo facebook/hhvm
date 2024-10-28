@@ -5117,13 +5117,25 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             //   as an lvalue.
             // - class member access (static or instance) is disallowed to avoid unexpected behavior
             //   around ref-counting and dangling references to class members.
-            MemberSelectionExpression(_) | ListExpression(_) | ScopeResolutionExpression(_)
+            // - `shape(...)` to keep things simple
+            MemberSelectionExpression(_)
+            | ListExpression(_)
+            | ScopeResolutionExpression(_)
+            | ShapeExpression(_)
                 if lval_root == LvalRoot::Inout =>
             {
                 err(self, errors::fun_arg_invalid_arg)
             }
             ListExpression(x) => syntax_to_list_no_separators(&x.members)
                 .for_each(|n| self.check_lvalue_and_inout(n, lval_root)),
+            ShapeExpression(x) => {
+                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
+                for field in syntax_to_list_no_separators(&x.fields) {
+                    if let FieldInitializer(x) = field.children {
+                        self.check_lvalue_and_inout(&x.value, lval_root)
+                    }
+                }
+            }
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }

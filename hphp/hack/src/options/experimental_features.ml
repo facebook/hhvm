@@ -64,6 +64,7 @@ type feature_name =
   | TypeSplat
   | ExpressionTreeNestedBindings
   | LikeTypeHints
+  | ShapeDestructure
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -104,6 +105,7 @@ let feature_name_map =
       ("type_splat", TypeSplat);
       ("expression_tree_nested_bindings", ExpressionTreeNestedBindings);
       ("like_type_hints", LikeTypeHints);
+      ("shape_destructure", ShapeDestructure);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

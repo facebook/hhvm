@@ -54,9 +54,6 @@ let mk_id () =
   incr id_counter;
   !id_counter
 
-(* A negative timeout for select means block until a fd is ready *)
-let no_select_timeout = ~-.1.0
-
 let with_timeout ~timeout ~on_timeout ~do_ =
   let start_time = Unix.gettimeofday () in
   let id = mk_id () in
@@ -86,8 +83,6 @@ let with_timeout ~timeout ~on_timeout ~do_ =
     on_timeout { start_time; timeout_time; deadline_time }
 
 let check_timeout _ = ()
-
-let select x y z = Sys_utils.select_non_intr x y z no_select_timeout
 
 (** Channel *)
 

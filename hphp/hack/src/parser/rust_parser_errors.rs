@@ -5837,10 +5837,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         })
     }
 
-    fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool) {
+    fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
         self.fold_child_nodes(self.env.syntax_tree.root());
         self.errors.reverse();
-        (self.errors, self.uses_readonly)
+        (
+            self.errors,
+            self.uses_readonly,
+            self.env.context.active_experimental_features,
+        )
     }
 
     fn parse_errors(
@@ -5852,7 +5856,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         mode: Mode,
         systemlib: bool,
         default_experimental_features: HashSet<FeatureName>,
-    ) -> (Vec<SyntaxError>, bool) {
+    ) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
         let env = Env {
             parser_options,
             syntax_tree: tree,
@@ -5883,7 +5887,7 @@ pub fn parse_errors<'a, State: Clone>(
     ns_mode: Mode,
     systemlib: bool,
     default_experimental_features: HashSet<FeatureName>,
-) -> (Vec<SyntaxError>, bool) {
+) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
         IndexedSourceText::new(tree.text().clone()),
@@ -5905,7 +5909,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     ns_mode: Mode,
     systemlib: bool,
     default_experimental_features: HashSet<FeatureName>,
-) -> (Vec<SyntaxError>, bool) {
+) -> (Vec<SyntaxError>, bool, HashSet<FeatureName>) {
     <ParserErrors<'a, State>>::parse_errors(
         tree,
         text,

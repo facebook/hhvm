@@ -180,6 +180,8 @@ pub struct Env<'a> {
     file_mode: file_info::Mode,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
+    pub active_experimental_features: HashSet<oxidized::experimental_features::FeatureName>,
+
     // Cache none pos, lazy_static doesn't allow Rc.
     pos_none: Pos,
     pub empty_ns_env: Arc<NamespaceEnv>,
@@ -210,6 +212,7 @@ impl<'a> Env<'a> {
         quick_mode: bool,
         show_all_errors: bool,
         mode: file_info::Mode,
+        active_experimental_features: HashSet<oxidized::experimental_features::FeatureName>,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a ParserOptions,
         namespace_env: Arc<NamespaceEnv>,
@@ -222,6 +225,7 @@ impl<'a> Env<'a> {
             show_all_errors,
             file_mode: mode,
             top_level_statements: true,
+            active_experimental_features,
             found_yield: false,
             found_await: false,
             in_async: false,

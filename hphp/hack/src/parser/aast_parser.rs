@@ -16,7 +16,6 @@ use mode_parser::Language;
 use namespaces_rust as namespaces;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use oxidized::aast::Program;
 use oxidized::experimental_features;
 use oxidized::file_info::Mode;
 use oxidized::namespace_env::Env as NamespaceEnv;
@@ -178,11 +177,62 @@ impl<'src> AastParser {
         let mode = mode.unwrap_or(Mode::Mstrict);
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, tree.root())?;
+        // Unless we are type checking in quick mode, we will want to run the
+        // syntax error checks from rust_parser_errors.rs. If we are type checking
+        // and not in quick mode, we also work out if we are in an hhi.
+        let (should_check_for_extra_errors, hhi_mode, mut syntax_errors) = match env.mode {
+            NamespaceMode::ForCodegen => (
+                true,
+                false,
+                tree.errors().into_iter().cloned().collect::<Vec<_>>(),
+            ),
+            NamespaceMode::ForTypecheck => {
+                let first_error = tree
+                    .errors()
+                    .into_iter()
+                    .take(1)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                if env.quick_mode {
+                    (false, false, first_error)
+                } else {
+                    let hhi_mode = indexed_source_text
+                        .source_text()
+                        .file_path()
+                        .has_extension("hhi");
+                    (true, hhi_mode, first_error)
+                }
+            }
+        };
+        let (active_experimental_features, uses_readonly) = if should_check_for_extra_errors {
+            stack_limit::reset();
+            let (parse_errors, uses_readonly, active_experimental_features) =
+                parse_errors_with_text(
+                    &tree,
+                    indexed_source_text.clone(),
+                    // TODO(hrust) change to parser_otions to ref in ParserErrors
+                    env.parser_options.clone(),
+                    true, /* hhvm_compat_mode */
+                    hhi_mode,
+                    env.mode,
+                    env.is_systemlib,
+                    default_experimental_features,
+                );
+            syntax_errors.extend(parse_errors);
+            syntax_errors.sort_by(SyntaxError::compare_offset);
+            (active_experimental_features, uses_readonly)
+        } else {
+            // If we aren't doin the extra checks, then the lowerer will be called in quick
+            // mode and won't report syntax errors, and so we don't need the active
+            // experimental features
+            (default_experimental_features, false)
+        };
         let mut lowerer_env = lowerer::Env::make(
             env.mode,
             env.quick_mode,
             env.show_all_errors,
             mode,
+            active_experimental_features,
             indexed_source_text,
             &env.parser_options,
             Arc::clone(&ns),
@@ -190,23 +240,27 @@ impl<'src> AastParser {
             arena,
         );
         stack_limit::reset();
-        let ret = lower(&mut lowerer_env, tree.root());
+        let aast = lower(&mut lowerer_env, tree.root());
         let (lowering_t, elaboration_t) = (lowering_t.elapsed(), Instant::now());
         let lower_peak = stack_limit::peak() as u64;
-        let mut ret = if env.elaborate_namespaces {
-            namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ret)
+        let mut aast = if env.elaborate_namespaces {
+            namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, aast)
         } else {
-            ret
+            aast
         };
+        if should_check_for_extra_errors {
+            if uses_readonly && !env.parser_options.no_parser_readonly_check {
+                syntax_errors.extend(readonly_check::check_program(
+                    &mut aast,
+                    matches!(env.mode, NamespaceMode::ForTypecheck),
+                ));
+            }
+            syntax_errors.extend(aast_check::check_program(&aast, env.mode));
+            syntax_errors.extend(modules_check::check_program(&aast));
+            syntax_errors.extend(expression_tree_check::check_splices(&aast));
+            syntax_errors.extend(coeffects_check::check_program(&aast, env.mode));
+        }
         let (elaboration_t, error_t) = (elaboration_t.elapsed(), Instant::now());
-        stack_limit::reset();
-        let syntax_errors = Self::check_syntax_error(
-            env,
-            indexed_source_text,
-            &tree,
-            Some(&mut ret),
-            default_experimental_features,
-        );
         let error_peak = stack_limit::peak() as u64;
         let lowerer_parsing_errors = lowerer_env.parsing_errors().to_vec();
         let errors = lowerer_env.hh_errors().to_vec();
@@ -216,7 +270,7 @@ impl<'src> AastParser {
         Ok(ParserResult {
             file_mode: mode,
             scoured_comments,
-            aast: ret,
+            aast,
             lowerer_parsing_errors,
             syntax_errors,
             errors,
@@ -231,68 +285,6 @@ impl<'src> AastParser {
                 ..Default::default()
             },
         })
-    }
-
-    fn check_syntax_error<'arena>(
-        env: &Env,
-        indexed_source_text: &'src IndexedSourceText<'src>,
-        tree: &PositionedSyntaxTree<'src, 'arena>,
-        aast: Option<&mut Program<(), ()>>,
-        default_experimental_features: HashSet<experimental_features::FeatureName>,
-    ) -> Vec<SyntaxError> {
-        let mut hhi_mode = false;
-        let (should_check_for_extra_errors, mut errors) = match env.mode {
-            NamespaceMode::ForCodegen => {
-                (true, tree.errors().into_iter().cloned().collect::<Vec<_>>())
-            }
-            NamespaceMode::ForTypecheck => {
-                let first_error = tree
-                    .errors()
-                    .into_iter()
-                    .take(1)
-                    .cloned()
-                    .collect::<Vec<_>>();
-                if env.quick_mode {
-                    (false, first_error)
-                } else {
-                    hhi_mode = indexed_source_text
-                        .source_text()
-                        .file_path()
-                        .has_extension("hhi");
-                    (true, first_error)
-                }
-            }
-        };
-        if should_check_for_extra_errors {
-            let (parse_errors, uses_readonly) = parse_errors_with_text(
-                tree,
-                indexed_source_text.clone(),
-                // TODO(hrust) change to parser_otions to ref in ParserErrors
-                env.parser_options.clone(),
-                true, /* hhvm_compat_mode */
-                hhi_mode,
-                env.mode,
-                env.is_systemlib,
-                default_experimental_features,
-            );
-            errors.extend(parse_errors);
-            errors.sort_by(SyntaxError::compare_offset);
-            let mut empty_program = Program(vec![]);
-            let aast = aast.unwrap_or(&mut empty_program);
-            if uses_readonly && !env.parser_options.no_parser_readonly_check {
-                errors.extend(readonly_check::check_program(
-                    aast,
-                    matches!(env.mode, NamespaceMode::ForTypecheck),
-                ));
-            }
-            errors.extend(aast_check::check_program(aast, env.mode));
-            errors.extend(modules_check::check_program(aast));
-            errors.extend(expression_tree_check::check_splices(aast));
-            errors.extend(coeffects_check::check_program(aast, env.mode));
-            errors
-        } else {
-            errors
-        }
     }
 
     fn parse_text<'arena>(

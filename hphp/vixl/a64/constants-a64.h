@@ -1465,11 +1465,11 @@ enum LSELoadOp {
   LSE_LDUMIN = 0x00007000
 };
 
-enum LSEAquireRelease {
-  LSEAquireReleaseN  = 0x00000000,
-  LSEAquireReleaseA  = 0x00800000,
-  LSEAquireReleaseL  = 0x00400000,
-  LSEAquireReleaseAL = 0x00C00000
+enum LSEAcquireRelease {
+  LSEAcquireReleaseN  = 0x00000000,
+  LSEAcquireReleaseA  = 0x00800000,
+  LSEAcquireReleaseL  = 0x00400000,
+  LSEAcquireReleaseAL = 0x00C00000
 };
 
 enum LSESize {
@@ -1493,22 +1493,22 @@ enum LSELd {
   LseLdOpFixed = 0x38200000,
   LseLdOpFMask = 0x3F208C00,
   #define LSELD(A)       \
-  LSELD_##A##_b   = LseLdOpFixed | LSESizeB | LSEAquireReleaseN  | LSE_LD##A, \
-  LSELD_##A##_ab  = LseLdOpFixed | LSESizeB | LSEAquireReleaseA  | LSE_LD##A, \
-  LSELD_##A##_lb  = LseLdOpFixed | LSESizeB | LSEAquireReleaseL  | LSE_LD##A, \
-  LSELD_##A##_alb = LseLdOpFixed | LSESizeB | LSEAquireReleaseAL | LSE_LD##A, \
-  LSELD_##A##_h   = LseLdOpFixed | LSESizeH | LSEAquireReleaseN  | LSE_LD##A, \
-  LSELD_##A##_ah  = LseLdOpFixed | LSESizeH | LSEAquireReleaseA  | LSE_LD##A, \
-  LSELD_##A##_lh  = LseLdOpFixed | LSESizeH | LSEAquireReleaseL  | LSE_LD##A, \
-  LSELD_##A##_alh = LseLdOpFixed | LSESizeH | LSEAquireReleaseAL | LSE_LD##A, \
-  LSELD_##A##_w   = LseLdOpFixed | LSESizeW | LSEAquireReleaseN  | LSE_LD##A, \
-  LSELD_##A##_aw  = LseLdOpFixed | LSESizeW | LSEAquireReleaseA  | LSE_LD##A, \
-  LSELD_##A##_lw  = LseLdOpFixed | LSESizeW | LSEAquireReleaseL  | LSE_LD##A, \
-  LSELD_##A##_alw = LseLdOpFixed | LSESizeW | LSEAquireReleaseAL | LSE_LD##A, \
-  LSELD_##A##_x   = LseLdOpFixed | LSESizeX | LSEAquireReleaseN  | LSE_LD##A, \
-  LSELD_##A##_ax  = LseLdOpFixed | LSESizeX | LSEAquireReleaseA  | LSE_LD##A, \
-  LSELD_##A##_lx  = LseLdOpFixed | LSESizeX | LSEAquireReleaseL  | LSE_LD##A, \
-  LSELD_##A##_alx = LseLdOpFixed | LSESizeX | LSEAquireReleaseAL | LSE_LD##A
+  LSELD_##A##_b   = LseLdOpFixed | LSESizeB | LSEAcquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ab  = LseLdOpFixed | LSESizeB | LSEAcquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lb  = LseLdOpFixed | LSESizeB | LSEAcquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alb = LseLdOpFixed | LSESizeB | LSEAcquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_h   = LseLdOpFixed | LSESizeH | LSEAcquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ah  = LseLdOpFixed | LSESizeH | LSEAcquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lh  = LseLdOpFixed | LSESizeH | LSEAcquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alh = LseLdOpFixed | LSESizeH | LSEAcquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_w   = LseLdOpFixed | LSESizeW | LSEAcquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_aw  = LseLdOpFixed | LSESizeW | LSEAcquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lw  = LseLdOpFixed | LSESizeW | LSEAcquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alw = LseLdOpFixed | LSESizeW | LSEAcquireReleaseAL | LSE_LD##A, \
+  LSELD_##A##_x   = LseLdOpFixed | LSESizeX | LSEAcquireReleaseN  | LSE_LD##A, \
+  LSELD_##A##_ax  = LseLdOpFixed | LSESizeX | LSEAcquireReleaseA  | LSE_LD##A, \
+  LSELD_##A##_lx  = LseLdOpFixed | LSESizeX | LSEAcquireReleaseL  | LSE_LD##A, \
+  LSELD_##A##_alx = LseLdOpFixed | LSESizeX | LSEAcquireReleaseAL | LSE_LD##A
   LSELD_OP_LIST(LSELD)
   #undef LSELD
 };

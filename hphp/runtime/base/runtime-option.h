@@ -295,6 +295,7 @@ struct RuntimeOption {
   static std::map<std::string, std::string> TierOverwriteInputs;
   static void StoreTierOverwriteInputs(const std::string &machine, const std::string &tier,
     const std::string &task, const std::string &cpu, const std::string &tiers, const std::string &tags);
+  static std::map<std::string, std::string> getTierOverwriteInputs();
 
   static std::string BuildId;
   static std::string InstanceId;

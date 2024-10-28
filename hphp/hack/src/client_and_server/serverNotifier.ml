@@ -206,7 +206,7 @@ let get_changes_sync (t : t) : changes * Watchman.clock option =
           ~timeout:120
           ~on_timeout:(fun (_ : Timeout.timings) ->
             Exit.exit Exit_status.Dfind_unresponsive)
-          ~do_:(fun t -> DfindLib.get_changes ~timeout:t dfind)
+          ~do_:(fun _timeout -> DfindLib.get_changes dfind)
       with
       | _ -> Exit.exit Exit_status.Dfind_died
     in

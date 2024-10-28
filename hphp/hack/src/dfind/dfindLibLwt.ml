@@ -31,17 +31,12 @@ module MarshalToolsLwt :
       ~set_flags:true
       (Daemon.descr_of_out_channel oc)
 
-  let to_fd_with_preamble ?timeout ?flags fd v =
-    if timeout <> None then raise (Invalid_argument "Use lwt timeouts directly");
+  let to_fd_with_preamble ?flags fd v =
     Marshal_tools_lwt.to_fd_with_preamble ?flags fd v
 
-  let from_fd_with_preamble ?timeout fd =
-    if timeout <> None then raise (Invalid_argument "Use lwt timeouts directly");
-    Marshal_tools_lwt.from_fd_with_preamble fd
+  let from_fd_with_preamble fd = Marshal_tools_lwt.from_fd_with_preamble fd
 end
 
 include DfindLib.DFindLibFunctor (MarshalToolsLwt)
 
-(* The Timeout module probably doesn't work terribly well with Lwt. Luckily, timeouts are super easy
- * to write in Lwt, so we don't **really** need them *)
 let get_changes handle = get_changes handle

@@ -58,7 +58,6 @@ val descr_of_in_channel : in_channel -> Unix.file_descr
     [select ~timeout read write exn] runs with a timeout and throws
     a Timeout exception on timeout. *)
 val select :
-  ?timeout:t ->
   Unix.file_descr list ->
   Unix.file_descr list ->
   Unix.file_descr list ->

@@ -87,7 +87,7 @@ let with_timeout ~timeout ~on_timeout ~do_ =
 
 let check_timeout _ = ()
 
-let select ?timeout:_ x y z = Sys_utils.select_non_intr x y z no_select_timeout
+let select x y z = Sys_utils.select_non_intr x y z no_select_timeout
 
 (** Channel *)
 

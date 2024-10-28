@@ -18,7 +18,7 @@ val wait_until_ready : t -> unit
 
 val pid : t -> int
 
-val get_changes : ?timeout:Timeout.t -> t -> SSet.t
+val get_changes : t -> SSet.t
 
 val stop : t -> unit
 
@@ -36,13 +36,9 @@ module type MARSHAL_TOOLS = sig
   val descr_of_out_channel : 'a Daemon.out_channel -> fd
 
   val to_fd_with_preamble :
-    ?timeout:Timeout.t ->
-    ?flags:Marshal.extern_flags list ->
-    fd ->
-    'a ->
-    int result
+    ?flags:Marshal.extern_flags list -> fd -> 'a -> int result
 
-  val from_fd_with_preamble : ?timeout:Timeout.t -> fd -> 'a result
+  val from_fd_with_preamble : fd -> 'a result
 end
 
 module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
@@ -57,7 +53,7 @@ module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
 
   val pid : t -> int
 
-  val get_changes : ?timeout:Timeout.t -> t -> SSet.t Marshal_tools.result
+  val get_changes : t -> SSet.t Marshal_tools.result
 
   val stop : t -> unit
 end

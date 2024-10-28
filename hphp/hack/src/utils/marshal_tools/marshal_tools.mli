@@ -43,19 +43,13 @@ val error_to_verbose_string : error -> string
 
 (** Writes a payload with preamble to a file descriptor.
     Returns the size of the marshalled payload.
-    [timeout] is the timeout for [Timeout.select] which selects ready file descriptors.
     Unix write operations interrupted by signals are automatically restarted. *)
 val to_fd_with_preamble :
-  ?timeout:Timeout.t ->
-  ?flags:Marshal.extern_flags list ->
-  Unix.file_descr ->
-  'a ->
-  int
+  ?flags:Marshal.extern_flags list -> Unix.file_descr -> 'a -> int
 
 (** Reads a payload with preamble from a file descriptor.
-    [timeout] is the timeout for [Timeout.select] which selects ready file descriptors.
     Unix read operations interrupted by signals are automatically restarted. *)
-val from_fd_with_preamble : ?timeout:Timeout.t -> Unix.file_descr -> 'a
+val from_fd_with_preamble : Unix.file_descr -> 'a
 
 module type WRITER_READER = sig
   type 'a result
@@ -68,21 +62,9 @@ module type WRITER_READER = sig
 
   val ( >>= ) : 'a result -> ('a -> 'b result) -> 'b result
 
-  val write :
-    ?timeout:Timeout.t ->
-    fd ->
-    buffer:bytes ->
-    offset:int ->
-    size:int ->
-    int result
+  val write : fd -> buffer:bytes -> offset:int -> size:int -> int result
 
-  val read :
-    ?timeout:Timeout.t ->
-    fd ->
-    buffer:bytes ->
-    offset:int ->
-    size:int ->
-    int result
+  val read : fd -> buffer:bytes -> offset:int -> size:int -> int result
 
   val log : string -> unit
 end
@@ -99,12 +81,10 @@ val parse_preamble : bytes -> int
 
 module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
   val to_fd_with_preamble :
-    ?timeout:Timeout.t ->
     ?flags:Marshal.extern_flags list ->
     WriterReader.fd ->
     'a ->
     int WriterReader.result
 
-  val from_fd_with_preamble :
-    ?timeout:Timeout.t -> WriterReader.fd -> 'a WriterReader.result
+  val from_fd_with_preamble : WriterReader.fd -> 'a WriterReader.result
 end

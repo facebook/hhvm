@@ -15,8 +15,8 @@ let log s ~tracker =
 
 let server_exists lock_file = not (Lock.check lock_file)
 
-let from_channel_without_buffering ?timeout tic =
-  Marshal_tools.from_fd_with_preamble ?timeout (Timeout.descr_of_in_channel tic)
+let from_channel_without_buffering tic =
+  Marshal_tools.from_fd_with_preamble (Timeout.descr_of_in_channel tic)
 
 let hh_monitor_config root =
   MonitorUtils.
@@ -62,14 +62,14 @@ let get_sockaddr config =
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
-    ~(timeout : Timeout.t) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
+    (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
     ( Timeout.in_channel
       * Stdlib.out_channel
       * ServerCommandTypes.server_specific_files,
       MonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
-  let m : PH.msg = from_channel_without_buffering ~timeout ic in
+  let m : PH.msg = from_channel_without_buffering ic in
   match m with
   | PH.Sentinel server_specific_files -> Ok (ic, oc, server_specific_files)
   | PH.Server_dormant_connections_limit_reached ->
@@ -81,7 +81,7 @@ let rec consume_prehandoff_messages
     Printf.eprintf
       "Waiting for a server to be started...%s\n%!"
       ClientMessages.waiting_for_server_to_be_started_doc;
-    consume_prehandoff_messages ~timeout ic oc
+    consume_prehandoff_messages ic oc
   | PH.Server_died_config_change ->
     Printf.eprintf
       ("Last server exited due to config change. Please re-run client"
@@ -390,7 +390,7 @@ let connect_once
     let timeout = max (timeout - elapsed_t) 1 in
     Timeout.with_timeout
       ~timeout
-      ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
+      ~do_:(fun _timeout -> consume_prehandoff_messages ic oc)
       ~on_timeout:(fun _ -> Error MonitorUtils.Server_dormant_out_of_retries)
   in
   (* oops too heavy *)

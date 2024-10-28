@@ -21,13 +21,9 @@ module type MARSHAL_TOOLS = sig
   val descr_of_out_channel : 'a Daemon.out_channel -> fd
 
   val to_fd_with_preamble :
-    ?timeout:Timeout.t ->
-    ?flags:Marshal.extern_flags list ->
-    fd ->
-    'a ->
-    int result
+    ?flags:Marshal.extern_flags list -> fd -> 'a -> int result
 
-  val from_fd_with_preamble : ?timeout:Timeout.t -> fd -> 'a result
+  val from_fd_with_preamble : fd -> 'a result
 end
 
 module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
@@ -42,7 +38,7 @@ module DFindLibFunctor (Marshal_tools : MARSHAL_TOOLS) : sig
 
   val pid : t -> int
 
-  val get_changes : ?timeout:Timeout.t -> t -> SSet.t Marshal_tools.result
+  val get_changes : t -> SSet.t Marshal_tools.result
 
   val stop : t -> unit
 end = struct
@@ -74,13 +70,13 @@ end = struct
     assert (msg = DfindServer.Ready);
     Marshal_tools.return ()
 
-  let request_changes ?timeout handle =
+  let request_changes handle =
     Marshal_tools.to_fd_with_preamble handle.outfd () >>= fun _ ->
-    Marshal_tools.from_fd_with_preamble ?timeout handle.infd
+    Marshal_tools.from_fd_with_preamble handle.infd
 
-  let get_changes ?timeout daemon =
+  let get_changes daemon =
     let rec loop acc =
-      (request_changes ?timeout daemon >>= function
+      (request_changes daemon >>= function
        | DfindServer.Updates s -> Marshal_tools.return s
        | DfindServer.Ready -> assert false)
       >>= fun diff ->

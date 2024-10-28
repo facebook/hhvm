@@ -1,0 +1,9 @@
+<?hh
+
+class C {
+    public function foo(SUBTYPE#1 $_): void {}
+}
+
+class D extends C {
+    public function foo(TYPE#1 $_): void {}
+}

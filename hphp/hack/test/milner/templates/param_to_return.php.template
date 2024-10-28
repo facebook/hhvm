@@ -1,0 +1,7 @@
+<?hh
+
+function foo(SUBTYPE#1 $x): TYPE#1 { return $x; }
+
+class C {
+    public function foo(SUBTYPE#1 $x): TYPE#1 { return $x; }
+}

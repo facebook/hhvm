@@ -53,10 +53,6 @@ val in_channel_of_descr : Unix.file_descr -> in_channel
 
 val descr_of_in_channel : in_channel -> Unix.file_descr
 
-val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int
-
-val really_input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> unit
-
 val input_char : ?timeout:t -> in_channel -> char
 
 val input_line : ?timeout:t -> in_channel -> string

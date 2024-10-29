@@ -525,6 +525,9 @@ impl TextualFile<'_> {
 
     fn write_line_loc(&mut self, src_loc: &SrcLoc) -> Result {
         writeln!(self.w, "// .line {}", src_loc.line_begin)?;
+        if src_loc.col_begin != 0 {
+            writeln!(self.w, "// .column {}", src_loc.col_begin)?;
+        }
         Ok(())
     }
 

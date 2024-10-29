@@ -140,6 +140,8 @@ constexpr char MISSING_DYNAMICALLY_REFERENCED[] =
   "Missing __DynamicallyReferenced attribute on class %s for classname_to_class";
 constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
   "Failed to load class from %s %s for classname_to_class.";
+constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =
+  "ReflectionClass::getConstants() misses constants from the enums/enum classes included by %s";
 
 } // namespace Strings
 } // namespace HPHP

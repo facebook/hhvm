@@ -1628,11 +1628,21 @@ void addClassConstantNames(const Class* cls,
 
   auto numConsts = cls->numConstants();
   const Class::Const* consts = cls->constants();
+  bool has_constants_from_included_enums = false;
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].cls == cls && !consts[i].isAbstractAndUninit()
-        && consts[i].kind() == ConstModifiers::Kind::Value) {
-      st->add(const_cast<StringData*>(consts[i].name.get()));
+    if (!consts[i].isAbstractAndUninit() && 
+        consts[i].kind() == ConstModifiers::Kind::Value) {
+      if (consts[i].cls == cls) { 
+        st->add(const_cast<StringData*>(consts[i].name.get()));
+      } else if (cls->hasIncludedEnums()
+                 && cls->allIncludedEnums().contains(consts[i].cls->name())) {
+        has_constants_from_included_enums = true;   
+      }
     }
+  }
+  if (has_constants_from_included_enums) {
+    raise_notice(Strings::REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS, 
+                 cls->name()->data());
   }
 
   auto const& allTraits = cls->usedTraitClasses();

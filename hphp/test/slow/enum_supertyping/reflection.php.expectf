@@ -1,0 +1,20 @@
+dict(1) {
+  ["A"]=>
+  string(1) "A"
+}
+
+Notice: ReflectionClass::getConstants() misses constants from the enums/enum classes included by CombinedEnums in %s/enum_supertyping/reflection.php on line 34
+dict(1) {
+  ["D"]=>
+  string(1) "D"
+}
+dict(1) {
+  ["BA"]=>
+  int(1)
+}
+
+Notice: ReflectionClass::getConstants() misses constants from the enums/enum classes included by Extd in %s/reflection.php on line 40
+dict(1) {
+  ["BB"]=>
+  int(2)
+}

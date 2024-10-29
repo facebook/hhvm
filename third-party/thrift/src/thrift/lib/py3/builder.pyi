@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 from typing import Any, Generic, Iterator, Tuple, Type, TypeVar
 
 from thrift.py3.types import Struct

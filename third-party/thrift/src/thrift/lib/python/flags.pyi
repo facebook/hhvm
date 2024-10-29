@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import typing
 
 def define_int_flag(name: str, default_value: int) -> None: ...

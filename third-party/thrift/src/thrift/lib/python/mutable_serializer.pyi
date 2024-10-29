@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import typing
-from enum import Enum
 
 from folly.iobuf import IOBuf
 from thrift.python.exceptions import GeneratedError

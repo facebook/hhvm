@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 from collections.abc import Mapping, Sequence, Set
 from enum import Enum
 from typing import Any, NamedTuple, Optional, overload, Tuple, Type, TypeVar, Union

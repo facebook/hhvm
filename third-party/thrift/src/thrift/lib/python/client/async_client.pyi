@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import enum
+# pyre-strict
+
 import types
 import typing
 

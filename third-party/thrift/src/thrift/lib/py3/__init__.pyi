@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 # pyre-fixme[21]: Could not find module `thrift.py3.client`.
 from thrift.py3.client import Client as Client, get_client as get_client
 

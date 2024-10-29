@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 from typing import AsyncIterator, Generic, Tuple, TypeVar
 
 _T = TypeVar("_T")

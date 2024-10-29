@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pyre-ignore-all-errors[3]: Return annotation cannot be `Any`
+# pyre-strict
 
 import typing
 from collections.abc import MutableSequence, MutableSet as MutableSetAbc
@@ -174,6 +174,7 @@ class ValueIterator:
         typeinfo: object,
         set_data: typing.Set[object],
     ) -> None: ...
+    # pyre-ignore[3]: TODO: remove Any returns
     def __next__(self) -> typing.Any: ...
     def __iter__(self) -> ValueIterator: ...
 
@@ -220,6 +221,7 @@ class MapItemsView:
     def __iter__(self) -> MapItemIterator: ...
 
 class MapItemIterator:
+    # pyre-ignore[3]: TODO: remove Any returns
     def __next__(self) -> typing.Any: ...
     def __iter__(self) -> MapItemIterator: ...
 

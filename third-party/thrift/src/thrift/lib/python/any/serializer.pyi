@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-strict
+
 import typing
 
 from apache.thrift.type.type.thrift_types import Type

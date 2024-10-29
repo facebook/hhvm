@@ -42,7 +42,7 @@ impl FeatureName {
             ClassType => Unstable,
             FunctionReferences => Unstable,
             FunctionTypeOptionalParams => OngoingRelease,
-            ExpressionTreeNest => Preview,
+            ExpressionTreeNest => OngoingRelease,
             SealedMethods => Unstable,
             AwaitInSplice => OngoingRelease,
             OpenTuples => Preview,

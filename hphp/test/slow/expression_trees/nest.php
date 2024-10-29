@@ -1,7 +1,6 @@
 <?hh
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
-<<file:__EnableUnstableFeatures('expression_tree_nest')>>
 
 function f<T1, T2, T3>(string $s, ExprTree<T1, T2, T3> $et): ExprTree<T1, T2, T3> {
   print($s."\n");

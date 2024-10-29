@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 from convertible.types import Nested, Simple, Union
 
 def echo_simple(strucc: Simple) -> Simple: ...

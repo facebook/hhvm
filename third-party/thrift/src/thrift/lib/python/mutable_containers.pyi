@@ -15,34 +15,124 @@
 # pyre-ignore-all-errors[3]: Return annotation cannot be `Any`
 
 import typing
-from collections.abc import MutableSet as MutableSetAbc
-from typing import Generic, TypeVar
+from collections.abc import MutableSequence, MutableSet as MutableSetAbc
+from typing import Any, Generic, Iterable, List, Optional, overload, TypeVar
+
+from thrift.python.mutable_types import (
+    _ThriftListWrapper,
+    _ThriftMapWrapper,
+    _ThriftSetWrapper,
+)
 
 class MapKwargsSentinelType: ...
 
 T = TypeVar("T")
 
-class MutableList(Generic[T]):
+class MutableList(MutableSequence[T]):
     def __init__(
         self,
         typeinfo: object,
-        list_data: typing.List[object],
+        list_data: List[T],
     ) -> None: ...
-    def __getitem__(self, index: object) -> T: ...
-    def __setitem__(self, index: object, value: object) -> None: ...
-    def __delitem__(self, index: object) -> None: ...
-    def insert(self, index: object, value: object) -> None: ...
-    def append(self, value: object) -> None: ...
-    def extend(self, values: typing.Iterable[object]) -> None: ...
-    def pop(self, index: typing.Optional[object] = -1) -> None: ...
+    def __len__(self) -> int: ...
+    @overload
+    def __getitem__(self, index: int) -> T: ...
+    @overload
+    def __getitem__(self, index: slice) -> MutableList[T]: ...
+    @overload
+    def __setitem__(self, index: int, value: T) -> None: ...
+    @overload
+    def __setitem__(
+        self: MutableList[MutableList[Any]],
+        index: int,
+        value: T | _ThriftListWrapper,
+    ) -> None: ...
+    @overload
+    def __setitem__(
+        self: MutableList[MutableSet[Any]], index: int, value: T | _ThriftSetWrapper
+    ) -> None: ...
+    @overload
+    def __setitem__(
+        self: MutableList[MutableMap[Any, Any]],
+        index: int,
+        value: T | _ThriftMapWrapper,
+    ) -> None: ...
+    @overload
+    def __delitem__(self, index: int) -> None: ...
+    @overload
+    def __delitem__(self, index: slice) -> None: ...
+    @overload
+    def insert(self, index: int, value: T) -> None: ...
+    @overload
+    def insert(
+        self: MutableList[MutableList[Any]],
+        index: int,
+        value: T | _ThriftListWrapper,
+    ) -> None: ...
+    @overload
+    def insert(
+        self: MutableList[MutableSet[Any]], index: int, value: T | _ThriftSetWrapper
+    ) -> None: ...
+    @overload
+    def insert(
+        self: MutableList[MutableMap[Any, Any]],
+        index: int,
+        value: T | _ThriftMapWrapper,
+    ) -> None: ...
+    @overload
+    def append(self, value: T) -> None: ...
+    @overload
+    def append(
+        self: MutableList[MutableList[Any]], value: T | _ThriftListWrapper
+    ) -> None: ...
+    @overload
+    def append(
+        self: MutableList[MutableSet[Any]], value: T | _ThriftSetWrapper
+    ) -> None: ...
+    @overload
+    def append(
+        self: MutableList[MutableMap[Any, Any]], value: T | _ThriftMapWrapper
+    ) -> None: ...
+    @overload
+    def extend(self, values: Iterable[T]) -> None: ...
+    @overload
+    def extend(
+        self: MutableList[MutableList[Any]],
+        values: Iterable[T | _ThriftListWrapper],
+    ) -> None: ...
+    @overload
+    def extend(
+        self: MutableList[MutableSet[Any]],
+        values: Iterable[T | _ThriftSetWrapper],
+    ) -> None: ...
+    @overload
+    def extend(
+        self: MutableList[MutableMap[Any, Any]],
+        values: Iterable[T | _ThriftMapWrapper],
+    ) -> None: ...
+    def pop(self, index: int = -1) -> T: ...
     def clear(self) -> None: ...
-    def __add__(self, other: typing.Iterable[object]) -> MutableList[T]: ...
+    @overload
+    def __add__(self, other: Iterable[T]) -> MutableList[T]: ...
+    @overload
+    def __add__(
+        self: MutableList[MutableList[Any]], other: Iterable[T | _ThriftListWrapper]
+    ) -> MutableList[T]: ...
+    @overload
+    def __add__(
+        self: MutableList[MutableSet[Any]], other: Iterable[T | _ThriftSetWrapper]
+    ) -> MutableList[T]: ...
+    @overload
+    def __add__(
+        self: MutableList[MutableMap[Any, Any]],
+        other: Iterable[T | _ThriftMapWrapper],
+    ) -> MutableList[T]: ...
     def count(self, value: object) -> int: ...
     def index(
         self,
         value: object,
-        start: typing.Optional[typing.Union[int, typing.SupportsIndex]] = 0,
-        stop: typing.Optional[typing.Union[int, typing.SupportsIndex]] = None,
+        start: Optional[int | typing.SupportsIndex] = 0,
+        stop: Optional[int | typing.SupportsIndex] = None,
     ) -> int: ...
     def __contains__(self, value: object) -> bool: ...
 

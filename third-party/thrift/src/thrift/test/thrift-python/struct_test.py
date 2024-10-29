@@ -780,6 +780,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             s.unqualified_list_i32[4] = 2
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_list_i32[4] = "Not integer"
 
         self.assertEqual([2, 2, 3], s.unqualified_list_i32)
@@ -830,6 +831,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual([11, 12, 13], lst2)
 
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[6]: Intentional for test
             lst2.extend([14, 15, "16", 17])
 
         # basic exception safety

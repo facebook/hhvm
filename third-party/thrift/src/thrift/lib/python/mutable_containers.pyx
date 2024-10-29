@@ -158,6 +158,13 @@ cdef class MutableList:
         else:
             return self._list_data.index(value, start, stop)
 
+    @classmethod
+    def __class_getitem__(cls, _):
+        """
+        PEP 560 – Core support for typing module and generic types
+        It enables generic types like `MutableList[T]`
+        """
+        return cls
 
 MutableSequence.register(MutableList)
 

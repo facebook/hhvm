@@ -23,6 +23,10 @@ from thrift.python.mutable_containers import MutableList
 from thrift.python.types import typeinfo_i32
 
 
+def create_MutableList_i32(lst: list[int]) -> MutableList[int]:
+    return MutableList(typeinfo_i32, lst)
+
+
 class MutableListTest(unittest.TestCase):
     """
     Some of the tests use a Python `list` for verification. They create a
@@ -31,14 +35,14 @@ class MutableListTest(unittest.TestCase):
     """
 
     def test_smoke(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         self.assertTrue(isinstance(mutable_list, MutableList))
         self.assertTrue(isinstance(mutable_list, MutableSequence))
         self.assertEqual(0, len(mutable_list))
         self.assertFalse(mutable_list)
 
     def test_extend(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(10))
@@ -47,17 +51,18 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list, mutable_list)
 
     def test_extend_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_list.extend([1, 2, "Not an integer", 3])
 
         # basic exception safety
         self.assertEqual([1, 2], mutable_list)
 
     def test_extend_i32_overflow(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaises(OverflowError):
             mutable_list.extend([1, 2, 2**31, 3])
 
@@ -65,7 +70,7 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual([1, 2], mutable_list)
 
     def test_append(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         for i in range(100):
@@ -75,19 +80,20 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list, mutable_list)
 
     def test_append_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_list.append("Not an interger")
 
     def test_append_i32_overflow(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaises(OverflowError):
             mutable_list.append(2**31)
 
     def test_getitem(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.extend(range(100))
 
         for i in range(100):
@@ -98,7 +104,7 @@ class MutableListTest(unittest.TestCase):
             mutable_list[100]
 
     def test_getitem_slice(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -111,7 +117,7 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list[101:201], mutable_list[101:201])
 
     def test_insert(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -128,19 +134,20 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list, mutable_list)
 
     def test_insert_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_list.insert(0, "Not an interger")
 
     def test_insert_i32_overflow(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         with self.assertRaises(OverflowError):
             mutable_list.insert(0, 2**31)
 
     def test_setitem(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -156,21 +163,22 @@ class MutableListTest(unittest.TestCase):
             mutable_list[111] = 123
 
     def test_setitem_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.append(0)
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_list[0] = "Not an integer"
 
     def test_setitem_i32_overflow(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.append(0)
         with self.assertRaises(OverflowError):
             mutable_list[0] = 2**31
 
     def test_setitem_slice(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -181,10 +189,11 @@ class MutableListTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'list'"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_list[1:3] = [22, 22]
 
     def test_delitem(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -201,7 +210,7 @@ class MutableListTest(unittest.TestCase):
             del mutable_list[100]
 
     def test_delitem_slice(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         python_list = []
 
         mutable_list.extend(range(100))
@@ -218,7 +227,7 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list, mutable_list)
 
     def test_pop(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.extend(range(100))
 
         self.assertEqual(50, mutable_list.pop(50))
@@ -233,14 +242,14 @@ class MutableListTest(unittest.TestCase):
             mutable_list.pop()
 
     def test_clear(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.extend(range(100))
         self.assertEqual(100, len(mutable_list))
         mutable_list.clear()
         self.assertEqual(0, len(mutable_list))
 
     def test_contains(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.extend(range(10))
 
         for i in range(10):
@@ -249,7 +258,7 @@ class MutableListTest(unittest.TestCase):
         self.assertFalse(10 in mutable_list)
 
     def test_contains_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 3])
+        mutable_list = create_MutableList_i32([1, 2, 3])
 
         self.assertIn(3, mutable_list)
         self.assertNotIn(4, mutable_list)
@@ -257,7 +266,7 @@ class MutableListTest(unittest.TestCase):
         self.assertNotIn(2**31, mutable_list)
 
     def test_add(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [])
+        mutable_list = create_MutableList_i32([])
         mutable_list.extend(range(100))
 
         result = mutable_list + list(range(100, 200))
@@ -266,20 +275,20 @@ class MutableListTest(unittest.TestCase):
         self.assertIsNot(result, mutable_list)
 
     def test_count(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+        mutable_list = create_MutableList_i32([1, 2, 1, 1, 3, 2])
 
         self.assertEqual(3, mutable_list.count(1))
         self.assertEqual(2, mutable_list.count(2))
         self.assertEqual(1, mutable_list.count(3))
 
     def test_count_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+        mutable_list = create_MutableList_i32([1, 2, 1, 1, 3, 2])
 
         self.assertEqual(0, mutable_list.count("Not an Integer"))
         self.assertEqual(0, mutable_list.count(2**31))
 
     def test_index(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+        mutable_list = create_MutableList_i32([1, 2, 1, 1, 3, 2])
 
         self.assertEqual(0, mutable_list.index(1))
         self.assertEqual(2, mutable_list.index(1, 1))
@@ -296,7 +305,7 @@ class MutableListTest(unittest.TestCase):
             _ = mutable_list.index(5)
 
     def test_index_wrong_type(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+        mutable_list = create_MutableList_i32([1, 2, 1, 1, 3, 2])
 
         with self.assertRaises(ValueError):
             _ = mutable_list.index("Not an Integer")
@@ -306,7 +315,7 @@ class MutableListTest(unittest.TestCase):
             _ = mutable_list.index(2**31)
 
     def test_pickle_round_trip(self) -> None:
-        mutable_list = MutableList(typeinfo_i32, [1, 2, 1, 1, 3, 2])
+        mutable_list = create_MutableList_i32([1, 2, 1, 1, 3, 2])
 
         pickled = pickle.dumps(mutable_list, protocol=pickle.HIGHEST_PROTOCOL)
         mutable_list_unpickled = pickle.loads(pickled)

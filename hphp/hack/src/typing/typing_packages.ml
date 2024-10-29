@@ -76,7 +76,9 @@ let can_access_by_package_v2_rules
       (Relative_path.suffix target_file)
   in
   let accessing_hhi = Pos_or_decl.is_hhi target_pos in
-  if in_same_file || accessing_hhi || is_test current_file then
+  if
+    in_same_file || accessing_hhi || is_test current_file || is_test target_file
+  then
     `Yes
   else
     let (current_pkg, target_pkg) =

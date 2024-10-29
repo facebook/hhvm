@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/test/reflection/gen-cpp2/visitation_same_build_rule_for_each_field.h> // @manual=
+#include <thrift/test/reflection/gen-cpp2/visitation_same_build_rule_for_each_field.h> // @manual
 #include <thrift/test/reflection/visitation_same_build_rule.h>
 
 namespace apache::thrift::test {

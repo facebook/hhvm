@@ -44,13 +44,7 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
     }
   }
 
-  // Add to scope
-  if (const t_named* existing = scope_->add_def(*definition)) {
-    // TODO(afuller): Propagate the existing diff up, and
-    // report a diagnostic immediately, instead of doing it after
-    // in `validate_uri_uniqueness`.
-    // return existing; // Confliciting definition!.
-  }
+  scope_->add_def(*definition);
 
   // Index the node.
   auto* ptr = definition.get();

@@ -16,17 +16,11 @@
 
 #pragma once
 
-#include <folly/Expected.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
 namespace detail {
-/**
- * Helper method to uncompress the payload from remote endpoint.
- */
-folly::Expected<std::unique_ptr<folly::IOBuf>, std::string> uncompressPayload(
-    CompressionAlgorithm compression, std::unique_ptr<folly::IOBuf> data);
 
 template <typename Metadata>
 void setCompressionCodec(
@@ -50,11 +44,18 @@ extern template void setCompressionCodec<>(
 /**
  * Helper method to compress the payload before sending to the remote endpoint.
  */
+[[deprecated("Use compressBuffer() instead.")]]
 void compressPayload(
     std::unique_ptr<folly::IOBuf>& data, CompressionAlgorithm compression);
+
 } // namespace detail
 
+std::unique_ptr<folly::IOBuf> compressBuffer(
+    std::unique_ptr<folly::IOBuf>&& buffer,
+    CompressionAlgorithm compressionAlgorithm);
+
 std::unique_ptr<folly::IOBuf> uncompressBuffer(
-    std::unique_ptr<folly::IOBuf>&& buffer, CompressionAlgorithm compression);
+    std::unique_ptr<folly::IOBuf>&& buffer,
+    CompressionAlgorithm compressionAlgorithm);
 
 } // namespace apache::thrift::rocket

@@ -87,9 +87,40 @@ enum RpcPriority {
 
 enum CompressionAlgorithm {
   NONE = 0,
+
   ZLIB = 1,
   ZSTD = 2,
+  LZ4 = 3,
+
   CUSTOM = 1000,
+
+  // Same algorithms as above, but less compression/CPU/memory.
+  ZLIB_LESS = 100000,
+  ZSTD_LESS = 100001,
+  LZ4_LESS = 100002,
+
+  // Same algorithms as above, but more compression/CPU/memory.
+  ZLIB_MORE = 200000,
+  ZSTD_MORE = 200001,
+  LZ4_MORE = 200002,
+}
+
+enum ZlibCompressionLevelPreset {
+  DEFAULT = 0,
+  LESS = 1, // Less compression/CPU/memory.
+  MORE = 2, // More compression/CPU/memory.
+}
+
+enum ZstdCompressionLevelPreset {
+  DEFAULT = 0,
+  LESS = 1, // Less compression/CPU/memory.
+  MORE = 2, // More compression/CPU/memory.
+}
+
+enum Lz4CompressionLevelPreset {
+  DEFAULT = 0,
+  LESS = 1, // Less compression/CPU/memory.
+  MORE = 2, // More compression/CPU/memory.
 }
 
 enum ErrorKind {
@@ -110,9 +141,17 @@ enum ErrorSafety {
   SAFE = 1,
 }
 
-struct ZlibCompressionCodecConfig {}
+struct ZlibCompressionCodecConfig {
+  1: optional ZlibCompressionLevelPreset levelPreset;
+}
 
-struct ZstdCompressionCodecConfig {}
+struct ZstdCompressionCodecConfig {
+  1: optional ZstdCompressionLevelPreset levelPreset;
+}
+
+struct Lz4CompressionCodecConfig {
+  1: optional Lz4CompressionLevelPreset levelPreset;
+}
 
 struct CustomCompressionCodecConfig {
   1: optional binary payload;
@@ -122,6 +161,7 @@ union CodecConfig {
   1: ZlibCompressionCodecConfig zlibConfig;
   2: ZstdCompressionCodecConfig zstdConfig;
   3: CustomCompressionCodecConfig customConfig;
+  4: Lz4CompressionCodecConfig lz4Config;
 }
 
 struct CompressionConfig {

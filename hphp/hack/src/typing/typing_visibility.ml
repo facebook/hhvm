@@ -147,21 +147,59 @@ let check_internal_access ~in_signature env target pos decl_pos =
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_package_access
-    ~ignore_package_errors env use_pos def_pos target_module target_package =
+let check_package_v2_access
+    ~ignore_package_errors env use_pos def_pos target_package =
   match
-    Typing_packages.can_access
+    Typing_packages.can_access_by_package_v2_rules
+      ~env
+      ~target_package
+      ~target_pos:def_pos
+  with
+  | `Yes -> None
+  | _ when ignore_package_errors -> None
+  | `PackageNotSatisfied
+      Typing_packages.
+        { current_package_pos; current_package_name; target_package_name } ->
+    Some
+      (Typing_error.package
+         (Cross_pkg_access
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              current_filename = Pos.filename use_pos;
+              target_filename = Pos_or_decl.filename def_pos;
+              package_pos = current_package_pos;
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
+            }))
+  | `PackageSoftIncludes
+      Typing_packages.
+        { current_package_pos; current_package_name; target_package_name } ->
+    Some
+      (Typing_error.package
+         (Soft_included_access
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              current_filename = Pos.filename use_pos;
+              target_filename = Pos_or_decl.filename def_pos;
+              package_pos = current_package_pos;
+              current_package_opt = current_package_name;
+              target_package_opt = target_package_name;
+            }))
+
+let check_package_v1_access env use_pos def_pos target_module =
+  match
+    Typing_packages.can_access_by_package_v1_rules
       ~env
       ~current_module:(Env.get_current_module env)
       ~target_module
-      ~target_package
-      def_pos
   with
   | `Yes -> None
   | `PackageNotSatisfied
       Typing_packages.
         {
-          current_module_pos_or_filename = `ModulePos current_module_pos;
+          current_module_pos;
           current_package_pos;
           current_package_name;
           target_package_name;
@@ -179,33 +217,10 @@ let check_package_access
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
-  | `PackageNotSatisfied
-      Typing_packages.
-        {
-          current_module_pos_or_filename = `FileName current_filename;
-          current_package_pos;
-          current_package_name;
-          target_package_name;
-        } ->
-    if ignore_package_errors then
-      None
-    else
-      Some
-        (Typing_error.package
-           (Cross_pkg_access
-              {
-                pos = use_pos;
-                decl_pos = def_pos;
-                current_filename;
-                target_filename = Pos_or_decl.filename def_pos;
-                package_pos = current_package_pos;
-                current_package_opt = current_package_name;
-                target_package_opt = target_package_name;
-              }))
   | `PackageSoftIncludes
       Typing_packages.
         {
-          current_module_pos_or_filename = `ModulePos current_module_pos;
+          current_module_pos;
           current_package_pos;
           current_package_name;
           target_package_name;
@@ -223,29 +238,6 @@ let check_package_access
               current_package_opt = current_package_name;
               target_package_opt = target_package_name;
             }))
-  | `PackageSoftIncludes
-      Typing_packages.
-        {
-          current_module_pos_or_filename = `FileName current_filename;
-          current_package_pos;
-          current_package_name;
-          target_package_name;
-        } ->
-    if ignore_package_errors then
-      None
-    else
-      Some
-        (Typing_error.package
-           (Soft_included_access
-              {
-                pos = use_pos;
-                decl_pos = def_pos;
-                current_filename;
-                target_filename = Pos_or_decl.filename def_pos;
-                package_pos = current_package_pos;
-                current_package_opt = current_package_name;
-                target_package_opt = target_package_name;
-              }))
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =
@@ -342,13 +334,15 @@ let is_visible_for_top_level
       None
   in
   let package_error =
-    check_package_access
-      ~ignore_package_errors
-      env
-      pos
-      decl_pos
-      target_module
-      target_package
+    if Env.package_v2 env then
+      check_package_v2_access
+        ~ignore_package_errors
+        env
+        pos
+        decl_pos
+        target_package
+    else
+      check_package_v1_access env pos decl_pos target_module
   in
   match (module_error, package_error) with
   | (Some e1, Some e2) -> [e1; e2]

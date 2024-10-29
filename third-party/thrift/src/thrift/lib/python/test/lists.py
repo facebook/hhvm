@@ -196,6 +196,13 @@ class ListTests(unittest.TestCase):
         self.assertGreater(y, x3)
         self.assertLessEqual(x3, y)
 
+    def test_no_raise_on_type_error(self) -> None:
+        t_list = self.I32List([1, 2, 3, 4])
+        self.assertFalse(t_list == self.easy())
+        self.assertFalse(self.easy() == t_list)
+        self.assertNotEqual(t_list, self.easy())
+        self.assertNotEqual(self.easy(), t_list)
+
     def test_string_list(self) -> None:
         self.StringList(["hello", "world"])
         with self.assertRaises(TypeError):

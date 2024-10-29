@@ -165,7 +165,6 @@ class ListTests(unittest.TestCase):
         #  got `List__i32`.
         self.assertGreaterEqual(x, x2)
 
-    @brokenInAutoMigrate()
     def test_no_raise_on_type_error(self) -> None:
         t_list = I32List([1, 2, 3, 4])
         self.assertFalse(t_list == easy())

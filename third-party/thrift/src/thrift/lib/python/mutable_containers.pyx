@@ -28,7 +28,8 @@ import itertools
 from thrift.python.mutable_types cimport _ThriftContainerWrapper
 from thrift.python.types cimport (
     TypeInfoBase,
-    list_compare,
+    list_eq,
+    list_lt,
 )
 
 
@@ -87,26 +88,26 @@ cdef class MutableList:
         self._list_data.clear()
 
     def __eq__(self, other):
-        return list_compare(self, other, Py_EQ)
+        return list_eq(self, other)
 
     def __ne__(self, other):
-        return not list_compare(self, other, Py_EQ)
+        return not list_eq(self, other)
 
     def __lt__(self, other):
-        return list_compare(self, other, Py_LT)
+        return list_lt(self, other)
 
     def __gt__(self, other):
-        return list_compare(other, self, Py_LT)
+        return list_lt(other, self)
 
     def __le__(self, other):
-        result = list_compare(other, self, Py_LT)
+        result = list_lt(other, self)
         if result is NotImplemented:
             return NotImplemented
 
         return not result
 
     def __ge__(self, other):
-        result = list_compare(self, other, Py_LT)
+        result = list_lt(self, other)
         if result is NotImplemented:
             return NotImplemented
 
@@ -701,4 +702,3 @@ cdef class MapValuesView:
 
     def __iter__(self):
         return ValueIterator(self._val_typeinfo, self._dict_values)
-

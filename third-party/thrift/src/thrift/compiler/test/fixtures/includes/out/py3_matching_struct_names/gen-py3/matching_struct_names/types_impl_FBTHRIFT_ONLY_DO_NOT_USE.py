@@ -7,7 +7,11 @@
 
 import enum
 import thrift.py3.types
-import matching_struct_names.thrift_metadata
+import matching_struct_names.thrift_metadata as _fbthrift_python_metadata
+try:
+    import matching_struct_names.thrift_types as _fbthrift_python_types
+except Exception: # TODO(T205494848): fix thrift-python import failures
+    _fbthrift_python_types = None
 
 _fbthrift__module_name__ = "matching_struct_names.types"
 

@@ -531,7 +531,7 @@ bool is_type_go_comparable(
   // Whether the underlying Go type is comparable.
   // As per: https://go.dev/ref/spec#Comparison_operators
   //   > Slice, map, and function types are not comparable.
-  // (By extension - structs with slice of map fields are incomparable.)
+  // (By extension - structs with slice or map fields are incomparable.)
 
   // Struct hierarchy can sometime be recursive.
   // Check if we have already visited this type.

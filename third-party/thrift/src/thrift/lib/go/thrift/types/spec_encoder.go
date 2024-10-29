@@ -197,7 +197,8 @@ func writeCodecMapSpec(d Encoder, srcValue reflect.Value, spec *CodecMapSpec) er
 			// 'keyReflectType' is a concrete struct (i.e. not a struct pointer)
 			// We must "take address" before passing recursively downstream, because
 			// 'readCodecStructSpec' expects a pointer to a struct, not a concrete struct.
-			passedKeyReflectValue = iter.Key().Addr()
+			passedKeyReflectValue = reflect.New(keyReflectType)
+			passedKeyReflectValue.Elem().Set(iter.Key())
 		} else if !isComparable && !isStruct {
 			// 'keyReflectType' is a pointer to a non-struct type.
 			// We must "dereference" before passing recursively downstream,

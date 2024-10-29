@@ -13,6 +13,7 @@ import sys
 import time
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 
@@ -38,6 +39,7 @@ class Command(abc.ABC):
     """ Additional information to display after the usage """
     epilog: typing.Optional[str] = None
 
+    # pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
     def __init__(self, debugger: lldb.SBDebugger, _internal_dict):
         self.parser = self.create_parser()
         self.help_string = self.parser.format_help()
@@ -81,11 +83,14 @@ class Command(abc.ABC):
         self,
         debugger: lldb.SBDebugger,
         command: str,
+        # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
         exe_ctx: lldb.SBExecutionContext,
+        # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a type.
         result: lldb.SBCommandReturnObject,
     ): ...
 
 
+# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def get_llvm_version(target: lldb.SBTarget) -> LLVMVersion:
     global _LLVMVersion
     if _LLVMVersion is not None:
@@ -231,6 +236,7 @@ def get_target_cache_dict(target: lldb.SBTarget) -> typing.Dict[str, typing.Any]
     return _target_cache[target_idx]
 
 
+# pyre-fixme[11]: Annotation `SBModule` is not defined as a type.
 def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
     """Get the module that contains the HHVM globals and types"""
 
@@ -250,6 +256,7 @@ def get_hhvm_module(target: lldb.SBTarget) -> typing.Optional[lldb.SBModule]:
     return None
 
 
+# pyre-fixme[11]: Annotation `SBType` is not defined as a type.
 def get_cached_type(name: str, target: lldb.SBTarget) -> typing.Optional[lldb.SBType]:
     """Get a type by name (trying from the HHVM module first) and cache the results"""
 
@@ -287,7 +294,9 @@ def get_cached_type(name: str, target: lldb.SBTarget) -> typing.Optional[lldb.SB
 
 
 def get_cached_global(
-    name: str, target: lldb.SBTarget
+    name: str,
+    target: lldb.SBTarget,
+    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 ) -> typing.Optional[lldb.SBValue]:
     """Get a global by name (trying from the HHVM module first) and cache the results"""
 
@@ -359,7 +368,10 @@ def Global(name: str, target: lldb.SBTarget) -> lldb.SBValue:
 
 
 def Enum(
-    enum_name: str, elem: typing.Union[str, int], target: lldb.SBTarget
+    enum_name: str,
+    elem: typing.Union[str, int],
+    target: lldb.SBTarget,
+    # pyre-fixme[11]: Annotation `SBTypeEnumMember` is not defined as a type.
 ) -> lldb.SBTypeEnumMember:
     """Look up the value of an enum member
 
@@ -700,6 +712,8 @@ def _full_func_name(func: lldb.SBValue) -> str:
             cls = ""
         else:
             cls = (
+                # pyre-fixme[58]: `+` is not supported for operand types
+                #  `Optional[str]` and `str`.
                 nameof(
                     unsigned_cast(cls, Type("HPHP::Class", cls.target).GetPointerType())
                 )
@@ -793,6 +807,7 @@ def crc32q(crc, quad):
 def read_cstring(
     addr: typing.Union[int, lldb.SBValue],
     len: str,
+    # pyre-fixme[11]: Annotation `SBProcess` is not defined as a type.
     process: lldb.SBProcess,
     keep_case: bool = True,
 ) -> str:
@@ -884,11 +899,13 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
             f"error while trying to get the type of what we believe is a string-like value: {err}",
             file=sys.stderr,
         )
+        # pyre-fixme[7]: Expected `Dict[str, typing.Any]` but got `None`.
         return None
 
     if is_char_pointer_type(t, s.target):
         # Note: 1024 is very arbitrary; the string may
         # very well be longer than this.
+        # pyre-fixme[6]: For 2nd argument expected `str` but got `int`.
         data = read_cstring(s.deref.load_addr, 1024, s.process)
     else:
         sd = deref(s)
@@ -900,6 +917,7 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
             sd = deref(get(sd, "m_px"))
 
         if rawtype(sd.type).name != "HPHP::StringData":
+            # pyre-fixme[7]: Expected `Dict[str, typing.Any]` but got `None`.
             return None
 
         data = string_data_val(sd)
@@ -909,6 +927,7 @@ def strinfo(s: lldb.SBValue, keep_case: bool = True) -> typing.Dict[str, typing.
             h = m_hash & 0x7FFFFFFF
 
     if data is None:
+        # pyre-fixme[7]: Expected `Dict[str, typing.Any]` but got `None`.
         return None
 
     assert isinstance(data, str)
@@ -940,6 +959,7 @@ def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
     ), f"invalid string address 0x{val.load_addr:x}"
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
+    # pyre-fixme[6]: For 2nd argument expected `str` but got `int`.
     return read_cstring(addr, m_len + 1, val.process)
 
 
@@ -1166,6 +1186,7 @@ def arch(target: lldb.SBTarget) -> str:
     try:
         return target.triple.split("-")[0]
     except Exception:
+        # pyre-fixme[7]: Expected `str` but got `None`.
         return None
 
 
@@ -1182,6 +1203,8 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
     a = arch(target)
 
     if a == "aarch64":
+        # pyre-fixme[7]: Expected `Dict[str, str]` but got `Dict[str, Union[str,
+        #  str, str, List[str]]]`.
         return {
             "fp": "fp",
             "sp": "sp",
@@ -1208,6 +1231,8 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
             ],
         }
     else:
+        # pyre-fixme[7]: Expected `Dict[str, str]` but got `Dict[str, Union[str,
+        #  str, str, List[str]]]`.
         return {
             "fp": "rbp",
             "sp": "rsp",
@@ -1216,6 +1241,7 @@ def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
         }
 
 
+# pyre-fixme[11]: Annotation `SBFrame` is not defined as a type.
 def reg(common_name: str, frame: lldb.SBFrame) -> lldb.SBValue:
     """Get the value of a register given its common name (e.g. "fp", "sp", etc.)
 

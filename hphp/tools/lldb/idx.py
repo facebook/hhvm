@@ -4,17 +4,21 @@ import shlex
 import sys
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
 def at(
-    ptr: lldb.SBValue, idx: typing.Union[int, lldb.SBValue]
+    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
+    ptr: lldb.SBValue,
+    idx: typing.Union[int, lldb.SBValue],
 ) -> typing.Optional[lldb.SBValue]:
     """Access ptr[idx]"""
 
@@ -206,6 +210,7 @@ def vec_at(base: lldb.SBValue, idx: int) -> lldb.SBValue:
         return None
 
 
+# pyre-fixme[31]: Expression `(str, lldb.SBValue)` is not a valid type.
 def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
     vde_type = utils.Type("HPHP::VanillaDictElm", base.target)
     utils.debug_print(f"Dict base address (i.e. first element): 0x{base.load_addr:x}")

@@ -7,12 +7,18 @@ import sys
 import traceback
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
+
+# pyre-fixme[21]: Could not find module `sizeof`.
 import sizeof
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `idx`.
     import idx
+
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
@@ -118,6 +124,7 @@ def format(
 
 
 @format("^HPHP::((Unaligned)?TypedValue|Variant|VarNR)$", regex=True)
+# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     m_type = utils.get(val_obj, "m_type")
     m_data = utils.get(val_obj, "m_data")
@@ -143,6 +150,7 @@ def pretty_ptr(val: lldb.SBValue) -> typing.Optional[str]:
         s = utils.string_data_val(inner)
     else:
         s = utils.nameof(inner)
+    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
     return '"' + s + '"'
 
 
@@ -255,6 +263,7 @@ class pp_ArrayData:
             return None
         if index >= self.num_children():
             return None
+        # pyre-fixme[16]: `pp_ArrayData` has no attribute `at_func`.
         if self.at_func is None:
             print("Invalid array type!", file=sys.stderr)
             return None
@@ -317,12 +326,14 @@ class pp_Array(pp_ArrayData):
 
 @format("^HPHP::(Class|LazyClassData|Func|ObjectData)$", regex=True)
 def pp_NamedValue(val_obj: lldb.SBValue, _internal_dict) -> str:
+    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
     return '"' + utils.nameof(val_obj) + '"'
 
 
 @format("^HPHP::Object$", regex=True)
 def pp_Object(val_obj: lldb.SBValue, _internal_dict) -> str:
     val = utils.get(val_obj, "m_obj")
+    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
     return '"' + utils.nameof(val) + '"'
 
 
@@ -355,6 +366,7 @@ def pp_HhbbcBytecode(val_obj: lldb.SBValue, _internal_dict) -> str:
     return "bc::%s { %s }" % (op, val)
 
 
+# pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
 def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict, top_module=""):
     """Register the pretty printers in this file with the LLDB debugger.
 

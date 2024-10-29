@@ -1,6 +1,8 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hhvm_lldb.utils as utils
+
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 

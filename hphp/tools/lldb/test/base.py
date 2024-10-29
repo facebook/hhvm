@@ -30,7 +30,11 @@ assert lldb_path, "Couldn't find lldb on host"
 
 sys.path.append(lldb_path)
 import hhvm_lldb.utils as utils
+
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
+
+# pyre-fixme[21]: Could not find module `fblldb.utils`.
 from fblldb.utils import get_lldb_object_description, run_lldb_command
 
 hhvm_path = pathlib.Path(__file__).parent.parent / "hhvm"
@@ -84,6 +88,7 @@ class LLDBTestBase(BaseFacebookTestCase):
     def launchProcess(self) -> bool:
         return True
 
+    # pyre-fixme[16]: Module `typing` has no attribute `abstractmethod`.
     @typing.abstractmethod
     def getTargetPath(self) -> str:
         pass
@@ -97,11 +102,13 @@ class LLDBTestBase(BaseFacebookTestCase):
         self.debugger = None
 
     @property
+    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
     def target(self) -> lldb.SBTarget:
         """Get the target associated wih the debugger"""
         return self.debugger.GetSelectedTarget()
 
     @property
+    # pyre-fixme[11]: Annotation `SBProcess` is not defined as a type.
     def process(self) -> lldb.SBProcess:
         """Get the process associated wih the debugger's target"""
         process = self.target.GetProcess()
@@ -111,6 +118,7 @@ class LLDBTestBase(BaseFacebookTestCase):
         return process
 
     @property
+    # pyre-fixme[11]: Annotation `SBThread` is not defined as a type.
     def thread(self) -> lldb.SBThread:
         """Get the process associated wih the debugger's target"""
         return self.process.GetSelectedThread()
@@ -136,6 +144,8 @@ class LLDBTestBase(BaseFacebookTestCase):
             (status, output) = run_lldb_command(self.debugger, command)
             if check:
                 self.assertEqual(status, 0, output)
+        # pyre-fixme[61]: `status` is undefined, or not always defined.
+        # pyre-fixme[61]: `output` is undefined, or not always defined.
         return (status, output)
 
     def run_until_breakpoint(self, breakpoint: str):
@@ -183,6 +193,7 @@ class TestHHVMBinary(LLDBTestBase):
 
 class TestHHVMTypesBinary(LLDBTestBase):
 
+    # pyre-fixme[14]: `setUp` overrides method defined in `LLDBTestBase` inconsistently.
     def setUp(self, test_type: str):
         self.test_type = test_type
         super().setUp()

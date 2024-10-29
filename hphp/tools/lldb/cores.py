@@ -4,10 +4,12 @@ LLDB command for extracting various information from cores
 
 import shlex
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
@@ -42,9 +44,12 @@ class ExtractCommand(utils.Command):
 
     def __call__(
         self,
+        # pyre-fixme[11]: Annotation `SBDebugger` is not defined as a type.
         debugger: lldb.SBDebugger,
         command: str,
+        # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
         exe_ctx: lldb.SBExecutionContext,
+        # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a type.
         result: lldb.SBCommandReturnObject,
     ):
         command_args = shlex.split(command)

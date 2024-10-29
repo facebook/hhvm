@@ -6,6 +6,7 @@ import shlex
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.utils as utils

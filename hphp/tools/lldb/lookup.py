@@ -1,13 +1,21 @@
 import shlex
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `idx`.
     import idx
+
+    # pyre-fixme[21]: Could not find module `sizeof`.
     import sizeof
+
+    # pyre-fixme[21]: Could not find module `unit`.
     import unit
+
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
@@ -16,6 +24,7 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
+# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def lookup_func(func_id: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     """Find the function corresponding to a given FuncID
 
@@ -135,7 +144,12 @@ class LookupCommand(utils.Command):
     class ArgsNamespace:  # noqa: B903
         # argparse will add attributes to this class
         def __init__(
-            self, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject
+            self,
+            # pyre-fixme[11]: Annotation `SBExecutionContext` is not defined as a type.
+            exe_ctx: lldb.SBExecutionContext,
+            # pyre-fixme[11]: Annotation `SBCommandReturnObject` is not defined as a
+            #  type.
+            result: lldb.SBCommandReturnObject,
         ):
             self.exe_ctx = exe_ctx
             self.result = result

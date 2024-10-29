@@ -6,10 +6,12 @@ import shlex
 import sys
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
@@ -18,6 +20,7 @@ except ModuleNotFoundError:
 # Size accessors
 
 
+# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def array_data_size(array_data: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     utils.debug_print(
         f"array_data_size(array_data=0x{array_data.load_addr:x} (type={array_data.type.name}))"

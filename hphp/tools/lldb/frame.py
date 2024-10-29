@@ -3,13 +3,21 @@
 import dataclasses
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `idx`.
     import idx
+
+    # pyre-fixme[21]: Could not find module `lookup`.
     import lookup
+
+    # pyre-fixme[21]: Could not find module `sizeof`.
     import sizeof
+
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
@@ -33,6 +41,7 @@ class Frame:
 # Frame sniffing.
 
 
+# pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
 def is_jitted(ip: lldb.SBValue) -> bool:
     """Determine if the instruction pointer points inside the region of jitted code
 
@@ -72,6 +81,7 @@ def create_native(
     idx: int,
     fp: typing.Union[str, lldb.SBValue],
     rip: lldb.SBValue,
+    # pyre-fixme[11]: Annotation `SBFrame` is not defined as a type.
     native_frame: typing.Optional[lldb.SBFrame] = None,
     name: typing.Optional[str] = None,
 ) -> Frame:
@@ -167,6 +177,7 @@ def create_php(
         # TODO test this code path
         class_type = utils.Type("HPHP::Class", ar.target).GetPointerType()
         func_name = utils.nameof(utils.get(func, "m_baseCls").Cast(class_type))
+        # pyre-fixme[16]: Optional type has no attribute `split`.
         func_name = func_name.split(";")[0]
 
     if len(func_name) == 0:
@@ -191,6 +202,7 @@ def create_php(
         )
 
     frame.file = php_filename(func, ar.target)
+    # pyre-fixme[8]: Attribute has type `Optional[str]`; used as `Optional[int]`.
     frame.line = php_line_number(func, pc)
 
     return frame
@@ -224,6 +236,7 @@ def format_ptr(p: typing.Union[str, int, lldb.SBValue]) -> str:
 # PHP frame info.
 
 
+# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def php_filename(func: lldb.SBValue, target: lldb.SBTarget) -> str:
     """Get the filename where the PHP function is defined
 
@@ -263,6 +276,7 @@ def php_line_number(func: lldb.SBValue, pc: int) -> typing.Optional[int]:
 
     if line_map.unsigned != 0:
         # TODO test this code path
+        # pyre-fixme[16]: Module `utils` has no attribute `debug_printf`.
         utils.debug_printf(f"php_line_number: line_map=0x{line_map.unsigned:x}")
         i = 0
         while True:

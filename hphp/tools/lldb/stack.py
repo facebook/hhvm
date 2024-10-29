@@ -5,12 +5,18 @@ import shlex
 import traceback
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `frame`.
     import frame
+
+    # pyre-fixme[21]: Could not find module `idx`.
     import idx
+
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.frame as frame
@@ -22,7 +28,11 @@ except ModuleNotFoundError:
 
 
 def function_name_for_rip(
-    rip: typing.Union[int, lldb.SBValue], target: lldb.SBTarget
+    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
+    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
+    rip: typing.Union[int, lldb.SBValue],
+    # pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
+    target: lldb.SBTarget,
 ) -> typing.Optional[str]:
     """Try getting the name of the function containing `rip`.
 

@@ -4,12 +4,18 @@ import enum
 import traceback
 import typing
 
+# pyre-fixme[21]: Could not find module `lldb`.
 import lldb
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
+    # pyre-fixme[21]: Could not find module `idx`.
     import idx
+
+    # pyre-fixme[21]: Could not find module `lookup`.
     import lookup
+
+    # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
     import hhvm_lldb.idx as idx
@@ -34,6 +40,7 @@ are found in:
 
 
 class InstrInfo(typing.NamedTuple):
+    # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.
     op: lldb.SBValue  # holding an HPHP::Op
     len: int
     imms: typing.List[dict]
@@ -50,6 +57,7 @@ class OpTableNames(enum.Enum):
     ImmSize = "HPHP::immSizeTable"
 
 
+# pyre-fixme[11]: Annotation `SBTarget` is not defined as a type.
 def op_table(name: OpTableNames, target: lldb.SBTarget) -> lldb.SBValue:
     """Get the symbol `name` as an int8_t[]"""
     try:
@@ -136,6 +144,7 @@ def rata_objs(target: lldb.SBTarget) -> typing.List[int]:
 
 
 def subop_to_name(
+    # pyre-fixme[11]: Annotation `SBTypeEnumMember` is not defined as a type.
     subop: typing.Union[lldb.SBValue, lldb.SBTypeEnumMember],
 ) -> str:
     if isinstance(subop, lldb.SBTypeEnumMember):
@@ -324,6 +333,7 @@ class HHBC:
             table_type = utils.Type("char", target).GetPointerType().GetPointerType()
             table = op_table(OpTableNames.OpcodeToName, target).Cast(table_type)
             name_entry = idx.at(table, op.unsigned)
+            # pyre-fixme[6]: For 2nd argument expected `str` but got `int`.
             name = utils.read_cstring(name_entry, 32, target.process)
         utils.debug_print(f"op_name(op={op}): name={name}")
         return name
@@ -335,6 +345,7 @@ class HHBC:
         utils.debug_print(f"try_lookup_litstr(imm={imm})")
 
         try:
+            # pyre-fixme[20]: Argument `unit` expected.
             litstr = lookup.lookup_litstr(imm)
             return utils.string_data_val(utils.rawptr(litstr))
         except Exception:
@@ -505,6 +516,7 @@ class HHBC:
                 elif tag.unsigned in rata_objs(target):
                     vid = HHBC.decode_iva(ptr)
                     size += vid["size"]
+                    # pyre-fixme[20]: Argument `unit` expected.
                     s = " " + lookup.lookup_litstr(vid["value"])
             except Exception:
                 pass

@@ -17,6 +17,9 @@ from thrift.python.mutable_types cimport (
     MutableUnion,
     MutableStructInfo,
     MutableUnionInfo,
+    _ThriftListWrapper,
+    _ThriftSetWrapper,
+    _ThriftMapWrapper,
 )
 from thrift.python.mutable_typeinfos cimport (
     MutableStructTypeInfo,
@@ -185,26 +188,26 @@ cdef object _to_mutable_python_field_value(
             (<MutableStructTypeInfo>mutable_type_info)._mutable_struct_class, src_value
         )
     elif isinstance(mutable_type_info, MutableListTypeInfo):
-        return [
+        return _ThriftListWrapper([
             _to_mutable_python_field_value(
                 elem, (<MutableListTypeInfo>mutable_type_info).val_info
             )
             for elem in src_value
-        ]
+        ])
     elif isinstance(mutable_type_info, MutableSetTypeInfo):
-        return {
+        return _ThriftSetWrapper({
             _to_mutable_python_field_value(
                 elem, (<MutableSetTypeInfo>mutable_type_info).val_info
             )
             for elem in src_value
-        }
+        })
     elif isinstance(mutable_type_info, MutableMapTypeInfo):
         mutable_map_type_info = <MutableMapTypeInfo>mutable_type_info
-        return {
+        return _ThriftMapWrapper({
             _to_mutable_python_field_value(k, mutable_map_type_info.key_info):
             _to_mutable_python_field_value(v, mutable_map_type_info.val_info)
             for k, v in src_value.items()
-        }
+        })
     elif isinstance(mutable_type_info, EnumTypeInfo):
         try:
             return (<EnumTypeInfo>mutable_type_info)._class(int(src_value))

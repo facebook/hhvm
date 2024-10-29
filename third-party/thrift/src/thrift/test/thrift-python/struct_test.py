@@ -82,6 +82,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @man
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStruct as TestStructImmutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
+    TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
@@ -423,6 +424,17 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertIsNot(w_immutable, w_mutable)
         self.assertNotEqual(w_immutable, w_mutable)
         self.assertEqual(set(w_immutable), set(w_mutable))
+
+        # Struct with container fields
+        w_immutable_containers = TestStructAllThriftContainerTypesImmutable(
+            unqualified_list_i32=[1, 2, 3],
+            unqualified_set_string={"a", "b", "c"},
+            unqualified_map_string_i32={"a": 1},
+        )
+        w_mutable_containers = w_immutable_containers._to_mutable_python()
+        self.assertIsNot(w_immutable_containers, w_mutable_containers)
+        self.assertNotEqual(w_immutable_containers, w_mutable_containers)
+        self.assertEqual(list(w_immutable_containers), list(w_mutable_containers))
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):

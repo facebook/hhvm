@@ -139,8 +139,7 @@ bool has_nonstandard_type_annotation(const t_named* node) {
 
 bool has_newtype_annotation(const t_named* node) {
   if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
-    if (const t_const* annot =
-            node->find_structured_annotation_or_null(kRustNewTypeUri)) {
+    if (node->find_structured_annotation_or_null(kRustNewTypeUri)) {
       return true;
     }
 

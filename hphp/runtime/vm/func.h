@@ -1041,11 +1041,6 @@ public:
    */
   const ReifiedGenericsInfo& getReifiedGenericsInfo() const;
 
-  /*
-   * Does this function wrap a builtin?
-   */
-  Func* unwrap();
-
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 

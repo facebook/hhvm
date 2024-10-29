@@ -144,8 +144,7 @@ bool register_intercept(const String& name, const Variant& callback) {
       if (!meth || meth->cls() != cls) return nullptr;
       return meth;
     } else {
-      auto const f = Func::load(name.get());
-      return f->unwrap();
+      return Func::load(name.get());
     }
   }();
 

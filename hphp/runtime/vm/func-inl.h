@@ -23,10 +23,6 @@
 #include "hphp/util/configs/eval.h"
 
 namespace HPHP {
-
-namespace {
-const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
-}
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
 
@@ -798,41 +794,14 @@ inline bool Func::hasReifiedGenerics() const {
   return shared()->m_allFlags.m_hasReifiedGenerics;
 }
 
-// If the function is a trivial builtin, that is not interceptable, and
-// is persistent, then unwrap it.
-inline Func* Func::unwrap() {
-  if (!RO::EvalReplaceTrivialBuiltins) return this;
-  // Already unwrapped
-  if (RO::RepoAuthoritative) return this;
-  if (RO::funcIsRenamable(name())) return this;
-
-  auto const it = userAttributes().find(s_TrivialHHVMBuiltinWrapper.get());
-  if (it != userAttributes().end()) {
-    assertx(tvIsVec(it->second));
-    auto const args = it->second.m_data.parr;
-    assertx(args->size() == 1);
-    auto const wrappedFunc = args->at(int64_t{0});
-    assertx(tvIsString(wrappedFunc));
-    assertx(wrappedFunc.m_data.pstr->isStatic());
-    auto const resolved_ne = NamedFunc::getOrCreate(wrappedFunc.m_data.pstr);
-    return resolved_ne->func();
-  }
-  return this;
-}
-
 /*
  * Find a function which always uniquely maps to the given name in the context
  * of the given unit. A function so returned can be used directly in the TC as
  * it will not change.
  */
 inline const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, const Unit* unit) {
-  auto const func = [&]() -> const Func* {
-    auto const ne = NamedFunc::getOrCreate(name);
-    auto const f = ne->func();
-    if (!f) return nullptr;
-    return f->unwrap();
-  }();
-
+  auto const ne = NamedFunc::getOrCreate(name);
+  auto const func = ne->func();
   if (!func || RO::funcIsRenamable(func->name())) return Func::none();
   // In non-repo mode while the function must be available in this unit, it
   // may be de-duplication on load. This may mean that while the func is

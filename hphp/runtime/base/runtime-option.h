@@ -926,7 +926,7 @@ struct RuntimeOption {
   F(bool, FastMethodIntercept, false)                                   \
   F(bool, LogHttpServerSignalSource, true)                              \
   F(bool, CrashOnStaticAnalysisError, debug)                            \
-  F(bool, ReplaceTrivialBuiltins, true)                                 \
+  F(bool, ReplaceTrivialBuiltins, false)                                \
   /* */
 
 private:

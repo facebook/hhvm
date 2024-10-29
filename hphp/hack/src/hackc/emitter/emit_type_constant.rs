@@ -452,7 +452,17 @@ fn hint_to_type_constant_list(
                 }
             }
         }
-        _ => {
+        Hint_::Habstr(_, _)
+        | Hint_::HclassArgs(_)
+        | Hint_::Hdynamic
+        | Hint_::HfunContext(_)
+        | Hint_::Hmixed
+        | Hint_::Hnonnull
+        | Hint_::Hnothing
+        | Hint_::Hprim(_)
+        | Hint_::Hthis
+        | Hint_::Hvar(_)
+        | Hint_::HvecOrDict(_, _) => {
             return Err(Error::unrecoverable(
                 "Hints not available on the original AST",
             ));

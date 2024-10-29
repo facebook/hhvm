@@ -149,7 +149,18 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         Htuple(TupleInfo { required, .. }) => format!("({})", fmt_hints(tparams, required)?),
         Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
-        h => fmt_name_or_prim(tparams, hint_to_string(h)).into(),
+        HclassArgs(_)
+        | HfunContext(_)
+        | Hdynamic
+        | Hintersection(_)
+        | Hmixed
+        | Hnonnull
+        | Hnothing
+        | Hprim(_)
+        | Hthis
+        | Hunion(_)
+        | Hvar(_)
+        | HvecOrDict(_, _) => fmt_name_or_prim(tparams, hint_to_string(h)).into(),
     })
 }
 
@@ -161,7 +172,23 @@ fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
         Hthis => typehints::THIS,
         Hdynamic => typehints::DYNAMIC,
         Hnothing => typehints::NOTHING,
-        _ => panic!("shouldn't invoke this function"),
+        Habstr(_, _)
+        | Haccess(_, _)
+        | Happly(_, _)
+        | HclassArgs(_)
+        | Hfun(_)
+        | HfunContext(_)
+        | Hlike(_)
+        | Hoption(_)
+        | Hrefinement(_, _)
+        | Hshape(_)
+        | Hsoft(_)
+        | Htuple(_)
+        | Hvar(_)
+        | HvecOrDict(_, _)
+        | Hwildcard => {
+            panic!("shouldn't invoke this function")
+        }
     }
 }
 
@@ -186,7 +213,21 @@ fn can_be_nullable(hint: &Hint_) -> bool {
         Happly(Id(_, id), _) => {
             id != "\\HH\\dynamic" && id != "\\HH\\nonnull" && id != "\\HH\\mixed"
         }
-        _ => true,
+        Habstr(_, _)
+        | HclassArgs(_)
+        | HfunContext(_)
+        | Hintersection(_)
+        | Hlike(_)
+        | Hnothing
+        | Hprim(_)
+        | Hrefinement(_, _)
+        | Hshape(_)
+        | Hsoft(_)
+        | Hthis
+        | Htuple(_)
+        | Hunion(_)
+        | Hvar(_)
+        | HvecOrDict(_, _) => true,
     }
 }
 
@@ -275,7 +316,15 @@ fn hint_to_type_constraint(
             // and in other cases they should be invisible to the HHVM, so unpack hint
             hint_to_type_constraint(kind, tparams, skipawaitable, hint)?
         }
-        h => type_application_helper(tparams, kind, hint_to_string(h))?,
+        // TODO: should probably just return Result::Err for some of these
+        HclassArgs(_)
+        | HfunContext(_)
+        | Hnonnull
+        | Hnothing
+        | Hprim(_)
+        | Hthis
+        | Hvar(_)
+        | HvecOrDict(_, _) => type_application_helper(tparams, kind, hint_to_string(hint))?,
     })
 }
 
@@ -480,6 +529,8 @@ pub fn hint_to_class(hint: &Hint) -> ClassName {
     }
 }
 
+// TODO(T206014630): This function and get_flags should likely be deleted now that
+// <<__Native>> functions do regular type enforcement
 pub fn emit_type_constraint_for_native_function(
     tparams: &[&str],
     ret_opt: Option<&Hint>,
@@ -519,6 +570,25 @@ fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> Type
         Happly(Id(_, s), _) if tparams.contains(&s.as_str()) => {
             TypeConstraintFlags::TypeVar | flags
         }
-        _ => flags,
+        Habstr(_, _)
+        | Happly(_, _)
+        | HclassArgs(_)
+        | Hdynamic
+        | Hfun(_)
+        | HfunContext(_)
+        | Hintersection(_)
+        | Hlike(_)
+        | Hmixed
+        | Hnonnull
+        | Hnothing
+        | Hprim(_)
+        | Hrefinement(_, _)
+        | Hshape(_)
+        | Hthis
+        | Htuple(_)
+        | Hunion(_)
+        | Hvar(_)
+        | HvecOrDict(_, _)
+        | Hwildcard => flags,
     }
 }

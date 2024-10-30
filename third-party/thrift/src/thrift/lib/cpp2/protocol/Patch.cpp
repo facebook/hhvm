@@ -861,6 +861,11 @@ void insertTypesToMask(
 ExtractedMasksFromPatch extractMaskFromPatch(
     const protocol::Object& patch, bool view) {
   ExtractedMasksFromPatch masks = {noneMask(), noneMask()};
+  // We cannot distinguish SetPatch::remove and MapPatch::remove without
+  // additional schema information. However, we can disambiguate if the same
+  // patch contains other map operations.
+  bool isMap = false;
+
   // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
     return {noneMask(), allMask()};
@@ -882,6 +887,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // others.
   if (auto* value = findOp(patch, PatchOp::Put)) {
     if (value->is_map()) {
+      isMap = true;
       insertWriteKeysToMapMask(masks.write, value->as_map(), view);
     } else if (!isIntrinsicDefault(*value)) {
       return {allMask(), allMask()};
@@ -892,6 +898,9 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // fields.
   for (auto op : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
     if (auto* patchFields = findOp(patch, op)) {
+      if (patchFields->is_map()) {
+        isMap = true;
+      }
       insertFieldsToMask(masks, *patchFields, true, view);
     }
   }
@@ -902,6 +911,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
       insertEnsureReadFieldsToMask(masks.read, *ensureStruct);
       insertEnsureWriteFieldsToMask(masks.write, *ensureStruct);
     } else {
+      isMap = true;
       insertEnsureReadKeysToMask(masks.read, *ensureStruct, view);
       insertWriteKeysToMapMask(masks.write, ensureStruct->as_map(), view);
     }
@@ -917,15 +927,17 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // We can only distinguish struct. For struct, add removed fields to write
   // mask. Both set and map use a set for Remove, so they are indistinguishable.
   // For set and map, we cannot distinguish them. For view, we always add
-  // removed keys to write map mask. For non-view, it is a read-write operation
-  // if not intristic default.
+  // removed keys to write map mask. For non-view, if any of map operations is
+  // used we can correctly distinguish between map and set, then we add removed
+  // keys to write map mask. For set or if we cannot distinguish, it is a
+  // read-write operation if not intristic default.
   if (auto* value = findOp(patch, PatchOp::Remove)) {
     if (value->is_list()) {
       // struct patch
       insertRemoveWriteFieldsToMask(masks.write, value->as_list());
     } else if (!isIntrinsicDefault(*value)) {
-      // set/map patch
-      if (!view) {
+      if (!view && !isMap) {
+        // cannot distinguish between set/map patch
         return {allMask(), allMask()};
       }
       insertWriteKeysToMapMask(masks.write, value->as_set(), view);

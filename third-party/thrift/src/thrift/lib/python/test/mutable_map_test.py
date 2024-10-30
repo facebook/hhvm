@@ -221,18 +221,11 @@ class MutableMapTest(unittest.TestCase):
 
     def test_contains_wrong_type(self) -> None:
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
-
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            _ = 1 in mutable_map
+        self.assertNotIn(1, mutable_map)
 
         mutable_map["A"] = 65
-
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            _ = 999 in mutable_map
+        self.assertNotIn(999, mutable_map)
+        self.assertIn("A", mutable_map)
 
     def test_keys(self) -> None:
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})

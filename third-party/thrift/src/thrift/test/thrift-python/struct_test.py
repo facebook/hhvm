@@ -1033,10 +1033,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotIn("11", s.unqualified_set_string)
         self.assertNotIn("12", s.unqualified_set_string)
 
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            self.assertIn(1, s.unqualified_set_string)
+        # `__contains__()` returns `False` even with the wrong key type
+        self.assertNotIn(1, s.unqualified_set_string)
 
         # `add()`
         s.unqualified_set_string.add("4")
@@ -1196,12 +1194,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertNotIn("x", s.unqualified_map_string_i32)
         self.assertNotIn("y", s.unqualified_map_string_i32)
 
-        # `__contains__()` is type checked
-        self.assertIn("a", s.unqualified_map_string_i32)
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            self.assertIn(1, s.unqualified_map_string_i32)
+        # `__contains__()` returns `False` even with the wrong key type
+        self.assertNotIn(1, s.unqualified_map_string_i32)
 
         # `__getitem__()`
         self.assertEqual(1, s.unqualified_map_string_i32["a"])

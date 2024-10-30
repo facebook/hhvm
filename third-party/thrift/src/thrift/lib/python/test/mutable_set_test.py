@@ -66,17 +66,13 @@ class MutableSetTest(unittest.TestCase):
 
     def test_contains_wrong_type(self) -> None:
         mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
-        with self.assertRaisesRegex(
-            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
-        ):
-            if "Not an interger" in mutable_set:
-                pass
+        self.assertIn(1, mutable_set)
+        self.assertNotIn("Not an interger", mutable_set)
 
     def test_contains_i32_overflow(self) -> None:
         mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
-        with self.assertRaises(OverflowError):
-            if (2**31) in mutable_set:
-                pass
+        self.assertIn(1, mutable_set)
+        self.assertNotIn(2**31, mutable_set)
 
     def test_iter(self) -> None:
         mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))

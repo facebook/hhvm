@@ -217,7 +217,11 @@ cdef class MutableSet:
         if item is None:
             return False
 
-        internal_item = self._val_typeinfo.to_internal_data(item)
+        try:
+            internal_item = self._val_typeinfo.to_internal_data(item)
+        except (TypeError, OverflowError):
+            return False
+
         return internal_item in self._set_data
 
     def __iter__(MutableSet self):
@@ -536,7 +540,14 @@ cdef class MutableMap:
             return default
 
     def __contains__(self, key):
-        internal_key = self._key_typeinfo.to_internal_data(key)
+        if key is None:
+            return False
+
+        try:
+            internal_key = self._key_typeinfo.to_internal_data(key)
+        except (TypeError, OverflowError):
+            return False
+
         return internal_key in self._map_data
 
     def __reduce__(self):

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 from thrift.py3.server import ThriftServer
 
 def install_http2_routing_handler(server: ThriftServer) -> None: ...

@@ -12,4 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 def mock_enable_resource_pools_for_python(flag_value: bool) -> None: ...

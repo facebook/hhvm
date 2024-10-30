@@ -292,6 +292,7 @@ const StaticString
   s_HHVM_JIT("HHVM_JIT"),
   s_HHVM_ARCH("HHVM_ARCH"),
   s_REQUEST_TIME_NS("REQUEST_TIME_NS"),
+  s_REQUEST_TIME_MONOTONIC_NS("REQUEST_TIME_MONOTONIC_NS"),
   s_DOCUMENT_ROOT("DOCUMENT_ROOT"),
   s_SCRIPT_FILENAME("SCRIPT_FILENAME"),
   s_SCRIPT_NAME("SCRIPT_NAME"),
@@ -716,9 +717,10 @@ void handle_destructor_exception(const char* situation) {
 }
 
 void init_server_request_time(Array& server) {
-  auto const nowNs = std::chrono::nanoseconds(
-    std::chrono::system_clock::now().time_since_epoch()).count();
-  server.set(s_REQUEST_TIME_NS, nowNs);
+  auto const nowRealtimeNs = gettime_ns(CLOCK_REALTIME);
+  auto const nowMonotonicNs = gettime_ns(CLOCK_MONOTONIC);
+  server.set(s_REQUEST_TIME_NS, nowRealtimeNs);
+  server.set(s_REQUEST_TIME_MONOTONIC_NS, nowMonotonicNs);
 }
 
 static RDS_LOCAL(rqtrace::Trace, tl_cmdTrace);

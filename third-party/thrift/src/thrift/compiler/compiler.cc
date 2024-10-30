@@ -738,7 +738,6 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
     const std::string scope_path = "thrift/annotation/scope.thrift";
     found_or_error =
         source_mgr.find_include_file(scope_path, "", pparams.incl_searchpath);
-    fmt::print(stderr, "!!! adding scope: {}\n", found_or_error.index());
     if (found_or_error.index() != 0) {
       // Fall back to the bundled annotation file.
       std::string_view content =

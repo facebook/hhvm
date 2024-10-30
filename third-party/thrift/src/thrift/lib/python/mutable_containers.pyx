@@ -51,6 +51,7 @@ cdef class MutableList:
     def __cinit__(self, TypeInfoBase value_typeinfo, list list_data):
         self._val_typeinfo = value_typeinfo
         self._list_data = list_data
+        self._value_type_is_container = value_typeinfo.is_container()
 
     def __getitem__(self, object index_obj):
         if isinstance(index_obj, slice):
@@ -73,7 +74,7 @@ cdef class MutableList:
 
     def append(self, value):
         internal_value = self._val_typeinfo.to_internal_data(value)
-        self._list_data.append(value)
+        self._list_data.append(internal_value)
 
     def extend(self, values):
         for value in values:
@@ -123,7 +124,7 @@ cdef class MutableList:
             return False
 
         try:
-            internal_value = self._val_typeinfo.to_internal_data(value)
+            internal_value = self._value_to_internal_data(value)
         except (TypeError, OverflowError):
             return False
 
@@ -142,7 +143,7 @@ cdef class MutableList:
 
     def count(self, value):
         try:
-            internal_value = self._val_typeinfo.to_internal_data(value)
+            internal_value = self._value_to_internal_data(value)
         except (TypeError, OverflowError):
             return 0
 
@@ -150,14 +151,14 @@ cdef class MutableList:
 
     def index(self, value, start=0, stop=None):
         try:
-            internal_value = self._val_typeinfo.to_internal_data(value)
+            internal_value = self._value_to_internal_data(value)
         except (TypeError, OverflowError):
             raise ValueError
 
         if stop is None:
-            return self._list_data.index(value, start)
+            return self._list_data.index(internal_value, start)
         else:
-            return self._list_data.index(value, start, stop)
+            return self._list_data.index(internal_value, start, stop)
 
     @classmethod
     def __class_getitem__(cls, _):
@@ -166,6 +167,27 @@ cdef class MutableList:
         It enables generic types like `MutableList[T]`
         """
         return cls
+
+    cdef _value_to_internal_data(self, value):
+        """
+        The `_value_to_internal_data()` method is internal and used to wrap the
+        value when it is a container. This should be done implicitly in some cases.
+        For example, for a given list field (list<list<int>>), the user must use
+        `to_thrift_list()` for assignment:
+
+        s.list_of_list_field = to_thrift_map([[1], [2]])
+
+        However, for `in` check, it is implicit:
+
+        [1] in s.list_of_list_field
+
+        This method is called when an implicit wrapper is needed.
+        """
+        value = (_ThriftContainerWrapper(value)
+                 if self._value_type_is_container
+                 else value)
+        return self._val_typeinfo.to_internal_data(value)
+
 
 MutableSequence.register(MutableList)
 

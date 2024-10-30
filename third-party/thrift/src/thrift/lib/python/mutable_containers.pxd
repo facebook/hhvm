@@ -17,6 +17,8 @@ from thrift.python.types cimport TypeInfoBase
 cdef class MutableList:
     cdef TypeInfoBase _val_typeinfo
     cdef list _list_data
+    cdef bint _value_type_is_container
+    cdef _value_to_internal_data(self, object)
 
 cdef class MutableSet:
     cdef TypeInfoBase _val_typeinfo

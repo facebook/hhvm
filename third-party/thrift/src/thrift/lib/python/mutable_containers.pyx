@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+cimport cython
 
 from collections.abc import (
     Iterable,
@@ -33,6 +34,7 @@ from thrift.python.types cimport (
 )
 
 
+@cython.final
 cdef class MutableList:
     """
     A mutable container used to represent a Thrift mutable list.
@@ -192,6 +194,7 @@ cdef class MutableList:
 MutableSequence.register(MutableList)
 
 
+@cython.final
 cdef class MutableSet:
     """
     A mutable container used to represent a Thrift mutable set. It implements
@@ -480,6 +483,7 @@ cdef class ValueIterator:
         return self
 
 
+@cython.final
 cdef class MutableMap:
     """
     A mutable container used to represent a Thrift mutable map. It implements

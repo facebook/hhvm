@@ -73,7 +73,8 @@ constexpr bool bundle_annotations() {
 #ifdef THRIFT_OSS
   return false;
 #else
-  return true;
+  // Bundling is temporarily disabled because of issues with configerator.
+  return false;
 #endif
 }
 

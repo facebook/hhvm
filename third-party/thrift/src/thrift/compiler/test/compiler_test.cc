@@ -2166,15 +2166,3 @@ TEST(CompilerTest, not_bundled_annotation) {
       {},
       options);
 }
-
-TEST(CompilerTest, bundled_annotation) {
-  auto options = check_compile_options();
-  options.add_standard_includes = false;
-  disable_relative_includes();
-  check_compile(
-      R"(
-      include "thrift/annotation/scope.thrift"
-      )",
-      {},
-      options);
-}

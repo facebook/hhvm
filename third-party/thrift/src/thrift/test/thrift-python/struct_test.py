@@ -1050,6 +1050,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.add(999)
 
         # `remove()`
@@ -1059,6 +1060,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_set_string.remove(111)
 
         # `remove()` raises a `KeyError` if key is absent
@@ -1071,6 +1073,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `discard()` does not raises a `KeyError` or `TypeError`
         s.unqualified_set_string.discard("111")
+        # pyre-ignore[6]: Intentional for test
         s.unqualified_set_string.discard(111)
 
         set1 = s.unqualified_set_string

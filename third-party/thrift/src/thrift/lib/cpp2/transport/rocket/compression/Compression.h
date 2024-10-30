@@ -41,13 +41,6 @@ extern template void setCompressionCodec<>(
     StreamPayloadMetadata& metadata,
     size_t payloadSize);
 
-/**
- * Helper method to compress the payload before sending to the remote endpoint.
- */
-[[deprecated("Use compressBuffer() instead.")]]
-void compressPayload(
-    std::unique_ptr<folly::IOBuf>& data, CompressionAlgorithm compression);
-
 } // namespace detail
 
 std::unique_ptr<folly::IOBuf> compressBuffer(

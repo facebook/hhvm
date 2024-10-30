@@ -50,11 +50,6 @@ template void setCompressionCodec<>(
     CompressionConfig compressionConfig,
     StreamPayloadMetadata& metadata,
     size_t payloadSize);
-
-void compressPayload(
-    std::unique_ptr<folly::IOBuf>& data, CompressionAlgorithm compression) {
-  data = compressBuffer(std::move(data), compression);
-}
 } // namespace detail
 
 std::unique_ptr<folly::IOBuf> compressBuffer(

@@ -1092,6 +1092,7 @@ public:
    * is being considered for compilation.
    */
   uint8_t incJitReqCount() const;
+  uint8_t readJitReqCount() const;
   void resetJitReqCount() const;
 
   /////////////////////////////////////////////////////////////////////////////

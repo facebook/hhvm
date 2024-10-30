@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
@@ -498,6 +499,7 @@ void logResume(SrcKey sk, ResumeFlags flags) {
   std::filesystem::path fpath = sk.unit()->filepath()->toCppString();
   auto const dir = RepoOptions::forFile(fpath.c_str()).dir();
   auto const rel = std::filesystem::proximate(fpath, dir);
+  auto const fn = folly::cEscape<std::string>(sk.func()->fullName()->slice());
 
   ent.setInt("sample_rate", Cfg::Eval::HandleResumeStatsRate);
   ent.setStr("file", rel.native());
@@ -509,7 +511,7 @@ void logResume(SrcKey sk, ResumeFlags flags) {
     else ent.setStr("class", sk.func()->preClass()->name()->slice());
   }
   ent.setStr("unit_sha1", sk.unit()->sha1().toString());
-  ent.setStr("full_func_name", sk.func()->fullName()->slice());
+  ent.setStr("full_func_name", fn);
   ent.setInt("prologue", sk.prologue() ? 1 : 0);
   ent.setInt("funcEntry", sk.funcEntry() ? 1 : 0);
   ent.setInt("hasThis", sk.hasThis() ? 1 : 0);
@@ -527,6 +529,23 @@ void logResume(SrcKey sk, ResumeFlags flags) {
   ent.setInt("cold_used_bytes", tc::code().cold().used());
   ent.setInt("frozen_used_bytes", tc::code().frozen().used());
   ent.setInt("data_used_bytes", tc::code().data().used());
+
+  if (auto const sr = tc::findSrcRec(sk)) {
+    auto const lock = sr->readlock();
+    ent.setInt("src_rec", 1);
+    ent.setInt("num_trans", sr->translations().size());
+    ent.setInt("tail_jumps", sr->tailFallbackJumps().size());
+    ent.setInt("incoming_branches", sr->incomingBranches().size());
+    ent.setInt("max_trans", Cfg::Jit::MaxTranslations);
+  } else {
+    ent.setInt("src_rec", 0);
+  }
+
+  ent.setInt("can_translate", tc::canTranslate() ? 1 : 0);
+  ent.setInt("profile_count", sk.func()->readJitReqCount());
+  ent.setInt("live_threshold", Cfg::Jit::LiveThreshold);
+  ent.setInt("live_main_usage", tc::getLiveMainUsage());
+  ent.setInt("live_main_limit", Cfg::Jit::MaxLiveMainUsage);
 
   StructuredLog::log("hhvm_resume_locations", ent);
 }

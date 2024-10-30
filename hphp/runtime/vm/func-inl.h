@@ -882,6 +882,10 @@ inline uint8_t Func::incJitReqCount() const {
   not_reached();
 }
 
+inline uint8_t Func::readJitReqCount() const {
+  return m_jitReqCount.load(std::memory_order_relaxed);
+}
+
 inline void Func::resetJitReqCount() const {
   m_jitReqCount.store(0, std::memory_order_release);
 }

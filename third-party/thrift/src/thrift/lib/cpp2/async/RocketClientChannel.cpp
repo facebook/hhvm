@@ -958,11 +958,6 @@ void RocketClientChannel::sendThriftRequest(
           std::move(clientCallback));
       break;
 
-    case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-      // should no longer reach here anymore, use sendRequestStream
-      DCHECK(false);
-      break;
-
     default:
       folly::assume_unreachable();
   }

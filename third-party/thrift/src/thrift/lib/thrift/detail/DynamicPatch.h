@@ -448,11 +448,16 @@ class DynamicStructurePatch {
                    : ensureStruct(id, std::move(v));
   }
 
-  DynamicPatch& patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {
-    return patchIfSetImpl(id, p);
+  DynamicPatch& patchIfSet(detail::Badge, FieldId id) {
+    ensurePatchable();
+    return ensure_.contains(id) ? patchAfter_[id] : patchPrior_[id];
   }
-  DynamicPatch& patchIfSet(detail::Badge, FieldId id, DynamicPatch&& p) {
-    return patchIfSetImpl(id, std::move(p));
+
+  template <class SubPatch>
+  DynamicPatch& patchIfSet(detail::Badge badge, FieldId id, SubPatch&& patch) {
+    auto& ret = patchIfSet(badge, id);
+    ret.merge(badge, std::forward<SubPatch>(patch));
+    return ret;
   }
 
   [[nodiscard]] bool empty(detail::Badge) const {
@@ -484,9 +489,6 @@ class DynamicStructurePatch {
 
   void ensureStruct(FieldId, Value);
   void ensureUnion(FieldId, Value);
-
-  template <class SubPatch>
-  DynamicPatch& patchIfSetImpl(FieldId, SubPatch&&);
 
  private:
   std::optional<Object> assign_;

@@ -439,21 +439,6 @@ void DynamicStructurePatch<IsUnion>::undoChanges(FieldId id) {
 }
 
 template <bool IsUnion>
-template <class SubPatch>
-DynamicPatch& DynamicStructurePatch<IsUnion>::patchIfSetImpl(
-    FieldId id, SubPatch&& p) {
-  ensurePatchable();
-
-  auto& patch = (ensure_.contains(id) ? patchAfter_ : patchPrior_);
-  if (auto subPatch = folly::get_ptr(patch, id)) {
-    subPatch->merge(badge, std::forward<SubPatch>(p));
-    return *subPatch;
-  } else {
-    return patch.emplace(id, std::forward<SubPatch>(p)).first->second;
-  }
-}
-
-template <bool IsUnion>
 void DynamicStructurePatch<IsUnion>::ensureUnion(FieldId id, Value v) {
   ensurePatchable();
 

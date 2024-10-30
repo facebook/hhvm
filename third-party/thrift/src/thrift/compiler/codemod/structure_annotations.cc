@@ -22,10 +22,10 @@
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/codemod/file_manager.h>
 #include <thrift/compiler/compiler.h>
 #include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/lib/uri.h>
 
 using namespace apache::thrift::compiler;
 

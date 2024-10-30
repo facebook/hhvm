@@ -22,9 +22,9 @@
 #include <unordered_set>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
 #include <thrift/compiler/generate/cpp/util.h>
-#include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/sema/standard_validator.h>

@@ -16,8 +16,8 @@
 
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
-#include <thrift/compiler/lib/uri.h>
 
 namespace apache::thrift::compiler::gen::cpp {
 

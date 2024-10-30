@@ -26,8 +26,8 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
-#include <thrift/compiler/lib/uri.h>
 
 template <>
 struct std::hash<std::pair<

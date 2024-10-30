@@ -26,11 +26,11 @@
 
 #include <openssl/evp.h>
 #include <thrift/compiler/ast/t_typedef.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/java/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/uri.h>
 
 using namespace std;
 

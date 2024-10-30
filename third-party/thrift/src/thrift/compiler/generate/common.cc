@@ -24,7 +24,7 @@
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_set.h>
-#include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 

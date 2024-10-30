@@ -21,7 +21,7 @@
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_type.h>
-#include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 

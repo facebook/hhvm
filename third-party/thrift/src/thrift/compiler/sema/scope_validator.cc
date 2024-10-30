@@ -26,7 +26,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
-#include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 

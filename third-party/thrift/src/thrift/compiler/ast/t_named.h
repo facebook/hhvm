@@ -24,7 +24,7 @@
 
 #include <thrift/compiler/ast/node_list.h>
 #include <thrift/compiler/ast/t_node.h>
-#include <thrift/compiler/lib/uri.h>
+#include <thrift/compiler/ast/uri.h>
 
 namespace apache::thrift::compiler {
 

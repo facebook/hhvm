@@ -26,6 +26,7 @@
 #include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
@@ -33,7 +34,6 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache::thrift::compiler {

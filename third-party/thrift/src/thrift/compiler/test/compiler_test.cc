@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
+#include <filesystem>
 #include <string>
 #include <thrift/compiler/test/compiler.h>
 
 #include <gtest/gtest.h>
 
 using apache::thrift::compiler::test::check_compile;
+using apache::thrift::compiler::test::check_compile_options;
+
+namespace {
+
+// Change the current directory to a subdirectory to avoid relative annotations
+// being found via relative includes. The exact directory doesn't matter so
+// pick "thrift" since we know it exists.
+void disable_relative_includes() {
+  std::filesystem::current_path("thrift");
+}
+
+} // namespace
 
 // Note: To see a reference on the expected lint message format: see the regex
 // in thrift/compiler/test/compiler.cc
@@ -2139,4 +2152,29 @@ TEST(CompilerTest, duplicate_include) {
     include "thrift/annotation/thrift.thrift"
     include "thrift/annotation/cpp.thrift" # expected-warning: Duplicate include of `thrift/annotation/cpp.thrift`
   )");
+}
+
+TEST(CompilerTest, not_bundled_annotation) {
+  auto options = check_compile_options();
+  options.add_standard_includes = false;
+  disable_relative_includes();
+  check_compile(
+      R"(
+      include "thrift/annotation/cpp.thrift"
+      # expected-error-1: Could not find include file thrift/annotation/cpp.thrift
+      )",
+      {},
+      options);
+}
+
+TEST(CompilerTest, bundled_annotation) {
+  auto options = check_compile_options();
+  options.add_standard_includes = false;
+  disable_relative_includes();
+  check_compile(
+      R"(
+      include "thrift/annotation/scope.thrift"
+      )",
+      {},
+      options);
 }

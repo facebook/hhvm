@@ -179,7 +179,8 @@ std::vector<diagnostic> extract_expected_diagnostics(
 void check_compile(
     const std::map<std::string, std::string>& name_contents_map,
     const std::string& file_name,
-    std::vector<std::string> args) {
+    std::vector<std::string> args,
+    check_compile_options options) {
   source_manager smgr;
   temp_dir tmp_dir;
   std::vector<diagnostic> expected_diagnostics;
@@ -208,9 +209,11 @@ void check_compile(
   args.emplace_back("mstch_cpp2"); // target language
   args.emplace_back("-o"); // output directory
   args.emplace_back(tmp_dir.string() + "/");
-  if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
-    args.emplace_back("-I"); // include directory
-    args.emplace_back(includes);
+  if (options.add_standard_includes) {
+    if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
+      args.emplace_back("-I"); // include directory
+      args.emplace_back(includes);
+    }
   }
   args.emplace_back(file_name); // input file name
 
@@ -223,11 +226,14 @@ void check_compile(
   EXPECT_THAT(result_diagnostics, ::testing::ContainerEq(expected_diagnostics));
 }
 
-void check_compile(const std::string& source, std::vector<std::string> args) {
-  const std::string TEST_FILE_NAME = "test.thrift";
+void check_compile(
+    const std::string& source,
+    std::vector<std::string> args,
+    check_compile_options options) {
+  const std::string test_file_name = "test.thrift";
   std::map<std::string, std::string> file_contents_map{
-      {TEST_FILE_NAME, source}};
-  check_compile(file_contents_map, TEST_FILE_NAME, std::move(args));
+      {test_file_name, source}};
+  check_compile(file_contents_map, test_file_name, std::move(args), options);
 }
 
 } // namespace apache::thrift::compiler::test

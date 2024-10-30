@@ -22,12 +22,20 @@
 
 namespace apache::thrift::compiler::test {
 
+struct check_compile_options {
+  // Specifies whether to add Thrift annotation and lib directories to the
+  // includes search path.
+  bool add_standard_includes = true;
+};
+
 void check_compile(
     const std::string& source,
-    std::vector<std::string> args = std::vector<std::string>());
+    std::vector<std::string> args = std::vector<std::string>(),
+    check_compile_options options = {});
 void check_compile(
     const std::map<std::string, std::string>& name_contents_map,
     const std::string& file_name,
-    std::vector<std::string> args = std::vector<std::string>());
+    std::vector<std::string> args = std::vector<std::string>(),
+    check_compile_options options = {});
 
 } // namespace apache::thrift::compiler::test

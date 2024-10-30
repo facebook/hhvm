@@ -69,6 +69,14 @@ struct gen_params {
   bool inject_schema_const = false;
 };
 
+constexpr bool bundle_annotations() {
+#ifdef THRIFT_OSS
+  return false;
+#else
+  return true;
+#endif
+}
+
 /**
  * Display the usage message.
  */
@@ -725,6 +733,21 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
     const std::string& input_filename,
     const parsing_params& pparams,
     const gen_params& gparams) {
+  auto found_or_error = source_manager::path_or_error();
+  if (bundle_annotations()) {
+    const std::string scope_path = "thrift/annotation/scope.thrift";
+    found_or_error =
+        source_mgr.find_include_file(scope_path, "", pparams.incl_searchpath);
+    fmt::print(stderr, "!!! adding scope: {}\n", found_or_error.index());
+    if (found_or_error.index() != 0) {
+      // Fall back to the bundled annotation file.
+      std::string_view content =
+          apache::thrift::detail::bundled_annotations::scope_file_content();
+      source_mgr.add_virtual_file(
+          scope_path, std::string(content.data(), content.size()));
+    }
+  }
+
   // Parse it!
   std::unique_ptr<t_program_bundle> program_bundle = parse_ast(
       source_mgr, ctx, input_filename, pparams, &ctx.sema_parameters());
@@ -734,55 +757,41 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
   // Load standard library if available.
   const std::string schema_path = "thrift/lib/thrift/schema.thrift";
-  auto found_or_error =
-      source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
-  if (found_or_error.index() == 0) {
-    // Found
-    if (!program_bundle->find_program(schema_path)) {
-      sema_context stdlib_ctx(
-          source_mgr,
-          [&](diagnostic&& d) {
-            ctx.report(
-                source_location{},
-                diagnostic_level::debug,
-                "Could not load Thrift standard libraries: {}",
-                d);
-          },
-          diagnostic_params::only_errors());
-      std::unique_ptr<t_program_bundle> inc = parse_ast(
-          source_mgr,
-          stdlib_ctx,
-          schema_path,
-          pparams,
-          nullptr,
-          program_bundle.get());
-      if (inc && !stdlib_ctx.has_errors()) {
-        program_bundle->add_implicit_includes(std::move(inc));
-      }
-    }
-  } else {
-    ctx.warning(
-        source_location(),
-        "Could not load Thrift standard libraries: {}",
-        std::get<1>(found_or_error));
-  }
-
-#ifndef THRIFT_OSS
-  const std::string scope_path = "thrift/annotation/scope.thrift";
   found_or_error =
-      source_mgr.find_include_file(scope_path, "", pparams.incl_searchpath);
-  if (found_or_error.index() != 0) {
-    // Fall back to the bundled annotation file.
-    std::string_view content =
-        apache::thrift::detail::bundled_annotations::scope_file_content();
-    source_mgr.add_virtual_file(
-        scope_path, std::string(content.data(), content.size()));
+      source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
+  if (found_or_error.index() == 0 &&
+      !program_bundle->find_program(schema_path)) {
+    sema_context stdlib_ctx(
+        source_mgr,
+        [&](diagnostic&& d) {
+          ctx.report(
+              source_location{},
+              diagnostic_level::debug,
+              "Could not load Thrift standard libraries: {}",
+              d);
+        },
+        diagnostic_params::only_errors());
+    std::unique_ptr<t_program_bundle> inc = parse_ast(
+        source_mgr,
+        stdlib_ctx,
+        schema_path,
+        pparams,
+        nullptr,
+        program_bundle.get());
+    if (inc && !stdlib_ctx.has_errors()) {
+      program_bundle->add_implicit_includes(std::move(inc));
+    }
   }
-#endif
 
   // C++ codegen inserts an empty const if this is false. Other languages may
   // dynamically determine whether the schema const exists.
   if (gparams.inject_schema_const) {
+    if (found_or_error.index() != 0) {
+      ctx.warning(
+          source_location(),
+          "Could not load Thrift standard libraries: {}",
+          std::get<1>(found_or_error));
+    }
     sema::add_schema(ctx, *program_bundle);
   }
 

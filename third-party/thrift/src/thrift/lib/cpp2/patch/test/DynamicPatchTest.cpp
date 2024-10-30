@@ -802,7 +802,7 @@ TEST(PatchMergeTest, DynamicStructPatch) {
 
   op::I32Patch foo;
   foo += 1;
-  p.patchIfSet(badge, FieldId{1}, DynamicPatch{foo});
+  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
 
   Object obj;
   obj[FieldId(1)].emplace_i32(3);
@@ -819,7 +819,7 @@ TEST(PatchMergeTest, DynamicStructPatch) {
   obj[FieldId(1)].emplace_i32(3);
 
   // patch becomes += 2
-  p.patchIfSet(badge, FieldId{1}, DynamicPatch{foo});
+  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
 
   p.apply(badge, obj);
   EXPECT_EQ(obj[FieldId(1)].as_i32(), 5);
@@ -829,7 +829,7 @@ TEST(PatchMergeTest, DynamicStructPatch) {
   // In dynamic patch, we only use Remove operation to remove field
   // Clear operation will just set field to intrinsic default
   foo.clear();
-  p.patchIfSet(badge, FieldId{1}, DynamicPatch{foo});
+  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
   p.apply(badge, obj);
   EXPECT_EQ(obj[FieldId(1)].as_i32(), 0);
 

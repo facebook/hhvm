@@ -929,7 +929,7 @@ DynamicUnionPatch DiffVisitorBase::diffUnion(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
-    patch.patchIfSet(badge, id, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
   }
 
   return patch;
@@ -1002,7 +1002,7 @@ void DiffVisitorBase::diffField(
     auto empty = emptyValue(field.getType());
     auto subPatch = diff(badge, empty, field);
     patch.ensure(badge, id, std::move(empty));
-    patch.patchIfSet(badge, id, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
     return;
   }
 
@@ -1010,7 +1010,7 @@ void DiffVisitorBase::diffField(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
-    patch.patchIfSet(badge, id, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
   }
 }
 

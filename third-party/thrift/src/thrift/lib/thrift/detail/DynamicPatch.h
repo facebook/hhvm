@@ -448,16 +448,25 @@ class DynamicStructurePatch {
                    : ensureStruct(id, std::move(v));
   }
 
+  // patchIfSet
+  template <class Tag>
+  op::patch_type<Tag>& patchIfSet(detail::Badge badge, FieldId id) {
+    using Patch = op::patch_type<Tag>;
+    auto& patch = patchIfSet(badge, id);
+
+    // patch already has the correct type, return it directly.
+    if (auto p = patch.template get_if<Patch>(badge)) {
+      return *p;
+    }
+
+    // Use merge to change patch's type.
+    patch.merge(badge, DynamicPatch{Patch{}});
+    return *patch.template get_if<Patch>(badge);
+  }
+
   DynamicPatch& patchIfSet(detail::Badge, FieldId id) {
     ensurePatchable();
     return ensure_.contains(id) ? patchAfter_[id] : patchPrior_[id];
-  }
-
-  template <class SubPatch>
-  DynamicPatch& patchIfSet(detail::Badge badge, FieldId id, SubPatch&& patch) {
-    auto& ret = patchIfSet(badge, id);
-    ret.merge(badge, std::forward<SubPatch>(patch));
-    return ret;
   }
 
   [[nodiscard]] bool empty(detail::Badge) const {
@@ -477,6 +486,12 @@ class DynamicStructurePatch {
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, detail::Badge, Visitor&& v);
+
+  // Needed for merge(...). We can consider making this a public API.
+  template <class SubPatch>
+  void patchIfSet(detail::Badge badge, FieldId id, SubPatch&& patch) {
+    patchIfSet(badge, id).merge(badge, std::forward<SubPatch>(patch));
+  }
 
  public:
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(

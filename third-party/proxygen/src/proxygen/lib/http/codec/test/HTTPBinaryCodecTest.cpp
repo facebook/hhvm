@@ -80,7 +80,7 @@ TEST_F(HTTPBinaryCodecTest, testParseFramingIndicatorSuccess) {
   bool knownLength = false;
   EXPECT_EQ(
       upstreamBinaryCodec_->parseFramingIndicator(cursor, request, knownLength)
-          .value(),
+          .bytesParsed_,
       1);
   EXPECT_EQ(request, true);
   EXPECT_EQ(knownLength, true);
@@ -94,7 +94,7 @@ TEST_F(HTTPBinaryCodecTest, testParseFramingIndicatorSuccess) {
 
   EXPECT_EQ(
       upstreamBinaryCodec_->parseFramingIndicator(cursor, request, knownLength)
-          .error(),
+          .error_,
       "Unsupported indeterminate length Binary HTTP Request");
   EXPECT_EQ(request, false);
   EXPECT_EQ(knownLength, false);
@@ -112,13 +112,13 @@ TEST_F(HTTPBinaryCodecTest, testParseFramingIndicatorFailure) {
   bool knownLength = false;
   EXPECT_EQ(
       upstreamBinaryCodec_->parseFramingIndicator(cursor, request, knownLength)
-          .error(),
+          .error_,
       "Invalid Framing Indicator: 4");
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataSuccess) {
-  // Format is `.GET.https.www.example.com./hello.txt` where `.` represents the
-  // length of each subsequent string
+  // Format is `.GET.https.www.example.com./hello.txt` where `.` represents
+  // the length of each subsequent string
   const std::vector<uint8_t> controlDataRequest{
       0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73,
       0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70,
@@ -132,7 +132,7 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataSuccess) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseRequestControlData(cursor, controlDataRequest.size(), msg)
-          .value(),
+          .bytesParsed_,
       controlDataRequest.size());
   EXPECT_EQ(msg.isSecure(), true);
   EXPECT_EQ(msg.getMethod(), proxygen::HTTPMethod::GET);
@@ -156,7 +156,7 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseRequestControlData(
                     cursor, controlDataInvalidRequest.size(), msg)
-                .error(),
+                .error_,
             "Failure to parse: path");
 
   // Format is `.GET.httpt.www.example.com./hello.txt` where `.` represents the
@@ -173,7 +173,7 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseRequestControlData(
                     cursor, controlDataInvalidScheme.size(), msg)
-                .error(),
+                .error_,
             "Failure to parse: scheme. Should be 'http' or 'https'");
 
   // Format is `.GET.https.www.example.com.hello.tx[\x1]` where `.` represents
@@ -189,7 +189,7 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseRequestControlData(cursor, controlDataInvalidPath.size(), msg)
-          .error(),
+          .error_,
       "Failure to parse: invalid URL path 'hello.tx\x1'");
 }
 
@@ -205,7 +205,7 @@ TEST_F(HTTPBinaryCodecTest, testParseResponseControlDataSuccess) {
   HTTPMessage msg;
   EXPECT_EQ(
       upstreamBinaryCodec_->parseResponseControlData(cursor, parsedBytes, msg)
-          .value(),
+          .bytesParsed_,
       parsedBytes);
   EXPECT_EQ(msg.getStatusCode(), 200);
 }
@@ -222,7 +222,7 @@ TEST_F(HTTPBinaryCodecTest, testParseResponseControlDataFailure) {
   HTTPMessage msg;
   EXPECT_EQ(
       upstreamBinaryCodec_->parseResponseControlData(cursor, parsedBytes, msg)
-          .error(),
+          .error_,
       "Invalid response status code: 600");
 
   folly::IOBufQueue controlInvalidDataInformationalResponseIOBuf;
@@ -236,7 +236,7 @@ TEST_F(HTTPBinaryCodecTest, testParseResponseControlDataFailure) {
 
   EXPECT_EQ(
       upstreamBinaryCodec_->parseResponseControlData(cursor, parsedBytes, msg)
-          .error(),
+          .error_,
       "Invalid response status code: 101");
 }
 
@@ -269,7 +269,7 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersSuccess) {
                   false /* allowEmptyPath */);
   EXPECT_EQ(
       upstreamBinaryCodec_->parseHeaders(cursor, headers.size(), decodeInfo)
-          .value(),
+          .bytesParsed_,
       headers.size());
 
   HTTPHeaders httpHeaders = decodeInfo.msg->getHeaders();
@@ -298,7 +298,7 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseHeaders(cursor, invalidHeadersCount.size(), decodeInfo)
-          .error(),
+          .error_,
       "Number of headers (key value pairs) should be >= 1. Header count is 0");
 
   // Format is `..user-agent.curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
@@ -321,7 +321,7 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
 
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseHeaders(cursor, invalidHeadersLength.size(), decodeInfo)
-                .error(),
+                .error_,
             "Failure to parse: headerValue");
 
   // Format is `..a.b` where the first `.` represents a too long length
@@ -334,7 +334,7 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseHeaders(cursor, invalidHeadersUnderflow.size(), decodeInfo)
-          .error(),
+          .error_,
       "Header parsing underflowed! Headers length in bytes (9) is "
       "inconsistent with remaining buffer length (4)");
 
@@ -347,7 +347,7 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseHeaders(cursor, invalidHeadersUnderflowQuic.size(), decodeInfo)
-          .error(),
+          .error_,
       "Failure to parse number of headers");
 }
 
@@ -360,9 +360,9 @@ TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
   folly::io::Cursor cursor(contentIOBuf.get());
 
   HTTPMessage msg;
-  EXPECT_EQ(
-      upstreamBinaryCodec_->parseContent(cursor, content.size(), msg).value(),
-      content.size());
+  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, content.size(), msg)
+                .bytesParsed_,
+            content.size());
   EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(), "hello\r\n");
 }
 
@@ -377,7 +377,7 @@ TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
   HTTPMessage msg;
   EXPECT_EQ(
       upstreamBinaryCodec_->parseContent(cursor, contentInvalid.size(), msg)
-          .error(),
+          .error_,
       "Failure to parse content");
 }
 
@@ -545,7 +545,8 @@ TEST_F(HTTPBinaryCodecTest, testGenerateBody) {
   // Decode Test Body and check
   folly::io::Cursor cursor(writeBuffer.front());
   HTTPMessage msg;
-  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, 18, msg).value(), 18);
+  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, 18, msg).bytesParsed_,
+            18);
   EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(),
             "Sample Test Body!");
 }

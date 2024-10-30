@@ -16,7 +16,29 @@
 
 namespace proxygen {
 
-using ParseResult = folly::Expected<size_t, std::string>;
+enum class ParseResultState {
+  INITIALIZED = 0,
+  WAITING_FOR_MORE_DATA = 1,
+  DONE = 2,
+  ERROR = 3,
+};
+
+class ParseResult {
+ public:
+  explicit ParseResult(size_t bytesParsed)
+      : parseResultState_(ParseResultState::DONE), bytesParsed_(bytesParsed) {
+  }
+  explicit ParseResult(const ParseResultState& parseResultState)
+      : parseResultState_(parseResultState) {
+  }
+  explicit ParseResult(std::string error)
+      : parseResultState_(ParseResultState::ERROR), error_(std::move(error)) {
+  }
+
+  ParseResultState parseResultState_{ParseResultState::INITIALIZED};
+  size_t bytesParsed_{};
+  std::string error_;
+};
 
 /* The HTTPBinaryCodec class is an implementation of the "Binary Representation
  * of HTTP Messages" RFC -

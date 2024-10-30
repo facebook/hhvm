@@ -45,6 +45,16 @@ class FooStreamEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FooStreamEx, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FooStreamEx, self)
+
 
 class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -72,6 +82,16 @@ class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx, self)
+
 
 class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -98,6 +118,16 @@ class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedError
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx2, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx2, self)
 
 
 

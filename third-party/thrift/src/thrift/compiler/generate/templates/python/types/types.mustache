@@ -155,6 +155,7 @@ Until we resolve the above error, register the class as virtual subclass of the 
     {{#program:py3_auto_migrate?}}
         return self
     {{/program:py3_auto_migrate?}}
+{{/program:generate_immutable_types}}
 
     def _to_py_deprecated(self):
         import importlib
@@ -165,7 +166,6 @@ Until we resolve the above error, register the class as virtual subclass of the 
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
-{{/program:generate_immutable_types}}
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
 

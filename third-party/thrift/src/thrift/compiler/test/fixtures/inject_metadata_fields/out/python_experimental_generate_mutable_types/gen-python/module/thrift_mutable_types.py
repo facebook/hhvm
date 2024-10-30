@@ -58,6 +58,16 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
+
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -95,6 +105,16 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
 
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -144,6 +164,16 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
 
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -215,6 +245,16 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
 
 
 

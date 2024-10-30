@@ -49,6 +49,16 @@ class empty_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.empty_struct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.empty_struct, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.decorated_struct.register
 class decorated_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -87,6 +97,16 @@ class decorated_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.decorated_struct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.decorated_struct, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ContainerStruct.register
@@ -204,6 +224,16 @@ class ContainerStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ContainerStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ContainerStruct, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.CppTypeStruct.register
 class CppTypeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -243,6 +273,16 @@ class CppTypeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CppTypeStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CppTypeStruct, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.VirtualStruct.register
 class VirtualStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -281,6 +321,16 @@ class VirtualStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.VirtualStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualStruct, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.MyStructWithForwardRefEnum.register
@@ -332,6 +382,16 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_mutable_types.Mutabl
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStructWithForwardRefEnum, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructWithForwardRefEnum, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.TrivialNumeric.register
 class TrivialNumeric(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -381,6 +441,16 @@ class TrivialNumeric(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.TrivialNumeric, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNumeric, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.TrivialNestedWithDefault.register
@@ -432,6 +502,16 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.TrivialNestedWithDefault, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNestedWithDefault, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ComplexString.register
 class ComplexString(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -482,6 +562,16 @@ class ComplexString(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexString, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexString, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ComplexNestedWithDefault.register
 class ComplexNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -531,6 +621,16 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_mutable_types.MutableS
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexNestedWithDefault, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexNestedWithDefault, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.MinPadding.register
@@ -615,6 +715,16 @@ class MinPadding(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MinPadding, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MinPadding, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.MinPaddingWithCustomType.register
 class MinPaddingWithCustomType(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -698,6 +808,16 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_mutable_types.MutableS
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MinPaddingWithCustomType, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MinPaddingWithCustomType, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -770,6 +890,16 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.MyDataItem.register
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -797,6 +927,16 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItem, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.Renaming.register
@@ -836,6 +976,16 @@ class Renaming(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Renaming, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Renaming, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.AnnotatedTypes.register
@@ -887,6 +1037,16 @@ class AnnotatedTypes(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AnnotatedTypes, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AnnotatedTypes, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageRoot.register
 class ForwardUsageRoot(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -937,6 +1097,16 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageRoot, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageRoot, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageStruct.register
 class ForwardUsageStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -975,6 +1145,16 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_mutable_types.MutableStructM
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageStruct, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.ForwardUsageByRef.register
@@ -1015,6 +1195,16 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageByRef, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageByRef, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteMap.register
 class IncompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1054,6 +1244,16 @@ class IncompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMap, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMap, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteMapDep.register
 class IncompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1081,6 +1281,16 @@ class IncompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMet
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMapDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMapDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteMap.register
@@ -1121,6 +1331,16 @@ class CompleteMap(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMap, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMap, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteMapDep.register
 class CompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1148,6 +1368,16 @@ class CompleteMapDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMapDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMapDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteList.register
@@ -1188,6 +1418,16 @@ class IncompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteList, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteList, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.IncompleteListDep.register
 class IncompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1215,6 +1455,16 @@ class IncompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMe
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteListDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteListDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteList.register
@@ -1255,6 +1505,16 @@ class CompleteList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteList, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteList, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.CompleteListDep.register
 class CompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1282,6 +1542,16 @@ class CompleteListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteListDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteListDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.AdaptedList.register
@@ -1322,6 +1592,16 @@ class AdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedList, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedList, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.AdaptedListDep.register
 class AdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1360,6 +1640,16 @@ class AdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedListDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedListDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.DependentAdaptedList.register
@@ -1400,6 +1690,16 @@ class DependentAdaptedList(metaclass=_fbthrift_python_mutable_types.MutableStruc
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.DependentAdaptedList, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedList, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.DependentAdaptedListDep.register
 class DependentAdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1438,6 +1738,16 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_mutable_types.MutableSt
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.DependentAdaptedListDep, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedListDep, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.AllocatorAware.register
@@ -1544,6 +1854,16 @@ class AllocatorAware(metaclass=_fbthrift_python_mutable_types.MutableStructMeta)
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AllocatorAware, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.AllocatorAware2.register
 class AllocatorAware2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1593,6 +1913,16 @@ class AllocatorAware2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AllocatorAware2, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware2, self)
 
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.TypedefStruct.register
@@ -1655,6 +1985,16 @@ class TypedefStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.TypedefStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.TypedefStruct, self)
+
 
 @apache.thrift.fixtures.types.module.thrift_abstract_types.StructWithDoubleUnderscores.register
 class StructWithDoubleUnderscores(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -1693,6 +2033,16 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_mutable_types.Mutab
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithDoubleUnderscores, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithDoubleUnderscores, self)
 
 
 

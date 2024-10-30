@@ -113,6 +113,16 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexUnion, self)
+
 
 @module.thrift_abstract_types.ListUnion.register
 class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -163,6 +173,16 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ListUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ListUnion, self)
+
 
 @module.thrift_abstract_types.DataUnion.register
 class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -212,6 +232,16 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.DataUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.DataUnion, self)
 
 
 @module.thrift_abstract_types.Val.register
@@ -274,6 +304,16 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Val, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Val, self)
+
 
 @module.thrift_abstract_types.ValUnion.register
 class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -323,6 +363,16 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ValUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ValUnion, self)
 
 
 @module.thrift_abstract_types.VirtualComplexUnion.register
@@ -374,6 +424,16 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.VirtualComplexUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualComplexUnion, self)
+
 
 @module.thrift_abstract_types.NonCopyableStruct.register
 class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -413,6 +473,16 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.NonCopyableStruct, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableStruct, self)
+
 
 @module.thrift_abstract_types.NonCopyableUnion.register
 class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
@@ -451,6 +521,16 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.NonCopyableUnion, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableUnion, self)
 
 
 

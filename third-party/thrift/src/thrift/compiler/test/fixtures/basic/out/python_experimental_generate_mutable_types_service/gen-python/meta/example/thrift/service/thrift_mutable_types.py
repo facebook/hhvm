@@ -56,6 +56,16 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.EchoRequest, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.EchoRequest, self)
+
 
 class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -94,6 +104,16 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.EchoResponse, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.EchoResponse, self)
+
 
 class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -131,6 +151,16 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.WhisperException, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("service.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.WhisperException, self)
 
 
 

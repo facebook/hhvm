@@ -58,6 +58,16 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
     def _to_mutable_python(self):
         return self
 
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
+
 
 
 _fbthrift_all_enums = [

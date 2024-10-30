@@ -69,7 +69,7 @@ let add_warning env ~as_lint pos kind ty1 ty2 =
         Some None
       else
         None)
-    (pos, warning_kind, { Typing_warning.EqualityCheck.kind; ty1; ty2 })
+    (pos, warning_kind, { Typing_warning.Equality_check.kind; ty1; ty2 })
 
 let error_if_inequatable env ty1 ty2 err =
   let expand_tydef =
@@ -100,21 +100,21 @@ let ensure_valid_equality_check env ~as_lint p bop e1 e2 =
        env
        ~as_lint
        p
-       (Typing_warning.EqualityCheck.Equality (equal_bop bop Diff2)))
+       (Typing_warning.Equality_check.Equality (equal_bop bop Diff2)))
 
 let ensure_valid_contains_check env ~as_lint p trv_val_ty val_ty =
   error_if_inequatable
     env
     trv_val_ty
     val_ty
-    (add_warning env ~as_lint p Typing_warning.EqualityCheck.Contains)
+    (add_warning env ~as_lint p Typing_warning.Equality_check.Contains)
 
 let ensure_valid_contains_key_check env ~as_lint p trv_key_ty key_ty =
   error_if_inequatable
     env
     trv_key_ty
     key_ty
-    (add_warning env ~as_lint p Typing_warning.EqualityCheck.Contains_key)
+    (add_warning env ~as_lint p Typing_warning.Equality_check.Contains_key)
 
 let handler ~as_lint =
   object

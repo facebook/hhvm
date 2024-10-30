@@ -90,7 +90,7 @@ let handler ~as_lint =
           ( pos,
             Typing_warning.Cast_non_primitive,
             {
-              Typing_warning.CastNonPrimitive.cast_hint =
+              Typing_warning.Cast_non_primitive.cast_hint =
                 Env.print_hint env hint;
               ty = Env.print_ty env ty;
             } )

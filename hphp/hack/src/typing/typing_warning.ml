@@ -16,7 +16,7 @@ type quickfix = {
   replacement_pos: Pos.t;
 }
 
-module IsAsAlways = struct
+module Is_as_always = struct
   type kind =
     | Is_is_always_true
     | Is_is_always_false
@@ -30,7 +30,7 @@ module IsAsAlways = struct
   }
 end
 
-module SketchyNullCheck = struct
+module Sketchy_null_check = struct
   type kind =
     | Coalesce
     | Eq
@@ -43,7 +43,7 @@ module SketchyNullCheck = struct
   }
 end
 
-module NonDisjointCheck = struct
+module Non_disjoint_check = struct
   type t = {
     name: string;
     ty1: string;
@@ -52,7 +52,7 @@ module NonDisjointCheck = struct
   }
 end
 
-module SketchyEquality = struct
+module Sketchy_equality = struct
   type t = {
     result: bool;
     left: Pos_or_decl.t Message.t list Lazy.t;
@@ -62,14 +62,14 @@ module SketchyEquality = struct
   }
 end
 
-module CastNonPrimitive = struct
+module Cast_non_primitive = struct
   type t = {
     cast_hint: string;
     ty: string;
   }
 end
 
-module TruthinessTest = struct
+module Truthiness_test = struct
   type sketchy_kind =
     | String
     | Arraykey
@@ -89,7 +89,7 @@ module TruthinessTest = struct
   }
 end
 
-module EqualityCheck = struct
+module Equality_check = struct
   type kind =
     | Equality of bool
     | Contains
@@ -102,7 +102,7 @@ module EqualityCheck = struct
   }
 end
 
-module DuplicateProperties = struct
+module Duplicate_properties = struct
   type t = {
     class_name: string;
     prop_name: string;
@@ -112,13 +112,13 @@ module DuplicateProperties = struct
 end
 
 type (_, _) kind =
-  | Sketchy_equality : (SketchyEquality.t, warn) kind
-  | Is_as_always : (IsAsAlways.t, migrated) kind
-  | Sketchy_null_check : (SketchyNullCheck.t, migrated) kind
-  | Non_disjoint_check : (NonDisjointCheck.t, migrated) kind
-  | Cast_non_primitive : (CastNonPrimitive.t, migrated) kind
-  | Truthiness_test : (TruthinessTest.t, migrated) kind
-  | Equality_check : (EqualityCheck.t, migrated) kind
-  | Duplicate_properties : (DuplicateProperties.t, migrated) kind
+  | Sketchy_equality : (Sketchy_equality.t, warn) kind
+  | Is_as_always : (Is_as_always.t, migrated) kind
+  | Sketchy_null_check : (Sketchy_null_check.t, migrated) kind
+  | Non_disjoint_check : (Non_disjoint_check.t, migrated) kind
+  | Cast_non_primitive : (Cast_non_primitive.t, migrated) kind
+  | Truthiness_test : (Truthiness_test.t, migrated) kind
+  | Equality_check : (Equality_check.t, migrated) kind
+  | Duplicate_properties : (Duplicate_properties.t, migrated) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

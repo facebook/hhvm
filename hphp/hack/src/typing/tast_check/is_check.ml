@@ -75,7 +75,7 @@ let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =
         ( pos,
           warning_kind,
           {
-            Typing_warning.IsAsAlways.kind;
+            Typing_warning.Is_as_always.kind;
             lhs_ty = print_ty lhs_ty;
             rhs_ty = print_ty rhs_ty;
           } )
@@ -101,8 +101,8 @@ let handler ~as_lint =
           env
           lhs_ty
           hint_ty
-          ~always_kind:Typing_warning.IsAsAlways.Is_is_always_true
-          ~never_kind:Typing_warning.IsAsAlways.Is_is_always_false
+          ~always_kind:Typing_warning.Is_as_always.Is_is_always_true
+          ~never_kind:Typing_warning.Is_as_always.Is_is_always_false
       | ( _,
           p,
           As
@@ -120,13 +120,13 @@ let handler ~as_lint =
           lhs_ty
           hint_ty
           ~always_kind:
-            (Typing_warning.IsAsAlways.As_always_succeeds
+            (Typing_warning.Is_as_always.As_always_succeeds
                {
                  Typing_warning.can_be_captured =
                    Aast_utils.can_be_captured lhs_expr;
                  original_pos = p;
                  replacement_pos = lhs_pos;
                })
-          ~never_kind:Typing_warning.IsAsAlways.As_always_fails
+          ~never_kind:Typing_warning.Is_as_always.As_always_fails
       | _ -> ()
   end

@@ -55,7 +55,7 @@ let sketchy_null_check env ~as_lint (ty, p, e) kind =
           ( p,
             warning_kind,
             {
-              Typing_warning.SketchyNullCheck.name;
+              Typing_warning.Sketchy_null_check.name;
               kind;
               ty = Tast_env.print_ty env ty;
             } )
@@ -75,16 +75,16 @@ let handler ~as_lint =
           env
           ~as_lint
           e
-          Typing_warning.SketchyNullCheck.Coalesce
+          Typing_warning.Sketchy_null_check.Coalesce
       | Unop (Unot, e)
       | Binop { bop = Eqeq; lhs = (_, _, Null); rhs = e }
       | Binop { bop = Eqeq; lhs = e; rhs = (_, _, Null) } ->
-        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Eq
+        sketchy_null_check env ~as_lint e Typing_warning.Sketchy_null_check.Eq
       | Eif (e, Some _, _) ->
-        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Neq
+        sketchy_null_check env ~as_lint e Typing_warning.Sketchy_null_check.Neq
       | Binop { bop = Ampamp | Barbar; lhs = e1; rhs = e2 } ->
-        sketchy_null_check env ~as_lint e1 Typing_warning.SketchyNullCheck.Neq;
-        sketchy_null_check env ~as_lint e2 Typing_warning.SketchyNullCheck.Neq
+        sketchy_null_check env ~as_lint e1 Typing_warning.Sketchy_null_check.Neq;
+        sketchy_null_check env ~as_lint e2 Typing_warning.Sketchy_null_check.Neq
       | _ -> ()
 
     method! at_stmt env x =
@@ -93,6 +93,6 @@ let handler ~as_lint =
       | Do (_, e)
       | While (e, _)
       | For (_, Some e, _, _) ->
-        sketchy_null_check env ~as_lint e Typing_warning.SketchyNullCheck.Neq
+        sketchy_null_check env ~as_lint e Typing_warning.Sketchy_null_check.Neq
       | _ -> ()
   end

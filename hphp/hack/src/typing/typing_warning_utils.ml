@@ -35,8 +35,8 @@ module type Lint = sig
   val lint_quickfix : t -> Typing_warning.quickfix option
 end
 
-module SketchyEquality = struct
-  type t = Typing_warning.SketchyEquality.t
+module Sketchy_equality = struct
+  type t = Typing_warning.Sketchy_equality.t
 
   let code = Codes.SketchyEquality
 
@@ -44,7 +44,7 @@ module SketchyEquality = struct
 
   let code _ = code
 
-  let claim { Typing_warning.SketchyEquality.result; _ } =
+  let claim { Typing_warning.Sketchy_equality.result; _ } =
     let b =
       Markdown_lite.md_codify
         (if result then
@@ -56,7 +56,7 @@ module SketchyEquality = struct
 
   let reasons
       {
-        Typing_warning.SketchyEquality.result = _;
+        Typing_warning.Sketchy_equality.result = _;
         left = (lazy left);
         right = (lazy right);
         left_trail;
@@ -70,15 +70,15 @@ module SketchyEquality = struct
   let quickfixes _ = []
 end
 
-module IsAsAlways = struct
-  type t = Typing_warning.IsAsAlways.t
+module Is_as_always = struct
+  type t = Typing_warning.Is_as_always.t
 
-  let code { Typing_warning.IsAsAlways.kind; _ } =
+  let code { Typing_warning.Is_as_always.kind; _ } =
     match kind with
-    | Typing_warning.IsAsAlways.Is_is_always_true -> Codes.IsIsAlwaysTrue
-    | Typing_warning.IsAsAlways.Is_is_always_false -> Codes.IsIsAlwaysFalse
-    | Typing_warning.IsAsAlways.As_always_succeeds _ -> Codes.AsAlwaysSucceeds
-    | Typing_warning.IsAsAlways.As_always_fails -> Codes.AsAlwaysFails
+    | Typing_warning.Is_as_always.Is_is_always_true -> Codes.IsIsAlwaysTrue
+    | Typing_warning.Is_as_always.Is_is_always_false -> Codes.IsIsAlwaysFalse
+    | Typing_warning.Is_as_always.As_always_succeeds _ -> Codes.AsAlwaysSucceeds
+    | Typing_warning.Is_as_always.As_always_fails -> Codes.AsAlwaysFails
 
   let codes =
     [
@@ -90,46 +90,46 @@ module IsAsAlways = struct
 
   let lint_severity _ = Lints_core.Lint_warning
 
-  let claim { Typing_warning.IsAsAlways.kind; lhs_ty; rhs_ty } =
+  let claim { Typing_warning.Is_as_always.kind; lhs_ty; rhs_ty } =
     Printf.sprintf
       (match kind with
-      | Typing_warning.IsAsAlways.Is_is_always_true ->
+      | Typing_warning.Is_as_always.Is_is_always_true ->
         "This `is` check is always `true`. The expression on the left has type %s which is a subtype of %s."
-      | Typing_warning.IsAsAlways.Is_is_always_false ->
+      | Typing_warning.Is_as_always.Is_is_always_false ->
         "This `is` check is always `false`. The expression on the left has type %s which shares no values with %s."
-      | Typing_warning.IsAsAlways.As_always_succeeds _ ->
+      | Typing_warning.Is_as_always.As_always_succeeds _ ->
         "This `as` assertion will always succeed and hence is redundant. The expression on the left has a type %s which is a subtype of %s."
-      | Typing_warning.IsAsAlways.As_always_fails ->
+      | Typing_warning.Is_as_always.As_always_fails ->
         "This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type %s which shares no values with %s.")
       (Markdown_lite.md_codify lhs_ty)
       (Markdown_lite.md_codify rhs_ty)
 
   let reasons _ = []
 
-  let lint_code { Typing_warning.IsAsAlways.kind; _ } =
+  let lint_code { Typing_warning.Is_as_always.kind; _ } =
     match kind with
-    | Typing_warning.IsAsAlways.Is_is_always_true ->
+    | Typing_warning.Is_as_always.Is_is_always_true ->
       Lints_codes.Codes.is_always_true
-    | Typing_warning.IsAsAlways.Is_is_always_false ->
+    | Typing_warning.Is_as_always.Is_is_always_false ->
       Lints_codes.Codes.is_always_false
-    | Typing_warning.IsAsAlways.As_always_succeeds _ ->
+    | Typing_warning.Is_as_always.As_always_succeeds _ ->
       Lints_codes.Codes.as_always_succeeds
-    | Typing_warning.IsAsAlways.As_always_fails ->
+    | Typing_warning.Is_as_always.As_always_fails ->
       Lints_codes.Codes.as_always_fails
 
-  let lint_quickfix { Typing_warning.IsAsAlways.kind; _ } =
+  let lint_quickfix { Typing_warning.Is_as_always.kind; _ } =
     match kind with
-    | Typing_warning.IsAsAlways.Is_is_always_true
-    | Typing_warning.IsAsAlways.Is_is_always_false
-    | Typing_warning.IsAsAlways.As_always_fails ->
+    | Typing_warning.Is_as_always.Is_is_always_true
+    | Typing_warning.Is_as_always.Is_is_always_false
+    | Typing_warning.Is_as_always.As_always_fails ->
       None
-    | Typing_warning.IsAsAlways.As_always_succeeds quickfix -> Some quickfix
+    | Typing_warning.Is_as_always.As_always_succeeds quickfix -> Some quickfix
 
   let quickfixes _ = []
 end
 
-module SketchyNullCheck = struct
-  type t = Typing_warning.SketchyNullCheck.t
+module Sketchy_null_check = struct
+  type t = Typing_warning.Sketchy_null_check.t
 
   let code = Codes.SketchyNullCheck
 
@@ -141,7 +141,7 @@ module SketchyNullCheck = struct
 
   let lint_severity _ = Lints_core.Lint_warning
 
-  let claim { Typing_warning.SketchyNullCheck.name; kind; ty } =
+  let claim { Typing_warning.Sketchy_null_check.name; kind; ty } =
     let name = Option.value name ~default:"$x" in
 
     "This is a sketchy null check on an expression of type "
@@ -152,14 +152,14 @@ module SketchyNullCheck = struct
     ^ "If you only meant to test for `null`, "
     ^
     match kind with
-    | Typing_warning.SketchyNullCheck.Coalesce ->
+    | Typing_warning.Sketchy_null_check.Coalesce ->
       Printf.sprintf
         "use `%s ?? $default` instead of `%s ?: $default`"
         name
         name
-    | Typing_warning.SketchyNullCheck.Eq ->
+    | Typing_warning.Sketchy_null_check.Eq ->
       Printf.sprintf "use `%s is null` instead" name
-    | Typing_warning.SketchyNullCheck.Neq ->
+    | Typing_warning.Sketchy_null_check.Neq ->
       Printf.sprintf "use `%s is nonnull` instead" name
 
   let reasons _ = []
@@ -169,8 +169,8 @@ module SketchyNullCheck = struct
   let lint_quickfix _ = None
 end
 
-module NonDisjointCheck = struct
-  type t = Typing_warning.NonDisjointCheck.t
+module Non_disjoint_check = struct
+  type t = Typing_warning.Non_disjoint_check.t
 
   let code = Codes.NonDisjointCheck
 
@@ -182,7 +182,7 @@ module NonDisjointCheck = struct
 
   let lint_severity _ = Lints_core.Lint_warning
 
-  let claim { Typing_warning.NonDisjointCheck.name; ty1; ty2; dynamic } =
+  let claim { Typing_warning.Non_disjoint_check.name; ty1; ty2; dynamic } =
     Printf.sprintf
       "%s to '%s' will always return the same value, because type %s is disjoint from type %s."
       (if dynamic then
@@ -200,8 +200,8 @@ module NonDisjointCheck = struct
   let lint_quickfix _ = None
 end
 
-module CastNonPrimitive = struct
-  type t = Typing_warning.CastNonPrimitive.t
+module Cast_non_primitive = struct
+  type t = Typing_warning.Cast_non_primitive.t
 
   let code = Codes.CastNonPrimitive
 
@@ -213,7 +213,7 @@ module CastNonPrimitive = struct
 
   let lint_severity _ = Lints_core.Lint_error
 
-  let claim { Typing_warning.CastNonPrimitive.cast_hint; ty } =
+  let claim { Typing_warning.Cast_non_primitive.cast_hint; ty } =
     Printf.sprintf
       ("Casting %s to %s: casting a non-primitive type to a primitive rarely yields a useful value. "
       ^^ "Did you mean to extract a value from this object before casting it, or to do a null-check?"
@@ -228,10 +228,10 @@ module CastNonPrimitive = struct
   let lint_quickfix _ = None
 end
 
-module TruthinessTest = struct
-  open Typing_warning.TruthinessTest
+module Truthiness_test = struct
+  open Typing_warning.Truthiness_test
 
-  type t = Typing_warning.TruthinessTest.t
+  type nonrec t = t
 
   let code = Codes.TruthinessTest
 
@@ -308,10 +308,10 @@ module TruthinessTest = struct
   let lint_quickfix _ = None
 end
 
-module EqualityCheck = struct
-  open Typing_warning.EqualityCheck
+module Equality_check = struct
+  open Typing_warning.Equality_check
 
-  type t = Typing_warning.EqualityCheck.t
+  type t = Typing_warning.Equality_check.t
 
   let code = Codes.EqualityCheck
 
@@ -354,10 +354,10 @@ module EqualityCheck = struct
   let lint_quickfix _ = None
 end
 
-module DuplicatedProperties = struct
-  open Typing_warning.DuplicateProperties
+module Duplicated_properties = struct
+  open Typing_warning.Duplicate_properties
 
-  type t = Typing_warning.DuplicateProperties.t
+  type t = Typing_warning.Duplicate_properties.t
 
   let code = Codes.DuplicateProperties
 
@@ -415,26 +415,26 @@ end
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
-  | Typing_warning.Sketchy_equality -> (module SketchyEquality)
-  | Typing_warning.Is_as_always -> (module IsAsAlways)
-  | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
-  | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
-  | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
-  | Typing_warning.Truthiness_test -> (module TruthinessTest)
-  | Typing_warning.Equality_check -> (module EqualityCheck)
-  | Typing_warning.Duplicate_properties -> (module DuplicatedProperties)
+  | Typing_warning.Sketchy_equality -> (module Sketchy_equality)
+  | Typing_warning.Is_as_always -> (module Is_as_always)
+  | Typing_warning.Sketchy_null_check -> (module Sketchy_null_check)
+  | Typing_warning.Non_disjoint_check -> (module Non_disjoint_check)
+  | Typing_warning.Cast_non_primitive -> (module Cast_non_primitive)
+  | Typing_warning.Truthiness_test -> (module Truthiness_test)
+  | Typing_warning.Equality_check -> (module Equality_check)
+  | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :
     (module Lint with type t = x) =
   match kind with
-  | Typing_warning.Is_as_always -> (module IsAsAlways)
-  | Typing_warning.Sketchy_null_check -> (module SketchyNullCheck)
-  | Typing_warning.Non_disjoint_check -> (module NonDisjointCheck)
-  | Typing_warning.Cast_non_primitive -> (module CastNonPrimitive)
-  | Typing_warning.Truthiness_test -> (module TruthinessTest)
-  | Typing_warning.Equality_check -> (module EqualityCheck)
-  | Typing_warning.Duplicate_properties -> (module DuplicatedProperties)
+  | Typing_warning.Is_as_always -> (module Is_as_always)
+  | Typing_warning.Sketchy_null_check -> (module Sketchy_null_check)
+  | Typing_warning.Non_disjoint_check -> (module Non_disjoint_check)
+  | Typing_warning.Cast_non_primitive -> (module Cast_non_primitive)
+  | Typing_warning.Truthiness_test -> (module Truthiness_test)
+  | Typing_warning.Equality_check -> (module Equality_check)
+  | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
 
 let code_is_enabled tcopt code =
   match TypecheckerOptions.hack_warnings tcopt with

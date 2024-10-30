@@ -108,7 +108,7 @@ let add_warning
     ( pos,
       warning_kind,
       {
-        Typing_warning.DuplicateProperties.class_name;
+        Typing_warning.Duplicate_properties.class_name;
         prop_name;
         class_names;
         initialized_with_constant;

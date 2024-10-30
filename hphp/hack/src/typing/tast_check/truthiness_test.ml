@@ -33,27 +33,41 @@ let add_warning env ~as_lint pos kind ty e not =
         None)
     ( pos,
       Typing_warning.Truthiness_test,
-      { Typing_warning.TruthinessTest.kind; ty; expr = get_lvar_name e; not } )
+      { Typing_warning.Truthiness_test.kind; ty; expr = get_lvar_name e; not }
+    )
 
 let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
-  let module TruthinessTest = Typing_warning.TruthinessTest in
   let prim_to_string prim =
     Env.print_error_ty env (MakeType.prim_type (get_reason ty) prim)
   in
   List.iter (Tast_utils.find_sketchy_types env ty) ~f:(function
       | Tast_utils.String ->
         let tystr = prim_to_string Aast_defs.Tstring in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy String) tystr e not
+        add_warning
+          env
+          ~as_lint
+          p
+          Typing_warning.Truthiness_test.(Sketchy String)
+          tystr
+          e
+          not
       | Tast_utils.Arraykey ->
         let tystr = prim_to_string Aast_defs.Tarraykey in
-        add_warning env ~as_lint p TruthinessTest.(Sketchy Arraykey) tystr e not
+        add_warning
+          env
+          ~as_lint
+          p
+          Typing_warning.Truthiness_test.(Sketchy Arraykey)
+          tystr
+          e
+          not
       | Tast_utils.Stringish ->
         let tystr = Utils.strip_ns SN.Classes.cStringish in
         add_warning
           env
           ~as_lint
           p
-          TruthinessTest.(Sketchy Stringish)
+          Typing_warning.Truthiness_test.(Sketchy Stringish)
           tystr
           e
           not
@@ -63,7 +77,7 @@ let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
           env
           ~as_lint
           p
-          TruthinessTest.(Sketchy Xhp_child)
+          Typing_warning.Truthiness_test.(Sketchy Xhp_child)
           tystr
           e
           not
@@ -72,7 +86,7 @@ let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
           env
           ~as_lint
           p
-          TruthinessTest.(Sketchy Traversable)
+          Typing_warning.Truthiness_test.(Sketchy Traversable)
           tystr
           e
           not);
@@ -82,7 +96,7 @@ let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
       env
       ~as_lint
       p
-      TruthinessTest.(Invalid { truthy = true })
+      Typing_warning.Truthiness_test.(Invalid { truthy = true })
       (Env.print_ty env ty)
       e
       not
@@ -91,7 +105,7 @@ let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
       env
       ~as_lint
       p
-      TruthinessTest.(Invalid { truthy = false })
+      Typing_warning.Truthiness_test.(Invalid { truthy = false })
       (Env.print_ty env ty)
       e
       not

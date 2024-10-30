@@ -39,7 +39,7 @@ let trivial_comparison_error
       ( pos,
         Typing_warning.Sketchy_equality,
         {
-          Typing_warning.SketchyEquality.result;
+          Typing_warning.Sketchy_equality.result;
           left;
           right;
           left_trail;

@@ -34,7 +34,7 @@ let add_warning env p name ty1 ty2 ~dynamic ~as_lint =
     ( p,
       warning_kind,
       {
-        Typing_warning.NonDisjointCheck.name = Utils.strip_ns name;
+        Typing_warning.Non_disjoint_check.name = Utils.strip_ns name;
         dynamic;
         ty1 = Env.print_ty env ty1;
         ty2 = Env.print_ty env ty2;

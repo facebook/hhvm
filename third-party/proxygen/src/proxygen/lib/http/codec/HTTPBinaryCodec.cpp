@@ -253,8 +253,7 @@ ParseResult HTTPBinaryCodec::parseHeaders(folly::io::Cursor& cursor,
 }
 
 ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
-                                          size_t remaining,
-                                          HTTPMessage& msg) {
+                                          size_t remaining) {
   size_t parsed = 0;
 
   // Parse the contentLength and advance cursor
@@ -288,20 +287,14 @@ ParseResult HTTPBinaryCodec::parseTrailers(folly::io::Cursor& cursor,
 }
 
 size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
-  auto len = bufferedIngress_.chainLength();
   bufferedIngress_.append(buf.clone());
-  return bufferedIngress_.chainLength() - len;
-}
+  const auto len = bufferedIngress_.chainLength();
 
-void HTTPBinaryCodec::onIngressEOF() {
   size_t parsedTot = 0;
   folly::io::Cursor cursor(bufferedIngress_.front());
   auto bufLen = bufferedIngress_.chainLength();
-  if (!bufLen) {
-    parseError_ = "Empty buffer provided!";
-  }
 
-  while (!parseError_ && parsedTot < bufLen && !parserPaused_) {
+  while (!parseError_ && !parserPaused_ && parsedTot < bufLen) {
     size_t parsed = 0;
     ParseResult parseResult(ParseResultState::INITIALIZED);
     switch (state_) {
@@ -374,17 +367,20 @@ void HTTPBinaryCodec::onIngressEOF() {
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::CONTENT;
         msg_ = std::move(decodeInfo_.msg);
+        callback_->onHeadersComplete(ingressTxnID_, std::move(msg_));
         break;
 
       case ParseState::CONTENT:
-        CHECK(msg_);
-        parseResult = parseContent(cursor, bufLen - parsedTot, *msg_);
+        parseResult = parseContent(cursor, bufLen - parsedTot);
         if (parseResult.parseResultState_ == ParseResultState::ERROR) {
           parseError_ = parseResult.error_;
           break;
         }
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::TRAILERS_SECTION;
+        if (msgBody_) {
+          callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
+        }
         break;
 
       case ParseState::TRAILERS_SECTION:
@@ -402,6 +398,9 @@ void HTTPBinaryCodec::onIngressEOF() {
             std::make_unique<HTTPHeaders>(decodeInfo_.msg->getHeaders());
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::PADDING;
+        if (trailers_) {
+          callback_->onTrailersComplete(ingressTxnID_, std::move(trailers_));
+        }
         break;
 
       case ParseState::PADDING:
@@ -422,30 +421,33 @@ void HTTPBinaryCodec::onIngressEOF() {
         ingressTxnID_,
         HTTPException(HTTPException::Direction::INGRESS,
                       fmt::format("Invalid Message: {}", *parseError_)));
-  } else {
+  }
 
-    if (!msg_) {
-      if (state_ == ParseState::HEADERS_SECTION) {
-        // Case where the sent message only contains control data
-        msg_ = std::move(decodeInfo_.msg);
-      } else {
-        callback_->onError(
-            ingressTxnID_,
-            HTTPException(
-                HTTPException::Direction::INGRESS,
-                fmt::format("Message not formed (incomplete binary data)")));
-        return;
-      }
-    }
-    callback_->onHeadersComplete(ingressTxnID_, std::move(msg_));
-    if (msgBody_) {
-      callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
-    }
-    if (trailers_) {
-      callback_->onTrailersComplete(ingressTxnID_, std::move(trailers_));
-    }
+  // We can trim the amount of bufferedIngress_ that we were successfully able
+  // to parse
+  bufferedIngress_.trimStartAtMost(parsedTot);
+
+  return len;
+}
+
+void HTTPBinaryCodec::onIngressEOF() {
+  if (!parseError_ && !bufferedIngress_.empty()) {
+    // Case where the ingress EOF is received before the entire message is
+    // parsed
+    callback_->onError(ingressTxnID_,
+                       HTTPException(HTTPException::Direction::INGRESS,
+                                     "Incomplete message received"));
+    return;
+  }
+  if (state_ == ParseState::HEADERS_SECTION) {
+    // Case where the sent message only contains control data and no headers
+    // nor body
+    callback_->onHeadersComplete(ingressTxnID_, std::move(decodeInfo_.msg));
+  }
+  if (!parseError_ && !parserPaused_) {
     callback_->onMessageComplete(ingressTxnID_, false);
   }
+  return;
 }
 
 size_t HTTPBinaryCodec::generateHeaderHelper(folly::io::QueueAppender& appender,

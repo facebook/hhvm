@@ -163,9 +163,7 @@ class HTTPBinaryCodec : public HTTPCodec {
   ParseResult parseHeaders(folly::io::Cursor& cursor,
                            size_t remaining,
                            HeaderDecodeInfo& decodeInfo);
-  ParseResult parseContent(folly::io::Cursor& cursor,
-                           size_t remaining,
-                           HTTPMessage& msg);
+  ParseResult parseContent(folly::io::Cursor& cursor, size_t remaining);
   ParseResult parseTrailers(folly::io::Cursor& cursor,
                             size_t remaining,
                             HeaderDecodeInfo& decodeInfo);

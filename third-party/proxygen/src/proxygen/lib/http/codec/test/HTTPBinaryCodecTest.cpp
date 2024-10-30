@@ -44,10 +44,8 @@ class HTTPBinaryCodecForTest : public HTTPBinaryCodec {
     return HTTPBinaryCodec::parseHeaders(cursor, remaining, decodeInfo);
   }
 
-  ParseResult parseContent(folly::io::Cursor& cursor,
-                           size_t remaining,
-                           HTTPMessage& msg) {
-    return HTTPBinaryCodec::parseContent(cursor, remaining, msg);
+  ParseResult parseContent(folly::io::Cursor& cursor, size_t remaining) {
+    return HTTPBinaryCodec::parseContent(cursor, remaining);
   }
 
   folly::IOBuf& getMsgBody() {
@@ -360,9 +358,9 @@ TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
   folly::io::Cursor cursor(contentIOBuf.get());
 
   HTTPMessage msg;
-  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, content.size(), msg)
-                .bytesParsed_,
-            content.size());
+  EXPECT_EQ(
+      upstreamBinaryCodec_->parseContent(cursor, content.size()).bytesParsed_,
+      content.size());
   EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(), "hello\r\n");
 }
 
@@ -376,8 +374,7 @@ TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
 
   HTTPMessage msg;
   EXPECT_EQ(
-      upstreamBinaryCodec_->parseContent(cursor, contentInvalid.size(), msg)
-          .error_,
+      upstreamBinaryCodec_->parseContent(cursor, contentInvalid.size()).error_,
       "Failure to parse content");
 }
 
@@ -449,6 +446,57 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessForControlData) {
   EXPECT_EQ(callback.msg->getURL(), "/");
 }
 
+TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessChunkedOnBoundaryMessage) {
+  // Format is chunk1 = `..GET`, chunk2 =
+  // `.https.www.example.com./hello.txt..user-agent.curl/7.16.3 libcurl/7.16.3
+  // OpenSSL/0.9.7l zlib/1.2.3.host.www.example.com.accept-language.en, mi`
+  const std::vector<uint8_t> binaryHTTPMessageChunk1{
+      0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70,
+      0x73, 0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d,
+      0x70, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6d, 0x0a, 0x2f, 0x68,
+      0x65, 0x6c, 0x6c, 0x6f, 0x2e, 0x74, 0x78, 0x74};
+  const std::vector<uint8_t> binaryHTTPMessageChunk2{
+      0x40, 0x6c, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x61, 0x67, 0x65, 0x6e,
+      0x74, 0x34, 0x63, 0x75, 0x72, 0x6c, 0x2f, 0x37, 0x2e, 0x31, 0x36, 0x2e,
+      0x33, 0x20, 0x6c, 0x69, 0x62, 0x63, 0x75, 0x72, 0x6c, 0x2f, 0x37, 0x2e,
+      0x31, 0x36, 0x2e, 0x33, 0x20, 0x4f, 0x70, 0x65, 0x6e, 0x53, 0x53, 0x4c,
+      0x2f, 0x30, 0x2e, 0x39, 0x2e, 0x37, 0x6c, 0x20, 0x7a, 0x6c, 0x69, 0x62,
+      0x2f, 0x31, 0x2e, 0x32, 0x2e, 0x33, 0x04, 0x68, 0x6f, 0x73, 0x74, 0x0f,
+      0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e,
+      0x63, 0x6f, 0x6d, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x70, 0x74, 0x2d, 0x6c,
+      0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x06, 0x65, 0x6e, 0x2c, 0x20,
+      0x6d, 0x69, 0x00, 0x00};
+
+  auto binaryHTTPMessageIOBufChunk1 = folly::IOBuf::wrapBuffer(folly::ByteRange(
+      binaryHTTPMessageChunk1.data(), binaryHTTPMessageChunk1.size()));
+  folly::io::Cursor cursor1(binaryHTTPMessageIOBufChunk1.get());
+  auto binaryHTTPMessageIOBufChunk2 = folly::IOBuf::wrapBuffer(folly::ByteRange(
+      binaryHTTPMessageChunk2.data(), binaryHTTPMessageChunk2.size()));
+  folly::io::Cursor cursor2(binaryHTTPMessageIOBufChunk2.get());
+
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodec_->setCallback(&callback);
+  upstreamBinaryCodec_->onIngress(*binaryHTTPMessageIOBufChunk1);
+  upstreamBinaryCodec_->onIngress(*binaryHTTPMessageIOBufChunk2);
+  upstreamBinaryCodec_->onIngressEOF();
+
+  // Check onError was not called for the callback
+  EXPECT_EQ(callback.lastParseError, nullptr);
+
+  // Check msg and header fields
+  EXPECT_EQ(callback.msg->isSecure(), true);
+  EXPECT_EQ(callback.msg->getMethod(), proxygen::HTTPMethod::GET);
+  EXPECT_EQ(callback.msg->getURL(), "/hello.txt");
+  HTTPHeaders httpHeaders = callback.msg->getHeaders();
+  EXPECT_EQ(httpHeaders.exists("user-agent"), true);
+  EXPECT_EQ(httpHeaders.exists("host"), true);
+  EXPECT_EQ(httpHeaders.exists("accept-language"), true);
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("user-agent"),
+            "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("host"), "www.example.com");
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("accept-language"), "en, mi");
+}
+
 TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
   // Format is `..GET.https.www.example.com./hello.txt..user-agent.curl/7.16.3
   // libcurl/7.16.3 OpenSSL/0.9.7l
@@ -480,24 +528,6 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
   // Check onError was called with the correct error
   EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
             "Invalid Message: Failure to parse: headerValue");
-}
-
-TEST_F(HTTPBinaryCodecTest, testOnIngressFailureIncompleteMessage) {
-  // Message is incomplete and has only 1 byte
-  const std::vector<uint8_t> binaryInvalidHTTPMessage{0x00};
-  auto binaryInvalidHTTPMessageIOBuf =
-      folly::IOBuf::wrapBuffer(folly::ByteRange(
-          binaryInvalidHTTPMessage.data(), binaryInvalidHTTPMessage.size()));
-  folly::io::Cursor cursor(binaryInvalidHTTPMessageIOBuf.get());
-
-  FakeHTTPCodecCallback callback;
-  upstreamBinaryCodec_->setCallback(&callback);
-  upstreamBinaryCodec_->onIngress(*binaryInvalidHTTPMessageIOBuf);
-  upstreamBinaryCodec_->onIngressEOF();
-
-  // Check onError was called with the correct error
-  EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
-            "Message not formed (incomplete binary data)");
 }
 
 TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {
@@ -545,8 +575,7 @@ TEST_F(HTTPBinaryCodecTest, testGenerateBody) {
   // Decode Test Body and check
   folly::io::Cursor cursor(writeBuffer.front());
   HTTPMessage msg;
-  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, 18, msg).bytesParsed_,
-            18);
+  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, 18).bytesParsed_, 18);
   EXPECT_EQ(upstreamBinaryCodec_->getMsgBody().to<std::string>(),
             "Sample Test Body!");
 }

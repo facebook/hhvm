@@ -887,23 +887,6 @@ ExtractedMasksFromPatch extractMaskFromPatch(
       return {allMask(), allMask()};
     }
   }
-  // We can only distinguish struct. For struct, add removed fields to write
-  // mask. Both set and map use a set for Remove, so they are indistinguishable.
-  // For set and map, we cannot distinguish them. For view, we always add
-  // removed keys to write map mask. For non-view, it is a read-write operation
-  // if not intristic default.
-  if (auto* value = findOp(patch, PatchOp::Remove)) {
-    if (value->is_list()) {
-      // struct patch
-      insertRemoveWriteFieldsToMask(masks.write, value->as_list());
-    } else if (!isIntrinsicDefault(*value)) {
-      // set/map patch
-      if (!view) {
-        return {allMask(), allMask()};
-      }
-      insertWriteKeysToMapMask(masks.write, value->as_set(), view);
-    }
-  }
 
   // If PatchPrior or PatchAfter, recursively constructs the mask for the
   // fields.
@@ -929,6 +912,24 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   if (auto* ensureUnion = findOp(patch, PatchOp::EnsureUnion)) {
     insertEnsureReadFieldsToMask(masks.read, *ensureUnion);
     masks.write = allMask();
+  }
+
+  // We can only distinguish struct. For struct, add removed fields to write
+  // mask. Both set and map use a set for Remove, so they are indistinguishable.
+  // For set and map, we cannot distinguish them. For view, we always add
+  // removed keys to write map mask. For non-view, it is a read-write operation
+  // if not intristic default.
+  if (auto* value = findOp(patch, PatchOp::Remove)) {
+    if (value->is_list()) {
+      // struct patch
+      insertRemoveWriteFieldsToMask(masks.write, value->as_list());
+    } else if (!isIntrinsicDefault(*value)) {
+      // set/map patch
+      if (!view) {
+        return {allMask(), allMask()};
+      }
+      insertWriteKeysToMapMask(masks.write, value->as_set(), view);
+    }
   }
 
   // If PatchIfTypeIsPrior or PatchIfTypeIsAfter, recursively constructs the

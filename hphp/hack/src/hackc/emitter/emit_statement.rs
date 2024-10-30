@@ -1545,10 +1545,12 @@ fn emit_foreach_await_key_value_storage<'a, 'd>(
 
     match iterator {
         A::AwaitAsKv(_, k, v) | A::AsKv(k, v) => Ok(InstrSeq::gather(vec![
-            emit_foreach_await_lvalue_storage(e, env, k, &[0], true)?,
-            emit_foreach_await_lvalue_storage(e, env, v, &[1], false)?,
+            emit_foreach_await_lvalue_storage(e, env, k, &[emit_expr::VecDictIndex::V(0)], true)?,
+            emit_foreach_await_lvalue_storage(e, env, v, &[emit_expr::VecDictIndex::V(1)], false)?,
         ])),
-        A::AwaitAsV(_, v) | A::AsV(v) => emit_foreach_await_lvalue_storage(e, env, v, &[1], false),
+        A::AwaitAsV(_, v) | A::AsV(v) => {
+            emit_foreach_await_lvalue_storage(e, env, v, &[emit_expr::VecDictIndex::V(1)], false)
+        }
     }
 }
 
@@ -1561,7 +1563,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     lvalue: &ast::Expr,
-    indices: &[isize],
+    indices: &[emit_expr::VecDictIndex<'_>],
     keep_on_stack: bool,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_local(e, |e, local| {

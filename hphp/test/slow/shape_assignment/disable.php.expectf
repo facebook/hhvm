@@ -1,0 +1,1 @@
+Fatal error: Cannot use unstable feature: `shape_destructure` in %s/hphp/test/slow/shape_assignment/disable.php on line %d

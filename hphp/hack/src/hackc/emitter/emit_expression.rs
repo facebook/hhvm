@@ -340,6 +340,9 @@ mod inout_locals {
                 }
             }
             ast::Expr_::List(exprs) => exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr)),
+            ast::Expr_::Shape(exprs) => exprs
+                .iter()
+                .for_each(|(_field_name, expr)| collect_lvars_hs(ctx, expr)),
             _ => {}
         }
     }
@@ -1085,39 +1088,40 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
     })
 }
 
+fn extract_shape_field_name_pstring<'a>(
+    env: &Env<'a>,
+    pos: &Pos,
+    field: &ast_defs::ShapeFieldName,
+) -> Result<ast::Expr_> {
+    use ast_defs::ShapeFieldName as SF;
+    Ok(match field {
+        SF::SFregexGroup(s) => ast::Expr_::mk_int(s.1.clone()),
+        SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
+        SF::SFclassname(id) => {
+            ast::Expr_::mk_nameof(ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())))
+        }
+        SF::SFclassConst(id, p) => {
+            if ClassExpr::is_reified_tparam(&env.scope, &id.1) {
+                return Err(Error::fatal_parse(
+                    &id.0,
+                    "Reified generics cannot be used in shape keys",
+                ));
+            } else {
+                ast::Expr_::mk_class_const(
+                    ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())),
+                    p.clone(),
+                )
+            }
+        }
+    })
+}
+
 fn emit_shape<'a, 'd>(
     emitter: &mut Emitter<'d>,
     env: &Env<'a>,
     expr: &ast::Expr,
     fl: &[(ast_defs::ShapeFieldName, ast::Expr)],
 ) -> Result<InstrSeq> {
-    fn extract_shape_field_name_pstring<'a>(
-        env: &Env<'a>,
-        pos: &Pos,
-        field: &ast_defs::ShapeFieldName,
-    ) -> Result<ast::Expr_> {
-        use ast_defs::ShapeFieldName as SF;
-        Ok(match field {
-            SF::SFregexGroup(s) => ast::Expr_::mk_int(s.1.clone()),
-            SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
-            SF::SFclassname(id) => {
-                ast::Expr_::mk_nameof(ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())))
-            }
-            SF::SFclassConst(id, p) => {
-                if ClassExpr::is_reified_tparam(&env.scope, &id.1) {
-                    return Err(Error::fatal_parse(
-                        &id.0,
-                        "Reified generics cannot be used in shape keys",
-                    ));
-                } else {
-                    ast::Expr_::mk_class_const(
-                        ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())),
-                        p.clone(),
-                    )
-                }
-            }
-        })
-    }
     let pos = &expr.1;
     // TODO(hrust): avoid clone
     let fl = fl
@@ -5741,9 +5745,13 @@ fn emit_lval_op<'a, 'd>(
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq> {
     match (op, &expr1.2, expr2) {
-        (LValOp::Set, ast::Expr_::List(l), Some(expr2)) => {
+        (LValOp::Set, ast::Expr_::List(_) | ast::Expr_::Shape(_), Some(expr2)) => {
             let instr_rhs = emit_expr(e, env, expr2)?;
-            let has_elements = l.iter().any(|e| !e.2.is_omitted());
+            let has_elements = match &expr1.2 {
+                ast::Expr_::List(l) => l.iter().any(|e| !e.2.is_omitted()),
+                ast::Expr_::Shape(l) => l.iter().any(|e| !e.1.2.is_omitted()),
+                _ => false,
+            };
             if !has_elements {
                 Ok(instr_rhs)
             } else {
@@ -5845,14 +5853,28 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
     })
 }
 
-// Given a local $local and a list of integer array indices i_1, ..., i_n,
-// generate code to extract the value of $local[i_n]...[i_1]:
+// Given a local $local and a list of array indices i_1, ..., i_n,
+// which can be integers or shape field names.
+// generate code to extract the value of $local[i_n]...[i_1],
+// Where the member key MK_x is
+// - EI:i_x for integers,
+// - ET:i_x for shape fields that are strings
+// - EC:0 for class constants, where we first emit a ClsCnsD instruction,
+//  and ec_count is the number of these instructions:
 //   BaseL $local Warn
-//   Dim Warn EI:i_n ...
-//   Dim Warn EI:i_2
-//   QueryM 0 CGet EI:i_1
-fn emit_array_get_fixed(last_usage: bool, local: Local, indices: &[isize]) -> InstrSeq {
-    let (base, stack_count) = if last_usage {
+//   Dim Warn MK_n ...
+//   Dim Warn MK_2
+//   QueryM ec_count CGet MK_1
+fn emit_array_get_fixed(
+    e: &mut Emitter<'_>,
+    env: &Env<'_>,
+    outer_pos: &Pos,
+    last_usage: bool,
+    local: Local,
+    // The indices must be reversed, with the innermost first in the slice
+    indices: &[VecDictIndex<'_>],
+) -> Result<InstrSeq> {
+    let (base, mut stack_count) = if last_usage {
         (
             InstrSeq::gather(vec![instr::push_l(local), instr::base_c(0, MOpMode::Warn)]),
             1,
@@ -5860,22 +5882,61 @@ fn emit_array_get_fixed(last_usage: bool, local: Local, indices: &[isize]) -> In
     } else {
         (instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any), 0)
     };
+    // Class constant indices (C::d) need to run an instruction to put the string
+    // on the stack for use with MemberKey::EC. This instruction cannot run
+    // (in repo mode) when the member base register is live, so collect them here
+    // and emit them before the base, dim, query instructions.
+    // This will be kept in order, outermost to innermost
+    let mut index_exprs = vec![];
     let indices = InstrSeq::gather(
         indices
             .iter()
             .enumerate()
             .rev()
             .map(|(i, ix)| {
-                let mk = MemberKey::EI(*ix as i64, ReadonlyOp::Any);
-                if i == 0 {
+                // We traverse the indices in order, but they are numbered in reverse, so that the
+                // innermost is numbered 0
+                let mk = match ix {
+                    VecDictIndex::V(ix) => {
+                        Ok::<_, Error>(MemberKey::EI(*ix as i64, ReadonlyOp::Any))
+                    }
+                    VecDictIndex::D(sf) => {
+                        let field_expr = ast::Expr(
+                            (),
+                            outer_pos.clone(),
+                            extract_shape_field_name_pstring(env, outer_pos, sf)?,
+                        );
+                        match constant_folder::expr_to_typed_value(e, &env.scope, &field_expr) {
+                            Ok(TypedValue::Int(i)) => Ok(MemberKey::EI(i, ReadonlyOp::Any)),
+                            Ok(TypedValue::String(s)) => Ok(MemberKey::ET(s, ReadonlyOp::Any)),
+                            _ => {
+                                index_exprs.push(emit_expr(e, env, &field_expr)?);
+                                stack_count += 1;
+                                Ok(MemberKey::EC(stack_count - 1, ReadonlyOp::Any))
+                            }
+                        }
+                    }
+                }?;
+                Ok::<_, Error>(InstrSeq::gather(vec![if i == 0 {
                     instr::query_m(stack_count, QueryMOp::CGet, mk)
                 } else {
                     instr::dim(MOpMode::Warn, mk)
-                }
+                }]))
             })
-            .collect(),
+            .collect::<Result<_, Error>>()?,
     );
-    InstrSeq::gather(vec![base, indices])
+    // Reverse the class constants, so that the outermost is nearest on the stack, since
+    // we built MemberKey::EC for them counting up from outermost to innermost.
+    index_exprs.reverse();
+    index_exprs.push(base);
+    index_exprs.push(indices);
+    Ok(InstrSeq::gather(index_exprs))
+}
+
+#[derive(Clone)]
+pub enum VecDictIndex<'a> {
+    V(isize),
+    D(&'a ast_defs::ShapeFieldName),
 }
 
 // Generate code for each lvalue assignment in a list destructuring expression.
@@ -5894,7 +5955,7 @@ pub fn emit_lval_op_list<'a, 'd>(
     env: &Env<'a>,
     outer_pos: &Pos,
     local: Option<&Local>,
-    indices: &[isize],
+    indices: &[VecDictIndex<'_>],
     expr: &ast::Expr,
     last_usage: bool,
     rhs_readonly: bool,
@@ -5903,25 +5964,40 @@ pub fn emit_lval_op_list<'a, 'd>(
 
     let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
-        Expr_::List(exprs) => {
+        Expr_::List(_) | Expr_::Shape(_) => {
+            let indexed_exprs = match &expr.2 {
+                Expr_::List(exprs) => exprs
+                    .iter()
+                    .enumerate()
+                    .map(|(i, e)| (VecDictIndex::V(i as isize), e))
+                    .collect(),
+                Expr_::Shape(fields) => fields
+                    .iter()
+                    .map(|(sf, e)| (VecDictIndex::D(sf), e))
+                    .collect(),
+                _ => vec![],
+            };
             let last_non_omitted = if last_usage {
                 // last usage of the local will happen when processing last non-omitted
                 // element in the list - find it
                 if is_ltr {
-                    exprs.iter().rposition(|v| !v.2.is_omitted())
+                    indexed_exprs.iter().rposition(|v| !v.1.2.is_omitted())
                 } else {
                     // in right-to-left case result list will be reversed
                     // so we need to find first non-omitted expression
-                    exprs.iter().rev().rposition(|v| !v.2.is_omitted())
+                    indexed_exprs
+                        .iter()
+                        .rev()
+                        .rposition(|v| !v.1.2.is_omitted())
                 }
             } else {
                 None
             };
-            let (lhs_instrs, set_instrs): (Vec<InstrSeq>, Vec<InstrSeq>) = exprs
-                .iter()
+            let (lhs_instrs, set_instrs): (Vec<InstrSeq>, Vec<InstrSeq>) = indexed_exprs
+                .into_iter()
                 .enumerate()
-                .map(|(i, expr)| {
-                    let mut new_indices = vec![i as isize];
+                .map(|(i, (index, expr))| {
+                    let mut new_indices = vec![index];
                     new_indices.extend_from_slice(indices);
                     emit_lval_op_list(
                         e,
@@ -5950,7 +6026,9 @@ pub fn emit_lval_op_list<'a, 'd>(
         _ => {
             // Generate code to access the element from the array
             let access_instrs = match (local, indices) {
-                (Some(loc), [_, ..]) => emit_array_get_fixed(last_usage, loc.to_owned(), indices),
+                (Some(loc), [_, ..]) => {
+                    emit_array_get_fixed(e, env, outer_pos, last_usage, loc.to_owned(), indices)?
+                }
                 (Some(loc), []) => {
                     if last_usage {
                         instr::push_l(loc.to_owned())

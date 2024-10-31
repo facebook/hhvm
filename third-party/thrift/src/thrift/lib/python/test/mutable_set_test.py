@@ -18,9 +18,19 @@ import collections.abc
 import pickle
 import unittest
 
+from typing import Iterable
+
 from thrift.python.mutable_containers import MutableSet
 
 from thrift.python.types import typeinfo_i32
+
+
+def _create_MutableSet_i32(iterable: Iterable[int]) -> MutableSet[int]:
+    """
+    Helper function to create and return a `MutableSet`.
+    The return type annotation enables Pyre type checking support.
+    """
+    return MutableSet._from_iterable(typeinfo_i32, set(), iterable)
 
 
 class MutableSetTest(unittest.TestCase):
@@ -57,7 +67,7 @@ class MutableSetTest(unittest.TestCase):
             MutableSet(typeinfo_i32, frozenset())
 
     def test_contains(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
 
         for i in range(10):
             self.assertIn(i, mutable_set)
@@ -65,17 +75,17 @@ class MutableSetTest(unittest.TestCase):
         self.assertNotIn(10, mutable_set)
 
     def test_contains_wrong_type(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         self.assertIn(1, mutable_set)
         self.assertNotIn("Not an interger", mutable_set)
 
     def test_contains_i32_overflow(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         self.assertIn(1, mutable_set)
         self.assertNotIn(2**31, mutable_set)
 
     def test_iter(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         python_set = set(range(10))
 
         for i in mutable_set:
@@ -85,7 +95,7 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(0, len(python_set))
 
     def test_iter_next(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         iter1 = iter(mutable_set)
         iter2 = iter(mutable_set)
 
@@ -102,11 +112,11 @@ class MutableSetTest(unittest.TestCase):
             next(iter2)
 
     def test_isdisjoint(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(1))
+        mutable_set_1 = _create_MutableSet_i32(range(10))
+        mutable_set_2 = _create_MutableSet_i32(range(1))
         self.assertFalse(mutable_set_1.isdisjoint(mutable_set_2))
 
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), range(10, 20))
+        mutable_set_3 = _create_MutableSet_i32(range(10, 20))
         self.assertTrue(mutable_set_1.isdisjoint(mutable_set_3))
 
         self.assertFalse(mutable_set_1.isdisjoint(range(3)))
@@ -115,8 +125,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertTrue(mutable_set_1.isdisjoint(frozenset([10])))
 
     def test_eq(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
+        mutable_set_1 = _create_MutableSet_i32([1, 2])
+        mutable_set_2 = _create_MutableSet_i32([1, 2, 3])
 
         self.assertEqual({1, 2}, mutable_set_1)
         self.assertEqual(mutable_set_1, {1, 2})
@@ -132,8 +142,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertNotEqual(mutable_set_2, mutable_set_1)
 
     def test_and(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 6))
 
         result_set = mutable_set_1 & mutable_set_2
 
@@ -148,8 +158,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({1, 2}, result_set)
 
     def test_or(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 6))
 
         result_set = mutable_set_1 | mutable_set_2
 
@@ -164,8 +174,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 1, 2, 3, 10, 11, 12, 13}, result_set)
 
     def test_sub(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 7))
 
         result_set = mutable_set_1 - mutable_set_2
         self.assertIsInstance(result_set, MutableSet)
@@ -183,8 +193,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 2, 3}, result_set)
 
     def test_xor(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 7))
 
         result_set = mutable_set_1 ^ mutable_set_2
         self.assertIsInstance(result_set, MutableSet)
@@ -197,7 +207,7 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 4}, result_set)
 
     def test_add(self) -> None:
-        mutable_set = MutableSet(typeinfo_i32, set())
+        mutable_set = _create_MutableSet_i32([])
         python_set = set()
 
         for i in range(10):
@@ -208,19 +218,20 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(python_set, mutable_set)
 
     def test_add_wrong_type(self) -> None:
-        mutable_set = MutableSet(typeinfo_i32, set())
+        mutable_set = _create_MutableSet_i32([])
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_set.add("Not an interger")
 
     def test_add_i32_overflow(self) -> None:
-        mutable_set = MutableSet(typeinfo_i32, set())
+        mutable_set = _create_MutableSet_i32([])
         with self.assertRaises(OverflowError):
             mutable_set.add(2**31)
 
     def test_discard(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         python_set = set(range(10))
 
         for i in range(1, 10, 2):
@@ -231,17 +242,18 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(python_set, mutable_set)
 
     def test_discard_wrong_type(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         # Discard doesn't raise an error, should it?
+        # pyre-ignore[6]: Intentional for test
         mutable_set.discard("Not an integer")
 
     def test_discard_i32_overflow(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
         # Discard doesn't raise an error, should it?
         mutable_set.discard(2**31)
 
     def test_remove(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+        mutable_set = _create_MutableSet_i32(range(3))
 
         # `remove()` raises an `KeyError` if key is absent
         with self.assertRaisesRegex(KeyError, "999"):
@@ -254,19 +266,20 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(0, len(mutable_set))
 
     def test_remove_wrong_type(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+        mutable_set = _create_MutableSet_i32(range(3))
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_set.remove("Not an interger")
 
     def test_remove_i32_overflow(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+        mutable_set = _create_MutableSet_i32(range(3))
         with self.assertRaises(OverflowError):
             mutable_set.remove(2**31)
 
     def test_pop(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+        mutable_set = _create_MutableSet_i32(range(3))
 
         mutable_set.pop()
         mutable_set.pop()
@@ -277,7 +290,7 @@ class MutableSetTest(unittest.TestCase):
             mutable_set.pop()
 
     def test_clear(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
 
         for i in range(10):
             mutable_set.add(i)
@@ -286,7 +299,7 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(0, len(mutable_set))
 
     def test_pickle_round_trip(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(10))
+        mutable_set = _create_MutableSet_i32(range(10))
 
         pickled = pickle.dumps(mutable_set, protocol=pickle.HIGHEST_PROTOCOL)
         mutable_set_unpickled = pickle.loads(pickled)
@@ -294,8 +307,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual(mutable_set, mutable_set_unpickled)
 
     def test_ior(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 6))
 
         mutable_set_1 |= mutable_set_2
 
@@ -307,7 +320,7 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({2, 3, 4, 5, 10, 11, 12, 13}, mutable_set_2)
 
     def test_ior_exception(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(3))
+        mutable_set = _create_MutableSet_i32(range(3))
 
         # basic exception safety
         with self.assertRaisesRegex(
@@ -321,8 +334,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 1, 2, 10, 11}, mutable_set)
 
     def test_iand(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 6))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 6))
 
         mutable_set_1 &= mutable_set_2
 
@@ -334,7 +347,7 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({2}, mutable_set_1)
 
     def test_iand_exception(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set = _create_MutableSet_i32(range(4))
 
         # No exception is raised, the non-integers are ignored, and only valid
         # integers are processed
@@ -343,8 +356,8 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 1, 2}, mutable_set)
 
     def test_ixor(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 7))
 
         mutable_set_1 ^= mutable_set_2
         self.assertEqual(5, len(mutable_set_1))
@@ -355,39 +368,40 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({0, 1, 7}, mutable_set_1)
 
     def test_ixor_exception(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set = _create_MutableSet_i32(range(4))
 
         # strong exception safety
         with self.assertRaisesRegex(
             TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_set ^= {10, 11, "Not an Integer", 13, 14}
 
         self.assertEqual(4, len(mutable_set))
         self.assertEqual({0, 1, 2, 3}, mutable_set)
 
     def test_isub(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 7))
 
         mutable_set_1 -= mutable_set_2
         self.assertEqual(2, len(mutable_set_1))
         self.assertEqual({0, 1}, mutable_set_1)
 
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
-        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), range(2, 7))
+        mutable_set_3 = _create_MutableSet_i32(range(4))
+        mutable_set_4 = _create_MutableSet_i32(range(2, 7))
 
         mutable_set_4 -= mutable_set_3
         self.assertEqual(3, len(mutable_set_4))
         self.assertEqual({4, 5, 6}, mutable_set_4)
 
-        mutable_set_5 = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set_5 = _create_MutableSet_i32(range(4))
         mutable_set_5 -= {1, 5, 6}
         self.assertEqual(3, len(mutable_set_5))
         self.assertEqual({0, 2, 3}, mutable_set_5)
 
     def test_isub_exception(self) -> None:
-        mutable_set = MutableSet._from_iterable(typeinfo_i32, set(), range(4))
+        mutable_set = _create_MutableSet_i32(range(4))
 
         # No exception is raised, the non-integers are ignored, and only valid
         # integers are processed
@@ -396,10 +410,10 @@ class MutableSetTest(unittest.TestCase):
         self.assertEqual({2, 3}, mutable_set)
 
     def test_le(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3])
+        mutable_set_1 = _create_MutableSet_i32([1, 2])
+        mutable_set_2 = _create_MutableSet_i32([1, 2])
+        mutable_set_3 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_4 = _create_MutableSet_i32([2, 3])
 
         self.assertTrue(mutable_set_1 <= mutable_set_2)
         self.assertTrue(mutable_set_2 <= mutable_set_1)
@@ -421,10 +435,10 @@ class MutableSetTest(unittest.TestCase):
             _ = mutable_set_1 <= [1, 2]
 
     def test_lt(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3])
+        mutable_set_1 = _create_MutableSet_i32([1, 2])
+        mutable_set_2 = _create_MutableSet_i32([1, 2])
+        mutable_set_3 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_4 = _create_MutableSet_i32([2, 3])
 
         self.assertFalse(mutable_set_1 < mutable_set_2)
         self.assertFalse(mutable_set_2 < mutable_set_1)
@@ -446,10 +460,10 @@ class MutableSetTest(unittest.TestCase):
             _ = mutable_set_1 < [1, 2]
 
     def test_ge(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3, 4])
+        mutable_set_1 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_2 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_3 = _create_MutableSet_i32([1, 2])
+        mutable_set_4 = _create_MutableSet_i32([2, 3, 4])
 
         self.assertTrue(mutable_set_1 >= mutable_set_2)
         self.assertTrue(mutable_set_2 >= mutable_set_1)
@@ -471,10 +485,10 @@ class MutableSetTest(unittest.TestCase):
             _ = mutable_set_1 >= [1, 2]
 
     def test_gt(self) -> None:
-        mutable_set_1 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_2 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2, 3])
-        mutable_set_3 = MutableSet._from_iterable(typeinfo_i32, set(), [1, 2])
-        mutable_set_4 = MutableSet._from_iterable(typeinfo_i32, set(), [2, 3, 4])
+        mutable_set_1 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_2 = _create_MutableSet_i32([1, 2, 3])
+        mutable_set_3 = _create_MutableSet_i32([1, 2])
+        mutable_set_4 = _create_MutableSet_i32([2, 3, 4])
 
         self.assertFalse(mutable_set_1 > mutable_set_2)
         self.assertFalse(mutable_set_2 > mutable_set_1)

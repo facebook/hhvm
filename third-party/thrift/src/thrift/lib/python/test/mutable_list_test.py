@@ -17,6 +17,7 @@ import pickle
 import unittest
 
 from collections.abc import MutableSequence
+from typing import cast
 
 from thrift.python.mutable_containers import MutableList
 
@@ -27,7 +28,6 @@ from thrift.python.types import typeinfo_i32
 
 
 def _create_MutableList_i32(lst: list[int]) -> MutableList[int]:
-    """Converts the given (built-in) nested int list to a nested MutableList."""
     return MutableList(typeinfo_i32, lst)
 
 
@@ -328,8 +328,11 @@ class MutableListTest(unittest.TestCase):
 
 
 def create_MutableList_List_i32(lst: list[list[int]]) -> MutableList[MutableList[int]]:
-    # pyre-ignore[7, 19]
-    return MutableList(MutableListTypeInfo(typeinfo_i32), lst)
+    """Converts the given (built-in) nested int list to a nested MutableList."""
+    return cast(
+        MutableList[MutableList[int]],
+        MutableList(MutableListTypeInfo(typeinfo_i32), lst),
+    )
 
 
 class MutableListNestedTest(unittest.TestCase):

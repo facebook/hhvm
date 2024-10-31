@@ -467,6 +467,13 @@ cdef class MutableSet:
 
         return self._val_typeinfo.same_as((<MutableSet>other)._val_typeinfo)
 
+    @classmethod
+    def __class_getitem__(cls, _):
+        """
+        PEP 560 – Core support for typing module and generic types
+        It enables generic types like `MutableSet[T]`
+        """
+        return cls
 
 pyMutableSet.register(MutableSet)
 

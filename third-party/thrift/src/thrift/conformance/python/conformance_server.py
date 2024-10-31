@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 import asyncio
 
 from thrift.conformance.conformance.thrift_services import ConformanceServiceInterface

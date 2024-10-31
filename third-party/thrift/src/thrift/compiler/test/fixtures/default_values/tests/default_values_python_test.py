@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 import unittest
 
 from facebook.thrift.compiler.test.fixtures.default_values.module.thrift_types import (

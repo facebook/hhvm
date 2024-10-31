@@ -96,6 +96,14 @@ class CertUtils {
    */
   static CompressedCertificate cloneCompressedCert(
       const CompressedCertificate& src);
+
+  template <KeyType T>
+  static void verify(
+      const OpenSSLSignature<T>& certSignature,
+      SignatureScheme scheme,
+      CertificateVerifyContext context,
+      folly::ByteRange toBeSigned,
+      folly::ByteRange signature);
 };
 
 const CertificateSerialization& certificateSerializer();

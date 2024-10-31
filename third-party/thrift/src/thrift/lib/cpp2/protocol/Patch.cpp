@@ -678,23 +678,22 @@ void insertEnsureWriteFieldsToMask(Mask& mask, const Value& ensureFields) {
 // Ensure requires reading existing value to know whether keys exist in the
 // map. Insert allMask() if the key was never included in read mask
 // before.
-void insertEnsureReadKeysToMask(
-    Mask& mask, const Value& ensureFields, bool view) {
-  const auto& map = ensureFields.as_map();
+void insertReadKeysToMapMask(
+    Mask& mask, const folly::F14FastMap<Value, Value>& map, bool view) {
   auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
   auto getIncludesStringMapRef = [&](Mask& mask) {
     return mask.includes_string_map_ref();
   };
   if (view) {
     auto readValueIndex = buildValueIndex(mask);
-    for (const auto& [key, value] : map) {
+    for (const auto& [key, _] : map) {
       auto id = static_cast<int64_t>(
           getMapIdValueAddressFromIndex(readValueIndex, key));
       tryInsertAllMask(mask, id, getIncludesMapRef);
     }
     return;
   }
-  for (const auto& [key, value] : map) {
+  for (const auto& [key, _] : map) {
     if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
       tryInsertAllMask(
           mask,
@@ -910,9 +909,9 @@ ExtractedMasksFromPatch extractMaskFromPatch(
     if (ensureStruct->if_object()) {
       insertEnsureReadFieldsToMask(masks.read, *ensureStruct);
       insertEnsureWriteFieldsToMask(masks.write, *ensureStruct);
-    } else {
+    } else if (ensureStruct->if_map()) {
       isMap = true;
-      insertEnsureReadKeysToMask(masks.read, *ensureStruct, view);
+      insertReadKeysToMapMask(masks.read, ensureStruct->as_map(), view);
       insertWriteKeysToMapMask(masks.write, ensureStruct->as_map(), view);
     }
   }

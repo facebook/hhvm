@@ -19,8 +19,12 @@
 #include <folly/Try.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/fdsock/SocketFds.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
+
+FdMetadata makeFdMetadata(
+    folly::SocketFds& fds, folly::AsyncTransport* transport);
 
 // When this is called, `transport` is actually expected to be an
 // `AsyncFdSocket`, but we don't want to complicate the no-FDs, TCP-centric

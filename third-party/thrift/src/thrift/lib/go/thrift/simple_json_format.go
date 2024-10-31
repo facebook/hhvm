@@ -320,7 +320,6 @@ func (p *simpleJSONFormat) ReadFieldBegin() (string, types.Type, int16, error) {
 
 func (p *simpleJSONFormat) ReadFieldEnd() error {
 	return nil
-	//return p.ParseListEnd()
 }
 
 func (p *simpleJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
@@ -389,7 +388,6 @@ func (p *simpleJSONFormat) ReadBool() (bool, error) {
 				e := fmt.Errorf("Expected \"true\" but found: %s", string(b))
 				return value, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 			}
-			break
 		case types.JSON_FALSE[0]:
 			b := make([]byte, len(types.JSON_FALSE))
 			_, err := p.reader.Read(b)
@@ -402,7 +400,6 @@ func (p *simpleJSONFormat) ReadBool() (bool, error) {
 				e := fmt.Errorf("Expected \"false\" but found: %s", string(b))
 				return value, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 			}
-			break
 		case types.JSON_NULL[0]:
 			b := make([]byte, len(types.JSON_NULL))
 			_, err := p.reader.Read(b)
@@ -533,12 +530,10 @@ func (p *simpleJSONFormat) OutputPreValue() error {
 		if _, e := p.write(types.JSON_COMMA); e != nil {
 			return types.NewProtocolException(e)
 		}
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
 		if _, e := p.write(types.JSON_COLON); e != nil {
 			return types.NewProtocolException(e)
 		}
-		break
 	}
 	return nil
 }
@@ -549,19 +544,15 @@ func (p *simpleJSONFormat) OutputPostValue() error {
 	case _CONTEXT_IN_LIST_FIRST:
 		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
 		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_LIST))
-		break
 	case _CONTEXT_IN_OBJECT_FIRST:
 		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
 		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_KEY:
 		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
 		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
 		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
 		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_KEY))
-		break
 	}
 	return nil
 }
@@ -579,7 +570,6 @@ func (p *simpleJSONFormat) OutputBool(value bool) error {
 	switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
-	default:
 	}
 	if e := p.OutputStringData(v); e != nil {
 		return e
@@ -613,7 +603,6 @@ func (p *simpleJSONFormat) OutputF64(value float64) error {
 		switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
 		case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 			v = string(types.JSON_QUOTE) + v + string(types.JSON_QUOTE)
-		default:
 		}
 	}
 	if e := p.OutputStringData(v); e != nil {
@@ -638,7 +627,6 @@ func (p *simpleJSONFormat) OutputF32(value float32) error {
 		switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
 		case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 			v = string(types.JSON_QUOTE) + v + string(types.JSON_QUOTE)
-		default:
 		}
 	}
 	if e := p.OutputStringData(v); e != nil {
@@ -655,7 +643,6 @@ func (p *simpleJSONFormat) OutputI64(value int64) error {
 	switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
-	default:
 	}
 	if e := p.OutputStringData(v); e != nil {
 		return e
@@ -758,7 +745,6 @@ func (p *simpleJSONFormat) ParsePreValue() error {
 				return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 			}
 		}
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_KEY:
 		if len(b) > 0 {
 			switch b[0] {
@@ -775,7 +761,6 @@ func (p *simpleJSONFormat) ParsePreValue() error {
 				return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 			}
 		}
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
 		if len(b) > 0 {
 			switch b[0] {
@@ -790,7 +775,6 @@ func (p *simpleJSONFormat) ParsePreValue() error {
 				return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 			}
 		}
-		break
 	}
 	return nil
 }
@@ -804,15 +788,12 @@ func (p *simpleJSONFormat) ParsePostValue() error {
 	case _CONTEXT_IN_LIST_FIRST:
 		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
 		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_LIST))
-		break
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
 		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
-		break
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
 		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
 		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_OBJECT_NEXT_KEY))
-		break
 	}
 	return nil
 }
@@ -827,8 +808,6 @@ func (p *simpleJSONFormat) readNonSignificantWhitespace() error {
 		case ' ', '\r', '\n', '\t':
 			p.reader.ReadByte()
 			continue
-		default:
-			break
 		}
 		break
 	}
@@ -1015,7 +994,7 @@ func (p *simpleJSONFormat) ParseObjectEnd() error {
 			e := fmt.Errorf("Expecting end of object \"}\", but found: \"%s\"", line)
 			return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 		case ' ', '\n', '\r', '\t', '}':
-			break
+			// do nothing
 		}
 	}
 	p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
@@ -1076,7 +1055,7 @@ func (p *simpleJSONFormat) ParseListEnd() error {
 			e := fmt.Errorf("Expecting end of list \"]\", but found: %q", line)
 			return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 		case ' ', '\n', '\r', '\t', rune(types.JSON_RBRACKET[0]):
-			break
+			// do nothing
 		}
 	}
 	p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
@@ -1174,10 +1153,8 @@ func (p *simpleJSONFormat) readIfNull() (bool, error) {
 			return false, nil
 		case types.JSON_NULL[0]:
 			cont = false
-			break
 		case ' ', '\n', '\r', '\t':
 			p.reader.ReadByte()
-			break
 		}
 	}
 	if p.safePeekContains(types.JSON_NULL) {
@@ -1305,8 +1282,6 @@ func (p *simpleJSONFormat) readNumeric() (types.Numeric, error) {
 		case types.JSON_QUOTE:
 			if !inQuotes {
 				inQuotes = true
-			} else {
-				break
 			}
 		default:
 			e := fmt.Errorf("Unable to parse number starting with character '%c'", c)

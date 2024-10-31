@@ -152,7 +152,6 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  *
  * The lambda parameters are as follows:
  *
- * - GetVal:     Return the SSATmp of the value to test
  * - GetTcInfo:  Return a string describing the origin of the type-constraint
  * - GetThisCls: Return the SSATmp of the the class of `this'
  * - SetVal:     Emit code to update the value with the coerced value.
@@ -163,8 +162,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * - Fallback:   Called when the type check cannot be resolved statically.
  *               Call a runtime helper to do the check.
  */
-template <typename TGetVal,
-          typename TGetTcInfo,
+template <typename TGetTcInfo,
           typename TGetThisCls,
           typename TSetVal,
           typename TFail,
@@ -174,7 +172,7 @@ template <typename TGetVal,
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
                     bool onlyCheckNullability,
-                    TGetVal getVal,
+                    SSATmp* inputVal,
                     TGetTcInfo getTcInfo,
                     TGetThisCls getThisCls,
                     TSetVal setVal,
@@ -350,9 +348,8 @@ void verifyTypeImpl(IRGS& env,
     }
   };
 
-  auto const genericVal = getVal();
-  assertx(genericVal->type() <= TCell);
-  auto const genericValType = genericVal->type();
+  auto const valType = inputVal->type();
+  assertx(valType <= TCell);
 
   // Given a DataType compute what AnnotAction to take.
   auto const computeAction = [&](DataType dt, const TypeConstraint& tc) -> AnnotAction {
@@ -366,10 +363,10 @@ void verifyTypeImpl(IRGS& env,
     if (tc.isThis()) return action;
     assertx(tc.isSubObject() || tc.isUnresolved());
 
-    if (!genericValType.clsSpec()) return action;
-    auto const cls = genericValType.clsSpec().cls();
+    if (!valType.clsSpec()) return action;
+    auto const cls = valType.clsSpec().cls();
 
-    if (env.irb->constrainValue(genericVal, GuardConstraint(cls).setWeak())) {
+    if (env.irb->constrainValue(inputVal, GuardConstraint(cls).setWeak())) {
       // We would have to constrain a guard to get the `cls` value.
       return action;
     }
@@ -434,12 +431,12 @@ void verifyTypeImpl(IRGS& env,
     }
   };
 
-  if (genericValType.isKnownDataType()) {
+  if (valType.isKnownDataType()) {
     // The type is well-known statically. Compute and then perform an action
     // based on the static type.
-    auto const dt = genericValType.toDataType();
+    auto const dt = valType.toDataType();
     auto action = computeUnionAction(dt, tc);
-    return checkOneType(genericVal, action);
+    return checkOneType(inputVal, action);
   }
 
   // Order matters here. When merging we always take the "largest" value.
@@ -451,7 +448,7 @@ void verifyTypeImpl(IRGS& env,
     // an entry to `result` saying how to handle it.
     for (auto const dt : kDataTypes) {
       auto const type = Type(dt);
-      if (!genericValType.maybe(type)) continue;
+      if (!valType.maybe(type)) continue;
       auto const action = computeUnionAction(dt, tc);
       switch (action) {
         case AnnotAction::Fail:
@@ -502,7 +499,7 @@ void verifyTypeImpl(IRGS& env,
   // then perform the fallbackAction.
   MultiCond mc{env};
   for (auto const& pair : options) {
-    mc.ifTypeThen(genericVal, Type(pair.first), [&](SSATmp* val) {
+    mc.ifTypeThen(inputVal, Type(pair.first), [&](SSATmp* val) {
       checkOneType(val, pair.second);
       return cns(env, TBottom);
     });
@@ -514,13 +511,13 @@ void verifyTypeImpl(IRGS& env,
         break;
       case Fail:
         hint(env, Block::Hint::Unlikely);
-        genFail(genericVal);
+        genFail(inputVal);
         break;
       case Fallback:
-        fallback(genericVal, genThisCls(), false);
+        fallback(inputVal, genThisCls(), false);
         break;
       case FallbackCoerce:
-        setVal(fallback(genericVal, genThisCls(), true));
+        setVal(fallback(inputVal, genThisCls(), true));
         break;
     }
     return cns(env, TBottom);
@@ -1367,13 +1364,12 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
   auto const func = curFunc(env);
   auto const verifyFunc = [&] (const TypeConstraint& tc) {
+    auto val = topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
     verifyTypeImpl(
       env,
       tc,
       onlyCheckNullability,
-      [&] { // Get value to test
-        return topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
-      },
+      val,
       [&] {
         if (id == TypeConstraint::ReturnId) {
           return folly::sformat("return of {}()", func->fullName());
@@ -1452,19 +1448,17 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
     }
   }
 }
-
 }
 
 void verifyParamType(IRGS& env, const Func* func, int32_t id,
                      BCSPRelOffset offset, SSATmp* prologueCtx) {
   auto const verifyFunc = [&](const TypeConstraint& tc) {
+    auto val = topC(env, offset, DataTypeGeneric);
     verifyTypeImpl(
       env,
       tc,
       false,  // onlyCheckNullability
-      [&] { // Get value to test
-        return topC(env, offset, DataTypeGeneric);
-      },
+      val,
       [&] {
         return folly::sformat(
           "argument {} passed to {}()", id + 1, func->fullName());
@@ -1589,16 +1583,13 @@ void verifyPropType(IRGS& env,
       return;
     }
 
-    verifyTypeImpl(
+    if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
+
+    return verifyTypeImpl(
       env,
       *tc,
       false,  // onlyCheckNullability
-      [&] { // Get value to check
-        // Guard the type only if we may coerce, so that the most common
-        // non-coercion case is handled without using the fallback.
-        if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
-        return val;
-      },
+      val,
       [&] {
         if (name->hasConstVal(TStaticStr)) {
           return folly::sformat("property {}", name->strVal());

@@ -13,23 +13,16 @@ namespace fizz {
 namespace extensions {
 
 template <openssl::KeyType T>
-PeerDelegatedCredentialImpl<T>::InternalPeerCert::InternalPeerCert(
-    folly::ssl::X509UniquePtr cert,
-    folly::ssl::EvpPkeyUniquePtr pubKey)
-    : openssl::OpenSSLPeerCertImpl<T>(std::move(cert)) {
-  if (openssl::CertUtils::getKeyType(pubKey) != T) {
-    throw std::runtime_error("Key and credential type don't match");
-  }
-  signature_.setKey(std::move(pubKey));
-}
-
-template <openssl::KeyType T>
 PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential)
-    : peerCertImpl_(std::move(cert), std::move(pubKey)),
-      credential_(std::move(credential)) {}
+    : peerCert_(std::move(cert)), credential_(std::move(credential)) {
+  if (openssl::CertUtils::getKeyType(pubKey) != T) {
+    throw std::runtime_error("Key and credential type don't match");
+  }
+  credentialSignature_.setKey(std::move(pubKey));
+}
 
 template <openssl::KeyType T>
 void PeerDelegatedCredentialImpl<T>::verify(
@@ -43,7 +36,7 @@ void PeerDelegatedCredentialImpl<T>::verify(
         "certificate verify didn't use credential's algorithm",
         AlertDescription::illegal_parameter);
   }
-  auto x509 = peerCertImpl_.getX509();
+  auto x509 = peerCert_.getX509();
   // Check extensions on cert
   DelegatedCredentialUtils::checkExtensions(x509);
   DelegatedCredentialUtils::checkCredentialTimeValidity(
@@ -52,11 +45,9 @@ void PeerDelegatedCredentialImpl<T>::verify(
   // Verify signature
   auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(
       credential_, folly::ssl::OpenSSLCertUtils::derEncode(*x509));
-  auto parentCert =
-      std::make_unique<openssl::OpenSSLPeerCertImpl<T>>(std::move(x509));
 
   try {
-    parentCert->verify(
+    peerCert_.verify(
         credential_.credential_scheme,
         context == CertificateVerifyContext::Server
             ? CertificateVerifyContext::ServerDelegatedCredential
@@ -71,8 +62,12 @@ void PeerDelegatedCredentialImpl<T>::verify(
   }
 
   // Call the parent verify method
-  peerCertImpl_.verify(
-      scheme, context, std::move(toBeSigned), std::move(signature));
+  openssl::CertUtils::verify(
+      credentialSignature_,
+      scheme,
+      context,
+      std::move(toBeSigned),
+      std::move(signature));
 }
 
 template <openssl::KeyType T>

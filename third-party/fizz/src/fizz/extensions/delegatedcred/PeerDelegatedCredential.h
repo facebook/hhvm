@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/backend/openssl/certificate/OpenSSLPeerCertImpl.h>
+#include <fizz/backend/openssl/crypto/signature/Signature.h>
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/protocol/clock/SystemClock.h>
 
@@ -41,11 +42,11 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
       folly::ByteRange signature) const override;
 
   folly::ssl::X509UniquePtr getX509() const override {
-    return peerCertImpl_.getX509();
+    return peerCert_.getX509();
   }
 
   std::string getIdentity() const override {
-    return peerCertImpl_.getIdentity();
+    return peerCert_.getIdentity();
   }
 
   const DelegatedCredential& getDelegatedCredential() const override {
@@ -60,19 +61,9 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
   }
 
  private:
-  class InternalPeerCert : public openssl::OpenSSLPeerCertImpl<T> {
-   public:
-    ~InternalPeerCert() override = default;
-
-    explicit InternalPeerCert(
-        folly::ssl::X509UniquePtr cert,
-        folly::ssl::EvpPkeyUniquePtr pubKey);
-
-    using openssl::OpenSSLPeerCertImpl<T>::signature_;
-    using openssl::OpenSSLPeerCertImpl<T>::cert_;
-  };
-  InternalPeerCert peerCertImpl_;
+  openssl::OpenSSLPeerCertImpl<T> peerCert_;
   DelegatedCredential credential_;
+  openssl::OpenSSLSignature<T> credentialSignature_;
   std::shared_ptr<Clock> clock_ = std::make_shared<SystemClock>();
 };
 } // namespace extensions

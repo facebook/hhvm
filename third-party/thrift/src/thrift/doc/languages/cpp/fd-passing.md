@@ -24,10 +24,11 @@ For a client to pass FDs to a server, use `RpcOptions::setFdsToSend`. To read FD
 
 ```
 SocketFds::ToSend fds;
-fds.emplace_back(std::make_shared(std::move(file1)));
-fds.emplace_back(std::make_shared(std::move(file2)));
+fds.emplace_back(std::make_shared<File>(std::move(file1)));
+fds.emplace_back(std::make_shared<File>(std::move(file2)));
 apache::thrift::RpcOptions rpcOptions;
 rpcOptions.setFdsToSend(std::move(fds));  // Send FDs to server
+// Annotate `METHOD` with `@cpp.GenerateDeprecatedHeaderClientMethods`
 client.header_semifuture_METHOD(rpcOptions, ...).thenTry([](auto maybeRet) {
   ...
   // Receive FDs from server
@@ -52,6 +53,8 @@ folly::coro::Task<...> co_METHOD(
   headerFds.dcheckEmpty() = folly::SocketFds{std::move(outFds)};
 }
 ```
+
+You'll find a working example of the above in `thrift/lib/cpp2/test/fdpassing`.
 
 Finally, to handle FDs on stream messages, the client / server must use the library flavor that passes `RichPayloadToSend` / `RichPayloadReceived` structures. These include `fds` both on the “send” (`StreamCallbacks.h`) and “receive” side (`ClientBufferedStream.h`).
 

@@ -150,11 +150,13 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * quite a bit depending on what the type-constraint represents, this function
  * is heavily templatized.
  *
+ * Returns the potentially updated value after parameter type check 
+ * and any coersions
+ *
  * The lambda parameters are as follows:
  *
  * - GetTcInfo:  Return a string describing the origin of the type-constraint
  * - GetThisCls: Return the SSATmp of the the class of `this'
- * - SetVal:     Emit code to update the value with the coerced value.
  * - Fail:       Emit code to deal with the type check failing.
  * - Callable:   Emit code to verify that the given value is callable.
  * - VerifyCls:  Emit code to verify that the given value is an instance of the
@@ -163,27 +165,25 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  *               Call a runtime helper to do the check.
  */
 template <typename TGetTcInfo,
-          typename TGetThisCls,
-          typename TSetVal,
-          typename TFail,
-          typename TCallable,
-          typename TVerifyCls,
-          typename TFallback>
-void verifyTypeImpl(IRGS& env,
-                    const TypeConstraint& tc,
-                    bool onlyCheckNullability,
-                    SSATmp* inputVal,
-                    TGetTcInfo getTcInfo,
-                    TGetThisCls getThisCls,
-                    TSetVal setVal,
-                    TFail fail,
-                    TCallable callable,
-                    TVerifyCls verifyCls,
-                    TFallback fallback) {
+  typename TGetThisCls,
+  typename TFail,
+  typename TCallable,
+  typename TVerifyCls,
+  typename TFallback>
+SSATmp* verifyTypeImpl(IRGS& env,
+  const TypeConstraint& tc,
+  bool onlyCheckNullability,
+  SSATmp* inputVal,
+  TGetTcInfo getTcInfo,
+  TGetThisCls getThisCls,
+  TFail fail,
+  TCallable callable,
+  TVerifyCls verifyCls,
+  TFallback fallback) {
 
   // Ensure that we should bother checking the type at all. If it's uncheckable
   // (because it's an unenforcible type) then just return.
-  if (!tc.isCheckable()) return;
+  if (!tc.isCheckable()) return inputVal;
 
   auto const genThisCls = [&]() {
     return tc.isThis() ? getThisCls() : cns(env, nullptr);
@@ -195,33 +195,32 @@ void verifyTypeImpl(IRGS& env,
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
       && !tc.isThis();
-    return fail(val, thisCls, failHard);
+    fail(val, thisCls, failHard);
   };
 
   // Check `val` against `tc` using `result` as a rule.
-  auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> void {
+  auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> SSATmp* {
     assertx(val->type().isKnownDataType());
-
+    
     switch (result) {
       case AnnotAction::Pass:
-        return;
+        return val;
 
       case AnnotAction::Fail:
         genFail(val);
-        return;
+        return val;
 
       case AnnotAction::Fallback:
         fallback(val, genThisCls(), false);
-        return;
+        return val;
 
       case AnnotAction::FallbackCoerce:
-        setVal(fallback(val, genThisCls(), true));
-        return;
+        return fallback(val, genThisCls(), true);
 
       case AnnotAction::CallableCheck:
         if (tc.isUnion()) not_implemented(); // TODO(T151885113)
         callable(val);
-        return;
+        return val;
 
       case AnnotAction::ObjectCheck:
         // We'll check objects next.
@@ -230,7 +229,6 @@ void verifyTypeImpl(IRGS& env,
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
         assertx(val->type() <= TCls);
-        setVal(gen(env, LdClsName, val));
         if (result == AnnotAction::WarnClass) {
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
@@ -242,12 +240,11 @@ void verifyTypeImpl(IRGS& env,
             cns(env, makeStaticString(msg))
           );
         }
-        return;
+        return gen(env, LdClsName, val);
 
       case AnnotAction::WarnLazyClass:
       case AnnotAction::ConvertLazyClass:
         assertx(val->type() <= TLazyCls);
-        setVal(gen(env, LdLazyClsName, val));
         if (result == AnnotAction::WarnLazyClass) {
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
@@ -259,7 +256,7 @@ void verifyTypeImpl(IRGS& env,
             cns(env, makeStaticString(msg))
           );
         }
-        return;
+        return gen(env, LdLazyClsName, val);
 
       case AnnotAction::WarnClassname:
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
@@ -267,7 +264,7 @@ void verifyTypeImpl(IRGS& env,
             RaiseNotice,
             SampleRateData { Cfg::Eval::ClassnameNoticesSampleRate },
             cns(env, s_CLASS_TO_CLASSNAME.get()));
-        return;
+        return val;
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(val->type() <= TObj);
@@ -291,7 +288,7 @@ void verifyTypeImpl(IRGS& env,
           genFail(val, thisCls);
         }
       );
-      return;
+      return val;
     }
 
     // At this point, we know that val is a TObj and that tc is an Object.
@@ -302,7 +299,7 @@ void verifyTypeImpl(IRGS& env,
         mc.ifThen(
           genCheckThis,
           [&](SSATmp*) {
-            return cns(env, TBottom);
+            return val;
           });
       }
       // Iterate through the matching classes.
@@ -316,13 +313,13 @@ void verifyTypeImpl(IRGS& env,
             return gen(env, JmpZero, taken, isInstance);
           },
           [&](SSATmp*) {
-            return cns(env, TBottom);
+            return val;
           });
       }
 
-      mc.elseDo([&] {
+      return mc.elseDo([&] {
         genFail(val);
-        return cns(env, TBottom);
+        return val;
       });
     } else {
       // Non-union:
@@ -340,16 +337,16 @@ void verifyTypeImpl(IRGS& env,
             hint(env, Block::Hint::Unlikely);
             genFail(val);
           }
-               );
-        return;
+        );
+        return val;
       }
-
       verifyCls(val, checkCls);
     }
-  };
+    return val;
+  }; // end checkOneType
 
+  assertx(inputVal->type() <= TCell);
   auto const valType = inputVal->type();
-  assertx(valType <= TCell);
 
   // Given a DataType compute what AnnotAction to take.
   auto const computeAction = [&](DataType dt, const TypeConstraint& tc) -> AnnotAction {
@@ -488,7 +485,7 @@ void verifyTypeImpl(IRGS& env,
       std::all_of(options.begin(), options.end(), [] (auto const& pair) {
         return pair.second == AnnotAction::Pass;
       })) {
-    return;
+    return inputVal;
   }
 
   // TODO(kshaunak): If we were a bit more sophisticated here, we could
@@ -499,12 +496,11 @@ void verifyTypeImpl(IRGS& env,
   // then perform the fallbackAction.
   MultiCond mc{env};
   for (auto const& pair : options) {
-    mc.ifTypeThen(inputVal, Type(pair.first), [&](SSATmp* val) {
-      checkOneType(val, pair.second);
-      return cns(env, TBottom);
+    mc.ifTypeThen(inputVal, Type(pair.first), [&](SSATmp* val) -> SSATmp* {
+      return checkOneType(val, pair.second);
     });
   }
-  mc.elseDo([&]{
+  return mc.elseDo([&]{
     switch (fallbackAction) {
       case None:
         gen(env, Unreachable, ASSERT_REASON);
@@ -512,13 +508,12 @@ void verifyTypeImpl(IRGS& env,
       case Fail:
         hint(env, Block::Hint::Unlikely);
         genFail(inputVal);
-        break;
+        return inputVal;
       case Fallback:
         fallback(inputVal, genThisCls(), false);
-        break;
+        return inputVal;
       case FallbackCoerce:
-        setVal(fallback(inputVal, genThisCls(), true));
-        break;
+        return fallback(inputVal, genThisCls(), true);
     }
     return cns(env, TBottom);
   });
@@ -1363,13 +1358,12 @@ namespace {
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
   auto const func = curFunc(env);
-  auto const verifyFunc = [&] (const TypeConstraint& tc) {
-    auto val = topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
-    verifyTypeImpl(
+  auto const verifyFunc = [&] (const TypeConstraint& tc, SSATmp* inputVal) -> SSATmp* {
+    return verifyTypeImpl(
       env,
       tc,
       onlyCheckNullability,
-      val,
+      inputVal,
       [&] {
         if (id == TypeConstraint::ReturnId) {
           return folly::sformat("return of {}()", func->fullName());
@@ -1381,11 +1375,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       },
       [&] { // Get the class representing `this' type
         return ldCtxCls(env);
-      },
-      [&] (SSATmp* updated) { // Set the potentially coerced value
-        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
-        env.irb->exceptionStackBoundary();
       },
       [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         updateMarker(env);
@@ -1428,37 +1417,45 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       }
     );
   };
+
+  auto const val = topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
   assertx(ind >= 0);
-  verifyFunc(tc);
+  auto updatedVal = verifyFunc(tc, val);
+
   if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
     auto const& ubs = func->returnUBs();
     for (auto const& ub : ubs.m_constraints) {
-      verifyFunc(ub);
+      updatedVal = verifyFunc(ub, updatedVal);
     }
   } else if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto const it = ubs.find(id);
     if (it != ubs.end()) {
       for (auto const& ub : it->second.m_constraints) {
-        verifyFunc(ub);
+        updatedVal = verifyFunc(ub, updatedVal);
       }
     }
+  }
+
+  if (updatedVal != val) {
+    auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+    gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updatedVal);
+    env.irb->exceptionStackBoundary();
   }
 }
 }
 
 void verifyParamType(IRGS& env, const Func* func, int32_t id,
                      BCSPRelOffset offset, SSATmp* prologueCtx) {
-  auto const verifyFunc = [&](const TypeConstraint& tc) {
-    auto val = topC(env, offset, DataTypeGeneric);
-    verifyTypeImpl(
+  auto const verifyFunc = [&](const TypeConstraint& tc, SSATmp* inputVal) -> SSATmp* {
+    return verifyTypeImpl(
       env,
       tc,
       false,  // onlyCheckNullability
-      val,
+      inputVal,
       [&] {
         return folly::sformat(
           "argument {} passed to {}()", id + 1, func->fullName());
@@ -1484,12 +1481,6 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
         auto const thiz =
           gen(env, AssertType, Type::SubObj(func->cls()), prologueCtx);
         return gen(env, LdObjClass, thiz);
-      },
-      [&] (SSATmp* updated) { // Set the potentially coerced value
-        auto const irspRelOffset = offsetFromIRSP(env, offset);
-        gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updated);
-        updateMarker(env);
-        env.irb->exceptionStackBoundary();
       },
       [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
         gen(
@@ -1530,16 +1521,24 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
       }
     );
   };
+  auto const val = topC(env, offset, DataTypeGeneric);
   auto const& tc = func->params()[id].typeConstraint;
-  verifyFunc(tc);
+  auto updatedVal = verifyFunc(tc, val);
   if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto const it = ubs.find(id);
     if (it != ubs.end()) {
       for (auto const& ub : it->second.m_constraints) {
-        verifyFunc(ub);
+        updatedVal = verifyFunc(ub, updatedVal);
       }
     }
+  }
+  
+  if (updatedVal != val) {
+    auto const irspRelOffset = offsetFromIRSP(env, offset);
+    gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updatedVal);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
   }
 }
 
@@ -1555,14 +1554,13 @@ void verifyPropType(IRGS& env,
   assertx(cls->isA(TCls));
   assertx(val->isA(TCell));
 
-  if (coerce) *coerce = val;
   if (Cfg::Eval::CheckPropTypeHints <= 0) return;
 
-  auto const verifyFunc = [&](const TypeConstraint* tc) {
-    if (!tc || !tc->isCheckable()) return;
+  auto const verifyFunc = [&](const TypeConstraint* tc, SSATmp* inputVal) -> SSATmp* {
+    if (!tc || !tc->isCheckable()) return inputVal;
     assertx(tc->validForProp());
 
-    auto const fallback = [&](SSATmp* val, SSATmp*, bool mayCoerce) {
+    auto const fallback = [&](SSATmp* val, SSATmp*, bool mayCoerce) -> SSATmp* {
       return gen(
         env,
         mayCoerce ? VerifyPropCoerce : VerifyProp,
@@ -1577,19 +1575,17 @@ void verifyPropType(IRGS& env,
     // For non-DataTypeSpecific values, verifyTypeImpl handles the different
     // cases separately. However, our callers want a single coerced value, which
     // we don't track, so we use the fallback if we're going to split it up.
-    if (tc->mayCoerce() && !val->type().isKnownDataType()) {
-      auto const updated = fallback(val, nullptr, true /* mayCoerce */);
-      if (coerce) *coerce = updated;
-      return;
+    if (tc->mayCoerce() && !inputVal->type().isKnownDataType()) {
+      return fallback(val, nullptr, true /* mayCoerce */);
     }
 
-    if (tc->mayCoerce()) env.irb->constrainValue(val, DataTypeSpecific);
+    if (tc->mayCoerce()) env.irb->constrainValue(inputVal, DataTypeSpecific);
 
     return verifyTypeImpl(
       env,
       *tc,
       false,  // onlyCheckNullability
-      val,
+      inputVal,
       [&] {
         if (name->hasConstVal(TStaticStr)) {
           return folly::sformat("property {}", name->strVal());
@@ -1599,10 +1595,6 @@ void verifyPropType(IRGS& env,
       },
       [&] { // Get the class representing `this' type
         return cls;
-      },
-      [&] (SSATmp* updated) { // Set the potentially coerced value
-        assertx(tc->mayCoerce());
-        if (coerce) *coerce = updated;
       },
       [&] (SSATmp* val, SSATmp*, bool hard) { // Check failure
         auto const failHard =
@@ -1635,10 +1627,12 @@ void verifyPropType(IRGS& env,
       fallback
     );
   };
-  verifyFunc(tc);
+  auto updatedVal = verifyFunc(tc, val);
   for (auto const& ub : ubs->m_constraints) {
-    verifyFunc(&ub);
+    updatedVal = verifyFunc(&ub, updatedVal);
   }
+
+  if (coerce) *coerce = updatedVal;
 }
 
 void emitVerifyRetTypeC(IRGS& env) {

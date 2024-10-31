@@ -44,15 +44,14 @@ struct IRGS;
 void verifyParamType(IRGS& env, const Func* callee, int32_t id,
                      BCSPRelOffset offset, SSATmp* prologueCtx);
 
-void verifyPropType(IRGS& env,
-                    SSATmp* cls,
-                    const HPHP::TypeConstraint* tc,
-                    const VMTypeIntersectionConstraint* ubs,
-                    Slot slot,
-                    SSATmp* val,
-                    SSATmp* name,
-                    bool isSProp,
-                    SSATmp** coerce = nullptr);
+SSATmp* verifyPropType(IRGS& env,
+                       SSATmp* cls,
+                       const HPHP::TypeConstraint* tc,
+                       const VMTypeIntersectionConstraint* ubs,
+                       Slot slot,
+                       SSATmp* val,
+                       SSATmp* name,
+                       bool isSProp);
 
 void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
                                 SSATmp* val, Block* fail);

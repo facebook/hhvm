@@ -1550,19 +1550,18 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
   }
 }
 
-void verifyPropType(IRGS& env,
-                    SSATmp* cls,
-                    const HPHP::TypeConstraint* tc,
-                    const Class::UpperBoundVec* ubs,
-                    Slot slot,
-                    SSATmp* val,
-                    SSATmp* name,
-                    bool isSProp,
-                    SSATmp** coerce /* = nullptr */) {
+SSATmp* verifyPropType(IRGS& env,
+                       SSATmp* cls,
+                       const HPHP::TypeConstraint* tc,
+                       const Class::UpperBoundVec* ubs,
+                       Slot slot,
+                       SSATmp* val,
+                       SSATmp* name,
+                       bool isSProp) {
   assertx(cls->isA(TCls));
   assertx(val->isA(TCell));
 
-  if (Cfg::Eval::CheckPropTypeHints <= 0) return;
+  if (Cfg::Eval::CheckPropTypeHints <= 0) return val;
 
   auto const verifyFunc = [&](const TypeConstraint* tc, SSATmp* inputVal) -> SSATmp* {
     if (!tc || !tc->isCheckable()) return inputVal;
@@ -1579,13 +1578,6 @@ void verifyPropType(IRGS& env,
         cns(env, isSProp)
       );
     };
-
-    // For non-DataTypeSpecific values, verifyTypeImpl handles the different
-    // cases separately. However, our callers want a single coerced value, which
-    // we don't track, so we use the fallback if we're going to split it up.
-    if (tc->mayCoerce() && !inputVal->type().isKnownDataType()) {
-      return fallback(val, nullptr, true /* mayCoerce */);
-    }
 
     if (tc->mayCoerce()) env.irb->constrainValue(inputVal, DataTypeSpecific);
 
@@ -1640,7 +1632,7 @@ void verifyPropType(IRGS& env,
     updatedVal = verifyFunc(&ub, updatedVal);
   }
 
-  if (coerce) *coerce = updatedVal;
+  return updatedVal;
 }
 
 void emitVerifyRetTypeC(IRGS& env) {

@@ -268,7 +268,7 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
   if (lookup.tc) {
-    verifyPropType(
+    value = verifyPropType(
       env,
       ssaCls,
       lookup.tc,
@@ -276,8 +276,7 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
       lookup.slot,
       value,
       ssaPropName,
-      true,
-      &value
+      true
     );
   } else if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
@@ -311,7 +310,7 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
 
   auto const finish = [&] (SSATmp* value) {
     if (lookup.tc) {
-      verifyPropType(
+      value = verifyPropType(
         env,
         ssaCls,
         lookup.tc,
@@ -319,8 +318,7 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
         lookup.slot,
         value,
         ssaPropName,
-        true,
-        &value
+        true
       );
     } else if (Cfg::Eval::CheckPropTypeHints > 0) {
       auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
@@ -527,7 +525,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const& prop = ctx->staticProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
-        verifyPropType(
+        val = verifyPropType(
           env,
           cns(env, ctx),
           &prop.typeConstraint,
@@ -535,8 +533,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
           slot,
           val,
           cns(env, propName),
-          true,
-          &val
+          true
         );
       }
 
@@ -561,7 +558,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const& prop = ctx->declProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
-        verifyPropType(
+        val = verifyPropType(
           env,
           cls,
           &prop.typeConstraint,
@@ -569,8 +566,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
           slot,
           val,
           cns(env, propName),
-          false,
-          &val
+          false
         );
       }
 

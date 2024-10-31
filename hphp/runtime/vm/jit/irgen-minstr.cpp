@@ -1155,8 +1155,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       *propInfo
     );
 
-    SSATmp* newVal = nullptr;
-    verifyPropType(
+    SSATmp* newVal = verifyPropType(
       env,
       gen(env, LdObjClass, base),
       propInfo->typeConstraint,
@@ -1164,8 +1163,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       propInfo->slot,
       value,
       key,
-      false,
-      &newVal
+      false
     );
 
     auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);

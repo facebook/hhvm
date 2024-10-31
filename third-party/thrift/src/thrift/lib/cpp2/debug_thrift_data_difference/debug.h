@@ -91,18 +91,22 @@ struct debug_output_callback {
       T const* rhs,
       std::string_view path,
       std::string_view message) const {
-    out_ << path << ": " << message;
+    out_ << path << ": " << message << '\n';
+    out_ << "  " << lhs_ << ":\n";
     if (lhs) {
-      out_ << "\n"
-           << "  " << lhs_ << ":\n";
       facebook::thrift::pretty_print<Tag>(out_, *lhs, "  ", "    ");
+      out_ << '\n';
+    } else {
+      out_ << "    <unset>\n";
     }
+
+    out_ << "  " << rhs_ << ":\n";
     if (rhs) {
-      out_ << "\n"
-           << "  " << rhs_ << ":\n";
       facebook::thrift::pretty_print<Tag>(out_, *rhs, "  ", "    ");
+      out_ << '\n';
+    } else {
+      out_ << "    <unset>\n";
     }
-    out_ << "\n";
   }
 
  private:

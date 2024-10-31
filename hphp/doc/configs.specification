@@ -275,6 +275,11 @@ The format can be found in hphp/tools/configs/generate-configs.rs
 
   Synchronize class loading between threads
 
+- bool Eval.ReflectionMissConstantFromIncludedEnumsNotice = false, fzn
+
+  Whether ReflectionClass::getConstants raises notice if it misses constants from
+  enums/enum classes included via enum inclusion
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

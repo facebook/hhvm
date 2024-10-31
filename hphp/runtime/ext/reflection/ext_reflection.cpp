@@ -1640,7 +1640,8 @@ void addClassConstantNames(const Class* cls,
       }
     }
   }
-  if (has_constants_from_included_enums) {
+  if (has_constants_from_included_enums && 
+      Cfg::Eval::ReflectionMissConstantFromIncludedEnumsNotice) {
     raise_notice(Strings::REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS, 
                  cls->name()->data());
   }

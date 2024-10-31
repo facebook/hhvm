@@ -56,6 +56,7 @@ struct SSLContextConfig {
     bool isBuffer{false};
   };
 
+  enum IssuerType { PUBLIC_CA, PROD_CA, PUBLIC_TO_PRODCA };
   /*
    * If using a delegated credential, in this case we expect
    * a combined pem. Also we expect the key here to refer to the
@@ -175,8 +176,16 @@ struct SSLContextConfig {
   // Load cert-key pairs corresponding to these domains
   std::vector<std::string> domains;
 
-  // If true, the certs for this domain is signed by our internal CA
-  bool isProdCASigned{false};
+  // This field is utilized in the origin tiers for the migration remaining
+  // Public cert usgae to our internal CA.
+  // If true, prefer to fetch an EC cert firectly from ProdCA.
+  // If false, or cert fetch failed, fallback to certs provided by Cryptossl
+  // Note: cryptossl may provide both RSA and EC cert for a given domain
+  bool shouldLoadFromProdCA{false};
+
+  // This value is used by the cert offload flow.
+  // Default to public cert (fetched from cryptossl)
+  IssuerType issuerType{IssuerType::PUBLIC_CA};
 
   // A namespace to use for sessions generated from this context so that
   // they will not be shared between other sessions generated from the

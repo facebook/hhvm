@@ -96,7 +96,7 @@ struct ServerSocketConfig {
 
   bool hasProdCASignedCert() const {
     for (const auto& cfg : sslContextConfigs) {
-      if (cfg.isProdCASigned) {
+      if (cfg.shouldLoadFromProdCA) {
         return true;
       }
     }

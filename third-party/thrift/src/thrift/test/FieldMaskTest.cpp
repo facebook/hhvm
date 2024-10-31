@@ -3694,4 +3694,170 @@ TEST(FieldMaskTest, FieldMaskLogicalOperatorNoneMask) {
   }
 }
 
+TEST(FieldMaskTest, ValidateSinglePathInvalid) {
+  {
+    // empty
+    Mask mask;
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // noneMask
+    Mask mask = noneMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive map mask
+    Mask mask;
+    mask.includes_map_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive map mask
+    Mask mask;
+    mask.excludes_map_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive string map mask
+    Mask mask;
+    mask.includes_string_map_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive string map mask
+    Mask mask;
+    mask.excludes_string_map_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive type mask
+    Mask mask;
+    mask.includes_type_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive type mask
+    Mask mask;
+    mask.excludes_type_ref().ensure();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+}
+
+TEST(FieldMaskTest, ValidateSinglePathInvalidNested) {
+  auto type = type::Type::create<type::infer_tag<Foo>>();
+  {
+    // exclusive field mask
+    Mask mask;
+    mask.excludes_ref().ensure()[1] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive map mask
+    Mask mask;
+    mask.excludes_map_ref().ensure()[1] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive string map mask
+    Mask mask;
+    mask.excludes_string_map_ref().ensure()["1"] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // exclusive type mask
+    Mask mask;
+    mask.excludes_type_ref().ensure()[type] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive field mask
+    Mask mask;
+    mask.includes_ref().ensure()[1].excludes_ref().ensure()[1] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive map mask
+    Mask mask;
+    mask.includes_map_ref().ensure()[1].excludes_ref().ensure()[1] = allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive string map mask
+    Mask mask;
+    mask.includes_string_map_ref().ensure()["1"].excludes_ref().ensure()[1] =
+        allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+  {
+    // inclusive type mask
+    Mask mask;
+    mask.includes_type_ref().ensure()[type].excludes_ref().ensure()[1] =
+        allMask();
+    EXPECT_THROW(validateSinglePath(mask), std::runtime_error);
+  }
+}
+
+TEST(FieldMaskTest, ValidateSinglePathValid) {
+  auto type = type::Type::create<type::infer_tag<Foo>>();
+  {
+    // allMask
+    Mask mask = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive field mask
+    Mask mask;
+    mask.includes_ref().ensure()[1] = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive map mask
+    Mask mask;
+    mask.includes_map_ref().ensure()[1] = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive string map mask
+    Mask mask;
+    mask.includes_string_map_ref().ensure()["1"] = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive type mask
+    Mask mask;
+    mask.includes_type_ref().ensure()[type] = allMask();
+    validateSinglePath(mask);
+  }
+}
+
+TEST(FieldMaskTest, ValidateSinglePathValidNested) {
+  auto type = type::Type::create<type::infer_tag<Foo>>();
+  {
+    // inclusive field mask
+    Mask mask;
+    mask.includes_ref().ensure()[1].includes_ref().ensure()[2] = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive map mask
+    Mask mask;
+    mask.includes_map_ref().ensure()[1].includes_ref().ensure()[2] = allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive string map mask
+    Mask mask;
+    mask.includes_string_map_ref().ensure()["1"].includes_ref().ensure()[2] =
+        allMask();
+    validateSinglePath(mask);
+  }
+  {
+    // inclusive type mask
+    Mask mask;
+    mask.includes_type_ref().ensure()[type].includes_ref().ensure()[2] =
+        allMask();
+    validateSinglePath(mask);
+  }
+}
+
 } // namespace apache::thrift::test

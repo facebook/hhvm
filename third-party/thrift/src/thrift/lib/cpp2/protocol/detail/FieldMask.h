@@ -178,4 +178,8 @@ ValueIndex buildValueIndex(const Mask& mask);
 MapId getMapIdValueAddressFromIndex(
     const ValueIndex& index, const Value& newKey);
 
+// Validate if a given mask expresses a single path to a field, map entry, or
+// type entry. The terminal field is indicated with allMask.
+void validateSinglePath(const Mask& mask);
+
 } // namespace apache::thrift::protocol::detail

@@ -166,4 +166,34 @@ ValueIndex buildValueIndex(const Mask& mask) {
   }
   return index;
 }
+
+void validateSinglePath(const Mask& mask) {
+  if (isAllMask(mask)) {
+    return;
+  }
+  if (isExclusive(mask)) {
+    folly::throw_exception<std::runtime_error>(
+        "Field mask should not contain any exclusive mask.");
+  }
+  op::invoke_by_field_id<Mask>(
+      static_cast<FieldId>(mask.getType()),
+      [&](auto id) {
+        using Id = decltype(id);
+        auto& m = op::get<Id>(mask).value();
+        if (m.size() > 1) {
+          folly::throw_exception<std::runtime_error>(
+              "Field mask expresses more than one path.");
+        }
+        if (m.size() == 0) {
+          folly::throw_exception<std::runtime_error>(
+              "The terminal path is not indicated with allMask.");
+        }
+        validateSinglePath(m.begin()->second);
+      },
+      [] {
+        folly::throw_exception<std::runtime_error>(
+            "Invalid mask to represent a single path.");
+      });
+}
+
 } // namespace apache::thrift::protocol::detail

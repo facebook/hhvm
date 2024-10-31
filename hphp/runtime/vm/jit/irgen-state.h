@@ -125,15 +125,6 @@ struct IRGS {
   > iterProfiles;
 
   /*
-   * Used to reuse blocks of code between compatible IterInits and IterNexts.
-   * See irgen-iter-spec for details.
-   */
-  jit::fast_map<
-    std::tuple<Block*, DataType, uint16_t, uint8_t>,
-    IterSpecInfo
-  > iters;
-
-  /*
    * Func entry inputs:
    *  - previous (caller's) FP
    *  - ActRec flags (callee's ActRec::m_callOffAndFlags)

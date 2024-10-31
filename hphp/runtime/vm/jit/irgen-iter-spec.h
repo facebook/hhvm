@@ -41,21 +41,6 @@ struct IterProfileInfo {
   ArrayKeyTypes keyTypes;
 };
 
-/*
- * To reduce code size for specialized iters, we share blocks of generated code
- * such as the "dec-ref old outputs; load, inc-ref, and store new ones" block
- * that's part of both IterInit and IterNext.
- *
- * To make it possible to reuse this code, we consider IterInits / IterNexts
- * equivalent if they share the same loop entry block, operate on the same
- * underlying DataType and are specialized using the same ArrayLayout and
- * ArrayKeyTypes. We store a map from a tuple of that to IterSpecInfo in IRGS.
- */
-struct IterSpecInfo {
-  Block* header;
-  Block* footer;
-};
-
 // Generate specialized code for an IterInit. Returns true iff succeeded, which
 // means we no longer need to emit the generic code.
 //

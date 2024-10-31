@@ -525,10 +525,8 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
   );
 }
 
-// At the start of each shared specialized block (header or footer), we must
-// clear FrameState (we'll reuse the block) and phi in the new pos value.
+// Create a phi for iteration position at the start of the current block.
 SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
-  env.irb->fs().clearForUnprocessedPred();
   auto block = env.irb->curBlock();
   auto const label = env.unit.defLabel(1, block, env.irb->nextBCContext());
   auto const pos = label->dst(0);
@@ -540,7 +538,7 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
 // Specialization implementations: init, header, next, and footer.
 
 void emitSpecializedInit(IRGS& env, const Accessor& accessor,
-                         const IterArgs& data, Block* header,
+                         const IterArgs& data, SrcKey bodySk,
                          Offset doneOffset, SSATmp* base) {
   // We don't need to specialize on key type for value-only iterators.
   // However, we still need to call accessor.check to rule out tombstones.
@@ -575,33 +573,17 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
         gen(env, Jmp, next, nextPos);
       }
     );
-    gen(env, Jmp, header, pos);
+    gen(env, StIterPos, IterId(data.iterId), fp(env),
+        posAsInt(env, accessor, pos));
   } else {
-    gen(env, Jmp, header, beginPos);
+    gen(env, StIterPos, IterId(data.iterId), fp(env),
+        posAsInt(env, accessor, beginPos));
   }
-}
-
-Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
-                             const IterArgs& data, const Type& value_type,
-                             SrcKey bodySk, uint32_t baseLocalId) {
-  auto const bodyProfCount = env.irb->hasBlock(bodySk)
-    ? getBlock(env, bodySk)->profCount()
-    : curProfCount(env);
-  auto const header = env.unit.defBlock(bodyProfCount);
-  BlockPusher bp(*env.irb, env.irb->curMarker(), header);
-
-  auto const pos = phiIterPos(env, accessor);
-  gen(env, AssertLoc, accessor.arrType(), LocalId(baseLocalId), fp(env));
-
-  gen(env, StIterPos, IterId(data.iterId), fp(env),
-      posAsInt(env, accessor, pos));
   gen(env, Jmp, getBlock(env, bodySk));
-
-  return header;
 }
 
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
-                         const IterArgs& data, Block* footer,
+                         const IterArgs& data, SrcKey bodySk,
                          SSATmp* base) {
   base = accessor.checkBase(env, base, makeExit(env));
 
@@ -636,12 +618,18 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
       [&] { gen(env, Jmp, next, cur); }
     );
 
-    gen(env, Jmp, footer, cur);
+    iterSurpriseCheck(env, accessor, data, cur);
+    gen(env, StIterPos, IterId(data.iterId), fp(env),
+        posAsInt(env, accessor, cur));
   } else {
     auto const cur = accessor.advancePos(env, old, 1);
     checkDone(cur);
-    gen(env, Jmp, footer, cur);
+    iterSurpriseCheck(env, accessor, data, cur);
+    gen(env, StIterPos, IterId(data.iterId), fp(env),
+        posAsInt(env, accessor, cur));
   }
+
+  gen(env, Jmp, getBlock(env, bodySk));
 
   env.irb->appendBlock(done);
   auto const nextProfCount = env.irb->hasBlock(nextSrcKey(env))
@@ -649,18 +637,6 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
     : curProfCount(env);
   env.irb->curBlock()->setProfCount(nextProfCount);
   gen(env, KillIter, id, fp(env));
-}
-
-Block* emitSpecializedFooter(IRGS& env, const Accessor& accessor,
-                           const IterArgs& data, Block* header) {
-  auto const footer = env.unit.defBlock(env.irb->curBlock()->profCount());
-  BlockPusher bp{*env.irb, env.irb->curMarker(), footer};
-
-  auto const pos = phiIterPos(env, accessor);
-  iterSurpriseCheck(env, accessor, data, pos);
-  gen(env, Jmp, header, pos);
-
-  return footer;
 }
 
 ArrayLayout getBaseLayout(SSATmp* base) {
@@ -717,24 +693,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
   assertx(base->type().maybe(accessor->arrType()));
 
-  auto const header = [&] {
-    auto const emitHeader = [&] {
-      return emitSpecializedHeader(
-        env, *accessor, data, profiledResult.value_type, bodySk, baseLocalId);
-    };
-
-    if (bodyKey == nullptr) return emitHeader();
-
-    auto const iterKey = std::make_tuple(
-      bodyKey, baseDT, layout.toUint16(), keyTypes.toBits());
-    if (env.iters.contains(iterKey)) return env.iters[iterKey].header;
-
-    auto const res = emitHeader();
-    env.iters.emplace(iterKey, IterSpecInfo{res, nullptr});
-    return res;
-  }();
-
-  emitSpecializedInit(env, *accessor, data, header, doneOffset, base);
+  emitSpecializedInit(env, *accessor, data, bodySk, doneOffset, base);
   return true;
 }
 
@@ -775,28 +734,7 @@ bool specializeIterNext(IRGS& env, Offset bodyOffset,
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
   assertx(base->type().maybe(accessor->arrType()));
 
-  auto iterSpecInfoUncached = IterSpecInfo{nullptr, nullptr};
-  auto& iterSpecInfo = [&]() -> IterSpecInfo& {
-    if (bodyKey == nullptr) return iterSpecInfoUncached;
-    auto const iterKey = std::make_tuple(
-      bodyKey, baseDT, layout.toUint16(), keyTypes.toBits());
-    return env.iters[iterKey];
-  }();
-  auto const header = [&] {
-    if (iterSpecInfo.header != nullptr) return iterSpecInfo.header;
-    auto const res = emitSpecializedHeader(
-      env, *accessor, data, TInitCell, bodySk, baseLocalId);
-    iterSpecInfo.header = res;
-    return res;
-  }();
-  auto const footer = [&] {
-    if (iterSpecInfo.footer != nullptr) return iterSpecInfo.footer;
-    auto const res = emitSpecializedFooter(env, *accessor, data, header);
-    iterSpecInfo.footer = res;
-    return res;
-  }();
-
-  emitSpecializedNext(env, *accessor, data, footer, base);
+  emitSpecializedNext(env, *accessor, data, bodySk, base);
   return true;
 }
 

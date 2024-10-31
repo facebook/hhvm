@@ -144,7 +144,6 @@ let parse_options () =
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason tcopt;
   ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
-    None,
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
 let parse_and_name ctx files_contents =
@@ -217,8 +216,7 @@ let file_to_files filename =
 let decl_and_run_mode
     { files; extra_builtins; ai_options; tcopt }
     (popt : ParserOptions.t)
-    (hhi_root : Path.t)
-    (naming_table_path : string option) : unit =
+    (hhi_root : Path.t) : unit =
   Ident.track_names := true;
   let builtins =
     let extra_builtins =
@@ -297,15 +295,6 @@ let decl_and_run_mode
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
-     so it will look in the sqlite database for names it doesn't know.
-     This function returns the forward naming table, but we don't care about that;
-     it's only needed for tools that process file changes, to know in the event
-     of a file-change which old symbols used to be defined in the file. *)
-  let _naming_table_for_root : Naming_table.t option =
-    Option.map naming_table_path ~f:(fun path ->
-        Naming_table.load_from_sqlite ctx path)
-  in
   let (errors, files_info) = parse_name_and_skip_decl ctx to_decl in
   let ctx = Provider_context.set_backend ctx Provider_backend.Analysis in
   handle_mode ai_options ctx files_info (Errors.get_sorted_error_list errors)
@@ -326,10 +315,8 @@ let write_file_to_root ~(root : Path.t) ~file =
   in
   List.map files_and_content ~f:write
 
-let main_hack
-    ({ tcopt; _ } as opts)
-    (naming_table : string option)
-    (sharedmem_config : SharedMem.config) : unit =
+let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
+    unit =
   Folly.ensure_folly_init ();
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -371,7 +358,7 @@ let main_hack
             in
             { opts with ai_options; files }
           in
-          decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root naming_table;
+          decl_and_run_mode opts tcopt.GlobalOptions.po hhi_root;
           TypingLogger.flush_buffers ()))
 
 (* command line driver *)
@@ -384,5 +371,5 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true;
-  let (options, naming_table, sharedmem_config) = parse_options () in
-  Unix.handle_unix_error main_hack options naming_table sharedmem_config
+  let (options, sharedmem_config) = parse_options () in
+  Unix.handle_unix_error main_hack options sharedmem_config

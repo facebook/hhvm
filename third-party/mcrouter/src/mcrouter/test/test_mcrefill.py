@@ -65,7 +65,9 @@ class TestMcRefill(McrouterTestCase):
 
         def condition():
             stat = self.mc1.stats()
-            return stat["total_items"] == "1"
+            # this stat is bumped twice because lease-get
+            # creates a lease token item
+            return stat["total_items"] == "2"
 
         self.assert_eventually_true(condition)
         res = self.mcrouter.leaseGet(key)

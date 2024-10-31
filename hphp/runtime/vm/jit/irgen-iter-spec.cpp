@@ -687,7 +687,7 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   if (bodyKey != nullptr) {
     auto const iterProfileKey = std::make_pair(bodyKey, baseDT);
-    env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout, keyTypes});
+    env.iterProfiles.emplace(iterProfileKey, IterProfileInfo{layout});
   }
 
   auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
@@ -711,9 +711,6 @@ bool specializeIterNext(IRGS& env, Offset bodyOffset,
   auto const baseDT = dt_modulo_persistence(base->type().toDataType());
   auto const iterProfileKey = std::make_pair(bodyKey, baseDT);
   auto const it = env.iterProfiles.find(iterProfileKey);
-  auto const keyTypes = it != env.iterProfiles.end()
-    ? it->second.keyTypes
-    : baseDT == KindOfVec ? ArrayKeyTypes::Ints() : ArrayKeyTypes::ArrayKeys();
   auto const layout = [&] {
     if (it != env.iterProfiles.end()) {
       // If IterInit provided a profiling hint and it doesn't contradict what
@@ -724,14 +721,13 @@ bool specializeIterNext(IRGS& env, Offset bodyOffset,
     return getBaseLayout(base);
   }();
 
-  FTRACE(2, "Trying to specialize IterNext: {} @ {}\n",
-         keyTypes.show(), layout.describe());
+  FTRACE(2, "Trying to specialize IterNext: {}\n", layout.describe());
   if (!layout.vanilla() && !layout.monotype() && !layout.is_struct()) {
     FTRACE(2, "Failure: not a vanilla, monotype, or struct layout.\n");
     return false;
   }
 
-  auto const accessor = getAccessor(baseDT, keyTypes, layout, data);
+  auto const accessor = getAccessor(baseDT, ArrayKeyTypes::Any(), layout, data);
   assertx(base->type().maybe(accessor->arrType()));
 
   emitSpecializedNext(env, *accessor, data, bodySk, base);

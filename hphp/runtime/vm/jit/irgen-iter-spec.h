@@ -32,13 +32,11 @@ struct IRGS;
 /*
  * Represents an information from profiling at IterInit, intersected with known
  * layout at that time. Used by IterNext to bootstrap its knowledge about the
- * iterated array, as we do not perform array key profiling there and known
- * information about array specialization in frame state is lost during irgen
- * due to unprocessed preds while emitting the loop.
+ * iterated array, as known information about array specialization in frame
+ * state is lost during irgen due to unprocessed preds while emitting the loop.
  */
 struct IterProfileInfo {
   ArrayLayout layout;
-  ArrayKeyTypes keyTypes;
 };
 
 // Generate specialized code for an IterInit. Returns true iff succeeded, which

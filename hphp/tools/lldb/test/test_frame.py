@@ -1,4 +1,6 @@
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
+import unittest
+
 import hhvm_lldb.frame as frame
 import hhvm_lldb.utils as utils
 
@@ -7,6 +9,9 @@ class FrameTestCase(base.TestHHVMBinary):
     def setUp(self):
         super().setUp(test_file="slow/reified-generics/reified-parent.php")
 
+    @unittest.skip(
+        "This test isn't behaving well with non-lowptr; enable once we're testing in lowptr again"
+    )
     def test_create_native_frame(self):
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
         ar = utils.reg("fp", self.frame).Cast(

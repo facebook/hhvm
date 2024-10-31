@@ -146,13 +146,18 @@ let parse_options () =
   ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 
+let get_parse_errors ctx files_contents =
+  Errors.do_ (fun () ->
+      Relative_path.Map.iter files_contents ~f:(fun fn contents ->
+          (* Get parse errors *)
+          Errors.run_in_context fn (fun () ->
+              let popt = Provider_context.get_popt ctx in
+              let _ = Full_fidelity_ast.defensive_program popt fn contents in
+              ())))
+  |> fst
+
 let parse_and_name ctx files_contents =
-  Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
-      (* Get parse errors *)
-      Errors.run_in_context fn (fun () ->
-          let popt = Provider_context.get_popt ctx in
-          let _ = Full_fidelity_ast.defensive_program popt fn contents in
-          ());
+  Relative_path.Map.mapi files_contents ~f:(fun fn _ ->
       match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
       | None -> failwith "no file contents"
       | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)
@@ -283,7 +288,12 @@ let decl_and_run_mode
       ~tcopt
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
-  let (errors, files_info) = parse_name_and_skip_decl ctx to_decl in
+  (* We only compute parse errors for user-specified files to avoid running the full
+     fidelity parser everywhere.
+  *)
+  let parse_errors = get_parse_errors ctx files_contents in
+  let (naming_errors, files_info) = parse_name_and_skip_decl ctx to_decl in
+  let errors = Errors.merge parse_errors naming_errors in
   let ctx = Provider_context.set_backend ctx Provider_backend.Analysis in
   handle_mode ai_options ctx files_info (Errors.get_sorted_error_list errors)
 

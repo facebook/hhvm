@@ -328,18 +328,26 @@ SSATmp* verifyTypeImpl(IRGS& env,
       auto const checkCls = lookupCls(env, clsName);
       auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
       if (fastIsInstance) {
-        ifThen(
+        return cond(
           env,
           [&] (Block* taken) {
             gen(env, JmpZero, taken, fastIsInstance);
           },
           [&] {
+            if (checkCls->hasConstVal(TCls)) {
+              // we know that val is an instance of checkCls, use that refine val's type
+              return gen(env, AssertType, Type::SubObj(checkCls->clsVal()), val);   
+            } else {
+              return val;
+            }      
+          },
+          [&] {
             hint(env, Block::Hint::Unlikely);
             genFail(val);
+            return val;
           }
         );
-        return val;
-      }
+      } 
       verifyCls(val, checkCls);
     }
     return val;

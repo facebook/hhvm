@@ -35,7 +35,7 @@ import a.types as _a_types
 cdef class __A_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __A_FieldsSetter _fbthrift_create(_a_types.cA* struct_cpp_obj):
+    cdef __A_FieldsSetter _fbthrift_create(_a_cbindings.cA* struct_cpp_obj):
         cdef __A_FieldsSetter __fbthrift_inst = __A_FieldsSetter.__new__(__A_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"b")] = __A_FieldsSetter._set_field_0
@@ -52,14 +52,14 @@ cdef class __A_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field b
         if _fbthrift_value is None:
-            __reset_field[_a_types.cA](deref(self._struct_cpp_obj), 0)
+            __reset_field[_a_cbindings.cA](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).b_ref().assign(_a_types.List__List__c_C__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field other
         if _fbthrift_value is None:
-            __reset_field[_a_types.cA](deref(self._struct_cpp_obj), 1)
+            __reset_field[_a_cbindings.cA](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).other_ref().assign(_a_types.List__c_C__make_instance(_fbthrift_value))
 

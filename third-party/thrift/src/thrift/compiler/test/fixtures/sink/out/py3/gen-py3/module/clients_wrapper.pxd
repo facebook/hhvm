@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_clients.h" namespace "::cpp2":

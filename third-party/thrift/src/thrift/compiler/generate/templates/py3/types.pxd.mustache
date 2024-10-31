@@ -16,24 +16,6 @@
 
 }}
 {{#program:auto_migrate?}}
-{{> common/auto_generated_py}}
-{{> types/cimport_extern }}
-
-{{#program:cppIncludes}}
-cdef extern from "{{.}}":
-  pass
-{{/program:cppIncludes}}{{!
-}}{{#program:customTemplates}}
-{{> types/custom_template}}
-{{/program:customTemplates}}{{!
-}}{{#program:customTypes}}
-{{> types/custom_type}}
-{{/program:customTypes}}
-
-{{> types/enum_extern }}
-{{> types/struct_extern }}
-{{> types/constant_extern }}
-
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
 {{> py3_types.pxd }}

@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport test.fixtures.enumstrict.module.types as _fbthrift_ctypes
+cimport test.fixtures.enumstrict.module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
-cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
+cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct)
 

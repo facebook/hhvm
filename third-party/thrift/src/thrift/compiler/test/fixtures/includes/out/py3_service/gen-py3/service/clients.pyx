@@ -50,12 +50,16 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport service.types as _service_types
+cimport service.cbindings as _service_cbindings
 import service.types as _service_types
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 import includes.types as _includes_types
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
 import transitive.types as _transitive_types
 
 import service.services_reflection as _services_reflection

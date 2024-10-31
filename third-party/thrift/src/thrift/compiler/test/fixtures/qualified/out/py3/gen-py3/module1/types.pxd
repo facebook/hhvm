@@ -41,60 +41,27 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module1.types as _fbthrift_types
 cimport module1.types_fields as _fbthrift_types_fields
+cimport module1.cbindings as _module1_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-py3/module1/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types.h" namespace "::module1":
-    cdef cppclass cEnum "::module1::Enum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_types_custom_protocol.h" namespace "::module1":
-
-    cdef cppclass cStruct "::module1::Struct":
-        cStruct() except +
-        cStruct(const cStruct&) except +
-        bint operator==(cStruct&)
-        bint operator!=(cStruct&)
-        bint operator<(cStruct&)
-        bint operator>(cStruct&)
-        bint operator<=(cStruct&)
-        bint operator>=(cStruct&)
-        __field_ref[cint32_t] first_ref "first_ref" ()
-        __field_ref[string] second_ref "second_ref" ()
-
-
-
 
 cdef class Struct(thrift.py3.types.Struct):
-    cdef shared_ptr[cStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module1_cbindings.cStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Struct_FieldsSetter _fields_setter
     cdef inline object first_impl(self)
     cdef inline object second_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module1_cbindings.cStruct])
 
 
-cdef vector[cEnum] List__Enum__make_instance(object items) except *
-cdef object List__Enum__from_cpp(const vector[cEnum]&) except *
+cdef vector[_module1_cbindings.cEnum] List__Enum__make_instance(object items) except *
+cdef object List__Enum__from_cpp(const vector[_module1_cbindings.cEnum]&) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module1_constants.h" namespace "::module1":
-    cdef cStruct cc1 "::module1::module1_constants::c1"()
-    cdef vector[cEnum] ce1s "::module1::module1_constants::e1s"()

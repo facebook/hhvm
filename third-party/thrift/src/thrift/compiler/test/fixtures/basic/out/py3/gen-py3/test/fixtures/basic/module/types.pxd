@@ -41,168 +41,18 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport test.fixtures.basic.module.types as _fbthrift_types
 cimport test.fixtures.basic.module.types_fields as _fbthrift_types_fields
+cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/basic/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h" namespace "::test::fixtures::basic":
-    cdef cppclass cMyEnum "::test::fixtures::basic::MyEnum":
-        pass
-
-    cdef cppclass cHackEnum "::test::fixtures::basic::HackEnum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::basic":
-
-    cdef cppclass cMyStruct "::test::fixtures::basic::MyStruct":
-        cMyStruct() except +
-        cMyStruct(const cMyStruct&) except +
-        bint operator==(cMyStruct&)
-        bint operator!=(cMyStruct&)
-        bint operator<(cMyStruct&)
-        bint operator>(cMyStruct&)
-        bint operator<=(cMyStruct&)
-        bint operator>=(cMyStruct&)
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
-        __field_ref[cMyDataItem] MyDataField_ref "MyDataField_ref" ()
-        __field_ref[cMyEnum] myEnum_ref "myEnum_ref" ()
-        __field_ref[cbool] oneway_ref "oneway_ref" ()
-        __field_ref[cbool] readonly_ref "readonly_ref" ()
-        __field_ref[cbool] idempotent_ref "idempotent_ref" ()
-        __field_ref[cset[float]] floatSet_ref "floatSet_ref" ()
-        __field_ref[string] no_hack_codegen_field_ref "no_hack_codegen_field_ref" ()
-
-
-    cdef cppclass cContainers "::test::fixtures::basic::Containers":
-        cContainers() except +
-        cContainers(const cContainers&) except +
-        bint operator==(cContainers&)
-        bint operator!=(cContainers&)
-        bint operator<(cContainers&)
-        bint operator>(cContainers&)
-        bint operator<=(cContainers&)
-        bint operator>=(cContainers&)
-        __field_ref[vector[cint32_t]] I32List_ref "I32List_ref" ()
-        __field_ref[cset[string]] StringSet_ref "StringSet_ref" ()
-        __field_ref[cmap[string,cint64_t]] StringToI64Map_ref "StringToI64Map_ref" ()
-
-
-    cdef cppclass cMyDataItem "::test::fixtures::basic::MyDataItem":
-        cMyDataItem() except +
-        cMyDataItem(const cMyDataItem&) except +
-        bint operator==(cMyDataItem&)
-        bint operator!=(cMyDataItem&)
-        bint operator<(cMyDataItem&)
-        bint operator>(cMyDataItem&)
-        bint operator<=(cMyDataItem&)
-        bint operator>=(cMyDataItem&)
-
-    cdef enum cMyUnion__type "::test::fixtures::basic::MyUnion::Type":
-        cMyUnion__type___EMPTY__ "::test::fixtures::basic::MyUnion::Type::__EMPTY__",
-        cMyUnion__type_myEnum "::test::fixtures::basic::MyUnion::Type::myEnum",
-        cMyUnion__type_myStruct "::test::fixtures::basic::MyUnion::Type::myStruct",
-        cMyUnion__type_myDataItem "::test::fixtures::basic::MyUnion::Type::myDataItem",
-        cMyUnion__type_floatSet "::test::fixtures::basic::MyUnion::Type::floatSet",
-
-    cdef cppclass cMyUnion "::test::fixtures::basic::MyUnion":
-        cMyUnion() except +
-        cMyUnion(const cMyUnion&) except +
-        bint operator==(cMyUnion&)
-        bint operator!=(cMyUnion&)
-        bint operator<(cMyUnion&)
-        bint operator>(cMyUnion&)
-        bint operator<=(cMyUnion&)
-        bint operator>=(cMyUnion&)
-        cMyUnion__type getType() const
-        const cMyEnum& get_myEnum "get_myEnum" () const
-        cMyEnum& set_myEnum "set_myEnum" (const cMyEnum&)
-        const cMyStruct& get_myStruct "get_myStruct" () const
-        cMyStruct& set_myStruct "set_myStruct" (const cMyStruct&)
-        const cMyDataItem& get_myDataItem "get_myDataItem" () const
-        cMyDataItem& set_myDataItem "set_myDataItem" (const cMyDataItem&)
-        const cset[float]& get_floatSet "get_floatSet" () const
-        cset[float]& set_floatSet "set_floatSet" (const cset[float]&)
-
-
-    cdef cppclass cMyException "::test::fixtures::basic::MyException"(cTException):
-        cMyException() except +
-        cMyException(const cMyException&) except +
-        bint operator==(cMyException&)
-        bint operator!=(cMyException&)
-        bint operator<(cMyException&)
-        bint operator>(cMyException&)
-        bint operator<=(cMyException&)
-        bint operator>=(cMyException&)
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
-        __field_ref[cMyStruct] myStruct_ref "myStruct_ref" ()
-        __field_ref[cMyUnion] myUnion_ref "myUnion_ref" ()
-
-
-    cdef cppclass cMyExceptionWithMessage "::test::fixtures::basic::MyExceptionWithMessage"(cTException):
-        cMyExceptionWithMessage() except +
-        cMyExceptionWithMessage(const cMyExceptionWithMessage&) except +
-        bint operator==(cMyExceptionWithMessage&)
-        bint operator!=(cMyExceptionWithMessage&)
-        bint operator<(cMyExceptionWithMessage&)
-        bint operator>(cMyExceptionWithMessage&)
-        bint operator<=(cMyExceptionWithMessage&)
-        bint operator>=(cMyExceptionWithMessage&)
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
-        __field_ref[cMyStruct] myStruct_ref "myStruct_ref" ()
-        __field_ref[cMyUnion] myUnion_ref "myUnion_ref" ()
-
-
-    cdef cppclass cReservedKeyword "::test::fixtures::basic::ReservedKeyword":
-        cReservedKeyword() except +
-        cReservedKeyword(const cReservedKeyword&) except +
-        bint operator==(cReservedKeyword&)
-        bint operator!=(cReservedKeyword&)
-        bint operator<(cReservedKeyword&)
-        bint operator>(cReservedKeyword&)
-        bint operator<=(cReservedKeyword&)
-        bint operator>=(cReservedKeyword&)
-        __field_ref[cint32_t] reserved_field_ref "reserved_field_ref" ()
-
-    cdef enum cUnionToBeRenamed__type "::test::fixtures::basic::UnionToBeRenamed::Type":
-        cUnionToBeRenamed__type___EMPTY__ "::test::fixtures::basic::UnionToBeRenamed::Type::__EMPTY__",
-        cUnionToBeRenamed__type_reserved_field "::test::fixtures::basic::UnionToBeRenamed::Type::reserved_field",
-
-    cdef cppclass cUnionToBeRenamed "::test::fixtures::basic::UnionToBeRenamed":
-        cUnionToBeRenamed() except +
-        cUnionToBeRenamed(const cUnionToBeRenamed&) except +
-        bint operator==(cUnionToBeRenamed&)
-        bint operator!=(cUnionToBeRenamed&)
-        bint operator<(cUnionToBeRenamed&)
-        bint operator>(cUnionToBeRenamed&)
-        bint operator<=(cUnionToBeRenamed&)
-        bint operator>=(cUnionToBeRenamed&)
-        cUnionToBeRenamed__type getType() const
-        const cint32_t& get_reserved_field "get_reserved_field" () const
-        cint32_t& set_reserved_field "set_reserved_field" (const cint32_t&)
-
-
-
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)
@@ -218,12 +68,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef Set__float __fbthrift_cached_floatSet
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct])
 
 
 
 cdef class Containers(thrift.py3.types.Struct):
-    cdef shared_ptr[cContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Containers_FieldsSetter _fields_setter
     cdef inline object I32List_impl(self)
     cdef inline object StringSet_impl(self)
@@ -233,28 +83,28 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef Map__string_i64 __fbthrift_cached_StringToI64Map
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cContainers])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cContainers])
 
 
 
 cdef class MyDataItem(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyDataItem] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyDataItem_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyDataItem])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem])
 
 
 
 cdef class MyUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly object type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
 
     @staticmethod
-    cdef unique_ptr[cMyUnion] _make_instance(
-        cMyUnion* base_instance,
+    cdef unique_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _make_instance(
+        _test_fixtures_basic_module_cbindings.cMyUnion* base_instance,
         object myEnum,
         MyStruct myStruct,
         MyDataItem myDataItem,
@@ -262,12 +112,12 @@ cdef class MyUnion(thrift.py3.types.Union):
     ) except *
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion])
 
 
 
 cdef class MyException(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cMyException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyException_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)
@@ -277,12 +127,12 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
     cdef MyUnion __fbthrift_cached_myUnion
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyException])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyException])
 
 
 
 cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cMyExceptionWithMessage] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyExceptionWithMessage_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)
@@ -292,34 +142,34 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     cdef MyUnion __fbthrift_cached_myUnion
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyExceptionWithMessage])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage])
 
 
 
 cdef class ReservedKeyword(thrift.py3.types.Struct):
-    cdef shared_ptr[cReservedKeyword] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ReservedKeyword_FieldsSetter _fields_setter
     cdef inline object reserved_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cReservedKeyword])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword])
 
 
 
 cdef class UnionToBeRenamed(thrift.py3.types.Union):
-    cdef shared_ptr[cUnionToBeRenamed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly object type
     cdef readonly object value
     cdef _load_cache(UnionToBeRenamed self)
 
     @staticmethod
-    cdef unique_ptr[cUnionToBeRenamed] _make_instance(
-        cUnionToBeRenamed* base_instance,
+    cdef unique_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _make_instance(
+        _test_fixtures_basic_module_cbindings.cUnionToBeRenamed* base_instance,
         object reserved_field
     ) except *
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cUnionToBeRenamed])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed])
 
 
 cdef class Set__float(thrift.py3.types.Set):
@@ -356,13 +206,3 @@ cdef class Map__string_List__i32(thrift.py3.types.Map):
 cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_constants.h" namespace "::test::fixtures::basic":
-    cdef cbool cFLAG "::test::fixtures::basic::module_constants::FLAG"
-    cdef cint8_t cOFFSET "::test::fixtures::basic::module_constants::OFFSET"
-    cdef cint16_t cCOUNT "::test::fixtures::basic::module_constants::COUNT"
-    cdef cint32_t cMASK "::test::fixtures::basic::module_constants::MASK"
-    cdef double cE "::test::fixtures::basic::module_constants::E"
-    cdef const char* cDATE "::test::fixtures::basic::module_constants::DATE"()
-    cdef vector[cint32_t] cAList "::test::fixtures::basic::module_constants::AList"()
-    cdef cset[string] cASet "::test::fixtures::basic::module_constants::ASet"()
-    cdef cmap[string,vector[cint32_t]] cAMap "::test::fixtures::basic::module_constants::AMap"()

@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection
@@ -76,23 +77,23 @@ cdef void Raiser_doRaise_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cBanal]():
+    if result.hasException[_module_cbindings.cBanal]():
         try:
-            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cBanal](result.exception()))
+            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cBanal](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
-    elif result.hasException[_module_types.cFiery]():
+    elif result.hasException[_module_cbindings.cFiery]():
         try:
-            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFiery](result.exception()))
+            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFiery](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
-    elif result.hasException[_module_types.cSerious]():
+    elif result.hasException[_module_cbindings.cSerious]():
         try:
-            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSerious](result.exception()))
+            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cSerious](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -123,23 +124,23 @@ cdef void Raiser_get500_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFiery]():
+    if result.hasException[_module_cbindings.cFiery]():
         try:
-            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFiery](result.exception()))
+            exc = _module_types.Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFiery](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
-    elif result.hasException[_module_types.cBanal]():
+    elif result.hasException[_module_cbindings.cBanal]():
         try:
-            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cBanal](result.exception()))
+            exc = _module_types.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cBanal](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
-    elif result.hasException[_module_types.cSerious]():
+    elif result.hasException[_module_cbindings.cSerious]():
         try:
-            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSerious](result.exception()))
+            exc = _module_types.Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cSerious](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

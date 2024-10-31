@@ -6,17 +6,18 @@
 #  @generated
 #
 
+cimport module.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStructNestedAnnotation] MyStructNestedAnnotation_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cMyStructNestedAnnotation] MyStructNestedAnnotation_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.MyStructNestedAnnotation?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object MyStructNestedAnnotation_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStructNestedAnnotation]& c_struct):
+cdef object MyStructNestedAnnotation_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStructNestedAnnotation]& c_struct):
     return _fbthrift_ctypes.MyStructNestedAnnotation._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.cSecretStruct] SecretStruct_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cSecretStruct] SecretStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.SecretStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object SecretStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cSecretStruct]& c_struct):
+cdef object SecretStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSecretStruct]& c_struct):
     return _fbthrift_ctypes.SecretStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

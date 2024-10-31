@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport foo.types as _foo_types
+cimport foo.cbindings as _foo_cbindings
 
 
 
 ctypedef void (*__Fields_FieldsSetterFunc)(__Fields_FieldsSetter, object) except *
 
 cdef class __Fields_FieldsSetter(__StructFieldsSetter):
-    cdef _foo_types.cFields* _struct_cpp_obj
+    cdef _foo_cbindings.cFields* _struct_cpp_obj
     cdef cumap[__cstring_view, __Fields_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Fields_FieldsSetter _fbthrift_create(_foo_types.cFields* struct_cpp_obj)
+    cdef __Fields_FieldsSetter _fbthrift_create(_foo_cbindings.cFields* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

@@ -7,6 +7,6 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport my.namespacing.extend.test.extend.types as _fbthrift_ctypes
+cimport my.namespacing.extend.test.extend.cbindings as _fbthrift_cbindings
 
 

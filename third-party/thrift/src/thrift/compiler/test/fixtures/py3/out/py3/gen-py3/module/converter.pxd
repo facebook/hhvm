@@ -7,27 +7,27 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cSimpleException] SimpleException_convert_to_cpp(object inst) except*
-cdef object SimpleException_from_cpp(const shared_ptr[_fbthrift_ctypes.cSimpleException]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSimpleException] SimpleException_convert_to_cpp(object inst) except*
+cdef object SimpleException_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleException]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cOptionalRefStruct] OptionalRefStruct_convert_to_cpp(object inst) except*
-cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cOptionalRefStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cOptionalRefStruct] OptionalRefStruct_convert_to_cpp(object inst) except*
+cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cOptionalRefStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*
-cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cSimpleStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*
+cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*
-cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cHiddenTypeFieldsStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*
+cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexStruct] ComplexStruct_convert_to_cpp(object inst) except*
-cdef object ComplexStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cComplexStruct] ComplexStruct_convert_to_cpp(object inst) except*
+cdef object ComplexStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cBinaryUnion] BinaryUnion_convert_to_cpp(object inst) except*
-cdef object BinaryUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cBinaryUnion]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cBinaryUnion] BinaryUnion_convert_to_cpp(object inst) except*
+cdef object BinaryUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnion]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cBinaryUnionStruct] BinaryUnionStruct_convert_to_cpp(object inst) except*
-cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cBinaryUnionStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct] BinaryUnionStruct_convert_to_cpp(object inst) except*
+cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct]& c_struct)
 

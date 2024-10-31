@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport test.namespace_from_package.module.types as _test_namespace_from_package_module_types
+cimport test.namespace_from_package.module.cbindings as _test_namespace_from_package_module_cbindings
 import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 
 import test.namespace_from_package.module.services_reflection as _services_reflection

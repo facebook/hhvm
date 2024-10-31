@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
 

@@ -74,7 +74,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Color(thrift.py3.types.Struct):
     def __init__(Color self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cColor]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cColor]()
         self._fields_setter = _fbthrift_types_fields.__Color_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -82,7 +82,7 @@ cdef class Color(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Color __fbthrift_inst = Color.__new__(Color)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cColor](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cColor](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Color_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -100,7 +100,7 @@ cdef class Color(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cColor] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cColor] cpp_obj):
         __fbthrift_inst = <Color>Color.__new__(Color)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -145,14 +145,14 @@ cdef class Color(thrift.py3.types.Struct):
 
 
     def __copy__(Color self):
-        cdef shared_ptr[cColor] cpp_obj = make_shared[cColor](
+        cdef shared_ptr[_module_cbindings.cColor] cpp_obj = make_shared[_module_cbindings.cColor](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Color._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cColor](
+        return __richcmp[_module_cbindings.cColor](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Color>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -165,7 +165,7 @@ cdef class Color(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cColor].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cColor].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -174,7 +174,7 @@ cdef class Color(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cColor](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cColor](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -183,14 +183,14 @@ cdef class Color(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Color self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cColor](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cColor](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Color self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cColor]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cColor]()
         with nogil:
-            needed = serializer.cdeserialize[cColor](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cColor](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -214,7 +214,7 @@ cdef class Color(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Vehicle(thrift.py3.types.Struct):
     def __init__(Vehicle self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cVehicle]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cVehicle]()
         self._fields_setter = _fbthrift_types_fields.__Vehicle_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -222,7 +222,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Vehicle __fbthrift_inst = Vehicle.__new__(Vehicle)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cVehicle](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cVehicle](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Vehicle_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -241,7 +241,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVehicle] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVehicle] cpp_obj):
         __fbthrift_inst = <Vehicle>Vehicle.__new__(Vehicle)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -301,14 +301,14 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
 
     def __copy__(Vehicle self):
-        cdef shared_ptr[cVehicle] cpp_obj = make_shared[cVehicle](
+        cdef shared_ptr[_module_cbindings.cVehicle] cpp_obj = make_shared[_module_cbindings.cVehicle](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cVehicle](
+        return __richcmp[_module_cbindings.cVehicle](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Vehicle>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -321,7 +321,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cVehicle].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cVehicle].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -330,7 +330,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cVehicle](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cVehicle](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -339,14 +339,14 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Vehicle self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cVehicle](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cVehicle](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Vehicle self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cVehicle]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cVehicle]()
         with nogil:
-            needed = serializer.cdeserialize[cVehicle](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cVehicle](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -370,7 +370,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Person(thrift.py3.types.Struct):
     def __init__(Person self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cPerson]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cPerson]()
         self._fields_setter = _fbthrift_types_fields.__Person_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -378,7 +378,7 @@ cdef class Person(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Person __fbthrift_inst = Person.__new__(Person)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cPerson](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cPerson](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Person_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -402,7 +402,7 @@ cdef class Person(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cPerson] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cPerson] cpp_obj):
         __fbthrift_inst = <Person>Person.__new__(Person)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -515,14 +515,14 @@ cdef class Person(thrift.py3.types.Struct):
 
 
     def __copy__(Person self):
-        cdef shared_ptr[cPerson] cpp_obj = make_shared[cPerson](
+        cdef shared_ptr[_module_cbindings.cPerson] cpp_obj = make_shared[_module_cbindings.cPerson](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Person._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cPerson](
+        return __richcmp[_module_cbindings.cPerson](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Person>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -535,7 +535,7 @@ cdef class Person(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cPerson].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cPerson].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -544,7 +544,7 @@ cdef class Person(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cPerson](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cPerson](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -553,14 +553,14 @@ cdef class Person(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Person self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cPerson](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cPerson](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Person self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cPerson]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cPerson]()
         with nogil:
-            needed = serializer.cdeserialize[cPerson](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cPerson](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -673,13 +673,13 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__Animal_string__make_instance(items)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cAnimal,string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_module_cbindings.cAnimal,string]] c_items):
         __fbthrift_inst = <Map__Animal_string>Map__Animal_string.__new__(Map__Animal_string)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(Map__Animal_string self):
-        cdef shared_ptr[cmap[cAnimal,string]] cpp_obj = make_shared[cmap[cAnimal,string]](
+        cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] cpp_obj = make_shared[cmap[_module_cbindings.cAnimal,string]](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Map__Animal_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
@@ -698,7 +698,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
         key = self._check_key_type(key)
         if key is None:
             raise err
-        cdef cAnimal ckey = <cAnimal><int>key
+        cdef _module_cbindings.cAnimal ckey = <_module_cbindings.cAnimal><int>key
         if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
             raise err
         cdef string citem
@@ -708,8 +708,8 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
     def __iter__(self):
         if not self:
             return
-        cdef __map_iter[cmap[cAnimal,string]] itr = __map_iter[cmap[cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cAnimal citem
+        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef _module_cbindings.cAnimal citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield translate_cpp_enum_to_python(Animal, <int> citem)
@@ -718,13 +718,13 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
         key = self._check_key_type(key)
         if key is None:
             return False
-        cdef cAnimal ckey = <cAnimal><int>key
+        cdef _module_cbindings.cAnimal ckey = <_module_cbindings.cAnimal><int>key
         return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
 
     def values(self):
         if not self:
             return
-        cdef __map_iter[cmap[cAnimal,string]] itr = __map_iter[cmap[cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef string citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
@@ -733,8 +733,8 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
     def items(self):
         if not self:
             return
-        cdef __map_iter[cmap[cAnimal,string]] itr = __map_iter[cmap[cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cAnimal ckey
+        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef _module_cbindings.cAnimal ckey
         cdef string citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
@@ -746,8 +746,8 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
 
 Mapping.register(Map__Animal_string)
 
-cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *:
-    cdef shared_ptr[cmap[cAnimal,string]] c_inst = make_shared[cmap[cAnimal,string]]()
+cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] Map__Animal_string__make_instance(object items) except *:
+    cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] c_inst = make_shared[cmap[_module_cbindings.cAnimal,string]]()
     if items is not None:
         for key, item in items.items():
             if not isinstance(key, Animal):
@@ -755,13 +755,13 @@ cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object i
             if not isinstance(item, str):
                 raise TypeError(f"{item!r} is not of type str")
 
-            deref(c_inst)[<cAnimal><int>key] = item.encode('UTF-8')
+            deref(c_inst)[<_module_cbindings.cAnimal><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 
 
-cdef vector[cVehicle] List__Vehicle__make_instance(object items) except *:
-    cdef vector[cVehicle] c_inst
+cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *:
+    cdef vector[_module_cbindings.cVehicle] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, Vehicle):
@@ -769,11 +769,11 @@ cdef vector[cVehicle] List__Vehicle__make_instance(object items) except *:
             c_inst.push_back(deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-cdef object List__Vehicle__from_cpp(const vector[cVehicle]& c_vec) except *:
+cdef object List__Vehicle__from_cpp(const vector[_module_cbindings.cVehicle]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
-        py_list.append(Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cVehicle](c_vec[idx])))
+        py_list.append(Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cVehicle](c_vec[idx])))
     return List__Vehicle(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

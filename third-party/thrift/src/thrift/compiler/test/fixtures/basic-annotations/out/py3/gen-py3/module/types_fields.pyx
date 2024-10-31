@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __MyStructNestedAnnotation_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyStructNestedAnnotation_FieldsSetter _fbthrift_create(_module_types.cMyStructNestedAnnotation* struct_cpp_obj):
+    cdef __MyStructNestedAnnotation_FieldsSetter _fbthrift_create(_module_cbindings.cMyStructNestedAnnotation* struct_cpp_obj):
         cdef __MyStructNestedAnnotation_FieldsSetter __fbthrift_inst = __MyStructNestedAnnotation_FieldsSetter.__new__(__MyStructNestedAnnotation_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"name")] = __MyStructNestedAnnotation_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __MyStructNestedAnnotation_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field name
         if _fbthrift_value is None:
-            __reset_field[_module_types.cMyStructNestedAnnotation](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cMyStructNestedAnnotation](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'name is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __MyStructNestedAnnotation_FieldsSetter(__StructFieldsSetter):
 cdef class __SecretStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __SecretStruct_FieldsSetter _fbthrift_create(_module_types.cSecretStruct* struct_cpp_obj):
+    cdef __SecretStruct_FieldsSetter _fbthrift_create(_module_cbindings.cSecretStruct* struct_cpp_obj):
         cdef __SecretStruct_FieldsSetter __fbthrift_inst = __SecretStruct_FieldsSetter.__new__(__SecretStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"id")] = __SecretStruct_FieldsSetter._set_field_0
@@ -77,7 +77,7 @@ cdef class __SecretStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field id
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSecretStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cSecretStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'id is not a { int !r}.')
@@ -87,7 +87,7 @@ cdef class __SecretStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field password
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSecretStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cSecretStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'password is not a { str !r}.')

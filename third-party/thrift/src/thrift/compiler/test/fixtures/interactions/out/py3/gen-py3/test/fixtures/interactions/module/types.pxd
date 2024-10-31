@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -49,44 +48,25 @@ from thrift.py3.stream cimport (
     ServerStream, cServerStream, ResponseAndServerStream
 )
 
+cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
+
+cimport test.fixtures.interactions.module.types as _fbthrift_types
 cimport test.fixtures.interactions.module.types_fields as _fbthrift_types_fields
+cimport test.fixtures.interactions.module.cbindings as _test_fixtures_interactions_module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cCustomException "::cpp2::CustomException"(cTException):
-        cCustomException() except +
-        cCustomException(const cCustomException&) except +
-        bint operator==(cCustomException&)
-        bint operator!=(cCustomException&)
-        bint operator<(cCustomException&)
-        bint operator>(cCustomException&)
-        bint operator<=(cCustomException&)
-        bint operator>=(cCustomException&)
-        __field_ref[string] message_ref "message_ref" ()
-
-
-
-
 cdef class CustomException(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cCustomException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CustomException_FieldsSetter _fields_setter
     cdef inline object message_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomException])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException])
 
 
 

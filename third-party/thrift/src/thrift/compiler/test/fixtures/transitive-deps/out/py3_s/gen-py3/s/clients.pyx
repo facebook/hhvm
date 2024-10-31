@@ -50,10 +50,13 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport s.types as _s_types
+cimport s.cbindings as _s_cbindings
 import s.types as _s_types
 cimport b.types as _b_types
+cimport b.cbindings as _b_cbindings
 import b.types as _b_types
 cimport c.types as _c_types
+cimport c.cbindings as _c_cbindings
 import c.types as _c_types
 
 import s.services_reflection as _services_reflection
@@ -67,9 +70,9 @@ cdef void TestService_test_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_c_types.cE]():
+    if result.hasException[_c_cbindings.cE]():
         try:
-            exc = _c_types.E._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_c_types.cE](result.exception()))
+            exc = _c_types.E._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_c_cbindings.cE](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,16 +41,17 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 
 
 
 ctypedef void (*__HsFoo_FieldsSetterFunc)(__HsFoo_FieldsSetter, object) except *
 
 cdef class __HsFoo_FieldsSetter(__StructFieldsSetter):
-    cdef _my_namespacing_test_hsmodule_types.cHsFoo* _struct_cpp_obj
+    cdef _my_namespacing_test_hsmodule_cbindings.cHsFoo* _struct_cpp_obj
     cdef cumap[__cstring_view, __HsFoo_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __HsFoo_FieldsSetter _fbthrift_create(_my_namespacing_test_hsmodule_types.cHsFoo* struct_cpp_obj)
+    cdef __HsFoo_FieldsSetter _fbthrift_create(_my_namespacing_test_hsmodule_cbindings.cHsFoo* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

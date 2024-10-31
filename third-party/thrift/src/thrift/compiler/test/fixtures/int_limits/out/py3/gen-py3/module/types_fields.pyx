@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Limits_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Limits_FieldsSetter _fbthrift_create(_module_types.cLimits* struct_cpp_obj):
+    cdef __Limits_FieldsSetter _fbthrift_create(_module_cbindings.cLimits* struct_cpp_obj):
         cdef __Limits_FieldsSetter __fbthrift_inst = __Limits_FieldsSetter.__new__(__Limits_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"max_i64_field")] = __Limits_FieldsSetter._set_field_0
@@ -56,7 +56,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field max_i64_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'max_i64_field is not a { int !r}.')
@@ -66,7 +66,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field min_i64_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'min_i64_field is not a { int !r}.')
@@ -76,7 +76,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field max_i32_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'max_i32_field is not a { int !r}.')
@@ -86,7 +86,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field min_i32_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 3)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'min_i32_field is not a { int !r}.')
@@ -96,7 +96,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field max_i16_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 4)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'max_i16_field is not a { int !r}.')
@@ -106,7 +106,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field min_i16_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 5)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 5)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'min_i16_field is not a { int !r}.')
@@ -116,7 +116,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field max_byte_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 6)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 6)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'max_byte_field is not a { int !r}.')
@@ -126,7 +126,7 @@ cdef class __Limits_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field min_byte_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cLimits](deref(self._struct_cpp_obj), 7)
+            __reset_field[_module_cbindings.cLimits](deref(self._struct_cpp_obj), 7)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'min_byte_field is not a { int !r}.')

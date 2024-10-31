@@ -41,46 +41,24 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport test.fixtures.another_interactions.shared.types as _fbthrift_types
 cimport test.fixtures.another_interactions.shared.types_fields as _fbthrift_types_fields
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/shared/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types_custom_protocol.h" namespace "::thrift::shared_interactions":
-
-    cdef cppclass cDoSomethingResult "::thrift::shared_interactions::DoSomethingResult":
-        cDoSomethingResult() except +
-        cDoSomethingResult(const cDoSomethingResult&) except +
-        bint operator==(cDoSomethingResult&)
-        bint operator!=(cDoSomethingResult&)
-        bint operator<(cDoSomethingResult&)
-        bint operator>(cDoSomethingResult&)
-        bint operator<=(cDoSomethingResult&)
-        bint operator>=(cDoSomethingResult&)
-        __field_ref[string] s_res_ref "s_res_ref" ()
-        __field_ref[cint32_t] i_res_ref "i_res_ref" ()
-
-
-
-
 cdef class DoSomethingResult(thrift.py3.types.Struct):
-    cdef shared_ptr[cDoSomethingResult] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__DoSomethingResult_FieldsSetter _fields_setter
     cdef inline object s_res_impl(self)
     cdef inline object i_res_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cDoSomethingResult])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult])
 
 
 

@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -42,13 +41,15 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
+
+cimport my.namespacing.extend.test.extend.types as _fbthrift_types
 cimport my.namespacing.extend.test.extend.types_fields as _fbthrift_types_fields
+cimport my.namespacing.extend.test.extend.cbindings as _my_namespacing_extend_test_extend_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/extend/types.h":
   pass
-
-
-
 
 
 

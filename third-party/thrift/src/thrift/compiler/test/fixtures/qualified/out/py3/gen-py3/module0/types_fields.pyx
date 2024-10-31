@@ -33,7 +33,7 @@ import module0.types as _module0_types
 cdef class __Struct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Struct_FieldsSetter _fbthrift_create(_module0_types.cStruct* struct_cpp_obj):
+    cdef __Struct_FieldsSetter _fbthrift_create(_module0_cbindings.cStruct* struct_cpp_obj):
         cdef __Struct_FieldsSetter __fbthrift_inst = __Struct_FieldsSetter.__new__(__Struct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"first")] = __Struct_FieldsSetter._set_field_0
@@ -50,7 +50,7 @@ cdef class __Struct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field first
         if _fbthrift_value is None:
-            __reset_field[_module0_types.cStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module0_cbindings.cStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'first is not a { int !r}.')
@@ -60,7 +60,7 @@ cdef class __Struct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field second
         if _fbthrift_value is None:
-            __reset_field[_module0_types.cStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module0_cbindings.cStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'second is not a { str !r}.')

@@ -68,7 +68,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Mixin1(thrift.py3.types.Struct):
     def __init__(Mixin1 self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin1]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin1]()
         self._fields_setter = _fbthrift_types_fields.__Mixin1_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -76,7 +76,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Mixin1 __fbthrift_inst = Mixin1.__new__(Mixin1)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Mixin1_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -91,7 +91,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin1] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin1] cpp_obj):
         __fbthrift_inst = <Mixin1>Mixin1.__new__(Mixin1)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -115,14 +115,14 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin1 self):
-        cdef shared_ptr[cMixin1] cpp_obj = make_shared[cMixin1](
+        cdef shared_ptr[_module_cbindings.cMixin1] cpp_obj = make_shared[_module_cbindings.cMixin1](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMixin1](
+        return __richcmp[_module_cbindings.cMixin1](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Mixin1>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -135,7 +135,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMixin1].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cMixin1].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -144,7 +144,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMixin1](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cMixin1](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -153,14 +153,14 @@ cdef class Mixin1(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Mixin1 self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMixin1](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cMixin1](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Mixin1 self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin1]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin1]()
         with nogil:
-            needed = serializer.cdeserialize[cMixin1](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cMixin1](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -184,7 +184,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Mixin2(thrift.py3.types.Struct):
     def __init__(Mixin2 self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin2]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin2]()
         self._fields_setter = _fbthrift_types_fields.__Mixin2_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -192,7 +192,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Mixin2 __fbthrift_inst = Mixin2.__new__(Mixin2)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin2](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin2](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Mixin2_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -208,7 +208,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin2] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin2] cpp_obj):
         __fbthrift_inst = <Mixin2>Mixin2.__new__(Mixin2)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -250,14 +250,14 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin2 self):
-        cdef shared_ptr[cMixin2] cpp_obj = make_shared[cMixin2](
+        cdef shared_ptr[_module_cbindings.cMixin2] cpp_obj = make_shared[_module_cbindings.cMixin2](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMixin2](
+        return __richcmp[_module_cbindings.cMixin2](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Mixin2>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -270,7 +270,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMixin2].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cMixin2].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -279,7 +279,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMixin2](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cMixin2](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -288,14 +288,14 @@ cdef class Mixin2(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Mixin2 self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMixin2](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cMixin2](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Mixin2 self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin2]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin2]()
         with nogil:
-            needed = serializer.cdeserialize[cMixin2](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cMixin2](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -319,7 +319,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Mixin3Base(thrift.py3.types.Struct):
     def __init__(Mixin3Base self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin3Base]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin3Base]()
         self._fields_setter = _fbthrift_types_fields.__Mixin3Base_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -327,7 +327,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Mixin3Base __fbthrift_inst = Mixin3Base.__new__(Mixin3Base)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin3Base](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin3Base](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Mixin3Base_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -342,7 +342,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMixin3Base] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMixin3Base] cpp_obj):
         __fbthrift_inst = <Mixin3Base>Mixin3Base.__new__(Mixin3Base)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -366,14 +366,14 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin3Base self):
-        cdef shared_ptr[cMixin3Base] cpp_obj = make_shared[cMixin3Base](
+        cdef shared_ptr[_module_cbindings.cMixin3Base] cpp_obj = make_shared[_module_cbindings.cMixin3Base](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMixin3Base](
+        return __richcmp[_module_cbindings.cMixin3Base](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Mixin3Base>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -386,7 +386,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMixin3Base].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cMixin3Base].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -395,7 +395,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMixin3Base](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cMixin3Base](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -404,14 +404,14 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Mixin3Base self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMixin3Base](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cMixin3Base](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Mixin3Base self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMixin3Base]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin3Base]()
         with nogil:
-            needed = serializer.cdeserialize[cMixin3Base](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cMixin3Base](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -435,7 +435,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Foo(thrift.py3.types.Struct):
     def __init__(Foo self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFoo]()
         self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -443,7 +443,7 @@ cdef class Foo(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Foo __fbthrift_inst = Foo.__new__(Foo)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -460,7 +460,7 @@ cdef class Foo(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo] cpp_obj):
         __fbthrift_inst = <Foo>Foo.__new__(Foo)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -534,14 +534,14 @@ cdef class Foo(thrift.py3.types.Struct):
 
 
     def __copy__(Foo self):
-        cdef shared_ptr[cFoo] cpp_obj = make_shared[cFoo](
+        cdef shared_ptr[_module_cbindings.cFoo] cpp_obj = make_shared[_module_cbindings.cFoo](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cFoo](
+        return __richcmp[_module_cbindings.cFoo](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Foo>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -554,7 +554,7 @@ cdef class Foo(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cFoo].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cFoo].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -563,7 +563,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cFoo](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFoo](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -572,14 +572,14 @@ cdef class Foo(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Foo self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Foo self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFoo]()
         with nogil:
-            needed = serializer.cdeserialize[cFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

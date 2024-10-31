@@ -41,362 +41,53 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/refs/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types.h" namespace "::cpp2":
-    cdef cppclass cMyEnum "::cpp2::MyEnum":
-        pass
-
-    cdef cppclass cTypedEnum "::cpp2::TypedEnum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-    cdef enum cMyUnion__type "::cpp2::MyUnion::Type":
-        cMyUnion__type___EMPTY__ "::cpp2::MyUnion::Type::__EMPTY__",
-        cMyUnion__type_anInteger "::cpp2::MyUnion::Type::anInteger",
-        cMyUnion__type_aString "::cpp2::MyUnion::Type::aString",
-
-    cdef cppclass cMyUnion "::cpp2::MyUnion":
-        cMyUnion() except +
-        cMyUnion(const cMyUnion&) except +
-        bint operator==(cMyUnion&)
-        bint operator!=(cMyUnion&)
-        bint operator<(cMyUnion&)
-        bint operator>(cMyUnion&)
-        bint operator<=(cMyUnion&)
-        bint operator>=(cMyUnion&)
-        cMyUnion__type getType() const
-        const unique_ptr[cint32_t]& get_anInteger "get_anInteger" () const
-        unique_ptr[cint32_t]& set_anInteger "set_anInteger" (const cint32_t&)
-        const unique_ptr[string]& get_aString "get_aString" () const
-        unique_ptr[string]& set_aString "set_aString" (const string&)
-
-    cdef enum cNonTriviallyDestructibleUnion__type "::cpp2::NonTriviallyDestructibleUnion::Type":
-        cNonTriviallyDestructibleUnion__type___EMPTY__ "::cpp2::NonTriviallyDestructibleUnion::Type::__EMPTY__",
-        cNonTriviallyDestructibleUnion__type_int_field "::cpp2::NonTriviallyDestructibleUnion::Type::int_field",
-
-    cdef cppclass cNonTriviallyDestructibleUnion "::cpp2::NonTriviallyDestructibleUnion":
-        cNonTriviallyDestructibleUnion() except +
-        cNonTriviallyDestructibleUnion(const cNonTriviallyDestructibleUnion&) except +
-        bint operator==(cNonTriviallyDestructibleUnion&)
-        bint operator!=(cNonTriviallyDestructibleUnion&)
-        bint operator<(cNonTriviallyDestructibleUnion&)
-        bint operator>(cNonTriviallyDestructibleUnion&)
-        bint operator<=(cNonTriviallyDestructibleUnion&)
-        bint operator>=(cNonTriviallyDestructibleUnion&)
-        cNonTriviallyDestructibleUnion__type getType() const
-        const shared_ptr[cint32_t]& get_int_field "get_int_field" () const
-        shared_ptr[cint32_t]& set_int_field "set_int_field" (const cint32_t&)
-
-
-    cdef cppclass cMyField "::cpp2::MyField":
-        cMyField() except +
-        cMyField(const cMyField&) except +
-        bint operator==(cMyField&)
-        bint operator!=(cMyField&)
-        bint operator<(cMyField&)
-        bint operator>(cMyField&)
-        bint operator<=(cMyField&)
-        bint operator>=(cMyField&)
-        unique_ptr[cint64_t] opt_value_ref "opt_value_ref" ()
-        unique_ptr[cint64_t] value_ref "value_ref" ()
-        unique_ptr[cint64_t] req_value_ref "req_value_ref" ()
-        unique_ptr[cMyEnum] opt_enum_value_ref "opt_enum_value_ref" ()
-        unique_ptr[cMyEnum] enum_value_ref "enum_value_ref" ()
-        unique_ptr[cMyEnum] req_enum_value_ref "req_enum_value_ref" ()
-        unique_ptr[string] opt_str_value_ref "opt_str_value_ref" ()
-        unique_ptr[string] str_value_ref "str_value_ref" ()
-        unique_ptr[string] req_str_value_ref "req_str_value_ref" ()
-
-
-    cdef cppclass cMyStruct "::cpp2::MyStruct":
-        cMyStruct() except +
-        cMyStruct(const cMyStruct&) except +
-        bint operator==(cMyStruct&)
-        bint operator!=(cMyStruct&)
-        bint operator<(cMyStruct&)
-        bint operator>(cMyStruct&)
-        bint operator<=(cMyStruct&)
-        bint operator>=(cMyStruct&)
-        unique_ptr[cMyField] opt_ref_ref "opt_ref_ref" ()
-        unique_ptr[cMyField] ref_ref "ref_ref" ()
-        unique_ptr[cMyField] req_ref_ref "req_ref_ref" ()
-
-
-    cdef cppclass cStructWithUnion "::cpp2::StructWithUnion":
-        cStructWithUnion() except +
-        cStructWithUnion(const cStructWithUnion&) except +
-        bint operator==(cStructWithUnion&)
-        bint operator!=(cStructWithUnion&)
-        bint operator<(cStructWithUnion&)
-        bint operator>(cStructWithUnion&)
-        bint operator<=(cStructWithUnion&)
-        bint operator>=(cStructWithUnion&)
-        unique_ptr[cMyUnion] u_ref "u_ref" ()
-        unique_ptr[double] aDouble_ref "aDouble_ref" ()
-        __field_ref[cMyField] f_ref "f_ref" ()
-
-
-    cdef cppclass cRecursiveStruct "::cpp2::RecursiveStruct":
-        cRecursiveStruct() except +
-        cRecursiveStruct(const cRecursiveStruct&) except +
-        bint operator==(cRecursiveStruct&)
-        bint operator!=(cRecursiveStruct&)
-        bint operator<(cRecursiveStruct&)
-        bint operator>(cRecursiveStruct&)
-        bint operator<=(cRecursiveStruct&)
-        bint operator>=(cRecursiveStruct&)
-        __optional_field_ref[vector[cRecursiveStruct]] mes_ref "mes_ref" ()
-
-
-    cdef cppclass cStructWithContainers "::cpp2::StructWithContainers":
-        cStructWithContainers() except +
-        cStructWithContainers(const cStructWithContainers&) except +
-        bint operator==(cStructWithContainers&)
-        bint operator!=(cStructWithContainers&)
-        bint operator<(cStructWithContainers&)
-        bint operator>(cStructWithContainers&)
-        bint operator<=(cStructWithContainers&)
-        bint operator>=(cStructWithContainers&)
-        unique_ptr[vector[cint32_t]] list_ref_ref "list_ref_ref" ()
-        unique_ptr[cset[cint32_t]] set_ref_ref "set_ref_ref" ()
-        unique_ptr[cmap[cint32_t,cint32_t]] map_ref_ref "map_ref_ref" ()
-        unique_ptr[vector[cint32_t]] list_ref_unique_ref "list_ref_unique_ref" ()
-        shared_ptr[cset[cint32_t]] set_ref_shared_ref "set_ref_shared_ref" ()
-        shared_ptr[const vector[cint32_t]] list_ref_shared_const_ref "list_ref_shared_const_ref" ()
-
-
-    cdef cppclass cStructWithSharedConst "::cpp2::StructWithSharedConst":
-        cStructWithSharedConst() except +
-        cStructWithSharedConst(const cStructWithSharedConst&) except +
-        bint operator==(cStructWithSharedConst&)
-        bint operator!=(cStructWithSharedConst&)
-        bint operator<(cStructWithSharedConst&)
-        bint operator>(cStructWithSharedConst&)
-        bint operator<=(cStructWithSharedConst&)
-        bint operator>=(cStructWithSharedConst&)
-        shared_ptr[const cMyField] opt_shared_const_ref "opt_shared_const_ref" ()
-        shared_ptr[const cMyField] shared_const_ref "shared_const_ref" ()
-        shared_ptr[const cMyField] req_shared_const_ref "req_shared_const_ref" ()
-
-
-    cdef cppclass cEmpty "::cpp2::Empty":
-        cEmpty() except +
-        cEmpty(const cEmpty&) except +
-        bint operator==(cEmpty&)
-        bint operator!=(cEmpty&)
-        bint operator<(cEmpty&)
-        bint operator>(cEmpty&)
-        bint operator<=(cEmpty&)
-        bint operator>=(cEmpty&)
-
-
-    cdef cppclass cStructWithRef "::cpp2::StructWithRef":
-        cStructWithRef() except +
-        cStructWithRef(const cStructWithRef&) except +
-        bint operator==(cStructWithRef&)
-        bint operator!=(cStructWithRef&)
-        bint operator<(cStructWithRef&)
-        bint operator>(cStructWithRef&)
-        bint operator<=(cStructWithRef&)
-        bint operator>=(cStructWithRef&)
-        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
-        unique_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
-        unique_ptr[cEmpty] req_field_ref "req_field_ref" ()
-
-
-    cdef cppclass cStructWithBox "::cpp2::StructWithBox":
-        cStructWithBox() except +
-        cStructWithBox(const cStructWithBox&) except +
-        bint operator==(cStructWithBox&)
-        bint operator!=(cStructWithBox&)
-        bint operator<(cStructWithBox&)
-        bint operator>(cStructWithBox&)
-        bint operator<=(cStructWithBox&)
-        bint operator>=(cStructWithBox&)
-        __optional_field_ref[string] a_ref "a_ref" ()
-        __optional_field_ref[vector[cint64_t]] b_ref "b_ref" ()
-        __optional_field_ref[cStructWithRef] c_ref "c_ref" ()
-
-
-    cdef cppclass cStructWithInternBox "::cpp2::StructWithInternBox":
-        cStructWithInternBox() except +
-        cStructWithInternBox(const cStructWithInternBox&) except +
-        bint operator==(cStructWithInternBox&)
-        bint operator!=(cStructWithInternBox&)
-        bint operator<(cStructWithInternBox&)
-        bint operator>(cStructWithInternBox&)
-        bint operator<=(cStructWithInternBox&)
-        bint operator>=(cStructWithInternBox&)
-        __field_ref[cEmpty] field1_ref "field1_ref" ()
-        __field_ref[cMyField] field2_ref "field2_ref" ()
-
-
-    cdef cppclass cStructWithTerseInternBox "::cpp2::StructWithTerseInternBox":
-        cStructWithTerseInternBox() except +
-        cStructWithTerseInternBox(const cStructWithTerseInternBox&) except +
-        bint operator==(cStructWithTerseInternBox&)
-        bint operator!=(cStructWithTerseInternBox&)
-        bint operator<(cStructWithTerseInternBox&)
-        bint operator>(cStructWithTerseInternBox&)
-        bint operator<=(cStructWithTerseInternBox&)
-        bint operator>=(cStructWithTerseInternBox&)
-        __terse_field_ref[cEmpty] field1_ref "field1_ref" ()
-        __terse_field_ref[cMyField] field2_ref "field2_ref" ()
-
-
-    cdef cppclass cAdaptedStructWithInternBox "::cpp2::AdaptedStructWithInternBox":
-        cAdaptedStructWithInternBox() except +
-        cAdaptedStructWithInternBox(const cAdaptedStructWithInternBox&) except +
-        bint operator==(cAdaptedStructWithInternBox&)
-        bint operator!=(cAdaptedStructWithInternBox&)
-        bint operator<(cAdaptedStructWithInternBox&)
-        bint operator>(cAdaptedStructWithInternBox&)
-        bint operator<=(cAdaptedStructWithInternBox&)
-        bint operator>=(cAdaptedStructWithInternBox&)
-        __field_ref[cEmpty] field1_ref "field1_ref" ()
-        __field_ref[cMyField] field2_ref "field2_ref" ()
-
-
-    cdef cppclass cAdaptedStructWithTerseInternBox "::cpp2::AdaptedStructWithTerseInternBox":
-        cAdaptedStructWithTerseInternBox() except +
-        cAdaptedStructWithTerseInternBox(const cAdaptedStructWithTerseInternBox&) except +
-        bint operator==(cAdaptedStructWithTerseInternBox&)
-        bint operator!=(cAdaptedStructWithTerseInternBox&)
-        bint operator<(cAdaptedStructWithTerseInternBox&)
-        bint operator>(cAdaptedStructWithTerseInternBox&)
-        bint operator<=(cAdaptedStructWithTerseInternBox&)
-        bint operator>=(cAdaptedStructWithTerseInternBox&)
-        __terse_field_ref[cEmpty] field1_ref "field1_ref" ()
-        __terse_field_ref[cMyField] field2_ref "field2_ref" ()
-
-
-    cdef cppclass cStructWithRefTypeUnique "::cpp2::StructWithRefTypeUnique":
-        cStructWithRefTypeUnique() except +
-        cStructWithRefTypeUnique(const cStructWithRefTypeUnique&) except +
-        bint operator==(cStructWithRefTypeUnique&)
-        bint operator!=(cStructWithRefTypeUnique&)
-        bint operator<(cStructWithRefTypeUnique&)
-        bint operator>(cStructWithRefTypeUnique&)
-        bint operator<=(cStructWithRefTypeUnique&)
-        bint operator>=(cStructWithRefTypeUnique&)
-        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
-        unique_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
-        unique_ptr[cEmpty] req_field_ref "req_field_ref" ()
-
-
-    cdef cppclass cStructWithRefTypeShared "::cpp2::StructWithRefTypeShared":
-        cStructWithRefTypeShared() except +
-        cStructWithRefTypeShared(const cStructWithRefTypeShared&) except +
-        bint operator==(cStructWithRefTypeShared&)
-        bint operator!=(cStructWithRefTypeShared&)
-        bint operator<(cStructWithRefTypeShared&)
-        bint operator>(cStructWithRefTypeShared&)
-        bint operator<=(cStructWithRefTypeShared&)
-        bint operator>=(cStructWithRefTypeShared&)
-        shared_ptr[cEmpty] def_field_ref "def_field_ref" ()
-        shared_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
-        shared_ptr[cEmpty] req_field_ref "req_field_ref" ()
-
-
-    cdef cppclass cStructWithRefTypeSharedConst "::cpp2::StructWithRefTypeSharedConst":
-        cStructWithRefTypeSharedConst() except +
-        cStructWithRefTypeSharedConst(const cStructWithRefTypeSharedConst&) except +
-        bint operator==(cStructWithRefTypeSharedConst&)
-        bint operator!=(cStructWithRefTypeSharedConst&)
-        bint operator<(cStructWithRefTypeSharedConst&)
-        bint operator>(cStructWithRefTypeSharedConst&)
-        bint operator<=(cStructWithRefTypeSharedConst&)
-        bint operator>=(cStructWithRefTypeSharedConst&)
-        shared_ptr[const cEmpty] def_field_ref "def_field_ref" ()
-        shared_ptr[const cEmpty] opt_field_ref "opt_field_ref" ()
-        shared_ptr[const cEmpty] req_field_ref "req_field_ref" ()
-
-
-    cdef cppclass cStructWithRefAndAnnotCppNoexceptMoveCtor "::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor":
-        cStructWithRefAndAnnotCppNoexceptMoveCtor() except +
-        cStructWithRefAndAnnotCppNoexceptMoveCtor(const cStructWithRefAndAnnotCppNoexceptMoveCtor&) except +
-        bint operator==(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        bint operator!=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        bint operator<(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        bint operator>(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        bint operator<=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        bint operator>=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
-        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
-
-
-    cdef cppclass cStructWithString "::cpp2::StructWithString":
-        cStructWithString() except +
-        cStructWithString(const cStructWithString&) except +
-        bint operator==(cStructWithString&)
-        bint operator!=(cStructWithString&)
-        bint operator<(cStructWithString&)
-        bint operator>(cStructWithString&)
-        bint operator<=(cStructWithString&)
-        bint operator>=(cStructWithString&)
-        unique_ptr[string] def_unique_string_ref_ref "def_unique_string_ref_ref" ()
-        shared_ptr[string] def_shared_string_ref_ref "def_shared_string_ref_ref" ()
-        shared_ptr[const string] def_shared_string_const_ref_ref "def_shared_string_const_ref_ref" ()
-        unique_ptr[string] unique_string_ref_ref "unique_string_ref_ref" ()
-        shared_ptr[string] shared_string_ref_ref "shared_string_ref_ref" ()
-
-
-
 
 cdef class MyUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly object type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
 
     @staticmethod
-    cdef unique_ptr[cMyUnion] _make_instance(
-        cMyUnion* base_instance,
+    cdef unique_ptr[_module_cbindings.cMyUnion] _make_instance(
+        _module_cbindings.cMyUnion* base_instance,
         object anInteger,
         str aString
     ) except *
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyUnion])
 
 
 
 cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cNonTriviallyDestructibleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cNonTriviallyDestructibleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly object type
     cdef readonly object value
     cdef _load_cache(NonTriviallyDestructibleUnion self)
 
     @staticmethod
-    cdef unique_ptr[cNonTriviallyDestructibleUnion] _make_instance(
-        cNonTriviallyDestructibleUnion* base_instance,
+    cdef unique_ptr[_module_cbindings.cNonTriviallyDestructibleUnion] _make_instance(
+        _module_cbindings.cNonTriviallyDestructibleUnion* base_instance,
         object int_field
     ) except *
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNonTriviallyDestructibleUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cNonTriviallyDestructibleUnion])
 
 
 
 cdef class MyField(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyField] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cMyField] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyField_FieldsSetter _fields_setter
     cdef inline object opt_value_impl(self)
     cdef inline object value_impl(self)
@@ -412,12 +103,12 @@ cdef class MyField(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_req_enum_value
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyField])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyField])
 
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object opt_ref_impl(self)
     cdef inline object ref_impl(self)
@@ -427,12 +118,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_req_ref
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct])
 
 
 
 cdef class StructWithUnion(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithUnion_FieldsSetter _fields_setter
     cdef inline object u_impl(self)
     cdef inline object aDouble_impl(self)
@@ -441,23 +132,23 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_f
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithUnion])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithUnion])
 
 
 
 cdef class RecursiveStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cRecursiveStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cRecursiveStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__RecursiveStruct_FieldsSetter _fields_setter
     cdef inline object mes_impl(self)
     cdef object __fbthrift_cached_mes
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cRecursiveStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cRecursiveStruct])
 
 
 
 cdef class StructWithContainers(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithContainers] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithContainers_FieldsSetter _fields_setter
     cdef inline object list_ref_impl(self)
     cdef inline object set_ref_impl(self)
@@ -473,12 +164,12 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_list_ref_shared_const
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithContainers])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithContainers])
 
 
 
 cdef class StructWithSharedConst(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithSharedConst_FieldsSetter _fields_setter
     cdef inline object opt_shared_const_impl(self)
     cdef inline object shared_const_impl(self)
@@ -488,21 +179,21 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_req_shared_const
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithSharedConst])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithSharedConst])
 
 
 
 cdef class Empty(thrift.py3.types.Struct):
-    cdef shared_ptr[cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Empty_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cEmpty])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cEmpty])
 
 
 
 cdef class StructWithRef(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRef] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithRef] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRef_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -512,12 +203,12 @@ cdef class StructWithRef(thrift.py3.types.Struct):
     cdef Empty __fbthrift_cached_req_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithRef])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRef])
 
 
 
 cdef class StructWithBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithBox_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
@@ -526,12 +217,12 @@ cdef class StructWithBox(thrift.py3.types.Struct):
     cdef StructWithRef __fbthrift_cached_c
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithBox])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithBox])
 
 
 
 cdef class StructWithInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -539,12 +230,12 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_field2
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithInternBox])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithInternBox])
 
 
 
 cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithTerseInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -552,12 +243,12 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_field2
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithTerseInternBox])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithTerseInternBox])
 
 
 
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cAdaptedStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cAdaptedStructWithInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -565,12 +256,12 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_field2
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAdaptedStructWithInternBox])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAdaptedStructWithInternBox])
 
 
 
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
-    cdef shared_ptr[cAdaptedStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cAdaptedStructWithTerseInternBox] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
@@ -578,12 +269,12 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     cdef MyField __fbthrift_cached_field2
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAdaptedStructWithTerseInternBox])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cAdaptedStructWithTerseInternBox])
 
 
 
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeUnique] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithRefTypeUnique] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeUnique_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -593,12 +284,12 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     cdef Empty __fbthrift_cached_req_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithRefTypeUnique])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeUnique])
 
 
 
 cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeShared] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithRefTypeShared] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeShared_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -608,12 +299,12 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     cdef Empty __fbthrift_cached_req_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithRefTypeShared])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeShared])
 
 
 
 cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefTypeSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithRefTypeSharedConst] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefTypeSharedConst_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef inline object opt_field_impl(self)
@@ -623,23 +314,23 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
     cdef Empty __fbthrift_cached_req_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithRefTypeSharedConst])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefTypeSharedConst])
 
 
 
 cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithRefAndAnnotCppNoexceptMoveCtor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithRefAndAnnotCppNoexceptMoveCtor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithRefAndAnnotCppNoexceptMoveCtor_FieldsSetter _fields_setter
     cdef inline object def_field_impl(self)
     cdef Empty __fbthrift_cached_def_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithRefAndAnnotCppNoexceptMoveCtor])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithRefAndAnnotCppNoexceptMoveCtor])
 
 
 
 cdef class StructWithString(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithString] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cStructWithString] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithString_FieldsSetter _fields_setter
     cdef inline object def_unique_string_ref_impl(self)
     cdef inline object def_shared_string_ref_impl(self)
@@ -648,11 +339,11 @@ cdef class StructWithString(thrift.py3.types.Struct):
     cdef inline object shared_string_ref_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithString])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cStructWithString])
 
 
-cdef vector[cRecursiveStruct] List__RecursiveStruct__make_instance(object items) except *
-cdef object List__RecursiveStruct__from_cpp(const vector[cRecursiveStruct]&) except *
+cdef vector[_module_cbindings.cRecursiveStruct] List__RecursiveStruct__make_instance(object items) except *
+cdef object List__RecursiveStruct__from_cpp(const vector[_module_cbindings.cRecursiveStruct]&) except *
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
@@ -676,8 +367,3 @@ cdef vector[cint64_t] List__i64__make_instance(object items) except *
 cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_constants.h" namespace "::cpp2":
-    cdef cStructWithRef ckStructWithRef "::cpp2::module_constants::kStructWithRef"()
-    cdef cStructWithRefTypeUnique ckStructWithRefTypeUnique "::cpp2::module_constants::kStructWithRefTypeUnique"()
-    cdef cStructWithRefTypeShared ckStructWithRefTypeShared "::cpp2::module_constants::kStructWithRefTypeShared"()
-    cdef cStructWithRefTypeSharedConst ckStructWithRefTypeSharedConst "::cpp2::module_constants::kStructWithRefTypeSharedConst"()

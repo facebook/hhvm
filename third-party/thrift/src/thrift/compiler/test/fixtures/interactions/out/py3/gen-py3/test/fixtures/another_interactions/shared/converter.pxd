@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport test.fixtures.another_interactions.shared.types as _fbthrift_ctypes
+cimport test.fixtures.another_interactions.shared.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cDoSomethingResult] DoSomethingResult_convert_to_cpp(object inst) except*
-cdef object DoSomethingResult_from_cpp(const shared_ptr[_fbthrift_ctypes.cDoSomethingResult]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cDoSomethingResult] DoSomethingResult_convert_to_cpp(object inst) except*
+cdef object DoSomethingResult_from_cpp(const shared_ptr[_fbthrift_cbindings.cDoSomethingResult]& c_struct)
 

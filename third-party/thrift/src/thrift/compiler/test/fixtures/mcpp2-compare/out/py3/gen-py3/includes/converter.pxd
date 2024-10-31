@@ -7,12 +7,12 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport includes.types as _fbthrift_ctypes
+cimport includes.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cAStruct] AStruct_convert_to_cpp(object inst) except*
-cdef object AStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cAStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAStruct] AStruct_convert_to_cpp(object inst) except*
+cdef object AStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cAStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAStructB] AStructB_convert_to_cpp(object inst) except*
-cdef object AStructB_from_cpp(const shared_ptr[_fbthrift_ctypes.cAStructB]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAStructB] AStructB_convert_to_cpp(object inst) except*
+cdef object AStructB_from_cpp(const shared_ptr[_fbthrift_cbindings.cAStructB]& c_struct)
 

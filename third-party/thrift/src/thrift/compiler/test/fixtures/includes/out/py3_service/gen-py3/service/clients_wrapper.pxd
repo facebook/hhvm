@@ -25,10 +25,14 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport service.types as _service_types
+cimport service.cbindings as _service_cbindings
 
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/service_clients.h" namespace "::cpp2":
   cdef cppclass cMyServiceAsyncClient "::cpp2::MyServiceAsyncClient":
@@ -47,9 +51,9 @@ cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/service/clients
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     cFollyFuture[cFollyUnit] query(cRpcOptions, 
-      _module_types.cMyStruct arg_s,
-      _includes_types.cIncluded arg_i,)
+      _module_cbindings.cMyStruct arg_s,
+      _includes_cbindings.cIncluded arg_i,)
     cFollyFuture[cFollyUnit] has_arg_docs(cRpcOptions, 
-      _module_types.cMyStruct arg_s,
-      _includes_types.cIncluded arg_i,)
+      _module_cbindings.cMyStruct arg_s,
+      _includes_cbindings.cIncluded arg_i,)
 

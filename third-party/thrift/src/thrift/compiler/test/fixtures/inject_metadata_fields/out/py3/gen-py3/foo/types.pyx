@@ -68,7 +68,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Fields(thrift.py3.types.Struct):
     def __init__(Fields self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_foo_cbindings.cFields]()
         self._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -76,7 +76,7 @@ cdef class Fields(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Fields __fbthrift_inst = Fields.__new__(Fields)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_foo_cbindings.cFields](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -93,7 +93,7 @@ cdef class Fields(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_foo_cbindings.cFields] cpp_obj):
         __fbthrift_inst = <Fields>Fields.__new__(Fields)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -135,14 +135,14 @@ cdef class Fields(thrift.py3.types.Struct):
 
 
     def __copy__(Fields self):
-        cdef shared_ptr[cFields] cpp_obj = make_shared[cFields](
+        cdef shared_ptr[_foo_cbindings.cFields] cpp_obj = make_shared[_foo_cbindings.cFields](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cFields](
+        return __richcmp[_foo_cbindings.cFields](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Fields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -155,7 +155,7 @@ cdef class Fields(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cFields].gen(meta)
+        _foo_cbindings.StructMetadata[_foo_cbindings.cFields].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -164,7 +164,7 @@ cdef class Fields(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cFields](idx))
+        return __sv_to_str(__get_field_name_by_index[_foo_cbindings.cFields](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -173,14 +173,14 @@ cdef class Fields(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Fields self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFields](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_foo_cbindings.cFields](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Fields self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFields]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_foo_cbindings.cFields]()
         with nogil:
-            needed = serializer.cdeserialize[cFields](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_foo_cbindings.cFields](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport emptyns.types as _emptyns_types
+cimport emptyns.cbindings as _emptyns_cbindings
 import emptyns.types as _emptyns_types
 
 import emptyns.services_reflection as _services_reflection

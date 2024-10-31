@@ -25,8 +25,10 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
 
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_clients.h" namespace "::apache::thrift::fixtures::types":
   cdef cppclass cSomeServiceAsyncClient "::apache::thrift::fixtures::types::SomeServiceAsyncClient":
@@ -44,8 +46,8 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-py3/module/clients_wra
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
-    cFollyFuture[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]] bounce_map(cRpcOptions, 
-      _apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string] arg_m,)
+    cFollyFuture[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] bounce_map(cRpcOptions, 
+      _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] arg_m,)
     cFollyFuture[cmap[string,cint64_t]] binary_keyed_map(cRpcOptions, 
       vector[cint64_t] arg_r,)
 

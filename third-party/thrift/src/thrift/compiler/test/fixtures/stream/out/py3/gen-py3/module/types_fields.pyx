@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __FooStreamEx_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __FooStreamEx_FieldsSetter _fbthrift_create(_module_types.cFooStreamEx* struct_cpp_obj):
+    cdef __FooStreamEx_FieldsSetter _fbthrift_create(_module_cbindings.cFooStreamEx* struct_cpp_obj):
         cdef __FooStreamEx_FieldsSetter __fbthrift_inst = __FooStreamEx_FieldsSetter.__new__(__FooStreamEx_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -50,7 +50,7 @@ cdef class __FooStreamEx_FieldsSetter(__StructFieldsSetter):
 cdef class __FooEx_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __FooEx_FieldsSetter _fbthrift_create(_module_types.cFooEx* struct_cpp_obj):
+    cdef __FooEx_FieldsSetter _fbthrift_create(_module_cbindings.cFooEx* struct_cpp_obj):
         cdef __FooEx_FieldsSetter __fbthrift_inst = __FooEx_FieldsSetter.__new__(__FooEx_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -67,7 +67,7 @@ cdef class __FooEx_FieldsSetter(__StructFieldsSetter):
 cdef class __FooEx2_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __FooEx2_FieldsSetter _fbthrift_create(_module_types.cFooEx2* struct_cpp_obj):
+    cdef __FooEx2_FieldsSetter _fbthrift_create(_module_cbindings.cFooEx2* struct_cpp_obj):
         cdef __FooEx2_FieldsSetter __fbthrift_inst = __FooEx2_FieldsSetter.__new__(__FooEx2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst

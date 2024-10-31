@@ -33,7 +33,7 @@ import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cdef class __HsFoo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __HsFoo_FieldsSetter _fbthrift_create(_my_namespacing_test_hsmodule_types.cHsFoo* struct_cpp_obj):
+    cdef __HsFoo_FieldsSetter _fbthrift_create(_my_namespacing_test_hsmodule_cbindings.cHsFoo* struct_cpp_obj):
         cdef __HsFoo_FieldsSetter __fbthrift_inst = __HsFoo_FieldsSetter.__new__(__HsFoo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyInt")] = __HsFoo_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __HsFoo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyInt
         if _fbthrift_value is None:
-            __reset_field[_my_namespacing_test_hsmodule_types.cHsFoo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_my_namespacing_test_hsmodule_cbindings.cHsFoo](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyInt is not a { int !r}.')

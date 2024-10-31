@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 import test.fixtures.another_interactions.shared.services_reflection as _services_reflection
@@ -73,7 +74,7 @@ cdef void InteractLocally_SharedInteraction_init_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void InteractLocally_SharedInteraction_do_something_callback(
-    cFollyTry[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]&& result,
+    cFollyTry[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -81,7 +82,7 @@ cdef void InteractLocally_SharedInteraction_do_something_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -181,7 +182,7 @@ cdef class InteractLocally_SharedInteraction(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
             self._executor,
             down_cast_ptr[cInteractLocallyClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).do_something(rpc_options._cpp_obj, 
             ),

@@ -34,7 +34,7 @@ import includes.types as _includes_types
 cdef class __Included_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Included_FieldsSetter _fbthrift_create(_includes_types.cIncluded* struct_cpp_obj):
+    cdef __Included_FieldsSetter _fbthrift_create(_includes_cbindings.cIncluded* struct_cpp_obj):
         cdef __Included_FieldsSetter __fbthrift_inst = __Included_FieldsSetter.__new__(__Included_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __Included_FieldsSetter._set_field_0
@@ -51,7 +51,7 @@ cdef class __Included_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_includes_types.cIncluded](deref(self._struct_cpp_obj), 0)
+            __reset_field[_includes_cbindings.cIncluded](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -61,7 +61,7 @@ cdef class __Included_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field MyTransitiveField
         if _fbthrift_value is None:
-            __reset_field[_includes_types.cIncluded](deref(self._struct_cpp_obj), 1)
+            __reset_field[_includes_cbindings.cIncluded](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _transitive_types.Foo):
             raise TypeError(f'MyTransitiveField is not a { _transitive_types.Foo !r}.')

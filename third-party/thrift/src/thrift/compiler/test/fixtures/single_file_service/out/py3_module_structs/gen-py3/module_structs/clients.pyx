@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module_structs.types as _module_structs_types
+cimport module_structs.cbindings as _module_structs_cbindings
 import module_structs.types as _module_structs_types
 
 import module_structs.services_reflection as _services_reflection

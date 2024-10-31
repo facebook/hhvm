@@ -56,6 +56,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection

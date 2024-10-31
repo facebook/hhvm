@@ -6,17 +6,18 @@
 #  @generated
 #
 
+cimport module.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cSmallStruct] SmallStruct_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cSmallStruct] SmallStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.SmallStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object SmallStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cSmallStruct]& c_struct):
+cdef object SmallStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSmallStruct]& c_struct):
     return _fbthrift_ctypes.SmallStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
-cdef shared_ptr[_fbthrift_ctypes.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.containerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.ccontainerStruct]& c_struct):
+cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct):
     return _fbthrift_ctypes.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

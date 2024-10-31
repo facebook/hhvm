@@ -70,7 +70,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     def __init__(FooStreamEx self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooStreamEx]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooStreamEx]()
         self._fields_setter = _fbthrift_types_fields.__FooStreamEx_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -82,7 +82,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooStreamEx] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooStreamEx] cpp_obj):
         __fbthrift_inst = <FooStreamEx>FooStreamEx.__new__(FooStreamEx, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -100,14 +100,14 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooStreamEx self):
-        cdef shared_ptr[cFooStreamEx] cpp_obj = make_shared[cFooStreamEx](
+        cdef shared_ptr[_module_cbindings.cFooStreamEx] cpp_obj = make_shared[_module_cbindings.cFooStreamEx](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cFooStreamEx](
+        return __richcmp[_module_cbindings.cFooStreamEx](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<FooStreamEx>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -120,7 +120,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cFooStreamEx].gen(meta)
+        _module_cbindings.ExceptionMetadata[_module_cbindings.cFooStreamEx].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -129,7 +129,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cFooStreamEx](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFooStreamEx](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -138,14 +138,14 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FooStreamEx self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFooStreamEx](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cFooStreamEx](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FooStreamEx self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooStreamEx]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooStreamEx]()
         with nogil:
-            needed = serializer.cdeserialize[cFooStreamEx](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cFooStreamEx](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -169,7 +169,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 @__cython.auto_pickle(False)
 cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     def __init__(FooEx self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooEx]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooEx]()
         self._fields_setter = _fbthrift_types_fields.__FooEx_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -181,7 +181,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx] cpp_obj):
         __fbthrift_inst = <FooEx>FooEx.__new__(FooEx, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -199,14 +199,14 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooEx self):
-        cdef shared_ptr[cFooEx] cpp_obj = make_shared[cFooEx](
+        cdef shared_ptr[_module_cbindings.cFooEx] cpp_obj = make_shared[_module_cbindings.cFooEx](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cFooEx](
+        return __richcmp[_module_cbindings.cFooEx](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<FooEx>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -219,7 +219,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cFooEx].gen(meta)
+        _module_cbindings.ExceptionMetadata[_module_cbindings.cFooEx].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -228,7 +228,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cFooEx](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFooEx](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -237,14 +237,14 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FooEx self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFooEx](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cFooEx](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FooEx self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooEx]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooEx]()
         with nogil:
-            needed = serializer.cdeserialize[cFooEx](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cFooEx](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -268,7 +268,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 @__cython.auto_pickle(False)
 cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     def __init__(FooEx2 self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooEx2]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooEx2]()
         self._fields_setter = _fbthrift_types_fields.__FooEx2_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -280,7 +280,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx2] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx2] cpp_obj):
         __fbthrift_inst = <FooEx2>FooEx2.__new__(FooEx2, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -298,14 +298,14 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooEx2 self):
-        cdef shared_ptr[cFooEx2] cpp_obj = make_shared[cFooEx2](
+        cdef shared_ptr[_module_cbindings.cFooEx2] cpp_obj = make_shared[_module_cbindings.cFooEx2](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cFooEx2](
+        return __richcmp[_module_cbindings.cFooEx2](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<FooEx2>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -318,7 +318,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cFooEx2].gen(meta)
+        _module_cbindings.ExceptionMetadata[_module_cbindings.cFooEx2].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -327,7 +327,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cFooEx2](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cFooEx2](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -336,14 +336,14 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FooEx2 self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cFooEx2](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cFooEx2](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(FooEx2 self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cFooEx2]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFooEx2]()
         with nogil:
-            needed = serializer.cdeserialize[cFooEx2](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cFooEx2](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -382,8 +382,8 @@ cdef class ClientBufferedStream__i32(ClientBufferedStream):
         cdef __cOptional[cint32_t] opt_val
         cdef cint32_t _value
         stream, pyfuture, rpc_options = <object> userdata
-        if result.hasException[cFooStreamEx]():
-            pyfuture.set_exception(FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(thrift.py3.exceptions.try_make_shared_exception[cFooStreamEx](result.exception())))
+        if result.hasException[_module_cbindings.cFooStreamEx]():
+            pyfuture.set_exception(FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(thrift.py3.exceptions.try_make_shared_exception[_module_cbindings.cFooStreamEx](result.exception())))
         elif result.hasException():
             pyfuture.set_exception(
                 thrift.python.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)

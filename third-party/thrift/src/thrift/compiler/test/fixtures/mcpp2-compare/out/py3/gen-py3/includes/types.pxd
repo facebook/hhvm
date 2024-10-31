@@ -41,79 +41,34 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport includes.types as _fbthrift_types
 cimport includes.types_fields as _fbthrift_types_fields
+cimport includes.cbindings as _includes_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/includes/types.h":
   pass
 
-cdef extern from "folly/sorted_vector_types.h":
-  pass
-
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h" namespace "::a::different::ns":
-    cdef cppclass cAnEnum "::a::different::ns::AnEnum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types_custom_protocol.h" namespace "::a::different::ns":
-
-    cdef cppclass cAStruct "::a::different::ns::AStruct":
-        cAStruct() except +
-        cAStruct(const cAStruct&) except +
-        bint operator==(cAStruct&)
-        bint operator!=(cAStruct&)
-        bint operator<(cAStruct&)
-        bint operator>(cAStruct&)
-        bint operator<=(cAStruct&)
-        bint operator>=(cAStruct&)
-        __field_ref[cint32_t] FieldA_ref "FieldA_ref" ()
-
-
-    cdef cppclass cAStructB "::a::different::ns::AStructB":
-        cAStructB() except +
-        cAStructB(const cAStructB&) except +
-        bint operator==(cAStructB&)
-        bint operator!=(cAStructB&)
-        bint operator<(cAStructB&)
-        bint operator>(cAStructB&)
-        bint operator<=(cAStructB&)
-        bint operator>=(cAStructB&)
-        shared_ptr[const cAStruct] FieldA_ref "FieldA_ref" ()
-
-
 
 
 cdef class AStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cAStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_includes_cbindings.cAStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AStruct_FieldsSetter _fields_setter
     cdef inline object FieldA_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cAStruct])
 
 
 
 cdef class AStructB(thrift.py3.types.Struct):
-    cdef shared_ptr[cAStructB] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_includes_cbindings.cAStructB] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AStructB_FieldsSetter _fields_setter
     cdef inline object FieldA_impl(self)
     cdef AStruct __fbthrift_cached_FieldA
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAStructB])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cAStructB])
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_constants.h" namespace "::a::different::ns":
-    cdef cint64_t cIncludedConstant "::a::different::ns::includes_constants::IncludedConstant"

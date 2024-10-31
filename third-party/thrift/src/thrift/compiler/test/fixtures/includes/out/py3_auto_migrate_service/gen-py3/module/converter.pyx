@@ -13,9 +13,9 @@ from cython.operator cimport dereference as deref
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/module/thrift_types_capi.h":
     pass
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
-    return make_shared[_fbthrift_ctypes.cMyStruct](python_to_cpp[_fbthrift_ctypes.cMyStruct](inst))
+cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cMyStruct](python_to_cpp[_fbthrift_cbindings.cMyStruct](inst))
 
 
-cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct):
-    return cpp_to_python[_fbthrift_ctypes.cMyStruct](deref(c_struct))
+cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
+    return cpp_to_python[_fbthrift_cbindings.cMyStruct](deref(c_struct))

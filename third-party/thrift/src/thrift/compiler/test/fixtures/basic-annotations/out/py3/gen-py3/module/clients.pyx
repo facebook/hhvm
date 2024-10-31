@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection
@@ -68,9 +69,9 @@ cdef void MyService_ping_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cMyException]():
+    if result.hasException[_module_cbindings.cMyException]():
         try:
-            exc = _module_types.MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cMyException](result.exception()))
+            exc = _module_types.MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cMyException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

@@ -54,11 +54,13 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+cimport my.namespacing.extend.test.extend.cbindings as _my_namespacing_extend_test_extend_cbindings
 import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
 cimport my.namespacing.test.hsmodule.services as _my_namespacing_test_hsmodule_services
 import my.namespacing.test.hsmodule.services as _my_namespacing_test_hsmodule_services
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 
 import my.namespacing.extend.test.extend.services_reflection as _services_reflection
 cimport my.namespacing.extend.test.extend.services_reflection as _services_reflection
@@ -146,10 +148,10 @@ cdef api void call_cy_ExtendTestService_check(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
-    unique_ptr[_my_namespacing_test_hsmodule_types.cHsFoo] struct1
+    unique_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo] struct1
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_types.cHsFoo](struct1.release()))
+    arg_struct1 = _my_namespacing_test_hsmodule_types.HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo](struct1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

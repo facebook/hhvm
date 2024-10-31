@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport test.namespace_from_package.module.types as _test_namespace_from_package_module_types
+cimport test.namespace_from_package.module.cbindings as _test_namespace_from_package_module_cbindings
 import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 
 import test.namespace_from_package.module.services_reflection as _services_reflection

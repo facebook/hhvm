@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_clients.h" namespace "::py3::simple":
@@ -65,7 +66,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapp
       string arg_first,
       string arg_second,)
     cFollyFuture[cint32_t] get_value(cRpcOptions, 
-      _module_types.cSimpleStruct arg_simple_struct,)
+      _module_cbindings.cSimpleStruct arg_simple_struct,)
     cFollyFuture[cbool] negate(cRpcOptions, 
       cbool arg_input,)
     cFollyFuture[cint8_t] tiny(cRpcOptions, 
@@ -87,7 +88,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapp
     cFollyFuture[string] concat_many(cRpcOptions, 
       vector[string] arg_words,)
     cFollyFuture[cint32_t] count_structs(cRpcOptions, 
-      vector[_module_types.cSimpleStruct] arg_items,)
+      vector[_module_cbindings.cSimpleStruct] arg_items,)
     cFollyFuture[cint32_t] sum_set(cRpcOptions, 
       cset[cint32_t] arg_numbers,)
     cFollyFuture[cbool] contains_word(cRpcOptions, 
@@ -97,22 +98,22 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapp
       cmap[string,string] arg_words,
       string arg_key,)
     cFollyFuture[cint16_t] map_length(cRpcOptions, 
-      cmap[string,_module_types.cSimpleStruct] arg_items,)
+      cmap[string,_module_cbindings.cSimpleStruct] arg_items,)
     cFollyFuture[cint16_t] sum_map_values(cRpcOptions, 
       cmap[string,cint16_t] arg_items,)
     cFollyFuture[cint32_t] complex_sum_i32(cRpcOptions, 
-      _module_types.cComplexStruct arg_counter,)
+      _module_cbindings.cComplexStruct arg_counter,)
     cFollyFuture[string] repeat_name(cRpcOptions, 
-      _module_types.cComplexStruct arg_counter,)
-    cFollyFuture[_module_types.cSimpleStruct] get_struct(cRpcOptions, )
+      _module_cbindings.cComplexStruct arg_counter,)
+    cFollyFuture[_module_cbindings.cSimpleStruct] get_struct(cRpcOptions, )
     cFollyFuture[vector[cint32_t]] fib(cRpcOptions, 
       cint16_t arg_n,)
     cFollyFuture[cset[string]] unique_words(cRpcOptions, 
       vector[string] arg_words,)
     cFollyFuture[cmap[string,cint16_t]] words_count(cRpcOptions, 
       vector[string] arg_words,)
-    cFollyFuture[_module_types.cAnEnum] set_enum(cRpcOptions, 
-      _module_types.cAnEnum arg_in_enum,)
+    cFollyFuture[_module_cbindings.cAnEnum] set_enum(cRpcOptions, 
+      _module_cbindings.cAnEnum arg_in_enum,)
     cFollyFuture[vector[vector[cint32_t]]] list_of_lists(cRpcOptions, 
       cint16_t arg_num_lists,
       cint16_t arg_num_items,)
@@ -121,7 +122,7 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapp
     cFollyFuture[vector[cset[string]]] list_of_sets(cRpcOptions, 
       string arg_some_words,)
     cFollyFuture[cint32_t] nested_map_argument(cRpcOptions, 
-      cmap[string,vector[_module_types.cSimpleStruct]] arg_struct_map,)
+      cmap[string,vector[_module_cbindings.cSimpleStruct]] arg_struct_map,)
     cFollyFuture[string] make_sentence(cRpcOptions, 
       vector[vector[string]] arg_word_chars,)
     cFollyFuture[cset[cint32_t]] get_union(cRpcOptions, 
@@ -134,10 +135,10 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapp
       string arg_something,)
     cFollyFuture[cset[string]] contain_binary(cRpcOptions, 
       vector[string] arg_binaries,)
-    cFollyFuture[vector[_module_types.cAnEnum]] contain_enum(cRpcOptions, 
-      vector[_module_types.cAnEnum] arg_the_enum,)
-    cFollyFuture[_module_types.cBinaryUnionStruct] get_binary_union_struct(cRpcOptions, 
-      _module_types.cBinaryUnion arg_u,)
+    cFollyFuture[vector[_module_cbindings.cAnEnum]] contain_enum(cRpcOptions, 
+      vector[_module_cbindings.cAnEnum] arg_the_enum,)
+    cFollyFuture[_module_cbindings.cBinaryUnionStruct] get_binary_union_struct(cRpcOptions, 
+      _module_cbindings.cBinaryUnion arg_u,)
 
 
   cdef cppclass cDerivedServiceClientWrapper "::py3::simple::DerivedServiceClientWrapper"(cSimpleServiceClientWrapper):

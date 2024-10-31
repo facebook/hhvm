@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __InitialResponse_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __InitialResponse_FieldsSetter _fbthrift_create(_module_types.cInitialResponse* struct_cpp_obj):
+    cdef __InitialResponse_FieldsSetter _fbthrift_create(_module_cbindings.cInitialResponse* struct_cpp_obj):
         cdef __InitialResponse_FieldsSetter __fbthrift_inst = __InitialResponse_FieldsSetter.__new__(__InitialResponse_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"content")] = __InitialResponse_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __InitialResponse_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field content
         if _fbthrift_value is None:
-            __reset_field[_module_types.cInitialResponse](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cInitialResponse](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'content is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __InitialResponse_FieldsSetter(__StructFieldsSetter):
 cdef class __FinalResponse_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __FinalResponse_FieldsSetter _fbthrift_create(_module_types.cFinalResponse* struct_cpp_obj):
+    cdef __FinalResponse_FieldsSetter _fbthrift_create(_module_cbindings.cFinalResponse* struct_cpp_obj):
         cdef __FinalResponse_FieldsSetter __fbthrift_inst = __FinalResponse_FieldsSetter.__new__(__FinalResponse_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"content")] = __FinalResponse_FieldsSetter._set_field_0
@@ -76,7 +76,7 @@ cdef class __FinalResponse_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field content
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFinalResponse](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFinalResponse](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'content is not a { str !r}.')
@@ -87,7 +87,7 @@ cdef class __FinalResponse_FieldsSetter(__StructFieldsSetter):
 cdef class __SinkPayload_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __SinkPayload_FieldsSetter _fbthrift_create(_module_types.cSinkPayload* struct_cpp_obj):
+    cdef __SinkPayload_FieldsSetter _fbthrift_create(_module_cbindings.cSinkPayload* struct_cpp_obj):
         cdef __SinkPayload_FieldsSetter __fbthrift_inst = __SinkPayload_FieldsSetter.__new__(__SinkPayload_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"content")] = __SinkPayload_FieldsSetter._set_field_0
@@ -103,7 +103,7 @@ cdef class __SinkPayload_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field content
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSinkPayload](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cSinkPayload](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'content is not a { str !r}.')
@@ -114,7 +114,7 @@ cdef class __SinkPayload_FieldsSetter(__StructFieldsSetter):
 cdef class __CompatibleWithKeywordSink_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CompatibleWithKeywordSink_FieldsSetter _fbthrift_create(_module_types.cCompatibleWithKeywordSink* struct_cpp_obj):
+    cdef __CompatibleWithKeywordSink_FieldsSetter _fbthrift_create(_module_cbindings.cCompatibleWithKeywordSink* struct_cpp_obj):
         cdef __CompatibleWithKeywordSink_FieldsSetter __fbthrift_inst = __CompatibleWithKeywordSink_FieldsSetter.__new__(__CompatibleWithKeywordSink_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"sink")] = __CompatibleWithKeywordSink_FieldsSetter._set_field_0
@@ -130,7 +130,7 @@ cdef class __CompatibleWithKeywordSink_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field sink
         if _fbthrift_value is None:
-            __reset_field[_module_types.cCompatibleWithKeywordSink](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cCompatibleWithKeywordSink](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'sink is not a { str !r}.')
@@ -141,7 +141,7 @@ cdef class __CompatibleWithKeywordSink_FieldsSetter(__StructFieldsSetter):
 cdef class __InitialException_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __InitialException_FieldsSetter _fbthrift_create(_module_types.cInitialException* struct_cpp_obj):
+    cdef __InitialException_FieldsSetter _fbthrift_create(_module_cbindings.cInitialException* struct_cpp_obj):
         cdef __InitialException_FieldsSetter __fbthrift_inst = __InitialException_FieldsSetter.__new__(__InitialException_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"reason")] = __InitialException_FieldsSetter._set_field_0
@@ -157,7 +157,7 @@ cdef class __InitialException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field reason
         if _fbthrift_value is None:
-            __reset_field[_module_types.cInitialException](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cInitialException](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'reason is not a { str !r}.')
@@ -168,7 +168,7 @@ cdef class __InitialException_FieldsSetter(__StructFieldsSetter):
 cdef class __SinkException1_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __SinkException1_FieldsSetter _fbthrift_create(_module_types.cSinkException1* struct_cpp_obj):
+    cdef __SinkException1_FieldsSetter _fbthrift_create(_module_cbindings.cSinkException1* struct_cpp_obj):
         cdef __SinkException1_FieldsSetter __fbthrift_inst = __SinkException1_FieldsSetter.__new__(__SinkException1_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"reason")] = __SinkException1_FieldsSetter._set_field_0
@@ -184,7 +184,7 @@ cdef class __SinkException1_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field reason
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSinkException1](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cSinkException1](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'reason is not a { str !r}.')
@@ -195,7 +195,7 @@ cdef class __SinkException1_FieldsSetter(__StructFieldsSetter):
 cdef class __SinkException2_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __SinkException2_FieldsSetter _fbthrift_create(_module_types.cSinkException2* struct_cpp_obj):
+    cdef __SinkException2_FieldsSetter _fbthrift_create(_module_cbindings.cSinkException2* struct_cpp_obj):
         cdef __SinkException2_FieldsSetter __fbthrift_inst = __SinkException2_FieldsSetter.__new__(__SinkException2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"reason")] = __SinkException2_FieldsSetter._set_field_0
@@ -211,7 +211,7 @@ cdef class __SinkException2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field reason
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSinkException2](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cSinkException2](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'reason is not a { int !r}.')

@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,30 +40,32 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 cimport matching_struct_names.types as _matching_struct_names_types
+cimport matching_struct_names.cbindings as _matching_struct_names_cbindings
 
 
 
 ctypedef void (*__MyStruct_FieldsSetterFunc)(__MyStruct_FieldsSetter, object) except *
 
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _matching_struct_names_types.cMyStruct* _struct_cpp_obj
+    cdef _matching_struct_names_cbindings.cMyStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyStruct_FieldsSetter _fbthrift_create(_matching_struct_names_types.cMyStruct* struct_cpp_obj)
+    cdef __MyStruct_FieldsSetter _fbthrift_create(_matching_struct_names_cbindings.cMyStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__Combo_FieldsSetterFunc)(__Combo_FieldsSetter, object) except *
 
 cdef class __Combo_FieldsSetter(__StructFieldsSetter):
-    cdef _matching_struct_names_types.cCombo* _struct_cpp_obj
+    cdef _matching_struct_names_cbindings.cCombo* _struct_cpp_obj
     cdef cumap[__cstring_view, __Combo_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Combo_FieldsSetter _fbthrift_create(_matching_struct_names_types.cCombo* struct_cpp_obj)
+    cdef __Combo_FieldsSetter _fbthrift_create(_matching_struct_names_cbindings.cCombo* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

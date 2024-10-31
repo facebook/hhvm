@@ -41,13 +41,13 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport empty.types as _fbthrift_types
 cimport empty.types_fields as _fbthrift_types_fields
+cimport empty.cbindings as _empty_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/empty/types.h":
   pass
-
-
-
 
 
 

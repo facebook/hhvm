@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 import test.fixtures.basic.module.services_reflection as _services_reflection
@@ -73,18 +74,18 @@ from test.fixtures.basic.module.services_wrapper cimport cDbMixedStackArgumentsI
 
 
 @cython.auto_pickle(False)
-cdef class Promise__test_fixtures_basic_module_types_cReservedKeyword:
-    cdef cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]]* cPromise
+cdef class Promise__test_fixtures_basic_module_cbindings_cReservedKeyword:
+    cdef cFollyPromise[unique_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]](cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword]](cFollyPromise[unique_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]] cPromise):
-        cdef Promise__test_fixtures_basic_module_types_cReservedKeyword inst = Promise__test_fixtures_basic_module_types_cReservedKeyword.__new__(Promise__test_fixtures_basic_module_types_cReservedKeyword)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword]] cPromise):
+        cdef Promise__test_fixtures_basic_module_cbindings_cReservedKeyword inst = Promise__test_fixtures_basic_module_cbindings_cReservedKeyword.__new__(Promise__test_fixtures_basic_module_cbindings_cReservedKeyword)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -481,10 +482,10 @@ async def FooService_onStopRequested_coro(
 cdef api void call_cy_FB303Service_simple_rpc(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_test_fixtures_basic_module_types.cReservedKeyword]] cPromise,
+    cFollyPromise[unique_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword]] cPromise,
     cint32_t int_parameter
 ) noexcept:
-    cdef Promise__test_fixtures_basic_module_types_cReservedKeyword __promise = Promise__test_fixtures_basic_module_types_cReservedKeyword._fbthrift_create(cmove(cPromise))
+    cdef Promise__test_fixtures_basic_module_cbindings_cReservedKeyword __promise = Promise__test_fixtures_basic_module_cbindings_cReservedKeyword._fbthrift_create(cmove(cPromise))
     arg_int_parameter = int_parameter
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -520,7 +521,7 @@ cdef api void call_cy_FB303Service_onStopRequested(
     )
 async def FB303Service_simple_rpc_coro(
     object self,
-    Promise__test_fixtures_basic_module_types_cReservedKeyword promise,
+    Promise__test_fixtures_basic_module_cbindings_cReservedKeyword promise,
     int_parameter
 ):
     try:
@@ -546,7 +547,7 @@ async def FB303Service_simple_rpc_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_types.cReservedKeyword](deref((<_test_fixtures_basic_module_types.ReservedKeyword?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_cbindings.cReservedKeyword](deref((<_test_fixtures_basic_module_types.ReservedKeyword?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def FB303Service_onStartServing_coro(
     object self,

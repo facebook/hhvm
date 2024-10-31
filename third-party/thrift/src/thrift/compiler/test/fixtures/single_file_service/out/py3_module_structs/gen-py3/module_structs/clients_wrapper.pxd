@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module_structs.types as _module_structs_types
+cimport module_structs.cbindings as _module_structs_cbindings
 
 
 cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":

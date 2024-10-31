@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport my.namespacing.test.module.module.types as _my_namespacing_test_module_module_types
+cimport my.namespacing.test.module.module.cbindings as _my_namespacing_test_module_module_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/module_clients.h" namespace "::cpp2":

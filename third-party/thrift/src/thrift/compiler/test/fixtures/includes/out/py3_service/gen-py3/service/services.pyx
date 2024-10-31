@@ -54,13 +54,17 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport service.types as _service_types
+cimport service.cbindings as _service_cbindings
 import service.types as _service_types
 import includes.types as _includes_types
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 import module.types as _module_types
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import transitive.types as _transitive_types
 cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
 
 import service.services_reflection as _services_reflection
 cimport service.services_reflection as _services_reflection
@@ -139,12 +143,12 @@ cdef api void call_cy_MyService_query(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    unique_ptr[_module_types.cMyStruct] s,
-    unique_ptr[_includes_types.cIncluded] i
+    unique_ptr[_module_cbindings.cMyStruct] s,
+    unique_ptr[_includes_cbindings.cIncluded] i
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](s.release()))
-    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_types.cIncluded](i.release()))
+    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](s.release()))
+    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -160,12 +164,12 @@ cdef api void call_cy_MyService_has_arg_docs(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    unique_ptr[_module_types.cMyStruct] s,
-    unique_ptr[_includes_types.cIncluded] i
+    unique_ptr[_module_cbindings.cMyStruct] s,
+    unique_ptr[_includes_cbindings.cIncluded] i
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](s.release()))
-    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_types.cIncluded](i.release()))
+    arg_s = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](s.release()))
+    arg_i = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded](i.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

@@ -41,44 +41,23 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport my.namespacing.test.hsmodule.types as _fbthrift_types
 cimport my.namespacing.test.hsmodule.types_fields as _fbthrift_types_fields
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-py3/hsmodule/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/hsmodule_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cHsFoo "::cpp2::HsFoo":
-        cHsFoo() except +
-        cHsFoo(const cHsFoo&) except +
-        bint operator==(cHsFoo&)
-        bint operator!=(cHsFoo&)
-        bint operator<(cHsFoo&)
-        bint operator>(cHsFoo&)
-        bint operator<=(cHsFoo&)
-        bint operator>=(cHsFoo&)
-        __field_ref[cint64_t] MyInt_ref "MyInt_ref" ()
-
-
-
-
 cdef class HsFoo(thrift.py3.types.Struct):
-    cdef shared_ptr[cHsFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__HsFoo_FieldsSetter _fields_setter
     cdef inline object MyInt_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cHsFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo])
 
 
 

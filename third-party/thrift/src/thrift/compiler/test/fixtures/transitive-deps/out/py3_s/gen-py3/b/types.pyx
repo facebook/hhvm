@@ -71,8 +71,8 @@ cdef object get_types_reflection():
     )
 
 
-cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *:
-    cdef vector[_c_types.cC] c_inst
+cdef vector[_c_cbindings.cC] List__c_C__make_instance(object items) except *:
+    cdef vector[_c_cbindings.cC] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, _c_types.C):
@@ -80,11 +80,11 @@ cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *:
             c_inst.push_back(deref((<_c_types.C>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-cdef object List__c_C__from_cpp(const vector[_c_types.cC]& c_vec) except *:
+cdef object List__c_C__from_cpp(const vector[_c_cbindings.cC]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
-        py_list.append(_c_types.C._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_c_types.cC](c_vec[idx])))
+        py_list.append(_c_types.C._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_c_cbindings.cC](c_vec[idx])))
     return List__c_C(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

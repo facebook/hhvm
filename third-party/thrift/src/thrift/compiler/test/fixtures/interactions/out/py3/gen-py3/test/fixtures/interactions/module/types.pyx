@@ -72,7 +72,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     def __init__(CustomException self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cCustomException]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_interactions_module_cbindings.cCustomException]()
         self._fields_setter = _fbthrift_types_fields.__CustomException_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -85,7 +85,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomException] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException] cpp_obj):
         __fbthrift_inst = <CustomException>CustomException.__new__(CustomException, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -110,14 +110,14 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(CustomException self):
-        cdef shared_ptr[cCustomException] cpp_obj = make_shared[cCustomException](
+        cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException] cpp_obj = make_shared[_test_fixtures_interactions_module_cbindings.cCustomException](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cCustomException](
+        return __richcmp[_test_fixtures_interactions_module_cbindings.cCustomException](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<CustomException>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -130,7 +130,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cCustomException].gen(meta)
+        _test_fixtures_interactions_module_cbindings.ExceptionMetadata[_test_fixtures_interactions_module_cbindings.cCustomException].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -139,7 +139,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cCustomException](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_interactions_module_cbindings.cCustomException](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -148,14 +148,14 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CustomException self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cCustomException](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_interactions_module_cbindings.cCustomException](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(CustomException self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cCustomException]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_interactions_module_cbindings.cCustomException]()
         with nogil:
-            needed = serializer.cdeserialize[cCustomException](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_interactions_module_cbindings.cCustomException](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

@@ -7,6 +7,6 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport service.types as _fbthrift_ctypes
+cimport service.cbindings as _fbthrift_cbindings
 
 

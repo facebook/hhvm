@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,20 +40,23 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport module0.types as _module0_types
+cimport module0.cbindings as _module0_cbindings
 cimport module1.types as _module1_types
+cimport module1.cbindings as _module1_cbindings
 
 cimport module2.types as _module2_types
+cimport module2.cbindings as _module2_cbindings
 
 
 
 ctypedef void (*__Struct_FieldsSetterFunc)(__Struct_FieldsSetter, object) except *
 
 cdef class __Struct_FieldsSetter(__StructFieldsSetter):
-    cdef _module2_types.cStruct* _struct_cpp_obj
+    cdef _module2_cbindings.cStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __Struct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Struct_FieldsSetter _fbthrift_create(_module2_types.cStruct* struct_cpp_obj)
+    cdef __Struct_FieldsSetter _fbthrift_create(_module2_cbindings.cStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 
@@ -60,11 +64,11 @@ cdef class __Struct_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__BigStruct_FieldsSetterFunc)(__BigStruct_FieldsSetter, object) except *
 
 cdef class __BigStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module2_types.cBigStruct* _struct_cpp_obj
+    cdef _module2_cbindings.cBigStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __BigStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __BigStruct_FieldsSetter _fbthrift_create(_module2_types.cBigStruct* struct_cpp_obj)
+    cdef __BigStruct_FieldsSetter _fbthrift_create(_module2_cbindings.cBigStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 

@@ -33,9 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport includes.types as _includes_types
-cimport module.types as _module_types
-cimport transitive.types as _transitive_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -44,13 +41,19 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
+cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
+cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
+
+cimport service.types as _fbthrift_types
 cimport service.types_fields as _fbthrift_types_fields
+cimport service.cbindings as _service_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/service/types.h":
   pass
-
-
-
 
 
 

@@ -54,9 +54,11 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 import includes.types as _includes_types
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 
 import module.services_reflection as _services_reflection
 cimport module.services_reflection as _services_reflection
@@ -74,82 +76,82 @@ from module.services_wrapper cimport cParamServiceInterface
 
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cComplexUnion:
-    cdef cFollyPromise[unique_ptr[_module_types.cComplexUnion]]* cPromise
+cdef class Promise__module_cbindings_cComplexUnion:
+    cdef cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_module_types.cComplexUnion]](cFollyPromise[unique_ptr[_module_types.cComplexUnion]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]](cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_types.cComplexUnion]] cPromise):
-        cdef Promise__module_types_cComplexUnion inst = Promise__module_types_cComplexUnion.__new__(Promise__module_types_cComplexUnion)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]] cPromise):
+        cdef Promise__module_cbindings_cComplexUnion inst = Promise__module_cbindings_cComplexUnion.__new__(Promise__module_cbindings_cComplexUnion)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_vector___module_types_cComplexUnion:
-    cdef cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]]* cPromise
+cdef class Promise_vector___module_cbindings_cComplexUnion:
+    cdef cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]](cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]](cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]] cPromise):
-        cdef Promise_vector___module_types_cComplexUnion inst = Promise_vector___module_types_cComplexUnion.__new__(Promise_vector___module_types_cComplexUnion)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]] cPromise):
+        cdef Promise_vector___module_cbindings_cComplexUnion inst = Promise_vector___module_cbindings_cComplexUnion.__new__(Promise_vector___module_cbindings_cComplexUnion)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct:
-    cdef cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]]* cPromise
+cdef class Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct:
+    cdef cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]](cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]](cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]] cPromise):
-        cdef Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct inst = Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct.__new__(Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]] cPromise):
+        cdef Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct inst = Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct.__new__(Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct:
-    cdef cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]* cPromise
+cdef class Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct:
+    cdef cFollyPromise[unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]](cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]](cFollyPromise[unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]] cPromise):
-        cdef Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct inst = Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct.__new__(Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] cPromise):
+        cdef Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct inst = Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct.__new__(Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_vector___module_types_cMyEnumA:
-    cdef cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]]* cPromise
+cdef class Promise_vector___module_cbindings_cMyEnumA:
+    cdef cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]](cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]](cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]] cPromise):
-        cdef Promise_vector___module_types_cMyEnumA inst = Promise_vector___module_types_cMyEnumA.__new__(Promise_vector___module_types_cMyEnumA)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]] cPromise):
+        cdef Promise_vector___module_cbindings_cMyEnumA inst = Promise_vector___module_cbindings_cMyEnumA.__new__(Promise_vector___module_cbindings_cMyEnumA)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -218,50 +220,50 @@ cdef class Promise_cmap__string_cint64_t:
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cMyEnumA:
-    cdef cFollyPromise[_module_types.cMyEnumA]* cPromise
+cdef class Promise__module_cbindings_cMyEnumA:
+    cdef cFollyPromise[_module_cbindings.cMyEnumA]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[_module_types.cMyEnumA](cFollyPromise[_module_types.cMyEnumA].makeEmpty())
+        self.cPromise = new cFollyPromise[_module_cbindings.cMyEnumA](cFollyPromise[_module_cbindings.cMyEnumA].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[_module_types.cMyEnumA] cPromise):
-        cdef Promise__module_types_cMyEnumA inst = Promise__module_types_cMyEnumA.__new__(Promise__module_types_cMyEnumA)
+    cdef _fbthrift_create(cFollyPromise[_module_cbindings.cMyEnumA] cPromise):
+        cdef Promise__module_cbindings_cMyEnumA inst = Promise__module_cbindings_cMyEnumA.__new__(Promise__module_cbindings_cMyEnumA)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cMyStruct:
-    cdef cFollyPromise[unique_ptr[_module_types.cMyStruct]]* cPromise
+cdef class Promise__module_cbindings_cMyStruct:
+    cdef cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_module_types.cMyStruct]](cFollyPromise[unique_ptr[_module_types.cMyStruct]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]](cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_types.cMyStruct]] cPromise):
-        cdef Promise__module_types_cMyStruct inst = Promise__module_types_cMyStruct.__new__(Promise__module_types_cMyStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]] cPromise):
+        cdef Promise__module_cbindings_cMyStruct inst = Promise__module_cbindings_cMyStruct.__new__(Promise__module_cbindings_cMyStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_cset___module_types_cMyStruct:
-    cdef cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]]* cPromise
+cdef class Promise_cset___module_cbindings_cMyStruct:
+    cdef cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]](cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]](cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]] cPromise):
-        cdef Promise_cset___module_types_cMyStruct inst = Promise_cset___module_types_cMyStruct.__new__(Promise_cset___module_types_cMyStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]] cPromise):
+        cdef Promise_cset___module_cbindings_cMyStruct inst = Promise_cset___module_cbindings_cMyStruct.__new__(Promise_cset___module_cbindings_cMyStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -1022,9 +1024,9 @@ cdef api void call_cy_ReturnService_simpleTypedefReturn(
 cdef api void call_cy_ReturnService_complexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]] cPromise
+    cFollyPromise[unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] cPromise
 ) noexcept:
-    cdef Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct __promise = Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct __promise = Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1037,9 +1039,9 @@ cdef api void call_cy_ReturnService_complexTypedefReturn(
 cdef api void call_cy_ReturnService_list_mostComplexTypedefReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]] cPromise
+    cFollyPromise[unique_ptr[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]] cPromise
 ) noexcept:
-    cdef Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct __promise = Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct __promise = Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1052,9 +1054,9 @@ cdef api void call_cy_ReturnService_list_mostComplexTypedefReturn(
 cdef api void call_cy_ReturnService_enumReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[_module_types.cMyEnumA] cPromise
+    cFollyPromise[_module_cbindings.cMyEnumA] cPromise
 ) noexcept:
-    cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cMyEnumA __promise = Promise__module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1067,9 +1069,9 @@ cdef api void call_cy_ReturnService_enumReturn(
 cdef api void call_cy_ReturnService_list_EnumReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]] cPromise
+    cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]] cPromise
 ) noexcept:
-    cdef Promise_vector___module_types_cMyEnumA __promise = Promise_vector___module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector___module_cbindings_cMyEnumA __promise = Promise_vector___module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1082,9 +1084,9 @@ cdef api void call_cy_ReturnService_list_EnumReturn(
 cdef api void call_cy_ReturnService_structReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cMyStruct]] cPromise
+    cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]] cPromise
 ) noexcept:
-    cdef Promise__module_types_cMyStruct __promise = Promise__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cMyStruct __promise = Promise__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1097,9 +1099,9 @@ cdef api void call_cy_ReturnService_structReturn(
 cdef api void call_cy_ReturnService_set_StructReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]] cPromise
+    cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]] cPromise
 ) noexcept:
-    cdef Promise_cset___module_types_cMyStruct __promise = Promise_cset___module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise_cset___module_cbindings_cMyStruct __promise = Promise_cset___module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1112,9 +1114,9 @@ cdef api void call_cy_ReturnService_set_StructReturn(
 cdef api void call_cy_ReturnService_unionReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cComplexUnion]] cPromise
+    cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]] cPromise
 ) noexcept:
-    cdef Promise__module_types_cComplexUnion __promise = Promise__module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cComplexUnion __promise = Promise__module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1127,9 +1129,9 @@ cdef api void call_cy_ReturnService_unionReturn(
 cdef api void call_cy_ReturnService_list_UnionReturn(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]] cPromise
+    cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]] cPromise
 ) noexcept:
-    cdef Promise_vector___module_types_cComplexUnion __promise = Promise_vector___module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector___module_cbindings_cComplexUnion __promise = Promise_vector___module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1508,7 +1510,7 @@ async def ReturnService_simpleTypedefReturn_coro(
 
 async def ReturnService_complexTypedefReturn_coro(
     object self,
-    Promise_vector__cmap___module_types_cEmpty__module_types_cMyStruct promise
+    Promise_vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct promise
 ):
     try:
         result = await self.complexTypedefReturn()
@@ -1533,11 +1535,11 @@ async def ReturnService_complexTypedefReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](_module_types.List__Map__Empty_MyStruct__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]](_module_types.List__Map__Empty_MyStruct__make_instance(result)))
 
 async def ReturnService_list_mostComplexTypedefReturn_coro(
     object self,
-    Promise_vector__vector__vector__cmap___module_types_cEmpty__module_types_cMyStruct promise
+    Promise_vector__vector__vector__cmap___module_cbindings_cEmpty__module_cbindings_cMyStruct promise
 ):
     try:
         result = await self.list_mostComplexTypedefReturn()
@@ -1562,11 +1564,11 @@ async def ReturnService_list_mostComplexTypedefReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](_module_types.List__List__List__Map__Empty_MyStruct__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]](_module_types.List__List__List__Map__Empty_MyStruct__make_instance(result)))
 
 async def ReturnService_enumReturn_coro(
     object self,
-    Promise__module_types_cMyEnumA promise
+    Promise__module_cbindings_cMyEnumA promise
 ):
     try:
         result = await self.enumReturn()
@@ -1590,11 +1592,11 @@ async def ReturnService_enumReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(<_module_types.cMyEnumA><int>result)
+        promise.cPromise.setValue(<_module_cbindings.cMyEnumA><int>result)
 
 async def ReturnService_list_EnumReturn_coro(
     object self,
-    Promise_vector___module_types_cMyEnumA promise
+    Promise_vector___module_cbindings_cMyEnumA promise
 ):
     try:
         result = await self.list_EnumReturn()
@@ -1619,11 +1621,11 @@ async def ReturnService_list_EnumReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](_module_types.List__MyEnumA__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[_module_cbindings.cMyEnumA]](_module_types.List__MyEnumA__make_instance(result)))
 
 async def ReturnService_structReturn_coro(
     object self,
-    Promise__module_types_cMyStruct promise
+    Promise__module_cbindings_cMyStruct promise
 ):
     try:
         result = await self.structReturn()
@@ -1647,11 +1649,11 @@ async def ReturnService_structReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_set_StructReturn_coro(
     object self,
-    Promise_cset___module_types_cMyStruct promise
+    Promise_cset___module_cbindings_cMyStruct promise
 ):
     try:
         result = await self.set_StructReturn()
@@ -1676,11 +1678,11 @@ async def ReturnService_set_StructReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_unionReturn_coro(
     object self,
-    Promise__module_types_cComplexUnion promise
+    Promise__module_cbindings_cComplexUnion promise
 ):
     try:
         result = await self.unionReturn()
@@ -1704,11 +1706,11 @@ async def ReturnService_unionReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_list_UnionReturn_coro(
     object self,
-    Promise_vector___module_types_cComplexUnion promise
+    Promise_vector___module_cbindings_cComplexUnion promise
 ):
     try:
         result = await self.list_UnionReturn()
@@ -1733,7 +1735,7 @@ async def ReturnService_list_UnionReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](_module_types.List__ComplexUnion__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[_module_cbindings.cComplexUnion]](_module_types.List__ComplexUnion__make_instance(result)))
 
 async def ReturnService_readDataEb_coro(
     object self,
@@ -1951,7 +1953,7 @@ cdef api void call_cy_ParamService_void_ret_enum_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    _module_types.cMyEnumA param1
+    _module_cbindings.cMyEnumA param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.MyEnumA(<int> param1)
@@ -1969,10 +1971,10 @@ cdef api void call_cy_ParamService_void_ret_struct_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    unique_ptr[_module_types.cMyStruct] param1
+    unique_ptr[_module_cbindings.cMyStruct] param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cMyStruct](param1.release()))
+    arg_param1 = _module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1987,7 +1989,7 @@ cdef api void call_cy_ParamService_void_ret_listunion_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    unique_ptr[vector[_module_types.cComplexUnion]] param1
+    unique_ptr[vector[_module_cbindings.cComplexUnion]] param1
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__ComplexUnion__from_cpp(deref(param1))
@@ -2044,10 +2046,10 @@ cdef api void call_cy_ParamService_bool_ret_union_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
-    unique_ptr[_module_types.cComplexUnion] param1
+    unique_ptr[_module_cbindings.cComplexUnion] param1
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexUnion](param1.release()))
+    arg_param1 = _module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexUnion](param1.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2084,7 +2086,7 @@ cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
     Cpp2RequestContext* ctx,
     cFollyPromise[cint64_t] cPromise,
     unique_ptr[string] param1,
-    unique_ptr[cset[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]] param2
+    unique_ptr[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]] param2
 ) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
@@ -2134,7 +2136,7 @@ cdef api void call_cy_ParamService_double_ret_setstruct_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[double] cPromise,
-    unique_ptr[cset[_module_types.cMyStruct]] param1
+    unique_ptr[cset[_module_cbindings.cMyStruct]] param1
 ) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
@@ -2263,7 +2265,7 @@ cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[vector[cint32_t]]] cPromise,
-    unique_ptr[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]] param1
+    unique_ptr[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]] param1
 ) noexcept:
     cdef Promise_vector__cint32_t __promise = Promise_vector__cint32_t._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.List__Map__Empty_MyStruct__from_cpp(deref(param1))
@@ -2280,10 +2282,10 @@ cdef api void call_cy_ParamService_listtypedef_ret_typedef_param(
 cdef api void call_cy_ParamService_enum_ret_double_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[_module_types.cMyEnumA] cPromise,
+    cFollyPromise[_module_cbindings.cMyEnumA] cPromise,
     double param1
 ) noexcept:
-    cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cMyEnumA __promise = Promise__module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -2298,11 +2300,11 @@ cdef api void call_cy_ParamService_enum_ret_double_param(
 cdef api void call_cy_ParamService_enum_ret_double_enum_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[_module_types.cMyEnumA] cPromise,
+    cFollyPromise[_module_cbindings.cMyEnumA] cPromise,
     double param1,
-    _module_types.cMyEnumA param2
+    _module_cbindings.cMyEnumA param2
 ) noexcept:
-    cdef Promise__module_types_cMyEnumA __promise = Promise__module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cMyEnumA __promise = Promise__module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = _module_types.MyEnumA(<int> param2)
     __context = RequestContext._fbthrift_create(ctx)
@@ -2319,10 +2321,10 @@ cdef api void call_cy_ParamService_enum_ret_double_enum_param(
 cdef api void call_cy_ParamService_listenum_ret_map_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[_module_types.cMyEnumA]]] cPromise,
+    cFollyPromise[unique_ptr[vector[_module_cbindings.cMyEnumA]]] cPromise,
     unique_ptr[cmap[string,cint64_t]] param1
 ) noexcept:
-    cdef Promise_vector___module_types_cMyEnumA __promise = Promise_vector___module_types_cMyEnumA._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector___module_cbindings_cMyEnumA __promise = Promise_vector___module_cbindings_cMyEnumA._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -2337,10 +2339,10 @@ cdef api void call_cy_ParamService_listenum_ret_map_param(
 cdef api void call_cy_ParamService_struct_ret_i16_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cMyStruct]] cPromise,
+    cFollyPromise[unique_ptr[_module_cbindings.cMyStruct]] cPromise,
     cint16_t param1
 ) noexcept:
-    cdef Promise__module_types_cMyStruct __promise = Promise__module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cMyStruct __promise = Promise__module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -2355,10 +2357,10 @@ cdef api void call_cy_ParamService_struct_ret_i16_param(
 cdef api void call_cy_ParamService_setstruct_ret_set_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[cset[_module_types.cMyStruct]]] cPromise,
+    cFollyPromise[unique_ptr[cset[_module_cbindings.cMyStruct]]] cPromise,
     unique_ptr[cset[string]] param1
 ) noexcept:
-    cdef Promise_cset___module_types_cMyStruct __promise = Promise_cset___module_types_cMyStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise_cset___module_cbindings_cMyStruct __promise = Promise_cset___module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -2373,11 +2375,11 @@ cdef api void call_cy_ParamService_setstruct_ret_set_param(
 cdef api void call_cy_ParamService_union_ret_i32_i32_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cComplexUnion]] cPromise,
+    cFollyPromise[unique_ptr[_module_cbindings.cComplexUnion]] cPromise,
     cint32_t param1,
     cint32_t param2
 ) noexcept:
-    cdef Promise__module_types_cComplexUnion __promise = Promise__module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cComplexUnion __promise = Promise__module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     arg_param1 = param1
     arg_param2 = param2
     __context = RequestContext._fbthrift_create(ctx)
@@ -2394,10 +2396,10 @@ cdef api void call_cy_ParamService_union_ret_i32_i32_param(
 cdef api void call_cy_ParamService_listunion_string_param(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[_module_types.cComplexUnion]]] cPromise,
+    cFollyPromise[unique_ptr[vector[_module_cbindings.cComplexUnion]]] cPromise,
     unique_ptr[string] param1
 ) noexcept:
-    cdef Promise_vector___module_types_cComplexUnion __promise = Promise_vector___module_types_cComplexUnion._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector___module_cbindings_cComplexUnion __promise = Promise_vector___module_cbindings_cComplexUnion._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -3117,7 +3119,7 @@ async def ParamService_listtypedef_ret_typedef_param_coro(
 
 async def ParamService_enum_ret_double_param_coro(
     object self,
-    Promise__module_types_cMyEnumA promise,
+    Promise__module_cbindings_cMyEnumA promise,
     param1
 ):
     try:
@@ -3143,11 +3145,11 @@ async def ParamService_enum_ret_double_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(<_module_types.cMyEnumA><int>result)
+        promise.cPromise.setValue(<_module_cbindings.cMyEnumA><int>result)
 
 async def ParamService_enum_ret_double_enum_param_coro(
     object self,
-    Promise__module_types_cMyEnumA promise,
+    Promise__module_cbindings_cMyEnumA promise,
     param1,
     param2
 ):
@@ -3175,11 +3177,11 @@ async def ParamService_enum_ret_double_enum_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(<_module_types.cMyEnumA><int>result)
+        promise.cPromise.setValue(<_module_cbindings.cMyEnumA><int>result)
 
 async def ParamService_listenum_ret_map_param_coro(
     object self,
-    Promise_vector___module_types_cMyEnumA promise,
+    Promise_vector___module_cbindings_cMyEnumA promise,
     param1
 ):
     try:
@@ -3206,11 +3208,11 @@ async def ParamService_listenum_ret_map_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cMyEnumA]](_module_types.List__MyEnumA__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[_module_cbindings.cMyEnumA]](_module_types.List__MyEnumA__make_instance(result)))
 
 async def ParamService_struct_ret_i16_param_coro(
     object self,
-    Promise__module_types_cMyStruct promise,
+    Promise__module_cbindings_cMyStruct promise,
     param1
 ):
     try:
@@ -3236,11 +3238,11 @@ async def ParamService_struct_ret_i16_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cMyStruct](deref((<_module_types.MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_setstruct_ret_set_param_coro(
     object self,
-    Promise_cset___module_types_cMyStruct promise,
+    Promise_cset___module_cbindings_cMyStruct promise,
     param1
 ):
     try:
@@ -3267,11 +3269,11 @@ async def ParamService_setstruct_ret_set_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_types.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_union_ret_i32_i32_param_coro(
     object self,
-    Promise__module_types_cComplexUnion promise,
+    Promise__module_cbindings_cComplexUnion promise,
     param1,
     param2
 ):
@@ -3299,11 +3301,11 @@ async def ParamService_union_ret_i32_i32_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cComplexUnion](deref((<_module_types.ComplexUnion?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_listunion_string_param_coro(
     object self,
-    Promise_vector___module_types_cComplexUnion promise,
+    Promise_vector___module_cbindings_cComplexUnion promise,
     param1
 ):
     try:
@@ -3330,7 +3332,7 @@ async def ParamService_listunion_string_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cComplexUnion]](_module_types.List__ComplexUnion__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[_module_cbindings.cComplexUnion]](_module_types.List__ComplexUnion__make_instance(result)))
 
 async def ParamService_onStartServing_coro(
     object self,

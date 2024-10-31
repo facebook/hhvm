@@ -50,8 +50,10 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
+cimport my.namespacing.extend.test.extend.cbindings as _my_namespacing_extend_test_extend_cbindings
 import my.namespacing.extend.test.extend.types as _my_namespacing_extend_test_extend_types
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 cimport my.namespacing.test.hsmodule.clients as _my_namespacing_test_hsmodule_clients
 import my.namespacing.test.hsmodule.clients as _my_namespacing_test_hsmodule_clients

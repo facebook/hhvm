@@ -41,48 +41,25 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport foo.types as _fbthrift_types
 cimport foo.types_fields as _fbthrift_types_fields
+cimport foo.cbindings as _foo_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/foo/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFields "::cpp2::Fields":
-        cFields() except +
-        cFields(const cFields&) except +
-        bint operator==(cFields&)
-        bint operator!=(cFields&)
-        bint operator<(cFields&)
-        bint operator>(cFields&)
-        bint operator<=(cFields&)
-        bint operator>=(cFields&)
-        __field_ref[string] injected_field_ref "injected_field_ref" ()
-        __optional_field_ref[string] injected_structured_annotation_field_ref "injected_structured_annotation_field_ref" ()
-        __optional_field_ref[string] injected_unstructured_annotation_field_ref "injected_unstructured_annotation_field_ref" ()
-
-
-
-
 cdef class Fields(thrift.py3.types.Struct):
-    cdef shared_ptr[cFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_foo_cbindings.cFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Fields_FieldsSetter _fields_setter
     cdef inline object injected_field_impl(self)
     cdef inline object injected_structured_annotation_field_impl(self)
     cdef inline object injected_unstructured_annotation_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_foo_cbindings.cFields])
 
 
 

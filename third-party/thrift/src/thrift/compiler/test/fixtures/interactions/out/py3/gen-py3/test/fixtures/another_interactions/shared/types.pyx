@@ -68,7 +68,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class DoSomethingResult(thrift.py3.types.Struct):
     def __init__(DoSomethingResult self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cDoSomethingResult]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]()
         self._fields_setter = _fbthrift_types_fields.__DoSomethingResult_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -76,7 +76,7 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef DoSomethingResult __fbthrift_inst = DoSomethingResult.__new__(DoSomethingResult)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cDoSomethingResult](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__DoSomethingResult_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -92,7 +92,7 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cDoSomethingResult] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] cpp_obj):
         __fbthrift_inst = <DoSomethingResult>DoSomethingResult.__new__(DoSomethingResult)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -123,14 +123,14 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
 
 
     def __copy__(DoSomethingResult self):
-        cdef shared_ptr[cDoSomethingResult] cpp_obj = make_shared[cDoSomethingResult](
+        cdef shared_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] cpp_obj = make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cDoSomethingResult](
+        return __richcmp[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<DoSomethingResult>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -143,7 +143,7 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cDoSomethingResult].gen(meta)
+        _test_fixtures_another_interactions_shared_cbindings.StructMetadata[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -152,7 +152,7 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cDoSomethingResult](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -161,14 +161,14 @@ cdef class DoSomethingResult(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(DoSomethingResult self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cDoSomethingResult](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(DoSomethingResult self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cDoSomethingResult]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]()
         with nogil:
-            needed = serializer.cdeserialize[cDoSomethingResult](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

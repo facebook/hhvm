@@ -5,7 +5,7 @@
 #  @generated
 #
 
-from apache.thrift.metadata.types cimport cThriftMetadata
+from apache.thrift.metadata.cbindings cimport cThriftMetadata
 from thrift.python.common cimport (
     cThriftMetadata as __fbthrift_cThriftMetadata,
 )

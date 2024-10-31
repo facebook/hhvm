@@ -48,82 +48,40 @@ from thrift.py3.stream cimport (
     ServerStream, cServerStream, ResponseAndServerStream
 )
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/stream/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/stream/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/stream/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/stream/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFooStreamEx "::cpp2::FooStreamEx"(cTException):
-        cFooStreamEx() except +
-        cFooStreamEx(const cFooStreamEx&) except +
-        bint operator==(cFooStreamEx&)
-        bint operator!=(cFooStreamEx&)
-        bint operator<(cFooStreamEx&)
-        bint operator>(cFooStreamEx&)
-        bint operator<=(cFooStreamEx&)
-        bint operator>=(cFooStreamEx&)
-
-
-    cdef cppclass cFooEx "::cpp2::FooEx"(cTException):
-        cFooEx() except +
-        cFooEx(const cFooEx&) except +
-        bint operator==(cFooEx&)
-        bint operator!=(cFooEx&)
-        bint operator<(cFooEx&)
-        bint operator>(cFooEx&)
-        bint operator<=(cFooEx&)
-        bint operator>=(cFooEx&)
-
-
-    cdef cppclass cFooEx2 "::cpp2::FooEx2"(cTException):
-        cFooEx2() except +
-        cFooEx2(const cFooEx2&) except +
-        bint operator==(cFooEx2&)
-        bint operator!=(cFooEx2&)
-        bint operator<(cFooEx2&)
-        bint operator>(cFooEx2&)
-        bint operator<=(cFooEx2&)
-        bint operator>=(cFooEx2&)
-
-
-
-
 cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cFooStreamEx] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFooStreamEx] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FooStreamEx_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooStreamEx])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooStreamEx])
 
 
 
 cdef class FooEx(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cFooEx] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFooEx] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FooEx_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx])
 
 
 
 cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cFooEx2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFooEx2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FooEx2_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFooEx2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFooEx2])
 
 
 

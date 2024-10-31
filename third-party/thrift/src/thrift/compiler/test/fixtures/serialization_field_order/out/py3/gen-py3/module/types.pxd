@@ -41,74 +41,37 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/serialization_field_order/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/serialization_field_order/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFoo "::cpp2::Foo":
-        cFoo() except +
-        cFoo(const cFoo&) except +
-        bint operator==(cFoo&)
-        bint operator!=(cFoo&)
-        bint operator<(cFoo&)
-        bint operator>(cFoo&)
-        bint operator<=(cFoo&)
-        bint operator>=(cFoo&)
-        __field_ref[cint32_t] field1_ref "field1_ref" ()
-        __field_ref[cint32_t] field2_ref "field2_ref" ()
-        __field_ref[cint32_t] field3_ref "field3_ref" ()
-
-
-    cdef cppclass cFoo2 "::cpp2::Foo2":
-        cFoo2() except +
-        cFoo2(const cFoo2&) except +
-        bint operator==(cFoo2&)
-        bint operator!=(cFoo2&)
-        bint operator<(cFoo2&)
-        bint operator>(cFoo2&)
-        bint operator<=(cFoo2&)
-        bint operator>=(cFoo2&)
-        __field_ref[cint32_t] field1_ref "field1_ref" ()
-        __field_ref[cint32_t] field2_ref "field2_ref" ()
-        __field_ref[cint32_t] field3_ref "field3_ref" ()
-
-
-
-
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
     cdef inline object field3_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo])
 
 
 
 cdef class Foo2(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFoo2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo2_FieldsSetter _fields_setter
     cdef inline object field1_impl(self)
     cdef inline object field2_impl(self)
     cdef inline object field3_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo2])
 
 
 

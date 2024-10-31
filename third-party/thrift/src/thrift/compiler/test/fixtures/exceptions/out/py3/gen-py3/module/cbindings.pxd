@@ -4,12 +4,130 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-from module.types cimport (
-    cFiery,
-    cSerious,
-    cComplexFieldNames,
-    cCustomFieldNames,
-    cExceptionWithPrimitiveField,
-    cExceptionWithStructuredAnnotation,
-    cBanal,
-    )
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+    uint16_t as cuint16_t,
+    uint32_t as cuint32_t,
+)
+from libcpp.string cimport string
+from libcpp cimport bool as cbool, nullptr, nullptr_t
+from cpython cimport bool as pbool
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap, pair as cpair
+from libcpp.unordered_map cimport unordered_map as cumap
+cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
+from thrift.py3.types cimport (
+    bstring,
+    field_ref as __field_ref,
+    optional_field_ref as __optional_field_ref,
+    required_field_ref as __required_field_ref,
+    terse_field_ref as __terse_field_ref,
+    union_field_ref as __union_field_ref,
+    get_union_field_value as __get_union_field_value,
+)
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+
+
+
+cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass ExceptionMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass StructMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+
+    cdef cppclass cFiery "::cpp2::Fiery"(cTException):
+        cFiery() except +
+        cFiery(const cFiery&) except +
+        bint operator==(cFiery&)
+        bint operator!=(cFiery&)
+        bint operator<(cFiery&)
+        bint operator>(cFiery&)
+        bint operator<=(cFiery&)
+        bint operator>=(cFiery&)
+        __required_field_ref[string] message_ref "message_ref" ()
+
+
+    cdef cppclass cSerious "::cpp2::Serious"(cTException):
+        cSerious() except +
+        cSerious(const cSerious&) except +
+        bint operator==(cSerious&)
+        bint operator!=(cSerious&)
+        bint operator<(cSerious&)
+        bint operator>(cSerious&)
+        bint operator<=(cSerious&)
+        bint operator>=(cSerious&)
+        __optional_field_ref[string] not_sonnet_ref "sonnet_ref" ()
+
+
+    cdef cppclass cComplexFieldNames "::cpp2::ComplexFieldNames"(cTException):
+        cComplexFieldNames() except +
+        cComplexFieldNames(const cComplexFieldNames&) except +
+        bint operator==(cComplexFieldNames&)
+        bint operator!=(cComplexFieldNames&)
+        bint operator<(cComplexFieldNames&)
+        bint operator>(cComplexFieldNames&)
+        bint operator<=(cComplexFieldNames&)
+        bint operator>=(cComplexFieldNames&)
+        __field_ref[string] error_message_ref "error_message_ref" ()
+        __field_ref[string] internal_error_message_ref "internal_error_message_ref" ()
+
+
+    cdef cppclass cCustomFieldNames "::cpp2::CustomFieldNames"(cTException):
+        cCustomFieldNames() except +
+        cCustomFieldNames(const cCustomFieldNames&) except +
+        bint operator==(cCustomFieldNames&)
+        bint operator!=(cCustomFieldNames&)
+        bint operator<(cCustomFieldNames&)
+        bint operator>(cCustomFieldNames&)
+        bint operator<=(cCustomFieldNames&)
+        bint operator>=(cCustomFieldNames&)
+        __field_ref[string] error_message_ref "error_message_ref" ()
+        __field_ref[string] internal_error_message_ref "internal_error_message_ref" ()
+
+
+    cdef cppclass cExceptionWithPrimitiveField "::cpp2::ExceptionWithPrimitiveField"(cTException):
+        cExceptionWithPrimitiveField() except +
+        cExceptionWithPrimitiveField(const cExceptionWithPrimitiveField&) except +
+        bint operator==(cExceptionWithPrimitiveField&)
+        bint operator!=(cExceptionWithPrimitiveField&)
+        bint operator<(cExceptionWithPrimitiveField&)
+        bint operator>(cExceptionWithPrimitiveField&)
+        bint operator<=(cExceptionWithPrimitiveField&)
+        bint operator>=(cExceptionWithPrimitiveField&)
+        __field_ref[string] message_ref "message_ref" ()
+        __field_ref[cint32_t] error_code_ref "error_code_ref" ()
+
+
+    cdef cppclass cExceptionWithStructuredAnnotation "::cpp2::ExceptionWithStructuredAnnotation"(cTException):
+        cExceptionWithStructuredAnnotation() except +
+        cExceptionWithStructuredAnnotation(const cExceptionWithStructuredAnnotation&) except +
+        bint operator==(cExceptionWithStructuredAnnotation&)
+        bint operator!=(cExceptionWithStructuredAnnotation&)
+        bint operator<(cExceptionWithStructuredAnnotation&)
+        bint operator>(cExceptionWithStructuredAnnotation&)
+        bint operator<=(cExceptionWithStructuredAnnotation&)
+        bint operator>=(cExceptionWithStructuredAnnotation&)
+        __field_ref[string] message_field_ref "message_field_ref" ()
+        __field_ref[cint32_t] error_code_ref "error_code_ref" ()
+
+
+    cdef cppclass cBanal "::cpp2::Banal"(cTException):
+        cBanal() except +
+        cBanal(const cBanal&) except +
+        bint operator==(cBanal&)
+        bint operator!=(cBanal&)
+        bint operator<(cBanal&)
+        bint operator>(cBanal&)
+        bint operator<=(cBanal&)
+        bint operator>=(cBanal&)
+

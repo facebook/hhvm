@@ -7,12 +7,12 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStructNestedAnnotation] MyStructNestedAnnotation_convert_to_cpp(object inst) except*
-cdef object MyStructNestedAnnotation_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStructNestedAnnotation]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyStructNestedAnnotation] MyStructNestedAnnotation_convert_to_cpp(object inst) except*
+cdef object MyStructNestedAnnotation_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStructNestedAnnotation]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSecretStruct] SecretStruct_convert_to_cpp(object inst) except*
-cdef object SecretStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cSecretStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSecretStruct] SecretStruct_convert_to_cpp(object inst) except*
+cdef object SecretStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSecretStruct]& c_struct)
 

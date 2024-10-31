@@ -34,7 +34,7 @@ import test.fixtures.interactions.module.types as _test_fixtures_interactions_mo
 cdef class __CustomException_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CustomException_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_types.cCustomException* struct_cpp_obj):
+    cdef __CustomException_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_cbindings.cCustomException* struct_cpp_obj):
         cdef __CustomException_FieldsSetter __fbthrift_inst = __CustomException_FieldsSetter.__new__(__CustomException_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"message")] = __CustomException_FieldsSetter._set_field_0
@@ -50,7 +50,7 @@ cdef class __CustomException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field message
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_interactions_module_types.cCustomException](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_interactions_module_cbindings.cCustomException](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'message is not a { str !r}.')

@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,27 +41,28 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 
 
 
 ctypedef void (*__AStruct_FieldsSetterFunc)(__AStruct_FieldsSetter, object) except *
 
 cdef class __AStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _includes_types.cAStruct* _struct_cpp_obj
+    cdef _includes_cbindings.cAStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __AStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __AStruct_FieldsSetter _fbthrift_create(_includes_types.cAStruct* struct_cpp_obj)
+    cdef __AStruct_FieldsSetter _fbthrift_create(_includes_cbindings.cAStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__AStructB_FieldsSetterFunc)(__AStructB_FieldsSetter, object) except *
 
 cdef class __AStructB_FieldsSetter(__StructFieldsSetter):
-    cdef _includes_types.cAStructB* _struct_cpp_obj
+    cdef _includes_cbindings.cAStructB* _struct_cpp_obj
     cdef cumap[__cstring_view, __AStructB_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __AStructB_FieldsSetter _fbthrift_create(_includes_types.cAStructB* struct_cpp_obj)
+    cdef __AStructB_FieldsSetter _fbthrift_create(_includes_cbindings.cAStructB* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

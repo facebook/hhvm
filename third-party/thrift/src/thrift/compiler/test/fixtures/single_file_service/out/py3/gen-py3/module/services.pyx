@@ -56,6 +56,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection
@@ -134,18 +135,18 @@ cdef void getNextGenerator_B_stream_stuff(object generator, cFollyPromise[option
 
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cFoo:
-    cdef cFollyPromise[unique_ptr[_module_types.cFoo]]* cPromise
+cdef class Promise__module_cbindings_cFoo:
+    cdef cFollyPromise[unique_ptr[_module_cbindings.cFoo]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_module_types.cFoo]](cFollyPromise[unique_ptr[_module_types.cFoo]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_module_cbindings.cFoo]](cFollyPromise[unique_ptr[_module_cbindings.cFoo]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_types.cFoo]] cPromise):
-        cdef Promise__module_types_cFoo inst = Promise__module_types_cFoo.__new__(Promise__module_types_cFoo)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_cbindings.cFoo]] cPromise):
+        cdef Promise__module_cbindings_cFoo inst = Promise__module_cbindings_cFoo.__new__(Promise__module_cbindings_cFoo)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -305,9 +306,9 @@ cdef class CInterface(
 cdef api void call_cy_A_foo(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cFoo]] cPromise
+    cFollyPromise[unique_ptr[_module_cbindings.cFoo]] cPromise
 ) noexcept:
-    cdef Promise__module_types_cFoo __promise = Promise__module_types_cFoo._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cFoo __promise = Promise__module_cbindings_cFoo._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -341,7 +342,7 @@ cdef api void call_cy_A_onStopRequested(
     )
 async def A_foo_coro(
     object self,
-    Promise__module_types_cFoo promise
+    Promise__module_cbindings_cFoo promise
 ):
     try:
         result = await self.foo()
@@ -365,7 +366,7 @@ async def A_foo_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cFoo](deref((<_module_types.Foo?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cFoo](deref((<_module_types.Foo?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def A_onStartServing_coro(
     object self,
@@ -427,10 +428,10 @@ cdef api void call_cy_B_bar(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise,
-    unique_ptr[_module_types.cFoo] foo
+    unique_ptr[_module_cbindings.cFoo] foo
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_foo = _module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cFoo](foo.release()))
+    arg_foo = _module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo](foo.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

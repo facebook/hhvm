@@ -7,18 +7,18 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cFields] Fields_convert_to_cpp(object inst) except*
-cdef object Fields_from_cpp(const shared_ptr[_fbthrift_ctypes.cFields]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFields] Fields_convert_to_cpp(object inst) except*
+cdef object Fields_from_cpp(const shared_ptr[_fbthrift_cbindings.cFields]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedToEmptyStruct] FieldsInjectedToEmptyStruct_convert_to_cpp(object inst) except*
-cdef object FieldsInjectedToEmptyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedToEmptyStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFieldsInjectedToEmptyStruct] FieldsInjectedToEmptyStruct_convert_to_cpp(object inst) except*
+cdef object FieldsInjectedToEmptyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsInjectedToEmptyStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedToStruct] FieldsInjectedToStruct_convert_to_cpp(object inst) except*
-cdef object FieldsInjectedToStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedToStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFieldsInjectedToStruct] FieldsInjectedToStruct_convert_to_cpp(object inst) except*
+cdef object FieldsInjectedToStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsInjectedToStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFieldsInjectedWithIncludedStruct] FieldsInjectedWithIncludedStruct_convert_to_cpp(object inst) except*
-cdef object FieldsInjectedWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFieldsInjectedWithIncludedStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithIncludedStruct] FieldsInjectedWithIncludedStruct_convert_to_cpp(object inst) except*
+cdef object FieldsInjectedWithIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFieldsInjectedWithIncludedStruct]& c_struct)
 

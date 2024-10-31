@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__Val_FieldsSetterFunc)(__Val_FieldsSetter, object) except *
 
 cdef class __Val_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cVal* _struct_cpp_obj
+    cdef _module_cbindings.cVal* _struct_cpp_obj
     cdef cumap[__cstring_view, __Val_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Val_FieldsSetter _fbthrift_create(_module_types.cVal* struct_cpp_obj)
+    cdef __Val_FieldsSetter _fbthrift_create(_module_cbindings.cVal* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -59,10 +61,10 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__NonCopyableStruct_FieldsSetterFunc)(__NonCopyableStruct_FieldsSetter, object) except *
 
 cdef class __NonCopyableStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cNonCopyableStruct* _struct_cpp_obj
+    cdef _module_cbindings.cNonCopyableStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __NonCopyableStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __NonCopyableStruct_FieldsSetter _fbthrift_create(_module_types.cNonCopyableStruct* struct_cpp_obj)
+    cdef __NonCopyableStruct_FieldsSetter _fbthrift_create(_module_cbindings.cNonCopyableStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

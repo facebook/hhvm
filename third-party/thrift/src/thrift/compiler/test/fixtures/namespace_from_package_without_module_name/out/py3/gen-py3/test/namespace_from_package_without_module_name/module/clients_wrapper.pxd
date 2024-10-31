@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport test.namespace_from_package_without_module_name.module.types as _test_namespace_from_package_without_module_name_module_types
+cimport test.namespace_from_package_without_module_name.module.cbindings as _test_namespace_from_package_without_module_name_module_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_clients.h" namespace "::test::namespace_from_package_without_module_name":

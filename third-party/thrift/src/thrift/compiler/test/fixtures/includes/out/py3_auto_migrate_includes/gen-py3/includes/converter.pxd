@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport includes.types as _fbthrift_ctypes
+cimport includes.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cIncluded] Included_convert_to_cpp(object inst) except*
-cdef object Included_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncluded]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cIncluded] Included_convert_to_cpp(object inst) except*
+cdef object Included_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncluded]& c_struct)
 

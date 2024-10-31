@@ -4,14 +4,99 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-from test.fixtures.enums.module.types cimport (
-    cMetasyntactic,
-    cMyEnum1,
-    cMyEnum2,
-    cMyEnum3,
-    cMyEnum4,
-    cMyBitmaskEnum1,
-    cMyBitmaskEnum2,
-    cSomeStruct,
-    cMyStruct,
-    )
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+    uint16_t as cuint16_t,
+    uint32_t as cuint32_t,
+)
+from libcpp.string cimport string
+from libcpp cimport bool as cbool, nullptr, nullptr_t
+from cpython cimport bool as pbool
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap, pair as cpair
+from libcpp.unordered_map cimport unordered_map as cumap
+cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
+from thrift.py3.types cimport (
+    bstring,
+    field_ref as __field_ref,
+    optional_field_ref as __optional_field_ref,
+    required_field_ref as __required_field_ref,
+    terse_field_ref as __terse_field_ref,
+    union_field_ref as __union_field_ref,
+    get_union_field_value as __get_union_field_value,
+)
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+
+
+
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass EnumMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h" namespace "::test::fixtures::enums":
+    cdef cppclass cMetasyntactic "::test::fixtures::enums::Metasyntactic":
+        pass
+
+    cdef cppclass cMyEnum1 "::test::fixtures::enums::MyEnum1":
+        pass
+
+    cdef cppclass cMyEnum2 "::test::fixtures::enums::MyEnum2":
+        pass
+
+    cdef cppclass cMyEnum3 "::test::fixtures::enums::MyEnum3":
+        pass
+
+    cdef cppclass cMyEnum4 "::test::fixtures::enums::MyEnum4":
+        pass
+
+    cdef cppclass cMyBitmaskEnum1 "::test::fixtures::enums::MyBitmaskEnum1":
+        pass
+
+    cdef cppclass cMyBitmaskEnum2 "::test::fixtures::enums::MyBitmaskEnum2":
+        pass
+
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass ExceptionMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass StructMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::enums":
+
+    cdef cppclass cSomeStruct "::test::fixtures::enums::SomeStruct":
+        cSomeStruct() except +
+        cSomeStruct(const cSomeStruct&) except +
+        bint operator==(cSomeStruct&)
+        bint operator!=(cSomeStruct&)
+        bint operator<(cSomeStruct&)
+        bint operator>(cSomeStruct&)
+        bint operator<=(cSomeStruct&)
+        bint operator>=(cSomeStruct&)
+        __field_ref[cMetasyntactic] reasonable_ref "reasonable_ref" ()
+        __field_ref[cMetasyntactic] fine_ref "fine_ref" ()
+        __field_ref[cMetasyntactic] questionable_ref "questionable_ref" ()
+        __field_ref[cset[cint32_t]] tags_ref "tags_ref" ()
+
+
+    cdef cppclass cMyStruct "::test::fixtures::enums::MyStruct":
+        cMyStruct() except +
+        cMyStruct(const cMyStruct&) except +
+        bint operator==(cMyStruct&)
+        bint operator!=(cMyStruct&)
+        bint operator<(cMyStruct&)
+        bint operator>(cMyStruct&)
+        bint operator<=(cMyStruct&)
+        bint operator>=(cMyStruct&)
+        __field_ref[cMyEnum2] me2_3_ref "me2_3_ref" ()
+        __field_ref[cMyEnum3] me3_n3_ref "me3_n3_ref" ()
+        __field_ref[cMyEnum1] me1_t1_ref "me1_t1_ref" ()
+        __field_ref[cMyEnum1] me1_t2_ref "me1_t2_ref" ()
+

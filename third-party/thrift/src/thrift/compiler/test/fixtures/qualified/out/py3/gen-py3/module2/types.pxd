@@ -33,8 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport module0.types as _module0_types
-cimport module1.types as _module1_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -43,53 +41,22 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport module0.types as _module0_types
+cimport module0.cbindings as _module0_cbindings
+cimport module1.types as _module1_types
+cimport module1.cbindings as _module1_cbindings
+
+cimport module2.types as _fbthrift_types
 cimport module2.types_fields as _fbthrift_types_fields
+cimport module2.cbindings as _module2_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/qualified/gen-py3/module2/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_types_custom_protocol.h" namespace "::module2":
-
-    cdef cppclass cStruct "::module2::Struct":
-        cStruct() except +
-        cStruct(const cStruct&) except +
-        bint operator==(cStruct&)
-        bint operator!=(cStruct&)
-        bint operator<(cStruct&)
-        bint operator>(cStruct&)
-        bint operator<=(cStruct&)
-        bint operator>=(cStruct&)
-        __field_ref[_module0_types.cStruct] first_ref "first_ref" ()
-        __field_ref[_module1_types.cStruct] second_ref "second_ref" ()
-
-
-    cdef cppclass cBigStruct "::module2::BigStruct":
-        cBigStruct() except +
-        cBigStruct(const cBigStruct&) except +
-        bint operator==(cBigStruct&)
-        bint operator!=(cBigStruct&)
-        bint operator<(cBigStruct&)
-        bint operator>(cBigStruct&)
-        bint operator<=(cBigStruct&)
-        bint operator>=(cBigStruct&)
-        __field_ref[cStruct] s_ref "s_ref" ()
-        __field_ref[cint32_t] id_ref "id_ref" ()
-
-
-
-
 cdef class Struct(thrift.py3.types.Struct):
-    cdef shared_ptr[cStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module2_cbindings.cStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Struct_FieldsSetter _fields_setter
     cdef inline object first_impl(self)
     cdef inline object second_impl(self)
@@ -97,23 +64,19 @@ cdef class Struct(thrift.py3.types.Struct):
     cdef _module1_types.Struct __fbthrift_cached_second
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module2_cbindings.cStruct])
 
 
 
 cdef class BigStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cBigStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module2_cbindings.cBigStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__BigStruct_FieldsSetter _fields_setter
     cdef inline object s_impl(self)
     cdef inline object id_impl(self)
     cdef Struct __fbthrift_cached_s
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBigStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module2_cbindings.cBigStruct])
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/qualified/gen-cpp2/module2_constants.h" namespace "::module2":
-    cdef cStruct cc2 "::module2::module2_constants::c2"()
-    cdef cStruct cc3 "::module2::module2_constants::c3"()
-    cdef cStruct cc4 "::module2::module2_constants::c4"()

@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,35 +41,36 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__FooStreamEx_FieldsSetterFunc)(__FooStreamEx_FieldsSetter, object) except *
 
 cdef class __FooStreamEx_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFooStreamEx* _struct_cpp_obj
+    cdef _module_cbindings.cFooStreamEx* _struct_cpp_obj
     cdef cumap[__cstring_view, __FooStreamEx_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FooStreamEx_FieldsSetter _fbthrift_create(_module_types.cFooStreamEx* struct_cpp_obj)
+    cdef __FooStreamEx_FieldsSetter _fbthrift_create(_module_cbindings.cFooStreamEx* struct_cpp_obj)
 
 
 ctypedef void (*__FooEx_FieldsSetterFunc)(__FooEx_FieldsSetter, object) except *
 
 cdef class __FooEx_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFooEx* _struct_cpp_obj
+    cdef _module_cbindings.cFooEx* _struct_cpp_obj
     cdef cumap[__cstring_view, __FooEx_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FooEx_FieldsSetter _fbthrift_create(_module_types.cFooEx* struct_cpp_obj)
+    cdef __FooEx_FieldsSetter _fbthrift_create(_module_cbindings.cFooEx* struct_cpp_obj)
 
 
 ctypedef void (*__FooEx2_FieldsSetterFunc)(__FooEx2_FieldsSetter, object) except *
 
 cdef class __FooEx2_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFooEx2* _struct_cpp_obj
+    cdef _module_cbindings.cFooEx2* _struct_cpp_obj
     cdef cumap[__cstring_view, __FooEx2_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FooEx2_FieldsSetter _fbthrift_create(_module_types.cFooEx2* struct_cpp_obj)
+    cdef __FooEx2_FieldsSetter _fbthrift_create(_module_cbindings.cFooEx2* struct_cpp_obj)
 

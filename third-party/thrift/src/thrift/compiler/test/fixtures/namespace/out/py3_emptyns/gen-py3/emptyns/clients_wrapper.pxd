@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport emptyns.types as _emptyns_types
+cimport emptyns.cbindings as _emptyns_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_clients.h" namespace "::cpp2":

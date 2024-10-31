@@ -50,9 +50,11 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+cimport test.fixtures.interactions.module.cbindings as _test_fixtures_interactions_module_cbindings
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 cimport test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 import test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
@@ -131,9 +133,9 @@ cdef void MyService_MyInteraction_frobnicate_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
+    if result.hasException[_test_fixtures_interactions_module_cbindings.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_cbindings.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -281,9 +283,9 @@ cdef void Factories_MyInteraction_frobnicate_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
+    if result.hasException[_test_fixtures_interactions_module_cbindings.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_cbindings.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -392,9 +394,9 @@ cdef void Perform_MyInteraction_frobnicate_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
+    if result.hasException[_test_fixtures_interactions_module_cbindings.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_cbindings.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -486,7 +488,7 @@ cdef void Perform_SerialInteraction_frobnicate_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void InteractWithShared_do_some_similar_things_callback(
-    cFollyTry[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]&& result,
+    cFollyTry[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -494,7 +496,7 @@ cdef void InteractWithShared_do_some_similar_things_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -503,9 +505,9 @@ cdef void InteractWithShared_MyInteraction_frobnicate_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_test_fixtures_interactions_module_types.cCustomException]():
+    if result.hasException[_test_fixtures_interactions_module_cbindings.cCustomException]():
         try:
-            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_types.cCustomException](result.exception()))
+            exc = _test_fixtures_interactions_module_types.CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_test_fixtures_interactions_module_cbindings.cCustomException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -558,7 +560,7 @@ cdef void InteractWithShared_SharedInteraction_init_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void InteractWithShared_SharedInteraction_do_something_callback(
-    cFollyTry[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]&& result,
+    cFollyTry[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -566,7 +568,7 @@ cdef void InteractWithShared_SharedInteraction_do_something_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_another_interactions_shared_types.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -1296,7 +1298,7 @@ cdef class InteractWithShared(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
             self._executor,
             down_cast_ptr[cInteractWithSharedClientWrapper, cClientWrapper](self._client.get()).do_some_similar_things(rpc_options._cpp_obj, 
             ),
@@ -1388,7 +1390,7 @@ cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](
+        bridgeFutureWith[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](
             self._executor,
             down_cast_ptr[cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper, cClientWrapper](self._client.get()).do_something(rpc_options._cpp_obj, 
             ),

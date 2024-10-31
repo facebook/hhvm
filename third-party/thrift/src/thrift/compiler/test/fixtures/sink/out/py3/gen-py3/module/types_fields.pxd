@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,82 +41,83 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__InitialResponse_FieldsSetterFunc)(__InitialResponse_FieldsSetter, object) except *
 
 cdef class __InitialResponse_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cInitialResponse* _struct_cpp_obj
+    cdef _module_cbindings.cInitialResponse* _struct_cpp_obj
     cdef cumap[__cstring_view, __InitialResponse_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __InitialResponse_FieldsSetter _fbthrift_create(_module_types.cInitialResponse* struct_cpp_obj)
+    cdef __InitialResponse_FieldsSetter _fbthrift_create(_module_cbindings.cInitialResponse* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__FinalResponse_FieldsSetterFunc)(__FinalResponse_FieldsSetter, object) except *
 
 cdef class __FinalResponse_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFinalResponse* _struct_cpp_obj
+    cdef _module_cbindings.cFinalResponse* _struct_cpp_obj
     cdef cumap[__cstring_view, __FinalResponse_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FinalResponse_FieldsSetter _fbthrift_create(_module_types.cFinalResponse* struct_cpp_obj)
+    cdef __FinalResponse_FieldsSetter _fbthrift_create(_module_cbindings.cFinalResponse* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__SinkPayload_FieldsSetterFunc)(__SinkPayload_FieldsSetter, object) except *
 
 cdef class __SinkPayload_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cSinkPayload* _struct_cpp_obj
+    cdef _module_cbindings.cSinkPayload* _struct_cpp_obj
     cdef cumap[__cstring_view, __SinkPayload_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __SinkPayload_FieldsSetter _fbthrift_create(_module_types.cSinkPayload* struct_cpp_obj)
+    cdef __SinkPayload_FieldsSetter _fbthrift_create(_module_cbindings.cSinkPayload* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__CompatibleWithKeywordSink_FieldsSetterFunc)(__CompatibleWithKeywordSink_FieldsSetter, object) except *
 
 cdef class __CompatibleWithKeywordSink_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cCompatibleWithKeywordSink* _struct_cpp_obj
+    cdef _module_cbindings.cCompatibleWithKeywordSink* _struct_cpp_obj
     cdef cumap[__cstring_view, __CompatibleWithKeywordSink_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __CompatibleWithKeywordSink_FieldsSetter _fbthrift_create(_module_types.cCompatibleWithKeywordSink* struct_cpp_obj)
+    cdef __CompatibleWithKeywordSink_FieldsSetter _fbthrift_create(_module_cbindings.cCompatibleWithKeywordSink* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__InitialException_FieldsSetterFunc)(__InitialException_FieldsSetter, object) except *
 
 cdef class __InitialException_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cInitialException* _struct_cpp_obj
+    cdef _module_cbindings.cInitialException* _struct_cpp_obj
     cdef cumap[__cstring_view, __InitialException_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __InitialException_FieldsSetter _fbthrift_create(_module_types.cInitialException* struct_cpp_obj)
+    cdef __InitialException_FieldsSetter _fbthrift_create(_module_cbindings.cInitialException* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__SinkException1_FieldsSetterFunc)(__SinkException1_FieldsSetter, object) except *
 
 cdef class __SinkException1_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cSinkException1* _struct_cpp_obj
+    cdef _module_cbindings.cSinkException1* _struct_cpp_obj
     cdef cumap[__cstring_view, __SinkException1_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __SinkException1_FieldsSetter _fbthrift_create(_module_types.cSinkException1* struct_cpp_obj)
+    cdef __SinkException1_FieldsSetter _fbthrift_create(_module_cbindings.cSinkException1* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__SinkException2_FieldsSetterFunc)(__SinkException2_FieldsSetter, object) except *
 
 cdef class __SinkException2_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cSinkException2* _struct_cpp_obj
+    cdef _module_cbindings.cSinkException2* _struct_cpp_obj
     cdef cumap[__cstring_view, __SinkException2_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __SinkException2_FieldsSetter _fbthrift_create(_module_types.cSinkException2* struct_cpp_obj)
+    cdef __SinkException2_FieldsSetter _fbthrift_create(_module_cbindings.cSinkException2* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

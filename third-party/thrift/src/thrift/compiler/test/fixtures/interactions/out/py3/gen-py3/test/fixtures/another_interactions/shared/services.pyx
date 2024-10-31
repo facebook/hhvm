@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
 import test.fixtures.another_interactions.shared.services_reflection as _services_reflection
@@ -70,18 +71,18 @@ from test.fixtures.another_interactions.shared.services_wrapper cimport cInterac
 
 
 @cython.auto_pickle(False)
-cdef class Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult:
-    cdef cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]]* cPromise
+cdef class Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult:
+    cdef cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]](cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]](cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]] cPromise):
-        cdef Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult inst = Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult.__new__(Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]] cPromise):
+        cdef Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult inst = Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult.__new__(Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 

@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport a.types as _fbthrift_ctypes
+cimport a.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cA] A_convert_to_cpp(object inst) except*
-cdef object A_from_cpp(const shared_ptr[_fbthrift_ctypes.cA]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cA] A_convert_to_cpp(object inst) except*
+cdef object A_from_cpp(const shared_ptr[_fbthrift_cbindings.cA]& c_struct)
 

@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,19 +40,21 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
 
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 
 
 
 ctypedef void (*__Included_FieldsSetterFunc)(__Included_FieldsSetter, object) except *
 
 cdef class __Included_FieldsSetter(__StructFieldsSetter):
-    cdef _includes_types.cIncluded* _struct_cpp_obj
+    cdef _includes_cbindings.cIncluded* _struct_cpp_obj
     cdef cumap[__cstring_view, __Included_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Included_FieldsSetter _fbthrift_create(_includes_types.cIncluded* struct_cpp_obj)
+    cdef __Included_FieldsSetter _fbthrift_create(_includes_cbindings.cIncluded* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 

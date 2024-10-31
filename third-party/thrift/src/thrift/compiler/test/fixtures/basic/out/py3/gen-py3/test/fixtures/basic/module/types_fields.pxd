@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 
 
 
 ctypedef void (*__MyStruct_FieldsSetterFunc)(__MyStruct_FieldsSetter, object) except *
 
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cMyStruct* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cMyStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyStruct_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyStruct* struct_cpp_obj)
+    cdef __MyStruct_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -65,11 +67,11 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__Containers_FieldsSetterFunc)(__Containers_FieldsSetter, object) except *
 
 cdef class __Containers_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cContainers* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cContainers* _struct_cpp_obj
     cdef cumap[__cstring_view, __Containers_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Containers_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cContainers* struct_cpp_obj)
+    cdef __Containers_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cContainers* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -78,21 +80,21 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__MyDataItem_FieldsSetterFunc)(__MyDataItem_FieldsSetter, object) except *
 
 cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cMyDataItem* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cMyDataItem* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyDataItem_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyDataItem_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyDataItem* struct_cpp_obj)
+    cdef __MyDataItem_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyDataItem* struct_cpp_obj)
 
 
 ctypedef void (*__MyException_FieldsSetterFunc)(__MyException_FieldsSetter, object) except *
 
 cdef class __MyException_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cMyException* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cMyException* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyException_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyException* struct_cpp_obj)
+    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyException* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -102,11 +104,11 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__MyExceptionWithMessage_FieldsSetterFunc)(__MyExceptionWithMessage_FieldsSetter, object) except *
 
 cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cMyExceptionWithMessage* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cMyExceptionWithMessage* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyExceptionWithMessage_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyExceptionWithMessage_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyExceptionWithMessage* struct_cpp_obj)
+    cdef __MyExceptionWithMessage_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -116,10 +118,10 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__ReservedKeyword_FieldsSetterFunc)(__ReservedKeyword_FieldsSetter, object) except *
 
 cdef class __ReservedKeyword_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_basic_module_types.cReservedKeyword* _struct_cpp_obj
+    cdef _test_fixtures_basic_module_cbindings.cReservedKeyword* _struct_cpp_obj
     cdef cumap[__cstring_view, __ReservedKeyword_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __ReservedKeyword_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cReservedKeyword* struct_cpp_obj)
+    cdef __ReservedKeyword_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cReservedKeyword* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

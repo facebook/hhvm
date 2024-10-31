@@ -4,40 +4,196 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-from module.types cimport (
-    cComplexUnion,
-    cComplexUnion__type,
-    cComplexUnion__type___EMPTY__,
-    cComplexUnion__type_intValue,
-    cComplexUnion__type_stringValue,
-    cComplexUnion__type_intListValue,
-    cComplexUnion__type_stringListValue,
-    cComplexUnion__type_typedefValue,
-    cComplexUnion__type_stringRef,
-    cListUnion,
-    cListUnion__type,
-    cListUnion__type___EMPTY__,
-    cListUnion__type_intListValue,
-    cListUnion__type_stringListValue,
-    cDataUnion,
-    cDataUnion__type,
-    cDataUnion__type___EMPTY__,
-    cDataUnion__type_binaryData,
-    cDataUnion__type_stringData,
-    cVal,
-    cValUnion,
-    cValUnion__type,
-    cValUnion__type___EMPTY__,
-    cValUnion__type_v1,
-    cValUnion__type_v2,
-    cVirtualComplexUnion,
-    cVirtualComplexUnion__type,
-    cVirtualComplexUnion__type___EMPTY__,
-    cVirtualComplexUnion__type_thingOne,
-    cVirtualComplexUnion__type_thingTwo,
-    cNonCopyableStruct,
-    cNonCopyableUnion,
-    cNonCopyableUnion__type,
-    cNonCopyableUnion__type___EMPTY__,
-    cNonCopyableUnion__type_s,
-    )
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+    uint16_t as cuint16_t,
+    uint32_t as cuint32_t,
+)
+from libcpp.string cimport string
+from libcpp cimport bool as cbool, nullptr, nullptr_t
+from cpython cimport bool as pbool
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap, pair as cpair
+from libcpp.unordered_map cimport unordered_map as cumap
+cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
+from thrift.py3.types cimport (
+    bstring,
+    field_ref as __field_ref,
+    optional_field_ref as __optional_field_ref,
+    required_field_ref as __required_field_ref,
+    terse_field_ref as __terse_field_ref,
+    union_field_ref as __union_field_ref,
+    get_union_field_value as __get_union_field_value,
+)
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+
+
+
+cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass ExceptionMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass StructMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+    cdef enum cComplexUnion__type "::cpp2::ComplexUnion::Type":
+        cComplexUnion__type___EMPTY__ "::cpp2::ComplexUnion::Type::__EMPTY__",
+        cComplexUnion__type_intValue "::cpp2::ComplexUnion::Type::intValue",
+        cComplexUnion__type_stringValue "::cpp2::ComplexUnion::Type::stringValue",
+        cComplexUnion__type_intListValue "::cpp2::ComplexUnion::Type::intListValue",
+        cComplexUnion__type_stringListValue "::cpp2::ComplexUnion::Type::stringListValue",
+        cComplexUnion__type_typedefValue "::cpp2::ComplexUnion::Type::typedefValue",
+        cComplexUnion__type_stringRef "::cpp2::ComplexUnion::Type::stringRef",
+
+    cdef cppclass cComplexUnion "::cpp2::ComplexUnion":
+        cComplexUnion() except +
+        cComplexUnion(const cComplexUnion&) except +
+        bint operator==(cComplexUnion&)
+        bint operator!=(cComplexUnion&)
+        bint operator<(cComplexUnion&)
+        bint operator>(cComplexUnion&)
+        bint operator<=(cComplexUnion&)
+        bint operator>=(cComplexUnion&)
+        cComplexUnion__type getType() const
+        const cint64_t& get_intValue "get_intValue" () const
+        cint64_t& set_intValue "set_intValue" (const cint64_t&)
+        const string& get_stringValue "get_stringValue" () const
+        string& set_stringValue "set_stringValue" (const string&)
+        const vector[cint64_t]& get_intListValue "get_intListValue" () const
+        vector[cint64_t]& set_intListValue "set_intListValue" (const vector[cint64_t]&)
+        const vector[string]& get_stringListValue "get_stringListValue" () const
+        vector[string]& set_stringListValue "set_stringListValue" (const vector[string]&)
+        const cmap[cint16_t,string]& get_typedefValue "get_typedefValue" () const
+        cmap[cint16_t,string]& set_typedefValue "set_typedefValue" (const cmap[cint16_t,string]&)
+        const unique_ptr[string]& get_stringRef "get_stringRef" () const
+        unique_ptr[string]& set_stringRef "set_stringRef" (const string&)
+
+    cdef enum cListUnion__type "::cpp2::ListUnion::Type":
+        cListUnion__type___EMPTY__ "::cpp2::ListUnion::Type::__EMPTY__",
+        cListUnion__type_intListValue "::cpp2::ListUnion::Type::intListValue",
+        cListUnion__type_stringListValue "::cpp2::ListUnion::Type::stringListValue",
+
+    cdef cppclass cListUnion "::cpp2::ListUnion":
+        cListUnion() except +
+        cListUnion(const cListUnion&) except +
+        bint operator==(cListUnion&)
+        bint operator!=(cListUnion&)
+        bint operator<(cListUnion&)
+        bint operator>(cListUnion&)
+        bint operator<=(cListUnion&)
+        bint operator>=(cListUnion&)
+        cListUnion__type getType() const
+        const vector[cint64_t]& get_intListValue "get_intListValue" () const
+        vector[cint64_t]& set_intListValue "set_intListValue" (const vector[cint64_t]&)
+        const vector[string]& get_stringListValue "get_stringListValue" () const
+        vector[string]& set_stringListValue "set_stringListValue" (const vector[string]&)
+
+    cdef enum cDataUnion__type "::cpp2::DataUnion::Type":
+        cDataUnion__type___EMPTY__ "::cpp2::DataUnion::Type::__EMPTY__",
+        cDataUnion__type_binaryData "::cpp2::DataUnion::Type::binaryData",
+        cDataUnion__type_stringData "::cpp2::DataUnion::Type::stringData",
+
+    cdef cppclass cDataUnion "::cpp2::DataUnion":
+        cDataUnion() except +
+        cDataUnion(const cDataUnion&) except +
+        bint operator==(cDataUnion&)
+        bint operator!=(cDataUnion&)
+        bint operator<(cDataUnion&)
+        bint operator>(cDataUnion&)
+        bint operator<=(cDataUnion&)
+        bint operator>=(cDataUnion&)
+        cDataUnion__type getType() const
+        const string& get_binaryData "get_binaryData" () const
+        string& set_binaryData "set_binaryData" (const string&)
+        const string& get_stringData "get_stringData" () const
+        string& set_stringData "set_stringData" (const string&)
+
+
+    cdef cppclass cVal "::cpp2::Val":
+        cVal() except +
+        cVal(const cVal&) except +
+        bint operator==(cVal&)
+        bint operator!=(cVal&)
+        bint operator<(cVal&)
+        bint operator>(cVal&)
+        bint operator<=(cVal&)
+        bint operator>=(cVal&)
+        __field_ref[string] strVal_ref "strVal_ref" ()
+        __field_ref[cint32_t] intVal_ref "intVal_ref" ()
+        __field_ref[cmap[cint16_t,string]] typedefValue_ref "typedefValue_ref" ()
+
+    cdef enum cValUnion__type "::cpp2::ValUnion::Type":
+        cValUnion__type___EMPTY__ "::cpp2::ValUnion::Type::__EMPTY__",
+        cValUnion__type_v1 "::cpp2::ValUnion::Type::v1",
+        cValUnion__type_v2 "::cpp2::ValUnion::Type::v2",
+
+    cdef cppclass cValUnion "::cpp2::ValUnion":
+        cValUnion() except +
+        cValUnion(const cValUnion&) except +
+        bint operator==(cValUnion&)
+        bint operator!=(cValUnion&)
+        bint operator<(cValUnion&)
+        bint operator>(cValUnion&)
+        bint operator<=(cValUnion&)
+        bint operator>=(cValUnion&)
+        cValUnion__type getType() const
+        const cVal& get_v1 "get_v1" () const
+        cVal& set_v1 "set_v1" (const cVal&)
+        const cVal& get_v2 "get_v2" () const
+        cVal& set_v2 "set_v2" (const cVal&)
+
+    cdef enum cVirtualComplexUnion__type "::cpp2::VirtualComplexUnion::Type":
+        cVirtualComplexUnion__type___EMPTY__ "::cpp2::VirtualComplexUnion::Type::__EMPTY__",
+        cVirtualComplexUnion__type_thingOne "::cpp2::VirtualComplexUnion::Type::thingOne",
+        cVirtualComplexUnion__type_thingTwo "::cpp2::VirtualComplexUnion::Type::thingTwo",
+
+    cdef cppclass cVirtualComplexUnion "::cpp2::VirtualComplexUnion":
+        cVirtualComplexUnion() except +
+        cVirtualComplexUnion(const cVirtualComplexUnion&) except +
+        bint operator==(cVirtualComplexUnion&)
+        bint operator!=(cVirtualComplexUnion&)
+        bint operator<(cVirtualComplexUnion&)
+        bint operator>(cVirtualComplexUnion&)
+        bint operator<=(cVirtualComplexUnion&)
+        bint operator>=(cVirtualComplexUnion&)
+        cVirtualComplexUnion__type getType() const
+        const string& get_thingOne "get_thingOne" () const
+        string& set_thingOne "set_thingOne" (const string&)
+        const string& get_thingTwo "get_thingTwo" () const
+        string& set_thingTwo "set_thingTwo" (const string&)
+
+
+    cdef cppclass cNonCopyableStruct "::cpp2::NonCopyableStruct":
+        cNonCopyableStruct() except +
+        bint operator==(cNonCopyableStruct&)
+        bint operator!=(cNonCopyableStruct&)
+        bint operator<(cNonCopyableStruct&)
+        bint operator>(cNonCopyableStruct&)
+        bint operator<=(cNonCopyableStruct&)
+        bint operator>=(cNonCopyableStruct&)
+        __field_ref[cint64_t] num_ref "num_ref" ()
+
+    cdef enum cNonCopyableUnion__type "::cpp2::NonCopyableUnion::Type":
+        cNonCopyableUnion__type___EMPTY__ "::cpp2::NonCopyableUnion::Type::__EMPTY__",
+        cNonCopyableUnion__type_s "::cpp2::NonCopyableUnion::Type::s",
+
+    cdef cppclass cNonCopyableUnion "::cpp2::NonCopyableUnion":
+        cNonCopyableUnion() except +
+        bint operator==(cNonCopyableUnion&)
+        bint operator!=(cNonCopyableUnion&)
+        bint operator<(cNonCopyableUnion&)
+        bint operator>(cNonCopyableUnion&)
+        bint operator<=(cNonCopyableUnion&)
+        bint operator>=(cNonCopyableUnion&)
+        cNonCopyableUnion__type getType() const
+        const cNonCopyableStruct& get_s "get_s" () const
+        cNonCopyableStruct& set_s "set_s" (const cNonCopyableStruct&)
+

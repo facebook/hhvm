@@ -187,4 +187,4 @@ cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_insta
 
 
 
-TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cTEST_MAP()))
+TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cTEST_MAP()))

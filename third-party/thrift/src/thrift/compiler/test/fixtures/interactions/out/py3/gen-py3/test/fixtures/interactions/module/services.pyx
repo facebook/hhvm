@@ -56,11 +56,13 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+cimport test.fixtures.interactions.module.cbindings as _test_fixtures_interactions_module_cbindings
 import test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
 cimport test.fixtures.another_interactions.shared.services as _test_fixtures_another_interactions_shared_services
 import test.fixtures.another_interactions.shared.services as _test_fixtures_another_interactions_shared_services
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 
 import test.fixtures.interactions.module.services_reflection as _services_reflection
 cimport test.fixtures.interactions.module.services_reflection as _services_reflection
@@ -247,18 +249,18 @@ cdef class Promise_cint32_t:
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult:
-    cdef cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]]* cPromise
+cdef class Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult:
+    cdef cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]](cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]](cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]] cPromise):
-        cdef Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult inst = Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult.__new__(Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]] cPromise):
+        cdef Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult inst = Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult.__new__(Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -1120,9 +1122,9 @@ async def Perform_onStopRequested_coro(
 cdef api void call_cy_InteractWithShared_do_some_similar_things(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_types.cDoSomethingResult]] cPromise
+    cFollyPromise[unique_ptr[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult]] cPromise
 ) noexcept:
-    cdef Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult __promise = Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult._fbthrift_create(cmove(cPromise))
+    cdef Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult __promise = Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1156,7 +1158,7 @@ cdef api void call_cy_InteractWithShared_onStopRequested(
     )
 async def InteractWithShared_do_some_similar_things_coro(
     object self,
-    Promise__test_fixtures_another_interactions_shared_types_cDoSomethingResult promise
+    Promise__test_fixtures_another_interactions_shared_cbindings_cDoSomethingResult promise
 ):
     try:
         result = await self.do_some_similar_things()
@@ -1180,7 +1182,7 @@ async def InteractWithShared_do_some_similar_things_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](deref((<_test_fixtures_another_interactions_shared_types.DoSomethingResult?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](deref((<_test_fixtures_another_interactions_shared_types.DoSomethingResult?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def InteractWithShared_onStartServing_coro(
     object self,

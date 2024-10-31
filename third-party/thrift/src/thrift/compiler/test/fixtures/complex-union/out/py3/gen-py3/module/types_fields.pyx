@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Val_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Val_FieldsSetter _fbthrift_create(_module_types.cVal* struct_cpp_obj):
+    cdef __Val_FieldsSetter _fbthrift_create(_module_cbindings.cVal* struct_cpp_obj):
         cdef __Val_FieldsSetter __fbthrift_inst = __Val_FieldsSetter.__new__(__Val_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"strVal")] = __Val_FieldsSetter._set_field_0
@@ -51,7 +51,7 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field strVal
         if _fbthrift_value is None:
-            __reset_field[_module_types.cVal](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cVal](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'strVal is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field intVal
         if _fbthrift_value is None:
-            __reset_field[_module_types.cVal](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cVal](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'intVal is not a { int !r}.')
@@ -70,7 +70,7 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field typedefValue
         if _fbthrift_value is None:
-            __reset_field[_module_types.cVal](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cVal](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).typedefValue_ref().assign(deref(_module_types.Map__i16_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -79,7 +79,7 @@ cdef class __Val_FieldsSetter(__StructFieldsSetter):
 cdef class __NonCopyableStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __NonCopyableStruct_FieldsSetter _fbthrift_create(_module_types.cNonCopyableStruct* struct_cpp_obj):
+    cdef __NonCopyableStruct_FieldsSetter _fbthrift_create(_module_cbindings.cNonCopyableStruct* struct_cpp_obj):
         cdef __NonCopyableStruct_FieldsSetter __fbthrift_inst = __NonCopyableStruct_FieldsSetter.__new__(__NonCopyableStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"num")] = __NonCopyableStruct_FieldsSetter._set_field_0
@@ -95,7 +95,7 @@ cdef class __NonCopyableStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field num
         if _fbthrift_value is None:
-            __reset_field[_module_types.cNonCopyableStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cNonCopyableStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'num is not a { int !r}.')

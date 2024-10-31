@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport foo.types as _foo_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -42,110 +41,51 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport foo.types as _foo_types
+cimport foo.cbindings as _foo_cbindings
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFields "::cpp2::Fields":
-        cFields() except +
-        cFields(const cFields&) except +
-        bint operator==(cFields&)
-        bint operator!=(cFields&)
-        bint operator<(cFields&)
-        bint operator>(cFields&)
-        bint operator<=(cFields&)
-        bint operator>=(cFields&)
-        __field_ref[string] injected_field_ref "injected_field_ref" ()
-
-
-    cdef cppclass cFieldsInjectedToEmptyStruct "::cpp2::FieldsInjectedToEmptyStruct":
-        cFieldsInjectedToEmptyStruct() except +
-        cFieldsInjectedToEmptyStruct(const cFieldsInjectedToEmptyStruct&) except +
-        bint operator==(cFieldsInjectedToEmptyStruct&)
-        bint operator!=(cFieldsInjectedToEmptyStruct&)
-        bint operator<(cFieldsInjectedToEmptyStruct&)
-        bint operator>(cFieldsInjectedToEmptyStruct&)
-        bint operator<=(cFieldsInjectedToEmptyStruct&)
-        bint operator>=(cFieldsInjectedToEmptyStruct&)
-        __field_ref[string] injected_field_ref "injected_field_ref" ()
-
-
-    cdef cppclass cFieldsInjectedToStruct "::cpp2::FieldsInjectedToStruct":
-        cFieldsInjectedToStruct() except +
-        cFieldsInjectedToStruct(const cFieldsInjectedToStruct&) except +
-        bint operator==(cFieldsInjectedToStruct&)
-        bint operator!=(cFieldsInjectedToStruct&)
-        bint operator<(cFieldsInjectedToStruct&)
-        bint operator>(cFieldsInjectedToStruct&)
-        bint operator<=(cFieldsInjectedToStruct&)
-        bint operator>=(cFieldsInjectedToStruct&)
-        __field_ref[string] string_field_ref "string_field_ref" ()
-        __field_ref[string] injected_field_ref "injected_field_ref" ()
-
-
-    cdef cppclass cFieldsInjectedWithIncludedStruct "::cpp2::FieldsInjectedWithIncludedStruct":
-        cFieldsInjectedWithIncludedStruct() except +
-        cFieldsInjectedWithIncludedStruct(const cFieldsInjectedWithIncludedStruct&) except +
-        bint operator==(cFieldsInjectedWithIncludedStruct&)
-        bint operator!=(cFieldsInjectedWithIncludedStruct&)
-        bint operator<(cFieldsInjectedWithIncludedStruct&)
-        bint operator>(cFieldsInjectedWithIncludedStruct&)
-        bint operator<=(cFieldsInjectedWithIncludedStruct&)
-        bint operator>=(cFieldsInjectedWithIncludedStruct&)
-        __field_ref[string] string_field_ref "string_field_ref" ()
-        __field_ref[string] injected_field_ref "injected_field_ref" ()
-        __optional_field_ref[string] injected_structured_annotation_field_ref "injected_structured_annotation_field_ref" ()
-        __optional_field_ref[string] injected_unstructured_annotation_field_ref "injected_unstructured_annotation_field_ref" ()
-
-
-
-
 cdef class Fields(thrift.py3.types.Struct):
-    cdef shared_ptr[cFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Fields_FieldsSetter _fields_setter
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFields])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFields])
 
 
 
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedToEmptyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFieldsInjectedToEmptyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter _fields_setter
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToEmptyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedToEmptyStruct])
 
 
 
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedToStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFieldsInjectedToStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter _fields_setter
     cdef inline object string_field_impl(self)
     cdef inline object injected_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedToStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedToStruct])
 
 
 
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFieldsInjectedWithIncludedStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFieldsInjectedWithIncludedStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter _fields_setter
     cdef inline object string_field_impl(self)
     cdef inline object injected_field_impl(self)
@@ -153,7 +93,7 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     cdef inline object injected_unstructured_annotation_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFieldsInjectedWithIncludedStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFieldsInjectedWithIncludedStruct])
 
 
 

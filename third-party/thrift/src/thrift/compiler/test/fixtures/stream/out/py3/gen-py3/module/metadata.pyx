@@ -8,8 +8,10 @@
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move as cmove
 
-from apache.thrift.metadata.types cimport (
+from apache.thrift.metadata.cbindings cimport (
     cThriftMetadata,
+)
+from apache.thrift.metadata.types cimport (
     ThriftMetadata,
 )
 

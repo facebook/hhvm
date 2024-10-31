@@ -7,105 +7,105 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport apache.thrift.fixtures.types.module.types as _fbthrift_ctypes
+cimport apache.thrift.fixtures.types.module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cempty_struct] empty_struct_convert_to_cpp(object inst) except*
-cdef object empty_struct_from_cpp(const shared_ptr[_fbthrift_ctypes.cempty_struct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cempty_struct] empty_struct_convert_to_cpp(object inst) except*
+cdef object empty_struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cempty_struct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cdecorated_struct] decorated_struct_convert_to_cpp(object inst) except*
-cdef object decorated_struct_from_cpp(const shared_ptr[_fbthrift_ctypes.cdecorated_struct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cdecorated_struct] decorated_struct_convert_to_cpp(object inst) except*
+cdef object decorated_struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cdecorated_struct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cContainerStruct] ContainerStruct_convert_to_cpp(object inst) except*
-cdef object ContainerStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cContainerStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cContainerStruct] ContainerStruct_convert_to_cpp(object inst) except*
+cdef object ContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cContainerStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCppTypeStruct] CppTypeStruct_convert_to_cpp(object inst) except*
-cdef object CppTypeStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cCppTypeStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCppTypeStruct] CppTypeStruct_convert_to_cpp(object inst) except*
+cdef object CppTypeStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cCppTypeStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cVirtualStruct] VirtualStruct_convert_to_cpp(object inst) except*
-cdef object VirtualStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cVirtualStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cVirtualStruct] VirtualStruct_convert_to_cpp(object inst) except*
+cdef object VirtualStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cVirtualStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStructWithForwardRefEnum] MyStructWithForwardRefEnum_convert_to_cpp(object inst) except*
-cdef object MyStructWithForwardRefEnum_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStructWithForwardRefEnum]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyStructWithForwardRefEnum] MyStructWithForwardRefEnum_convert_to_cpp(object inst) except*
+cdef object MyStructWithForwardRefEnum_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStructWithForwardRefEnum]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cTrivialNumeric] TrivialNumeric_convert_to_cpp(object inst) except*
-cdef object TrivialNumeric_from_cpp(const shared_ptr[_fbthrift_ctypes.cTrivialNumeric]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cTrivialNumeric] TrivialNumeric_convert_to_cpp(object inst) except*
+cdef object TrivialNumeric_from_cpp(const shared_ptr[_fbthrift_cbindings.cTrivialNumeric]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cTrivialNestedWithDefault] TrivialNestedWithDefault_convert_to_cpp(object inst) except*
-cdef object TrivialNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_ctypes.cTrivialNestedWithDefault]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cTrivialNestedWithDefault] TrivialNestedWithDefault_convert_to_cpp(object inst) except*
+cdef object TrivialNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_cbindings.cTrivialNestedWithDefault]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexString] ComplexString_convert_to_cpp(object inst) except*
-cdef object ComplexString_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexString]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cComplexString] ComplexString_convert_to_cpp(object inst) except*
+cdef object ComplexString_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexString]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexNestedWithDefault] ComplexNestedWithDefault_convert_to_cpp(object inst) except*
-cdef object ComplexNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexNestedWithDefault]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cComplexNestedWithDefault] ComplexNestedWithDefault_convert_to_cpp(object inst) except*
+cdef object ComplexNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexNestedWithDefault]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMinPadding] MinPadding_convert_to_cpp(object inst) except*
-cdef object MinPadding_from_cpp(const shared_ptr[_fbthrift_ctypes.cMinPadding]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMinPadding] MinPadding_convert_to_cpp(object inst) except*
+cdef object MinPadding_from_cpp(const shared_ptr[_fbthrift_cbindings.cMinPadding]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMinPaddingWithCustomType] MinPaddingWithCustomType_convert_to_cpp(object inst) except*
-cdef object MinPaddingWithCustomType_from_cpp(const shared_ptr[_fbthrift_ctypes.cMinPaddingWithCustomType]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMinPaddingWithCustomType] MinPaddingWithCustomType_convert_to_cpp(object inst) except*
+cdef object MinPaddingWithCustomType_from_cpp(const shared_ptr[_fbthrift_cbindings.cMinPaddingWithCustomType]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
-cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
+cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMyDataItem] MyDataItem_convert_to_cpp(object inst) except*
-cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyDataItem]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyDataItem] MyDataItem_convert_to_cpp(object inst) except*
+cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyDataItem]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cRenaming] Renaming_convert_to_cpp(object inst) except*
-cdef object Renaming_from_cpp(const shared_ptr[_fbthrift_ctypes.cRenaming]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cRenaming] Renaming_convert_to_cpp(object inst) except*
+cdef object Renaming_from_cpp(const shared_ptr[_fbthrift_cbindings.cRenaming]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAnnotatedTypes] AnnotatedTypes_convert_to_cpp(object inst) except*
-cdef object AnnotatedTypes_from_cpp(const shared_ptr[_fbthrift_ctypes.cAnnotatedTypes]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAnnotatedTypes] AnnotatedTypes_convert_to_cpp(object inst) except*
+cdef object AnnotatedTypes_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnnotatedTypes]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cForwardUsageRoot] ForwardUsageRoot_convert_to_cpp(object inst) except*
-cdef object ForwardUsageRoot_from_cpp(const shared_ptr[_fbthrift_ctypes.cForwardUsageRoot]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cForwardUsageRoot] ForwardUsageRoot_convert_to_cpp(object inst) except*
+cdef object ForwardUsageRoot_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageRoot]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cForwardUsageStruct] ForwardUsageStruct_convert_to_cpp(object inst) except*
-cdef object ForwardUsageStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cForwardUsageStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cForwardUsageStruct] ForwardUsageStruct_convert_to_cpp(object inst) except*
+cdef object ForwardUsageStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cForwardUsageByRef] ForwardUsageByRef_convert_to_cpp(object inst) except*
-cdef object ForwardUsageByRef_from_cpp(const shared_ptr[_fbthrift_ctypes.cForwardUsageByRef]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cForwardUsageByRef] ForwardUsageByRef_convert_to_cpp(object inst) except*
+cdef object ForwardUsageByRef_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageByRef]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cIncompleteMap] IncompleteMap_convert_to_cpp(object inst) except*
-cdef object IncompleteMap_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncompleteMap]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cIncompleteMap] IncompleteMap_convert_to_cpp(object inst) except*
+cdef object IncompleteMap_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteMap]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cIncompleteMapDep] IncompleteMapDep_convert_to_cpp(object inst) except*
-cdef object IncompleteMapDep_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncompleteMapDep]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cIncompleteMapDep] IncompleteMapDep_convert_to_cpp(object inst) except*
+cdef object IncompleteMapDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteMapDep]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCompleteMap] CompleteMap_convert_to_cpp(object inst) except*
-cdef object CompleteMap_from_cpp(const shared_ptr[_fbthrift_ctypes.cCompleteMap]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCompleteMap] CompleteMap_convert_to_cpp(object inst) except*
+cdef object CompleteMap_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteMap]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCompleteMapDep] CompleteMapDep_convert_to_cpp(object inst) except*
-cdef object CompleteMapDep_from_cpp(const shared_ptr[_fbthrift_ctypes.cCompleteMapDep]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCompleteMapDep] CompleteMapDep_convert_to_cpp(object inst) except*
+cdef object CompleteMapDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteMapDep]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cIncompleteList] IncompleteList_convert_to_cpp(object inst) except*
-cdef object IncompleteList_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncompleteList]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cIncompleteList] IncompleteList_convert_to_cpp(object inst) except*
+cdef object IncompleteList_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteList]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cIncompleteListDep] IncompleteListDep_convert_to_cpp(object inst) except*
-cdef object IncompleteListDep_from_cpp(const shared_ptr[_fbthrift_ctypes.cIncompleteListDep]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cIncompleteListDep] IncompleteListDep_convert_to_cpp(object inst) except*
+cdef object IncompleteListDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteListDep]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCompleteList] CompleteList_convert_to_cpp(object inst) except*
-cdef object CompleteList_from_cpp(const shared_ptr[_fbthrift_ctypes.cCompleteList]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCompleteList] CompleteList_convert_to_cpp(object inst) except*
+cdef object CompleteList_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteList]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCompleteListDep] CompleteListDep_convert_to_cpp(object inst) except*
-cdef object CompleteListDep_from_cpp(const shared_ptr[_fbthrift_ctypes.cCompleteListDep]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCompleteListDep] CompleteListDep_convert_to_cpp(object inst) except*
+cdef object CompleteListDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteListDep]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAdaptedList] AdaptedList_convert_to_cpp(object inst) except*
-cdef object AdaptedList_from_cpp(const shared_ptr[_fbthrift_ctypes.cAdaptedList]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAdaptedList] AdaptedList_convert_to_cpp(object inst) except*
+cdef object AdaptedList_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedList]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cDependentAdaptedList] DependentAdaptedList_convert_to_cpp(object inst) except*
-cdef object DependentAdaptedList_from_cpp(const shared_ptr[_fbthrift_ctypes.cDependentAdaptedList]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cDependentAdaptedList] DependentAdaptedList_convert_to_cpp(object inst) except*
+cdef object DependentAdaptedList_from_cpp(const shared_ptr[_fbthrift_cbindings.cDependentAdaptedList]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAllocatorAware] AllocatorAware_convert_to_cpp(object inst) except*
-cdef object AllocatorAware_from_cpp(const shared_ptr[_fbthrift_ctypes.cAllocatorAware]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAllocatorAware] AllocatorAware_convert_to_cpp(object inst) except*
+cdef object AllocatorAware_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllocatorAware]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAllocatorAware2] AllocatorAware2_convert_to_cpp(object inst) except*
-cdef object AllocatorAware2_from_cpp(const shared_ptr[_fbthrift_ctypes.cAllocatorAware2]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAllocatorAware2] AllocatorAware2_convert_to_cpp(object inst) except*
+cdef object AllocatorAware2_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllocatorAware2]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cTypedefStruct] TypedefStruct_convert_to_cpp(object inst) except*
-cdef object TypedefStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cTypedefStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cTypedefStruct] TypedefStruct_convert_to_cpp(object inst) except*
+cdef object TypedefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cTypedefStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cStructWithDoubleUnderscores] StructWithDoubleUnderscores_convert_to_cpp(object inst) except*
-cdef object StructWithDoubleUnderscores_from_cpp(const shared_ptr[_fbthrift_ctypes.cStructWithDoubleUnderscores]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores] StructWithDoubleUnderscores_convert_to_cpp(object inst) except*
+cdef object StructWithDoubleUnderscores_from_cpp(const shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores]& c_struct)
 

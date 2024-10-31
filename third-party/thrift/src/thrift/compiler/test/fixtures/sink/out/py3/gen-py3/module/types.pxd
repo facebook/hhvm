@@ -41,176 +41,83 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/sink/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/sink/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cInitialResponse "::cpp2::InitialResponse":
-        cInitialResponse() except +
-        cInitialResponse(const cInitialResponse&) except +
-        bint operator==(cInitialResponse&)
-        bint operator!=(cInitialResponse&)
-        bint operator<(cInitialResponse&)
-        bint operator>(cInitialResponse&)
-        bint operator<=(cInitialResponse&)
-        bint operator>=(cInitialResponse&)
-        __field_ref[string] content_ref "content_ref" ()
-
-
-    cdef cppclass cFinalResponse "::cpp2::FinalResponse":
-        cFinalResponse() except +
-        cFinalResponse(const cFinalResponse&) except +
-        bint operator==(cFinalResponse&)
-        bint operator!=(cFinalResponse&)
-        bint operator<(cFinalResponse&)
-        bint operator>(cFinalResponse&)
-        bint operator<=(cFinalResponse&)
-        bint operator>=(cFinalResponse&)
-        __field_ref[string] content_ref "content_ref" ()
-
-
-    cdef cppclass cSinkPayload "::cpp2::SinkPayload":
-        cSinkPayload() except +
-        cSinkPayload(const cSinkPayload&) except +
-        bint operator==(cSinkPayload&)
-        bint operator!=(cSinkPayload&)
-        bint operator<(cSinkPayload&)
-        bint operator>(cSinkPayload&)
-        bint operator<=(cSinkPayload&)
-        bint operator>=(cSinkPayload&)
-        __field_ref[string] content_ref "content_ref" ()
-
-
-    cdef cppclass cCompatibleWithKeywordSink "::cpp2::CompatibleWithKeywordSink":
-        cCompatibleWithKeywordSink() except +
-        cCompatibleWithKeywordSink(const cCompatibleWithKeywordSink&) except +
-        bint operator==(cCompatibleWithKeywordSink&)
-        bint operator!=(cCompatibleWithKeywordSink&)
-        bint operator<(cCompatibleWithKeywordSink&)
-        bint operator>(cCompatibleWithKeywordSink&)
-        bint operator<=(cCompatibleWithKeywordSink&)
-        bint operator>=(cCompatibleWithKeywordSink&)
-        __field_ref[string] sink_ref "sink_ref" ()
-
-
-    cdef cppclass cInitialException "::cpp2::InitialException"(cTException):
-        cInitialException() except +
-        cInitialException(const cInitialException&) except +
-        bint operator==(cInitialException&)
-        bint operator!=(cInitialException&)
-        bint operator<(cInitialException&)
-        bint operator>(cInitialException&)
-        bint operator<=(cInitialException&)
-        bint operator>=(cInitialException&)
-        __field_ref[string] reason_ref "reason_ref" ()
-
-
-    cdef cppclass cSinkException1 "::cpp2::SinkException1"(cTException):
-        cSinkException1() except +
-        cSinkException1(const cSinkException1&) except +
-        bint operator==(cSinkException1&)
-        bint operator!=(cSinkException1&)
-        bint operator<(cSinkException1&)
-        bint operator>(cSinkException1&)
-        bint operator<=(cSinkException1&)
-        bint operator>=(cSinkException1&)
-        __field_ref[string] reason_ref "reason_ref" ()
-
-
-    cdef cppclass cSinkException2 "::cpp2::SinkException2"(cTException):
-        cSinkException2() except +
-        cSinkException2(const cSinkException2&) except +
-        bint operator==(cSinkException2&)
-        bint operator!=(cSinkException2&)
-        bint operator<(cSinkException2&)
-        bint operator>(cSinkException2&)
-        bint operator<=(cSinkException2&)
-        bint operator>=(cSinkException2&)
-        __field_ref[cint64_t] reason_ref "reason_ref" ()
-
-
-
-
 cdef class InitialResponse(thrift.py3.types.Struct):
-    cdef shared_ptr[cInitialResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cInitialResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__InitialResponse_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialResponse])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialResponse])
 
 
 
 cdef class FinalResponse(thrift.py3.types.Struct):
-    cdef shared_ptr[cFinalResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFinalResponse] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__FinalResponse_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFinalResponse])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFinalResponse])
 
 
 
 cdef class SinkPayload(thrift.py3.types.Struct):
-    cdef shared_ptr[cSinkPayload] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cSinkPayload] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkPayload_FieldsSetter _fields_setter
     cdef inline object content_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkPayload])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkPayload])
 
 
 
 cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompatibleWithKeywordSink] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cCompatibleWithKeywordSink] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompatibleWithKeywordSink_FieldsSetter _fields_setter
     cdef inline object sink_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompatibleWithKeywordSink])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCompatibleWithKeywordSink])
 
 
 
 cdef class InitialException(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cInitialException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cInitialException] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__InitialException_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cInitialException])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cInitialException])
 
 
 
 cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cSinkException1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cSinkException1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkException1_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException1])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException1])
 
 
 
 cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cSinkException2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cSinkException2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SinkException2_FieldsSetter _fields_setter
     cdef inline object reason_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSinkException2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSinkException2])
 
 
 

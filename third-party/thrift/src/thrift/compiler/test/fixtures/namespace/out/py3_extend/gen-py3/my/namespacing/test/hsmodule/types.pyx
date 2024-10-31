@@ -68,7 +68,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class HsFoo(thrift.py3.types.Struct):
     def __init__(HsFoo self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cHsFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_my_namespacing_test_hsmodule_cbindings.cHsFoo]()
         self._fields_setter = _fbthrift_types_fields.__HsFoo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -76,7 +76,7 @@ cdef class HsFoo(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef HsFoo __fbthrift_inst = HsFoo.__new__(HsFoo)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cHsFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_my_namespacing_test_hsmodule_cbindings.cHsFoo](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__HsFoo_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -91,7 +91,7 @@ cdef class HsFoo(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cHsFoo] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo] cpp_obj):
         __fbthrift_inst = <HsFoo>HsFoo.__new__(HsFoo)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -115,14 +115,14 @@ cdef class HsFoo(thrift.py3.types.Struct):
 
 
     def __copy__(HsFoo self):
-        cdef shared_ptr[cHsFoo] cpp_obj = make_shared[cHsFoo](
+        cdef shared_ptr[_my_namespacing_test_hsmodule_cbindings.cHsFoo] cpp_obj = make_shared[_my_namespacing_test_hsmodule_cbindings.cHsFoo](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return HsFoo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cHsFoo](
+        return __richcmp[_my_namespacing_test_hsmodule_cbindings.cHsFoo](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<HsFoo>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -135,7 +135,7 @@ cdef class HsFoo(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cHsFoo].gen(meta)
+        _my_namespacing_test_hsmodule_cbindings.StructMetadata[_my_namespacing_test_hsmodule_cbindings.cHsFoo].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -144,7 +144,7 @@ cdef class HsFoo(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cHsFoo](idx))
+        return __sv_to_str(__get_field_name_by_index[_my_namespacing_test_hsmodule_cbindings.cHsFoo](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -153,14 +153,14 @@ cdef class HsFoo(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(HsFoo self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cHsFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_my_namespacing_test_hsmodule_cbindings.cHsFoo](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(HsFoo self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cHsFoo]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_my_namespacing_test_hsmodule_cbindings.cHsFoo]()
         with nogil:
-            needed = serializer.cdeserialize[cHsFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_my_namespacing_test_hsmodule_cbindings.cHsFoo](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

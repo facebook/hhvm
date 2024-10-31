@@ -33,7 +33,7 @@ import test.fixtures.another_interactions.shared.types as _test_fixtures_another
 cdef class __DoSomethingResult_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __DoSomethingResult_FieldsSetter _fbthrift_create(_test_fixtures_another_interactions_shared_types.cDoSomethingResult* struct_cpp_obj):
+    cdef __DoSomethingResult_FieldsSetter _fbthrift_create(_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult* struct_cpp_obj):
         cdef __DoSomethingResult_FieldsSetter __fbthrift_inst = __DoSomethingResult_FieldsSetter.__new__(__DoSomethingResult_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"s_res")] = __DoSomethingResult_FieldsSetter._set_field_0
@@ -50,7 +50,7 @@ cdef class __DoSomethingResult_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field s_res
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f's_res is not a { str !r}.')
@@ -59,7 +59,7 @@ cdef class __DoSomethingResult_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field i_res
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_another_interactions_shared_types.cDoSomethingResult](deref(self._struct_cpp_obj), 1)
+            __reset_field[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'i_res is not a { int !r}.')

@@ -6,11 +6,12 @@
 #  @generated
 #
 
+cimport test.fixtures.another_interactions.shared.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cDoSomethingResult] DoSomethingResult_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cDoSomethingResult] DoSomethingResult_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.DoSomethingResult?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object DoSomethingResult_from_cpp(const shared_ptr[_fbthrift_ctypes.cDoSomethingResult]& c_struct):
+cdef object DoSomethingResult_from_cpp(const shared_ptr[_fbthrift_cbindings.cDoSomethingResult]& c_struct):
     return _fbthrift_ctypes.DoSomethingResult._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

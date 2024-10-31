@@ -601,6 +601,7 @@ class py3_mstch_type : public mstch_type {
         this,
         {
             {"type:modulePath", &py3_mstch_type::modulePath},
+            {"type:cbinding_path", &py3_mstch_type::cbinding_path},
             {"type:flat_name", &py3_mstch_type::flatName},
             {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
@@ -628,23 +629,23 @@ class py3_mstch_type : public mstch_type {
         this,
         {
             {"type:need_module_path?", &py3_mstch_type::need_module_path},
+            {"type:need_cbinding_path?", &py3_mstch_type::need_cbinding_path},
         });
   }
 
-  mstch::node need_module_path() {
-    if (!has_option("is_types_file")) {
-      return true;
-    }
-    if (const t_program* prog = type_->program()) {
-      if (prog != prog_) {
-        return true;
-      }
-    }
-    return false;
+  mstch::node need_module_path() { return need_import_path("is_types_file"); }
+
+  mstch::node need_cbinding_path() {
+    return need_import_path("is_cbindings_file");
   }
 
   mstch::node modulePath() {
-    return fmt::format("_{}", fmt::join(get_type_py3_namespace(), "_"));
+    return fmt::format("_{}", fmt::join(get_type_py3_namespace("types"), "_"));
+  }
+
+  mstch::node cbinding_path() {
+    return fmt::format(
+        "_{}", fmt::join(get_type_py3_namespace("cbindings"), "_"));
   }
 
   mstch::node flatName() { return cached_props_.flat_name(); }
@@ -720,10 +721,23 @@ class py3_mstch_type : public mstch_type {
     return prog_;
   }
 
-  std::vector<std::string> get_type_py3_namespace() const {
+  std::vector<std::string> get_type_py3_namespace(
+      const std::string& suffix) const {
     auto ns = get_py3_namespace_with_name(get_type_program());
-    ns.push_back("types");
+    ns.push_back(suffix);
     return ns;
+  }
+
+  bool need_import_path(const std::string& option) {
+    if (!has_option(option)) {
+      return true;
+    }
+    if (const t_program* prog = type_->program()) {
+      if (prog != prog_) {
+        return true;
+      }
+    }
+    return false;
   }
 
   std::vector<std::string> get_type_cpp2_namespace() const {
@@ -1284,7 +1298,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
         enum_member_union_field_names_validator::validate_union);
   }
 
-  enum class TypesFile { IsTypesFile, NotTypesFile };
+  enum class FileType { CBindingsFile, TypesFile, NotTypesFile };
 
  private:
   bool should_resolve_typedefs() const override { return true; }
@@ -1292,7 +1306,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
   void generate_init_files();
   void generate_file(
       const std::string& template_name,
-      TypesFile is_types_file,
+      FileType file_type,
       const std::filesystem::path& base);
   void generate_types();
   void generate_services();
@@ -1355,13 +1369,19 @@ std::filesystem::path t_mstch_py3_generator::package_to_path() {
 
 void t_mstch_py3_generator::generate_file(
     const std::string& template_name,
-    TypesFile is_types_file,
+    FileType file_type,
     const std::filesystem::path& base = {}) {
   t_program* program = get_program();
   const std::string& program_name = program->name();
 
   mstch_context_.set_or_erase_option(
-      is_types_file == TypesFile::IsTypesFile, "is_types_file", "");
+      (file_type == FileType::TypesFile) ||
+          (file_type == FileType::CBindingsFile),
+      "is_types_file",
+      "");
+
+  mstch_context_.set_or_erase_option(
+      file_type == FileType::CBindingsFile, "is_cbindings_file", "");
 
   std::shared_ptr<mstch_base> mstch_program =
       make_mstch_program_cached(program, mstch_context_);
@@ -1389,7 +1409,6 @@ void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> cythonFilesWithTypeContext{
       "types.pyx",
       "types.pxd",
-      "cbindings.pxd",
       "types.pyi",
   };
 
@@ -1415,31 +1434,33 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.cpp",
   };
 
+  generate_file("cbindings.pxd", FileType::CBindingsFile, generateRootPath_);
+
   if (has_option("enable_container_pickling_DO_NOT_USE")) {
-    generate_file("__init__.py", TypesFile::IsTypesFile, generateRootPath_);
+    generate_file("__init__.py", FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : converterFiles) {
-    generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
+    generate_file(file, FileType::TypesFile, generateRootPath_);
   }
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
   for (const auto& file : autoMigrateFilesWithTypeContext) {
-    generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
+    generate_file(file, FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : autoMigrateFilesNoTypeContext) {
-    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cythonFilesWithTypeContext) {
-    generate_file(file, TypesFile::IsTypesFile, generateRootPath_);
+    generate_file(file, FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : cppFilesWithTypeContext) {
-    generate_file(file, TypesFile::IsTypesFile);
+    generate_file(file, FileType::TypesFile);
   }
   for (const auto& file : cythonFilesNoTypeContext) {
-    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cppFilesWithNoTypeContext) {
-    generate_file(file, TypesFile::NotTypesFile);
+    generate_file(file, FileType::NotTypesFile);
   }
 }
 
@@ -1486,16 +1507,16 @@ void t_mstch_py3_generator::generate_services() {
   // - if auto_migrate isn't present, just generate all the normal files
 
   for (const auto& file : pythonFiles) {
-    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : normalCythonFiles) {
-    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cppFiles) {
-    generate_file(file, TypesFile::NotTypesFile);
+    generate_file(file, FileType::NotTypesFile);
   }
   for (const auto& file : cythonFiles) {
-    generate_file(file, TypesFile::NotTypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
 }
 

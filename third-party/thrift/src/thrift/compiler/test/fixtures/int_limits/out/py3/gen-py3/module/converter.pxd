@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cLimits] Limits_convert_to_cpp(object inst) except*
-cdef object Limits_from_cpp(const shared_ptr[_fbthrift_ctypes.cLimits]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cLimits] Limits_convert_to_cpp(object inst) except*
+cdef object Limits_from_cpp(const shared_ptr[_fbthrift_cbindings.cLimits]& c_struct)
 

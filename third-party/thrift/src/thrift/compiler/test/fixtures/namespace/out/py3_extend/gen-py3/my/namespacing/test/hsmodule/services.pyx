@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
+cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
 import my.namespacing.test.hsmodule.services_reflection as _services_reflection

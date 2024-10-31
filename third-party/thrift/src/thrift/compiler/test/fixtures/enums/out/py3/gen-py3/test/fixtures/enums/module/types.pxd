@@ -41,83 +41,18 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport test.fixtures.enums.module.types as _fbthrift_types
 cimport test.fixtures.enums.module.types_fields as _fbthrift_types_fields
+cimport test.fixtures.enums.module.cbindings as _test_fixtures_enums_module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/enums/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h" namespace "::test::fixtures::enums":
-    cdef cppclass cMetasyntactic "::test::fixtures::enums::Metasyntactic":
-        pass
-
-    cdef cppclass cMyEnum1 "::test::fixtures::enums::MyEnum1":
-        pass
-
-    cdef cppclass cMyEnum2 "::test::fixtures::enums::MyEnum2":
-        pass
-
-    cdef cppclass cMyEnum3 "::test::fixtures::enums::MyEnum3":
-        pass
-
-    cdef cppclass cMyEnum4 "::test::fixtures::enums::MyEnum4":
-        pass
-
-    cdef cppclass cMyBitmaskEnum1 "::test::fixtures::enums::MyBitmaskEnum1":
-        pass
-
-    cdef cppclass cMyBitmaskEnum2 "::test::fixtures::enums::MyBitmaskEnum2":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::enums":
-
-    cdef cppclass cSomeStruct "::test::fixtures::enums::SomeStruct":
-        cSomeStruct() except +
-        cSomeStruct(const cSomeStruct&) except +
-        bint operator==(cSomeStruct&)
-        bint operator!=(cSomeStruct&)
-        bint operator<(cSomeStruct&)
-        bint operator>(cSomeStruct&)
-        bint operator<=(cSomeStruct&)
-        bint operator>=(cSomeStruct&)
-        __field_ref[cMetasyntactic] reasonable_ref "reasonable_ref" ()
-        __field_ref[cMetasyntactic] fine_ref "fine_ref" ()
-        __field_ref[cMetasyntactic] questionable_ref "questionable_ref" ()
-        __field_ref[cset[cint32_t]] tags_ref "tags_ref" ()
-
-
-    cdef cppclass cMyStruct "::test::fixtures::enums::MyStruct":
-        cMyStruct() except +
-        cMyStruct(const cMyStruct&) except +
-        bint operator==(cMyStruct&)
-        bint operator!=(cMyStruct&)
-        bint operator<(cMyStruct&)
-        bint operator>(cMyStruct&)
-        bint operator<=(cMyStruct&)
-        bint operator>=(cMyStruct&)
-        __field_ref[cMyEnum2] me2_3_ref "me2_3_ref" ()
-        __field_ref[cMyEnum3] me3_n3_ref "me3_n3_ref" ()
-        __field_ref[cMyEnum1] me1_t1_ref "me1_t1_ref" ()
-        __field_ref[cMyEnum1] me1_t2_ref "me1_t2_ref" ()
-
-
-
 
 cdef class SomeStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cSomeStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_enums_module_cbindings.cSomeStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SomeStruct_FieldsSetter _fields_setter
     cdef inline object reasonable_impl(self)
     cdef inline object fine_impl(self)
@@ -129,12 +64,12 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef Set__i32 __fbthrift_cached_tags
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSomeStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cSomeStruct])
 
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_fixtures_enums_module_cbindings.cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object me2_3_impl(self)
     cdef inline object me3_n3_impl(self)
@@ -146,7 +81,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_me1_t2
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cMyStruct])
 
 
 cdef class Set__i32(thrift.py3.types.Set):

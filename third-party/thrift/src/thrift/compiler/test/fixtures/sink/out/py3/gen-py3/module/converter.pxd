@@ -7,27 +7,27 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cInitialResponse] InitialResponse_convert_to_cpp(object inst) except*
-cdef object InitialResponse_from_cpp(const shared_ptr[_fbthrift_ctypes.cInitialResponse]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cInitialResponse] InitialResponse_convert_to_cpp(object inst) except*
+cdef object InitialResponse_from_cpp(const shared_ptr[_fbthrift_cbindings.cInitialResponse]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFinalResponse] FinalResponse_convert_to_cpp(object inst) except*
-cdef object FinalResponse_from_cpp(const shared_ptr[_fbthrift_ctypes.cFinalResponse]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFinalResponse] FinalResponse_convert_to_cpp(object inst) except*
+cdef object FinalResponse_from_cpp(const shared_ptr[_fbthrift_cbindings.cFinalResponse]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSinkPayload] SinkPayload_convert_to_cpp(object inst) except*
-cdef object SinkPayload_from_cpp(const shared_ptr[_fbthrift_ctypes.cSinkPayload]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSinkPayload] SinkPayload_convert_to_cpp(object inst) except*
+cdef object SinkPayload_from_cpp(const shared_ptr[_fbthrift_cbindings.cSinkPayload]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cCompatibleWithKeywordSink] CompatibleWithKeywordSink_convert_to_cpp(object inst) except*
-cdef object CompatibleWithKeywordSink_from_cpp(const shared_ptr[_fbthrift_ctypes.cCompatibleWithKeywordSink]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCompatibleWithKeywordSink] CompatibleWithKeywordSink_convert_to_cpp(object inst) except*
+cdef object CompatibleWithKeywordSink_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompatibleWithKeywordSink]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cInitialException] InitialException_convert_to_cpp(object inst) except*
-cdef object InitialException_from_cpp(const shared_ptr[_fbthrift_ctypes.cInitialException]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cInitialException] InitialException_convert_to_cpp(object inst) except*
+cdef object InitialException_from_cpp(const shared_ptr[_fbthrift_cbindings.cInitialException]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSinkException1] SinkException1_convert_to_cpp(object inst) except*
-cdef object SinkException1_from_cpp(const shared_ptr[_fbthrift_ctypes.cSinkException1]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSinkException1] SinkException1_convert_to_cpp(object inst) except*
+cdef object SinkException1_from_cpp(const shared_ptr[_fbthrift_cbindings.cSinkException1]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSinkException2] SinkException2_convert_to_cpp(object inst) except*
-cdef object SinkException2_from_cpp(const shared_ptr[_fbthrift_ctypes.cSinkException2]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSinkException2] SinkException2_convert_to_cpp(object inst) except*
+cdef object SinkException2_from_cpp(const shared_ptr[_fbthrift_cbindings.cSinkException2]& c_struct)
 

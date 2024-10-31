@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_clients.h" namespace "::thrift::shared_interactions":
@@ -54,6 +55,6 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/shared/clie
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     cFollyFuture[cint32_t] init(cRpcOptions, )
-    cFollyFuture[_test_fixtures_another_interactions_shared_types.cDoSomethingResult] do_something(cRpcOptions, )
+    cFollyFuture[_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult] do_something(cRpcOptions, )
     cFollyFuture[cFollyUnit] tear_down(cRpcOptions, )
 

@@ -41,46 +41,23 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport transitive.types as _fbthrift_types
 cimport transitive.types_fields as _fbthrift_types_fields
+cimport transitive.cbindings as _transitive_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/transitive/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFoo "::cpp2::Foo":
-        cFoo() except +
-        cFoo(const cFoo&) except +
-        bint operator==(cFoo&)
-        bint operator!=(cFoo&)
-        bint operator<(cFoo&)
-        bint operator>(cFoo&)
-        bint operator<=(cFoo&)
-        bint operator>=(cFoo&)
-        __field_ref[cint64_t] a_ref "a_ref" ()
-
-
-
-
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_transitive_cbindings.cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_transitive_cbindings.cFoo])
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_constants.h" namespace "::cpp2":
-    cdef cFoo cExampleFoo "::cpp2::transitive_constants::ExampleFoo"()

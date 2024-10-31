@@ -4,38 +4,348 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-from module.types cimport (
-    cMyEnum,
-    cTypedEnum,
-    cMyUnion,
-    cMyUnion__type,
-    cMyUnion__type___EMPTY__,
-    cMyUnion__type_anInteger,
-    cMyUnion__type_aString,
-    cNonTriviallyDestructibleUnion,
-    cNonTriviallyDestructibleUnion__type,
-    cNonTriviallyDestructibleUnion__type___EMPTY__,
-    cNonTriviallyDestructibleUnion__type_int_field,
-    cMyField,
-    cMyStruct,
-    cStructWithUnion,
-    cRecursiveStruct,
-    cStructWithContainers,
-    cStructWithSharedConst,
-    cEmpty,
-    cStructWithRef,
-    cStructWithBox,
-    cStructWithInternBox,
-    cStructWithTerseInternBox,
-    cAdaptedStructWithInternBox,
-    cAdaptedStructWithTerseInternBox,
-    cStructWithRefTypeUnique,
-    cStructWithRefTypeShared,
-    cStructWithRefTypeSharedConst,
-    cStructWithRefAndAnnotCppNoexceptMoveCtor,
-    cStructWithString,
-    ckStructWithRef,
-ckStructWithRefTypeUnique,
-ckStructWithRefTypeShared,
-ckStructWithRefTypeSharedConst,
+from libc.stdint cimport (
+    int8_t as cint8_t,
+    int16_t as cint16_t,
+    int32_t as cint32_t,
+    int64_t as cint64_t,
+    uint16_t as cuint16_t,
+    uint32_t as cuint32_t,
 )
+from libcpp.string cimport string
+from libcpp cimport bool as cbool, nullptr, nullptr_t
+from cpython cimport bool as pbool
+from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.vector cimport vector
+from libcpp.set cimport set as cset
+from libcpp.map cimport map as cmap, pair as cpair
+from libcpp.unordered_map cimport unordered_map as cumap
+cimport folly.iobuf as _fbthrift_iobuf
+from thrift.python.exceptions cimport cTException
+from thrift.py3.types cimport (
+    bstring,
+    field_ref as __field_ref,
+    optional_field_ref as __optional_field_ref,
+    required_field_ref as __required_field_ref,
+    terse_field_ref as __terse_field_ref,
+    union_field_ref as __union_field_ref,
+    get_union_field_value as __get_union_field_value,
+)
+from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
+
+
+
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass EnumMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types.h" namespace "::cpp2":
+    cdef cppclass cMyEnum "::cpp2::MyEnum":
+        pass
+
+    cdef cppclass cTypedEnum "::cpp2::TypedEnum":
+        pass
+
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass ExceptionMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass StructMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+    cdef enum cMyUnion__type "::cpp2::MyUnion::Type":
+        cMyUnion__type___EMPTY__ "::cpp2::MyUnion::Type::__EMPTY__",
+        cMyUnion__type_anInteger "::cpp2::MyUnion::Type::anInteger",
+        cMyUnion__type_aString "::cpp2::MyUnion::Type::aString",
+
+    cdef cppclass cMyUnion "::cpp2::MyUnion":
+        cMyUnion() except +
+        cMyUnion(const cMyUnion&) except +
+        bint operator==(cMyUnion&)
+        bint operator!=(cMyUnion&)
+        bint operator<(cMyUnion&)
+        bint operator>(cMyUnion&)
+        bint operator<=(cMyUnion&)
+        bint operator>=(cMyUnion&)
+        cMyUnion__type getType() const
+        const unique_ptr[cint32_t]& get_anInteger "get_anInteger" () const
+        unique_ptr[cint32_t]& set_anInteger "set_anInteger" (const cint32_t&)
+        const unique_ptr[string]& get_aString "get_aString" () const
+        unique_ptr[string]& set_aString "set_aString" (const string&)
+
+    cdef enum cNonTriviallyDestructibleUnion__type "::cpp2::NonTriviallyDestructibleUnion::Type":
+        cNonTriviallyDestructibleUnion__type___EMPTY__ "::cpp2::NonTriviallyDestructibleUnion::Type::__EMPTY__",
+        cNonTriviallyDestructibleUnion__type_int_field "::cpp2::NonTriviallyDestructibleUnion::Type::int_field",
+
+    cdef cppclass cNonTriviallyDestructibleUnion "::cpp2::NonTriviallyDestructibleUnion":
+        cNonTriviallyDestructibleUnion() except +
+        cNonTriviallyDestructibleUnion(const cNonTriviallyDestructibleUnion&) except +
+        bint operator==(cNonTriviallyDestructibleUnion&)
+        bint operator!=(cNonTriviallyDestructibleUnion&)
+        bint operator<(cNonTriviallyDestructibleUnion&)
+        bint operator>(cNonTriviallyDestructibleUnion&)
+        bint operator<=(cNonTriviallyDestructibleUnion&)
+        bint operator>=(cNonTriviallyDestructibleUnion&)
+        cNonTriviallyDestructibleUnion__type getType() const
+        const shared_ptr[cint32_t]& get_int_field "get_int_field" () const
+        shared_ptr[cint32_t]& set_int_field "set_int_field" (const cint32_t&)
+
+
+    cdef cppclass cMyField "::cpp2::MyField":
+        cMyField() except +
+        cMyField(const cMyField&) except +
+        bint operator==(cMyField&)
+        bint operator!=(cMyField&)
+        bint operator<(cMyField&)
+        bint operator>(cMyField&)
+        bint operator<=(cMyField&)
+        bint operator>=(cMyField&)
+        unique_ptr[cint64_t] opt_value_ref "opt_value_ref" ()
+        unique_ptr[cint64_t] value_ref "value_ref" ()
+        unique_ptr[cint64_t] req_value_ref "req_value_ref" ()
+        unique_ptr[cMyEnum] opt_enum_value_ref "opt_enum_value_ref" ()
+        unique_ptr[cMyEnum] enum_value_ref "enum_value_ref" ()
+        unique_ptr[cMyEnum] req_enum_value_ref "req_enum_value_ref" ()
+        unique_ptr[string] opt_str_value_ref "opt_str_value_ref" ()
+        unique_ptr[string] str_value_ref "str_value_ref" ()
+        unique_ptr[string] req_str_value_ref "req_str_value_ref" ()
+
+
+    cdef cppclass cMyStruct "::cpp2::MyStruct":
+        cMyStruct() except +
+        cMyStruct(const cMyStruct&) except +
+        bint operator==(cMyStruct&)
+        bint operator!=(cMyStruct&)
+        bint operator<(cMyStruct&)
+        bint operator>(cMyStruct&)
+        bint operator<=(cMyStruct&)
+        bint operator>=(cMyStruct&)
+        unique_ptr[cMyField] opt_ref_ref "opt_ref_ref" ()
+        unique_ptr[cMyField] ref_ref "ref_ref" ()
+        unique_ptr[cMyField] req_ref_ref "req_ref_ref" ()
+
+
+    cdef cppclass cStructWithUnion "::cpp2::StructWithUnion":
+        cStructWithUnion() except +
+        cStructWithUnion(const cStructWithUnion&) except +
+        bint operator==(cStructWithUnion&)
+        bint operator!=(cStructWithUnion&)
+        bint operator<(cStructWithUnion&)
+        bint operator>(cStructWithUnion&)
+        bint operator<=(cStructWithUnion&)
+        bint operator>=(cStructWithUnion&)
+        unique_ptr[cMyUnion] u_ref "u_ref" ()
+        unique_ptr[double] aDouble_ref "aDouble_ref" ()
+        __field_ref[cMyField] f_ref "f_ref" ()
+
+
+    cdef cppclass cRecursiveStruct "::cpp2::RecursiveStruct":
+        cRecursiveStruct() except +
+        cRecursiveStruct(const cRecursiveStruct&) except +
+        bint operator==(cRecursiveStruct&)
+        bint operator!=(cRecursiveStruct&)
+        bint operator<(cRecursiveStruct&)
+        bint operator>(cRecursiveStruct&)
+        bint operator<=(cRecursiveStruct&)
+        bint operator>=(cRecursiveStruct&)
+        __optional_field_ref[vector[cRecursiveStruct]] mes_ref "mes_ref" ()
+
+
+    cdef cppclass cStructWithContainers "::cpp2::StructWithContainers":
+        cStructWithContainers() except +
+        cStructWithContainers(const cStructWithContainers&) except +
+        bint operator==(cStructWithContainers&)
+        bint operator!=(cStructWithContainers&)
+        bint operator<(cStructWithContainers&)
+        bint operator>(cStructWithContainers&)
+        bint operator<=(cStructWithContainers&)
+        bint operator>=(cStructWithContainers&)
+        unique_ptr[vector[cint32_t]] list_ref_ref "list_ref_ref" ()
+        unique_ptr[cset[cint32_t]] set_ref_ref "set_ref_ref" ()
+        unique_ptr[cmap[cint32_t,cint32_t]] map_ref_ref "map_ref_ref" ()
+        unique_ptr[vector[cint32_t]] list_ref_unique_ref "list_ref_unique_ref" ()
+        shared_ptr[cset[cint32_t]] set_ref_shared_ref "set_ref_shared_ref" ()
+        shared_ptr[const vector[cint32_t]] list_ref_shared_const_ref "list_ref_shared_const_ref" ()
+
+
+    cdef cppclass cStructWithSharedConst "::cpp2::StructWithSharedConst":
+        cStructWithSharedConst() except +
+        cStructWithSharedConst(const cStructWithSharedConst&) except +
+        bint operator==(cStructWithSharedConst&)
+        bint operator!=(cStructWithSharedConst&)
+        bint operator<(cStructWithSharedConst&)
+        bint operator>(cStructWithSharedConst&)
+        bint operator<=(cStructWithSharedConst&)
+        bint operator>=(cStructWithSharedConst&)
+        shared_ptr[const cMyField] opt_shared_const_ref "opt_shared_const_ref" ()
+        shared_ptr[const cMyField] shared_const_ref "shared_const_ref" ()
+        shared_ptr[const cMyField] req_shared_const_ref "req_shared_const_ref" ()
+
+
+    cdef cppclass cEmpty "::cpp2::Empty":
+        cEmpty() except +
+        cEmpty(const cEmpty&) except +
+        bint operator==(cEmpty&)
+        bint operator!=(cEmpty&)
+        bint operator<(cEmpty&)
+        bint operator>(cEmpty&)
+        bint operator<=(cEmpty&)
+        bint operator>=(cEmpty&)
+
+
+    cdef cppclass cStructWithRef "::cpp2::StructWithRef":
+        cStructWithRef() except +
+        cStructWithRef(const cStructWithRef&) except +
+        bint operator==(cStructWithRef&)
+        bint operator!=(cStructWithRef&)
+        bint operator<(cStructWithRef&)
+        bint operator>(cStructWithRef&)
+        bint operator<=(cStructWithRef&)
+        bint operator>=(cStructWithRef&)
+        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
+        unique_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
+        unique_ptr[cEmpty] req_field_ref "req_field_ref" ()
+
+
+    cdef cppclass cStructWithBox "::cpp2::StructWithBox":
+        cStructWithBox() except +
+        cStructWithBox(const cStructWithBox&) except +
+        bint operator==(cStructWithBox&)
+        bint operator!=(cStructWithBox&)
+        bint operator<(cStructWithBox&)
+        bint operator>(cStructWithBox&)
+        bint operator<=(cStructWithBox&)
+        bint operator>=(cStructWithBox&)
+        __optional_field_ref[string] a_ref "a_ref" ()
+        __optional_field_ref[vector[cint64_t]] b_ref "b_ref" ()
+        __optional_field_ref[cStructWithRef] c_ref "c_ref" ()
+
+
+    cdef cppclass cStructWithInternBox "::cpp2::StructWithInternBox":
+        cStructWithInternBox() except +
+        cStructWithInternBox(const cStructWithInternBox&) except +
+        bint operator==(cStructWithInternBox&)
+        bint operator!=(cStructWithInternBox&)
+        bint operator<(cStructWithInternBox&)
+        bint operator>(cStructWithInternBox&)
+        bint operator<=(cStructWithInternBox&)
+        bint operator>=(cStructWithInternBox&)
+        __field_ref[cEmpty] field1_ref "field1_ref" ()
+        __field_ref[cMyField] field2_ref "field2_ref" ()
+
+
+    cdef cppclass cStructWithTerseInternBox "::cpp2::StructWithTerseInternBox":
+        cStructWithTerseInternBox() except +
+        cStructWithTerseInternBox(const cStructWithTerseInternBox&) except +
+        bint operator==(cStructWithTerseInternBox&)
+        bint operator!=(cStructWithTerseInternBox&)
+        bint operator<(cStructWithTerseInternBox&)
+        bint operator>(cStructWithTerseInternBox&)
+        bint operator<=(cStructWithTerseInternBox&)
+        bint operator>=(cStructWithTerseInternBox&)
+        __terse_field_ref[cEmpty] field1_ref "field1_ref" ()
+        __terse_field_ref[cMyField] field2_ref "field2_ref" ()
+
+
+    cdef cppclass cAdaptedStructWithInternBox "::cpp2::AdaptedStructWithInternBox":
+        cAdaptedStructWithInternBox() except +
+        cAdaptedStructWithInternBox(const cAdaptedStructWithInternBox&) except +
+        bint operator==(cAdaptedStructWithInternBox&)
+        bint operator!=(cAdaptedStructWithInternBox&)
+        bint operator<(cAdaptedStructWithInternBox&)
+        bint operator>(cAdaptedStructWithInternBox&)
+        bint operator<=(cAdaptedStructWithInternBox&)
+        bint operator>=(cAdaptedStructWithInternBox&)
+        __field_ref[cEmpty] field1_ref "field1_ref" ()
+        __field_ref[cMyField] field2_ref "field2_ref" ()
+
+
+    cdef cppclass cAdaptedStructWithTerseInternBox "::cpp2::AdaptedStructWithTerseInternBox":
+        cAdaptedStructWithTerseInternBox() except +
+        cAdaptedStructWithTerseInternBox(const cAdaptedStructWithTerseInternBox&) except +
+        bint operator==(cAdaptedStructWithTerseInternBox&)
+        bint operator!=(cAdaptedStructWithTerseInternBox&)
+        bint operator<(cAdaptedStructWithTerseInternBox&)
+        bint operator>(cAdaptedStructWithTerseInternBox&)
+        bint operator<=(cAdaptedStructWithTerseInternBox&)
+        bint operator>=(cAdaptedStructWithTerseInternBox&)
+        __terse_field_ref[cEmpty] field1_ref "field1_ref" ()
+        __terse_field_ref[cMyField] field2_ref "field2_ref" ()
+
+
+    cdef cppclass cStructWithRefTypeUnique "::cpp2::StructWithRefTypeUnique":
+        cStructWithRefTypeUnique() except +
+        cStructWithRefTypeUnique(const cStructWithRefTypeUnique&) except +
+        bint operator==(cStructWithRefTypeUnique&)
+        bint operator!=(cStructWithRefTypeUnique&)
+        bint operator<(cStructWithRefTypeUnique&)
+        bint operator>(cStructWithRefTypeUnique&)
+        bint operator<=(cStructWithRefTypeUnique&)
+        bint operator>=(cStructWithRefTypeUnique&)
+        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
+        unique_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
+        unique_ptr[cEmpty] req_field_ref "req_field_ref" ()
+
+
+    cdef cppclass cStructWithRefTypeShared "::cpp2::StructWithRefTypeShared":
+        cStructWithRefTypeShared() except +
+        cStructWithRefTypeShared(const cStructWithRefTypeShared&) except +
+        bint operator==(cStructWithRefTypeShared&)
+        bint operator!=(cStructWithRefTypeShared&)
+        bint operator<(cStructWithRefTypeShared&)
+        bint operator>(cStructWithRefTypeShared&)
+        bint operator<=(cStructWithRefTypeShared&)
+        bint operator>=(cStructWithRefTypeShared&)
+        shared_ptr[cEmpty] def_field_ref "def_field_ref" ()
+        shared_ptr[cEmpty] opt_field_ref "opt_field_ref" ()
+        shared_ptr[cEmpty] req_field_ref "req_field_ref" ()
+
+
+    cdef cppclass cStructWithRefTypeSharedConst "::cpp2::StructWithRefTypeSharedConst":
+        cStructWithRefTypeSharedConst() except +
+        cStructWithRefTypeSharedConst(const cStructWithRefTypeSharedConst&) except +
+        bint operator==(cStructWithRefTypeSharedConst&)
+        bint operator!=(cStructWithRefTypeSharedConst&)
+        bint operator<(cStructWithRefTypeSharedConst&)
+        bint operator>(cStructWithRefTypeSharedConst&)
+        bint operator<=(cStructWithRefTypeSharedConst&)
+        bint operator>=(cStructWithRefTypeSharedConst&)
+        shared_ptr[const cEmpty] def_field_ref "def_field_ref" ()
+        shared_ptr[const cEmpty] opt_field_ref "opt_field_ref" ()
+        shared_ptr[const cEmpty] req_field_ref "req_field_ref" ()
+
+
+    cdef cppclass cStructWithRefAndAnnotCppNoexceptMoveCtor "::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor":
+        cStructWithRefAndAnnotCppNoexceptMoveCtor() except +
+        cStructWithRefAndAnnotCppNoexceptMoveCtor(const cStructWithRefAndAnnotCppNoexceptMoveCtor&) except +
+        bint operator==(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        bint operator!=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        bint operator<(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        bint operator>(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        bint operator<=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        bint operator>=(cStructWithRefAndAnnotCppNoexceptMoveCtor&)
+        unique_ptr[cEmpty] def_field_ref "def_field_ref" ()
+
+
+    cdef cppclass cStructWithString "::cpp2::StructWithString":
+        cStructWithString() except +
+        cStructWithString(const cStructWithString&) except +
+        bint operator==(cStructWithString&)
+        bint operator!=(cStructWithString&)
+        bint operator<(cStructWithString&)
+        bint operator>(cStructWithString&)
+        bint operator<=(cStructWithString&)
+        bint operator>=(cStructWithString&)
+        unique_ptr[string] def_unique_string_ref_ref "def_unique_string_ref_ref" ()
+        shared_ptr[string] def_shared_string_ref_ref "def_shared_string_ref_ref" ()
+        shared_ptr[const string] def_shared_string_const_ref_ref "def_shared_string_const_ref_ref" ()
+        unique_ptr[string] unique_string_ref_ref "unique_string_ref_ref" ()
+        shared_ptr[string] shared_string_ref_ref "shared_string_ref_ref" ()
+
+cdef extern from "thrift/compiler/test/fixtures/refs/gen-cpp2/module_constants.h" namespace "::cpp2":
+    cdef cStructWithRef ckStructWithRef "::cpp2::module_constants::kStructWithRef"()
+    cdef cStructWithRefTypeUnique ckStructWithRefTypeUnique "::cpp2::module_constants::kStructWithRefTypeUnique"()
+    cdef cStructWithRefTypeShared ckStructWithRefTypeShared "::cpp2::module_constants::kStructWithRefTypeShared"()
+    cdef cStructWithRefTypeSharedConst ckStructWithRefTypeSharedConst "::cpp2::module_constants::kStructWithRefTypeSharedConst"()

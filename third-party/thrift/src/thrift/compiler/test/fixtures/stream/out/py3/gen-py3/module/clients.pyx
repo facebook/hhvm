@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
@@ -90,9 +91,9 @@ cdef void PubSubStreamingService_servicethrows_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFooEx]():
+    if result.hasException[_module_cbindings.cFooEx]():
         try:
-            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -110,16 +111,16 @@ cdef void PubSubStreamingService_servicethrows2_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFooEx]():
+    if result.hasException[_module_cbindings.cFooEx]():
         try:
-            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
             pyfuture.set_exception(exc)
-    elif result.hasException[_module_types.cFooEx2]():
+    elif result.hasException[_module_cbindings.cFooEx2]():
         try:
-            exc = _module_types.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx2](result.exception()))
+            exc = _module_types.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx2](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -137,9 +138,9 @@ cdef void PubSubStreamingService_boththrows_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFooEx]():
+    if result.hasException[_module_cbindings.cFooEx]():
         try:
-            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -170,9 +171,9 @@ cdef void PubSubStreamingService_responseandstreamservicethrows_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFooEx]():
+    if result.hasException[_module_cbindings.cFooEx]():
         try:
-            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -190,9 +191,9 @@ cdef void PubSubStreamingService_responseandstreamboththrows_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cFooEx]():
+    if result.hasException[_module_cbindings.cFooEx]():
         try:
-            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+            exc = _module_types.FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cFooEx](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:

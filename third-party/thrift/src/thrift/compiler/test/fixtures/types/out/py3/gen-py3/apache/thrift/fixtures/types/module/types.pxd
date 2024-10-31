@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -42,848 +41,39 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
+
+cimport apache.thrift.fixtures.types.module.types as _fbthrift_types
 cimport apache.thrift.fixtures.types.module.types_fields as _fbthrift_types_fields
+cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/types/gen-py3/module/types.h":
   pass
 
-cdef extern from * nogil:
-    cdef cppclass std_unordered_map "std::unordered_map"[T, U]:
-        ctypedef T key_type
-        ctypedef U mapped_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_unordered_map() except +
-        std_unordered_map(std_unordered_map&) except +
-
-        U& operator[](T&)
-        iterator find(const T&)
-        const_iterator const_find "find"(const T&)
-        size_type count(const T&)
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass std_list "std::list"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_list() except +
-        std_list(std_list&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass std_deque "std::deque"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_deque() except +
-        std_deque(std_deque&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass folly_fbvector "folly::fbvector"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        folly_fbvector() except +
-        folly_fbvector(folly_fbvector&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass folly_small_vector "folly::small_vector"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        folly_small_vector() except +
-        folly_small_vector(folly_small_vector&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass folly_sorted_vector_set "folly::sorted_vector_set"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        folly_sorted_vector_set() except +
-        folly_sorted_vector_set(folly_sorted_vector_set&) except +
-
-        cpair[iterator, bint] insert(const T&) except +
-        size_type size()
-        size_type count(const T&)
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass std_unordered_map "std::unordered_map"[T, U]:
-        ctypedef T key_type
-        ctypedef U mapped_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_unordered_map() except +
-        std_unordered_map(std_unordered_map&) except +
-
-        U& operator[](T&)
-        iterator find(const T&)
-        const_iterator const_find "find"(const T&)
-        size_type count(const T&)
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass _std_list "::std::list"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        _std_list() except +
-        _std_list(_std_list&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass folly_small_vector "folly::small_vector"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        folly_small_vector() except +
-        folly_small_vector(folly_small_vector&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-cdef extern from * nogil:
-    cdef cppclass std_list_int32_t "std::list<int32_t>":
-        ctypedef cint32_t value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            cint32_t& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            cint32_t& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_list_int32_t() except +
-        std_list_int32_t(std_list_int32_t&) except +
-
-        cint32_t& operator[](size_type)
-        void push_back(cint32_t&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-
-cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h" namespace "::apache::thrift::fixtures::types":
-    cdef cppclass chas_bitwise_ops "::apache::thrift::fixtures::types::has_bitwise_ops":
-        pass
-
-    cdef cppclass cis_unscoped "::apache::thrift::fixtures::types::is_unscoped":
-        pass
-
-    cdef cppclass cMyForwardRefEnum "::apache::thrift::fixtures::types::MyForwardRefEnum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types_custom_protocol.h" namespace "::apache::thrift::fixtures::types":
-
-    cdef cppclass cempty_struct "::apache::thrift::fixtures::types::empty_struct":
-        cempty_struct() except +
-        cempty_struct(const cempty_struct&) except +
-        bint operator==(cempty_struct&)
-        bint operator!=(cempty_struct&)
-        bint operator<(cempty_struct&)
-        bint operator>(cempty_struct&)
-        bint operator<=(cempty_struct&)
-        bint operator>=(cempty_struct&)
-
-
-    cdef cppclass cdecorated_struct "::apache::thrift::fixtures::types::decorated_struct":
-        cdecorated_struct() except +
-        cdecorated_struct(const cdecorated_struct&) except +
-        bint operator==(cdecorated_struct&)
-        bint operator!=(cdecorated_struct&)
-        bint operator<(cdecorated_struct&)
-        bint operator>(cdecorated_struct&)
-        bint operator<=(cdecorated_struct&)
-        bint operator>=(cdecorated_struct&)
-        __field_ref[string] field_ref "field_ref" ()
-
-
-    cdef cppclass cContainerStruct "::apache::thrift::fixtures::types::ContainerStruct":
-        cContainerStruct() except +
-        cContainerStruct(const cContainerStruct&) except +
-        bint operator==(cContainerStruct&)
-        bint operator!=(cContainerStruct&)
-        bint operator<(cContainerStruct&)
-        bint operator>(cContainerStruct&)
-        bint operator<=(cContainerStruct&)
-        bint operator>=(cContainerStruct&)
-        __field_ref[vector[cint32_t]] fieldA_ref "fieldA_ref" ()
-        __field_ref[std_list[cint32_t]] fieldB_ref "fieldB_ref" ()
-        __field_ref[std_deque[cint32_t]] fieldC_ref "fieldC_ref" ()
-        __field_ref[folly_fbvector[cint32_t]] fieldD_ref "fieldD_ref" ()
-        __field_ref[folly_small_vector[cint32_t]] fieldE_ref "fieldE_ref" ()
-        __field_ref[folly_sorted_vector_set[cint32_t]] fieldF_ref "fieldF_ref" ()
-        __field_ref[cmap[cint32_t,string]] fieldG_ref "fieldG_ref" ()
-        __field_ref[std_unordered_map[cint32_t,string]] fieldH_ref "fieldH_ref" ()
-
-
-    cdef cppclass cCppTypeStruct "::apache::thrift::fixtures::types::CppTypeStruct":
-        cCppTypeStruct() except +
-        cCppTypeStruct(const cCppTypeStruct&) except +
-        bint operator==(cCppTypeStruct&)
-        bint operator!=(cCppTypeStruct&)
-        bint operator<(cCppTypeStruct&)
-        bint operator>(cCppTypeStruct&)
-        bint operator<=(cCppTypeStruct&)
-        bint operator>=(cCppTypeStruct&)
-        __field_ref[std_list_int32_t] fieldA_ref "fieldA_ref" ()
-
-
-    cdef cppclass cVirtualStruct "::apache::thrift::fixtures::types::VirtualStruct":
-        cVirtualStruct() except +
-        cVirtualStruct(const cVirtualStruct&) except +
-        bint operator==(cVirtualStruct&)
-        bint operator!=(cVirtualStruct&)
-        bint operator<(cVirtualStruct&)
-        bint operator>(cVirtualStruct&)
-        bint operator<=(cVirtualStruct&)
-        bint operator>=(cVirtualStruct&)
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-
-
-    cdef cppclass cMyStructWithForwardRefEnum "::apache::thrift::fixtures::types::MyStructWithForwardRefEnum":
-        cMyStructWithForwardRefEnum() except +
-        cMyStructWithForwardRefEnum(const cMyStructWithForwardRefEnum&) except +
-        bint operator==(cMyStructWithForwardRefEnum&)
-        bint operator!=(cMyStructWithForwardRefEnum&)
-        bint operator<(cMyStructWithForwardRefEnum&)
-        bint operator>(cMyStructWithForwardRefEnum&)
-        bint operator<=(cMyStructWithForwardRefEnum&)
-        bint operator>=(cMyStructWithForwardRefEnum&)
-        __field_ref[cMyForwardRefEnum] a_ref "a_ref" ()
-        __field_ref[cMyForwardRefEnum] b_ref "b_ref" ()
-
-
-    cdef cppclass cTrivialNumeric "::apache::thrift::fixtures::types::TrivialNumeric":
-        cTrivialNumeric() except +
-        cTrivialNumeric(const cTrivialNumeric&) except +
-        bint operator==(cTrivialNumeric&)
-        bint operator!=(cTrivialNumeric&)
-        bint operator<(cTrivialNumeric&)
-        bint operator>(cTrivialNumeric&)
-        bint operator<=(cTrivialNumeric&)
-        bint operator>=(cTrivialNumeric&)
-        __field_ref[cint32_t] a_ref "a_ref" ()
-        __field_ref[cbool] b_ref "b_ref" ()
-
-
-    cdef cppclass cTrivialNestedWithDefault "::apache::thrift::fixtures::types::TrivialNestedWithDefault":
-        cTrivialNestedWithDefault() except +
-        cTrivialNestedWithDefault(const cTrivialNestedWithDefault&) except +
-        bint operator==(cTrivialNestedWithDefault&)
-        bint operator!=(cTrivialNestedWithDefault&)
-        bint operator<(cTrivialNestedWithDefault&)
-        bint operator>(cTrivialNestedWithDefault&)
-        bint operator<=(cTrivialNestedWithDefault&)
-        bint operator>=(cTrivialNestedWithDefault&)
-        __field_ref[cint32_t] z_ref "z_ref" ()
-        __field_ref[cTrivialNumeric] n_ref "n_ref" ()
-
-
-    cdef cppclass cComplexString "::apache::thrift::fixtures::types::ComplexString":
-        cComplexString() except +
-        cComplexString(const cComplexString&) except +
-        bint operator==(cComplexString&)
-        bint operator!=(cComplexString&)
-        bint operator<(cComplexString&)
-        bint operator>(cComplexString&)
-        bint operator<=(cComplexString&)
-        bint operator>=(cComplexString&)
-        __field_ref[string] a_ref "a_ref" ()
-        __field_ref[cmap[string,cint32_t]] b_ref "b_ref" ()
-
-
-    cdef cppclass cComplexNestedWithDefault "::apache::thrift::fixtures::types::ComplexNestedWithDefault":
-        cComplexNestedWithDefault() except +
-        cComplexNestedWithDefault(const cComplexNestedWithDefault&) except +
-        bint operator==(cComplexNestedWithDefault&)
-        bint operator!=(cComplexNestedWithDefault&)
-        bint operator<(cComplexNestedWithDefault&)
-        bint operator>(cComplexNestedWithDefault&)
-        bint operator<=(cComplexNestedWithDefault&)
-        bint operator>=(cComplexNestedWithDefault&)
-        __field_ref[string] z_ref "z_ref" ()
-        __field_ref[cComplexString] n_ref "n_ref" ()
-
-
-    cdef cppclass cMinPadding "::apache::thrift::fixtures::types::MinPadding":
-        cMinPadding() except +
-        cMinPadding(const cMinPadding&) except +
-        bint operator==(cMinPadding&)
-        bint operator!=(cMinPadding&)
-        bint operator<(cMinPadding&)
-        bint operator>(cMinPadding&)
-        bint operator<=(cMinPadding&)
-        bint operator>=(cMinPadding&)
-        __required_field_ref[cint8_t] small_ref "small_ref" ()
-        __required_field_ref[cint64_t] big_ref "big_ref" ()
-        __required_field_ref[cint16_t] medium_ref "medium_ref" ()
-        __required_field_ref[cint32_t] biggish_ref "biggish_ref" ()
-        __required_field_ref[cint8_t] tiny_ref "tiny_ref" ()
-
-
-    cdef cppclass cMinPaddingWithCustomType "::apache::thrift::fixtures::types::MinPaddingWithCustomType":
-        cMinPaddingWithCustomType() except +
-        cMinPaddingWithCustomType(const cMinPaddingWithCustomType&) except +
-        bint operator==(cMinPaddingWithCustomType&)
-        bint operator!=(cMinPaddingWithCustomType&)
-        bint operator<(cMinPaddingWithCustomType&)
-        bint operator>(cMinPaddingWithCustomType&)
-        bint operator<=(cMinPaddingWithCustomType&)
-        bint operator>=(cMinPaddingWithCustomType&)
-        __terse_field_ref[cint8_t] small_ref "small_ref" ()
-        __terse_field_ref[cint64_t] big_ref "big_ref" ()
-        __terse_field_ref[cint16_t] medium_ref "medium_ref" ()
-        __terse_field_ref[cint32_t] biggish_ref "biggish_ref" ()
-        __terse_field_ref[cint8_t] tiny_ref "tiny_ref" ()
-
-
-    cdef cppclass cMyStruct "::apache::thrift::fixtures::types::MyStruct":
-        cMyStruct() except +
-        cMyStruct(const cMyStruct&) except +
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
-        __field_ref[cint64_t] majorVer_ref "majorVer_ref" ()
-        __field_ref[cMyDataItem] data_ref "data_ref" ()
-
-
-    cdef cppclass cMyDataItem "::apache::thrift::fixtures::types::MyDataItem":
-        cMyDataItem() except +
-        cMyDataItem(const cMyDataItem&) except +
-
-
-    cdef cppclass cRenaming "::apache::thrift::fixtures::types::Renaming":
-        cRenaming() except +
-        cRenaming(const cRenaming&) except +
-        bint operator==(cRenaming&)
-        bint operator!=(cRenaming&)
-        bint operator<(cRenaming&)
-        bint operator>(cRenaming&)
-        bint operator<=(cRenaming&)
-        bint operator>=(cRenaming&)
-        __field_ref[cint64_t] foo_ref "bar_ref" ()
-
-
-    cdef cppclass cAnnotatedTypes "::apache::thrift::fixtures::types::AnnotatedTypes":
-        cAnnotatedTypes() except +
-        cAnnotatedTypes(const cAnnotatedTypes&) except +
-        bint operator==(cAnnotatedTypes&)
-        bint operator!=(cAnnotatedTypes&)
-        bint operator<(cAnnotatedTypes&)
-        bint operator>(cAnnotatedTypes&)
-        bint operator<=(cAnnotatedTypes&)
-        bint operator>=(cAnnotatedTypes&)
-        __field_ref[string] binary_field_ref "binary_field_ref" ()
-        __field_ref[vector[std_unordered_map[cint32_t,string]]] list_field_ref "list_field_ref" ()
-
-
-    cdef cppclass cForwardUsageRoot "::apache::thrift::fixtures::types::ForwardUsageRoot":
-        cForwardUsageRoot() except +
-        cForwardUsageRoot(const cForwardUsageRoot&) except +
-        bint operator==(cForwardUsageRoot&)
-        bint operator!=(cForwardUsageRoot&)
-        bint operator<(cForwardUsageRoot&)
-        bint operator>(cForwardUsageRoot&)
-        bint operator<=(cForwardUsageRoot&)
-        bint operator>=(cForwardUsageRoot&)
-        __optional_field_ref[cForwardUsageStruct] ForwardUsageStruct_ref "ForwardUsageStruct_ref" ()
-        unique_ptr[cForwardUsageByRef] ForwardUsageByRef_ref "ForwardUsageByRef_ref" ()
-
-
-    cdef cppclass cForwardUsageStruct "::apache::thrift::fixtures::types::ForwardUsageStruct":
-        cForwardUsageStruct() except +
-        cForwardUsageStruct(const cForwardUsageStruct&) except +
-        bint operator==(cForwardUsageStruct&)
-        bint operator!=(cForwardUsageStruct&)
-        bint operator<(cForwardUsageStruct&)
-        bint operator>(cForwardUsageStruct&)
-        bint operator<=(cForwardUsageStruct&)
-        bint operator>=(cForwardUsageStruct&)
-        unique_ptr[cForwardUsageRoot] foo_ref "foo_ref" ()
-
-
-    cdef cppclass cForwardUsageByRef "::apache::thrift::fixtures::types::ForwardUsageByRef":
-        cForwardUsageByRef() except +
-        cForwardUsageByRef(const cForwardUsageByRef&) except +
-        bint operator==(cForwardUsageByRef&)
-        bint operator!=(cForwardUsageByRef&)
-        bint operator<(cForwardUsageByRef&)
-        bint operator>(cForwardUsageByRef&)
-        bint operator<=(cForwardUsageByRef&)
-        bint operator>=(cForwardUsageByRef&)
-        unique_ptr[cForwardUsageRoot] foo_ref "foo_ref" ()
-
-
-    cdef cppclass cIncompleteMap "::apache::thrift::fixtures::types::IncompleteMap":
-        cIncompleteMap() except +
-        cIncompleteMap(const cIncompleteMap&) except +
-        bint operator==(cIncompleteMap&)
-        bint operator!=(cIncompleteMap&)
-        bint operator<(cIncompleteMap&)
-        bint operator>(cIncompleteMap&)
-        bint operator<=(cIncompleteMap&)
-        bint operator>=(cIncompleteMap&)
-        __optional_field_ref[cmap[cint32_t,cIncompleteMapDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cIncompleteMapDep "::apache::thrift::fixtures::types::IncompleteMapDep":
-        cIncompleteMapDep() except +
-        cIncompleteMapDep(const cIncompleteMapDep&) except +
-        bint operator==(cIncompleteMapDep&)
-        bint operator!=(cIncompleteMapDep&)
-        bint operator<(cIncompleteMapDep&)
-        bint operator>(cIncompleteMapDep&)
-        bint operator<=(cIncompleteMapDep&)
-        bint operator>=(cIncompleteMapDep&)
-
-
-    cdef cppclass cCompleteMap "::apache::thrift::fixtures::types::CompleteMap":
-        cCompleteMap() except +
-        cCompleteMap(const cCompleteMap&) except +
-        bint operator==(cCompleteMap&)
-        bint operator!=(cCompleteMap&)
-        bint operator<(cCompleteMap&)
-        bint operator>(cCompleteMap&)
-        bint operator<=(cCompleteMap&)
-        bint operator>=(cCompleteMap&)
-        __optional_field_ref[std_unordered_map[cint32_t,cCompleteMapDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cCompleteMapDep "::apache::thrift::fixtures::types::CompleteMapDep":
-        cCompleteMapDep() except +
-        cCompleteMapDep(const cCompleteMapDep&) except +
-        bint operator==(cCompleteMapDep&)
-        bint operator!=(cCompleteMapDep&)
-        bint operator<(cCompleteMapDep&)
-        bint operator>(cCompleteMapDep&)
-        bint operator<=(cCompleteMapDep&)
-        bint operator>=(cCompleteMapDep&)
-
-
-    cdef cppclass cIncompleteList "::apache::thrift::fixtures::types::IncompleteList":
-        cIncompleteList() except +
-        cIncompleteList(const cIncompleteList&) except +
-        bint operator==(cIncompleteList&)
-        bint operator!=(cIncompleteList&)
-        bint operator<(cIncompleteList&)
-        bint operator>(cIncompleteList&)
-        bint operator<=(cIncompleteList&)
-        bint operator>=(cIncompleteList&)
-        __optional_field_ref[_std_list[cIncompleteListDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cIncompleteListDep "::apache::thrift::fixtures::types::IncompleteListDep":
-        cIncompleteListDep() except +
-        cIncompleteListDep(const cIncompleteListDep&) except +
-        bint operator==(cIncompleteListDep&)
-        bint operator!=(cIncompleteListDep&)
-        bint operator<(cIncompleteListDep&)
-        bint operator>(cIncompleteListDep&)
-        bint operator<=(cIncompleteListDep&)
-        bint operator>=(cIncompleteListDep&)
-
-
-    cdef cppclass cCompleteList "::apache::thrift::fixtures::types::CompleteList":
-        cCompleteList() except +
-        cCompleteList(const cCompleteList&) except +
-        bint operator==(cCompleteList&)
-        bint operator!=(cCompleteList&)
-        bint operator<(cCompleteList&)
-        bint operator>(cCompleteList&)
-        bint operator<=(cCompleteList&)
-        bint operator>=(cCompleteList&)
-        __optional_field_ref[folly_small_vector[cCompleteListDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cCompleteListDep "::apache::thrift::fixtures::types::CompleteListDep":
-        cCompleteListDep() except +
-        cCompleteListDep(const cCompleteListDep&) except +
-        bint operator==(cCompleteListDep&)
-        bint operator!=(cCompleteListDep&)
-        bint operator<(cCompleteListDep&)
-        bint operator>(cCompleteListDep&)
-        bint operator<=(cCompleteListDep&)
-        bint operator>=(cCompleteListDep&)
-
-
-    cdef cppclass cAdaptedList "::apache::thrift::fixtures::types::AdaptedList":
-        cAdaptedList() except +
-        cAdaptedList(const cAdaptedList&) except +
-        bint operator==(cAdaptedList&)
-        bint operator!=(cAdaptedList&)
-        bint operator<(cAdaptedList&)
-        bint operator>(cAdaptedList&)
-        bint operator<=(cAdaptedList&)
-        bint operator>=(cAdaptedList&)
-        __optional_field_ref[vector[cAdaptedListDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cDependentAdaptedList "::apache::thrift::fixtures::types::DependentAdaptedList":
-        cDependentAdaptedList() except +
-        cDependentAdaptedList(const cDependentAdaptedList&) except +
-        bint operator==(cDependentAdaptedList&)
-        bint operator!=(cDependentAdaptedList&)
-        bint operator<(cDependentAdaptedList&)
-        bint operator>(cDependentAdaptedList&)
-        bint operator<=(cDependentAdaptedList&)
-        bint operator>=(cDependentAdaptedList&)
-        __optional_field_ref[vector[cDependentAdaptedListDep]] field_ref "field_ref" ()
-
-
-    cdef cppclass cAllocatorAware "::apache::thrift::fixtures::types::AllocatorAware":
-        cAllocatorAware() except +
-        cAllocatorAware(const cAllocatorAware&) except +
-        bint operator==(cAllocatorAware&)
-        bint operator!=(cAllocatorAware&)
-        bint operator<(cAllocatorAware&)
-        bint operator>(cAllocatorAware&)
-        bint operator<=(cAllocatorAware&)
-        bint operator>=(cAllocatorAware&)
-        __field_ref[vector[cint32_t]] aa_list_ref "aa_list_ref" ()
-        __field_ref[cset[cint32_t]] aa_set_ref "aa_set_ref" ()
-        __field_ref[cmap[cint32_t,cint32_t]] aa_map_ref "aa_map_ref" ()
-        __field_ref[string] aa_string_ref "aa_string_ref" ()
-        __field_ref[cint32_t] not_a_container_ref "not_a_container_ref" ()
-        unique_ptr[cint32_t] aa_unique_ref "aa_unique_ref" ()
-        shared_ptr[cint32_t] aa_shared_ref "aa_shared_ref" ()
-
-
-    cdef cppclass cAllocatorAware2 "::apache::thrift::fixtures::types::AllocatorAware2":
-        cAllocatorAware2() except +
-        cAllocatorAware2(const cAllocatorAware2&) except +
-        bint operator==(cAllocatorAware2&)
-        bint operator!=(cAllocatorAware2&)
-        bint operator<(cAllocatorAware2&)
-        bint operator>(cAllocatorAware2&)
-        bint operator<=(cAllocatorAware2&)
-        bint operator>=(cAllocatorAware2&)
-        __field_ref[cint32_t] not_a_container_ref "not_a_container_ref" ()
-        __optional_field_ref[cint32_t] box_field_ref "box_field_ref" ()
-
-
-    cdef cppclass cTypedefStruct "::apache::thrift::fixtures::types::TypedefStruct":
-        cTypedefStruct() except +
-        cTypedefStruct(const cTypedefStruct&) except +
-        bint operator==(cTypedefStruct&)
-        bint operator!=(cTypedefStruct&)
-        bint operator<(cTypedefStruct&)
-        bint operator>(cTypedefStruct&)
-        bint operator<=(cTypedefStruct&)
-        bint operator>=(cTypedefStruct&)
-        __field_ref[cint32_t] i32_field_ref "i32_field_ref" ()
-        __field_ref[cint32_t] IntTypedef_field_ref "IntTypedef_field_ref" ()
-        __field_ref[cint32_t] UintTypedef_field_ref "UintTypedef_field_ref" ()
-
-
-    cdef cppclass cStructWithDoubleUnderscores "::apache::thrift::fixtures::types::StructWithDoubleUnderscores":
-        cStructWithDoubleUnderscores() except +
-        cStructWithDoubleUnderscores(const cStructWithDoubleUnderscores&) except +
-        bint operator==(cStructWithDoubleUnderscores&)
-        bint operator!=(cStructWithDoubleUnderscores&)
-        bint operator<(cStructWithDoubleUnderscores&)
-        bint operator>(cStructWithDoubleUnderscores&)
-        bint operator<=(cStructWithDoubleUnderscores&)
-        bint operator>=(cStructWithDoubleUnderscores&)
-        __field_ref[cint32_t] __field_ref "__field_ref" ()
-
-
 
 
 cdef class empty_struct(thrift.py3.types.Struct):
-    cdef shared_ptr[cempty_struct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cempty_struct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__empty_struct_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cempty_struct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cempty_struct])
 
 
 
 cdef class decorated_struct(thrift.py3.types.Struct):
-    cdef shared_ptr[cdecorated_struct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cdecorated_struct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__decorated_struct_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cdecorated_struct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cdecorated_struct])
 
 
 
 cdef class ContainerStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cContainerStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ContainerStruct_FieldsSetter _fields_setter
     cdef inline object fieldA_impl(self)
     cdef inline object fieldB_impl(self)
@@ -903,33 +93,33 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef std_unordered_map__Map__i32_string __fbthrift_cached_fieldH
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cContainerStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct])
 
 
 
 cdef class CppTypeStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cCppTypeStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCppTypeStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CppTypeStruct_FieldsSetter _fields_setter
     cdef inline object fieldA_impl(self)
     cdef object __fbthrift_cached_fieldA
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCppTypeStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCppTypeStruct])
 
 
 
 cdef class VirtualStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cVirtualStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cVirtualStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__VirtualStruct_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVirtualStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cVirtualStruct])
 
 
 
 cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStructWithForwardRefEnum] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStructWithForwardRefEnum_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
@@ -937,59 +127,59 @@ cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_b
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStructWithForwardRefEnum])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum])
 
 
 
 cdef class TrivialNumeric(thrift.py3.types.Struct):
-    cdef shared_ptr[cTrivialNumeric] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__TrivialNumeric_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTrivialNumeric])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric])
 
 
 
 cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
-    cdef shared_ptr[cTrivialNestedWithDefault] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__TrivialNestedWithDefault_FieldsSetter _fields_setter
     cdef inline object z_impl(self)
     cdef inline object n_impl(self)
     cdef TrivialNumeric __fbthrift_cached_n
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTrivialNestedWithDefault])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault])
 
 
 
 cdef class ComplexString(thrift.py3.types.Struct):
-    cdef shared_ptr[cComplexString] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cComplexString] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ComplexString_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
     cdef Map__string_i32 __fbthrift_cached_b
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexString])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cComplexString])
 
 
 
 cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
-    cdef shared_ptr[cComplexNestedWithDefault] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ComplexNestedWithDefault_FieldsSetter _fields_setter
     cdef inline object z_impl(self)
     cdef inline object n_impl(self)
     cdef ComplexString __fbthrift_cached_n
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexNestedWithDefault])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault])
 
 
 
 cdef class MinPadding(thrift.py3.types.Struct):
-    cdef shared_ptr[cMinPadding] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMinPadding] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MinPadding_FieldsSetter _fields_setter
     cdef inline object small_impl(self)
     cdef inline object big_impl(self)
@@ -998,12 +188,12 @@ cdef class MinPadding(thrift.py3.types.Struct):
     cdef inline object tiny_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMinPadding])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMinPadding])
 
 
 
 cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
-    cdef shared_ptr[cMinPaddingWithCustomType] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter _fields_setter
     cdef inline object small_impl(self)
     cdef inline object big_impl(self)
@@ -1012,12 +202,12 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     cdef inline object tiny_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMinPaddingWithCustomType])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType])
 
 
 
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyStringField_impl(self)
@@ -1026,43 +216,43 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef MyDataItem __fbthrift_cached_data
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyStruct])
 
 
 
 cdef class MyDataItem(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyDataItem] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyDataItem] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyDataItem_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyDataItem])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMyDataItem])
 
 
 
 cdef class Renaming(thrift.py3.types.Struct):
-    cdef shared_ptr[cRenaming] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cRenaming] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Renaming_FieldsSetter _fields_setter
     cdef inline object foo_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cRenaming])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cRenaming])
 
 
 
 cdef class AnnotatedTypes(thrift.py3.types.Struct):
-    cdef shared_ptr[cAnnotatedTypes] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AnnotatedTypes_FieldsSetter _fields_setter
     cdef inline object binary_field_impl(self)
     cdef inline object list_field_impl(self)
     cdef object __fbthrift_cached_list_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAnnotatedTypes])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes])
 
 
 
 cdef class ForwardUsageRoot(thrift.py3.types.Struct):
-    cdef shared_ptr[cForwardUsageRoot] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ForwardUsageRoot_FieldsSetter _fields_setter
     cdef inline object ForwardUsageStruct_impl(self)
     cdef inline object ForwardUsageByRef_impl(self)
@@ -1070,136 +260,136 @@ cdef class ForwardUsageRoot(thrift.py3.types.Struct):
     cdef ForwardUsageByRef __fbthrift_cached_ForwardUsageByRef
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cForwardUsageRoot])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot])
 
 
 
 cdef class ForwardUsageStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cForwardUsageStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ForwardUsageStruct_FieldsSetter _fields_setter
     cdef inline object foo_impl(self)
     cdef ForwardUsageRoot __fbthrift_cached_foo
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cForwardUsageStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct])
 
 
 
 cdef class ForwardUsageByRef(thrift.py3.types.Struct):
-    cdef shared_ptr[cForwardUsageByRef] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ForwardUsageByRef_FieldsSetter _fields_setter
     cdef inline object foo_impl(self)
     cdef ForwardUsageRoot __fbthrift_cached_foo
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cForwardUsageByRef])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef])
 
 
 
 cdef class IncompleteMap(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IncompleteMap_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef Map__i32_IncompleteMapDep __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncompleteMap])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap])
 
 
 
 cdef class IncompleteMapDep(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncompleteMapDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IncompleteMapDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncompleteMapDep])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep])
 
 
 
 cdef class CompleteMap(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompleteMap_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef std_unordered_map__Map__i32_CompleteMapDep __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompleteMap])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap])
 
 
 
 cdef class CompleteMapDep(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompleteMapDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompleteMapDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompleteMapDep])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep])
 
 
 
 cdef class IncompleteList(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncompleteList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IncompleteList_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef object __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncompleteList])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteList])
 
 
 
 cdef class IncompleteListDep(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncompleteListDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IncompleteListDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncompleteListDep])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep])
 
 
 
 cdef class CompleteList(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompleteList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompleteList_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef object __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompleteList])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteList])
 
 
 
 cdef class CompleteListDep(thrift.py3.types.Struct):
-    cdef shared_ptr[cCompleteListDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompleteListDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCompleteListDep])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep])
 
 
 
 cdef class AdaptedList(thrift.py3.types.Struct):
-    cdef shared_ptr[cAdaptedList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAdaptedList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AdaptedList_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef object __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAdaptedList])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAdaptedList])
 
 
 
 cdef class DependentAdaptedList(thrift.py3.types.Struct):
-    cdef shared_ptr[cDependentAdaptedList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__DependentAdaptedList_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
     cdef object __fbthrift_cached_field
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cDependentAdaptedList])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList])
 
 
 
 cdef class AllocatorAware(thrift.py3.types.Struct):
-    cdef shared_ptr[cAllocatorAware] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AllocatorAware_FieldsSetter _fields_setter
     cdef inline object aa_list_impl(self)
     cdef inline object aa_set_impl(self)
@@ -1213,49 +403,49 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
     cdef Map__i32_i32 __fbthrift_cached_aa_map
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAllocatorAware])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware])
 
 
 
 cdef class AllocatorAware2(thrift.py3.types.Struct):
-    cdef shared_ptr[cAllocatorAware2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__AllocatorAware2_FieldsSetter _fields_setter
     cdef inline object not_a_container_impl(self)
     cdef inline object box_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cAllocatorAware2])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2])
 
 
 
 cdef class TypedefStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cTypedefStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__TypedefStruct_FieldsSetter _fields_setter
     cdef inline object i32_field_impl(self)
     cdef inline object IntTypedef_field_impl(self)
     cdef inline object UintTypedef_field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cTypedefStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct])
 
 
 
 cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
-    cdef shared_ptr[cStructWithDoubleUnderscores] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__StructWithDoubleUnderscores_FieldsSetter _fields_setter
     cdef inline object __field_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cStructWithDoubleUnderscores])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores])
 
 
 cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
-    cdef shared_ptr[std_unordered_map[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_unordered_map[cint32_t,string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]])
     cdef _check_key_type(self, key)
 
-cdef shared_ptr[std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *
 cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
@@ -1271,24 +461,24 @@ cdef shared_ptr[cmap[string,cint64_t]] Map__binary_i64__make_instance(object ite
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 
-cdef std_list[cint32_t] std_list__List__i32__make_instance(object items) except *
-cdef object std_list__List__i32__from_cpp(const std_list[cint32_t]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *
+cdef object std_list__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t]&) except *
 
-cdef std_deque[cint32_t] std_deque__List__i32__make_instance(object items) except *
-cdef object std_deque__List__i32__from_cpp(const std_deque[cint32_t]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t] std_deque__List__i32__make_instance(object items) except *
+cdef object std_deque__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t]&) except *
 
-cdef folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object items) except *
-cdef object folly_fbvector__List__i32__from_cpp(const folly_fbvector[cint32_t]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object items) except *
+cdef object folly_fbvector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t]&) except *
 
-cdef folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(object items) except *
-cdef object folly_small_vector__List__i32__from_cpp(const folly_small_vector[cint32_t]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(object items) except *
+cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t]&) except *
 
 cdef class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
-    cdef shared_ptr[folly_sorted_vector_set[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[folly_sorted_vector_set[cint32_t]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]])
 
-cdef shared_ptr[folly_sorted_vector_set[cint32_t]] folly_sorted_vector_set__Set__i32__make_instance(object items) except *
+cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] folly_sorted_vector_set__Set__i32__make_instance(object items) except *
 
 cdef class Map__i32_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -1298,8 +488,8 @@ cdef class Map__i32_string(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[cint32_t,string]] Map__i32_string__make_instance(object items) except *
 
-cdef std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *
-cdef object std_list_int32_t__List__i32__from_cpp(const std_list_int32_t&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *
+cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t&) except *
 
 cdef class Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -1309,36 +499,36 @@ cdef class Map__string_i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object items) except *
 
-cdef vector[std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
-cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[std_unordered_map[cint32_t,string]]&) except *
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]&) except *
 
 cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,cIncompleteMapDep]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]])
     cdef _check_key_type(self, key)
 
-cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] Map__i32_IncompleteMapDep__make_instance(object items) except *
+cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] Map__i32_IncompleteMapDep__make_instance(object items) except *
 
 cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
-    cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]])
     cdef _check_key_type(self, key)
 
-cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
+cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
 
-cdef _std_list[cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *
-cdef object _std_list__List__IncompleteListDep__from_cpp(const _std_list[cIncompleteListDep]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *
+cdef object _std_list__List__IncompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]&) except *
 
-cdef folly_small_vector[cCompleteListDep] folly_small_vector__List__CompleteListDep__make_instance(object items) except *
-cdef object folly_small_vector__List__CompleteListDep__from_cpp(const folly_small_vector[cCompleteListDep]&) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep] folly_small_vector__List__CompleteListDep__make_instance(object items) except *
+cdef object folly_small_vector__List__CompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep]&) except *
 
-cdef vector[cAdaptedListDep] List__AdaptedListDep__make_instance(object items) except *
-cdef object List__AdaptedListDep__from_cpp(const vector[cAdaptedListDep]&) except *
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep] List__AdaptedListDep__make_instance(object items) except *
+cdef object List__AdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep]&) except *
 
-cdef vector[cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instance(object items) except *
-cdef object List__DependentAdaptedListDep__from_cpp(const vector[cDependentAdaptedListDep]&) except *
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instance(object items) except *
+cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep]&) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

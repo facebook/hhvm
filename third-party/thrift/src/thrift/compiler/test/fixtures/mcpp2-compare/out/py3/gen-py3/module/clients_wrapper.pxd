@@ -25,8 +25,10 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_clients.h" namespace "::some::valid::ns":
   cdef cppclass cEmptyServiceAsyncClient "::some::valid::ns::EmptyServiceAsyncClient":
@@ -75,14 +77,14 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
     cFollyFuture[string] binaryReturn(cRpcOptions, )
     cFollyFuture[cmap[string,cint64_t]] mapReturn(cRpcOptions, )
     cFollyFuture[cint32_t] simpleTypedefReturn(cRpcOptions, )
-    cFollyFuture[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]] complexTypedefReturn(cRpcOptions, )
-    cFollyFuture[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]] list_mostComplexTypedefReturn(cRpcOptions, )
-    cFollyFuture[_module_types.cMyEnumA] enumReturn(cRpcOptions, )
-    cFollyFuture[vector[_module_types.cMyEnumA]] list_EnumReturn(cRpcOptions, )
-    cFollyFuture[_module_types.cMyStruct] structReturn(cRpcOptions, )
-    cFollyFuture[cset[_module_types.cMyStruct]] set_StructReturn(cRpcOptions, )
-    cFollyFuture[_module_types.cComplexUnion] unionReturn(cRpcOptions, )
-    cFollyFuture[vector[_module_types.cComplexUnion]] list_UnionReturn(cRpcOptions, )
+    cFollyFuture[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]] complexTypedefReturn(cRpcOptions, )
+    cFollyFuture[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]] list_mostComplexTypedefReturn(cRpcOptions, )
+    cFollyFuture[_module_cbindings.cMyEnumA] enumReturn(cRpcOptions, )
+    cFollyFuture[vector[_module_cbindings.cMyEnumA]] list_EnumReturn(cRpcOptions, )
+    cFollyFuture[_module_cbindings.cMyStruct] structReturn(cRpcOptions, )
+    cFollyFuture[cset[_module_cbindings.cMyStruct]] set_StructReturn(cRpcOptions, )
+    cFollyFuture[_module_cbindings.cComplexUnion] unionReturn(cRpcOptions, )
+    cFollyFuture[vector[_module_cbindings.cComplexUnion]] list_UnionReturn(cRpcOptions, )
     cFollyFuture[_fbthrift_iobuf.cIOBuf] readDataEb(cRpcOptions, 
       cint64_t arg_size,)
     cFollyFuture[unique_ptr[_fbthrift_iobuf.cIOBuf]] readData(cRpcOptions, 
@@ -106,24 +108,24 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
     cFollyFuture[cFollyUnit] void_ret_map_typedef_param(cRpcOptions, 
       cint32_t arg_param1,)
     cFollyFuture[cFollyUnit] void_ret_enum_param(cRpcOptions, 
-      _module_types.cMyEnumA arg_param1,)
+      _module_cbindings.cMyEnumA arg_param1,)
     cFollyFuture[cFollyUnit] void_ret_struct_param(cRpcOptions, 
-      _module_types.cMyStruct arg_param1,)
+      _module_cbindings.cMyStruct arg_param1,)
     cFollyFuture[cFollyUnit] void_ret_listunion_param(cRpcOptions, 
-      vector[_module_types.cComplexUnion] arg_param1,)
+      vector[_module_cbindings.cComplexUnion] arg_param1,)
     cFollyFuture[cbool] bool_ret_i32_i64_param(cRpcOptions, 
       cint32_t arg_param1,
       cint64_t arg_param2,)
     cFollyFuture[cbool] bool_ret_map_param(cRpcOptions, 
       cmap[string,cint64_t] arg_param1,)
     cFollyFuture[cbool] bool_ret_union_param(cRpcOptions, 
-      _module_types.cComplexUnion arg_param1,)
+      _module_cbindings.cComplexUnion arg_param1,)
     cFollyFuture[cint64_t] i64_ret_float_double_param(cRpcOptions, 
       float arg_param1,
       double arg_param2,)
     cFollyFuture[cint64_t] i64_ret_string_typedef_param(cRpcOptions, 
       string arg_param1,
-      cset[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]] arg_param2,)
+      cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] arg_param2,)
     cFollyFuture[cint64_t] i64_ret_i32_i32_i32_i32_i32_param(cRpcOptions, 
       cint32_t arg_param1,
       cint32_t arg_param2,
@@ -131,7 +133,7 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
       cint32_t arg_param4,
       cint32_t arg_param5,)
     cFollyFuture[double] double_ret_setstruct_param(cRpcOptions, 
-      cset[_module_types.cMyStruct] arg_param1,)
+      cset[_module_cbindings.cMyStruct] arg_param1,)
     cFollyFuture[string] string_ret_string_param(cRpcOptions, 
       string arg_param1,)
     cFollyFuture[string] binary_ret_binary_param(cRpcOptions, 
@@ -146,21 +148,21 @@ cdef extern from "thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/cli
     cFollyFuture[cint32_t] typedef_ret_i32_param(cRpcOptions, 
       cint32_t arg_param1,)
     cFollyFuture[vector[cint32_t]] listtypedef_ret_typedef_param(cRpcOptions, 
-      vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]] arg_param1,)
-    cFollyFuture[_module_types.cMyEnumA] enum_ret_double_param(cRpcOptions, 
+      vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]] arg_param1,)
+    cFollyFuture[_module_cbindings.cMyEnumA] enum_ret_double_param(cRpcOptions, 
       double arg_param1,)
-    cFollyFuture[_module_types.cMyEnumA] enum_ret_double_enum_param(cRpcOptions, 
+    cFollyFuture[_module_cbindings.cMyEnumA] enum_ret_double_enum_param(cRpcOptions, 
       double arg_param1,
-      _module_types.cMyEnumA arg_param2,)
-    cFollyFuture[vector[_module_types.cMyEnumA]] listenum_ret_map_param(cRpcOptions, 
+      _module_cbindings.cMyEnumA arg_param2,)
+    cFollyFuture[vector[_module_cbindings.cMyEnumA]] listenum_ret_map_param(cRpcOptions, 
       cmap[string,cint64_t] arg_param1,)
-    cFollyFuture[_module_types.cMyStruct] struct_ret_i16_param(cRpcOptions, 
+    cFollyFuture[_module_cbindings.cMyStruct] struct_ret_i16_param(cRpcOptions, 
       cint16_t arg_param1,)
-    cFollyFuture[cset[_module_types.cMyStruct]] setstruct_ret_set_param(cRpcOptions, 
+    cFollyFuture[cset[_module_cbindings.cMyStruct]] setstruct_ret_set_param(cRpcOptions, 
       cset[string] arg_param1,)
-    cFollyFuture[_module_types.cComplexUnion] union_ret_i32_i32_param(cRpcOptions, 
+    cFollyFuture[_module_cbindings.cComplexUnion] union_ret_i32_i32_param(cRpcOptions, 
       cint32_t arg_param1,
       cint32_t arg_param2,)
-    cFollyFuture[vector[_module_types.cComplexUnion]] listunion_string_param(cRpcOptions, 
+    cFollyFuture[vector[_module_cbindings.cComplexUnion]] listunion_string_param(cRpcOptions, 
       string arg_param1,)
 

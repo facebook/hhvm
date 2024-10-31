@@ -7,6 +7,6 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport apache.thrift.fixtures.types.included.types as _fbthrift_ctypes
+cimport apache.thrift.fixtures.types.included.cbindings as _fbthrift_cbindings
 
 

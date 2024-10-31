@@ -77,7 +77,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -85,7 +85,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef MyStruct __fbthrift_inst = MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -108,7 +108,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -194,14 +194,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
     def __copy__(MyStruct self):
-        cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyStruct](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cMyStruct](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -214,7 +214,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMyStruct].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cMyStruct].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -223,7 +223,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cMyStruct](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -232,14 +232,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -263,7 +263,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class Containers(thrift.py3.types.Struct):
     def __init__(Containers self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cContainers]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cContainers]()
         self._fields_setter = _fbthrift_types_fields.__Containers_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -271,7 +271,7 @@ cdef class Containers(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Containers __fbthrift_inst = Containers.__new__(Containers)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cContainers](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cContainers](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Containers_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -288,7 +288,7 @@ cdef class Containers(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cContainers] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cContainers] cpp_obj):
         __fbthrift_inst = <Containers>Containers.__new__(Containers)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -332,14 +332,14 @@ cdef class Containers(thrift.py3.types.Struct):
 
 
     def __copy__(Containers self):
-        cdef shared_ptr[cContainers] cpp_obj = make_shared[cContainers](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cContainers] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cContainers](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Containers._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cContainers](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cContainers](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Containers>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -352,7 +352,7 @@ cdef class Containers(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cContainers].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cContainers].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -361,7 +361,7 @@ cdef class Containers(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cContainers](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cContainers](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -370,14 +370,14 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Containers self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cContainers](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cContainers](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Containers self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cContainers]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cContainers]()
         with nogil:
-            needed = serializer.cdeserialize[cContainers](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cContainers](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -401,7 +401,7 @@ cdef class Containers(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class MyDataItem(thrift.py3.types.Struct):
     def __init__(MyDataItem self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyDataItem]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem]()
         self._fields_setter = _fbthrift_types_fields.__MyDataItem_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -416,7 +416,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyDataItem] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem] cpp_obj):
         __fbthrift_inst = <MyDataItem>MyDataItem.__new__(MyDataItem)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -433,14 +433,14 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 
     def __copy__(MyDataItem self):
-        cdef shared_ptr[cMyDataItem] cpp_obj = make_shared[cMyDataItem](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyDataItem](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cMyDataItem](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyDataItem>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -453,7 +453,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMyDataItem].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cMyDataItem].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -462,7 +462,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyDataItem](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cMyDataItem](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -471,14 +471,14 @@ cdef class MyDataItem(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyDataItem self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyDataItem](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cMyDataItem](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyDataItem self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyDataItem]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem]()
         with nogil:
-            needed = serializer.cdeserialize[cMyDataItem](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyDataItem](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -536,19 +536,19 @@ cdef class MyUnion(thrift.py3.types.Union):
         raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @staticmethod
-    cdef unique_ptr[cMyUnion] _make_instance(
-        cMyUnion* base_instance,
+    cdef unique_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _make_instance(
+        _test_fixtures_basic_module_cbindings.cMyUnion* base_instance,
         object myEnum,
         MyStruct myStruct,
         MyDataItem myDataItem,
         object floatSet
     ) except *:
-        cdef unique_ptr[cMyUnion] c_inst = make_unique[cMyUnion]()
+        cdef unique_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] c_inst = make_unique[_test_fixtures_basic_module_cbindings.cMyUnion]()
         cdef bint any_set = False
         if myEnum is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_myEnum(<cMyEnum><int>myEnum)
+            deref(c_inst).set_myEnum(<_test_fixtures_basic_module_cbindings.cMyEnum><int>myEnum)
             any_set = True
         if myStruct is not None:
             if any_set:
@@ -570,7 +570,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyUnion] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj):
         __fbthrift_inst = <MyUnion>MyUnion.__new__(MyUnion)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -612,21 +612,21 @@ cdef class MyUnion(thrift.py3.types.Union):
         elif type == 1:
             self.value = translate_cpp_enum_to_python(MyEnum, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myEnum())
         elif type == 2:
-            self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myStruct()))
+            self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myStruct()))
         elif type == 3:
-            self.value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
+            self.value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
         elif type == 4:
             self.value = Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[float]](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet()))
 
     def __copy__(MyUnion self):
-        cdef shared_ptr[cMyUnion] cpp_obj = make_shared[cMyUnion](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyUnion](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cMyUnion](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyUnion>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -639,7 +639,7 @@ cdef class MyUnion(thrift.py3.types.Union):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMyUnion].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cMyUnion].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -648,7 +648,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyUnion](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cMyUnion](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -657,14 +657,14 @@ cdef class MyUnion(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyUnion self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyUnion](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cMyUnion](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyUnion self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyUnion]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion]()
         with nogil:
-            needed = serializer.cdeserialize[cMyUnion](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyUnion](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
@@ -690,7 +690,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 @__cython.auto_pickle(False)
 cdef class MyException(thrift.py3.exceptions.GeneratedError):
     def __init__(MyException self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyException]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyException]()
         self._fields_setter = _fbthrift_types_fields.__MyException_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -706,7 +706,7 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyException] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyException] cpp_obj):
         __fbthrift_inst = <MyException>MyException.__new__(MyException, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -756,14 +756,14 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(MyException self):
-        cdef shared_ptr[cMyException] cpp_obj = make_shared[cMyException](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyException] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyException](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyException](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cMyException](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyException>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -776,7 +776,7 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cMyException].gen(meta)
+        _test_fixtures_basic_module_cbindings.ExceptionMetadata[_test_fixtures_basic_module_cbindings.cMyException].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -785,7 +785,7 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyException](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cMyException](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -794,14 +794,14 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyException self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyException](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cMyException](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyException self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyException]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyException]()
         with nogil:
-            needed = serializer.cdeserialize[cMyException](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyException](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -825,7 +825,7 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 @__cython.auto_pickle(False)
 cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     def __init__(MyExceptionWithMessage self, *args, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyExceptionWithMessage]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage]()
         self._fields_setter = _fbthrift_types_fields.__MyExceptionWithMessage_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__( *args, **kwargs)
 
@@ -841,7 +841,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyExceptionWithMessage] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage] cpp_obj):
         __fbthrift_inst = <MyExceptionWithMessage>MyExceptionWithMessage.__new__(MyExceptionWithMessage, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
@@ -894,14 +894,14 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(MyExceptionWithMessage self):
-        cdef shared_ptr[cMyExceptionWithMessage] cpp_obj = make_shared[cMyExceptionWithMessage](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyExceptionWithMessage._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyExceptionWithMessage](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyExceptionWithMessage>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -914,7 +914,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        ExceptionMetadata[cMyExceptionWithMessage].gen(meta)
+        _test_fixtures_basic_module_cbindings.ExceptionMetadata[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -923,7 +923,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyExceptionWithMessage](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -932,14 +932,14 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyExceptionWithMessage self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyExceptionWithMessage](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyExceptionWithMessage self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyExceptionWithMessage]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage]()
         with nogil:
-            needed = serializer.cdeserialize[cMyExceptionWithMessage](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -963,7 +963,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 @__cython.auto_pickle(False)
 cdef class ReservedKeyword(thrift.py3.types.Struct):
     def __init__(ReservedKeyword self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cReservedKeyword]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword]()
         self._fields_setter = _fbthrift_types_fields.__ReservedKeyword_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -971,7 +971,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef ReservedKeyword __fbthrift_inst = ReservedKeyword.__new__(ReservedKeyword)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cReservedKeyword](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__ReservedKeyword_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -986,7 +986,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cReservedKeyword] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword] cpp_obj):
         __fbthrift_inst = <ReservedKeyword>ReservedKeyword.__new__(ReservedKeyword)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -1010,14 +1010,14 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
 
     def __copy__(ReservedKeyword self):
-        cdef shared_ptr[cReservedKeyword] cpp_obj = make_shared[cReservedKeyword](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cReservedKeyword](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cReservedKeyword](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<ReservedKeyword>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -1030,7 +1030,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cReservedKeyword].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cReservedKeyword].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -1039,7 +1039,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cReservedKeyword](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cReservedKeyword](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -1048,14 +1048,14 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(ReservedKeyword self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cReservedKeyword](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cReservedKeyword](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(ReservedKeyword self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cReservedKeyword]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword]()
         with nogil:
-            needed = serializer.cdeserialize[cReservedKeyword](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cReservedKeyword](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -1111,11 +1111,11 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @staticmethod
-    cdef unique_ptr[cUnionToBeRenamed] _make_instance(
-        cUnionToBeRenamed* base_instance,
+    cdef unique_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _make_instance(
+        _test_fixtures_basic_module_cbindings.cUnionToBeRenamed* base_instance,
         object reserved_field
     ) except *:
-        cdef unique_ptr[cUnionToBeRenamed] c_inst = make_unique[cUnionToBeRenamed]()
+        cdef unique_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] c_inst = make_unique[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed]()
         cdef bint any_set = False
         if reserved_field is not None:
             if any_set:
@@ -1127,7 +1127,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cUnionToBeRenamed] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] cpp_obj):
         __fbthrift_inst = <UnionToBeRenamed>UnionToBeRenamed.__new__(UnionToBeRenamed)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         __fbthrift_inst._load_cache()
@@ -1152,14 +1152,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_reserved_field()
 
     def __copy__(UnionToBeRenamed self):
-        cdef shared_ptr[cUnionToBeRenamed] cpp_obj = make_shared[cUnionToBeRenamed](
+        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return UnionToBeRenamed._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cUnionToBeRenamed](
+        return __richcmp[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<UnionToBeRenamed>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -1172,7 +1172,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cUnionToBeRenamed].gen(meta)
+        _test_fixtures_basic_module_cbindings.StructMetadata[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -1181,7 +1181,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cUnionToBeRenamed](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -1190,14 +1190,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(UnionToBeRenamed self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cUnionToBeRenamed](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(UnionToBeRenamed self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cUnionToBeRenamed]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed]()
         with nogil:
-            needed = serializer.cdeserialize[cUnionToBeRenamed](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         # force a cache reload since the underlying data's changed
         self._load_cache()
         return needed
@@ -1603,9 +1603,9 @@ OFFSET = -10
 COUNT = 200
 MASK = 16388846
 E = 2.718281828459
-DATE = cDATE().decode('UTF-8')
-AList = List__i32__from_cpp(cAList())
-ASet = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cASet()))
-AMap = Map__string_List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cAMap()))
+DATE = _test_fixtures_basic_module_cbindings.cDATE().decode('UTF-8')
+AList = List__i32__from_cpp(_test_fixtures_basic_module_cbindings.cAList())
+ASet = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_basic_module_cbindings.cASet()))
+AMap = Map__string_List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_basic_module_cbindings.cAMap()))
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem

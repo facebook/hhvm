@@ -53,10 +53,10 @@ file.
 }}{{/constant:value}}
 {{/type:float?}}
 {{#type:string?}}
-{{constant:name}} = {{> types/c_constant }}().decode('UTF-8')
+{{constant:name}} = {{> types/current_module_cbindings}}.{{> types/c_constant }}().decode('UTF-8')
 {{/type:string?}}
 {{#type:binary?}}
-{{constant:name}} = <bytes> {{> types/c_constant }}()
+{{constant:name}} = <bytes> {{> types/current_module_cbindings}}.{{> types/c_constant }}()
 {{/type:binary?}}
 {{! We take the constant structs/containers and build a non-const shared_ptr
     as required by the thrift-py3 wrapper api, generally this is a terrible
@@ -65,17 +65,17 @@ file.
 }}
 {{#type:struct?}}
 {{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
-    }}{{> types/c_constant }}()))
+    }}{{> types/current_module_cbindings}}.{{> types/c_constant }}()))
 {{/type:struct?}}
 {{#type:container?}}{{^type:list?}}
 {{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
-    }}{{> types/c_constant }}()))
+    }}{{> types/current_module_cbindings}}.{{> types/c_constant }}()))
 {{/type:list?}}{{/type:container?}}
 {{#type:list?}}
-{{constant:name}} = {{> types/container_from_cpp }}({{> types/c_constant }}())
+{{constant:name}} = {{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}())
 {{/type:list?}}
 {{#type:enum}}
 {{constant:name}} = {{#type:need_module_path?}}{{type:modulePath}}.{{!
-    }}{{/type:need_module_path?}}{{enum:name}}(<int> ({{> types/c_constant }}()))
+    }}{{/type:need_module_path?}}{{enum:name}}(<int> ({{> types/current_module_cbindings}}.{{> types/c_constant }}()))
 {{/type:enum}}
 {{/constant:type}}

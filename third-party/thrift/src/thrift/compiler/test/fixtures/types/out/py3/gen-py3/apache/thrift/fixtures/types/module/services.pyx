@@ -54,9 +54,11 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
 
 import apache.thrift.fixtures.types.module.services_reflection as _services_reflection
 cimport apache.thrift.fixtures.types.module.services_reflection as _services_reflection
@@ -88,18 +90,18 @@ cdef class Promise_cmap__binary_cint64_t:
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string:
-    cdef cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]]* cPromise
+cdef class Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string:
+    cdef cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]](cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]](cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]] cPromise):
-        cdef Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string inst = Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string.__new__(Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]] cPromise):
+        cdef Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string inst = Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string.__new__(Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -164,10 +166,10 @@ cdef class SomeServiceInterface(
 cdef api void call_cy_SomeService_bounce_map(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]] cPromise,
-    unique_ptr[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]] m
+    cFollyPromise[unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]] cPromise,
+    unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] m
 ) noexcept:
-    cdef Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string __promise = Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string._fbthrift_create(cmove(cPromise))
+    cdef Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string __promise = Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string._fbthrift_create(cmove(cPromise))
     arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(m)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -221,7 +223,7 @@ cdef api void call_cy_SomeService_onStopRequested(
     )
 async def SomeService_bounce_map_coro(
     object self,
-    Promise__apache_thrift_fixtures_types_module_types_std_unordered_map__cint32_t_string promise,
+    Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string promise,
     m
 ):
     try:
@@ -248,7 +250,7 @@ async def SomeService_bounce_map_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]](deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SomeService_binary_keyed_map_coro(
     object self,

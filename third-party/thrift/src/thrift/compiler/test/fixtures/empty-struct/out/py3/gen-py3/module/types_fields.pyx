@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Empty_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Empty_FieldsSetter _fbthrift_create(_module_types.cEmpty* struct_cpp_obj):
+    cdef __Empty_FieldsSetter _fbthrift_create(_module_cbindings.cEmpty* struct_cpp_obj):
         cdef __Empty_FieldsSetter __fbthrift_inst = __Empty_FieldsSetter.__new__(__Empty_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst

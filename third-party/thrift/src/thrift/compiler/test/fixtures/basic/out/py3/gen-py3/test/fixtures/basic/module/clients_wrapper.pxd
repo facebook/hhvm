@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/basic/gen-cpp2/module_clients.h" namespace "::test::fixtures::basic":
@@ -71,7 +72,7 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-py3/module/clients_wra
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
-    cFollyFuture[_test_fixtures_basic_module_types.cReservedKeyword] simple_rpc(cRpcOptions, 
+    cFollyFuture[_test_fixtures_basic_module_cbindings.cReservedKeyword] simple_rpc(cRpcOptions, 
       cint32_t arg_int_parameter,)
 
 

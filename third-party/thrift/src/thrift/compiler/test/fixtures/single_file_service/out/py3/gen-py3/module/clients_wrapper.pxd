@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
 
@@ -66,7 +67,7 @@ cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/modu
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
-    cFollyFuture[_module_types.cFoo] foo(cRpcOptions, )
+    cFollyFuture[_module_cbindings.cFoo] foo(cRpcOptions, )
     cFollyFuture[unique_ptr[cClientWrapper]]& createI()
 
   cdef cppclass cAClientWrapper_IInteractionWrapper "::cpp2::AClientWrapper::IInteractionWrapper"(cClientWrapper):
@@ -79,7 +80,7 @@ cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/modu
   cdef cppclass cBClientWrapper "::cpp2::BClientWrapper"(cAClientWrapper):
 
     cFollyFuture[cFollyUnit] bar(cRpcOptions, 
-      _module_types.cFoo arg_foo,)
+      _module_cbindings.cFoo arg_foo,)
     cFollyFuture[cClientBufferedStream[cint32_t]] stream_stuff(cRpcOptions, )
 
 

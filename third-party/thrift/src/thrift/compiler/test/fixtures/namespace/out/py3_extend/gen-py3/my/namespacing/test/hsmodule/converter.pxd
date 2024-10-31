@@ -7,9 +7,9 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport my.namespacing.test.hsmodule.types as _fbthrift_ctypes
+cimport my.namespacing.test.hsmodule.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cHsFoo] HsFoo_convert_to_cpp(object inst) except*
-cdef object HsFoo_from_cpp(const shared_ptr[_fbthrift_ctypes.cHsFoo]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cHsFoo] HsFoo_convert_to_cpp(object inst) except*
+cdef object HsFoo_from_cpp(const shared_ptr[_fbthrift_cbindings.cHsFoo]& c_struct)
 

@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
@@ -64,7 +65,7 @@ from module.clients_wrapper cimport cCClientWrapper_IInteractionWrapper
 
 
 cdef void A_foo_callback(
-    cFollyTry[_module_types.cFoo]&& result,
+    cFollyTry[_module_cbindings.cFoo]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -72,7 +73,7 @@ cdef void A_foo_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cFoo](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cFoo](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -156,7 +157,7 @@ cdef class A(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cFoo](
+        bridgeFutureWith[_module_cbindings.cFoo](
             self._executor,
             down_cast_ptr[cAClientWrapper, cClientWrapper](self._client.get()).foo(rpc_options._cpp_obj, 
             ),

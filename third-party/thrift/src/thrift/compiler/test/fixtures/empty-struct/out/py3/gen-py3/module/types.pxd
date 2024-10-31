@@ -41,72 +41,38 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/empty-struct/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cEmpty "::cpp2::Empty":
-        cEmpty() except +
-        cEmpty(const cEmpty&) except +
-        bint operator==(cEmpty&)
-        bint operator!=(cEmpty&)
-        bint operator<(cEmpty&)
-        bint operator>(cEmpty&)
-        bint operator<=(cEmpty&)
-        bint operator>=(cEmpty&)
-
-    cdef enum cNada__type "::cpp2::Nada::Type":
-        cNada__type___EMPTY__ "::cpp2::Nada::Type::__EMPTY__",
-
-    cdef cppclass cNada "::cpp2::Nada":
-        cNada() except +
-        cNada(const cNada&) except +
-        bint operator==(cNada&)
-        bint operator!=(cNada&)
-        bint operator<(cNada&)
-        bint operator>(cNada&)
-        bint operator<=(cNada&)
-        bint operator>=(cNada&)
-        cNada__type getType() const
-
-
-
-
 cdef class Empty(thrift.py3.types.Struct):
-    cdef shared_ptr[cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cEmpty] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Empty_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cEmpty])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cEmpty])
 
 
 
 cdef class Nada(thrift.py3.types.Union):
-    cdef shared_ptr[cNada] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cNada] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef readonly object type
     cdef readonly object value
     cdef _load_cache(Nada self)
 
     @staticmethod
-    cdef unique_ptr[cNada] _make_instance(
-        cNada* base_instance
+    cdef unique_ptr[_module_cbindings.cNada] _make_instance(
+        _module_cbindings.cNada* base_instance
     ) except *
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cNada])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cNada])
 
 
 

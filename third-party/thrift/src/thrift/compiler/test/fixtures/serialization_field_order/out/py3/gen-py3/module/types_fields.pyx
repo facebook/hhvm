@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Foo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Foo_FieldsSetter _fbthrift_create(_module_types.cFoo* struct_cpp_obj):
+    cdef __Foo_FieldsSetter _fbthrift_create(_module_cbindings.cFoo* struct_cpp_obj):
         cdef __Foo_FieldsSetter __fbthrift_inst = __Foo_FieldsSetter.__new__(__Foo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field1")] = __Foo_FieldsSetter._set_field_0
@@ -51,7 +51,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field1
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field1 is not a { int !r}.')
@@ -61,7 +61,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field field2
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field2 is not a { int !r}.')
@@ -71,7 +71,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field field3
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field3 is not a { int !r}.')
@@ -83,7 +83,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
 cdef class __Foo2_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Foo2_FieldsSetter _fbthrift_create(_module_types.cFoo2* struct_cpp_obj):
+    cdef __Foo2_FieldsSetter _fbthrift_create(_module_cbindings.cFoo2* struct_cpp_obj):
         cdef __Foo2_FieldsSetter __fbthrift_inst = __Foo2_FieldsSetter.__new__(__Foo2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field1")] = __Foo2_FieldsSetter._set_field_0
@@ -101,7 +101,7 @@ cdef class __Foo2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field1
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo2](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFoo2](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field1 is not a { int !r}.')
@@ -111,7 +111,7 @@ cdef class __Foo2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field field2
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo2](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cFoo2](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field2 is not a { int !r}.')
@@ -121,7 +121,7 @@ cdef class __Foo2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field field3
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo2](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cFoo2](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'field3 is not a { int !r}.')

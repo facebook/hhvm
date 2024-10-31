@@ -33,7 +33,7 @@ import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyStruct_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyStruct* struct_cpp_obj):
+    cdef __MyStruct_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyStruct* struct_cpp_obj):
         cdef __MyStruct_FieldsSetter __fbthrift_inst = __MyStruct_FieldsSetter.__new__(__MyStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __MyStruct_FieldsSetter._set_field_0
@@ -57,7 +57,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -67,7 +67,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field MyStringField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'MyStringField is not a { str !r}.')
@@ -76,7 +76,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field MyDataField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 2)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyDataItem):
             raise TypeError(f'MyDataField is not a { _test_fixtures_basic_module_types.MyDataItem !r}.')
@@ -85,16 +85,16 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myEnum
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 3)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyEnum):
             raise TypeError(f'field myEnum value: {repr(_fbthrift_value)} is not of the enum type { _test_fixtures_basic_module_types.MyEnum }.')
-        deref(self._struct_cpp_obj).myEnum_ref().assign(<_test_fixtures_basic_module_types.cMyEnum><int>_fbthrift_value)
+        deref(self._struct_cpp_obj).myEnum_ref().assign(<_test_fixtures_basic_module_cbindings.cMyEnum><int>_fbthrift_value)
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field oneway
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 4)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, bool):
             raise TypeError(f'oneway is not a { bool !r}.')
@@ -103,7 +103,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field readonly
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 5)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 5)
             return
         if not isinstance(_fbthrift_value, bool):
             raise TypeError(f'readonly is not a { bool !r}.')
@@ -112,7 +112,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field idempotent
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 6)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 6)
             return
         if not isinstance(_fbthrift_value, bool):
             raise TypeError(f'idempotent is not a { bool !r}.')
@@ -121,14 +121,14 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field floatSet
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 7)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 7)
             return
         deref(self._struct_cpp_obj).floatSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__float(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field no_hack_codegen_field
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyStruct](deref(self._struct_cpp_obj), 8)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 8)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'no_hack_codegen_field is not a { str !r}.')
@@ -139,7 +139,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __Containers_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Containers_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cContainers* struct_cpp_obj):
+    cdef __Containers_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cContainers* struct_cpp_obj):
         cdef __Containers_FieldsSetter __fbthrift_inst = __Containers_FieldsSetter.__new__(__Containers_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"I32List")] = __Containers_FieldsSetter._set_field_0
@@ -157,21 +157,21 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field I32List
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_basic_module_cbindings.cContainers](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).I32List_ref().assign(_test_fixtures_basic_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field StringSet
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 1)
+            __reset_field[_test_fixtures_basic_module_cbindings.cContainers](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).StringSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field StringToI64Map
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cContainers](deref(self._struct_cpp_obj), 2)
+            __reset_field[_test_fixtures_basic_module_cbindings.cContainers](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).StringToI64Map_ref().assign(deref(_test_fixtures_basic_module_types.Map__string_i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -180,7 +180,7 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
 cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyDataItem_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyDataItem* struct_cpp_obj):
+    cdef __MyDataItem_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyDataItem* struct_cpp_obj):
         cdef __MyDataItem_FieldsSetter __fbthrift_inst = __MyDataItem_FieldsSetter.__new__(__MyDataItem_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -197,7 +197,7 @@ cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
 cdef class __MyException_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyException* struct_cpp_obj):
+    cdef __MyException_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyException* struct_cpp_obj):
         cdef __MyException_FieldsSetter __fbthrift_inst = __MyException_FieldsSetter.__new__(__MyException_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __MyException_FieldsSetter._set_field_0
@@ -216,7 +216,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -226,7 +226,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field MyStringField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 1)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'MyStringField is not a { str !r}.')
@@ -235,7 +235,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field myStruct
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 2)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyStruct):
             raise TypeError(f'myStruct is not a { _test_fixtures_basic_module_types.MyStruct !r}.')
@@ -244,7 +244,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myUnion
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyException](deref(self._struct_cpp_obj), 3)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyException](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyUnion):
             raise TypeError(f'myUnion is not a { _test_fixtures_basic_module_types.MyUnion !r}.')
@@ -255,7 +255,7 @@ cdef class __MyException_FieldsSetter(__StructFieldsSetter):
 cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyExceptionWithMessage_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cMyExceptionWithMessage* struct_cpp_obj):
+    cdef __MyExceptionWithMessage_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage* struct_cpp_obj):
         cdef __MyExceptionWithMessage_FieldsSetter __fbthrift_inst = __MyExceptionWithMessage_FieldsSetter.__new__(__MyExceptionWithMessage_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __MyExceptionWithMessage_FieldsSetter._set_field_0
@@ -274,7 +274,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -284,7 +284,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field MyStringField
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 1)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'MyStringField is not a { str !r}.')
@@ -293,7 +293,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field myStruct
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 2)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyStruct):
             raise TypeError(f'myStruct is not a { _test_fixtures_basic_module_types.MyStruct !r}.')
@@ -302,7 +302,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myUnion
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 3)
+            __reset_field[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_basic_module_types.MyUnion):
             raise TypeError(f'myUnion is not a { _test_fixtures_basic_module_types.MyUnion !r}.')
@@ -313,7 +313,7 @@ cdef class __MyExceptionWithMessage_FieldsSetter(__StructFieldsSetter):
 cdef class __ReservedKeyword_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ReservedKeyword_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_types.cReservedKeyword* struct_cpp_obj):
+    cdef __ReservedKeyword_FieldsSetter _fbthrift_create(_test_fixtures_basic_module_cbindings.cReservedKeyword* struct_cpp_obj):
         cdef __ReservedKeyword_FieldsSetter __fbthrift_inst = __ReservedKeyword_FieldsSetter.__new__(__ReservedKeyword_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"reserved_field")] = __ReservedKeyword_FieldsSetter._set_field_0
@@ -329,7 +329,7 @@ cdef class __ReservedKeyword_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field reserved_field
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_basic_module_types.cReservedKeyword](deref(self._struct_cpp_obj), 0)
+            __reset_field[_test_fixtures_basic_module_cbindings.cReservedKeyword](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'reserved_field is not a { int !r}.')

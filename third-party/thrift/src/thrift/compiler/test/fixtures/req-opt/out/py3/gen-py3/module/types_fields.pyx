@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Foo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Foo_FieldsSetter _fbthrift_create(_module_types.cFoo* struct_cpp_obj):
+    cdef __Foo_FieldsSetter _fbthrift_create(_module_cbindings.cFoo* struct_cpp_obj):
         cdef __Foo_FieldsSetter __fbthrift_inst = __Foo_FieldsSetter.__new__(__Foo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"myInteger")] = __Foo_FieldsSetter._set_field_0
@@ -52,7 +52,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field myInteger
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'myInteger is not a { int !r}.')
@@ -62,7 +62,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field myString
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'myString is not a { str !r}.')
@@ -71,14 +71,14 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field myBools
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).myBools_ref().assign(_module_types.List__bool__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field myNumbers
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 3)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 3)
             return
         deref(self._struct_cpp_obj).myNumbers_ref().assign(_module_types.List__i32__make_instance(_fbthrift_value))
 

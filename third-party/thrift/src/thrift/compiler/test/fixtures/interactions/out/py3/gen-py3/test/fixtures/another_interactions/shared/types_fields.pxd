@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 
 
 
 ctypedef void (*__DoSomethingResult_FieldsSetterFunc)(__DoSomethingResult_FieldsSetter, object) except *
 
 cdef class __DoSomethingResult_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_another_interactions_shared_types.cDoSomethingResult* _struct_cpp_obj
+    cdef _test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult* _struct_cpp_obj
     cdef cumap[__cstring_view, __DoSomethingResult_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __DoSomethingResult_FieldsSetter _fbthrift_create(_test_fixtures_another_interactions_shared_types.cDoSomethingResult* struct_cpp_obj)
+    cdef __DoSomethingResult_FieldsSetter _fbthrift_create(_test_fixtures_another_interactions_shared_cbindings.cDoSomethingResult* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 

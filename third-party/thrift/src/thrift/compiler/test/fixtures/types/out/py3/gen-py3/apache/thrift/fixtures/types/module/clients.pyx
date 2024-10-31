@@ -50,8 +50,10 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
+cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 import apache.thrift.fixtures.types.module.services_reflection as _services_reflection
@@ -61,7 +63,7 @@ from apache.thrift.fixtures.types.module.clients_wrapper cimport cSomeServiceAsy
 
 
 cdef void SomeService_bounce_map_callback(
-    cFollyTry[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]]&& result,
+    cFollyTry[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -69,7 +71,7 @@ cdef void SomeService_bounce_map_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]](cmove(result.value()))))
+            pyfuture.set_result(_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -117,7 +119,7 @@ cdef class SomeService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_apache_thrift_fixtures_types_module_types.std_unordered_map[cint32_t,string]](
+        bridgeFutureWith[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](
             self._executor,
             down_cast_ptr[cSomeServiceClientWrapper, cClientWrapper](self._client.get()).bounce_map(rpc_options._cpp_obj, 
                 deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string>m)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),

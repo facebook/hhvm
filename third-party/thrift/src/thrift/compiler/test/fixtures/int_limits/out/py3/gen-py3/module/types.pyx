@@ -68,7 +68,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class Limits(thrift.py3.types.Struct):
     def __init__(Limits self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cLimits]()
         self._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -76,7 +76,7 @@ cdef class Limits(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef Limits __fbthrift_inst = Limits.__new__(Limits)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cLimits](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Limits_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -98,7 +98,7 @@ cdef class Limits(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cLimits] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cLimits] cpp_obj):
         __fbthrift_inst = <Limits>Limits.__new__(Limits)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -171,14 +171,14 @@ cdef class Limits(thrift.py3.types.Struct):
 
 
     def __copy__(Limits self):
-        cdef shared_ptr[cLimits] cpp_obj = make_shared[cLimits](
+        cdef shared_ptr[_module_cbindings.cLimits] cpp_obj = make_shared[_module_cbindings.cLimits](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Limits._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cLimits](
+        return __richcmp[_module_cbindings.cLimits](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<Limits>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -191,7 +191,7 @@ cdef class Limits(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cLimits].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cLimits].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -200,7 +200,7 @@ cdef class Limits(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cLimits](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cLimits](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -209,14 +209,14 @@ cdef class Limits(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Limits self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cLimits](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cLimits](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(Limits self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cLimits]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cLimits]()
         with nogil:
-            needed = serializer.cdeserialize[cLimits](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cLimits](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 

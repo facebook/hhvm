@@ -41,118 +41,37 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-py3/module/types.h":
   pass
 
-cdef extern from * nogil:
-    cdef cppclass std_deque_std_string "std::deque<std::string>":
-        ctypedef string value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            string& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            string& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        std_deque_std_string() except +
-        std_deque_std_string(std_deque_std_string&) except +
-
-        string& operator[](size_type)
-        void push_back(string&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h" namespace "::cpp2":
-    cdef cppclass cMyEnum "::cpp2::YourEnum":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cMyStructNestedAnnotation "::cpp2::MyStructNestedAnnotation":
-        cMyStructNestedAnnotation() except +
-        cMyStructNestedAnnotation(const cMyStructNestedAnnotation&) except +
-        bint operator==(cMyStructNestedAnnotation&)
-        bint operator!=(cMyStructNestedAnnotation&)
-        bint operator<(cMyStructNestedAnnotation&)
-        bint operator>(cMyStructNestedAnnotation&)
-        bint operator<=(cMyStructNestedAnnotation&)
-        bint operator>=(cMyStructNestedAnnotation&)
-        __field_ref[string] name_ref "name_ref" ()
-
-
-    cdef cppclass cSecretStruct "::cpp2::SecretStruct":
-        cSecretStruct() except +
-        cSecretStruct(const cSecretStruct&) except +
-        bint operator==(cSecretStruct&)
-        bint operator!=(cSecretStruct&)
-        bint operator<(cSecretStruct&)
-        bint operator>(cSecretStruct&)
-        bint operator<=(cSecretStruct&)
-        bint operator>=(cSecretStruct&)
-        __field_ref[cint64_t] id_ref "id_ref" ()
-        __field_ref[string] password_ref "password_ref" ()
-
-
 
 
 cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStructNestedAnnotation] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cMyStructNestedAnnotation] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStructNestedAnnotation_FieldsSetter _fields_setter
     cdef inline object name_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStructNestedAnnotation])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStructNestedAnnotation])
 
 
 
 cdef class SecretStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cSecretStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cSecretStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__SecretStruct_FieldsSetter _fields_setter
     cdef inline object id_impl(self)
     cdef inline object password_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSecretStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSecretStruct])
 
 
-cdef std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *
-cdef object std_deque_std_string__List__string__from_cpp(const std_deque_std_string&) except *
+cdef _module_cbindings.std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *
+cdef object std_deque_std_string__List__string__from_cpp(const _module_cbindings.std_deque_std_string&) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_constants.h" namespace "::cpp2":
-    cdef cMyStruct cmyStruct "::cpp2::module_constants::myStruct"()

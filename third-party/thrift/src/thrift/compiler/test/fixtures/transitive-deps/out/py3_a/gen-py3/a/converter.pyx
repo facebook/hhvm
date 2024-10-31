@@ -6,11 +6,12 @@
 #  @generated
 #
 
+cimport a.types as _fbthrift_ctypes
 
 
-cdef shared_ptr[_fbthrift_ctypes.cA] A_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.cA] A_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.A?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
 
-cdef object A_from_cpp(const shared_ptr[_fbthrift_ctypes.cA]& c_struct):
+cdef object A_from_cpp(const shared_ptr[_fbthrift_cbindings.cA]& c_struct):
     return _fbthrift_ctypes.A._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

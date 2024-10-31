@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Mixin1_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Mixin1_FieldsSetter _fbthrift_create(_module_types.cMixin1* struct_cpp_obj):
+    cdef __Mixin1_FieldsSetter _fbthrift_create(_module_cbindings.cMixin1* struct_cpp_obj):
         cdef __Mixin1_FieldsSetter __fbthrift_inst = __Mixin1_FieldsSetter.__new__(__Mixin1_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field1")] = __Mixin1_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __Mixin1_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field1
         if _fbthrift_value is None:
-            __reset_field[_module_types.cMixin1](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cMixin1](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field1 is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __Mixin1_FieldsSetter(__StructFieldsSetter):
 cdef class __Mixin2_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Mixin2_FieldsSetter _fbthrift_create(_module_types.cMixin2* struct_cpp_obj):
+    cdef __Mixin2_FieldsSetter _fbthrift_create(_module_cbindings.cMixin2* struct_cpp_obj):
         cdef __Mixin2_FieldsSetter __fbthrift_inst = __Mixin2_FieldsSetter.__new__(__Mixin2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"m1")] = __Mixin2_FieldsSetter._set_field_0
@@ -77,7 +77,7 @@ cdef class __Mixin2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field m1
         if _fbthrift_value is None:
-            __reset_field[_module_types.cMixin2](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cMixin2](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin1):
             raise TypeError(f'm1 is not a { _module_types.Mixin1 !r}.')
@@ -86,7 +86,7 @@ cdef class __Mixin2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field field2
         if _fbthrift_value is None:
-            __reset_field[_module_types.cMixin2](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cMixin2](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field2 is not a { str !r}.')
@@ -97,7 +97,7 @@ cdef class __Mixin2_FieldsSetter(__StructFieldsSetter):
 cdef class __Mixin3Base_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Mixin3Base_FieldsSetter _fbthrift_create(_module_types.cMixin3Base* struct_cpp_obj):
+    cdef __Mixin3Base_FieldsSetter _fbthrift_create(_module_cbindings.cMixin3Base* struct_cpp_obj):
         cdef __Mixin3Base_FieldsSetter __fbthrift_inst = __Mixin3Base_FieldsSetter.__new__(__Mixin3Base_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field3")] = __Mixin3Base_FieldsSetter._set_field_0
@@ -113,7 +113,7 @@ cdef class __Mixin3Base_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field3
         if _fbthrift_value is None:
-            __reset_field[_module_types.cMixin3Base](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cMixin3Base](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field3 is not a { str !r}.')
@@ -124,7 +124,7 @@ cdef class __Mixin3Base_FieldsSetter(__StructFieldsSetter):
 cdef class __Foo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Foo_FieldsSetter _fbthrift_create(_module_types.cFoo* struct_cpp_obj):
+    cdef __Foo_FieldsSetter _fbthrift_create(_module_cbindings.cFoo* struct_cpp_obj):
         cdef __Foo_FieldsSetter __fbthrift_inst = __Foo_FieldsSetter.__new__(__Foo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field4")] = __Foo_FieldsSetter._set_field_0
@@ -142,7 +142,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field4
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field4 is not a { str !r}.')
@@ -151,7 +151,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field m2
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin2):
             raise TypeError(f'm2 is not a { _module_types.Mixin2 !r}.')
@@ -160,7 +160,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field m3
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFoo](deref(self._struct_cpp_obj), 2)
+            __reset_field[_module_cbindings.cFoo](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, _module_types.Mixin3Base):
             raise TypeError(f'm3 is not a { _module_types.Mixin3Base !r}.')

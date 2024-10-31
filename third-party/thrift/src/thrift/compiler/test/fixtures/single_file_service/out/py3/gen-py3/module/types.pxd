@@ -48,46 +48,23 @@ from thrift.py3.stream cimport (
     ServerStream, cServerStream, ResponseAndServerStream
 )
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-py3/module/types.h":
   pass
 
-cdef extern from "<memory>":
-  pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/single_file_service/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFoo "::cpp2::Foo":
-        cFoo() except +
-        cFoo(const cFoo&) except +
-        bint operator==(cFoo&)
-        bint operator!=(cFoo&)
-        bint operator<(cFoo&)
-        bint operator>(cFoo&)
-        bint operator<=(cFoo&)
-        bint operator>=(cFoo&)
-        __optional_field_ref[cint32_t] value_ref "value_ref" ()
-
-
 
 
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object value_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFoo])
 
 
 

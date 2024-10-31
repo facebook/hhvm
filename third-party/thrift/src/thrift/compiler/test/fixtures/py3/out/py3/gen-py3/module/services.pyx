@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection
@@ -72,50 +73,50 @@ from module.services_wrapper cimport cRederivedServiceInterface
 
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cAnEnum:
-    cdef cFollyPromise[_module_types.cAnEnum]* cPromise
+cdef class Promise__module_cbindings_cAnEnum:
+    cdef cFollyPromise[_module_cbindings.cAnEnum]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[_module_types.cAnEnum](cFollyPromise[_module_types.cAnEnum].makeEmpty())
+        self.cPromise = new cFollyPromise[_module_cbindings.cAnEnum](cFollyPromise[_module_cbindings.cAnEnum].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[_module_types.cAnEnum] cPromise):
-        cdef Promise__module_types_cAnEnum inst = Promise__module_types_cAnEnum.__new__(Promise__module_types_cAnEnum)
+    cdef _fbthrift_create(cFollyPromise[_module_cbindings.cAnEnum] cPromise):
+        cdef Promise__module_cbindings_cAnEnum inst = Promise__module_cbindings_cAnEnum.__new__(Promise__module_cbindings_cAnEnum)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cBinaryUnionStruct:
-    cdef cFollyPromise[unique_ptr[_module_types.cBinaryUnionStruct]]* cPromise
+cdef class Promise__module_cbindings_cBinaryUnionStruct:
+    cdef cFollyPromise[unique_ptr[_module_cbindings.cBinaryUnionStruct]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_module_types.cBinaryUnionStruct]](cFollyPromise[unique_ptr[_module_types.cBinaryUnionStruct]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_module_cbindings.cBinaryUnionStruct]](cFollyPromise[unique_ptr[_module_cbindings.cBinaryUnionStruct]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_types.cBinaryUnionStruct]] cPromise):
-        cdef Promise__module_types_cBinaryUnionStruct inst = Promise__module_types_cBinaryUnionStruct.__new__(Promise__module_types_cBinaryUnionStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_cbindings.cBinaryUnionStruct]] cPromise):
+        cdef Promise__module_cbindings_cBinaryUnionStruct inst = Promise__module_cbindings_cBinaryUnionStruct.__new__(Promise__module_cbindings_cBinaryUnionStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise_vector___module_types_cAnEnum:
-    cdef cFollyPromise[unique_ptr[vector[_module_types.cAnEnum]]]* cPromise
+cdef class Promise_vector___module_cbindings_cAnEnum:
+    cdef cFollyPromise[unique_ptr[vector[_module_cbindings.cAnEnum]]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_types.cAnEnum]]](cFollyPromise[unique_ptr[vector[_module_types.cAnEnum]]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[vector[_module_cbindings.cAnEnum]]](cFollyPromise[unique_ptr[vector[_module_cbindings.cAnEnum]]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_types.cAnEnum]]] cPromise):
-        cdef Promise_vector___module_types_cAnEnum inst = Promise_vector___module_types_cAnEnum.__new__(Promise_vector___module_types_cAnEnum)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[vector[_module_cbindings.cAnEnum]]] cPromise):
+        cdef Promise_vector___module_cbindings_cAnEnum inst = Promise_vector___module_cbindings_cAnEnum.__new__(Promise_vector___module_cbindings_cAnEnum)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -248,18 +249,18 @@ cdef class Promise_cset__string:
         return inst
 
 @cython.auto_pickle(False)
-cdef class Promise__module_types_cSimpleStruct:
-    cdef cFollyPromise[unique_ptr[_module_types.cSimpleStruct]]* cPromise
+cdef class Promise__module_cbindings_cSimpleStruct:
+    cdef cFollyPromise[unique_ptr[_module_cbindings.cSimpleStruct]]* cPromise
 
     def __cinit__(self):
-        self.cPromise = new cFollyPromise[unique_ptr[_module_types.cSimpleStruct]](cFollyPromise[unique_ptr[_module_types.cSimpleStruct]].makeEmpty())
+        self.cPromise = new cFollyPromise[unique_ptr[_module_cbindings.cSimpleStruct]](cFollyPromise[unique_ptr[_module_cbindings.cSimpleStruct]].makeEmpty())
 
     def __dealloc__(self):
         del self.cPromise
 
     @staticmethod
-    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_types.cSimpleStruct]] cPromise):
-        cdef Promise__module_types_cSimpleStruct inst = Promise__module_types_cSimpleStruct.__new__(Promise__module_types_cSimpleStruct)
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_module_cbindings.cSimpleStruct]] cPromise):
+        cdef Promise__module_cbindings_cSimpleStruct inst = Promise__module_cbindings_cSimpleStruct.__new__(Promise__module_cbindings_cSimpleStruct)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -785,10 +786,10 @@ cdef api void call_cy_SimpleService_get_value(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise,
-    unique_ptr[_module_types.cSimpleStruct] simple_struct
+    unique_ptr[_module_cbindings.cSimpleStruct] simple_struct
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_simple_struct = _module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cSimpleStruct](simple_struct.release()))
+    arg_simple_struct = _module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSimpleStruct](simple_struct.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -995,7 +996,7 @@ cdef api void call_cy_SimpleService_count_structs(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise,
-    unique_ptr[vector[_module_types.cSimpleStruct]] items
+    unique_ptr[vector[_module_cbindings.cSimpleStruct]] items
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     arg_items = _module_types.List__SimpleStruct__from_cpp(deref(items))
@@ -1073,7 +1074,7 @@ cdef api void call_cy_SimpleService_map_length(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint16_t] cPromise,
-    unique_ptr[cmap[string,_module_types.cSimpleStruct]] items
+    unique_ptr[cmap[string,_module_cbindings.cSimpleStruct]] items
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
     arg_items = _module_types.Map__string_SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
@@ -1109,10 +1110,10 @@ cdef api void call_cy_SimpleService_complex_sum_i32(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise,
-    unique_ptr[_module_types.cComplexStruct] counter
+    unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexStruct](counter.release()))
+    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexStruct](counter.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1127,10 +1128,10 @@ cdef api void call_cy_SimpleService_repeat_name(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[unique_ptr[string]] cPromise,
-    unique_ptr[_module_types.cComplexStruct] counter
+    unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cComplexStruct](counter.release()))
+    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexStruct](counter.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1144,9 +1145,9 @@ cdef api void call_cy_SimpleService_repeat_name(
 cdef api void call_cy_SimpleService_get_struct(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cSimpleStruct]] cPromise
+    cFollyPromise[unique_ptr[_module_cbindings.cSimpleStruct]] cPromise
 ) noexcept:
-    cdef Promise__module_types_cSimpleStruct __promise = Promise__module_types_cSimpleStruct._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cSimpleStruct __promise = Promise__module_cbindings_cSimpleStruct._fbthrift_create(cmove(cPromise))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1213,10 +1214,10 @@ cdef api void call_cy_SimpleService_words_count(
 cdef api void call_cy_SimpleService_set_enum(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[_module_types.cAnEnum] cPromise,
-    _module_types.cAnEnum in_enum
+    cFollyPromise[_module_cbindings.cAnEnum] cPromise,
+    _module_cbindings.cAnEnum in_enum
 ) noexcept:
-    cdef Promise__module_types_cAnEnum __promise = Promise__module_types_cAnEnum._fbthrift_create(cmove(cPromise))
+    cdef Promise__module_cbindings_cAnEnum __promise = Promise__module_cbindings_cAnEnum._fbthrift_create(cmove(cPromise))
     arg_in_enum = _module_types.AnEnum(<int> in_enum)
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1289,7 +1290,7 @@ cdef api void call_cy_SimpleService_nested_map_argument(
     object self,
     Cpp2RequestContext* ctx,
     cFollyPromise[cint32_t] cPromise,
-    unique_ptr[cmap[string,vector[_module_types.cSimpleStruct]]] struct_map
+    unique_ptr[cmap[string,vector[_module_cbindings.cSimpleStruct]]] struct_map
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
     arg_struct_map = _module_types.Map__string_List__SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(struct_map)))
@@ -1414,10 +1415,10 @@ cdef api void call_cy_SimpleService_contain_binary(
 cdef api void call_cy_SimpleService_contain_enum(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[vector[_module_types.cAnEnum]]] cPromise,
-    unique_ptr[vector[_module_types.cAnEnum]] the_enum
+    cFollyPromise[unique_ptr[vector[_module_cbindings.cAnEnum]]] cPromise,
+    unique_ptr[vector[_module_cbindings.cAnEnum]] the_enum
 ) noexcept:
-    cdef Promise_vector___module_types_cAnEnum __promise = Promise_vector___module_types_cAnEnum._fbthrift_create(cmove(cPromise))
+    cdef Promise_vector___module_cbindings_cAnEnum __promise = Promise_vector___module_cbindings_cAnEnum._fbthrift_create(cmove(cPromise))
     arg_the_enum = _module_types.List__AnEnum__from_cpp(deref(the_enum))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1432,11 +1433,11 @@ cdef api void call_cy_SimpleService_contain_enum(
 cdef api void call_cy_SimpleService_get_binary_union_struct(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[unique_ptr[_module_types.cBinaryUnionStruct]] cPromise,
-    unique_ptr[_module_types.cBinaryUnion] u
+    cFollyPromise[unique_ptr[_module_cbindings.cBinaryUnionStruct]] cPromise,
+    unique_ptr[_module_cbindings.cBinaryUnion] u
 ) noexcept:
-    cdef Promise__module_types_cBinaryUnionStruct __promise = Promise__module_types_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
-    arg_u = _module_types.BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_types.cBinaryUnion](u.release()))
+    cdef Promise__module_cbindings_cBinaryUnionStruct __promise = Promise__module_cbindings_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
+    arg_u = _module_types.BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBinaryUnion](u.release()))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2191,7 +2192,7 @@ async def SimpleService_repeat_name_coro(
 
 async def SimpleService_get_struct_coro(
     object self,
-    Promise__module_types_cSimpleStruct promise
+    Promise__module_cbindings_cSimpleStruct promise
 ):
     try:
         result = await self.get_struct()
@@ -2215,7 +2216,7 @@ async def SimpleService_get_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cSimpleStruct](deref((<_module_types.SimpleStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cSimpleStruct](deref((<_module_types.SimpleStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_fib_coro(
     object self,
@@ -2312,7 +2313,7 @@ async def SimpleService_words_count_coro(
 
 async def SimpleService_set_enum_coro(
     object self,
-    Promise__module_types_cAnEnum promise,
+    Promise__module_cbindings_cAnEnum promise,
     in_enum
 ):
     try:
@@ -2338,7 +2339,7 @@ async def SimpleService_set_enum_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(<_module_types.cAnEnum><int>result)
+        promise.cPromise.setValue(<_module_cbindings.cAnEnum><int>result)
 
 async def SimpleService_list_of_lists_coro(
     object self,
@@ -2650,7 +2651,7 @@ async def SimpleService_contain_binary_coro(
 
 async def SimpleService_contain_enum_coro(
     object self,
-    Promise_vector___module_types_cAnEnum promise,
+    Promise_vector___module_cbindings_cAnEnum promise,
     the_enum
 ):
     try:
@@ -2677,11 +2678,11 @@ async def SimpleService_contain_enum_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[vector[_module_types.cAnEnum]](_module_types.List__AnEnum__make_instance(result)))
+        promise.cPromise.setValue(make_unique[vector[_module_cbindings.cAnEnum]](_module_types.List__AnEnum__make_instance(result)))
 
 async def SimpleService_get_binary_union_struct_coro(
     object self,
-    Promise__module_types_cBinaryUnionStruct promise,
+    Promise__module_cbindings_cBinaryUnionStruct promise,
     u
 ):
     try:
@@ -2707,7 +2708,7 @@ async def SimpleService_get_binary_union_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_types.cBinaryUnionStruct](deref((<_module_types.BinaryUnionStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cBinaryUnionStruct](deref((<_module_types.BinaryUnionStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def SimpleService_onStartServing_coro(
     object self,

@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 import test.fixtures.basic.module.services_reflection as _services_reflection
@@ -75,7 +76,7 @@ cdef void FooService_simple_rpc_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void FB303Service_simple_rpc_callback(
-    cFollyTry[_test_fixtures_basic_module_types.cReservedKeyword]&& result,
+    cFollyTry[_test_fixtures_basic_module_cbindings.cReservedKeyword]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -83,7 +84,7 @@ cdef void FB303Service_simple_rpc_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_basic_module_types.ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_types.cReservedKeyword](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_basic_module_types.ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -327,7 +328,7 @@ cdef class FB303Service(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_test_fixtures_basic_module_types.cReservedKeyword](
+        bridgeFutureWith[_test_fixtures_basic_module_cbindings.cReservedKeyword](
             self._executor,
             down_cast_ptr[cFB303ServiceClientWrapper, cClientWrapper](self._client.get()).simple_rpc(rpc_options._cpp_obj, 
                 int_parameter,

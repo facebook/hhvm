@@ -24,7 +24,7 @@ custom type overrides from the cpp.type annotation.
   }}{{#type:iobuf?}}_fbthrift_iobuf.cIOBuf{{/type:iobuf?}}{{!
   }}{{#type:iobufRef?}}unique_ptr[_fbthrift_iobuf.cIOBuf]{{/type:iobufRef?}}{{!
   }}{{^type:iobuf?}}{{^type:iobufRef?}}{{!
-    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+    }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
     }}{{type:cythonCustomType}}{{!
   }}{{/type:iobufRef?}}{{/type:iobuf?}}{{!
 }}{{/type:hasCustomType?}}{{!

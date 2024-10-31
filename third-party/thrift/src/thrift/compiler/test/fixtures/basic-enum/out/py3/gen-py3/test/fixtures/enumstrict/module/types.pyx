@@ -74,7 +74,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_enumstrict_module_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -82,7 +82,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef MyStruct __fbthrift_inst = MyStruct.__new__(MyStruct)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_enumstrict_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -98,7 +98,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enumstrict_module_cbindings.cMyStruct] cpp_obj):
         __fbthrift_inst = <MyStruct>MyStruct.__new__(MyStruct)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -133,14 +133,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
     def __copy__(MyStruct self):
-        cdef shared_ptr[cMyStruct] cpp_obj = make_shared[cMyStruct](
+        cdef shared_ptr[_test_fixtures_enumstrict_module_cbindings.cMyStruct] cpp_obj = make_shared[_test_fixtures_enumstrict_module_cbindings.cMyStruct](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyStruct](
+        return __richcmp[_test_fixtures_enumstrict_module_cbindings.cMyStruct](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -153,7 +153,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMyStruct].gen(meta)
+        _test_fixtures_enumstrict_module_cbindings.StructMetadata[_test_fixtures_enumstrict_module_cbindings.cMyStruct].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -162,7 +162,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_enumstrict_module_cbindings.cMyStruct](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -171,14 +171,14 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_test_fixtures_enumstrict_module_cbindings.cMyStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_enumstrict_module_cbindings.cMyStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_test_fixtures_enumstrict_module_cbindings.cMyStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -209,13 +209,13 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__MyEnum_string__make_instance(items)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cMyEnum,string]] c_items):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] c_items):
         __fbthrift_inst = <Map__MyEnum_string>Map__MyEnum_string.__new__(Map__MyEnum_string)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
         return __fbthrift_inst
 
     def __copy__(Map__MyEnum_string self):
-        cdef shared_ptr[cmap[cMyEnum,string]] cpp_obj = make_shared[cmap[cMyEnum,string]](
+        cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] cpp_obj = make_shared[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
@@ -234,7 +234,7 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         key = self._check_key_type(key)
         if key is None:
             raise err
-        cdef cMyEnum ckey = <cMyEnum><int>key
+        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey = <_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key
         if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
             raise err
         cdef string citem
@@ -244,8 +244,8 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
     def __iter__(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cMyEnum citem
+        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
             yield translate_cpp_enum_to_python(MyEnum, <int> citem)
@@ -254,13 +254,13 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
         key = self._check_key_type(key)
         if key is None:
             return False
-        cdef cMyEnum ckey = <cMyEnum><int>key
+        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey = <_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key
         return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
 
     def values(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef string citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
@@ -269,8 +269,8 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
     def items(self):
         if not self:
             return
-        cdef __map_iter[cmap[cMyEnum,string]] itr = __map_iter[cmap[cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cMyEnum ckey
+        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey
         cdef string citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
@@ -282,8 +282,8 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
 
 Mapping.register(Map__MyEnum_string)
 
-cdef shared_ptr[cmap[cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *:
-    cdef shared_ptr[cmap[cMyEnum,string]] c_inst = make_shared[cmap[cMyEnum,string]]()
+cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *:
+    cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] c_inst = make_shared[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]]()
     if items is not None:
         for key, item in items.items():
             if not isinstance(key, MyEnum):
@@ -291,10 +291,10 @@ cdef shared_ptr[cmap[cMyEnum,string]] Map__MyEnum_string__make_instance(object i
             if not isinstance(item, str):
                 raise TypeError(f"{item!r} is not of type str")
 
-            deref(c_inst)[<cMyEnum><int>key] = item.encode('UTF-8')
+            deref(c_inst)[<_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 
 
-kOne = MyEnum(<int> (ckOne()))
-enumNames = Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cenumNames()))
+kOne = MyEnum(<int> (_test_fixtures_enumstrict_module_cbindings.ckOne()))
+enumNames = Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_enumstrict_module_cbindings.cenumNames()))

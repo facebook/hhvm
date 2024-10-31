@@ -33,7 +33,7 @@ import module.types as _module_types
 cdef class __Fiery_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Fiery_FieldsSetter _fbthrift_create(_module_types.cFiery* struct_cpp_obj):
+    cdef __Fiery_FieldsSetter _fbthrift_create(_module_cbindings.cFiery* struct_cpp_obj):
         cdef __Fiery_FieldsSetter __fbthrift_inst = __Fiery_FieldsSetter.__new__(__Fiery_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"message")] = __Fiery_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __Fiery_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cFiery](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cFiery](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'message is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __Fiery_FieldsSetter(__StructFieldsSetter):
 cdef class __Serious_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Serious_FieldsSetter _fbthrift_create(_module_types.cSerious* struct_cpp_obj):
+    cdef __Serious_FieldsSetter _fbthrift_create(_module_cbindings.cSerious* struct_cpp_obj):
         cdef __Serious_FieldsSetter __fbthrift_inst = __Serious_FieldsSetter.__new__(__Serious_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"not_sonnet")] = __Serious_FieldsSetter._set_field_0
@@ -76,7 +76,7 @@ cdef class __Serious_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field not_sonnet
         if _fbthrift_value is None:
-            __reset_field[_module_types.cSerious](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cSerious](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'not_sonnet is not a { str !r}.')
@@ -87,7 +87,7 @@ cdef class __Serious_FieldsSetter(__StructFieldsSetter):
 cdef class __ComplexFieldNames_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ComplexFieldNames_FieldsSetter _fbthrift_create(_module_types.cComplexFieldNames* struct_cpp_obj):
+    cdef __ComplexFieldNames_FieldsSetter _fbthrift_create(_module_cbindings.cComplexFieldNames* struct_cpp_obj):
         cdef __ComplexFieldNames_FieldsSetter __fbthrift_inst = __ComplexFieldNames_FieldsSetter.__new__(__ComplexFieldNames_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"error_message")] = __ComplexFieldNames_FieldsSetter._set_field_0
@@ -104,7 +104,7 @@ cdef class __ComplexFieldNames_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field error_message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cComplexFieldNames](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cComplexFieldNames](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'error_message is not a { str !r}.')
@@ -113,7 +113,7 @@ cdef class __ComplexFieldNames_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field internal_error_message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cComplexFieldNames](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cComplexFieldNames](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'internal_error_message is not a { str !r}.')
@@ -124,7 +124,7 @@ cdef class __ComplexFieldNames_FieldsSetter(__StructFieldsSetter):
 cdef class __CustomFieldNames_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CustomFieldNames_FieldsSetter _fbthrift_create(_module_types.cCustomFieldNames* struct_cpp_obj):
+    cdef __CustomFieldNames_FieldsSetter _fbthrift_create(_module_cbindings.cCustomFieldNames* struct_cpp_obj):
         cdef __CustomFieldNames_FieldsSetter __fbthrift_inst = __CustomFieldNames_FieldsSetter.__new__(__CustomFieldNames_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"error_message")] = __CustomFieldNames_FieldsSetter._set_field_0
@@ -141,7 +141,7 @@ cdef class __CustomFieldNames_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field error_message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cCustomFieldNames](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cCustomFieldNames](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'error_message is not a { str !r}.')
@@ -150,7 +150,7 @@ cdef class __CustomFieldNames_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field internal_error_message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cCustomFieldNames](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cCustomFieldNames](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'internal_error_message is not a { str !r}.')
@@ -161,7 +161,7 @@ cdef class __CustomFieldNames_FieldsSetter(__StructFieldsSetter):
 cdef class __ExceptionWithPrimitiveField_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ExceptionWithPrimitiveField_FieldsSetter _fbthrift_create(_module_types.cExceptionWithPrimitiveField* struct_cpp_obj):
+    cdef __ExceptionWithPrimitiveField_FieldsSetter _fbthrift_create(_module_cbindings.cExceptionWithPrimitiveField* struct_cpp_obj):
         cdef __ExceptionWithPrimitiveField_FieldsSetter __fbthrift_inst = __ExceptionWithPrimitiveField_FieldsSetter.__new__(__ExceptionWithPrimitiveField_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"message")] = __ExceptionWithPrimitiveField_FieldsSetter._set_field_0
@@ -178,7 +178,7 @@ cdef class __ExceptionWithPrimitiveField_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field message
         if _fbthrift_value is None:
-            __reset_field[_module_types.cExceptionWithPrimitiveField](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cExceptionWithPrimitiveField](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'message is not a { str !r}.')
@@ -187,7 +187,7 @@ cdef class __ExceptionWithPrimitiveField_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field error_code
         if _fbthrift_value is None:
-            __reset_field[_module_types.cExceptionWithPrimitiveField](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cExceptionWithPrimitiveField](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'error_code is not a { int !r}.')
@@ -199,7 +199,7 @@ cdef class __ExceptionWithPrimitiveField_FieldsSetter(__StructFieldsSetter):
 cdef class __ExceptionWithStructuredAnnotation_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ExceptionWithStructuredAnnotation_FieldsSetter _fbthrift_create(_module_types.cExceptionWithStructuredAnnotation* struct_cpp_obj):
+    cdef __ExceptionWithStructuredAnnotation_FieldsSetter _fbthrift_create(_module_cbindings.cExceptionWithStructuredAnnotation* struct_cpp_obj):
         cdef __ExceptionWithStructuredAnnotation_FieldsSetter __fbthrift_inst = __ExceptionWithStructuredAnnotation_FieldsSetter.__new__(__ExceptionWithStructuredAnnotation_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"message_field")] = __ExceptionWithStructuredAnnotation_FieldsSetter._set_field_0
@@ -216,7 +216,7 @@ cdef class __ExceptionWithStructuredAnnotation_FieldsSetter(__StructFieldsSetter
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field message_field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cExceptionWithStructuredAnnotation](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_cbindings.cExceptionWithStructuredAnnotation](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'message_field is not a { str !r}.')
@@ -225,7 +225,7 @@ cdef class __ExceptionWithStructuredAnnotation_FieldsSetter(__StructFieldsSetter
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field error_code
         if _fbthrift_value is None:
-            __reset_field[_module_types.cExceptionWithStructuredAnnotation](deref(self._struct_cpp_obj), 1)
+            __reset_field[_module_cbindings.cExceptionWithStructuredAnnotation](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'error_code is not a { int !r}.')
@@ -237,7 +237,7 @@ cdef class __ExceptionWithStructuredAnnotation_FieldsSetter(__StructFieldsSetter
 cdef class __Banal_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Banal_FieldsSetter _fbthrift_create(_module_types.cBanal* struct_cpp_obj):
+    cdef __Banal_FieldsSetter _fbthrift_create(_module_cbindings.cBanal* struct_cpp_obj):
         cdef __Banal_FieldsSetter __fbthrift_inst = __Banal_FieldsSetter.__new__(__Banal_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst

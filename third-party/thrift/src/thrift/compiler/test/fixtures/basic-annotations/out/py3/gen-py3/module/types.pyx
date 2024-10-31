@@ -74,7 +74,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     def __init__(MyStructNestedAnnotation self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStructNestedAnnotation]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyStructNestedAnnotation]()
         self._fields_setter = _fbthrift_types_fields.__MyStructNestedAnnotation_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -82,7 +82,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef MyStructNestedAnnotation __fbthrift_inst = MyStructNestedAnnotation.__new__(MyStructNestedAnnotation)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStructNestedAnnotation](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyStructNestedAnnotation](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStructNestedAnnotation_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -97,7 +97,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStructNestedAnnotation] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStructNestedAnnotation] cpp_obj):
         __fbthrift_inst = <MyStructNestedAnnotation>MyStructNestedAnnotation.__new__(MyStructNestedAnnotation)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -121,14 +121,14 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
 
     def __copy__(MyStructNestedAnnotation self):
-        cdef shared_ptr[cMyStructNestedAnnotation] cpp_obj = make_shared[cMyStructNestedAnnotation](
+        cdef shared_ptr[_module_cbindings.cMyStructNestedAnnotation] cpp_obj = make_shared[_module_cbindings.cMyStructNestedAnnotation](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return MyStructNestedAnnotation._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cMyStructNestedAnnotation](
+        return __richcmp[_module_cbindings.cMyStructNestedAnnotation](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<MyStructNestedAnnotation>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -141,7 +141,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cMyStructNestedAnnotation].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cMyStructNestedAnnotation].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -150,7 +150,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cMyStructNestedAnnotation](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cMyStructNestedAnnotation](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -159,14 +159,14 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStructNestedAnnotation self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cMyStructNestedAnnotation](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cMyStructNestedAnnotation](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(MyStructNestedAnnotation self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cMyStructNestedAnnotation]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyStructNestedAnnotation]()
         with nogil:
-            needed = serializer.cdeserialize[cMyStructNestedAnnotation](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cMyStructNestedAnnotation](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -190,7 +190,7 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 @__cython.auto_pickle(False)
 cdef class SecretStruct(thrift.py3.types.Struct):
     def __init__(SecretStruct self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSecretStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSecretStruct]()
         self._fields_setter = _fbthrift_types_fields.__SecretStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -198,7 +198,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef SecretStruct __fbthrift_inst = SecretStruct.__new__(SecretStruct)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSecretStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSecretStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__SecretStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -214,7 +214,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSecretStruct] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSecretStruct] cpp_obj):
         __fbthrift_inst = <SecretStruct>SecretStruct.__new__(SecretStruct)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -245,14 +245,14 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
 
     def __copy__(SecretStruct self):
-        cdef shared_ptr[cSecretStruct] cpp_obj = make_shared[cSecretStruct](
+        cdef shared_ptr[_module_cbindings.cSecretStruct] cpp_obj = make_shared[_module_cbindings.cSecretStruct](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return SecretStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cSecretStruct](
+        return __richcmp[_module_cbindings.cSecretStruct](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<SecretStruct>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -265,7 +265,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cSecretStruct].gen(meta)
+        _module_cbindings.StructMetadata[_module_cbindings.cSecretStruct].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -274,7 +274,7 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cSecretStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cSecretStruct](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -283,14 +283,14 @@ cdef class SecretStruct(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(SecretStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cSecretStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_module_cbindings.cSecretStruct](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(SecretStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cSecretStruct]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSecretStruct]()
         with nogil:
-            needed = serializer.cdeserialize[cSecretStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_module_cbindings.cSecretStruct](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -312,8 +312,8 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
 
 
-cdef std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *:
-    cdef std_deque_std_string c_inst
+cdef _module_cbindings.std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *:
+    cdef _module_cbindings.std_deque_std_string c_inst
     if items is not None:
         if isinstance(items, str):
             raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
@@ -323,7 +323,7 @@ cdef std_deque_std_string std_deque_std_string__List__string__make_instance(obje
             c_inst.push_back(item.encode('UTF-8'))
     return cmove(c_inst)
 
-cdef object std_deque_std_string__List__string__from_cpp(const std_deque_std_string& c_vec) except *:
+cdef object std_deque_std_string__List__string__from_cpp(const _module_cbindings.std_deque_std_string& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
@@ -331,5 +331,5 @@ cdef object std_deque_std_string__List__string__from_cpp(const std_deque_std_str
     return std_deque_std_string__List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(cmyStruct()))
+myStruct = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cmyStruct()))
 list_string_6884 = std_deque_std_string__List__string

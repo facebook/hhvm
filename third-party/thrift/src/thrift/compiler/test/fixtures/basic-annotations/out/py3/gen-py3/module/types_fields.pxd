@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,28 +41,29 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__MyStructNestedAnnotation_FieldsSetterFunc)(__MyStructNestedAnnotation_FieldsSetter, object) except *
 
 cdef class __MyStructNestedAnnotation_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cMyStructNestedAnnotation* _struct_cpp_obj
+    cdef _module_cbindings.cMyStructNestedAnnotation* _struct_cpp_obj
     cdef cumap[__cstring_view, __MyStructNestedAnnotation_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __MyStructNestedAnnotation_FieldsSetter _fbthrift_create(_module_types.cMyStructNestedAnnotation* struct_cpp_obj)
+    cdef __MyStructNestedAnnotation_FieldsSetter _fbthrift_create(_module_cbindings.cMyStructNestedAnnotation* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__SecretStruct_FieldsSetterFunc)(__SecretStruct_FieldsSetter, object) except *
 
 cdef class __SecretStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cSecretStruct* _struct_cpp_obj
+    cdef _module_cbindings.cSecretStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __SecretStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __SecretStruct_FieldsSetter _fbthrift_create(_module_types.cSecretStruct* struct_cpp_obj)
+    cdef __SecretStruct_FieldsSetter _fbthrift_create(_module_cbindings.cSecretStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 

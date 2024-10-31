@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,9 +40,13 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
 
 cimport service.types as _service_types
+cimport service.cbindings as _service_cbindings
 
 

@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport empty.types as _empty_types
+cimport empty.cbindings as _empty_cbindings
 import empty.types as _empty_types
 
 import empty.services_reflection as _services_reflection

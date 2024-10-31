@@ -33,7 +33,7 @@ import my.namespacing.test.module.module.types as _my_namespacing_test_module_mo
 cdef class __Foo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Foo_FieldsSetter _fbthrift_create(_my_namespacing_test_module_module_types.cFoo* struct_cpp_obj):
+    cdef __Foo_FieldsSetter _fbthrift_create(_my_namespacing_test_module_module_cbindings.cFoo* struct_cpp_obj):
         cdef __Foo_FieldsSetter __fbthrift_inst = __Foo_FieldsSetter.__new__(__Foo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyInt")] = __Foo_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __Foo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyInt
         if _fbthrift_value is None:
-            __reset_field[_my_namespacing_test_module_module_types.cFoo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_my_namespacing_test_module_module_cbindings.cFoo](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyInt is not a { int !r}.')

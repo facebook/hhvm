@@ -33,7 +33,7 @@ import c.types as _c_types
 cdef class __C_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __C_FieldsSetter _fbthrift_create(_c_types.cC* struct_cpp_obj):
+    cdef __C_FieldsSetter _fbthrift_create(_c_cbindings.cC* struct_cpp_obj):
         cdef __C_FieldsSetter __fbthrift_inst = __C_FieldsSetter.__new__(__C_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"i")] = __C_FieldsSetter._set_field_0
@@ -49,7 +49,7 @@ cdef class __C_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field i
         if _fbthrift_value is None:
-            __reset_field[_c_types.cC](deref(self._struct_cpp_obj), 0)
+            __reset_field[_c_cbindings.cC](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'i is not a { int !r}.')
@@ -61,7 +61,7 @@ cdef class __C_FieldsSetter(__StructFieldsSetter):
 cdef class __E_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __E_FieldsSetter _fbthrift_create(_c_types.cE* struct_cpp_obj):
+    cdef __E_FieldsSetter _fbthrift_create(_c_cbindings.cE* struct_cpp_obj):
         cdef __E_FieldsSetter __fbthrift_inst = __E_FieldsSetter.__new__(__E_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst

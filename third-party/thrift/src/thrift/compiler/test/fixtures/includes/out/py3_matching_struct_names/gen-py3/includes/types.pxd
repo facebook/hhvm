@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport transitive.types as _transitive_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -42,50 +41,27 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport transitive.types as _transitive_types
+cimport transitive.cbindings as _transitive_cbindings
+
+cimport includes.types as _fbthrift_types
 cimport includes.types_fields as _fbthrift_types_fields
+cimport includes.cbindings as _includes_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/includes/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cIncluded "::cpp2::Included":
-        cIncluded() except +
-        cIncluded(const cIncluded&) except +
-        bint operator==(cIncluded&)
-        bint operator!=(cIncluded&)
-        bint operator<(cIncluded&)
-        bint operator>(cIncluded&)
-        bint operator<=(cIncluded&)
-        bint operator>=(cIncluded&)
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[_transitive_types.cFoo] MyTransitiveField_ref "MyTransitiveField_ref" ()
-
-
-
-
 cdef class Included(thrift.py3.types.Struct):
-    cdef shared_ptr[cIncluded] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_includes_cbindings.cIncluded] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Included_FieldsSetter _fields_setter
     cdef inline object MyIntField_impl(self)
     cdef inline object MyTransitiveField_impl(self)
     cdef _transitive_types.Foo __fbthrift_cached_MyTransitiveField
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cIncluded])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_includes_cbindings.cIncluded])
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h" namespace "::cpp2":
-    cdef cIncluded cExampleIncluded "::cpp2::includes_constants::ExampleIncluded"()
-    cdef cint64_t cIncludedConstant "::cpp2::includes_constants::IncludedConstant"

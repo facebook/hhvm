@@ -25,9 +25,12 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport s.types as _s_types
+cimport s.cbindings as _s_cbindings
 
 cimport b.types as _b_types
+cimport b.cbindings as _b_cbindings
 cimport c.types as _c_types
+cimport c.cbindings as _c_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/s_clients.h" namespace "::cpp2":
   cdef cppclass cTestServiceAsyncClient "::cpp2::TestServiceAsyncClient":

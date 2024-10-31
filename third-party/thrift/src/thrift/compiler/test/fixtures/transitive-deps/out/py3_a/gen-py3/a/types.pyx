@@ -76,7 +76,7 @@ cdef object get_types_reflection():
 @__cython.auto_pickle(False)
 cdef class A(thrift.py3.types.Struct):
     def __init__(A self, **kwargs):
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cA]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_a_cbindings.cA]()
         self._fields_setter = _fbthrift_types_fields.__A_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         super().__init__(**kwargs)
 
@@ -84,7 +84,7 @@ cdef class A(thrift.py3.types.Struct):
         if not kwargs:
             return self
         cdef A __fbthrift_inst = A.__new__(A)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cA](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_a_cbindings.cA](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__A_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -100,7 +100,7 @@ cdef class A(thrift.py3.types.Struct):
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cA] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_a_cbindings.cA] cpp_obj):
         __fbthrift_inst = <A>A.__new__(A)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
         return __fbthrift_inst
@@ -135,14 +135,14 @@ cdef class A(thrift.py3.types.Struct):
 
 
     def __copy__(A self):
-        cdef shared_ptr[cA] cpp_obj = make_shared[cA](
+        cdef shared_ptr[_a_cbindings.cA] cpp_obj = make_shared[_a_cbindings.cA](
             deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         )
         return A._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cA](
+        return __richcmp[_a_cbindings.cA](
             self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             (<A>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
             op,
@@ -155,7 +155,7 @@ cdef class A(thrift.py3.types.Struct):
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cA].gen(meta)
+        _a_cbindings.StructMetadata[_a_cbindings.cA].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
@@ -164,7 +164,7 @@ cdef class A(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cA](idx))
+        return __sv_to_str(__get_field_name_by_index[_a_cbindings.cA](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -173,14 +173,14 @@ cdef class A(thrift.py3.types.Struct):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(A self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cA](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+            data = cmove(serializer.cserialize[_a_cbindings.cA](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize(A self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[cA]()
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_a_cbindings.cA]()
         with nogil:
-            needed = serializer.cdeserialize[cA](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+            needed = serializer.cdeserialize[_a_cbindings.cA](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
         return needed
 
 
@@ -202,8 +202,8 @@ cdef class A(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.A, self)
 
 
-cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *:
-    cdef vector[_c_types.cC] c_inst
+cdef vector[_c_cbindings.cC] List__c_C__make_instance(object items) except *:
+    cdef vector[_c_cbindings.cC] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, _c_types.C):
@@ -211,16 +211,16 @@ cdef vector[_c_types.cC] List__c_C__make_instance(object items) except *:
             c_inst.push_back(deref((<_c_types.C>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
-cdef object List__c_C__from_cpp(const vector[_c_types.cC]& c_vec) except *:
+cdef object List__c_C__from_cpp(const vector[_c_cbindings.cC]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
-        py_list.append(_c_types.C._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_c_types.cC](c_vec[idx])))
+        py_list.append(_c_types.C._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_c_cbindings.cC](c_vec[idx])))
     return List__c_C(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
-cdef vector[vector[_c_types.cC]] List__List__c_C__make_instance(object items) except *:
-    cdef vector[vector[_c_types.cC]] c_inst
+cdef vector[vector[_c_cbindings.cC]] List__List__c_C__make_instance(object items) except *:
+    cdef vector[vector[_c_cbindings.cC]] c_inst
     if items is not None:
         for item in items:
             if item is None:
@@ -230,7 +230,7 @@ cdef vector[vector[_c_types.cC]] List__List__c_C__make_instance(object items) ex
             c_inst.push_back(List__c_C__make_instance(item))
     return cmove(c_inst)
 
-cdef object List__List__c_C__from_cpp(const vector[vector[_c_types.cC]]& c_vec) except *:
+cdef object List__List__c_C__from_cpp(const vector[vector[_c_cbindings.cC]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):

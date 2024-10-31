@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__Color_FieldsSetterFunc)(__Color_FieldsSetter, object) except *
 
 cdef class __Color_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cColor* _struct_cpp_obj
+    cdef _module_cbindings.cColor* _struct_cpp_obj
     cdef cumap[__cstring_view, __Color_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Color_FieldsSetter _fbthrift_create(_module_types.cColor* struct_cpp_obj)
+    cdef __Color_FieldsSetter _fbthrift_create(_module_cbindings.cColor* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -60,11 +62,11 @@ cdef class __Color_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__Vehicle_FieldsSetterFunc)(__Vehicle_FieldsSetter, object) except *
 
 cdef class __Vehicle_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cVehicle* _struct_cpp_obj
+    cdef _module_cbindings.cVehicle* _struct_cpp_obj
     cdef cumap[__cstring_view, __Vehicle_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Vehicle_FieldsSetter _fbthrift_create(_module_types.cVehicle* struct_cpp_obj)
+    cdef __Vehicle_FieldsSetter _fbthrift_create(_module_cbindings.cVehicle* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *
@@ -75,11 +77,11 @@ cdef class __Vehicle_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__Person_FieldsSetterFunc)(__Person_FieldsSetter, object) except *
 
 cdef class __Person_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cPerson* _struct_cpp_obj
+    cdef _module_cbindings.cPerson* _struct_cpp_obj
     cdef cumap[__cstring_view, __Person_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Person_FieldsSetter _fbthrift_create(_module_types.cPerson* struct_cpp_obj)
+    cdef __Person_FieldsSetter _fbthrift_create(_module_cbindings.cPerson* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

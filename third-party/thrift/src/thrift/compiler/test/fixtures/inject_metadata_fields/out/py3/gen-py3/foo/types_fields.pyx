@@ -33,7 +33,7 @@ import foo.types as _foo_types
 cdef class __Fields_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Fields_FieldsSetter _fbthrift_create(_foo_types.cFields* struct_cpp_obj):
+    cdef __Fields_FieldsSetter _fbthrift_create(_foo_cbindings.cFields* struct_cpp_obj):
         cdef __Fields_FieldsSetter __fbthrift_inst = __Fields_FieldsSetter.__new__(__Fields_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"injected_field")] = __Fields_FieldsSetter._set_field_0
@@ -51,7 +51,7 @@ cdef class __Fields_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field injected_field
         if _fbthrift_value is None:
-            __reset_field[_foo_types.cFields](deref(self._struct_cpp_obj), 0)
+            __reset_field[_foo_cbindings.cFields](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'injected_field is not a { str !r}.')
@@ -60,7 +60,7 @@ cdef class __Fields_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field injected_structured_annotation_field
         if _fbthrift_value is None:
-            __reset_field[_foo_types.cFields](deref(self._struct_cpp_obj), 1)
+            __reset_field[_foo_cbindings.cFields](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'injected_structured_annotation_field is not a { str !r}.')
@@ -69,7 +69,7 @@ cdef class __Fields_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field injected_unstructured_annotation_field
         if _fbthrift_value is None:
-            __reset_field[_foo_types.cFields](deref(self._struct_cpp_obj), 2)
+            __reset_field[_foo_cbindings.cFields](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'injected_unstructured_annotation_field is not a { str !r}.')

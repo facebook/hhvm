@@ -6,5 +6,6 @@
 #  @generated
 #
 
+cimport b.types as _fbthrift_ctypes
 
 

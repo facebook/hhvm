@@ -54,6 +54,7 @@ from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport module_structs.types as _module_structs_types
+cimport module_structs.cbindings as _module_structs_cbindings
 import module_structs.types as _module_structs_types
 
 import module_structs.services_reflection as _services_reflection

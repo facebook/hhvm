@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,41 +40,43 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport foo.types as _foo_types
+cimport foo.cbindings as _foo_cbindings
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__Fields_FieldsSetterFunc)(__Fields_FieldsSetter, object) except *
 
 cdef class __Fields_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFields* _struct_cpp_obj
+    cdef _module_cbindings.cFields* _struct_cpp_obj
     cdef cumap[__cstring_view, __Fields_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __Fields_FieldsSetter _fbthrift_create(_module_types.cFields* struct_cpp_obj)
+    cdef __Fields_FieldsSetter _fbthrift_create(_module_cbindings.cFields* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__FieldsInjectedToEmptyStruct_FieldsSetterFunc)(__FieldsInjectedToEmptyStruct_FieldsSetter, object) except *
 
 cdef class __FieldsInjectedToEmptyStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFieldsInjectedToEmptyStruct* _struct_cpp_obj
+    cdef _module_cbindings.cFieldsInjectedToEmptyStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __FieldsInjectedToEmptyStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FieldsInjectedToEmptyStruct_FieldsSetter _fbthrift_create(_module_types.cFieldsInjectedToEmptyStruct* struct_cpp_obj)
+    cdef __FieldsInjectedToEmptyStruct_FieldsSetter _fbthrift_create(_module_cbindings.cFieldsInjectedToEmptyStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__FieldsInjectedToStruct_FieldsSetterFunc)(__FieldsInjectedToStruct_FieldsSetter, object) except *
 
 cdef class __FieldsInjectedToStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFieldsInjectedToStruct* _struct_cpp_obj
+    cdef _module_cbindings.cFieldsInjectedToStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __FieldsInjectedToStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FieldsInjectedToStruct_FieldsSetter _fbthrift_create(_module_types.cFieldsInjectedToStruct* struct_cpp_obj)
+    cdef __FieldsInjectedToStruct_FieldsSetter _fbthrift_create(_module_cbindings.cFieldsInjectedToStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 
@@ -81,11 +84,11 @@ cdef class __FieldsInjectedToStruct_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__FieldsInjectedWithIncludedStruct_FieldsSetterFunc)(__FieldsInjectedWithIncludedStruct_FieldsSetter, object) except *
 
 cdef class __FieldsInjectedWithIncludedStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cFieldsInjectedWithIncludedStruct* _struct_cpp_obj
+    cdef _module_cbindings.cFieldsInjectedWithIncludedStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __FieldsInjectedWithIncludedStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __FieldsInjectedWithIncludedStruct_FieldsSetter _fbthrift_create(_module_types.cFieldsInjectedWithIncludedStruct* struct_cpp_obj)
+    cdef __FieldsInjectedWithIncludedStruct_FieldsSetter _fbthrift_create(_module_cbindings.cFieldsInjectedWithIncludedStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

@@ -34,7 +34,7 @@ import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_type
 cdef class __empty_struct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __empty_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cempty_struct* struct_cpp_obj):
+    cdef __empty_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cempty_struct* struct_cpp_obj):
         cdef __empty_struct_FieldsSetter __fbthrift_inst = __empty_struct_FieldsSetter.__new__(__empty_struct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -51,7 +51,7 @@ cdef class __empty_struct_FieldsSetter(__StructFieldsSetter):
 cdef class __decorated_struct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __decorated_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cdecorated_struct* struct_cpp_obj):
+    cdef __decorated_struct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cdecorated_struct* struct_cpp_obj):
         cdef __decorated_struct_FieldsSetter __fbthrift_inst = __decorated_struct_FieldsSetter.__new__(__decorated_struct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __decorated_struct_FieldsSetter._set_field_0
@@ -67,7 +67,7 @@ cdef class __decorated_struct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cdecorated_struct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cdecorated_struct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field is not a { str !r}.')
@@ -78,7 +78,7 @@ cdef class __decorated_struct_FieldsSetter(__StructFieldsSetter):
 cdef class __ContainerStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ContainerStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cContainerStruct* struct_cpp_obj):
+    cdef __ContainerStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cContainerStruct* struct_cpp_obj):
         cdef __ContainerStruct_FieldsSetter __fbthrift_inst = __ContainerStruct_FieldsSetter.__new__(__ContainerStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldA")] = __ContainerStruct_FieldsSetter._set_field_0
@@ -101,56 +101,56 @@ cdef class __ContainerStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field fieldA
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).fieldA_ref().assign(_apache_thrift_fixtures_types_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field fieldB
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).fieldB_ref().assign(_apache_thrift_fixtures_types_module_types.std_list__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field fieldC
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).fieldC_ref().assign(_apache_thrift_fixtures_types_module_types.std_deque__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field fieldD
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 3)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 3)
             return
         deref(self._struct_cpp_obj).fieldD_ref().assign(_apache_thrift_fixtures_types_module_types.folly_fbvector__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field fieldE
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 4)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 4)
             return
         deref(self._struct_cpp_obj).fieldE_ref().assign(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field fieldF
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 5)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 5)
             return
         deref(self._struct_cpp_obj).fieldF_ref().assign(deref(_apache_thrift_fixtures_types_module_types.folly_sorted_vector_set__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field fieldG
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 6)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 6)
             return
         deref(self._struct_cpp_obj).fieldG_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Map__i32_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field fieldH
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cContainerStruct](deref(self._struct_cpp_obj), 7)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 7)
             return
         deref(self._struct_cpp_obj).fieldH_ref().assign(deref(_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -159,7 +159,7 @@ cdef class __ContainerStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __CppTypeStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CppTypeStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cCppTypeStruct* struct_cpp_obj):
+    cdef __CppTypeStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cCppTypeStruct* struct_cpp_obj):
         cdef __CppTypeStruct_FieldsSetter __fbthrift_inst = __CppTypeStruct_FieldsSetter.__new__(__CppTypeStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"fieldA")] = __CppTypeStruct_FieldsSetter._set_field_0
@@ -175,7 +175,7 @@ cdef class __CppTypeStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field fieldA
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cCppTypeStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cCppTypeStruct](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).fieldA_ref().assign(_apache_thrift_fixtures_types_module_types.std_list_int32_t__List__i32__make_instance(_fbthrift_value))
 
@@ -184,7 +184,7 @@ cdef class __CppTypeStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __VirtualStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __VirtualStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cVirtualStruct* struct_cpp_obj):
+    cdef __VirtualStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cVirtualStruct* struct_cpp_obj):
         cdef __VirtualStruct_FieldsSetter __fbthrift_inst = __VirtualStruct_FieldsSetter.__new__(__VirtualStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __VirtualStruct_FieldsSetter._set_field_0
@@ -200,7 +200,7 @@ cdef class __VirtualStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cVirtualStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cVirtualStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -212,7 +212,7 @@ cdef class __VirtualStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __MyStructWithForwardRefEnum_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyStructWithForwardRefEnum_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cMyStructWithForwardRefEnum* struct_cpp_obj):
+    cdef __MyStructWithForwardRefEnum_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum* struct_cpp_obj):
         cdef __MyStructWithForwardRefEnum_FieldsSetter __fbthrift_inst = __MyStructWithForwardRefEnum_FieldsSetter.__new__(__MyStructWithForwardRefEnum_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"a")] = __MyStructWithForwardRefEnum_FieldsSetter._set_field_0
@@ -229,27 +229,27 @@ cdef class __MyStructWithForwardRefEnum_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field a
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
             raise TypeError(f'field a value: {repr(_fbthrift_value)} is not of the enum type { _apache_thrift_fixtures_types_module_types.MyForwardRefEnum }.')
-        deref(self._struct_cpp_obj).a_ref().assign(<_apache_thrift_fixtures_types_module_types.cMyForwardRefEnum><int>_fbthrift_value)
+        deref(self._struct_cpp_obj).a_ref().assign(<_apache_thrift_fixtures_types_module_cbindings.cMyForwardRefEnum><int>_fbthrift_value)
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field b
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyForwardRefEnum):
             raise TypeError(f'field b value: {repr(_fbthrift_value)} is not of the enum type { _apache_thrift_fixtures_types_module_types.MyForwardRefEnum }.')
-        deref(self._struct_cpp_obj).b_ref().assign(<_apache_thrift_fixtures_types_module_types.cMyForwardRefEnum><int>_fbthrift_value)
+        deref(self._struct_cpp_obj).b_ref().assign(<_apache_thrift_fixtures_types_module_cbindings.cMyForwardRefEnum><int>_fbthrift_value)
 
 
 @__cython.auto_pickle(False)
 cdef class __TrivialNumeric_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __TrivialNumeric_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cTrivialNumeric* struct_cpp_obj):
+    cdef __TrivialNumeric_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric* struct_cpp_obj):
         cdef __TrivialNumeric_FieldsSetter __fbthrift_inst = __TrivialNumeric_FieldsSetter.__new__(__TrivialNumeric_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"a")] = __TrivialNumeric_FieldsSetter._set_field_0
@@ -266,7 +266,7 @@ cdef class __TrivialNumeric_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field a
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTrivialNumeric](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'a is not a { int !r}.')
@@ -276,7 +276,7 @@ cdef class __TrivialNumeric_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field b
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTrivialNumeric](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, bool):
             raise TypeError(f'b is not a { bool !r}.')
@@ -287,7 +287,7 @@ cdef class __TrivialNumeric_FieldsSetter(__StructFieldsSetter):
 cdef class __TrivialNestedWithDefault_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __TrivialNestedWithDefault_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cTrivialNestedWithDefault* struct_cpp_obj):
+    cdef __TrivialNestedWithDefault_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault* struct_cpp_obj):
         cdef __TrivialNestedWithDefault_FieldsSetter __fbthrift_inst = __TrivialNestedWithDefault_FieldsSetter.__new__(__TrivialNestedWithDefault_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"z")] = __TrivialNestedWithDefault_FieldsSetter._set_field_0
@@ -304,7 +304,7 @@ cdef class __TrivialNestedWithDefault_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field z
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTrivialNestedWithDefault](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'z is not a { int !r}.')
@@ -314,7 +314,7 @@ cdef class __TrivialNestedWithDefault_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field n
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTrivialNestedWithDefault](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.TrivialNumeric):
             raise TypeError(f'n is not a { _apache_thrift_fixtures_types_module_types.TrivialNumeric !r}.')
@@ -325,7 +325,7 @@ cdef class __TrivialNestedWithDefault_FieldsSetter(__StructFieldsSetter):
 cdef class __ComplexString_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ComplexString_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cComplexString* struct_cpp_obj):
+    cdef __ComplexString_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cComplexString* struct_cpp_obj):
         cdef __ComplexString_FieldsSetter __fbthrift_inst = __ComplexString_FieldsSetter.__new__(__ComplexString_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"a")] = __ComplexString_FieldsSetter._set_field_0
@@ -342,7 +342,7 @@ cdef class __ComplexString_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field a
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cComplexString](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cComplexString](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'a is not a { str !r}.')
@@ -351,7 +351,7 @@ cdef class __ComplexString_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field b
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cComplexString](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cComplexString](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).b_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Map__string_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -360,7 +360,7 @@ cdef class __ComplexString_FieldsSetter(__StructFieldsSetter):
 cdef class __ComplexNestedWithDefault_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ComplexNestedWithDefault_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cComplexNestedWithDefault* struct_cpp_obj):
+    cdef __ComplexNestedWithDefault_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault* struct_cpp_obj):
         cdef __ComplexNestedWithDefault_FieldsSetter __fbthrift_inst = __ComplexNestedWithDefault_FieldsSetter.__new__(__ComplexNestedWithDefault_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"z")] = __ComplexNestedWithDefault_FieldsSetter._set_field_0
@@ -377,7 +377,7 @@ cdef class __ComplexNestedWithDefault_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field z
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cComplexNestedWithDefault](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'z is not a { str !r}.')
@@ -386,7 +386,7 @@ cdef class __ComplexNestedWithDefault_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field n
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cComplexNestedWithDefault](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ComplexString):
             raise TypeError(f'n is not a { _apache_thrift_fixtures_types_module_types.ComplexString !r}.')
@@ -397,7 +397,7 @@ cdef class __ComplexNestedWithDefault_FieldsSetter(__StructFieldsSetter):
 cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MinPadding_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cMinPadding* struct_cpp_obj):
+    cdef __MinPadding_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cMinPadding* struct_cpp_obj):
         cdef __MinPadding_FieldsSetter __fbthrift_inst = __MinPadding_FieldsSetter.__new__(__MinPadding_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"small")] = __MinPadding_FieldsSetter._set_field_0
@@ -417,7 +417,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field small
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPadding](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPadding](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'small is not a { int !r}.')
@@ -427,7 +427,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field big
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPadding](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPadding](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'big is not a { int !r}.')
@@ -437,7 +437,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field medium
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPadding](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPadding](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'medium is not a { int !r}.')
@@ -447,7 +447,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field biggish
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPadding](deref(self._struct_cpp_obj), 3)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPadding](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'biggish is not a { int !r}.')
@@ -457,7 +457,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field tiny
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPadding](deref(self._struct_cpp_obj), 4)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPadding](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'tiny is not a { int !r}.')
@@ -469,7 +469,7 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
 cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MinPaddingWithCustomType_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType* struct_cpp_obj):
+    cdef __MinPaddingWithCustomType_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType* struct_cpp_obj):
         cdef __MinPaddingWithCustomType_FieldsSetter __fbthrift_inst = __MinPaddingWithCustomType_FieldsSetter.__new__(__MinPaddingWithCustomType_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"small")] = __MinPaddingWithCustomType_FieldsSetter._set_field_0
@@ -489,7 +489,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field small
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'small is not a { int !r}.')
@@ -499,7 +499,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field big
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'big is not a { int !r}.')
@@ -509,7 +509,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field medium
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'medium is not a { int !r}.')
@@ -519,7 +519,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field biggish
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 3)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'biggish is not a { int !r}.')
@@ -529,7 +529,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field tiny
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 4)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'tiny is not a { int !r}.')
@@ -541,7 +541,7 @@ cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cMyStruct* struct_cpp_obj):
+    cdef __MyStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cMyStruct* struct_cpp_obj):
         cdef __MyStruct_FieldsSetter __fbthrift_inst = __MyStruct_FieldsSetter.__new__(__MyStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __MyStruct_FieldsSetter._set_field_0
@@ -560,7 +560,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field MyIntField
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'MyIntField is not a { int !r}.')
@@ -570,7 +570,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field MyStringField
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'MyStringField is not a { str !r}.')
@@ -579,7 +579,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field majorVer
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStruct](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'majorVer is not a { int !r}.')
@@ -589,7 +589,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field data
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cMyStruct](deref(self._struct_cpp_obj), 3)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.MyDataItem):
             raise TypeError(f'data is not a { _apache_thrift_fixtures_types_module_types.MyDataItem !r}.')
@@ -600,7 +600,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyDataItem_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cMyDataItem* struct_cpp_obj):
+    cdef __MyDataItem_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cMyDataItem* struct_cpp_obj):
         cdef __MyDataItem_FieldsSetter __fbthrift_inst = __MyDataItem_FieldsSetter.__new__(__MyDataItem_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -617,7 +617,7 @@ cdef class __MyDataItem_FieldsSetter(__StructFieldsSetter):
 cdef class __Renaming_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Renaming_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cRenaming* struct_cpp_obj):
+    cdef __Renaming_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cRenaming* struct_cpp_obj):
         cdef __Renaming_FieldsSetter __fbthrift_inst = __Renaming_FieldsSetter.__new__(__Renaming_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"foo")] = __Renaming_FieldsSetter._set_field_0
@@ -633,7 +633,7 @@ cdef class __Renaming_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field foo
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cRenaming](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cRenaming](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'foo is not a { int !r}.')
@@ -645,7 +645,7 @@ cdef class __Renaming_FieldsSetter(__StructFieldsSetter):
 cdef class __AnnotatedTypes_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __AnnotatedTypes_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cAnnotatedTypes* struct_cpp_obj):
+    cdef __AnnotatedTypes_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes* struct_cpp_obj):
         cdef __AnnotatedTypes_FieldsSetter __fbthrift_inst = __AnnotatedTypes_FieldsSetter.__new__(__AnnotatedTypes_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"binary_field")] = __AnnotatedTypes_FieldsSetter._set_field_0
@@ -662,7 +662,7 @@ cdef class __AnnotatedTypes_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field binary_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAnnotatedTypes](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, bytes):
             raise TypeError(f'binary_field is not a { bytes !r}.')
@@ -671,7 +671,7 @@ cdef class __AnnotatedTypes_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field list_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAnnotatedTypes](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).list_field_ref().assign(_apache_thrift_fixtures_types_module_types.List__std_unordered_map__Map__i32_string__make_instance(_fbthrift_value))
 
@@ -680,7 +680,7 @@ cdef class __AnnotatedTypes_FieldsSetter(__StructFieldsSetter):
 cdef class __ForwardUsageRoot_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ForwardUsageRoot_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cForwardUsageRoot* struct_cpp_obj):
+    cdef __ForwardUsageRoot_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot* struct_cpp_obj):
         cdef __ForwardUsageRoot_FieldsSetter __fbthrift_inst = __ForwardUsageRoot_FieldsSetter.__new__(__ForwardUsageRoot_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"ForwardUsageStruct")] = __ForwardUsageRoot_FieldsSetter._set_field_0
@@ -697,7 +697,7 @@ cdef class __ForwardUsageRoot_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field ForwardUsageStruct
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageStruct):
             raise TypeError(f'ForwardUsageStruct is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageStruct !r}.')
@@ -706,18 +706,18 @@ cdef class __ForwardUsageRoot_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field ForwardUsageByRef
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageByRef):
             raise TypeError(f'ForwardUsageByRef is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageByRef !r}.')
-        assign_unique_ptr[_apache_thrift_fixtures_types_module_types.cForwardUsageByRef](deref(self._struct_cpp_obj).ForwardUsageByRef_ref(), make_unique[_apache_thrift_fixtures_types_module_types.cForwardUsageByRef](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageByRef?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref(self._struct_cpp_obj).ForwardUsageByRef_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageByRef?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
 @__cython.auto_pickle(False)
 cdef class __ForwardUsageStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ForwardUsageStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cForwardUsageStruct* struct_cpp_obj):
+    cdef __ForwardUsageStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct* struct_cpp_obj):
         cdef __ForwardUsageStruct_FieldsSetter __fbthrift_inst = __ForwardUsageStruct_FieldsSetter.__new__(__ForwardUsageStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"foo")] = __ForwardUsageStruct_FieldsSetter._set_field_0
@@ -733,18 +733,18 @@ cdef class __ForwardUsageStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field foo
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cForwardUsageStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageRoot):
             raise TypeError(f'foo is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageRoot !r}.')
-        assign_unique_ptr[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
 @__cython.auto_pickle(False)
 cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __ForwardUsageByRef_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cForwardUsageByRef* struct_cpp_obj):
+    cdef __ForwardUsageByRef_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef* struct_cpp_obj):
         cdef __ForwardUsageByRef_FieldsSetter __fbthrift_inst = __ForwardUsageByRef_FieldsSetter.__new__(__ForwardUsageByRef_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"foo")] = __ForwardUsageByRef_FieldsSetter._set_field_0
@@ -760,18 +760,18 @@ cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field foo
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cForwardUsageByRef](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, _apache_thrift_fixtures_types_module_types.ForwardUsageRoot):
             raise TypeError(f'foo is not a { _apache_thrift_fixtures_types_module_types.ForwardUsageRoot !r}.')
-        assign_unique_ptr[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_types.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot](deref((<_apache_thrift_fixtures_types_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 
 @__cython.auto_pickle(False)
 cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __IncompleteMap_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cIncompleteMap* struct_cpp_obj):
+    cdef __IncompleteMap_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap* struct_cpp_obj):
         cdef __IncompleteMap_FieldsSetter __fbthrift_inst = __IncompleteMap_FieldsSetter.__new__(__IncompleteMap_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __IncompleteMap_FieldsSetter._set_field_0
@@ -787,7 +787,7 @@ cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cIncompleteMap](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Map__i32_IncompleteMapDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -796,7 +796,7 @@ cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
 cdef class __IncompleteMapDep_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __IncompleteMapDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cIncompleteMapDep* struct_cpp_obj):
+    cdef __IncompleteMapDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep* struct_cpp_obj):
         cdef __IncompleteMapDep_FieldsSetter __fbthrift_inst = __IncompleteMapDep_FieldsSetter.__new__(__IncompleteMapDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -813,7 +813,7 @@ cdef class __IncompleteMapDep_FieldsSetter(__StructFieldsSetter):
 cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CompleteMap_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cCompleteMap* struct_cpp_obj):
+    cdef __CompleteMap_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cCompleteMap* struct_cpp_obj):
         cdef __CompleteMap_FieldsSetter __fbthrift_inst = __CompleteMap_FieldsSetter.__new__(__CompleteMap_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __CompleteMap_FieldsSetter._set_field_0
@@ -829,7 +829,7 @@ cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cCompleteMap](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(deref(_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_CompleteMapDep(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
@@ -838,7 +838,7 @@ cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
 cdef class __CompleteMapDep_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CompleteMapDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cCompleteMapDep* struct_cpp_obj):
+    cdef __CompleteMapDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep* struct_cpp_obj):
         cdef __CompleteMapDep_FieldsSetter __fbthrift_inst = __CompleteMapDep_FieldsSetter.__new__(__CompleteMapDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -855,7 +855,7 @@ cdef class __CompleteMapDep_FieldsSetter(__StructFieldsSetter):
 cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __IncompleteList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cIncompleteList* struct_cpp_obj):
+    cdef __IncompleteList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cIncompleteList* struct_cpp_obj):
         cdef __IncompleteList_FieldsSetter __fbthrift_inst = __IncompleteList_FieldsSetter.__new__(__IncompleteList_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __IncompleteList_FieldsSetter._set_field_0
@@ -871,7 +871,7 @@ cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cIncompleteList](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cIncompleteList](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types._std_list__List__IncompleteListDep__make_instance(_fbthrift_value))
 
@@ -880,7 +880,7 @@ cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
 cdef class __IncompleteListDep_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __IncompleteListDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cIncompleteListDep* struct_cpp_obj):
+    cdef __IncompleteListDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep* struct_cpp_obj):
         cdef __IncompleteListDep_FieldsSetter __fbthrift_inst = __IncompleteListDep_FieldsSetter.__new__(__IncompleteListDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -897,7 +897,7 @@ cdef class __IncompleteListDep_FieldsSetter(__StructFieldsSetter):
 cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CompleteList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cCompleteList* struct_cpp_obj):
+    cdef __CompleteList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cCompleteList* struct_cpp_obj):
         cdef __CompleteList_FieldsSetter __fbthrift_inst = __CompleteList_FieldsSetter.__new__(__CompleteList_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __CompleteList_FieldsSetter._set_field_0
@@ -913,7 +913,7 @@ cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cCompleteList](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cCompleteList](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.folly_small_vector__List__CompleteListDep__make_instance(_fbthrift_value))
 
@@ -922,7 +922,7 @@ cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
 cdef class __CompleteListDep_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __CompleteListDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cCompleteListDep* struct_cpp_obj):
+    cdef __CompleteListDep_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep* struct_cpp_obj):
         cdef __CompleteListDep_FieldsSetter __fbthrift_inst = __CompleteListDep_FieldsSetter.__new__(__CompleteListDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
@@ -939,7 +939,7 @@ cdef class __CompleteListDep_FieldsSetter(__StructFieldsSetter):
 cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __AdaptedList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cAdaptedList* struct_cpp_obj):
+    cdef __AdaptedList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cAdaptedList* struct_cpp_obj):
         cdef __AdaptedList_FieldsSetter __fbthrift_inst = __AdaptedList_FieldsSetter.__new__(__AdaptedList_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __AdaptedList_FieldsSetter._set_field_0
@@ -955,7 +955,7 @@ cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAdaptedList](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAdaptedList](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__AdaptedListDep__make_instance(_fbthrift_value))
 
@@ -964,7 +964,7 @@ cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
 cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __DependentAdaptedList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cDependentAdaptedList* struct_cpp_obj):
+    cdef __DependentAdaptedList_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList* struct_cpp_obj):
         cdef __DependentAdaptedList_FieldsSetter __fbthrift_inst = __DependentAdaptedList_FieldsSetter.__new__(__DependentAdaptedList_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __DependentAdaptedList_FieldsSetter._set_field_0
@@ -980,7 +980,7 @@ cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cDependentAdaptedList](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).field_ref().assign(_apache_thrift_fixtures_types_module_types.List__DependentAdaptedListDep__make_instance(_fbthrift_value))
 
@@ -989,7 +989,7 @@ cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
 cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __AllocatorAware_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cAllocatorAware* struct_cpp_obj):
+    cdef __AllocatorAware_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware* struct_cpp_obj):
         cdef __AllocatorAware_FieldsSetter __fbthrift_inst = __AllocatorAware_FieldsSetter.__new__(__AllocatorAware_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"aa_list")] = __AllocatorAware_FieldsSetter._set_field_0
@@ -1011,28 +1011,28 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field aa_list
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).aa_list_ref().assign(_apache_thrift_fixtures_types_module_types.List__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field aa_set
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).aa_set_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field aa_map
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).aa_map_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field aa_string
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 3)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 3)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'aa_string is not a { str !r}.')
@@ -1041,7 +1041,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_4(self, _fbthrift_value) except *:
         # for field not_a_container
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 4)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 4)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'not_a_container is not a { int !r}.')
@@ -1051,7 +1051,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field aa_unique
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 5)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 5)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'aa_unique is not a { int !r}.')
@@ -1061,7 +1061,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field aa_shared
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware](deref(self._struct_cpp_obj), 6)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 6)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'aa_shared is not a { int !r}.')
@@ -1073,7 +1073,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
 cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __AllocatorAware2_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cAllocatorAware2* struct_cpp_obj):
+    cdef __AllocatorAware2_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2* struct_cpp_obj):
         cdef __AllocatorAware2_FieldsSetter __fbthrift_inst = __AllocatorAware2_FieldsSetter.__new__(__AllocatorAware2_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"not_a_container")] = __AllocatorAware2_FieldsSetter._set_field_0
@@ -1090,7 +1090,7 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field not_a_container
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware2](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'not_a_container is not a { int !r}.')
@@ -1100,7 +1100,7 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field box_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cAllocatorAware2](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'box_field is not a { int !r}.')
@@ -1112,7 +1112,7 @@ cdef class __AllocatorAware2_FieldsSetter(__StructFieldsSetter):
 cdef class __TypedefStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __TypedefStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cTypedefStruct* struct_cpp_obj):
+    cdef __TypedefStruct_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct* struct_cpp_obj):
         cdef __TypedefStruct_FieldsSetter __fbthrift_inst = __TypedefStruct_FieldsSetter.__new__(__TypedefStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"i32_field")] = __TypedefStruct_FieldsSetter._set_field_0
@@ -1130,7 +1130,7 @@ cdef class __TypedefStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field i32_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTypedefStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'i32_field is not a { int !r}.')
@@ -1140,7 +1140,7 @@ cdef class __TypedefStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field IntTypedef_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTypedefStruct](deref(self._struct_cpp_obj), 1)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct](deref(self._struct_cpp_obj), 1)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'IntTypedef_field is not a { int !r}.')
@@ -1150,7 +1150,7 @@ cdef class __TypedefStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field UintTypedef_field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cTypedefStruct](deref(self._struct_cpp_obj), 2)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct](deref(self._struct_cpp_obj), 2)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'UintTypedef_field is not a { int !r}.')
@@ -1162,7 +1162,7 @@ cdef class __TypedefStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __StructWithDoubleUnderscores_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __StructWithDoubleUnderscores_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_types.cStructWithDoubleUnderscores* struct_cpp_obj):
+    cdef __StructWithDoubleUnderscores_FieldsSetter _fbthrift_create(_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores* struct_cpp_obj):
         cdef __StructWithDoubleUnderscores_FieldsSetter __fbthrift_inst = __StructWithDoubleUnderscores_FieldsSetter.__new__(__StructWithDoubleUnderscores_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"__field")] = __StructWithDoubleUnderscores_FieldsSetter._set_field_0
@@ -1178,7 +1178,7 @@ cdef class __StructWithDoubleUnderscores_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field __field
         if _fbthrift_value is None:
-            __reset_field[_apache_thrift_fixtures_types_module_types.cStructWithDoubleUnderscores](deref(self._struct_cpp_obj), 0)
+            __reset_field[_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'__field is not a { int !r}.')

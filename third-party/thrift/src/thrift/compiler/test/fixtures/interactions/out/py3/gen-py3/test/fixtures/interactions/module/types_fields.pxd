@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -39,18 +40,20 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 cimport test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
+cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 
 cimport test.fixtures.interactions.module.types as _test_fixtures_interactions_module_types
+cimport test.fixtures.interactions.module.cbindings as _test_fixtures_interactions_module_cbindings
 
 
 
 ctypedef void (*__CustomException_FieldsSetterFunc)(__CustomException_FieldsSetter, object) except *
 
 cdef class __CustomException_FieldsSetter(__StructFieldsSetter):
-    cdef _test_fixtures_interactions_module_types.cCustomException* _struct_cpp_obj
+    cdef _test_fixtures_interactions_module_cbindings.cCustomException* _struct_cpp_obj
     cdef cumap[__cstring_view, __CustomException_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __CustomException_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_types.cCustomException* struct_cpp_obj)
+    cdef __CustomException_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_cbindings.cCustomException* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 

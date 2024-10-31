@@ -34,7 +34,7 @@ import matching_struct_names.types as _matching_struct_names_types
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __MyStruct_FieldsSetter _fbthrift_create(_matching_struct_names_types.cMyStruct* struct_cpp_obj):
+    cdef __MyStruct_FieldsSetter _fbthrift_create(_matching_struct_names_cbindings.cMyStruct* struct_cpp_obj):
         cdef __MyStruct_FieldsSetter __fbthrift_inst = __MyStruct_FieldsSetter.__new__(__MyStruct_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __MyStruct_FieldsSetter._set_field_0
@@ -50,7 +50,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field field
         if _fbthrift_value is None:
-            __reset_field[_matching_struct_names_types.cMyStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_matching_struct_names_cbindings.cMyStruct](deref(self._struct_cpp_obj), 0)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'field is not a { str !r}.')
@@ -61,7 +61,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 cdef class __Combo_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __Combo_FieldsSetter _fbthrift_create(_matching_struct_names_types.cCombo* struct_cpp_obj):
+    cdef __Combo_FieldsSetter _fbthrift_create(_matching_struct_names_cbindings.cCombo* struct_cpp_obj):
         cdef __Combo_FieldsSetter __fbthrift_inst = __Combo_FieldsSetter.__new__(__Combo_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         __fbthrift_inst._setters[__cstring_view(<const char*>"listOfOurMyStructLists")] = __Combo_FieldsSetter._set_field_0
@@ -80,28 +80,28 @@ cdef class __Combo_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *:
         # for field listOfOurMyStructLists
         if _fbthrift_value is None:
-            __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 0)
+            __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 0)
             return
         deref(self._struct_cpp_obj).listOfOurMyStructLists_ref().assign(_matching_struct_names_types.List__List__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_1(self, _fbthrift_value) except *:
         # for field theirMyStructList
         if _fbthrift_value is None:
-            __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 1)
+            __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 1)
             return
         deref(self._struct_cpp_obj).theirMyStructList_ref().assign(_matching_struct_names_types.List__module_MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field ourMyStructList
         if _fbthrift_value is None:
-            __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 2)
+            __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 2)
             return
         deref(self._struct_cpp_obj).ourMyStructList_ref().assign(_matching_struct_names_types.List__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field listOfTheirMyStructList
         if _fbthrift_value is None:
-            __reset_field[_matching_struct_names_types.cCombo](deref(self._struct_cpp_obj), 3)
+            __reset_field[_matching_struct_names_cbindings.cCombo](deref(self._struct_cpp_obj), 3)
             return
         deref(self._struct_cpp_obj).listOfTheirMyStructList_ref().assign(_matching_struct_names_types.List__List__module_MyStruct__make_instance(_fbthrift_value))
 

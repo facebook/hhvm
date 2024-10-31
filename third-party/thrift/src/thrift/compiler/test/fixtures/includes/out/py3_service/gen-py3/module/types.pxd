@@ -33,7 +33,6 @@ from thrift.py3.types cimport (
     get_union_field_value as __get_union_field_value,
 )
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
-cimport includes.types as _includes_types
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
 from thrift.python.common cimport (
@@ -42,41 +41,20 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cMyStruct "::cpp2::MyStruct":
-        cMyStruct() except +
-        cMyStruct(const cMyStruct&) except +
-        bint operator==(cMyStruct&)
-        bint operator!=(cMyStruct&)
-        bint operator<(cMyStruct&)
-        bint operator>(cMyStruct&)
-        bint operator<=(cMyStruct&)
-        bint operator>=(cMyStruct&)
-        __field_ref[_includes_types.cIncluded] MyIncludedField_ref "MyIncludedField_ref" ()
-        __field_ref[_includes_types.cIncluded] MyOtherIncludedField_ref "MyOtherIncludedField_ref" ()
-        __field_ref[cint64_t] MyIncludedInt_ref "MyIncludedInt_ref" ()
-
-
-
-
 cdef class MyStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cMyStruct] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MyStruct_FieldsSetter _fields_setter
     cdef inline object MyIncludedField_impl(self)
     cdef inline object MyOtherIncludedField_impl(self)
@@ -85,7 +63,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _includes_types.Included __fbthrift_cached_MyOtherIncludedField
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cMyStruct])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cMyStruct])
 
 
 

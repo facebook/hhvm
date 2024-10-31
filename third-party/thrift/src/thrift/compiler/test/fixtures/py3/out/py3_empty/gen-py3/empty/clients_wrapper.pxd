@@ -25,6 +25,7 @@ from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
 cimport empty.types as _empty_types
+cimport empty.cbindings as _empty_cbindings
 
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/empty_clients.h" namespace "::cpp2":

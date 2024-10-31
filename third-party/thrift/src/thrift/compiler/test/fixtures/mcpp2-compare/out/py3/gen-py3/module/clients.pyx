@@ -50,8 +50,10 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 cimport includes.types as _includes_types
+cimport includes.cbindings as _includes_cbindings
 import includes.types as _includes_types
 
 import module.services_reflection as _services_reflection
@@ -206,7 +208,7 @@ cdef void ReturnService_simpleTypedefReturn_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_complexTypedefReturn_callback(
-    cFollyTry[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]&& result,
+    cFollyTry[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -219,7 +221,7 @@ cdef void ReturnService_complexTypedefReturn_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_list_mostComplexTypedefReturn_callback(
-    cFollyTry[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]]&& result,
+    cFollyTry[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -232,7 +234,7 @@ cdef void ReturnService_list_mostComplexTypedefReturn_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_enumReturn_callback(
-    cFollyTry[_module_types.cMyEnumA]&& result,
+    cFollyTry[_module_cbindings.cMyEnumA]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -245,7 +247,7 @@ cdef void ReturnService_enumReturn_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_list_EnumReturn_callback(
-    cFollyTry[vector[_module_types.cMyEnumA]]&& result,
+    cFollyTry[vector[_module_cbindings.cMyEnumA]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -258,7 +260,7 @@ cdef void ReturnService_list_EnumReturn_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_structReturn_callback(
-    cFollyTry[_module_types.cMyStruct]&& result,
+    cFollyTry[_module_cbindings.cMyStruct]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -266,12 +268,12 @@ cdef void ReturnService_structReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cMyStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cMyStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_set_StructReturn_callback(
-    cFollyTry[cset[_module_types.cMyStruct]]&& result,
+    cFollyTry[cset[_module_cbindings.cMyStruct]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -279,12 +281,12 @@ cdef void ReturnService_set_StructReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[_module_types.cMyStruct]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[_module_cbindings.cMyStruct]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_unionReturn_callback(
-    cFollyTry[_module_types.cComplexUnion]&& result,
+    cFollyTry[_module_cbindings.cComplexUnion]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -292,12 +294,12 @@ cdef void ReturnService_unionReturn_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cComplexUnion](cmove(result.value()))))
+            pyfuture.set_result(_module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cComplexUnion](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ReturnService_list_UnionReturn_callback(
-    cFollyTry[vector[_module_types.cComplexUnion]]&& result,
+    cFollyTry[vector[_module_cbindings.cComplexUnion]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -622,7 +624,7 @@ cdef void ParamService_listtypedef_ret_typedef_param_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_enum_ret_double_param_callback(
-    cFollyTry[_module_types.cMyEnumA]&& result,
+    cFollyTry[_module_cbindings.cMyEnumA]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -635,7 +637,7 @@ cdef void ParamService_enum_ret_double_param_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_enum_ret_double_enum_param_callback(
-    cFollyTry[_module_types.cMyEnumA]&& result,
+    cFollyTry[_module_cbindings.cMyEnumA]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -648,7 +650,7 @@ cdef void ParamService_enum_ret_double_enum_param_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_listenum_ret_map_param_callback(
-    cFollyTry[vector[_module_types.cMyEnumA]]&& result,
+    cFollyTry[vector[_module_cbindings.cMyEnumA]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -661,7 +663,7 @@ cdef void ParamService_listenum_ret_map_param_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_struct_ret_i16_param_callback(
-    cFollyTry[_module_types.cMyStruct]&& result,
+    cFollyTry[_module_cbindings.cMyStruct]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -669,12 +671,12 @@ cdef void ParamService_struct_ret_i16_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cMyStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cMyStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_setstruct_ret_set_param_callback(
-    cFollyTry[cset[_module_types.cMyStruct]]&& result,
+    cFollyTry[cset[_module_cbindings.cMyStruct]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -682,12 +684,12 @@ cdef void ParamService_setstruct_ret_set_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[_module_types.cMyStruct]](cmove(result.value()))))
+            pyfuture.set_result(_module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[_module_cbindings.cMyStruct]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_union_ret_i32_i32_param_callback(
-    cFollyTry[_module_types.cComplexUnion]&& result,
+    cFollyTry[_module_cbindings.cComplexUnion]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -695,12 +697,12 @@ cdef void ParamService_union_ret_i32_i32_param_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cComplexUnion](cmove(result.value()))))
+            pyfuture.set_result(_module_types.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cComplexUnion](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void ParamService_listunion_string_param_callback(
-    cFollyTry[vector[_module_types.cComplexUnion]]&& result,
+    cFollyTry[vector[_module_cbindings.cComplexUnion]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -991,7 +993,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]](
+        bridgeFutureWith[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).complexTypedefReturn(rpc_options._cpp_obj, 
             ),
@@ -1011,7 +1013,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[vector[vector[cmap[_module_types.cEmpty,_module_types.cMyStruct]]]]](
+        bridgeFutureWith[vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).list_mostComplexTypedefReturn(rpc_options._cpp_obj, 
             ),
@@ -1031,7 +1033,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cMyEnumA](
+        bridgeFutureWith[_module_cbindings.cMyEnumA](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).enumReturn(rpc_options._cpp_obj, 
             ),
@@ -1051,7 +1053,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[_module_types.cMyEnumA]](
+        bridgeFutureWith[vector[_module_cbindings.cMyEnumA]](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).list_EnumReturn(rpc_options._cpp_obj, 
             ),
@@ -1071,7 +1073,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cMyStruct](
+        bridgeFutureWith[_module_cbindings.cMyStruct](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).structReturn(rpc_options._cpp_obj, 
             ),
@@ -1091,7 +1093,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[cset[_module_types.cMyStruct]](
+        bridgeFutureWith[cset[_module_cbindings.cMyStruct]](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).set_StructReturn(rpc_options._cpp_obj, 
             ),
@@ -1111,7 +1113,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cComplexUnion](
+        bridgeFutureWith[_module_cbindings.cComplexUnion](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).unionReturn(rpc_options._cpp_obj, 
             ),
@@ -1131,7 +1133,7 @@ cdef class ReturnService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[_module_types.cComplexUnion]](
+        bridgeFutureWith[vector[_module_cbindings.cComplexUnion]](
             self._executor,
             down_cast_ptr[cReturnServiceClientWrapper, cClientWrapper](self._client.get()).list_UnionReturn(rpc_options._cpp_obj, 
             ),
@@ -1374,7 +1376,7 @@ cdef class ParamService(thrift.py3.client.Client):
         bridgeFutureWith[cFollyUnit](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).void_ret_enum_param(rpc_options._cpp_obj, 
-                <_module_types.cMyEnumA><int>param1,
+                <_module_cbindings.cMyEnumA><int>param1,
             ),
             ParamService_void_ret_enum_param_callback,
             <PyObject *> __userdata
@@ -1809,7 +1811,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cMyEnumA](
+        bridgeFutureWith[_module_cbindings.cMyEnumA](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).enum_ret_double_param(rpc_options._cpp_obj, 
                 param1,
@@ -1832,11 +1834,11 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cMyEnumA](
+        bridgeFutureWith[_module_cbindings.cMyEnumA](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).enum_ret_double_enum_param(rpc_options._cpp_obj, 
                 param1,
-                <_module_types.cMyEnumA><int>param2,
+                <_module_cbindings.cMyEnumA><int>param2,
             ),
             ParamService_enum_ret_double_enum_param_callback,
             <PyObject *> __userdata
@@ -1857,7 +1859,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[_module_types.cMyEnumA]](
+        bridgeFutureWith[vector[_module_cbindings.cMyEnumA]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).listenum_ret_map_param(rpc_options._cpp_obj, 
                 deref((<_module_types.Map__string_i64>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
@@ -1883,7 +1885,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cMyStruct](
+        bridgeFutureWith[_module_cbindings.cMyStruct](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).struct_ret_i16_param(rpc_options._cpp_obj, 
                 param1,
@@ -1907,7 +1909,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[cset[_module_types.cMyStruct]](
+        bridgeFutureWith[cset[_module_cbindings.cMyStruct]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).setstruct_ret_set_param(rpc_options._cpp_obj, 
                 deref((<_module_types.Set__string>param1)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
@@ -1938,7 +1940,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cComplexUnion](
+        bridgeFutureWith[_module_cbindings.cComplexUnion](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).union_ret_i32_i32_param(rpc_options._cpp_obj, 
                 param1,
@@ -1961,7 +1963,7 @@ cdef class ParamService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[_module_types.cComplexUnion]](
+        bridgeFutureWith[vector[_module_cbindings.cComplexUnion]](
             self._executor,
             down_cast_ptr[cParamServiceClientWrapper, cClientWrapper](self._client.get()).listunion_string_param(rpc_options._cpp_obj, 
                 param1.encode('UTF-8'),

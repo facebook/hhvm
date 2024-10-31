@@ -7,51 +7,51 @@
 
 from libcpp.memory cimport shared_ptr
 
-cimport module.types as _fbthrift_ctypes
+cimport module.cbindings as _fbthrift_cbindings
 
 
-cdef shared_ptr[_fbthrift_ctypes.cEmpty] Empty_convert_to_cpp(object inst) except*
-cdef object Empty_from_cpp(const shared_ptr[_fbthrift_ctypes.cEmpty]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cEmpty] Empty_convert_to_cpp(object inst) except*
+cdef object Empty_from_cpp(const shared_ptr[_fbthrift_cbindings.cEmpty]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cASimpleStruct] ASimpleStruct_convert_to_cpp(object inst) except*
-cdef object ASimpleStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cASimpleStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cASimpleStruct] ASimpleStruct_convert_to_cpp(object inst) except*
+cdef object ASimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cASimpleStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cASimpleStructNoexcept] ASimpleStructNoexcept_convert_to_cpp(object inst) except*
-cdef object ASimpleStructNoexcept_from_cpp(const shared_ptr[_fbthrift_ctypes.cASimpleStructNoexcept]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cASimpleStructNoexcept] ASimpleStructNoexcept_convert_to_cpp(object inst) except*
+cdef object ASimpleStructNoexcept_from_cpp(const shared_ptr[_fbthrift_cbindings.cASimpleStructNoexcept]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
-cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
+cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cSimpleUnion] SimpleUnion_convert_to_cpp(object inst) except*
-cdef object SimpleUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cSimpleUnion]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cSimpleUnion] SimpleUnion_convert_to_cpp(object inst) except*
+cdef object SimpleUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleUnion]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexUnion] ComplexUnion_convert_to_cpp(object inst) except*
-cdef object ComplexUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexUnion]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cComplexUnion] ComplexUnion_convert_to_cpp(object inst) except*
+cdef object ComplexUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexUnion]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAnException] AnException_convert_to_cpp(object inst) except*
-cdef object AnException_from_cpp(const shared_ptr[_fbthrift_ctypes.cAnException]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAnException] AnException_convert_to_cpp(object inst) except*
+cdef object AnException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnException]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAnotherException] AnotherException_convert_to_cpp(object inst) except*
-cdef object AnotherException_from_cpp(const shared_ptr[_fbthrift_ctypes.cAnotherException]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAnotherException] AnotherException_convert_to_cpp(object inst) except*
+cdef object AnotherException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnotherException]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*
-cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.ccontainerStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*
+cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cMyIncludedStruct] MyIncludedStruct_convert_to_cpp(object inst) except*
-cdef object MyIncludedStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cMyIncludedStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cMyIncludedStruct] MyIncludedStruct_convert_to_cpp(object inst) except*
+cdef object MyIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyIncludedStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAnnotatedStruct] AnnotatedStruct_convert_to_cpp(object inst) except*
-cdef object AnnotatedStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cAnnotatedStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAnnotatedStruct] AnnotatedStruct_convert_to_cpp(object inst) except*
+cdef object AnnotatedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnnotatedStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cComplexContainerStruct] ComplexContainerStruct_convert_to_cpp(object inst) except*
-cdef object ComplexContainerStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cComplexContainerStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cComplexContainerStruct] ComplexContainerStruct_convert_to_cpp(object inst) except*
+cdef object ComplexContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexContainerStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFloatStruct] FloatStruct_convert_to_cpp(object inst) except*
-cdef object FloatStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cFloatStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFloatStruct] FloatStruct_convert_to_cpp(object inst) except*
+cdef object FloatStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloatStruct]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cFloatUnion] FloatUnion_convert_to_cpp(object inst) except*
-cdef object FloatUnion_from_cpp(const shared_ptr[_fbthrift_ctypes.cFloatUnion]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cFloatUnion] FloatUnion_convert_to_cpp(object inst) except*
+cdef object FloatUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloatUnion]& c_struct)
 
-cdef shared_ptr[_fbthrift_ctypes.cAllRequiredNoExceptMoveCtrStruct] AllRequiredNoExceptMoveCtrStruct_convert_to_cpp(object inst) except*
-cdef object AllRequiredNoExceptMoveCtrStruct_from_cpp(const shared_ptr[_fbthrift_ctypes.cAllRequiredNoExceptMoveCtrStruct]& c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cAllRequiredNoExceptMoveCtrStruct] AllRequiredNoExceptMoveCtrStruct_convert_to_cpp(object inst) except*
+cdef object AllRequiredNoExceptMoveCtrStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllRequiredNoExceptMoveCtrStruct]& c_struct)
 

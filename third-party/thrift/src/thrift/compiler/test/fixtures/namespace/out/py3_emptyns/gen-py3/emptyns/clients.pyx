@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport emptyns.types as _emptyns_types
+cimport emptyns.cbindings as _emptyns_cbindings
 import emptyns.types as _emptyns_types
 
 import emptyns.services_reflection as _services_reflection

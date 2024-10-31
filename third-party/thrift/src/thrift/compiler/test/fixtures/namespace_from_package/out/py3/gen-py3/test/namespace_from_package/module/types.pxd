@@ -41,44 +41,23 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport test.namespace_from_package.module.types as _fbthrift_types
 cimport test.namespace_from_package.module.types_fields as _fbthrift_types_fields
+cimport test.namespace_from_package.module.cbindings as _test_namespace_from_package_module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types_custom_protocol.h" namespace "::test::namespace_from_package::module":
-
-    cdef cppclass cFoo "::test::namespace_from_package::module::Foo":
-        cFoo() except +
-        cFoo(const cFoo&) except +
-        bint operator==(cFoo&)
-        bint operator!=(cFoo&)
-        bint operator<(cFoo&)
-        bint operator>(cFoo&)
-        bint operator<=(cFoo&)
-        bint operator>=(cFoo&)
-        __field_ref[cint64_t] MyInt_ref "MyInt_ref" ()
-
-
-
-
 cdef class Foo(thrift.py3.types.Struct):
-    cdef shared_ptr[cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_test_namespace_from_package_module_cbindings.cFoo] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Foo_FieldsSetter _fields_setter
     cdef inline object MyInt_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFoo])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_namespace_from_package_module_cbindings.cFoo])
 
 
 

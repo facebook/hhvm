@@ -22,6 +22,7 @@ from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
 from libcpp.unordered_map cimport unordered_map as cumap
 cimport folly.iobuf as _fbthrift_iobuf
+
 from thrift.python.exceptions cimport cTException
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
@@ -40,17 +41,18 @@ from folly.optional cimport cOptional as __cOptional
 
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 
 
 
 ctypedef void (*__SmallStruct_FieldsSetterFunc)(__SmallStruct_FieldsSetter, object) except *
 
 cdef class __SmallStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cSmallStruct* _struct_cpp_obj
+    cdef _module_cbindings.cSmallStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __SmallStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __SmallStruct_FieldsSetter _fbthrift_create(_module_types.cSmallStruct* struct_cpp_obj)
+    cdef __SmallStruct_FieldsSetter _fbthrift_create(_module_cbindings.cSmallStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
 
@@ -58,11 +60,11 @@ cdef class __SmallStruct_FieldsSetter(__StructFieldsSetter):
 ctypedef void (*__containerStruct_FieldsSetterFunc)(__containerStruct_FieldsSetter, object) except *
 
 cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.ccontainerStruct* _struct_cpp_obj
+    cdef _module_cbindings.ccontainerStruct* _struct_cpp_obj
     cdef cumap[__cstring_view, __containerStruct_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __containerStruct_FieldsSetter _fbthrift_create(_module_types.ccontainerStruct* struct_cpp_obj)
+    cdef __containerStruct_FieldsSetter _fbthrift_create(_module_cbindings.ccontainerStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

@@ -50,6 +50,7 @@ import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
 cimport module.types as _module_types
+cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
 import module.services_reflection as _services_reflection
@@ -195,9 +196,9 @@ cdef void SimpleService_expected_exception_callback(
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
-    if result.hasException[_module_types.cSimpleException]():
+    if result.hasException[_module_cbindings.cSimpleException]():
         try:
-            exc = _module_types.SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_types.cSimpleException](result.exception()))
+            exc = _module_types.SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cSimpleException](result.exception()))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -380,7 +381,7 @@ cdef void SimpleService_repeat_name_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void SimpleService_get_struct_callback(
-    cFollyTry[_module_types.cSimpleStruct]&& result,
+    cFollyTry[_module_cbindings.cSimpleStruct]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -388,7 +389,7 @@ cdef void SimpleService_get_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cSimpleStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cSimpleStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -432,7 +433,7 @@ cdef void SimpleService_words_count_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void SimpleService_set_enum_callback(
-    cFollyTry[_module_types.cAnEnum]&& result,
+    cFollyTry[_module_cbindings.cAnEnum]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -575,7 +576,7 @@ cdef void SimpleService_contain_binary_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void SimpleService_contain_enum_callback(
-    cFollyTry[vector[_module_types.cAnEnum]]&& result,
+    cFollyTry[vector[_module_cbindings.cAnEnum]]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -588,7 +589,7 @@ cdef void SimpleService_contain_enum_callback(
             pyfuture.set_exception(ex.with_traceback(None))
 
 cdef void SimpleService_get_binary_union_struct_callback(
-    cFollyTry[_module_types.cBinaryUnionStruct]&& result,
+    cFollyTry[_module_cbindings.cBinaryUnionStruct]&& result,
     PyObject* userdata
 ) noexcept:
     client, pyfuture, options = <object> userdata  
@@ -596,7 +597,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_types.cBinaryUnionStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_types.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cBinaryUnionStruct](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -1216,7 +1217,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cSimpleStruct](
+        bridgeFutureWith[_module_cbindings.cSimpleStruct](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_struct(rpc_options._cpp_obj, 
             ),
@@ -1311,10 +1312,10 @@ cdef class SimpleService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cAnEnum](
+        bridgeFutureWith[_module_cbindings.cAnEnum](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).set_enum(rpc_options._cpp_obj, 
-                <_module_types.cAnEnum><int>in_enum,
+                <_module_cbindings.cAnEnum><int>in_enum,
             ),
             SimpleService_set_enum_callback,
             <PyObject *> __userdata
@@ -1579,7 +1580,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[vector[_module_types.cAnEnum]](
+        bridgeFutureWith[vector[_module_cbindings.cAnEnum]](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contain_enum(rpc_options._cpp_obj, 
                 _module_types.List__AnEnum__make_instance(the_enum),
@@ -1601,7 +1602,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         __loop = asyncio_get_event_loop()
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[_module_types.cBinaryUnionStruct](
+        bridgeFutureWith[_module_cbindings.cBinaryUnionStruct](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_binary_union_struct(rpc_options._cpp_obj, 
                 deref((<_module_types.BinaryUnion>u)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),

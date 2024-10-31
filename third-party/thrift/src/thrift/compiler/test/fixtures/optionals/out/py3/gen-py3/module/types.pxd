@@ -41,87 +41,18 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/optionals/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass EnumMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types.h" namespace "::cpp2":
-    cdef cppclass cAnimal "::cpp2::Animal":
-        pass
-
-
-cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/optionals/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cColor "::cpp2::Color":
-        cColor() except +
-        cColor(const cColor&) except +
-        bint operator==(cColor&)
-        bint operator!=(cColor&)
-        bint operator<(cColor&)
-        bint operator>(cColor&)
-        bint operator<=(cColor&)
-        bint operator>=(cColor&)
-        __field_ref[double] red_ref "red_ref" ()
-        __field_ref[double] green_ref "green_ref" ()
-        __field_ref[double] blue_ref "blue_ref" ()
-        __field_ref[double] alpha_ref "alpha_ref" ()
-
-
-    cdef cppclass cVehicle "::cpp2::Vehicle":
-        cVehicle() except +
-        cVehicle(const cVehicle&) except +
-        bint operator==(cVehicle&)
-        bint operator!=(cVehicle&)
-        bint operator<(cVehicle&)
-        bint operator>(cVehicle&)
-        bint operator<=(cVehicle&)
-        bint operator>=(cVehicle&)
-        __field_ref[cColor] color_ref "color_ref" ()
-        __optional_field_ref[string] licensePlate_ref "licensePlate_ref" ()
-        __optional_field_ref[string] description_ref "description_ref" ()
-        __optional_field_ref[string] name_ref "name_ref" ()
-        __optional_field_ref[cbool] hasAC_ref "hasAC_ref" ()
-
-
-    cdef cppclass cPerson "::cpp2::Person":
-        cPerson() except +
-        cPerson(const cPerson&) except +
-        bint operator==(cPerson&)
-        bint operator!=(cPerson&)
-        bint operator<(cPerson&)
-        bint operator>(cPerson&)
-        bint operator<=(cPerson&)
-        bint operator>=(cPerson&)
-        __field_ref[cint64_t] id_ref "id_ref" ()
-        __field_ref[string] name_ref "name_ref" ()
-        __optional_field_ref[cint16_t] age_ref "age_ref" ()
-        __optional_field_ref[string] address_ref "address_ref" ()
-        __optional_field_ref[cColor] favoriteColor_ref "favoriteColor_ref" ()
-        __optional_field_ref[cset[cint64_t]] friends_ref "friends_ref" ()
-        __optional_field_ref[cint64_t] bestFriend_ref "bestFriend_ref" ()
-        __optional_field_ref[cmap[cAnimal,string]] petNames_ref "petNames_ref" ()
-        __optional_field_ref[cAnimal] afraidOfAnimal_ref "afraidOfAnimal_ref" ()
-        __optional_field_ref[vector[cVehicle]] vehicles_ref "vehicles_ref" ()
-
-
-
 
 cdef class Color(thrift.py3.types.Struct):
-    cdef shared_ptr[cColor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cColor] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Color_FieldsSetter _fields_setter
     cdef inline object red_impl(self)
     cdef inline object green_impl(self)
@@ -129,12 +60,12 @@ cdef class Color(thrift.py3.types.Struct):
     cdef inline object alpha_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cColor])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cColor])
 
 
 
 cdef class Vehicle(thrift.py3.types.Struct):
-    cdef shared_ptr[cVehicle] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cVehicle] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Vehicle_FieldsSetter _fields_setter
     cdef inline object color_impl(self)
     cdef inline object licensePlate_impl(self)
@@ -144,12 +75,12 @@ cdef class Vehicle(thrift.py3.types.Struct):
     cdef Color __fbthrift_cached_color
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cVehicle])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVehicle])
 
 
 
 cdef class Person(thrift.py3.types.Struct):
-    cdef shared_ptr[cPerson] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cPerson] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Person_FieldsSetter _fields_setter
     cdef inline object id_impl(self)
     cdef inline object name_impl(self)
@@ -168,7 +99,7 @@ cdef class Person(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_vehicles
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cPerson])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cPerson])
 
 
 cdef class Set__i64(thrift.py3.types.Set):
@@ -179,14 +110,14 @@ cdef class Set__i64(thrift.py3.types.Set):
 cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *
 
 cdef class Map__Animal_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cAnimal,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cAnimal,string]])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_module_cbindings.cAnimal,string]])
     cdef _check_key_type(self, key)
 
-cdef shared_ptr[cmap[cAnimal,string]] Map__Animal_string__make_instance(object items) except *
+cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] Map__Animal_string__make_instance(object items) except *
 
-cdef vector[cVehicle] List__Vehicle__make_instance(object items) except *
-cdef object List__Vehicle__from_cpp(const vector[cVehicle]&) except *
+cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *
+cdef object List__Vehicle__from_cpp(const vector[_module_cbindings.cVehicle]&) except *
 
 

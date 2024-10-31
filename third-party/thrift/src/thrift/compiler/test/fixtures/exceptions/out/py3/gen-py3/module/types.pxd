@@ -41,182 +41,86 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-py3/module/types.h":
   pass
 
 
 
-cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass ExceptionMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
-    cdef cppclass StructMetadata[T]:
-        @staticmethod
-        void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
-
-    cdef cppclass cFiery "::cpp2::Fiery"(cTException):
-        cFiery() except +
-        cFiery(const cFiery&) except +
-        bint operator==(cFiery&)
-        bint operator!=(cFiery&)
-        bint operator<(cFiery&)
-        bint operator>(cFiery&)
-        bint operator<=(cFiery&)
-        bint operator>=(cFiery&)
-        __required_field_ref[string] message_ref "message_ref" ()
-
-
-    cdef cppclass cSerious "::cpp2::Serious"(cTException):
-        cSerious() except +
-        cSerious(const cSerious&) except +
-        bint operator==(cSerious&)
-        bint operator!=(cSerious&)
-        bint operator<(cSerious&)
-        bint operator>(cSerious&)
-        bint operator<=(cSerious&)
-        bint operator>=(cSerious&)
-        __optional_field_ref[string] not_sonnet_ref "sonnet_ref" ()
-
-
-    cdef cppclass cComplexFieldNames "::cpp2::ComplexFieldNames"(cTException):
-        cComplexFieldNames() except +
-        cComplexFieldNames(const cComplexFieldNames&) except +
-        bint operator==(cComplexFieldNames&)
-        bint operator!=(cComplexFieldNames&)
-        bint operator<(cComplexFieldNames&)
-        bint operator>(cComplexFieldNames&)
-        bint operator<=(cComplexFieldNames&)
-        bint operator>=(cComplexFieldNames&)
-        __field_ref[string] error_message_ref "error_message_ref" ()
-        __field_ref[string] internal_error_message_ref "internal_error_message_ref" ()
-
-
-    cdef cppclass cCustomFieldNames "::cpp2::CustomFieldNames"(cTException):
-        cCustomFieldNames() except +
-        cCustomFieldNames(const cCustomFieldNames&) except +
-        bint operator==(cCustomFieldNames&)
-        bint operator!=(cCustomFieldNames&)
-        bint operator<(cCustomFieldNames&)
-        bint operator>(cCustomFieldNames&)
-        bint operator<=(cCustomFieldNames&)
-        bint operator>=(cCustomFieldNames&)
-        __field_ref[string] error_message_ref "error_message_ref" ()
-        __field_ref[string] internal_error_message_ref "internal_error_message_ref" ()
-
-
-    cdef cppclass cExceptionWithPrimitiveField "::cpp2::ExceptionWithPrimitiveField"(cTException):
-        cExceptionWithPrimitiveField() except +
-        cExceptionWithPrimitiveField(const cExceptionWithPrimitiveField&) except +
-        bint operator==(cExceptionWithPrimitiveField&)
-        bint operator!=(cExceptionWithPrimitiveField&)
-        bint operator<(cExceptionWithPrimitiveField&)
-        bint operator>(cExceptionWithPrimitiveField&)
-        bint operator<=(cExceptionWithPrimitiveField&)
-        bint operator>=(cExceptionWithPrimitiveField&)
-        __field_ref[string] message_ref "message_ref" ()
-        __field_ref[cint32_t] error_code_ref "error_code_ref" ()
-
-
-    cdef cppclass cExceptionWithStructuredAnnotation "::cpp2::ExceptionWithStructuredAnnotation"(cTException):
-        cExceptionWithStructuredAnnotation() except +
-        cExceptionWithStructuredAnnotation(const cExceptionWithStructuredAnnotation&) except +
-        bint operator==(cExceptionWithStructuredAnnotation&)
-        bint operator!=(cExceptionWithStructuredAnnotation&)
-        bint operator<(cExceptionWithStructuredAnnotation&)
-        bint operator>(cExceptionWithStructuredAnnotation&)
-        bint operator<=(cExceptionWithStructuredAnnotation&)
-        bint operator>=(cExceptionWithStructuredAnnotation&)
-        __field_ref[string] message_field_ref "message_field_ref" ()
-        __field_ref[cint32_t] error_code_ref "error_code_ref" ()
-
-
-    cdef cppclass cBanal "::cpp2::Banal"(cTException):
-        cBanal() except +
-        cBanal(const cBanal&) except +
-        bint operator==(cBanal&)
-        bint operator!=(cBanal&)
-        bint operator<(cBanal&)
-        bint operator>(cBanal&)
-        bint operator<=(cBanal&)
-        bint operator>=(cBanal&)
-
-
-
-
 cdef class Fiery(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cFiery] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cFiery] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Fiery_FieldsSetter _fields_setter
     cdef inline object message_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cFiery])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cFiery])
 
 
 
 cdef class Serious(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cSerious] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cSerious] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Serious_FieldsSetter _fields_setter
     cdef inline object not_sonnet_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cSerious])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSerious])
 
 
 
 cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cComplexFieldNames] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cComplexFieldNames] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ComplexFieldNames_FieldsSetter _fields_setter
     cdef inline object error_message_impl(self)
     cdef inline object internal_error_message_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cComplexFieldNames])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexFieldNames])
 
 
 
 cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cCustomFieldNames] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cCustomFieldNames] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CustomFieldNames_FieldsSetter _fields_setter
     cdef inline object error_message_impl(self)
     cdef inline object internal_error_message_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cCustomFieldNames])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomFieldNames])
 
 
 
 cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cExceptionWithPrimitiveField] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cExceptionWithPrimitiveField] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ExceptionWithPrimitiveField_FieldsSetter _fields_setter
     cdef inline object message_impl(self)
     cdef inline object error_code_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cExceptionWithPrimitiveField])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cExceptionWithPrimitiveField])
 
 
 
 cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cExceptionWithStructuredAnnotation] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cExceptionWithStructuredAnnotation] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__ExceptionWithStructuredAnnotation_FieldsSetter _fields_setter
     cdef inline object message_field_impl(self)
     cdef inline object error_code_impl(self)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cExceptionWithStructuredAnnotation])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cExceptionWithStructuredAnnotation])
 
 
 
 cdef class Banal(thrift.py3.exceptions.GeneratedError):
-    cdef shared_ptr[cBanal] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[_module_cbindings.cBanal] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__Banal_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cBanal])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBanal])
 
 
 

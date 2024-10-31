@@ -41,13 +41,13 @@ from thrift.python.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+
+cimport module.types as _fbthrift_types
 cimport module.types_fields as _fbthrift_types_fields
+cimport module.cbindings as _module_cbindings
 
 cdef extern from "thrift/compiler/test/fixtures/list/gen-py3/module/types.h":
   pass
-
-
-
 
 
 cdef vector[string] List__string__make_instance(object items) except *
@@ -62,5 +62,3 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
 cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_instance(object items) except *
 
 
-cdef extern from "thrift/compiler/test/fixtures/list/gen-cpp2/module_constants.h" namespace "::cpp2":
-    cdef cmap[cint64_t,vector[string]] cTEST_MAP "::cpp2::module_constants::TEST_MAP"()

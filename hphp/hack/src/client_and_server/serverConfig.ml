@@ -504,7 +504,7 @@ let load
     ~silent
     ~from
     ~(cli_config_overrides : (string * string) list)
-    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
+    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t * Errors.t =
   let command_line_overrides = Config_file.of_list cli_config_overrides in
   let (config_hash, config) =
     Config_file.parse_hhconfig (Relative_path.to_absolute repo_config_path)
@@ -573,11 +573,13 @@ let load
     string_list "warnings_generated_files" ~default:[] config
     |> List.map ~f:Str.regexp
   in
+  let package_v2 = bool_ "package_v2" ~default:false config in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
       ~f:maybe_relative_path
   in
+  let (errors, package_info) = PackageConfig.load_and_parse ~package_v2 () in
   let global_opts =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =
@@ -588,6 +590,7 @@ let load
               default.po with
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
+              ParserOptions.package_info;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:
@@ -650,7 +653,8 @@ let load
       naming_table_compression_threads;
       warnings_generated_files;
     },
-    local_config )
+    local_config,
+    errors )
 
 (* useful in testing code *)
 let default_config =

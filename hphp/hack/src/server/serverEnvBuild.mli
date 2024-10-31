@@ -20,6 +20,5 @@ val make_env :
   init_id:string ->
   deps_mode:Typing_deps_mode.t ->
   ?errorl:Errors.t ->
-  ?package_info:PackageInfo.t ->
   ServerConfig.t ->
   ServerEnv.env

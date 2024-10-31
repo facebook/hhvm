@@ -40,12 +40,12 @@ val program_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
   - Creates a bunch of files for IPC, e.g. for errors and status transmission.
   - Configure GC
   - initialize logging
-  - initialize workers
-  - load and parse package config *)
+  - initialize workers *)
 val setup_server :
   informant_managed:bool ->
   monitor_pid:int option ->
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
+  Errors.t ->
   MultiWorker.worker list * ServerEnv.env

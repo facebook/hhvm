@@ -58,7 +58,7 @@ let init (root : Path.t) (naming_table_path : string option) :
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmpdir_NOT_USED");
   Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
 
-  let (server_config, server_local_config) =
+  let (server_config, server_local_config, _) =
     ServerConfig.load
       ~silent:true
       ~from:""
@@ -285,7 +285,7 @@ let () =
       Relative_path.Tmp
       (Path.make "tmpdir_NOT_USED");
     Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
-    let (server_config, _server_local_config) =
+    let (server_config, _server_local_config, _errors) =
       ServerConfig.load
         ~silent:true
         ~from:""

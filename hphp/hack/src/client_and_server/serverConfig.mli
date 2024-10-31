@@ -26,7 +26,7 @@ val load :
   from:string ->
   cli_config_overrides:(string * string) list ->
   ai_options:Ai_options.t option ->
-  t * ServerLocalConfig.t
+  t * ServerLocalConfig.t * Errors.t
 
 val load_config : Config_file_common.t -> GlobalOptions.t -> GlobalOptions.t
 

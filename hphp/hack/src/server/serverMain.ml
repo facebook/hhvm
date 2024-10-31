@@ -92,7 +92,7 @@ module Program = struct
         (Relative_path.to_absolute ServerConfig.repo_config_path)
     in
     if hhconfig_in_updates then begin
-      let (new_config, _) =
+      let (new_config, _, _) =
         ServerConfig.load
           ~silent:false
           ~from:(ServerArgs.from genv.options)
@@ -1245,14 +1245,14 @@ let log_pids root ~monitor_pid =
   - Creates a bunch of files for IPC, e.g. for errors and status transmission.
   - Configure GC
   - initialize logging
-  - initialize workers
-  - load and parse package config *)
+  - initialize workers *)
 let setup_server
     ~(informant_managed : bool)
     ~(monitor_pid : int option)
     (options : ServerArgs.options)
     (config : ServerConfig.t)
-    (local_config : ServerLocalConfig.t) : MultiWorker.worker list * env =
+    (local_config : ServerLocalConfig.t)
+    (errorl : Errors.t) : MultiWorker.worker list * env =
   let num_workers = num_workers options local_config in
   let shmem_handle =
     SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
@@ -1306,16 +1306,11 @@ let setup_server
       config
       local_config
   in
-  let package_v2 =
-    TypecheckerOptions.package_v2 @@ ServerConfig.typechecker_options config
-  in
-  let (errorl, package_info) = PackageConfig.load_and_parse ~package_v2 () in
   let env =
     ServerEnvBuild.make_env
       config
       ~init_id
       ~errorl
-      ~package_info
       ~deps_mode:(get_deps_mode options)
   in
 
@@ -1344,6 +1339,7 @@ let run_once options config local_config =
       options
       config
       local_config
+      Errors.empty
       ~informant_managed:false
       ~monitor_pid:None
   in
@@ -1392,7 +1388,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
 
   Hh_logger.log "ServerMain daemon starting.";
 
-  let (config, local_config) =
+  let (config, local_config, errorl) =
     ServerConfig.load
       ~silent:false
       ~from:(ServerArgs.from options)
@@ -1406,6 +1402,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       options
       config
       local_config
+      errorl
       ~informant_managed
       ~monitor_pid:(Some monitor_pid)
   in

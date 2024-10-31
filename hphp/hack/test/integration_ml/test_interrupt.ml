@@ -42,7 +42,7 @@ allowed_decl_fixme_codes = 4336
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename hhconfig_contents;
-  let (custom_config, _) =
+  let (custom_config, _, _) =
     ServerConfig.load
       ~silent:false
       ~from:""

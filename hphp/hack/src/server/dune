@@ -156,7 +156,6 @@
     load_script
     lwt
     memory_stats
-    package_config
     parent
     provider_backend
     security_stubs

@@ -356,6 +356,7 @@
    procs_bucket
    server_local_config_knobs_stubs
    config_file
+   package_config
    )
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

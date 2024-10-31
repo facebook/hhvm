@@ -137,7 +137,7 @@ let exec_command_with_config
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  let (config, local_config) =
+  let (config, local_config, _errors) =
     ServerConfig.load
       ~silent:true
       ~from

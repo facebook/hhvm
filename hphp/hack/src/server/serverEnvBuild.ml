@@ -42,16 +42,10 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ~init_id ~deps_mode ?errorl ?package_info config : ServerEnv.env =
-  let popt = ServerConfig.parser_options config in
-  let popt =
-    match package_info with
-    | None -> popt
-    | Some package_info -> { popt with ParserOptions.package_info }
-  in
+let make_env ~init_id ~deps_mode ?errorl config : ServerEnv.env =
   {
     tcopt = ServerConfig.typechecker_options config;
-    popt;
+    popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
     swriteopt = ServerConfig.symbol_write_options config;
     naming_table = Naming_table.empty;

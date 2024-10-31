@@ -15,7 +15,7 @@ let hhconfig_filename = Filename.concat root ".hhconfig"
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename "timeout = 737";
-  let (config, local_config) =
+  let (config, local_config, _) =
     ServerConfig.load
       ~silent:false
       ~from:""

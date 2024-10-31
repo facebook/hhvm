@@ -9,7 +9,6 @@
   lwt
   ide_highlight_refs
   lsp
-  package_config
   package_info
   rust_batch_index_ffi
   server

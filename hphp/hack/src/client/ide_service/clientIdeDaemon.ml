@@ -348,23 +348,12 @@ let initialize1
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
-  let (config, local_config) =
+  let (config, local_config, _) =
     ServerConfig.load
       ~silent:true
       ~cli_config_overrides:config
       ~from:""
       ~ai_options:None
-  in
-  (* Ignore package loading errors for now TODO(jjwu) *)
-  log "Loading package configuration";
-  let po = ServerConfig.parser_options config in
-  let (_, package_info) =
-    PackageConfig.load_and_parse ~package_v2:po.ParserOptions.package_v2 ()
-  in
-  let config =
-    ServerConfig.set_parser_options
-      config
-      { po with ParserOptions.package_info }
   in
   HackEventLogger.set_hhconfig_version
     (ServerConfig.version config |> Config_file.version_to_string_opt);

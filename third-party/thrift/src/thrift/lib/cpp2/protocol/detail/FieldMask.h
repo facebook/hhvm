@@ -39,6 +39,14 @@ enum class ArrayKey {
   String = 1,
 };
 
+inline bool isInclusive(const Mask& mask) {
+  return folly::to_underlying(mask.getType()) % 2 == 0;
+}
+
+inline bool isExclusive(const Mask& mask) {
+  return folly::to_underlying(mask.getType()) % 2 == 1;
+}
+
 // Returns mask == allMask() but faster
 inline bool isAllMask(const Mask& mask) {
   return mask.excludes_ref() && mask.excludes_ref()->empty();

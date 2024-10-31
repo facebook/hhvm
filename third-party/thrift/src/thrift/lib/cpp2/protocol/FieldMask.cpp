@@ -271,10 +271,6 @@ Mask subtractMask(const Mask& lhs, const Mask& rhs) {
   return apply(lhs, rhs, SubtractMaskImpl{});
 }
 
-bool isInclusive(const Mask& mask) {
-  return folly::to_underlying(mask.getType()) % 2 == 0;
-}
-
 } // namespace
 
 Mask operator&(const Mask& lhs, const Mask& rhs) {
@@ -285,14 +281,14 @@ Mask operator&(const Mask& lhs, const Mask& rhs) {
     return lhs;
   }
 
-  if (isInclusive(lhs)) {
-    if (isInclusive(rhs)) { // lhs=includes rhs=includes
+  if (detail::isInclusive(lhs)) {
+    if (detail::isInclusive(rhs)) { // lhs=includes rhs=includes
       return intersectMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return subtractMask(lhs, rhs);
   }
-  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
+  if (detail::isInclusive(rhs)) { // lhs=excludes rhs=includes
     return subtractMask(rhs, lhs);
   }
   // lhs=excludes rhs=excludes
@@ -306,14 +302,14 @@ Mask operator|(const Mask& lhs, const Mask& rhs) {
     return rhs;
   }
 
-  if (isInclusive(lhs)) {
-    if (isInclusive(rhs)) { // lhs=includes rhs=includes
+  if (detail::isInclusive(lhs)) {
+    if (detail::isInclusive(rhs)) { // lhs=includes rhs=includes
       return unionMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return reverseMask(subtractMask(rhs, lhs));
   }
-  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
+  if (detail::isInclusive(rhs)) { // lhs=excludes rhs=includes
     return reverseMask(subtractMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes
@@ -330,14 +326,14 @@ Mask operator-(const Mask& lhs, const Mask& rhs) {
     return noneMask();
   }
 
-  if (isInclusive(lhs)) {
-    if (isInclusive(rhs)) { // lhs=includes rhs=includes
+  if (detail::isInclusive(lhs)) {
+    if (detail::isInclusive(rhs)) { // lhs=includes rhs=includes
       return subtractMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return intersectMask(lhs, rhs);
   }
-  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
+  if (detail::isInclusive(rhs)) { // lhs=excludes rhs=includes
     return reverseMask(unionMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes

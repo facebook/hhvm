@@ -23,6 +23,7 @@
 
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/detail/Object.h>
 
 namespace field_mask_constants = apache::thrift::protocol::field_mask_constants;
 
@@ -114,6 +115,50 @@ std::string getStringFromValue(const Value& v) {
   }
   folly::throw_exception<std::runtime_error>(
       "Value contains a non-string key.");
+}
+
+Value getValueFromMapIdAs(MapId id, const Value& as) {
+  auto key = static_cast<int64_t>(id);
+  if (as.is_byte()) {
+    if (key > std::numeric_limits<int8_t>::max() ||
+        key < std::numeric_limits<int8_t>::min()) {
+      folly::throw_exception<std::runtime_error>(
+          "MapId overflows the provided type.");
+    }
+    return asValueStruct<type::byte_t>(key);
+  }
+  if (as.is_i16()) {
+    if (key > std::numeric_limits<int16_t>::max() ||
+        key < std::numeric_limits<int16_t>::min()) {
+      folly::throw_exception<std::runtime_error>(
+          "MapId overflows the provided type.");
+    }
+    return asValueStruct<type::i16_t>(key);
+  }
+  if (as.is_i32()) {
+    if (key > std::numeric_limits<int32_t>::max() ||
+        key < std::numeric_limits<int32_t>::min()) {
+      folly::throw_exception<std::runtime_error>(
+          "MapId overflows the provided type.");
+    }
+    return asValueStruct<type::i32_t>(key);
+  }
+  if (as.is_i64()) {
+    return asValueStruct<type::i64_t>(key);
+  }
+  folly::throw_exception<std::runtime_error>(
+      "Provided value contains a non-integer.");
+}
+
+Value getValueFromStringAs(std::string key, const Value& as) {
+  if (as.is_binary()) {
+    return asValueStruct<type::binary_t>(key);
+  }
+  if (as.is_string()) {
+    return asValueStruct<type::string_t>(key);
+  }
+  folly::throw_exception<std::runtime_error>(
+      "Provided value contains a non-string.");
 }
 
 void throwIfContainsMapMask(const Mask& mask) {

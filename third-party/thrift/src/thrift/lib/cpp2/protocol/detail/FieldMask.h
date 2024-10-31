@@ -17,8 +17,6 @@
 #pragma once
 
 #include <functional>
-#include <map>
-#include <string_view>
 
 #include <folly/CppAttributes.h>
 #include <folly/container/F14Set.h>
@@ -151,12 +149,20 @@ void compare_impl(const T& original, const T& modified, FieldIdToMask& mask) {
 ArrayKey getArrayKeyFromValue(const Value& v);
 
 // Returns the MapId of the given Value key. If the Value key
-// contains a non-integer valie, it throws.
+// contains a non-integer value, it throws.
 MapId getMapIdFromValue(const Value& v);
 
 // Returns the string of the given Value key. If the Value key contains a
 // non-string value, it throws.
 std::string getStringFromValue(const Value& v);
+
+// Returns the Value of the given MapId with the corresponding type. If the
+// given type contains a non-integer value, it throws.
+Value getValueFromMapIdAs(MapId id, const Value& as);
+
+// Returns the Value of the given string with the corresponding type. If the
+// given type contains a non-integer value, it throws.
+Value getValueFromStringAs(std::string key, const Value& as);
 
 // Returns the MapId in map mask of the given Value key.
 // If it doesn't exist, it returns the new MapId (pointer to the key).

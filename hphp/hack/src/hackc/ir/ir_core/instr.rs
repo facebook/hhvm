@@ -6,7 +6,6 @@ use macros::HasLoc;
 use macros::HasLocals;
 use macros::HasOperands;
 use newtype::newtype_int;
-use smallvec::SmallVec;
 use strum::Display;
 
 use crate::AsTypeStructExceptionKind;
@@ -26,6 +25,7 @@ use crate::IncDecOp;
 use crate::InitPropOp;
 use crate::IsLogAsDynamicCallOp;
 use crate::IsTypeOp;
+use crate::IterArgs;
 use crate::IterArgsFlags;
 use crate::IterId;
 use crate::LocId;
@@ -501,6 +501,10 @@ pub enum Hhbc {
     IterBase(ValueId, LocId),
     #[has_operands(none)]
     IterFree(IterId, LocId),
+    #[has_operands(none)]
+    IterGetKey(IterArgs, LocalId, LocId),
+    #[has_operands(none)]
+    IterGetValue(IterArgs, LocalId, LocId),
     LateBoundCls(LocId),
     LazyClassFromClass(ValueId, LocId),
     LockObj(ValueId, LocId),
@@ -1044,12 +1048,11 @@ pub enum Predicate {
     Zero,
 }
 
-#[derive(Clone, Debug, HasLoc, PartialEq, Eq)]
+#[derive(Clone, Debug, HasLoc, HasLocals, PartialEq, Eq)]
 pub struct IteratorArgs {
     pub iter_id: IterId,
     pub flags: IterArgsFlags,
-    // Stored as [BaseLid, ValueLid, KeyLid]
-    pub locals: SmallVec<[LocalId; 3]>,
+    pub base_lid: LocalId,
     pub targets: [BlockId; 2],
     pub loc: LocId,
 }
@@ -1059,37 +1062,17 @@ impl IteratorArgs {
         iter_id: IterId,
         flags: IterArgsFlags,
         base_lid: LocalId,
-        key_lid: Option<LocalId>,
-        value_lid: LocalId,
         done_bid: BlockId,
         next_bid: BlockId,
         loc: LocId,
     ) -> Self {
-        let mut locals = SmallVec::new();
-        locals.push(base_lid);
-        locals.push(value_lid);
-        if let Some(key_lid) = key_lid {
-            locals.push(key_lid);
-        }
         IteratorArgs {
             iter_id,
             flags,
-            locals,
+            base_lid,
             targets: [done_bid, next_bid],
             loc,
         }
-    }
-
-    pub fn base_lid(&self) -> LocalId {
-        self.locals[0]
-    }
-
-    pub fn key_lid(&self) -> Option<LocalId> {
-        self.locals.get(2).copied()
-    }
-
-    pub fn value_lid(&self) -> LocalId {
-        self.locals[1]
     }
 
     pub fn done_bid(&self) -> BlockId {
@@ -1098,12 +1081,6 @@ impl IteratorArgs {
 
     pub fn next_bid(&self) -> BlockId {
         self.targets[1]
-    }
-}
-
-impl HasLocals for IteratorArgs {
-    fn locals(&self) -> &[LocalId] {
-        self.locals.as_slice()
     }
 }
 

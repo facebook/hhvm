@@ -62,69 +62,21 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
   return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
 }
 
-void implIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const isInitK = inst->is(IterInitArrK, IterInitObjK);
-  auto const extra = &inst->extra<IterData>()->args;
-
-  auto const src = inst->src(0);
+void implIterArr(
+  IRLS& env,
+  const IRInstruction* inst,
+  CallSpec target,
+  CallDest dstInfo
+) {
+  assertx(inst->is(IterGetKeyArr, IterGetValArr, IterInitArr, IterNextArr));
   auto const fp = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  auto const valOff = localOffset(extra->valId);
+  auto const iterId = inst->extra<IterData>()->args.iterId;
+  auto const args = argGroup(env, inst)
+    .addr(fp, iterOffset(inst->marker(), iterId))
+    .ssa(0 /* arr */);
 
   auto& v = vmain(env);
-
-  if (src->isA(TArrLike)) {
-    auto args = argGroup(env, inst)
-      .addr(fp, iterOff)
-      .ssa(0 /* src */)
-      .addr(fp, valOff);
-    if (isInitK) {
-      args.addr(fp, localOffset(extra->keyId));
-    }
-
-    auto const baseConst = has_flag(extra->flags, IterArgs::Flags::BaseConst);
-    auto const target = isInitK
-      ? CallSpec::direct(new_iter_array_key_helper(baseConst))
-      : CallSpec::direct(new_iter_array_helper(baseConst));
-    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
-    return;
-  }
-
-  always_assert(src->type() <= TObj);
-
-  auto args = argGroup(env, inst)
-    .ssa(0 /* src */)
-    .addr(fp, valOff);
-  if (isInitK) {
-    args.addr(fp, localOffset(extra->keyId));
-  } else {
-    args.imm(0);
-  }
-
-  auto const target = CallSpec::direct(new_iter_object);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void implIterNext(IRLS& env, const IRInstruction* inst, CallSpec target) {
-  always_assert(inst->is(IterNextArr, IterNextArrK,
-                         IterNextObj, IterNextObjK));
-  auto const isArr = inst->is(IterNextArr, IterNextArrK);
-  auto const isKey = inst->is(IterNextArrK, IterNextObjK);
-  auto const extra = &inst->extra<IterData>()->args;
-
-  auto const sync = isArr ? SyncOptions::None : SyncOptions::Sync;
-  auto const args = [&] {
-    auto const fp = srcLoc(env, inst, 1).reg();
-    auto ret = argGroup(env, inst);
-    if (isArr) ret.addr(fp, iterOffset(inst->marker(), extra->iterId));
-    ret.ssa(0);
-    ret.addr(fp, localOffset(extra->valId));
-    if (isKey) ret.addr(fp, localOffset(extra->keyId));
-    return ret;
-  }();
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), sync, args);
+  cgCallHelper(v, env, target, dstInfo, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,47 +149,34 @@ void cgProfileIterInit(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::None, args);
 }
 
+void cgIterGetKeyArr(IRLS& env, const IRInstruction* inst) {
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const target = CallSpec::direct(iter_select(iter_get_key_array, flags));
+  implIterArr(env, inst, target, callDestTV(env, inst));
+}
+
+void cgIterGetValArr(IRLS& env, const IRInstruction* inst) {
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const target =
+    CallSpec::direct(iter_select(iter_get_value_array, flags));
+  implIterArr(env, inst, target, callDestTV(env, inst));
+}
+
 void cgIterInitArr(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
-void cgIterInitArrK(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
-void cgIterInitObj(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
-}
-
-void cgIterInitObjK(IRLS& env, const IRInstruction* inst) {
-  implIterInit(env, inst);
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const target = CallSpec::direct(iter_select(iter_init_array, flags));
+  implIterArr(env, inst, target, callDest(env, inst));
 }
 
 void cgIterNextArr(IRLS& env, const IRInstruction* inst) {
   auto const flags = inst->extra<IterData>()->args.flags;
-  auto const target = has_flag(flags, IterArgs::Flags::BaseConst)
-    ? CallSpec::direct(iter_next_array<true>)
-    : CallSpec::direct(iter_next_array<false>);
-  implIterNext(env, inst, target);
-}
-
-void cgIterNextArrK(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<IterData>()->args.flags;
-  auto const target = has_flag(flags, IterArgs::Flags::BaseConst)
-    ? CallSpec::direct(iter_next_array_key<true>)
-    : CallSpec::direct(iter_next_array_key<false>);
-  implIterNext(env, inst, target);
-}
-
-void cgIterNextObj(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_next_object));
-}
-
-void cgIterNextObjK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst, CallSpec::direct(iter_next_object_key));
+  auto const target = CallSpec::direct(iter_select(iter_next_array, flags));
+  implIterArr(env, inst, target, callDest(env, inst));
 }
 
 IMPL_OPCODE_CALL(IterExtractBase)
+IMPL_OPCODE_CALL(IterInitObj)
+IMPL_OPCODE_CALL(IterNextObj)
 
 ///////////////////////////////////////////////////////////////////////////////
 

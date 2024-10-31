@@ -24,6 +24,9 @@ enum class IterArgsFlags : uint8_t {
   None      = 0,
   // The base is stored in a local, and that local is unmodified in the loop.
   BaseConst = (1 << 0),
+  // Indicates whether IterGetKeys migh be used during iteration. Forces
+  // iterator to be index-based rather than elemptr-based for vectors.
+  WithKeys  = (1 << 1),
 };
 
 constexpr IterArgsFlags operator&(IterArgsFlags a, IterArgsFlags b) {
@@ -32,6 +35,10 @@ constexpr IterArgsFlags operator&(IterArgsFlags a, IterArgsFlags b) {
 
 constexpr IterArgsFlags operator|(IterArgsFlags a, IterArgsFlags b) {
   return IterArgsFlags(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+
+constexpr IterArgsFlags operator~(IterArgsFlags a) {
+  return IterArgsFlags(~static_cast<uint8_t>(a));
 }
 
 constexpr bool has_flag(IterArgsFlags flags, IterArgsFlags flag) {

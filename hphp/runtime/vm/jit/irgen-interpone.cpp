@@ -234,14 +234,6 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpIterInit:
-    case OpIterNext: {
-      auto const ita = getImm(sk.pc(),  0).u_ITA;
-      setLocType(ita.valId, TCell);
-      if (ita.hasKey()) setLocType(ita.keyId, TCell);
-      break;
-    }
-
     case OpSilence:
       if (static_cast<SilenceOp>(getImm(sk.pc(), 1).u_OA) == SilenceOp::Start) {
         setImmLocType(0, TInt);

@@ -156,6 +156,104 @@ void emitIterBase(IRGS& env) {
   decRef(env, base);
 }
 
+namespace {
+
+const StaticString s_current("current");
+const StaticString s_key("key");
+
+void emitIterObjGet(IRGS& env, SSATmp* base, const StringData* methodName) {
+  assertx(base->isA(TObj));
+
+  pushIncRef(env, base);
+  push(env, cns(env, TUninit));
+  updateStackOffset(env);
+
+  auto const fca = FCallArgs(
+    FCallArgsFlags::SkipRepack | FCallArgsFlags::EnforceMutableReturn,
+    0, 1, nullptr, nullptr, kInvalidOffset, nullptr
+  );
+  auto const subop = ObjMethodOp::NullThrows;
+  emitFCallObjMethodD(env, fca, staticEmptyString(), subop, methodName);
+}
+
+}
+
+void emitIterGetKey(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
+  if (base->isA(TObj)) return emitIterObjGet(env, base, s_key.get());
+
+  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+    if (base->isA(TVec)) {
+      push(env, pos);
+    } else if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterKey, TInt | TStr, base, elm));
+    } else {
+      assertx(base->isA(TKeyset));
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInt | TStr, base, elm));
+    }
+    return;
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+    pushIncRef(env, gen(env, BespokeIterGetKey, base, pos));
+    return;
+  }
+
+  pushIncRef(env, gen(env, IterGetKeyArr, IterData(ita), base, fp(env)));
+}
+
+void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
+  if (base->isA(TObj)) return emitIterObjGet(env, base, s_current.get());
+
+  auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
+  auto const withKeys = has_flag(ita.flags, IterArgs::Flags::WithKeys);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+    if (base->isA(TVec)) {
+      if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
+        auto const elm = gen(env, IntAsPtrToElem, pos);
+        pushIncRef(env, gen(env, LdPtrIterVal, TInitCell, base, elm));
+      } else {
+        pushIncRef(env, gen(env, LdVecElem, base, pos));
+      }
+    } else if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInitCell, base, elm));
+    } else {
+      assertx(base->isA(TKeyset));
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      pushIncRef(env, gen(env, LdPtrIterVal, TInt | TStr, base, elm));
+    }
+    return;
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+    pushIncRef(env, gen(env, BespokeIterGetVal, base, pos));
+    return;
+  }
+
+  pushIncRef(env, gen(env, IterGetValArr, IterData(ita), base, fp(env)));
+}
+
 void emitIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneRelOffset) {
   auto const doneOffset = bcOff(env) + doneRelOffset;
@@ -167,11 +265,8 @@ void emitIterInit(IRGS& env, IterArgs ita,
     specializeIterInit(env, doneOffset, ita, base, baseLocalId, profiledResult);
   if (done) return;
 
-  auto const op = base->isA(TArrLike)
-    ? (ita.hasKey() ? IterInitArrK : IterInitArr)
-    : (ita.hasKey() ? IterInitObjK : IterInitObj);
-  auto const data = IterData(ita);
-  auto const result = gen(env, op, data, base, fp(env));
+  auto const op = base->isA(TArrLike) ? IterInitArr : IterInitObj;
+  auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterInitJmp(env, doneOffset, result, ita.iterId);
 }
@@ -184,9 +279,7 @@ void emitIterNext(IRGS& env, IterArgs ita,
 
   if (specializeIterNext(env, bodyOffset, ita, base, baseLocalId)) return;
 
-  auto const op = base->isA(TArrLike)
-    ? ita.hasKey() ? IterNextArrK : IterNextArr
-    : ita.hasKey() ? IterNextObjK : IterNextObj;
+  auto const op = base->isA(TArrLike) ? IterNextArr : IterNextObj;
   auto const result = gen(env, op, IterData(ita), base, fp(env));
   widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, bodyOffset, result, ita.iterId);

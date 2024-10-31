@@ -1503,11 +1503,11 @@ struct IterTypes {
     Any        // Nothing known
   };
   Count count;
-  // Can a IterInit[K] op throw on this iterator?
+  // Can a IterInit op throw on this iterator?
   bool mayThrowOnInit;
-  // Can a IterNext[K] op throw on this iterator? Can only happen for object
-  // types.
-  bool mayThrowOnNext;
+  // Can a IterGetKey, IterGetValue or IterNext op throw on this iterator?
+  // Can only happen for object types.
+  bool mayThrowOnGetOrNext;
 };
 IterTypes iter_types(const Type&);
 

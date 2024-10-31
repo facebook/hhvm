@@ -14,9 +14,11 @@
          PopC
 
          # Loop over array and jump to each label.
-         IterInit <> 0 NK V:$foo $arr endfor
+         IterInit <> 0 $arr endfor
          .try {
-loop:      CGetL $foo
+loop:      IterGetValue <> 0 $arr
+           PopL $foo
+           CGetL $foo
            SSwitch <"label_0":label_0
                     "label_1":label_1
                     "label_2":label_2
@@ -38,7 +40,7 @@ default:   String "default\n"
 
 printer:   Print
            PopC
-           IterNext <> 0 NK V:$foo $arr loop
+           IterNext <> 0 $arr loop
            Jmp endfor
          } .catch {
            IterFree 0

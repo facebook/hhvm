@@ -528,6 +528,12 @@ struct OptimizeIterState {
       // ultimately eligible, but we'll check that before actually doing the
       // transformation.
       switch (op.op) {
+        case Op::IterGetKey:
+          fixupFromState(op.IterGetKey.ita.iterId);
+          break;
+        case Op::IterGetValue:
+          fixupFromState(op.IterGetValue.ita.iterId);
+          break;
         case Op::IterInit:
           assertx(opIdx == blk->hhbcs.size() - 1);
           fixupForInit(findIterBaseLoc(state, func, op.IterInit.loc2));
@@ -598,20 +604,44 @@ void optimize_iterators(VisitContext& visit) {
       continue;
     }
 
-    auto const flags = state.updated[fixup.init]
-      ? IterArgs::Flags::None
-      : IterArgs::Flags::BaseConst;
+    auto const updateFlags = [&] (IterArgs& args) {
+      auto const newBaseConst = !state.updated[fixup.init];
+      if (has_flag(args.flags, IterArgs::Flags::BaseConst) == newBaseConst) {
+        return true;
+      }
+      if (newBaseConst) {
+        args.flags = args.flags | IterArgs::Flags::BaseConst;
+      } else {
+        args.flags = args.flags & ~IterArgs::Flags::BaseConst;
+      }
+      return false;
+    };
 
     BytecodeVec newOps;
     assertx(fixup.base != NoLocalId);
 
     // Rewrite the iteration op to its liter equivalent:
     switch (op.op) {
+      case Op::IterGetKey: {
+        auto args = op.IterGetKey.ita;
+        if (updateFlags(args) && op.IterGetKey.loc2 == fixup.base) continue;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::IterGetKey{args, fixup.base})
+        };
+        break;
+      }
+      case Op::IterGetValue: {
+        auto args = op.IterGetValue.ita;
+        if (updateFlags(args) && op.IterGetValue.loc2 == fixup.base) continue;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::IterGetValue{args, fixup.base})
+        };
+        break;
+      }
       case Op::IterInit: {
         auto args = op.IterInit.ita;
-        if (args.flags == flags && op.IterInit.loc2 == fixup.base) continue;
+        if (updateFlags(args) && op.IterInit.loc2 == fixup.base) continue;
         auto const target = op.IterInit.target3;
-        args.flags = flags;
         newOps = {
           bc_with_loc(op.srcLoc, bc::IterInit{args, fixup.base, target})
         };
@@ -619,9 +649,8 @@ void optimize_iterators(VisitContext& visit) {
       }
       case Op::IterNext: {
         auto args = op.IterNext.ita;
-        if (args.flags == flags && op.IterNext.loc2 == fixup.base) continue;
+        if (updateFlags(args) && op.IterNext.loc2 == fixup.base) continue;
         auto const target = op.IterNext.target3;
-        args.flags = flags;
         newOps = {
           bc_with_loc(op.srcLoc, bc::IterNext{args, fixup.base, target}),
         };

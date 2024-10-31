@@ -1065,9 +1065,7 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
         let loop_next = e.label_gen_mut().next_regular();
         let iter_args = IterArgs {
             iter_id,
-            key_id,
-            val_id,
-            flags: IterArgsFlags::None, // base is being modified
+            flags: IterArgsFlags::WithKeys, // base is being modified by key
         };
         let iter_init = InstrSeq::gather(vec![instr::iter_init(
             iter_args.clone(),
@@ -1076,6 +1074,10 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
         )]);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_next),
+            instr::iter_get_value(iter_args.clone(), *collection),
+            instr::pop_l(val_id),
+            instr::iter_get_key(iter_args.clone(), *collection),
+            instr::pop_l(key_id),
             f(val_id, key_id),
             instr::iter_next(iter_args, *collection, loop_next),
         ]);

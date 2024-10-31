@@ -587,10 +587,7 @@ struct hasher_impl {
   }
 
   static size_t hash(IterArgs ita) {
-    auto hash =
-      HPHP::hash_int64_pair(folly::to_underlying(ita.flags), ita.iterId);
-    hash = HPHP::hash_int64_pair(hash, ita.keyId);
-    return HPHP::hash_int64_pair(hash, ita.valId);
+    return HPHP::hash_int64_pair(folly::to_underlying(ita.flags), ita.iterId);
   }
 
   static size_t hash(FCallArgs fca) {

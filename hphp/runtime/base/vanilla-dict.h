@@ -350,14 +350,7 @@ private:
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
 public:
-
-  // Fetch a value and optional key (if keyPos != nullptr), given an
-  // iterator pos.  Get the value cell, and initialize keyOut.
-  void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
-  void getArrayElm(ssize_t pos, TypedValue* out) const;
-
   const TypedValue* getArrayElmPtr(ssize_t pos) const;
-  TypedValue getArrayElmKey(ssize_t pos) const;
 
   bool isTombstone(ssize_t pos) const;
   // Elm's data.m_type == kInvalidDataType for deleted slots.
@@ -421,9 +414,6 @@ public:
       }
     }
   }
-
-private:
-  static TypedValue getElmKey(const Elm& e);
 
 private:
   enum class AllocMode : bool { Request, Static };

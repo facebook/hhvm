@@ -48,6 +48,8 @@ impl LocalInfo {
             | Opcode::IsTypeL(local, _)
             | Opcode::IsUnsetL(local)
             | Opcode::IssetL(local)
+            | Opcode::IterGetKey(_, local)
+            | Opcode::IterGetValue(_, local)
             | Opcode::IterInit(_, local, _)
             | Opcode::IterNext(_, local, _) => LocalInfo::Read(*local),
 

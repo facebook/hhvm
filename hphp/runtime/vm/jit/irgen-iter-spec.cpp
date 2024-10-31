@@ -256,14 +256,6 @@ struct Accessor {
   virtual void checkTombstone(IRGS& env, SSATmp* arr, SSATmp* elm, Block* taken)
     const = 0;
 
-  // Given a base and an "elm value", this method returns the key of that elm.
-  // Keysets use the already loaded val to avoid duplicate load.
-  virtual SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp* val) const
-    = 0;
-
-  // Given a base and an "elm value", this method returns the val of that elm.
-  virtual SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
-
   Type arrType() const { return m_arrType; }
   bool isPtrIter() const { return m_isPtrIter; }
 
@@ -302,19 +294,6 @@ struct VecAccessor : public Accessor {
 
   void checkTombstone(IRGS&, SSATmp*, SSATmp*, Block*) const override {
     always_assert(false);
-  }
-
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
-    // isPtrIter() is only true when the iterator doesn't output a key,
-    // and this method is only called when the iterator *does* output a key.
-    always_assert(!isPtrIter());
-    return elm;
-  }
-
-  SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return isPtrIter()
-      ? gen(env, LdPtrIterVal, TInitCell, arr, elm)
-      : gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
@@ -363,14 +342,6 @@ struct DictAccessor : public Accessor {
     gen(env, CheckPtrIterTombstone, taken, arr, elm);
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
-    return gen(env, LdPtrIterKey, m_keyJitType, arr, elm);
-  }
-
-  SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, LdPtrIterVal, TInitCell, arr, elm);
-  }
-
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
     return isPtrIter()
       ? gen(env, AdvanceDictPtrIter, IterOffsetData{offset}, pos)
@@ -412,14 +383,6 @@ struct KeysetAccessor : public Accessor {
     const override {
     assertx(mayContainTombstones());
     gen(env, CheckPtrIterTombstone, taken, arr, elm);
-  }
-
-  SSATmp* getKey(IRGS&, SSATmp*, SSATmp*, SSATmp* val) const override {
-    return val;
-  }
-
-  SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, LdPtrIterVal, TInt | TStr, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
@@ -475,14 +438,6 @@ struct BespokeAccessor : public Accessor {
     always_assert(false);
   }
 
-  SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm, SSATmp*) const override {
-    return gen(env, BespokeIterGetKey, arr, elm);
-  }
-
-  SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, BespokeIterGetVal, arr, elm);
-  }
-
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
     return gen(env, AddInt, pos, cns(env, offset));
   }
@@ -500,9 +455,10 @@ std::unique_ptr<Accessor> getAccessor(
   }
 
   auto const baseConst = has_flag(data.flags, IterArgs::Flags::BaseConst);
+  auto const withKeys = has_flag(data.flags, IterArgs::Flags::WithKeys);
   switch (baseDT) {
     case KindOfVec:
-      return std::make_unique<VecAccessor>(baseConst, data.hasKey());
+      return std::make_unique<VecAccessor>(baseConst, withKeys);
     case KindOfDict:
       return std::make_unique<DictAccessor>(baseConst, keyTypes);
     case KindOfKeyset:
@@ -514,16 +470,6 @@ std::unique_ptr<Accessor> getAccessor(
 
 //////////////////////////////////////////////////////////////////////
 // Specialization helpers.
-
-// Load the iterator base from a local.
-// This method may only be called from one of the guarded specialized blocks,
-// so we can assert that the type of the base matches the iterator type.
-SSATmp* iterBase(IRGS& env, const Accessor& accessor,
-                 const IterArgs& data, uint32_t baseLocalId) {
-  auto const type = accessor.arrType();
-  gen(env, AssertLoc, type, LocalId(baseLocalId), fp(env));
-  return gen(env, LdLoc, type, LocalId(baseLocalId), fp(env));
-}
 
 // When ifThen creates new blocks, it assigns them a profCount of curProfCount.
 // curProfCount is based the bytecode we're generating code for: e.g. a
@@ -543,25 +489,6 @@ void iterIfThen(IRGS& env, Branch branch, Taken taken) {
     taken();
   });
   env.irb->curBlock()->setProfCount(count);
-}
-
-// Clear the value in an iterator's output local. Since we never specialize
-// iterators in pseudo-mains, we can use LdLoc here without a problem.
-void iterClear(IRGS& env, uint32_t local) {
-  assertx(local != kInvalidId);
-  decRef(
-      env,
-      gen(env, LdLoc, TCell, LocalId(local), fp(env)),
-      static_cast<DecRefProfileId>(local)
-  );
-}
-
-// Iterator output locals should always be cells, so we can store without
-// needing to create an exit here. We check the cell invariant in debug mode.
-void iterStore(IRGS& env, uint32_t local, SSATmp* cell) {
-  assertx(cell->type() <= TCell);
-  assertx(local != kInvalidId);
-  gen(env, StLoc, LocalId(local), fp(env), cell);
 }
 
 // Convert an iterator position to an integer representation.
@@ -590,38 +517,12 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
       gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
     },
     [&]{
-      iterStore(env, data.valId, cns(env, TInitNull));
-      if (data.hasKey()) iterStore(env, data.keyId, cns(env, TInitNull));
       auto const old = accessor.advancePos(env, pos, -1);
       gen(env, StIterPos, IterId(data.iterId), fp(env),
           posAsInt(env, accessor, old));
       gen(env, Jmp, makeExitSlow(env));
     }
   );
-}
-
-// In profiling mode, we profile the dec-ref of the iterator output locals
-// before calling the generic native helper, so that if we specialize we'll
-// produce good code for them. `init` is true for *IterInit*, not *IterNext*.
-void profileDecRefs(IRGS& env, const IterArgs& data, const bool init) {
-  if (env.context.kind != TransKind::Profile) return;
-
-  auto const val = gen(env, LdLoc, TCell, LocalId(data.valId), fp(env));
-  gen(env, ProfileDecRef, DecRefData(data.valId), val);
-  if (!data.hasKey()) return;
-
-  // If we haven't already guarded on the type of a string key, and it may or
-  // may not be persistent, force a guard on it now. We'll lose the persistent-
-  // vs-not distinction when specializing, but a DecRefProfile for a generic
-  // type like TInitCell would capture this distinction.
-  auto const key = [&]{
-    auto const tmp = gen(env, LdLoc, TCell, LocalId(data.keyId), fp(env));
-    return init ? tmp : cond(env,
-      [&](Block* taken) { return gen(env, CheckType, TStr, taken, tmp); },
-      [&](SSATmp* str)  { return str; },
-      [&]               { return tmp; });
-  }();
-  gen(env, ProfileDecRef, DecRefData(data.keyId), key);
 }
 
 // At the start of each shared specialized block (header or footer), we must
@@ -650,9 +551,6 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
     [&](Block* taken) { gen(env, JmpZero, taken, size); },
     [&]{ gen(env, Jmp, getBlock(env, doneOffset)); }
   );
-
-  iterClear(env, data.valId);
-  if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
   auto const endIdx = accessor.mayContainTombstones()
@@ -693,40 +591,10 @@ Block* emitSpecializedHeader(IRGS& env, const Accessor& accessor,
   BlockPusher bp(*env.irb, env.irb->curMarker(), header);
 
   auto const pos = phiIterPos(env, accessor);
-  auto const arr = iterBase(env, accessor, data, baseLocalId);
+  gen(env, AssertLoc, accessor.arrType(), LocalId(baseLocalId), fp(env));
 
-  auto const finish = [&](SSATmp* elm, SSATmp* val) {
-    auto const keyed = data.hasKey();
-    auto const key = keyed ? accessor.getKey(env, arr, elm, val) : nullptr;
-    iterStore(env, data.valId, val);
-    if (keyed) iterStore(env, data.keyId, key);
-    gen(env, StIterPos, IterId(data.iterId), fp(env),
-        posAsInt(env, accessor, pos));
-    gen(env, IncRef, val);
-    if (keyed) gen(env, IncRef, key);
-  };
-
-  auto guarded_val = (SSATmp*)nullptr;
-  auto const elm = accessor.getElm(env, arr, pos);
-  auto const val = accessor.getVal(env, arr, elm);
-  auto const guardable = relaxToGuardable(value_type);
-  always_assert(guardable <= TCell);
-
-  if (guardable != TCell) {
-    iterIfThen(env,
-      [&](Block* taken) {
-        guarded_val = gen(env, CheckType, guardable, taken, val);
-      },
-      [&] {
-        finish(elm, val);
-        gen(env, Jmp, makeExit(env, bodySk));
-      }
-    );
-  } else {
-    guarded_val = val;
-  }
-
-  finish(elm, guarded_val);
+  gen(env, StIterPos, IterId(data.iterId), fp(env),
+      posAsInt(env, accessor, pos));
   gen(env, Jmp, getBlock(env, bodySk));
 
   return header;
@@ -789,8 +657,6 @@ Block* emitSpecializedFooter(IRGS& env, const Accessor& accessor,
   BlockPusher bp{*env.irb, env.irb->curMarker(), footer};
 
   auto const pos = phiIterPos(env, accessor);
-  iterClear(env, data.valId);
-  if (data.hasKey()) iterClear(env, data.keyId);
   iterSurpriseCheck(env, accessor, data, pos);
   gen(env, Jmp, header, pos);
 
@@ -817,7 +683,6 @@ bool specializeIterInit(IRGS& env, Offset doneOffset,
                         uint32_t baseLocalId,
                         ArrayIterProfile::Result profiledResult) {
   assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
-  profileDecRefs(env, data, /*init=*/true);
   if (base->isA(TObj)) return false;
 
   auto const bodySk = nextSrcKey(env);
@@ -878,7 +743,6 @@ bool specializeIterNext(IRGS& env, Offset bodyOffset,
                         const IterArgs& data, SSATmp* base,
                         uint32_t baseLocalId) {
   assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
-  profileDecRefs(env, data, /*init=*/false);
   if (base->isA(TObj)) return false;
 
   auto const bodySk = SrcKey{curSrcKey(env), bodyOffset};

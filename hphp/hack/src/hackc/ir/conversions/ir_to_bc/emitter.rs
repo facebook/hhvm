@@ -511,6 +511,14 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::IssetS(_, _) => Opcode::IssetS,
             Hhbc::IterBase(..) => Opcode::IterBase,
             Hhbc::IterFree(iter_id, _) => Opcode::IterFree(iter_id),
+            Hhbc::IterGetKey(iter_args, base_lid, _) => {
+                let local = self.lookup_local(base_lid);
+                Opcode::IterGetKey(iter_args, local)
+            }
+            Hhbc::IterGetValue(iter_args, base_lid, _) => {
+                let local = self.lookup_local(base_lid);
+                Opcode::IterGetValue(iter_args, local)
+            }
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
             Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,
@@ -868,13 +876,9 @@ impl<'b> InstrEmitter<'b> {
             Terminator::IterInit(ref ir_args) => {
                 let args = hhbc::IterArgs {
                     iter_id: ir_args.iter_id,
-                    key_id: ir_args
-                        .key_lid()
-                        .map_or(hhbc::Local::INVALID, |lid| self.lookup_local(lid)),
-                    val_id: self.lookup_local(ir_args.value_lid()),
                     flags: ir_args.flags,
                 };
-                let base_id = self.lookup_local(ir_args.base_lid());
+                let base_id = self.lookup_local(ir_args.base_lid);
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
                 self.push_opcode(Opcode::IterInit(args, base_id, label));
                 self.jump_to(ir_args.next_bid());
@@ -882,13 +886,9 @@ impl<'b> InstrEmitter<'b> {
             Terminator::IterNext(ref ir_args) => {
                 let args = hhbc::IterArgs {
                     iter_id: ir_args.iter_id,
-                    key_id: ir_args
-                        .key_lid()
-                        .map_or(hhbc::Local::INVALID, |lid| self.lookup_local(lid)),
-                    val_id: self.lookup_local(ir_args.value_lid()),
                     flags: ir_args.flags,
                 };
-                let base_id = self.lookup_local(ir_args.base_lid());
+                let base_id = self.lookup_local(ir_args.base_lid);
                 let label = self.labeler.lookup_or_insert_bid(ir_args.done_bid());
                 self.push_opcode(Opcode::IterNext(args, base_id, label));
                 self.jump_to(ir_args.next_bid());

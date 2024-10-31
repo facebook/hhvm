@@ -1772,6 +1772,7 @@ pub(crate) fn assemble_iterargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc:
         let tok = token_iter.expect_token()?;
         match tok.into_identifier()? {
             b"BaseConst" => flags |= hhbc::IterArgsFlags::BaseConst,
+            b"WithKeys" => flags |= hhbc::IterArgsFlags::WithKeys,
             _ => return Err(tok.error("Unrecognized IterArgsFlags")),
         }
     }

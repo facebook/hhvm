@@ -63,6 +63,7 @@ pub mod ffi {
     enum IterArgsFlags {
         None = 0x0,
         BaseConst = 0x1,
+        WithKeys = 0x2,
     }
 
     #[repr(u8)]

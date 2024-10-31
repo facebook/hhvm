@@ -618,15 +618,15 @@ without fallthrough or a terminal instruction.
 8) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
-via IterInit*). Every range of bytecode for which an iterator variable i is
+via IterInit). Every range of bytecode for which an iterator variable i is
 initialized must be protected by an EH entry with a catch handler that unsets
 i by calling IterFree.
 
-9) The iterator variable referenced by IterInit* must be in the uninitialized
+9) The iterator variable referenced by IterInit must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
-IterNext* and IterFree must be in the "iter-initialized" state. Note that
-IterInit* conditionally initialize the iterator variable, and IterNext*
-conditionally free the iterator variable.
+IterGetKey, IterGetValue, IterNext and IterFree instructions must be in
+the "iter-initialized" state. Note that IterInit conditionally initialize
+the iterator variable, and IterNext conditionally free the iterator variable.
 
 10) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
@@ -2689,9 +2689,14 @@ UnsetM <stack count> <member key>    [...]  ->  []
 -------------------------
 
 Several iterator instructions take an IterArgs struct. This struct contains an
-iterator ID, an value output local ID, and optionally a key output local ID.
-Below, when we refer to "the iterator ID in %1", "the value local given in %1",
-etc., we're referring to these IDs.
+iterator ID and flags.
+
+Flags must be set consistently across all instructions referring to the same
+iterator. They carry information that could be used by the runtime to optimize
+iteration:
+
+  BaseConst: The base local is unmodified in the loop.
+  WithKeys: Indicates whether IterGetKeys might be used during iteration.
 
 IterBase    [C]  ->  [C:Arr|Obj]
 
@@ -2726,26 +2731,16 @@ IterInit  <IterArgs> <local id> <rel offset>    []   ->  []
   it frees the iterator (with an implicit IterFree) and transfers control to
   the target %3.
 
-  If the base is non-empty, this instruction writes the value of the base's
-  first element to the value local given in %1. If the iterator is a key-value
-  iterator, then this instruction also writes the key of the base's first
-  element to the key local given in %1.
+  The precise semantics of "rewind" and "is empty" depend on the type of
+  the base:
 
-  This instruction stores to its key and value output locals with the same
-  semantics as SetL (non-binding assignment).
-
-  The precise semantics of "rewind", "is empty", "get key", and "get value"
-  depend on the type of the base:
-
-    - If $1 is array-like, we will create a new array iterator. "rewind" does
+    - If %2 is array-like, we will create a new array iterator. "rewind" does
       nothing in this case - array iterators don't have base-internal state.
-      The "is empty" check is a check on the length of $1, and "get key" and
-      "get value" load $1's first element.
+      The "is empty" check is a check on the length of %2.
 
-    - If $1 is an object that implements Iterator, then we create a new object
-      iterator. We call $1->rewind() to reset the base's internal state, then
-      call $1->valid() to check if $1 is non-empty. If $1 is valid, then we call
-      $1->current() (and $1->key()) to get the $1's first value (and key).
+    - If %2 is an object that implements Iterator, then we create a new object
+      iterator. We call %2->rewind() to reset the base's internal state, then
+      call %2->valid() to check if %2 is non-empty.
 
   All other operations on this iterator must provide the same local (containing
   the same iterator base) as immediates.
@@ -2753,24 +2748,38 @@ IterInit  <IterArgs> <local id> <rel offset>    []   ->  []
 IterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 
   Iterator next. This instruction first advances the iterator with the ID given
-  in %1 using a base in %2. If the iterator has more elements, then it writes
-  the next element's value (and, for key-value iters, its key) to the output
-  locals given in %1 and transfers control to the location specified by %3,
-  Otherwise, it frees the iterator (with an implicit IterFree).
+  in %1 using a base in %2. If the iterator has more elements, it transfers
+  control to the location specified by %3. Otherwise, it frees the iterator
+  (with an implicit IterFree).
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
-  depend on the iterator type. (We could also say it depends on the type of
-  the base, but we use some iterator types (e.g. array iterator) for multiple
-  base types (e.g. array-likes).)
+  depends on the type of the base:
 
-    - For array iterators: "advance" increments the iterator's position, and
+    - If %2 is array-like, "advance" increments the iterator's position, and
       the base "has more elements" if this position is not the final position
-      for the stored array. If the array has more elements, we take its key
-      and value at the new position.
+      for the stored array.
 
-    - For object iterators: we call $base->next() to update the base's internal
-      state, then call $base->valid() to check whether it has more elements. If
-      so, we use $base->key() and $base->current() to get the new key and value.
+    - If %2 is an object that implements Iterator, we call %2->next() to update
+      the base's internal state, then call %2->valid() to check whether it has
+      more elements.
+
+IterGetKey  <IterArgs> <local id>    []  ->  [C]
+
+  Get the key at the current position of iterator with the ID given in %1 using
+  a base in %2. Then push it to the evaluation stack.
+
+  If %2 is an object that implements Iterator, the current key is obtained by
+  calling %2->key().
+
+  This instruction requires "WithKeys" flag to be set in %1 for this iterator.
+
+IterGetValue  <IterArgs> <local id>    []  ->  [C]
+
+  Get the value at the current position of iterator with the ID given in %1
+  using a base in %2. Then push it to the evaluation stack.
+
+  If %2 is an object that implements Iterator, the current value is obtained by
+  calling %2->current().
 
 IterFree <iterator id>    []  ->  []
 

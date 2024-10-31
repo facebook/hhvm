@@ -202,6 +202,8 @@ namespace HPHP {
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \
   O(IterBase,        NA,               ONE(CV),         ONE(CV),    NF) \
+  O(IterGetKey,      TWO(ITA,LA),      NOV,             ONE(CV),    NF) \
+  O(IterGetValue,    TWO(ITA,LA),      NOV,             ONE(CV),    NF) \
   O(IterInit,        THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterNext,        THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \

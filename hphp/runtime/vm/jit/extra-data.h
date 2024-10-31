@@ -668,8 +668,6 @@ struct IterData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(args.iterId),
-      std::hash<int32_t>()(args.keyId),
-      std::hash<int32_t>()(args.valId),
       std::hash<IterArgs::Flags>()(args.flags)
     );
   }
@@ -1490,7 +1488,7 @@ struct FuncNameData : IRExtraData {
     : name(name)
   {}
 
-  std::string show() const { 
+  std::string show() const {
     return name->toCppString();
   }
 
@@ -2793,7 +2791,7 @@ struct LoggingProfileData : IRExtraData {
 };
 
 struct LoggingSpeculateData : IRExtraData {
-  LoggingSpeculateData(const StringData* clsName, 
+  LoggingSpeculateData(const StringData* clsName,
                        const StringData* ctxName,
                        const StringData* methName,
                        Op op,
@@ -2833,9 +2831,9 @@ struct LoggingSpeculateData : IRExtraData {
 
   bool equals(const LoggingSpeculateData& o) const {
     return clsName == o.clsName &&
-      ctxName == o.ctxName && 
-      methName == o.methName && 
-      opcode == o.opcode && 
+      ctxName == o.ctxName &&
+      methName == o.methName &&
+      opcode == o.opcode &&
       expectedId == o.expectedId &&
       success == o.success;
   }
@@ -3028,14 +3026,12 @@ X(StIterEnd,                    IterId);
 X(LdIterPos,                    IterId);
 X(LdIterEnd,                    IterId);
 X(KillIter,                     IterId);
+X(IterGetKeyArr,                IterData);
+X(IterGetValArr,                IterData);
 X(IterInitArr,                  IterData);
-X(IterInitArrK,                 IterData);
 X(IterInitObj,                  IterData);
-X(IterInitObjK,                 IterData);
 X(IterNextArr,                  IterData);
-X(IterNextArrK,                 IterData);
 X(IterNextObj,                  IterData);
-X(IterNextObjK,                 IterData);
 X(ConstructInstance,            ClassData);
 X(ConstructClosure,             ClassData);
 X(InitProps,                    ClassData);

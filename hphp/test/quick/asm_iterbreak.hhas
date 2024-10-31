@@ -18,10 +18,13 @@
   SetL $0
   PopC
 
-  IterInit <> 0 K:$2 V:$1 $0 endOuter
+  IterInit <WithKeys> 0 $0 endOuter
   .try {
   startOuter:
-
+    IterGetValue <WithKeys> 0 $0
+    PopL $1
+    IterGetKey <WithKeys> 0 $0 
+    PopL $2
     String "\n"
     CGetL2 $1
     Concat
@@ -34,9 +37,13 @@
     Print
     PopC
 
-    IterInit <> 1 K:$4 V:$3 $0 endInner
+    IterInit <WithKeys> 1 $0 endInner
     .try {
     startInner:
+      IterGetValue <WithKeys> 1 $0
+      PopL $3
+      IterGetKey <WithKeys> 1 $0 
+      PopL $4
       String "\n"
       CGetL2 $3
       Concat
@@ -52,14 +59,14 @@
       IterFree 1
       IterFree 0
       Jmp endOuter
-      IterNext <> 1 K:$4 V:$3 $0 startInner
+      IterNext <WithKeys> 1 $0 startInner
       Jmp endInner
     } .catch {
       IterFree 1
       Throw
     }
   endInner:
-    IterNext <> 0 K:$2 V:$1 $0 startOuter
+    IterNext <WithKeys> 0 $0 startOuter
     Jmp endOuter
   } .catch {
     IterFree 0

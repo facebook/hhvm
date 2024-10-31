@@ -127,9 +127,7 @@ T decode(const Buffer& buffer, size_t& pos) {
   if constexpr (std::is_same<T, IterArgs>::value) {
     auto const flags  = DECODE_MEMBER(flags);
     auto const iterId = DECODE_MEMBER(iterId);
-    auto const keyId  = DECODE_MEMBER(keyId) + IterArgs::kNoKey;
-    auto const valId  = DECODE_MEMBER(valId);
-    return T(flags, iterId, keyId, valId);
+    return T(flags, iterId);
   }
 
   if constexpr (std::is_same<T, LocalRange>::value) {
@@ -261,8 +259,6 @@ void encode(Buffer& buffer, const T& data) {
   } else if constexpr (std::is_same<T, IterArgs>::value) {
     encode(buffer, data.flags);
     encode(buffer, data.iterId);
-    encode(buffer, data.keyId - IterArgs::kNoKey);
-    encode(buffer, data.valId);
 
   } else if constexpr (std::is_same<T, LocalRange>::value) {
     encode(buffer, data.first);

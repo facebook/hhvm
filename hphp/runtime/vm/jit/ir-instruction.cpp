@@ -411,10 +411,11 @@ Type bespokePosReturn(const IRInstruction* inst, bool isKey) {
   return resultType;
 }
 
-Type ptrIterReturn(const IRInstruction* inst, bool isKey) {
+Type iterReturn(const IRInstruction* inst, bool isKey) {
   assertx(inst->src(0)->type() <= TArrLike);
-  auto const ty = inst->typeParam();
-  return arrLikePosType(inst->src(0)->type(), TInt, isKey, inst->ctx()) & ty;
+  auto const resultType =
+    arrLikePosType(inst->src(0)->type(), TInt, isKey, inst->ctx());
+  return inst->hasTypeParam() ? resultType & inst->typeParam() : resultType;
 }
 
 Type vecElemReturn(const IRInstruction* inst) {
@@ -808,8 +809,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DBespokeElemUninit    return bespokeElemReturn(inst, false);
 #define DBespokePosKey        return bespokePosReturn(inst, true);
 #define DBespokePosVal        return bespokePosReturn(inst, false);
-#define DPtrIterKey     return ptrIterReturn(inst, true);
-#define DPtrIterVal     return ptrIterReturn(inst, false);
+#define DIterKey              return iterReturn(inst, true);
+#define DIterVal              return iterReturn(inst, false);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
@@ -864,8 +865,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DBespokeElemUninit
 #undef DBespokePosKey
 #undef DBespokePosVal
-#undef DPtrIterKey
-#undef DPtrIterVal
+#undef DIterKey
+#undef DIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem

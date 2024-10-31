@@ -47,28 +47,36 @@ function params_and_locals(int $a) : void {
 // CHECK:   jmp b1
 // CHECK: #b1:
 // CHECK:   n5: *HackMixed = load &$0
-// CHECK:   n6 = $builtins.hhbc_iter_init(&iter0, &$k, &$v, n5)
+// CHECK:   n6 = $builtins.hhbc_iter_init(&iter0, n5)
 // CHECK:   jmp b2, b7
 // CHECK:   .handlers b9
 // CHECK: #b2:
 // CHECK:   prune $builtins.hack_is_true(n6)
 // CHECK:   jmp b3
 // CHECK: #b3:
-// CHECK:   n7: *HackMixed = load &$0
-// CHECK:   n8: *HackMixed = load &iter0
-// CHECK:   n9 = $builtins.hhbc_iter_next(n8, &$k, &$v, n7)
+// CHECK:   n7: *HackMixed = load &iter0
+// CHECK:   n8: *HackMixed = load &$0
+// CHECK:   n9 = $builtins.hhbc_iter_get_value(n7, n8)
+// CHECK:   store &$v <- n9: *HackMixed
+// CHECK:   n10: *HackMixed = load &iter0
+// CHECK:   n11: *HackMixed = load &$0
+// CHECK:   n12 = $builtins.hhbc_iter_get_key(n10, n11)
+// CHECK:   store &$k <- n12: *HackMixed
+// CHECK:   n13: *HackMixed = load &$0
+// CHECK:   n14: *HackMixed = load &iter0
+// CHECK:   n15 = $builtins.hhbc_iter_next(n14, n13)
 // CHECK:   jmp b5, b6
 // CHECK:   .handlers b4
-// CHECK: #b4(n10: *HackMixed):
-// CHECK:   n11: *HackMixed = load &iter0
-// CHECK:   n12 = $builtins.hhbc_iter_free(n11)
-// CHECK:   throw n10
+// CHECK: #b4(n16: *HackMixed):
+// CHECK:   n17: *HackMixed = load &iter0
+// CHECK:   n18 = $builtins.hhbc_iter_free(n17)
+// CHECK:   throw n16
 // CHECK:   .handlers b9
 // CHECK: #b5:
-// CHECK:   prune $builtins.hack_is_true(n9)
+// CHECK:   prune $builtins.hack_is_true(n15)
 // CHECK:   jmp b8
 // CHECK: #b6:
-// CHECK:   prune ! $builtins.hack_is_true(n9)
+// CHECK:   prune ! $builtins.hack_is_true(n15)
 // CHECK:   jmp b3
 // CHECK: #b7:
 // CHECK:   prune ! $builtins.hack_is_true(n6)
@@ -76,9 +84,9 @@ function params_and_locals(int $a) : void {
 // CHECK: #b8:
 // CHECK:   jmp b10
 // CHECK:   .handlers b9
-// CHECK: #b9(n13: *HackMixed):
+// CHECK: #b9(n19: *HackMixed):
 // CHECK:   store &$0 <- null: *HackMixed
-// CHECK:   throw n13
+// CHECK:   throw n19
 // CHECK: #b10:
 // CHECK:   store &$0 <- null: *HackMixed
 // CHECK:   store &$0 <- null: *HackMixed

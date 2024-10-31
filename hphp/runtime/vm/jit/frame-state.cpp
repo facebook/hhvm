@@ -302,12 +302,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().mROProp = oldMROProp;
   }
 
-  auto const killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
-    for (auto id : ids) {
-      setValueAndSyncMBase(loc(id), nullptr, false);
-    }
-  };
-
   auto const setFrameCtx = [&] (const SSATmp* fp, SSATmp* ctx) {
     for (auto& frame : m_stack) {
       if (frame.fpValue != fp) continue;
@@ -595,27 +589,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
     // Be conservative and drop minstr state
     clearMInstr();
-    break;
-  }
-
-  case IterInitArr:
-  case IterInitObj:
-  case IterNextArr:
-  case IterNextObj: {
-    auto const& args = inst->extra<IterData>()->args;
-    assertx(!args.hasKey());
-    killIterLocals({safe_cast<uint32_t>(args.valId)});
-    break;
-  }
-
-  case IterInitArrK:
-  case IterInitObjK:
-  case IterNextArrK:
-  case IterNextObjK: {
-    auto const& args = inst->extra<IterData>()->args;
-    assertx(args.hasKey());
-    killIterLocals({safe_cast<uint32_t>(args.keyId),
-                    safe_cast<uint32_t>(args.valId)});
     break;
   }
 

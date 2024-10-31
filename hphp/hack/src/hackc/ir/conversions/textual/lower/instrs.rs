@@ -277,23 +277,11 @@ impl LowerInstrs<'_> {
         let loc = args.loc;
         let iter_lid = iter_var_name(args.iter_id);
 
-        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid(), loc)));
+        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid, loc)));
 
         let iter_var = builder.emit(Textual::deref(iter_lid));
 
-        let value_var = builder.emit(Textual::deref(args.value_lid()));
-
-        let key_var = if let Some(key_lid) = args.key_lid() {
-            builder.emit(Textual::deref(key_lid))
-        } else {
-            builder.emit_imm(Immediate::Null)
-        };
-
-        let pred = builder.emit_hhbc_builtin(
-            hack::Hhbc::IterInit,
-            &[iter_var, key_var, value_var, base_var],
-            loc,
-        );
+        let pred = builder.emit_hhbc_builtin(hack::Hhbc::IterInit, &[iter_var, base_var], loc);
 
         Instr::jmp_op(
             pred,
@@ -313,22 +301,10 @@ impl LowerInstrs<'_> {
         let loc = args.loc;
         let iter_lid = iter_var_name(args.iter_id);
 
-        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid(), loc)));
-
-        let value_var = builder.emit(Textual::deref(args.value_lid()));
-
-        let key_var = if let Some(key_lid) = args.key_lid() {
-            builder.emit(Textual::deref(key_lid))
-        } else {
-            builder.emit_imm(Immediate::Null)
-        };
+        let base_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(args.base_lid, loc)));
 
         let iter_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
-        let pred = builder.emit_hhbc_builtin(
-            hack::Hhbc::IterNext,
-            &[iter_var, key_var, value_var, base_var],
-            loc,
-        );
+        let pred = builder.emit_hhbc_builtin(hack::Hhbc::IterNext, &[iter_var, base_var], loc);
 
         Instr::jmp_op(
             pred,
@@ -790,6 +766,18 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = iter_var_name(id);
                 let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
                 builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
+            }
+            Instr::Hhbc(Hhbc::IterGetKey(iter_args, base_lid, loc)) => {
+                let iter_lid = iter_var_name(iter_args.iter_id);
+                let iter_value = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
+                let base_value = builder.emit(Instr::Hhbc(Hhbc::CGetL(base_lid, loc)));
+                builder.hhbc_builtin(hack::Hhbc::IterGetKey, &[iter_value, base_value], loc)
+            }
+            Instr::Hhbc(Hhbc::IterGetValue(iter_args, base_lid, loc)) => {
+                let iter_lid = iter_var_name(iter_args.iter_id);
+                let iter_value = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
+                let base_value = builder.emit(Instr::Hhbc(Hhbc::CGetL(base_lid, loc)));
+                builder.hhbc_builtin(hack::Hhbc::IterGetValue, &[iter_value, base_value], loc)
             }
             Instr::Hhbc(Hhbc::ClassHasReifiedGenerics(..) | Hhbc::HasReifiedParent(..)) => {
                 // Reified generics generate a lot of IR that is opaque to the analysis and actually

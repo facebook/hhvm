@@ -288,6 +288,8 @@ bool canDCE(const IRInstruction& inst) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
+  case IterGetKeyArr:
+  case IterGetValArr:
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
@@ -598,13 +600,9 @@ bool canDCE(const IRInstruction& inst) {
   case RestoreErrorLevel:
   case IterExtractBase:
   case IterInitArr:
-  case IterInitArrK:
   case IterInitObj:
-  case IterInitObjK:
   case IterNextArr:
-  case IterNextArrK:
   case IterNextObj:
-  case IterNextObjK:
   case KillActRec:
   case KillIter:
   case KillLoc:
@@ -1165,7 +1163,7 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     FTRACE(3, "Adding {}\n", ins->toString());
   };
   auto const combine = [&] (auto inst, auto inst_prev,
-                            auto src1, auto src2, auto src3, 
+                            auto src1, auto src2, auto src3,
                             bool leftConcat) {
     /*
      * ~~ Converting ~~
@@ -1211,7 +1209,7 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     assertx(inst_prev->is(ConcatStrStr)); // dst of inst_prev is already canonical
     assertx(inst->is(ConcatStrStr)); // dst of inst is already canonical
 
-    auto const trackedUses = 1 + rcInsts[inst_prev].decs.size() 
+    auto const trackedUses = 1 + rcInsts[inst_prev].decs.size()
                                + rcInsts[inst_prev].stores.size()
                                + rcInsts[inst_prev].passthroughs.size();
 
@@ -1237,10 +1235,10 @@ void optimizeConcats(jit::vector<IRInstruction*>& concats,
     decref(&inst->next()->front(), src2);
     // We might be combining in one of the following ways
     // 1. ConcatStr3(a, b, c) -> ConcatStrStr(a, b) + {String} (c)
-    // 2. ConcatStr3(a, b, c) -> String (a) + ConcatStrStr(b, c) 
+    // 2. ConcatStr3(a, b, c) -> String (a) + ConcatStrStr(b, c)
     // leftConcat is case 1, decRef src3 if it is case 2
     if (!leftConcat) decref(&inst->next()->front(), src3);
-    
+
   };
 
   for (auto& inst : concats) {
@@ -1387,7 +1385,7 @@ void fullDCE(IRUnit& unit) {
       auto const srcCanonicalInst = srcCanonical->inst();
       if (srcInst->op() == DefConst) return;
 
-      // Use the Canonical source for accounting 
+      // Use the Canonical source for accounting
       if (srcCanonicalInst->producesReference() && canDCE(*srcCanonicalInst)) {
         ++uses[srcCanonical];
         switch (inst->op()) {
@@ -1409,7 +1407,7 @@ void fullDCE(IRUnit& unit) {
             break;
           default:
             if (inst->isPassthrough()) {
-              // keep track of passthroughs since if this source 
+              // keep track of passthroughs since if this source
               // instruction is killed later, passthroughs die too
               rcInsts[srcCanonicalInst].passthroughs.emplace_back(inst);
             }

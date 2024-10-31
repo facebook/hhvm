@@ -585,18 +585,6 @@ impl Display for FmtMOpMode {
     }
 }
 
-pub(crate) struct FmtOptKeyValue(pub Option<LocalId>, pub LocalId);
-
-impl Display for FmtOptKeyValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let FmtOptKeyValue(key, value) = *self;
-        match key {
-            Some(key) => write!(f, "{} => {}", FmtLid(key), FmtLid(value)),
-            None => write!(f, "{}", FmtLid(value)),
-        }
-    }
-}
-
 pub(crate) struct FmtQuotedStr<'a>(pub(crate) &'a [u8]);
 
 impl Display for FmtQuotedStr<'_> {

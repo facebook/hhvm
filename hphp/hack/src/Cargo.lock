@@ -2711,7 +2711,6 @@ dependencies = [
  "maplit",
  "naming_special_names_rust",
  "newtype",
- "smallvec",
  "static_assertions",
  "strum",
 ]

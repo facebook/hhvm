@@ -707,8 +707,6 @@ bool FuncChecker::checkImmITA(PC& pc, PC const instr) {
     error("invalid iterator variable id %d at %d\n", ita.iterId, offset(instr));
     ok = false;
   }
-  ok &= checkLocal(pc, ita.valId);
-  if (ita.hasKey()) ok &= checkLocal(pc, ita.keyId);
   return ok;
 }
 
@@ -1118,11 +1116,7 @@ std::set<int> localIds(Op op, PC pc) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
-#define ITA(n) do {                             \
-    auto const ita = getImm(pc, n).u_ITA;       \
-    result.insert(ita.valId);                   \
-    if (ita.hasKey()) result.insert(ita.keyId); \
-  } while (false);
+#define ITA(n)
 #define FCA(n)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
     OPCODES

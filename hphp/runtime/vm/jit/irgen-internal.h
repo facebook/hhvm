@@ -109,10 +109,15 @@ inline SSATmp* curRequiredCoeffects(IRGS& env) {
 }
 
 inline SSATmp* curCoeffects(IRGS& env) {
+  auto const op = curSrcKey(env).op();
+  if (op == Op::IterGetKey || op == Op::IterGetValue) {
+    // Match C++ implementation in iter.cpp.
+    return cns(env, RuntimeCoeffects::fixme().value());
+  }
   auto const coeffects = curRequiredCoeffects(env);
   auto const mask = [&]() -> RuntimeCoeffects::storage_t {
     auto const escapes = curFunc(env)->coeffectEscapes();
-    if (curSrcKey(env).op() != Op::FCallCtor) return escapes.value();
+    if (op != Op::FCallCtor) return escapes.value();
     return escapes.value() | RuntimeCoeffects::write_this_props().value();
   }();
   return gen(env, OrInt, coeffects, cns(env, mask));

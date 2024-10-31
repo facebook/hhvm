@@ -1179,7 +1179,7 @@ fn emit_foreach_<'a, 'd>(
     let liter_local = check_l_iter(e, env, pos, collection, iterator, block)?;
     if let Some(loc) = liter_local {
         // TODO: infer whether the base is const
-        let flags = IterArgsFlags::None;
+        let base_const = false;
         let liter_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
         Ok(InstrSeq::gather(vec![
@@ -1190,7 +1190,7 @@ fn emit_foreach_<'a, 'd>(
             instr::jmp(done_label),
             instr::label(liter_label),
             emit_pos(&collection.1),
-            emit_foreach_local(e, env, pos, iterator, block, loc, flags)?,
+            emit_foreach_local(e, env, pos, iterator, block, loc, base_const)?,
             instr::label(done_label),
         ]))
     } else {
@@ -1212,8 +1212,7 @@ fn emit_foreach_non_local<'a, 'd>(
         instr::iter_base(),
         scope::with_unnamed_local(e, |e, local| {
             let before = instr::pop_l(local);
-            let flags = IterArgsFlags::BaseConst;
-            let inner = emit_foreach_local(e, env, pos, iterator, block, local, flags)?;
+            let inner = emit_foreach_local(e, env, pos, iterator, block, local, true)?;
             let after = instr::unset_l(local);
             Ok((before, inner, after))
         })?,
@@ -1227,20 +1226,22 @@ fn emit_foreach_local<'a, 'd>(
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
     local: Local,
-    flags: IterArgsFlags,
+    base_const: bool,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
         let iter_id = e.iterator_mut().gen_iter();
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
-        let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
-        let iter_args = IterArgs {
-            iter_id,
-            key_id: key_id.unwrap_or(Local::INVALID),
-            val_id,
-            flags,
+        let (key_id_opt, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
+        let mut flags = IterArgsFlags::None;
+        if base_const {
+            flags |= IterArgsFlags::BaseConst
         };
+        if key_id_opt.is_some() {
+            flags |= IterArgsFlags::WithKeys
+        };
+        let iter_args = IterArgs { iter_id, flags };
         let body = env.do_in_loop_body(
             e,
             loop_break_label,
@@ -1252,6 +1253,16 @@ fn emit_foreach_local<'a, 'd>(
         let iter_init = instr::iter_init(iter_args.clone(), local, loop_break_label);
         let iterate = InstrSeq::gather(vec![
             instr::label(loop_head_label),
+            instr::iter_get_value(iter_args.clone(), local),
+            instr::pop_l(val_id),
+            if let Some(key_id) = key_id_opt {
+                InstrSeq::gather(vec![
+                    instr::iter_get_key(iter_args.clone(), local),
+                    instr::pop_l(key_id),
+                ])
+            } else {
+                instr::empty()
+            },
             preamble,
             body,
             instr::label(loop_continue_label),

@@ -124,7 +124,7 @@ static_assert(CheckSize<php::Func, use_lowptr ? 184 : 232>(), "");
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
 static_assert(CheckSize<MKey, 16>(), "");
-static_assert(CheckSize<IterArgs, 16>(), "");
+static_assert(CheckSize<IterArgs, 8>(), "");
 static_assert(CheckSize<FCallArgs, 8>(), "");
 static_assert(CheckSize<RepoAuthType, 8>(), "");
 

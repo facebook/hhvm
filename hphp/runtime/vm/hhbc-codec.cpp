@@ -119,16 +119,12 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 void encodeIterArgs(FuncEmitter& fe, const IterArgs& args) {
   fe.emitByte(folly::to_underlying(args.flags));
   fe.emitIVA(args.iterId);
-  fe.emitIVA(args.keyId - IterArgs::kNoKey);
-  fe.emitIVA(args.valId);
 }
 
 IterArgs decodeIterArgs(PC& pc) {
   auto const flags = static_cast<IterArgs::Flags>(decode_byte(pc));
   auto const iterId = int32_t(decode_iva(pc));
-  auto const keyId = int32_t(decode_iva(pc)) + IterArgs::kNoKey;
-  auto const valId = int32_t(decode_iva(pc));
-  return IterArgs(flags, iterId, keyId, valId);
+  return IterArgs(flags, iterId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

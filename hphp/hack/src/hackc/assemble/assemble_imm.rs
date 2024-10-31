@@ -272,30 +272,13 @@ impl AssembleImm<hhbc::FunctionName> for Lexer<'_> {
 }
 
 impl AssembleImm<hhbc::IterArgs> for Lexer<'_> {
-    fn assemble_imm(&mut self, decl_map: &DeclMap, adata: &AdataMap) -> Result<hhbc::IterArgs> {
-        // IterArg { iter_id: IterId (~u32), key_id: Local, val_id: Local}
-        // Ex: 0 NK V:$v
+    fn assemble_imm(&mut self, _: &DeclMap, _: &AdataMap) -> Result<hhbc::IterArgs> {
+        // IterArgs { iter_id: IterId (~u32), flags: IterArgsFlags }
+        // Ex: <BaseConst> 0
         let flags = assemble::assemble_iterargsflags(self)?;
         let idx: usize = self.expect_and_get_number()?;
-        let tok = self.expect_token()?;
-        let key_id: hhbc::Local = match tok.into_identifier()? {
-            b"NK" => hhbc::Local::INVALID,
-            b"K" => {
-                self.expect(Token::is_colon)?;
-                self.assemble_imm(decl_map, adata)?
-            }
-            _ => return Err(tok.error("Invalid key_id given as iter args to IterArg")),
-        };
-        self.expect_str(Token::is_identifier, "V")?;
-        self.expect(Token::is_colon)?;
         let iter_id = hhbc::IterId::new(idx);
-        let val_id = self.assemble_imm(decl_map, adata)?;
-        Ok(hhbc::IterArgs {
-            iter_id,
-            key_id,
-            val_id,
-            flags,
-        })
+        Ok(hhbc::IterArgs { iter_id, flags })
     }
 }
 

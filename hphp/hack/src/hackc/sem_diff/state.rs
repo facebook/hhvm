@@ -282,10 +282,8 @@ impl<'a> State<'a> {
                 .iter()
                 .sorted_by_key(|x| x.0)
                 .map(|(idx, iter_state)| {
-                    let key = self.debug_local_name(iter_state.key);
-                    let value = self.debug_local_name(iter_state.value);
                     let base = iter_state.base;
-                    format!("{idx} => {{ K: {key}, V: {value}, B: {base} }}")
+                    format!("{idx} => {{ B: {base} }}")
                 })
                 .join(", "),
         );
@@ -392,10 +390,10 @@ impl<'a> State<'a> {
                 self.step_memo_get_eager(builder, targets, range)?;
             }
 
+            Instruct::Opcode(Opcode::IterFree(iter_id)) => self.step_iter_free(iter_id),
             Instruct::Opcode(Opcode::IterInit(ref iter_args, local, target)) => {
                 self.step_iter_init(builder, iter_args, local, target)
             }
-            Instruct::Opcode(Opcode::IterFree(iter_id)) => self.step_iter_free(iter_id),
             Instruct::Opcode(Opcode::IterNext(ref iter_args, local, target)) => {
                 self.step_iter_next(builder, iter_args, local, target)
             }
@@ -931,7 +929,7 @@ impl<'a> State<'a> {
         base_local: Local,
         target: Label,
     ) {
-        // IterArgs { iter_id: IterId, key_id: Local, val_id: Local }
+        // IterArgs { iter_id: IterId, flags: IterArgsFlags }
         let base = self.local_get(&base_local);
         let inputs = vec![self.reffy(base)];
 
@@ -945,21 +943,8 @@ impl<'a> State<'a> {
             Local::INVALID,
             Label::INVALID,
         ));
-        let key_value = builder.compute_value(&instr, 0, &inputs);
-        let value_value = builder.compute_value(&instr, 1, &inputs);
         self.seq_push(builder, instr, inputs);
-        self.iterators.insert(
-            iter_args.iter_id,
-            IterState {
-                key: iter_args.key_id,
-                value: iter_args.val_id,
-                base,
-            },
-        );
-        if iter_args.key_id != Local::INVALID {
-            self.local_set(&iter_args.key_id, key_value);
-        }
-        self.local_set(&iter_args.val_id, value_value);
+        self.iterators.insert(iter_args.iter_id, IterState { base });
     }
 
     fn step_iter_next(
@@ -978,15 +963,7 @@ impl<'a> State<'a> {
             Label::INVALID,
         ));
 
-        self.fork_and_adjust(builder, &[target], |fork, builder, _| {
-            if iter_args.key_id != Local::INVALID {
-                let key_value = builder.compute_value(&instr, 0, &inputs);
-                fork.local_set(&iter_args.key_id, key_value);
-            }
-
-            let value_value = builder.compute_value(&instr, 1, &inputs);
-            fork.local_set(&iter_args.val_id, value_value);
-        });
+        self.fork_and_adjust(builder, &[target], |_, _, _| {});
 
         self.seq_push(builder, instr, inputs);
 
@@ -1202,8 +1179,6 @@ impl<'a> State<'a> {
 
 #[derive(Clone)]
 pub(crate) struct IterState {
-    pub(crate) key: Local,
-    pub(crate) value: Local,
     pub(crate) base: Value,
 }
 
@@ -1426,11 +1401,13 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::InclOnce
             | Opcode::InitProp(..)
             | Opcode::IterBase
-            | Opcode::JmpNZ(..)
-            | Opcode::JmpZ(..)
             | Opcode::IterFree(..)
+            | Opcode::IterGetKey(..)
+            | Opcode::IterGetValue(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)
+            | Opcode::JmpNZ(..)
+            | Opcode::JmpZ(..)
             | Opcode::LockObj
             | Opcode::Lte
             | Opcode::MemoGet(..)
@@ -1676,6 +1653,9 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         Opcode::Enter(_) => Opcode::Enter(Label::INVALID),
         Opcode::Jmp(_) => Opcode::Jmp(Label::INVALID),
         Opcode::MemoSetEager(_) => Opcode::MemoSetEager(LocalRange::EMPTY),
+
+        Opcode::IterGetKey(_, _) => Opcode::IterGetKey(IterArgs::default(), Local::INVALID),
+        Opcode::IterGetValue(_, _) => Opcode::IterGetValue(IterArgs::default(), Local::INVALID),
 
         Opcode::BareThis(_)
         | Opcode::CGetS(_)

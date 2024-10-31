@@ -3277,6 +3277,7 @@ Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     equivLoc = NoLocalId;
   }
   nothrow(env);
+  auto const iterKeyEquiv = env.state.topStkIterKeyEquiv;
   auto val = popC(env);
   setLoc(env, op.loc1, val);
   if (equivLoc == StackThisId) {
@@ -3287,6 +3288,9 @@ Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     setStkLocal(env, op.loc1);
   } else if (equivLoc != op.loc1 && equivLoc != NoLocalId) {
     addLocEquiv(env, op.loc1, equivLoc);
+  }
+  if (iterKeyEquiv != NoIterId) {
+    setIterKey(env, iterKeyEquiv, op.loc1);
   }
   return { std::make_pair(std::move(val), equivLoc) };
 }
@@ -4844,6 +4848,23 @@ void in(ISS& env, const bc::IterBase&) {
   push(env, tOut);
 }
 
+void in(ISS& env, const bc::IterGetKey& op) {
+  assertx(!iterIsDead(env, op.ita.iterId));
+  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  if (!li.types.mayThrowOnGetOrNext) effect_free(env);
+  mayReadLocal(env, op.loc2);
+  push(env, li.types.key);
+  env.state.topStkIterKeyEquiv = op.ita.iterId;
+}
+
+void in(ISS& env, const bc::IterGetValue& op) {
+  assertx(!iterIsDead(env, op.ita.iterId));
+  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  if (!li.types.mayThrowOnGetOrNext) effect_free(env);
+  mayReadLocal(env, op.loc2);
+  push(env, li.types.value);
+}
+
 void in(ISS& env, const bc::IterInit& op) {
   auto const ita = op.ita;
   auto const baseLoc = op.loc2;
@@ -4861,13 +4882,6 @@ void in(ISS& env, const bc::IterInit& op) {
   auto const fallthrough = [&] {
     setIter(env, ita.iterId, LiveIter { ity, sourceLoc, NoLocalId, env.bid,
                                         false });
-    // Do this after setting the iterator, in case it clobbers the base local
-    // equivalency.
-    setLoc(env, ita.valId, std::move(ity.value));
-    if (ita.hasKey()) {
-      setLoc(env, ita.keyId, std::move(ity.key));
-      setIterKey(env, ita.iterId, ita.keyId);
-    }
   };
 
   assertx(iterIsDead(env, ita.iterId));
@@ -4882,8 +4896,6 @@ void in(ISS& env, const bc::IterInit& op) {
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      mayReadLocal(env, ita.valId);
-      if (ita.hasKey()) mayReadLocal(env, ita.keyId);
       jmp_setdest(env, op.target3);
       return;
     case IterTypes::Count::Single:
@@ -4904,8 +4916,6 @@ void in(ISS& env, const bc::IterInit& op) {
 
 void in(ISS& env, const bc::IterNext& op) {
   auto const ita = op.ita;
-  auto const curVal = peekLocRaw(env, ita.valId);
-  auto const curKey = ita.hasKey() ? peekLocRaw(env, ita.keyId) : TBottom;
 
   auto noThrow = false;
   auto const noTaken = match<bool>(
@@ -4915,7 +4925,7 @@ void in(ISS& env, const bc::IterNext& op) {
       return false;
     },
     [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) noThrow = true;
+      if (!ti.types.mayThrowOnGetOrNext) noThrow = true;
       if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
@@ -4923,11 +4933,6 @@ void in(ISS& env, const bc::IterNext& op) {
           return true;
         case IterTypes::Count::NonEmpty:
         case IterTypes::Count::Any:
-          setLoc(env, ita.valId, ti.types.value);
-          if (ita.hasKey()) {
-            setLoc(env, ita.keyId, ti.types.key);
-            setIterKey(env, ita.iterId, ita.keyId);
-          }
           return false;
         case IterTypes::Count::Empty:
           always_assert(false);
@@ -4942,8 +4947,6 @@ void in(ISS& env, const bc::IterNext& op) {
   }
 
   mayReadLocal(env, op.loc2);
-  mayReadLocal(env, ita.valId);
-  if (ita.hasKey()) mayReadLocal(env, ita.keyId);
 
   if (noThrow) nothrow(env);
 
@@ -4956,8 +4959,6 @@ void in(ISS& env, const bc::IterNext& op) {
   env.propagate(op.target3, &env.state);
 
   freeIter(env, ita.iterId);
-  setLocRaw(env, ita.valId, curVal);
-  if (ita.hasKey()) setLocRaw(env, ita.keyId, curKey);
 }
 
 void in(ISS& env, const bc::IterFree& op) {

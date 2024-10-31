@@ -1498,7 +1498,7 @@ DEBUG_ONLY bool check_state(const RCState& state) {
     auto const asetID = state.support_map[id];
     if (asetID != -1) {
       always_assert_flog(
-        asetID >= 0, 
+        asetID >= 0,
         "asetID {} must be non-negative",
         asetID
       );
@@ -2485,6 +2485,14 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     // these commonly occur along with type guards
     case LdLoc:
     case LdStk:
+    case LdIterPos:
+    case LdPtrIterKey:
+    case LdPtrIterVal:
+    case GetDictPtrIter:
+    case GetKeysetPtrIter:
+    case BespokeIterGetKey:
+    case BespokeIterGetVal:
+    case IntAsPtrToElem:
     case BeginInlining:
     case EnterInlineFrame:
     case EndInlining:

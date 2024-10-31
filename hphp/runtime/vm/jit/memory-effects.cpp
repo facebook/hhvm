@@ -269,22 +269,6 @@ GeneralEffects may_load_store_move_kill(AliasClass loads,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Helper for iterator instructions.  They all affect some locals, but are
- * otherwise the same. Value iters touch one local; key-value iters touch two.
- */
-GeneralEffects iter_effects(const IRInstruction& inst,
-                            SSATmp* fp,
-                            AliasClass locals) {
-  auto const iters =
-    AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
-  return may_load_store_kill(
-    iters | locals | AHeapAny,
-    iters | locals | AHeapAny,
-    AMIStateAny
-  );
-}
-
-/*
  * Construct effects for InterpOne, using the information in its extra data.
  *
  * We always consider an InterpOne as potentially doing anything to the heap,
@@ -845,27 +829,25 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterExtractBase:
     return may_load_store(AEmpty, AEmpty);
 
+  case IterGetKeyArr:
+  case IterGetValArr: {
+    auto const fp = inst.src(1);
+    auto const iter = aiter_pos(fp, inst.extra<IterData>()->args.iterId);
+    return may_load_store(AElemAny | iter, AEmpty);
+  }
+
   case IterInitArr:
   case IterInitObj:
   case IterNextArr:
   case IterNextObj: {
-    auto const& args = inst.extra<IterData>()->args;
-    assertx(!args.hasKey());
     auto const fp = inst.src(1);
-    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
-    return iter_effects(inst, fp, val);
-  }
-
-  case IterInitArrK:
-  case IterInitObjK:
-  case IterNextArrK:
-  case IterNextObjK: {
-    auto const& args = inst.extra<IterData>()->args;
-    assertx(args.hasKey());
-    auto const fp = inst.src(1);
-    AliasClass key = ALocal { fp, safe_cast<uint32_t>(args.keyId) };
-    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
-    return iter_effects(inst, fp, key | val);
+    auto const iters =
+      AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
+    return may_load_store_kill(
+      iters | AHeapAny,
+      iters | AHeapAny,
+      AMIStateAny
+    );
   }
 
   case LdIterPos:

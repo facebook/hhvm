@@ -293,8 +293,10 @@ static const struct {
   /*** 11. Iterator instructions ***/
 
   { OpIterBase,    {Stack1,           Stack1,       OutUnknown      }},
-  { OpIterInit,    {Local,            Local,        OutUnknown      }},
-  { OpIterNext,    {Local,            Local,        OutUnknown      }},
+  { OpIterGetKey,  {Local,            Stack1,       OutUnknown      }},
+  { OpIterGetValue,{Local,            Stack1,       OutUnknown      }},
+  { OpIterInit,    {Local,            None,         OutUnknown      }},
+  { OpIterNext,    {Local,            None,         OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
@@ -606,14 +608,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
-  switch (op) {
-    case Op::IterInit:
-    case Op::IterNext:
-      return 1;
-    default:
-      break;
-  }
-
   size_t idx = 0xff;
   switch (op) {
     OPCODES
@@ -861,28 +855,21 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
 jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni) {
   fast_set<uint32_t> locals;
   auto const op = ni.op();
-
-  if (isIteratorOp(op)) {
-    auto const ita = ni.imm[0].u_ITA;
-    locals.insert(ita.valId);
-    if (ita.hasKey()) locals.insert(ita.keyId);
-  } else {
-    auto const info = getInstrInfo(op);
-    if (info.out & Local) {
-      auto const id = getLocalOperand(ni);
-      locals.insert(id);
+  auto const info = getInstrInfo(op);
+  if (info.out & Local) {
+    auto const id = getLocalOperand(ni);
+    locals.insert(id);
+  }
+  if (info.out & LocalRange) {
+    auto const& range = ni.imm[localRangeImmIdx(op)].u_LAR;
+    for (unsigned i = 0; i < range.count; ++i) {
+      locals.insert(range.first + i);
     }
-    if (info.out & LocalRange) {
-      auto const& range = ni.imm[localRangeImmIdx(op)].u_LAR;
-      for (unsigned i = 0; i < range.count; ++i) {
-        locals.insert(range.first + i);
-      }
-    }
-    if (info.out & MKey) {
-      auto const mk = ni.imm[memberKeyImmIdx(op)].u_KA;
-      if (mk.mcode == MEL || mk.mcode == MPL) {
-        locals.insert(mk.local.id);
-      }
+  }
+  if (info.out & MKey) {
+    auto const mk = ni.imm[memberKeyImmIdx(op)].u_KA;
+    if (mk.mcode == MEL || mk.mcode == MPL) {
+      locals.insert(mk.local.id);
     }
   }
 

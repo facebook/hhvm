@@ -15,10 +15,10 @@ Breakpoint 1 reached at genFoo() on line 15 of %s/flow_break_interference.php
 b c 1
 Breakpoint 1 cleared on line 15 of flow_break_interference.php
 o
-Break at main() on line 23 of %s/flow_break_interference.php
-  22   foreach (genFoo(1) as $x) {
-  23*    var_dump($x);
-  24   }
+Break at main() on line 22 of %s/flow_break_interference.php
+  21   $a = 42;
+  22*  foreach (genFoo(1) as $x) {
+  23     var_dump($x);
 
 c
 int(1)

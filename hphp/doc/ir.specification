@@ -2767,52 +2767,39 @@ ReqBindJmp and CallFuncEntry.
 
   Profile iterator initialization from base S0.
 
-| IterInitArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
+| IterInitArr<IterArgs>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-| IterInitArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+  If S0 is an empty array, this instruction returns false.
 
-| IterInitObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
+  Otherwise, it initializes the iterator variable IterArgs.iterId inside the
+  stack frame S1 to the starting position of base S0, then the instruction
+  returns true.
 
-| IterInitObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
+| IterNextArr<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
 
-  <IterData> consists of three indices, iterId, keyId and valId. iterId is
-  the index of the iterator variable, keyId and valId are indices of local
-  variables.
-
-  Initializes the iterator variable whose index is given by iterId.
-  This instruction creates the appropriate iterator for the array or object that
-  S0 references, and rewinds the new iterator to its start. S0 points to the
-  stack frame containing the iterator and local variables with the indices
-  iterId, keyId and valId. Ownership of the base is not taken. Instead, the base
-  is provided on each operation on the iterator, so that we can avoid
-  inc-ref-ing the base.
-
-  If the new iterator is at its end (i.e., has no elements to iterate over),
-  this instruction decrements the refcount of S0 and returns false; otheriwse,
-  it stores a reference to S0 in the new iterator and returns true. If the
-  iterator is not at its end, then this instruction stores the iterator's first
-  value (and key) into the local variable with index valId (and keyId,
-  respectively).
-
-| IterNextArr<IterData>,  D(Bool), S(ArrLike) S(FramePtr), LA
-
-| IterNextArrK<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
-
-| IterNextObj<IterData>,  D(Bool), S(Obj) S(FramePtr), LA
-
-| IterNextObjK<IterData>, D(Bool), S(Obj) S(FramePtr), LA
-
-  <IterData> consists of three indices, iterId, keyId and valId. iterId is
-  the index of the iterator variable, keyId and valId are indices of local
-  variables.  S0 points to the stack frame containing the iterator and local
-  variables with the indices iterId, keyId and valId.
-
-  Advances the iterator variable whose index is given by iterId.
+  Advances the iterator variable IterArgs.iterId inside the stack frame S1,
+  using the base S0.
 
   If the iterator has reached the end, this instruction frees the iterator
-  variable and returns false; otherwise, it returns true. If the iterator has
-  not reached its end, then this instruction stores the iterator's next value
-  (and key) into the local variable with index valId (and keyId, respectively).
+  variable and returns false. Otherwise, it returns true.
+
+| IterGetKeyArr<IterData>, DIterKey, S(ArrLike) S(FramePtr), LA
+
+  Get the key at the position of the iterator variable IterArgs.iterId inside
+  the stack frame S1 using the base S0.
+
+| IterGetValArr<IterData>, DIterVal, S(ArrLike) S(FramePtr), LA
+
+  Get the value at the position of the iterator variable IterArgs.iterId inside
+  the stack frame S1 using the base S0.
+
+| IterInitObj<IterArgs>, D(Bool), S(Obj) S(FramePtr), LA
+
+  Calls S0->rewind(), then S0->valid() and returns its result casted to a bool.
+
+| IterNextObj<IterData>, D(Bool), S(Obj) S(FramePtr), LA
+
+  Calls S0->next(), then S0->valid() and returns its result casted to a bool.
 
 | KillActRec, ND, S(FramePtr), NF
 
@@ -2850,9 +2837,9 @@ ReqBindJmp and CallFuncEntry.
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.
 
-| LdPtrIterKey<T>, DPtrIterKey, S(Dict) S(PtrToElem), NF
+| LdPtrIterKey<T>, DIterKey, S(Dict) S(PtrToElem), NF
 
-| LdPtrIterVal<T>, DPtrIterVal, S(ArrLike) S(PtrToElem), NF
+| LdPtrIterVal<T>, DIterVal, S(ArrLike) S(PtrToElem), NF
 
   Loads the key or val from the array S0 containing an element pointed to by S1.
   S1 must be a valid elm; that is, it can't point to the end of the array data.

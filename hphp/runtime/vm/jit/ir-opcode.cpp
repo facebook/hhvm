@@ -53,8 +53,8 @@ TRACE_SET_MOD(hhir);
 #define DBespokeElemUninit   HasDest
 #define DBespokePosKey HasDest
 #define DBespokePosVal HasDest
-#define DPtrIterKey    HasDest
-#define DPtrIterVal    HasDest
+#define DIterKey       HasDest
+#define DIterVal       HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
 #define DModified(n)   HasDest
@@ -133,8 +133,8 @@ OpInfo g_opInfo[] = {
 #undef DBespokeElem
 #undef DBespokePosKey
 #undef DBespokePosVal
-#undef DPtrIterKey
-#undef DPtrIterVal
+#undef DIterKey
+#undef DIterVal
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
@@ -336,9 +336,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IssetProp:
   case IterExtractBase:
   case IterInitObj:
-  case IterInitObjK:
   case IterNextObj:
-  case IterNextObjK:
   case KeysetGet:
   case LdCls:
   case LdClsCached:
@@ -700,10 +698,10 @@ bool opcodeMayRaise(Opcode opc) {
   case IsTypeMem:
   case IsTypeStructCached:
   case IsWaitHandle:
+  case IterGetKeyArr:
+  case IterGetValArr:
   case IterInitArr:
-  case IterInitArrK:
   case IterNextArr:
-  case IterNextArrK:
   case Jmp:
   case JmpExit:
   case JmpNZero:

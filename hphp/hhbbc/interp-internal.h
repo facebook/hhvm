@@ -248,6 +248,7 @@ Type popT(ISS& env) {
   FTRACE(2, "    pop:  {}\n", show(ret));
   assertx(ret.subtypeOf(BCell));
   env.state.stack.pop_elem();
+  env.state.topStkIterKeyEquiv = NoIterId;
   if (env.undo) env.undo->onPop(ret);
   return ret;
 }
@@ -292,6 +293,7 @@ void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));
   env.state.stack.push_elem(std::move(t), NoLocalId,
                             env.unchangedBcs + env.replacedBcs.size());
+  env.state.topStkIterKeyEquiv = NoIterId;
   if (env.undo) env.undo->onPush();
 }
 
@@ -303,6 +305,7 @@ void push(ISS& env, Type t, LocalId l) {
   FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_elem(std::move(t), l,
                             env.unchangedBcs + env.replacedBcs.size());
+  env.state.topStkIterKeyEquiv = NoIterId;
   if (env.undo) env.undo->onPush();
 }
 

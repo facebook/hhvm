@@ -416,6 +416,7 @@ struct State : StateBase {
   }
 
   InterpStack stack;
+  IterId topStkIterKeyEquiv = NoIterId;
 };
 
 /*

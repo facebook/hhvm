@@ -212,12 +212,10 @@ impl std::fmt::Display for IterId {
     }
 }
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct IterArgs {
     pub iter_id: IterId,
-    pub key_id: Local,
-    pub val_id: Local,
     pub flags: IterArgsFlags,
 }
 
@@ -225,8 +223,6 @@ impl std::default::Default for IterArgs {
     fn default() -> Self {
         Self {
             iter_id: Default::default(),
-            key_id: Local::INVALID,
-            val_id: Local::INVALID,
             flags: IterArgsFlags::None,
         }
     }

@@ -44,41 +44,49 @@ class HHBCTestCase(base.TestHHVMBinary):
             "+34: AddElemC",
             "+35: SetL L:0",
             "+37: PopC",
-            "+38: IterInit 0 K:2 V:1 L:0 109",
-            "+48: String 6",  # 6=>"\n"
-            "+53: CGetL2 L:1:1",
-            "+56: Concat",
-            "+57: Print",
-            "+58: PopC",
-            "+59: String 6",  # 6=>"\n"'
-            "+64: CGetL2 L:2:2",
-            "+67: Concat",
-            "+68: Print",
-            "+69: PopC",
-            "+70: IterInit 1 K:4 V:3 L:0 59",
-            "+80: String 6",  # 6=>"\n"
-            "+85: CGetL2 L:3:3",
-            "+88: Concat",
-            "+89: Print",
-            "+90: PopC",
-            "+91: String 6",  # 6=>"\n"
-            "+96: CGetL2 L:4:4",
-            "+99: Concat",
-            "+100: Print",
-            "+101: PopC",
-            "+102: IterFree 1",
-            "+104: IterFree 0",
-            "+106: Jmp 41",
-            "+111: IterNext 1 K:4 V:3 L:0 -31",
-            "+121: Jmp 8",
-            "+126: IterFree 1",
-            "+128: Throw",
-            "+129: IterNext 0 K:2 V:1 L:0 -81",
+            "+38: IterInit WithKeys 0 L:0 125",
+            "+46: IterGetValue WithKeys 0 L:0",
+            "+50: PopL L:1",
+            "+52: IterGetKey WithKeys 0 L:0",
+            "+56: PopL L:2",
+            "+58: String 6",  # 6=>"\n"
+            "+63: CGetL2 L:1:1",
+            "+66: Concat",
+            "+67: Print",
+            "+68: PopC",
+            "+69: String 6",  # 6=>"\n"'
+            "+74: CGetL2 L:2:2",
+            "+77: Concat",
+            "+78: Print",
+            "+79: PopC",
+            "+80: IterInit WithKeys 1 L:0 67",
+            "+88: IterGetValue WithKeys 1 L:0",
+            "+92: PopL L:3",
+            "+94: IterGetKey WithKeys 1 L:0",
+            "+98: PopL L:4",
+            "+100: String 6",  # 6=>"\n"
+            "+105: CGetL2 L:3:3",
+            "+108: Concat",
+            "+109: Print",
+            "+110: PopC",
+            "+111: String 6",  # 6=>"\n"
+            "+116: CGetL2 L:4:4",
+            "+119: Concat",
+            "+120: Print",
+            "+121: PopC",
+            "+122: IterFree 1",
+            "+124: IterFree 0",
+            "+126: Jmp 37",
+            "+131: IterNext WithKeys 1 L:0 -43",
             "+139: Jmp 8",
-            "+144: IterFree 0",
+            "+144: IterFree 1",
             "+146: Throw",
-            "+147: Int 1",
-            "+156: RetC",
+            "+147: IterNext WithKeys 0 L:0 -101",
+            "+155: Jmp 8",
+            "+160: IterFree 0",
+            "+162: Throw",
+            "+163: Int 1",
+            "+172: RetC",
         ]
         output_lines = output.strip().split("\n")
         self.assertEqual(len(output_lines), len(expected_bcs))
@@ -204,26 +212,28 @@ class HHBCTestCase3(base.TestHHVMBinary):
             "+0: Dict 0",  # 0=>dict(0=>0,1=>1,2=>2,3=>3,4=>4)",
             "+5: SetL L:0",
             "+7: PopC",
-            "+8: IterInit 0 NK V:1 L:0 109",
-            "+18: CGetL L:1:1",
-            "+21: Switch 0 0 <31 41 51 61 71>",  # 0=>Unbounded
-            "+52: String 0",  # 0=>\"label_0\n\"
-            "+57: Jmp 40",
-            "+62: String 1",  # 1=>\"label_1\n\"
-            "+67: Jmp 30",
-            "+72: String 2",  # 2=>\"label_2\n\"
-            "+77: Jmp 20",
-            "+82: String 3",  # 3=>\"label_3\n\"
-            "+87: Jmp 10",
-            "+92: String 4",  # 4=>\"label_4\n\"
-            "+97: Print",
-            "+98: PopC",
-            "+99: IterNext 0 NK V:1 L:0 -81",
-            "+109: Jmp 8",
-            "+114: IterFree 0",
-            "+116: Throw",
-            "+117: Int 1",
-            "+126: RetC",
+            "+8: IterInit 0 L:0 111",
+            "+16: IterGetValue 0 L:0",
+            "+20: PopL L:1",
+            "+22: CGetL L:1:1",
+            "+25: Switch 0 0 <31 41 51 61 71>",  # 0=>Unbounded
+            "+56: String 0",  # 0=>\"label_0\n\"
+            "+61: Jmp 40",
+            "+66: String 1",  # 1=>\"label_1\n\"
+            "+71: Jmp 30",
+            "+76: String 2",  # 2=>\"label_2\n\"
+            "+81: Jmp 20",
+            "+86: String 3",  # 3=>\"label_3\n\"
+            "+91: Jmp 10",
+            "+96: String 4",  # 4=>\"label_4\n\"
+            "+101: Print",
+            "+102: PopC",
+            "+103: IterNext 0 L:0 -87",
+            "+111: Jmp 8",
+            "+116: IterFree 0",
+            "+118: Throw",
+            "+119: Int 1",
+            "+128: RetC",
         ]
 
         output_lines = output.strip().split("\n")

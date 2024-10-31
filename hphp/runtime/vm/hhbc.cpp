@@ -1099,7 +1099,21 @@ bool instrIsVMCall(Op opcode) {
 }
 
 bool instrMayVMCall(Op opcode) {
-  return instrIsVMCall(opcode) || opcode == OpIdx;
+  if (instrIsVMCall(opcode)) return true;
+  switch (opcode) {
+    case OpIterGetKey:
+    case OpIterGetValue:
+      // These instructions might directly call key() and current() methods on
+      // an Iterable from JIT without reentering VM. We might call skipCall() on
+      // these instructions if we are interpreting RetC of these methods. It is
+      // safe to do so (even if these instructions performed an additional work
+      // after the call), since we are going to always return to the JIT, which
+      // doesn't care about the state of VM registers.
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 }
@@ -1152,14 +1166,13 @@ std::string show(const IterArgs& ita, PrintLocal print_local) {
     if (has_flag(ita.flags, IterArgs::Flags::BaseConst)) {
       parts.push_back("BaseConst");
     }
+    if (has_flag(ita.flags, IterArgs::Flags::WithKeys)) {
+      parts.push_back("WithKeys");
+    }
     return folly::sformat("<{}>", folly::join(' ', parts));
   }();
 
-  auto const key = ita.hasKey()
-    ? folly::to<std::string>("K:", print_local(ita.keyId))
-    : folly::to<std::string>("NK");
-  auto const val = "V:" + print_local(ita.valId);
-  return folly::sformat("{} {} {} {}", flags, ita.iterId, key, val);
+  return folly::sformat("{} {}", flags, ita.iterId);
 }
 
 std::string show(const LocalRange& range) {

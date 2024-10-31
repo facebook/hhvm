@@ -711,12 +711,8 @@ void handleBA(TranslationState& ts, const T& labels) {
 void handleITA(TranslationState& ts, const hhbc::IterArgs& ita) {
   HPHP::IterArgs ia(
     ita.flags,
-    ita.iter_id.idx,
-    ita.key_id.idx,
-    ita.val_id.idx
+    ita.iter_id.idx
   );
-  ts.trackMaxUnnamed(ita.key_id.idx);
-  ts.trackMaxUnnamed(ita.val_id.idx);
   encodeIterArgs(*ts.fe, ia);
 }
 

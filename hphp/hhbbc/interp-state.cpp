@@ -78,7 +78,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const throws1 =
             diter.types.mayThrowOnInit || siter.types.mayThrowOnInit;
           auto const throws2 =
-            diter.types.mayThrowOnNext || siter.types.mayThrowOnNext;
+            diter.types.mayThrowOnGetOrNext || siter.types.mayThrowOnGetOrNext;
           auto const baseUpdated = diter.baseUpdated || siter.baseUpdated;
           auto const baseLocal = (diter.baseLocal != siter.baseLocal)
             ? NoLocalId
@@ -94,7 +94,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             !equivalently_refined(value, diter.types.value) ||
             count != diter.types.count ||
             throws1 != diter.types.mayThrowOnInit ||
-            throws2 != diter.types.mayThrowOnNext ||
+            throws2 != diter.types.mayThrowOnGetOrNext ||
             keyLocal != diter.keyLocal ||
             baseLocal != diter.baseLocal ||
             baseUpdated != diter.baseUpdated ||

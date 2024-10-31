@@ -75,6 +75,7 @@ pub use hhbc::IncludePath;
 pub use hhbc::InitPropOp;
 pub use hhbc::IsLogAsDynamicCallOp;
 pub use hhbc::IsTypeOp;
+pub use hhbc::IterArgs;
 pub use hhbc::IterArgsFlags;
 pub use hhbc::IterId;
 pub use hhbc::MOpMode;

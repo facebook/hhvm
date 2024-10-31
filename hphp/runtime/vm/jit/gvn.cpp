@@ -342,6 +342,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdStructDictVal:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdPtrIterKey:
+  case LdPtrIterVal:
+  case GetDictPtrIter:
+  case GetKeysetPtrIter:
+  case BespokeIterGetKey:
+  case BespokeIterGetVal:
     return true;
 
   case EqArrLike:
@@ -355,7 +361,7 @@ bool supportsGVN(const IRInstruction* inst) {
     return !opcodeMayRaise(IsTypeStruct) && !inst->src(1)->type().maybe(TRes);
 
   case LdFuncCached: {
-    // Do not need to reload a function within a translation except if it 
+    // Do not need to reload a function within a translation except if it
     // could have been renamed.
     auto const funcName = inst->extra<FuncNameData>()->name;
     return !RO::funcIsRenamable(funcName);

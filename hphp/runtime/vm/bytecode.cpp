@@ -4406,54 +4406,54 @@ OPTBLD_INLINE void iopIterBase() {
   tvMove(Iter::extractBase(*base, arGetContextClass(vmfp())), base);
 }
 
-
-OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
-                               TypedValue* base, PC targetpc) {
-  auto value = frame_local(vmfp(), ita.valId);
-  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
-  auto it = frame_iter(vmfp(), ita.iterId);
-
+OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, TypedValue* base) {
   if (isArrayLikeType(type(base))) {
-    auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
+    auto it = frame_iter(vmfp(), ita.iterId);
     auto const arr = val(base).parr;
-    auto const res = ita.hasKey()
-      ? new_iter_array_key_helper(baseConst)(it, arr, value, key)
-      : new_iter_array_helper(baseConst)(it, arr, value);
-    if (res == 0) pc = targetpc;
+    auto const key = iter_select(iter_get_key_array, ita.flags)(it, arr);
+    tvDup(key, *vmStack().allocTV());
     return;
   }
 
-  // The base is extracted and we already handled ArrayLike.
   assertx(isObjectType(type(base)));
-  if (!new_iter_object(val(base).pobj, value, key)) {
-    pc = targetpc;
+  auto const key = iter_get_key_object(val(base).pobj);
+  tvCopy(key, *vmStack().allocTV());
+}
+
+OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, TypedValue* base) {
+  if (isArrayLikeType(type(base))) {
+    auto it = frame_iter(vmfp(), ita.iterId);
+    auto const arr = val(base).parr;
+    auto const value = iter_select(iter_get_value_array, ita.flags)(it, arr);
+    tvDup(value, *vmStack().allocTV());
+    return;
   }
+
+  assertx(isObjectType(type(base)));
+  auto const value = iter_get_value_object(val(base).pobj);
+  tvCopy(value, *vmStack().allocTV());
+}
+
+OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
+                               TypedValue* base, PC targetpc) {
+  assertx(isArrayLikeType(type(base)) || isObjectType(type(base)));
+  auto it = frame_iter(vmfp(), ita.iterId);
+
+  auto const more = isArrayLikeType(type(base))
+    ? iter_select(iter_init_array, ita.flags)(it, val(base).parr)
+    : iter_init_object(val(base).pobj);
+
+  if (!more) pc = targetpc;
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita,
                                TypedValue* base, PC targetpc) {
-  auto value = frame_local(vmfp(), ita.valId);
-  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
+  assertx(isArrayLikeType(type(base)) || isObjectType(type(base)));
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  auto const more = [&] {
-    if (isArrayLikeType(type(base))) {
-      auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
-      auto const arr = val(base).parr;
-      return key
-        ? baseConst
-          ? iter_next_array_key<true>(it, arr, value, key)
-          : iter_next_array_key<false>(it, arr, value, key)
-        : baseConst
-          ? iter_next_array<true>(it, arr, value)
-          : iter_next_array<false>(it, arr, value);
-    }
-    assertx(isObjectType(type(base)));
-    auto const obj = val(base).pobj;
-    return key
-      ? iter_next_object_key(obj, value, key)
-      : iter_next_object(obj, value);
-  }();
+  auto const more = isArrayLikeType(type(base))
+    ? iter_select(iter_next_array, ita.flags)(it, val(base).parr)
+    : iter_next_object(val(base).pobj);
 
   if (more) {
     vmpc() = targetpc;

@@ -41,6 +41,7 @@ use ir_core::FunctionFlags;
 use ir_core::Immediate;
 use ir_core::InstrId;
 use ir_core::InstrIdSet;
+use ir_core::IterArgs;
 use ir_core::IterArgsFlags;
 use ir_core::IterId;
 use ir_core::LocId;
@@ -367,15 +368,6 @@ impl FunctionParser<'_> {
         }
     }
 
-    fn keyvalue(&self, tokenizer: &mut Tokenizer<'_>) -> Result<(Option<LocalId>, LocalId)> {
-        let a = self.lid(tokenizer)?;
-        Ok(if tokenizer.next_is_identifier("=>")? {
-            (Some(a), self.lid(tokenizer)?)
-        } else {
-            (None, a)
-        })
-    }
-
     fn lid(&self, tokenizer: &mut Tokenizer<'_>) -> Result<LocalId> {
         let (id, loc) = parse_user_id(tokenizer)?;
         if id.is_empty() {
@@ -682,22 +674,32 @@ impl FunctionParser<'_> {
     }
 
     fn parse_iterator(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
-        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "next":"next"; "init":"init"]>);
+        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "get_key":"get_key"; "get_value":"get_value"; "next":"next"; "init":"init"]>);
         let iter_id = IterId::new(iter_id);
         Ok(match op.identifier() {
             "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
+            "get_key" => {
+                let flags = self.parse_iterator_flags(tokenizer)?;
+                parse!(tokenizer, "from" <lid:self.lid>);
+                Instr::Hhbc(Hhbc::IterGetKey(IterArgs { iter_id, flags }, lid, loc))
+            }
+            "get_value" => {
+                let flags = self.parse_iterator_flags(tokenizer)?;
+                parse!(tokenizer, "from" <lid:self.lid>);
+                Instr::Hhbc(Hhbc::IterGetValue(IterArgs { iter_id, flags }, lid, loc))
+            }
             "init" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;
-                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
+                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid>);
                 Instr::Terminator(Terminator::IterInit(instr::IteratorArgs::new(
-                    iter_id, flags, lid, locals.0, locals.1, target0, target1, loc,
+                    iter_id, flags, lid, target0, target1, loc,
                 )))
             }
             "next" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;
-                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid> "with" <locals:self.keyvalue>);
+                parse!(tokenizer, "from" <lid:self.lid> "jmp" "to" <target0:parse_bid> "else" <target1:parse_bid>);
                 Instr::Terminator(Terminator::IterNext(instr::IteratorArgs::new(
-                    iter_id, flags, lid, locals.0, locals.1, target0, target1, loc,
+                    iter_id, flags, lid, target0, target1, loc,
                 )))
             }
             _ => unreachable!(),
@@ -708,6 +710,7 @@ impl FunctionParser<'_> {
         fn convert_iter_args_flag(id: &str) -> Option<IterArgsFlags> {
             Some(match id {
                 "base_const" => IterArgsFlags::BaseConst,
+                "with_keys" => IterArgsFlags::WithKeys,
                 _ => return None,
             })
         }

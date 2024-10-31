@@ -675,6 +675,14 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         (Hhbc::IterFree(x0, _), Hhbc::IterFree(x1, _)) => {
             cmp_eq(x0, x1).qualified("IterFree param x")?;
         }
+        (Hhbc::IterGetKey(x0, y0, _), Hhbc::IterGetKey(x1, y1, _)) => {
+            cmp_eq(x0, x1).qualified("IterGetKey param x")?;
+            cmp_eq(y0, y1).qualified("IterGetKey param y")?;
+        }
+        (Hhbc::IterGetValue(x0, y0, _), Hhbc::IterGetValue(x1, y1, _)) => {
+            cmp_eq(x0, x1).qualified("IterGetValue param x")?;
+            cmp_eq(y0, y1).qualified("IterGetValue param y")?;
+        }
         (Hhbc::NewDictArray(x0, _), Hhbc::NewDictArray(x1, _)) => {
             cmp_eq(x0, x1).qualified("NewDictArray param x")?;
         }
@@ -860,6 +868,8 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             | Hhbc::IsTypeL(..)
             | Hhbc::IsTypeStructC(..)
             | Hhbc::IterFree(..)
+            | Hhbc::IterGetKey(..)
+            | Hhbc::IterGetValue(..)
             | Hhbc::NewDictArray(..)
             | Hhbc::NewObjD(..)
             | Hhbc::NewObjS(..)
@@ -1179,22 +1189,23 @@ fn cmp_instr_terminator(a: &Terminator, b: &Terminator) -> Result {
 }
 
 fn cmp_instr_iterator(a: &IteratorArgs, b: &IteratorArgs) -> Result {
-    // Ignore IterArgsFlags, LocId, ValueIds and LocalIds - those are checked elsewhere.
+    // Ignore LocId, ValueIds and LocalIds - those are checked elsewhere.
     let IteratorArgs {
         iter_id: a_iter_id,
-        flags: _,
-        locals: _,
+        flags: a_flags,
+        base_lid: _,
         targets: _,
         loc: _,
     } = a;
     let IteratorArgs {
         iter_id: b_iter_id,
-        flags: _,
-        locals: _,
+        flags: b_flags,
+        base_lid: _,
         targets: _,
         loc: _,
     } = b;
     cmp_eq(a_iter_id, b_iter_id).qualified("iter_id")?;
+    cmp_eq(a_flags, b_flags).qualified("flags")?;
     Ok(())
 }
 

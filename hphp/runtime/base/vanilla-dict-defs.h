@@ -58,50 +58,11 @@ inline bool VanillaDict::isTombstone(ssize_t pos) const {
 }
 
 ALWAYS_INLINE
-TypedValue VanillaDict::getElmKey(const Elm& e) {
-  if (e.hasIntKey()) {
-    return make_tv<KindOfInt64>(e.ikey);
-  }
-  auto str = e.skey;
-  if (str->isRefCounted()) {
-    str->rawIncRefCount();
-    return make_tv<KindOfString>(str);
-  }
-  return make_tv<KindOfPersistentString>(str);
-}
-
-ALWAYS_INLINE
-void VanillaDict::getArrayElm(ssize_t pos,
-                            TypedValue* valOut,
-                            TypedValue* keyOut) const {
-  assertx(size_t(pos) < m_used);
-  auto& elm = data()[pos];
-  tvDup(elm.data, *valOut);
-  tvCopy(getElmKey(elm), *keyOut);
-}
-
-ALWAYS_INLINE
-void VanillaDict::getArrayElm(ssize_t pos, TypedValue* valOut) const {
-  assertx(size_t(pos) < m_used);
-  auto& elm = data()[pos];
-  tvDup(elm.data, *valOut);
-}
-
-ALWAYS_INLINE
 const TypedValue* VanillaDict::getArrayElmPtr(ssize_t pos) const {
   assertx(validPos(pos));
   if (size_t(pos) >= m_used) return nullptr;
   auto& elm = data()[pos];
   return !isTombstone(elm.data.m_type) ? &elm.data : nullptr;
-}
-
-ALWAYS_INLINE
-TypedValue VanillaDict::getArrayElmKey(ssize_t pos) const {
-  assertx(validPos(pos));
-  if (size_t(pos) >= m_used) return make_tv<KindOfUninit>();
-  auto& elm = data()[pos];
-  if (isTombstone(elm.data.m_type)) return make_tv<KindOfUninit>();
-  return getElmKey(elm);
 }
 
 template <class K>

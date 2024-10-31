@@ -113,7 +113,7 @@ impl<'b> PrintOpcode<'b> {
     }
 
     fn print_iter_args(&self, w: &mut dyn Write, iter_args: &IterArgs) -> Result<()> {
-        print_iter_args(w, iter_args, self.local_names)
+        print_iter_args(w, iter_args)
     }
 
     fn print_member_key(&self, w: &mut dyn Write, member_key: &MemberKey) -> Result<()> {
@@ -224,25 +224,13 @@ fn print_function_name(w: &mut dyn Write, id: &FunctionName) -> Result<()> {
     print_quoted_str(w, id.as_str())
 }
 
-fn print_iter_args(
-    w: &mut dyn Write,
-    iter_args: &IterArgs,
-    local_names: &[StringId],
-) -> Result<()> {
+fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs) -> Result<()> {
     angle(w, |w| {
         let flags = hhvm_hhbc_defs_ffi::ffi::iter_args_flags_to_string_ffi(iter_args.flags);
         write!(w, "{}", flags)
     })?;
     w.write_all(b" ")?;
-    print_iterator_id(w, &iter_args.iter_id)?;
-    if iter_args.key_id.is_valid() {
-        w.write_all(b" K:")?;
-        print_local(w, &iter_args.key_id, local_names)?;
-    } else {
-        w.write_all(b" NK")?;
-    }
-    w.write_all(b" V:")?;
-    print_local(w, &iter_args.val_id, local_names)
+    print_iterator_id(w, &iter_args.iter_id)
 }
 
 fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {

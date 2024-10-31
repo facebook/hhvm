@@ -1145,6 +1145,10 @@ IterArgsFlags read_iter_args_flags(AsmState& as) {
       flags = flags | IterArgsFlags::BaseConst;
       continue;
     }
+    if (flag == "WithKeys") {
+      flags = flags | IterArgsFlags::WithKeys;
+      continue;
+    }
 
     as.error("unrecognized IterArgs flag `" + flag + "'");
   }
@@ -1157,22 +1161,7 @@ IterArgs read_iter_args(AsmState& as) {
   auto const flags = read_iter_args_flags(as);
   auto const iterInt = read_opcode_arg<int32_t>(as);
   auto const iterId = as.getIterId(iterInt);
-  auto const keyId = [&]{
-    auto const keyStr = read_opcode_arg<std::string>(as);
-    if (keyStr == "NK") return IterArgs::kNoKey;
-    if (!folly::StringPiece(keyStr).startsWith("K:")) {
-      as.error("Expected: NK | K:$local; got: `" + keyStr + "'");
-    }
-    return as.getLocalId(keyStr.substr(2));
-  }();
-  auto const valId = [&]{
-    auto const valStr = read_opcode_arg<std::string>(as);
-    if (!folly::StringPiece(valStr).startsWith("V:")) {
-      as.error("Expected: V:$local; got: `" + valStr + "'");
-    }
-    return as.getLocalId(valStr.substr(2));
-  }();
-  return IterArgs(flags, iterId, keyId, valId);
+  return IterArgs(flags, iterId);
 }
 
 FCallArgsFlags read_fcall_flags(AsmState& as, Op thisOpcode) {

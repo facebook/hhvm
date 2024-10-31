@@ -595,7 +595,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       std::min(numArgsInclUnpack, callee->numNonVariadicParams());
     auto const entry = SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} };
 
-    if (isFCall(curSrcKey(env).op()) && !hasRdsCache) {
+    if (!hasRdsCache) {
       if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset,
                               calleeFP)) {
         return;
@@ -936,8 +936,8 @@ void optimizeProfiledCallMethod(IRGS& env,
                                cls ? cls : callee->cls(), cls != nullptr);
     }
 
-    ctx = cls ? gen(env, AssertType, Type::ExactObj(cls), ctx) 
-              : gen(env, AssertType, Type::SubObj(callee->implCls()), ctx); 
+    ctx = cls ? gen(env, AssertType, Type::ExactObj(cls), ctx)
+              : gen(env, AssertType, Type::SubObj(callee->implCls()), ctx);
 
     if (!callee->isStaticInPrologue()) return ctx;
 
@@ -1419,8 +1419,8 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
       return fast();
     case Func::FuncLookupResult::Maybe:
       auto const loadedFunc = gen(env, LdFuncCached, FuncNameData { funcName } );
-      ifThenElse( 
-        env,  
+      ifThenElse(
+        env,
         [&] (Block* taken) {
           gen(env, EqFuncId, FuncData(lookup.func), taken, loadedFunc);
         },
@@ -1581,7 +1581,7 @@ void emitNewObj(IRGS& env) {
 void emitNewObjD(IRGS& env, const StringData* className) {
   auto const lookup = lookupKnownMaybe(env, className);
   auto const cls = lookup.cls;
-  bool const fastPath = lookup.cls && isNormalClass(cls) 
+  bool const fastPath = lookup.cls && isNormalClass(cls)
     && !isAbstract(cls) && !cls->hasNativePropHandler();
 
   auto const knownClass = [&]() {
@@ -1597,7 +1597,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
                                cns(env, className));
     push(env, gen(env, AllocObj, cachedCls));
   };
-  
+
   auto const data = [&](uint32_t id, bool success) {
     return LoggingSpeculateData {
       className,

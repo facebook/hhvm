@@ -1214,6 +1214,23 @@ void dce(Env& env, const bc::CGetL2& op) {
     });
 }
 
+void iterGetImpl(Env& env, LocalId loc) {
+  stack_ops(env, [&] (UseInfo& ui) {
+    scheduleGenLoc(env, loc);
+    return allUnused(ui) && !env.states.wasPEI()
+      ? PushFlags::MarkUnused
+      : PushFlags::MarkLive;
+  });
+}
+
+void dce(Env& env, const bc::IterGetKey& op) {
+  iterGetImpl(env, op.loc2);
+}
+
+void dce(Env& env, const bc::IterGetValue& op) {
+  iterGetImpl(env, op.loc2);
+}
+
 void dce(Env& env, const bc::BareThis& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnusedIfNotLastRef(ui) &&
@@ -1624,6 +1641,8 @@ void dce(Env& env, const bc::IssetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IsUnsetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
+void dce(Env& env, const bc::IterInit& op) { no_dce(env, op); }
+void dce(Env& env, const bc::IterNext& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpZ& op) { no_dce(env, op); }
@@ -1698,32 +1717,6 @@ void dce(Env& env, const bc::VerifyRetTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::WHResult& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Yield& op) { no_dce(env, op); }
 void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Iterator ops don't really read their key and value output locals; they just
-// dec-ref the old value there before storing the new one (i.e. SetL semantics).
-//
-// We have to mark these values as live inside (else they could be completely
-// killed - that is, remap locals could reused their local slot), but we don't
-// have to may-read them.
-//
-// This is distinct from a kill, because the iter ops don't necessarily replace
-// the key or value local.  Eg. on the last iteration, they are left alone.
-void iter_dce(Env& env, const IterArgs& ita, LocalId baseId, int numPop) {
-  addLocUse(env, ita.valId);
-  if (ita.hasKey()) addLocUse(env, ita.keyId);
-  addLocGen(env, baseId);
-  pop_inputs(env, numPop);
-}
-
-void dce(Env& env, const bc::IterInit& op) {
-  iter_dce(env, op.ita, op.loc2, op.numPop());
-}
-
-void dce(Env& env, const bc::IterNext& op) {
-  iter_dce(env, op.ita, op.loc2, op.numPop());
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2503,17 +2496,6 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
         }
       };
 
-      auto const fixupITA = [&](IterArgs& ita) {
-        if (ita.hasKey()) {
-          if (0 <= ita.keyId && ita.keyId < maxRemappedLocals) {
-            ita.keyId = remapping[ita.keyId];
-          }
-        }
-        if (0 <= ita.valId && ita.valId < maxRemappedLocals) {
-          ita.valId = remapping[ita.valId];
-        }
-      };
-
 #define IMM_BLA(n)
 #define IMM_SLA(n)
 #define IMM_IVA(n)
@@ -2532,7 +2514,7 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
 #define IMM_VSA(n)
 #define IMM_KA(n)      fixupMKey(op.mkey)
 #define IMM_LAR(n)     fixupLAR(op.locrange)
-#define IMM_ITA(n)     fixupITA(op.ita)
+#define IMM_ITA(n)
 #define IMM_FCA(n)
 
 #define IMM(which, n)             IMM_##which(n)
@@ -2963,39 +2945,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     locMayNeedUnsetting[bid] = result.locMayNeedUnsetting;
     locMayNeedUnsettingExn[bid] = result.locMayNeedUnsettingExn;
 
-    // If blk ends with an iterator block, and succId is the loop body for
-    // this iterator, this method returns the iterator's arguments so that
-    // we can kill its key and value output locals.
-    //
-    // We can't do this optimization if succId is also the loop end block.
-    // This case should never occur, because then the iter would have to
-    // be both live and dead at succId, but we guard against it anyway.
-    //
-    // It would be nice to move this logic to the iter_dce method itself,
-    // but this analysis pass only tracks a single out-state for each block,
-    // so we must do it here to apply it to the in-state of the body and not
-    // to the in-state of the done block. (Catch blocks are handled further
-    // down and this logic never applies to them.)
-    auto const killIterOutputs = [] (const php::Block* blk, BlockId succId)
-        -> Optional<IterArgs> {
-      auto const& lastOpc = blk->hhbcs.back();
-      auto const next = blk->fallthrough == succId;
-      auto ita = Optional<IterArgs>{};
-      auto const kill = [&]{
-        switch (lastOpc.op) {
-          case Op::IterInit:
-            ita = lastOpc.IterInit.ita;
-            return next && lastOpc.IterInit.target3 != succId;
-          case Op::IterNext:
-            ita = lastOpc.IterNext.ita;
-            return !next && lastOpc.IterNext.target3 == succId;
-          default:
-            return false;
-        }
-      }();
-      return kill ? ita : std::nullopt;
-    };
-
     auto const isCFPushTaken = [] (const php::Block* blk, BlockId succId) {
       auto const& lastOpc = blk->hhbcs.back();
       switch (lastOpc.op) {
@@ -3022,18 +2971,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
       auto& pbs = blockStates[pid];
       auto const oldPredLocLive = pbs.locLive;
       auto const pred = func.blocks()[pid].get();
-      if (auto const ita = killIterOutputs(pred, bid)) {
-        auto const key = ita->hasKey();
-        FTRACE(3, "    Killing iterator output locals: {}\n",
-               key ? folly::to<std::string>(ita->valId, ", ", ita->keyId)
-                   : folly::to<std::string>(ita->valId));
-        auto liveIn = result.locLiveIn;
-        if (ita->valId < kMaxTrackedLocals) liveIn[ita->valId] = false;
-        if (key && ita->keyId < kMaxTrackedLocals) liveIn[ita->keyId] = false;
-        pbs.locLive |= liveIn;
-      } else {
-        pbs.locLive |= result.locLiveIn;
-      }
+      pbs.locLive |= result.locLiveIn;
 
       auto changed = pbs.locLive != oldPredLocLive;
 

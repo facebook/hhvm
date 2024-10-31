@@ -1186,6 +1186,8 @@ void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
   FTRACE_MOD(Trace::hhir, 2, "At {}: {}: perform bespoke translation\n",
              sk.offset(), opcodeToName(sk.op()));
   switch (ni.op()) {
+    case Op::IterGetKey:
+    case Op::IterGetValue:
     case Op::IterInit:
     case Op::IterNext:
     case Op::UnsetM:
@@ -1268,6 +1270,8 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
       return {Location::Stack{soff}};
 
     // Local iterators constrain the local base.
+    case Op::IterGetKey:
+    case Op::IterGetValue:
     case Op::IterInit:
     case Op::IterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
@@ -1549,7 +1553,7 @@ void emitLoggingDiamond(
         // IterInit and IterNext might produce back control flow edges that
         // reset type information.
         if (ni.op() != Op::IncDecM && ni.op() != Op::SetOpM &&
-            !isIteratorOp(ni.op())) {
+            !isIteratorControlFlow(ni.op())) {
           for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
             always_assert_flog(
               env.irb->fs().local(i).type <= vanillaLocalTypes[i],

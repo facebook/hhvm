@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/base/unaligned-typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/iter-args-flags.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
@@ -115,45 +116,57 @@ struct alignas(16) Iter {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Native helpers for the interpreter + JIT used to implement *IterInit* ops.
-// These helpers return 1 if the base has any elements and 0 otherwise.
-// (They would return a bool, but native method calls from the JIT produce GP
-// register outputs, so we extend the return type to an int64_t.)
-//
-// If these helpers return 1, they set `val` (and `key`, for key-value iters)
-// from the first key-value pair of the base.
-//
-// For non-local iters, if these helpers return 0, they also dec-ref the base.
-//
-// For the array helpers, first provide a baseConst flag to get an IterInit
-// helper to call, then call it. This indirection lets us burn the appropriate
-// helper into the JIT (where we know the baseConst flag statically). For
-// objects, we don't need it because they have reference semantics and do not
-// change identity.
-using IterInitArr    = int64_t(*)(Iter*, ArrayData*, TypedValue*);
-using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
+/*
+ * Native iteration helpers for arrays.
+ *
+ * Use iter_select() to pick the right specialization based on IterArgsFlags.
+ *
+ * iter_init_array():
+ *   If the base is empty, return 0. Otherwise, initialize the iterator with
+ *   the starting position of the base and return 1.
+ * iter_next_array():
+ *   Advance the iterator. If it has reached the end, free it and return 0.
+ *   Otherwise, return 1.
+ * (They would return a bool, but native method calls from the JIT produce GP
+ *  register outputs, so we extend the return type to an int64_t.)
+ *
+ * iter_get_key_array():
+ *   Get the key at the position of the iterator. Does not IncRef the key.
+ * iter_get_value_array():
+ *   Get the value at the position of the iterator. Does not IncRef the value.
+ */
+template<bool BaseConst, bool WithKeys>
+NEVER_INLINE TypedValue iter_get_key_array(Iter*, ArrayData*) noexcept;
+template<bool BaseConst, bool WithKeys>
+NEVER_INLINE TypedValue iter_get_value_array(Iter*, ArrayData*) noexcept;
+template<bool BaseConst, bool WithKeys>
+NEVER_INLINE int64_t iter_init_array(Iter*, ArrayData*) noexcept;
+template<bool BaseConst, bool WithKeys>
+NEVER_INLINE int64_t iter_next_array(Iter*, ArrayData*) noexcept;
 
-IterInitArr    new_iter_array_helper(bool baseConst);
-IterInitArrKey new_iter_array_key_helper(bool baseConst);
+#define iter_select(fn, flags) (                 \
+  has_flag(flags, IterArgs::Flags::BaseConst)    \
+    ? has_flag(flags, IterArgs::Flags::WithKeys) \
+      ? fn<true, true>                           \
+      : fn<true, false>                          \
+    : fn<false, true>                            \
+)
 
-int64_t new_iter_object(ObjectData* obj, TypedValue* val, TypedValue* key);
-
-
-// Native helpers for the interpreter + JIT used to implement *IterInit* ops.
-// These helpers return 1 if the base has more elements and 0 otherwise.
-// (As above, they return a logical bool which we extend to a GP register.)
-//
-// If these helpers return 1, they set `val` (and `key`, for key-value iters)
-// from the next key-value pair of the base.
-//
-// For non-local iters, if these helpers return 0, they also dec-ref the base.
-template<bool BaseConst>
-NEVER_INLINE int64_t iter_next_array(Iter*, ArrayData*, TypedValue*);
-template<bool BaseConst>
-NEVER_INLINE int64_t iter_next_array_key(Iter*, ArrayData*, TypedValue*, TypedValue*);
-
-NEVER_INLINE int64_t iter_next_object(ObjectData*, TypedValue*);
-NEVER_INLINE int64_t iter_next_object_key(ObjectData*, TypedValue*, TypedValue*);
+/*
+ * Native iteration helpers for objects implementing the Iterator interface.
+ *
+ * Unlike the array APIs, these methods do not operate on an iterator slot,
+ * but instead call methods on the base object implementing the Iterator
+ * interface.
+ *
+ * Since iter_get_key_object() and iter_get_value_object() call methods to
+ * obtain the key and value, they have the "produces reference" semantics,
+ * i.e. the returned values already hold a reference.
+ */
+NEVER_INLINE TypedValue iter_get_key_object(ObjectData*);
+NEVER_INLINE TypedValue iter_get_value_object(ObjectData*);
+NEVER_INLINE int64_t iter_init_object(ObjectData*);
+NEVER_INLINE int64_t iter_next_object(ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -193,6 +193,10 @@ pub(crate) enum Hhbc {
     IterBase,
     #[decl(fn hhbc_iter_free(it: *Iterator) -> void)]
     IterFree,
+    #[decl(fn hhbc_iter_get_key(it: *Iterator) -> *HackMixed)]
+    IterGetKey,
+    #[decl(fn hhbc_iter_get_value(it: *Iterator) -> *HackMixed)]
+    IterGetValue,
     #[decl(fn hhbc_iter_init(it: **Iterator, key: **HackMixed, var: **HackMixed, container: *HackMixed) -> *HackBool)]
     IterInit,
     #[decl(fn hhbc_iter_next(it: *Iterator, key: **HackMixed, var: **HackMixed) -> *HackBool)]

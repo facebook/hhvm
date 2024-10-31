@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/vanilla-vec.h"
 
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -493,6 +494,8 @@ static CallMap s_callMap {
 
     /* Iterators */
     {IterExtractBase, Iter::extractBase, DTV, SSync, {{TV, 0}, {SSA, 1}}},
+    {IterInitObj, iter_init_object, DSSA, SSync, {{SSA, 0}}},
+    {IterNextObj, iter_next_object, DSSA, SSync, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

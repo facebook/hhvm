@@ -969,6 +969,16 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::IterFree(iter_id, _loc) => {
             write!(w, "iterator ^{} free", iter_id)?;
         }
+        Hhbc::IterGetKey(iter_args, base_lid, _loc) => {
+            write!(w, "iterator ^{} get_key", iter_args.iter_id)?;
+            print_iter_args_flags(w, iter_args.flags)?;
+            write!(w, " from {}", FmtLid(base_lid))?;
+        }
+        Hhbc::IterGetValue(iter_args, base_lid, _loc) => {
+            write!(w, "iterator ^{} get_value", iter_args.iter_id)?;
+            print_iter_args_flags(w, iter_args.flags)?;
+            write!(w, " from {}", FmtLid(base_lid))?;
+        }
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
         }
@@ -1908,6 +1918,16 @@ fn print_symbol_refs(w: &mut dyn Write, refs: &SymbolRefs) -> Result {
     Ok(())
 }
 
+fn print_iter_args_flags(w: &mut dyn Write, flags: IterArgsFlags) -> Result {
+    if flags.contains(IterArgsFlags::BaseConst) {
+        write!(w, " base_const")?;
+    }
+    if flags.contains(IterArgsFlags::WithKeys) {
+        write!(w, " with_keys")?;
+    }
+    Ok(())
+}
+
 fn print_terminator(
     w: &mut dyn Write,
     ctx: &mut FuncContext,
@@ -1933,30 +1953,24 @@ fn print_terminator(
         }
         Terminator::IterInit(args) => {
             write!(w, "iterator ^{} init", args.iter_id)?;
-            if args.flags.contains(IterArgsFlags::BaseConst) {
-                write!(w, " base_const")?;
-            }
+            print_iter_args_flags(w, args.flags)?;
             write!(
                 w,
-                " from {} jmp to {} else {} with {}",
-                FmtLid(args.base_lid()),
+                " from {} jmp to {} else {}",
+                FmtLid(args.base_lid),
                 FmtBid(func, args.targets[0], verbose),
-                FmtBid(func, args.targets[1], verbose),
-                FmtOptKeyValue(args.key_lid(), args.value_lid())
+                FmtBid(func, args.targets[1], verbose)
             )?;
         }
         Terminator::IterNext(args) => {
             write!(w, "iterator ^{} next", args.iter_id)?;
-            if args.flags.contains(IterArgsFlags::BaseConst) {
-                write!(w, " base_const")?;
-            }
+            print_iter_args_flags(w, args.flags)?;
             write!(
                 w,
-                " from {} jmp to {} else {} with {}",
-                FmtLid(args.base_lid()),
+                " from {} jmp to {} else {}",
+                FmtLid(args.base_lid),
                 FmtBid(func, args.targets[0], verbose),
-                FmtBid(func, args.targets[1], verbose),
-                FmtOptKeyValue(args.key_lid(), args.value_lid())
+                FmtBid(func, args.targets[1], verbose)
             )?;
         }
         Terminator::Jmp(bid, _) => write!(w, "jmp to {}", FmtBid(func, *bid, verbose))?,

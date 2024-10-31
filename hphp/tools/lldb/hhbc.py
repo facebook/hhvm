@@ -539,23 +539,21 @@ class HHBC:
             size = 1
             itid = HHBC.decode_iva(utils.ptr_add(ptr, size))
             size += itid["size"]
-            kid = HHBC.decode_iva(utils.ptr_add(ptr, size))
-            size += kid["size"]
-            vid = HHBC.decode_iva(utils.ptr_add(ptr, size))
-            size += vid["size"]
 
             fstr = (
                 "BaseConst "
                 if flags.unsigned
                 & utils.Enum("HPHP::IterArgs::Flags", "BaseConst", target).unsigned
                 else ""
+            ) + (
+                "WithKeys "
+                if flags.unsigned
+                & utils.Enum("HPHP::IterArgs::Flags", "WithKeys", target).unsigned
+                else ""
             )
             istr = str(itid["value"].signed)
-            key = kid["value"].signed - 1  # -1 for kNoKey
-            kstr = " K:" + str(key) if (key != -1) else " NK"
-            vstr = " V:" + str(vid["value"].signed)
             info["size"] = size
-            info["value"] = fstr + istr + kstr + vstr
+            info["value"] = fstr + istr
 
         elif immtype.unsigned == utils.Enum("HPHP::ArgType", "FCA", target).unsigned:
             flags_type = utils.Type("HPHP::FCallArgsFlags", target)

@@ -138,10 +138,10 @@ Breakpoint 1 reached at genFoo() on line 10 of %s/flow2.php
   11   $z = yield $a+5;
 
 out
-Break at foo() on line 40 of %s/flow2.php
-  39   foreach (genFoo($a) as $x) {
-  40*    $i++;
-  41     var_dump($x);
+Break at foo() on line 39 of %s/flow2.php
+  38   $i = 0;
+  39*  foreach (genFoo($a) as $x) {
+  40     $i++;
 
 continue
 Breakpoint 2 reached at genFoo() on line 12 of %s/flow2.php
@@ -150,10 +150,10 @@ Breakpoint 2 reached at genFoo() on line 12 of %s/flow2.php
   13   error_log('Finished in genFoo');
 
 out
-Break at foo() on line 40 of %s/flow2.php
-  39   foreach (genFoo($a) as $x) {
-  40*    $i++;
-  41     var_dump($x);
+Break at foo() on line 39 of %s/flow2.php
+  38   $i = 0;
+  39*  foreach (genFoo($a) as $x) {
+  40     $i++;
 
 break clear all
 All breakpoints are cleared.

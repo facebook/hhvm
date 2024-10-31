@@ -420,12 +420,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
       });
     };
 
-    auto const emit_ita  = [&](IterArgs ita) {
-      if (ita.hasKey()) ita.keyId = map_local(ita.keyId);
-      ita.valId = map_local(ita.valId);
-      encodeIterArgs(fe, ita);
-    };
-
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_IVA(n)     fe.emitIVA(data.arg##n);
@@ -445,7 +439,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue, FuncEmitter& f
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), fe);
 #define IMM_LAR(n)     emit_lar(data.locrange);
-#define IMM_ITA(n)     emit_ita(data.ita);
+#define IMM_ITA(n)     encodeIterArgs(fe, data.ita);
 #define IMM_FCA(n)     encodeFCallArgs(                                 \
                          fe, data.fca.base(),                           \
                          data.fca.enforceInOut(),                       \

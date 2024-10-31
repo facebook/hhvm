@@ -93,6 +93,7 @@ std::string array_string(SArray arr) {
 namespace php {
 
 std::string local_string(const Func& func, LocalId lid) {
+  if (lid == NoLocalId) return "None";
   if (lid == StackDupId) return "Dup";
   if (lid == StackThisId) return "This";
   assertx(lid <= MaxLocalId);

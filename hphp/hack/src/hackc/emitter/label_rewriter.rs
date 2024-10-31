@@ -286,6 +286,8 @@ where
             | Opcode::IssetS
             | Opcode::IterBase
             | Opcode::IterFree(..)
+            | Opcode::IterGetKey(..)
+            | Opcode::IterGetValue(..)
             | Opcode::Keyset(..)
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)

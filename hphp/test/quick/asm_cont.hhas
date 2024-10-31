@@ -25,15 +25,17 @@
   NullUninit
   FCallFuncD <> 0 1 "" "" - "" "R"
   PopL $0
-  IterInit <> 0 NK V:$i $0 L0
+  IterInit <> 0 $0 L0
   .try {
   L1:
+    IterGetValue <> 0 $0
+    PopL $i
     String "\n"
     CGetL2 $i
     Concat
     Print
     PopC
-    IterNext <> 0 NK V:$i $0 L1
+    IterNext <> 0 $0 L1
     Jmp L0
   } .catch {
     IterFree 0

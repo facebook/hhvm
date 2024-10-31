@@ -21,7 +21,6 @@ macros = { version = "0.0.0", path = "../macros" }
 maplit = "1.0"
 naming_special_names_rust = { version = "0.0.0", path = "../../../naming" }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
-smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 strum = { version = "0.26.2", features = ["derive"] }
 
 [dev-dependencies]

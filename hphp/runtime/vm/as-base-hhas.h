@@ -102,7 +102,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(EnforceReadonlyThis,  "EnforceReadonlyThis")
 
   #define HHAS_ITER_ARGS_FLAGS                         \
-  X(BaseConst,            "BaseConst");
+  X(BaseConst,            "BaseConst");                \
+  X(WithKeys,             "WithKeys");
 }
 
 }

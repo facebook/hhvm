@@ -552,7 +552,7 @@ RegionDescPtr form_region(Env& env) {
     if (instructionEndsRegion(env)) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);
       break;
-    } else if (isIteratorOp(env.sk.op())) {
+    } else if (isIteratorControlFlow(env.sk.op())) {
       FTRACE(1, "selectTracelet: tracelet broken before iterator op\n");
       break;
     }

@@ -7648,7 +7648,7 @@ TEST(Type, IterTypes) {
     EXPECT_EQ(iter.value, p.second.value);
     EXPECT_EQ(iter.count, p.second.count) << show(p.first);
     EXPECT_EQ(iter.mayThrowOnInit, p.second.mayThrowOnInit);
-    EXPECT_EQ(iter.mayThrowOnNext, p.second.mayThrowOnNext);
+    EXPECT_EQ(iter.mayThrowOnGetOrNext, p.second.mayThrowOnGetOrNext);
   }
 }
 

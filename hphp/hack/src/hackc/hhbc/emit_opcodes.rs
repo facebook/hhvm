@@ -13,7 +13,6 @@ use proc_macro2::Punct;
 use proc_macro2::Spacing;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
-use quote::format_ident;
 use quote::quote;
 use syn::ItemEnum;
 use syn::Result;
@@ -375,14 +374,8 @@ pub fn emit_impl_locals(input: TokenStream, opcodes: &[OpcodeData]) -> Result<To
                     match_parts.push(quote!(#imm_name));
                 }
                 ImmType::ITA => {
-                    let key = format_ident!("{}_key", imm_name);
-                    let val = format_ident!("{}_val", imm_name);
-                    locals.push(quote!(#key));
-                    locals.push(quote!(#val));
                     let mstr = quote!(IterArgs {
                         iter_id: _,
-                        key_id: #key,
-                        val_id: #val,
                         flags: _,
                     });
                     match_parts.push(quote!(#mstr));

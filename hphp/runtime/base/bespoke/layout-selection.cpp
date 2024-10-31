@@ -782,7 +782,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     total += count;
   }
 
-  auto const p_cutoff = isIteratorOp(profile.key.second.op()) ?
+  auto const p_cutoff = isIteratorBaseAccess(profile.key.second.op()) ?
     RO::EvalBespokeArraySinkIteratorSpecializationThreshold / 100 :
     RO::EvalBespokeArraySinkSpecializationThreshold / 100;
 
@@ -827,7 +827,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     // When vanilla + top struct cover all sources, return both
     if (p_is_struct > 0 &&
         p_vanilla + p_is_struct >= layoutThreshold &&
-        !isIteratorOp(profile.key.second.op())) {
+        !isIteratorBaseAccess(profile.key.second.op())) {
 
       // if single struct, return it
       if (sortedStructs.size() == 1) {
@@ -898,7 +898,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
 
   auto const selectMultipleLayouts = [&](double p1, double p2){
     // Do not select multiple layouts for iterator ops
-    if (isIteratorOp(profile.key.second.op())) return false;
+    if (isIteratorBaseAccess(profile.key.second.op())) return false;
 
     // Require at least cutoff for multiple layouts
     if (p1 + p2 < p_cutoff) return false;
@@ -917,7 +917,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     auto const& [layout_first, p_first] = sortedStructs[0];
 
     if (sortedStructs.size() > 1 &&
-        !isIteratorOp(profile.key.second.op())) {
+        !isIteratorBaseAccess(profile.key.second.op())) {
       auto const& [layout_second, p_second] = sortedStructs[1];
 
       if (p_first + p_second >= p_cutoff &&
@@ -936,7 +936,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     // When top struct + vanilla cover all sources, return both
     if (p_vanilla > 0 &&
         p_is_struct + p_vanilla >= layoutThreshold &&
-        !isIteratorOp(profile.key.second.op())) {
+        !isIteratorBaseAccess(profile.key.second.op())) {
       return {
         {ArrayLayout(TopStructLayout::Index()), p_is_struct},
         {ArrayLayout::Vanilla(), p_vanilla}
@@ -967,7 +967,7 @@ SinkLayouts selectSinkLayouts(
 
   auto const sideExit = [&] {
     // We do not specialize iterators for bespoke layouts unless we side exit.
-    if (isIteratorOp(profile.key.second.op())) return true;
+    if (isIteratorBaseAccess(profile.key.second.op())) return true;
 
     auto const coverage = std::accumulate(
       decisions.begin(),
@@ -1040,7 +1040,7 @@ SinkLayouts layoutsForSink(
   }
 
   // For <= 2 layouts just return them in sorted order
-  if (layoutFrequencies.size() <= 2 && !isIteratorOp(sk.op())) {
+  if (layoutFrequencies.size() <= 2 && !isIteratorBaseAccess(sk.op())) {
     std::vector<std::pair<uint16_t, double>>
       sortedFrequencies(layoutFrequencies.begin(), layoutFrequencies.end());
     std::sort(

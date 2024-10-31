@@ -53,13 +53,8 @@ struct LocalRange {
 
 /*
  * Arguments to IterInit / IterNext opcodes.
- * hhas format: <iterId> K:<keyId> V:<valId> (for key-value iters)
- *              <iterId> NK V:<valId>        (for value-only iters)
- * hhbc format: <uint8:flags> <iva:iterId> <iva:(keyId + 1)> <iva:valId>
- *
- * For value-only iters, keyId will be -1 (an invalid local ID); to take
- * advantage of the one-byte encoding for IVA arguments, we add 1 to the key
- * when encoding these args in the hhbc format.
+ * hhas format: <iterId>
+ * hhbc format: <uint8:flags> <iva:iterId>
  *
  * We don't accept flags from hhas because our flags require analyses that we
  * currently only do in HHBBC.
@@ -67,38 +62,26 @@ struct LocalRange {
 struct IterArgs {
   using Flags = IterArgsFlags;
 
-  static constexpr int32_t kNoKey = -1;
-
-  explicit IterArgs(Flags flags, int32_t iterId, int32_t keyId, int32_t valId)
-    : iterId(iterId), keyId(keyId), valId(valId), flags(flags) {}
-
-  bool hasKey() const {
-    assertx(keyId == kNoKey || keyId >= 0);
-    return keyId != kNoKey;
-  }
+  explicit IterArgs(Flags flags, int32_t iterId)
+    : iterId(iterId), flags(flags) {}
 
   bool operator==(const IterArgs& other) const {
-    return iterId == other.iterId && keyId == other.keyId &&
-           valId == other.valId && flags == other.flags;
+    return iterId == other.iterId && flags == other.flags;
   }
 
   int32_t iterId;
-  int32_t keyId;
-  int32_t valId;
   Flags flags;
 
   template <typename SerDe> static IterArgs makeForSerde(SerDe& sd) {
     static_assert(SerDe::deserializing);
     int32_t iterId;
-    int32_t keyId;
-    int32_t valId;
     Flags flags;
-    sd(iterId)(keyId)(valId)(flags);
-    return IterArgs{flags, iterId, keyId, valId};
+    sd(iterId)(flags);
+    return IterArgs{flags, iterId};
   }
 
   template <typename SerDe> void serde(SerDe& sd) {
-    sd(iterId)(keyId)(valId)(flags);
+    sd(iterId)(flags);
   }
 };
 
@@ -650,8 +633,21 @@ constexpr bool isTypeAssert(Op op) {
   return op == OpAssertRATL || op == OpAssertRATStk;
 }
 
-constexpr bool isIteratorOp(Op op) {
+constexpr bool isIteratorControlFlow(Op op) {
   return op == Op::IterInit || op == Op::IterNext;
+}
+
+constexpr bool isIteratorBaseAccess(Op op) {
+  switch (op) {
+    case Op::IterGetKey:
+    case Op::IterGetValue:
+    case Op::IterInit:
+    case Op::IterNext:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 inline bool isMemberBaseOp(Op op) {

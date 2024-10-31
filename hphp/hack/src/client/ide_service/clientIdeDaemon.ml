@@ -348,7 +348,7 @@ let initialize1
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
-  let (config, local_config, _) =
+  let (config, local_config) =
     ServerConfig.load
       ~silent:true
       ~cli_config_overrides:config

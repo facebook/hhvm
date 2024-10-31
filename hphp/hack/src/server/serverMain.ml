@@ -92,7 +92,7 @@ module Program = struct
         (Relative_path.to_absolute ServerConfig.repo_config_path)
     in
     if hhconfig_in_updates then begin
-      let (new_config, _, _) =
+      let (new_config, _) =
         ServerConfig.load
           ~silent:false
           ~from:(ServerArgs.from genv.options)
@@ -1251,8 +1251,7 @@ let setup_server
     ~(monitor_pid : int option)
     (options : ServerArgs.options)
     (config : ServerConfig.t)
-    (local_config : ServerLocalConfig.t)
-    (errorl : Errors.t) : MultiWorker.worker list * env =
+    (local_config : ServerLocalConfig.t) : MultiWorker.worker list * env =
   let num_workers = num_workers options local_config in
   let shmem_handle =
     SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
@@ -1307,11 +1306,7 @@ let setup_server
       local_config
   in
   let env =
-    ServerEnvBuild.make_env
-      config
-      ~init_id
-      ~errorl
-      ~deps_mode:(get_deps_mode options)
+    ServerEnvBuild.make_env config ~init_id ~deps_mode:(get_deps_mode options)
   in
 
   (workers, env)
@@ -1339,7 +1334,6 @@ let run_once options config local_config =
       options
       config
       local_config
-      Errors.empty
       ~informant_managed:false
       ~monitor_pid:None
   in
@@ -1388,7 +1382,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
 
   Hh_logger.log "ServerMain daemon starting.";
 
-  let (config, local_config, errorl) =
+  let (config, local_config) =
     ServerConfig.load
       ~silent:false
       ~from:(ServerArgs.from options)
@@ -1402,7 +1396,6 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       options
       config
       local_config
-      errorl
       ~informant_managed
       ~monitor_pid:(Some monitor_pid)
   in

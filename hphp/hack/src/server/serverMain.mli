@@ -47,5 +47,4 @@ val setup_server :
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
-  Errors.t ->
   MultiWorker.worker list * ServerEnv.env

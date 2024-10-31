@@ -1,9 +1,20 @@
-error: Parsing[1009] The uses field is not supported by PackageV2 in package pkg1 [1]
+Uncaught exception:
 
-PACKAGES.toml:3:11
-1 | [packages]
-2 |
-[1] 3 | [packages.pkg1]
-4 | uses=["a.*"]
+(Failure
+"ERROR: File \"PACKAGES.toml\", line 3, characters 11-14:\
+\nThe `uses` field is not supported by PackageV2 in package pkg1 (Parsing[1009])\
+\n")
 
-1 error found
+Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+Called from PackageConfig.load_and_parse in file "fbcode/hphp/hack/src/package/packageConfig.ml", line 58, characters 17-61
+Called from Errors.do_.(fun) in file "fbcode/hphp/hack/src/errors/errors.ml", line 268, characters 25-29
+Called from Utils.try_finally in file "fbcode/hphp/hack/src/utils/core/utils.ml", line 213, characters 8-12
+Re-raised at Exception.reraise in file "fbcode/hphp/hack/src/utils/core/exception.ml", line 36, characters 33-76
+Called from Utils.try_finally in file "fbcode/hphp/hack/src/utils/core/utils.ml", line 217, characters 6-25
+Called from Errors.do_ in file "fbcode/hphp/hack/src/errors/errors.ml", lines 264-277, characters 4-11
+Called from Hh_single_type_check.decl_and_run_mode in file "fbcode/hphp/hack/src/hh_single_type_check.ml", lines 2500-2511, characters 4-10
+Called from Hh_single_type_check.main_hack.process in file "fbcode/hphp/hack/src/hh_single_type_check.ml", line 2608, characters 4-35
+Called from Utils.try_finally in file "fbcode/hphp/hack/src/utils/core/utils.ml", line 213, characters 8-12
+Re-raised at Exception.reraise in file "fbcode/hphp/hack/src/utils/core/exception.ml", line 36, characters 33-76
+Called from Utils.try_finally in file "fbcode/hphp/hack/src/utils/core/utils.ml", line 217, characters 6-25
+Called from Hh_single_type_check in file "fbcode/hphp/hack/src/hh_single_type_check.ml", line 2626, characters 2-64

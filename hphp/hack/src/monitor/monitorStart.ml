@@ -64,7 +64,7 @@ let monitor_daemon_main
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "MonitorStart. Monitor init_id: %s" init_id;
-  let (config, local_config, _errors) =
+  let (config, local_config) =
     ServerConfig.load
       ~silent:false
       ~from:(ServerArgs.from options)

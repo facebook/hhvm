@@ -2501,14 +2501,13 @@ let decl_and_run_mode
     match packages_config_path with
     | None -> PackageInfo.empty
     | Some _ ->
-      let (errors, info) =
+      let info =
         PackageConfig.load_and_parse
           ~package_v2:(TypecheckerOptions.package_v2 tcopt)
           ~strict:false
           ~pkgs_config_abs_path:packages_config_path
           ()
       in
-      Errors.iter errors ~f:Errors.add_error;
       info
   in
   let tcopt = TypecheckerOptions.set_package_info tcopt package_info in

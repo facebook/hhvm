@@ -90,7 +90,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   Relative_path.set_path_prefix Relative_path.Hhi hhi_folder;
-  let (hhconfig, _, _) =
+  let (hhconfig, _) =
     ServerConfig.load
       ~silent:true
       ~from:""

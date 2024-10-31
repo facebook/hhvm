@@ -25,28 +25,35 @@ let parse (package_v2 : bool) (strict : bool) (path : string) =
   let contents = Sys_utils.cat path in
   let root = Relative_path.(path_of_prefix Root) in
   match extract_packages_from_text package_v2 strict root path contents with
+  | Error [] -> failwith "Bad package specifiction"
   | Error errors ->
-    let error_list =
-      List.map errors ~f:(fun (pos, msg, reasons) ->
+    let strings =
+      List.map
+        ~f:(fun (pos, msg, reasons) ->
           let reasons =
             List.map ~f:(fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
           in
-          Parsing_error.(
-            to_user_error @@ Package_config_error { pos; msg; reasons }))
+          User_error.(
+            to_string
+              true
+              (to_absolute
+                 Parsing_error.(
+                   to_user_error @@ Package_config_error { pos; msg; reasons }))))
+        errors
     in
-    (Errors.from_error_list error_list, PackageInfo.empty)
-  | Ok packages -> (Errors.empty, PackageInfo.from_packages packages)
+    failwith (String.concat strings)
+  | Ok packages -> PackageInfo.from_packages packages
 
 let load_and_parse
     ~(package_v2 : bool) ?(strict = true) ?(pkgs_config_abs_path = None) () :
-    Errors.t * PackageInfo.t =
+    PackageInfo.t =
   let pkgs_config_abs_path =
     match pkgs_config_abs_path with
     | None -> Relative_path.to_absolute repo_config_path
     | Some path -> path
   in
   if not @@ Sys.file_exists pkgs_config_abs_path then
-    (Errors.empty, PackageInfo.empty)
+    PackageInfo.empty
   else
     let result = parse package_v2 strict pkgs_config_abs_path in
     log_debug "Parsed %s" pkgs_config_abs_path;

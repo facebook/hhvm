@@ -85,7 +85,7 @@ let test () =
 
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
   TestDisk.set hhconfig_filename "";
-  let (custom_config, _, _) =
+  let (custom_config, _) =
     ServerConfig.load
       ~silent:false
       ~from:""

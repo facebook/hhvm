@@ -79,13 +79,32 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.MyStruct": premadeCodecTypeSpec_module_MyStruct,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

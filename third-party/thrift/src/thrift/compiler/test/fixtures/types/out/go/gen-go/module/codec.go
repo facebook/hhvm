@@ -1537,69 +1537,88 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.has_bitwise_ops": premadeCodecTypeSpec_module_has_bitwise_ops,
-            "module.is_unscoped": premadeCodecTypeSpec_module_is_unscoped,
-            "module.MyForwardRefEnum": premadeCodecTypeSpec_module_MyForwardRefEnum,
-            "module.empty_struct": premadeCodecTypeSpec_module_empty_struct,
-            "string": premadeCodecTypeSpec_string,
-            "module.decorated_struct": premadeCodecTypeSpec_module_decorated_struct,
-            "i32": premadeCodecTypeSpec_i32,
-            "module.set_i32_7194": premadeCodecTypeSpec_module_set_i32_7194,
-            "module.map_i32_string_1261": premadeCodecTypeSpec_module_map_i32_string_1261,
-            "module.ContainerStruct": premadeCodecTypeSpec_module_ContainerStruct,
-            "module.CppTypeStruct": premadeCodecTypeSpec_module_CppTypeStruct,
-            "i64": premadeCodecTypeSpec_i64,
-            "module.VirtualStruct": premadeCodecTypeSpec_module_VirtualStruct,
-            "module.MyStructWithForwardRefEnum": premadeCodecTypeSpec_module_MyStructWithForwardRefEnum,
-            "bool": premadeCodecTypeSpec_bool,
-            "module.TrivialNumeric": premadeCodecTypeSpec_module_TrivialNumeric,
-            "module.TrivialNestedWithDefault": premadeCodecTypeSpec_module_TrivialNestedWithDefault,
-            "module.ComplexString": premadeCodecTypeSpec_module_ComplexString,
-            "module.ComplexNestedWithDefault": premadeCodecTypeSpec_module_ComplexNestedWithDefault,
-            "byte": premadeCodecTypeSpec_byte,
-            "i16": premadeCodecTypeSpec_i16,
-            "module.MinPadding": premadeCodecTypeSpec_module_MinPadding,
-            "module.MinPaddingWithCustomType": premadeCodecTypeSpec_module_MinPaddingWithCustomType,
-            "module.MyDataItem": premadeCodecTypeSpec_module_MyDataItem,
-            "module.MyStruct": premadeCodecTypeSpec_module_MyStruct,
-            "module.Renaming": premadeCodecTypeSpec_module_Renaming,
-            "binary": premadeCodecTypeSpec_binary,
-            "module.TBinary": premadeCodecTypeSpec_module_TBinary,
-            "module.TBinary_8623": premadeCodecTypeSpec_module_TBinary_8623,
-            "module.SomeListOfTypeMap_2468": premadeCodecTypeSpec_module_SomeListOfTypeMap_2468,
-            "module.AnnotatedTypes": premadeCodecTypeSpec_module_AnnotatedTypes,
-            "module.ForwardUsageStruct": premadeCodecTypeSpec_module_ForwardUsageStruct,
-            "module.ForwardUsageByRef": premadeCodecTypeSpec_module_ForwardUsageByRef,
-            "module.ForwardUsageRoot": premadeCodecTypeSpec_module_ForwardUsageRoot,
-            "module.IncompleteMapDep": premadeCodecTypeSpec_module_IncompleteMapDep,
-            "module.IncompleteMap": premadeCodecTypeSpec_module_IncompleteMap,
-            "module.CompleteMapDep": premadeCodecTypeSpec_module_CompleteMapDep,
-            "module.CompleteMap": premadeCodecTypeSpec_module_CompleteMap,
-            "module.IncompleteListDep": premadeCodecTypeSpec_module_IncompleteListDep,
-            "module.IncompleteList": premadeCodecTypeSpec_module_IncompleteList,
-            "module.CompleteListDep": premadeCodecTypeSpec_module_CompleteListDep,
-            "module.CompleteList": premadeCodecTypeSpec_module_CompleteList,
-            "module.AdaptedListDep": premadeCodecTypeSpec_module_AdaptedListDep,
-            "module.AdaptedList": premadeCodecTypeSpec_module_AdaptedList,
-            "module.DependentAdaptedListDep": premadeCodecTypeSpec_module_DependentAdaptedListDep,
-            "module.DependentAdaptedList": premadeCodecTypeSpec_module_DependentAdaptedList,
-            "module.list_i32_9187": premadeCodecTypeSpec_module_list_i32_9187,
-            "module.set_i32_7070": premadeCodecTypeSpec_module_set_i32_7070,
-            "module.map_i32_i32_9565": premadeCodecTypeSpec_module_map_i32_i32_9565,
-            "module.string_5252": premadeCodecTypeSpec_module_string_5252,
-            "module.i32_9314": premadeCodecTypeSpec_module_i32_9314,
-            "module.AllocatorAware": premadeCodecTypeSpec_module_AllocatorAware,
-            "module.AllocatorAware2": premadeCodecTypeSpec_module_AllocatorAware2,
-            "module.IntTypedef": premadeCodecTypeSpec_module_IntTypedef,
-            "module.UintTypedef": premadeCodecTypeSpec_module_UintTypedef,
-            "module.TypedefStruct": premadeCodecTypeSpec_module_TypedefStruct,
-            "module.StructWithDoubleUnderscores": premadeCodecTypeSpec_module_StructWithDoubleUnderscores,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.has_bitwise_ops", premadeCodecTypeSpec_module_has_bitwise_ops })
+        results = append(results, codecSpecWithFullName{ "module.is_unscoped", premadeCodecTypeSpec_module_is_unscoped })
+        results = append(results, codecSpecWithFullName{ "module.MyForwardRefEnum", premadeCodecTypeSpec_module_MyForwardRefEnum })
+        results = append(results, codecSpecWithFullName{ "module.empty_struct", premadeCodecTypeSpec_module_empty_struct })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.decorated_struct", premadeCodecTypeSpec_module_decorated_struct })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module.set_i32_7194", premadeCodecTypeSpec_module_set_i32_7194 })
+        results = append(results, codecSpecWithFullName{ "module.map_i32_string_1261", premadeCodecTypeSpec_module_map_i32_string_1261 })
+        results = append(results, codecSpecWithFullName{ "module.ContainerStruct", premadeCodecTypeSpec_module_ContainerStruct })
+        results = append(results, codecSpecWithFullName{ "module.CppTypeStruct", premadeCodecTypeSpec_module_CppTypeStruct })
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "module.VirtualStruct", premadeCodecTypeSpec_module_VirtualStruct })
+        results = append(results, codecSpecWithFullName{ "module.MyStructWithForwardRefEnum", premadeCodecTypeSpec_module_MyStructWithForwardRefEnum })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "module.TrivialNumeric", premadeCodecTypeSpec_module_TrivialNumeric })
+        results = append(results, codecSpecWithFullName{ "module.TrivialNestedWithDefault", premadeCodecTypeSpec_module_TrivialNestedWithDefault })
+        results = append(results, codecSpecWithFullName{ "module.ComplexString", premadeCodecTypeSpec_module_ComplexString })
+        results = append(results, codecSpecWithFullName{ "module.ComplexNestedWithDefault", premadeCodecTypeSpec_module_ComplexNestedWithDefault })
+        results = append(results, codecSpecWithFullName{ "byte", premadeCodecTypeSpec_byte })
+        results = append(results, codecSpecWithFullName{ "i16", premadeCodecTypeSpec_i16 })
+        results = append(results, codecSpecWithFullName{ "module.MinPadding", premadeCodecTypeSpec_module_MinPadding })
+        results = append(results, codecSpecWithFullName{ "module.MinPaddingWithCustomType", premadeCodecTypeSpec_module_MinPaddingWithCustomType })
+        results = append(results, codecSpecWithFullName{ "module.MyDataItem", premadeCodecTypeSpec_module_MyDataItem })
+        results = append(results, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
+        results = append(results, codecSpecWithFullName{ "module.Renaming", premadeCodecTypeSpec_module_Renaming })
+        results = append(results, codecSpecWithFullName{ "binary", premadeCodecTypeSpec_binary })
+        results = append(results, codecSpecWithFullName{ "module.TBinary", premadeCodecTypeSpec_module_TBinary })
+        results = append(results, codecSpecWithFullName{ "module.TBinary_8623", premadeCodecTypeSpec_module_TBinary_8623 })
+        results = append(results, codecSpecWithFullName{ "module.SomeListOfTypeMap_2468", premadeCodecTypeSpec_module_SomeListOfTypeMap_2468 })
+        results = append(results, codecSpecWithFullName{ "module.AnnotatedTypes", premadeCodecTypeSpec_module_AnnotatedTypes })
+        results = append(results, codecSpecWithFullName{ "module.ForwardUsageStruct", premadeCodecTypeSpec_module_ForwardUsageStruct })
+        results = append(results, codecSpecWithFullName{ "module.ForwardUsageByRef", premadeCodecTypeSpec_module_ForwardUsageByRef })
+        results = append(results, codecSpecWithFullName{ "module.ForwardUsageRoot", premadeCodecTypeSpec_module_ForwardUsageRoot })
+        results = append(results, codecSpecWithFullName{ "module.IncompleteMapDep", premadeCodecTypeSpec_module_IncompleteMapDep })
+        results = append(results, codecSpecWithFullName{ "module.IncompleteMap", premadeCodecTypeSpec_module_IncompleteMap })
+        results = append(results, codecSpecWithFullName{ "module.CompleteMapDep", premadeCodecTypeSpec_module_CompleteMapDep })
+        results = append(results, codecSpecWithFullName{ "module.CompleteMap", premadeCodecTypeSpec_module_CompleteMap })
+        results = append(results, codecSpecWithFullName{ "module.IncompleteListDep", premadeCodecTypeSpec_module_IncompleteListDep })
+        results = append(results, codecSpecWithFullName{ "module.IncompleteList", premadeCodecTypeSpec_module_IncompleteList })
+        results = append(results, codecSpecWithFullName{ "module.CompleteListDep", premadeCodecTypeSpec_module_CompleteListDep })
+        results = append(results, codecSpecWithFullName{ "module.CompleteList", premadeCodecTypeSpec_module_CompleteList })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedListDep", premadeCodecTypeSpec_module_AdaptedListDep })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedList", premadeCodecTypeSpec_module_AdaptedList })
+        results = append(results, codecSpecWithFullName{ "module.DependentAdaptedListDep", premadeCodecTypeSpec_module_DependentAdaptedListDep })
+        results = append(results, codecSpecWithFullName{ "module.DependentAdaptedList", premadeCodecTypeSpec_module_DependentAdaptedList })
+        results = append(results, codecSpecWithFullName{ "module.list_i32_9187", premadeCodecTypeSpec_module_list_i32_9187 })
+        results = append(results, codecSpecWithFullName{ "module.set_i32_7070", premadeCodecTypeSpec_module_set_i32_7070 })
+        results = append(results, codecSpecWithFullName{ "module.map_i32_i32_9565", premadeCodecTypeSpec_module_map_i32_i32_9565 })
+        results = append(results, codecSpecWithFullName{ "module.string_5252", premadeCodecTypeSpec_module_string_5252 })
+        results = append(results, codecSpecWithFullName{ "module.i32_9314", premadeCodecTypeSpec_module_i32_9314 })
+        results = append(results, codecSpecWithFullName{ "module.AllocatorAware", premadeCodecTypeSpec_module_AllocatorAware })
+        results = append(results, codecSpecWithFullName{ "module.AllocatorAware2", premadeCodecTypeSpec_module_AllocatorAware2 })
+        results = append(results, codecSpecWithFullName{ "module.IntTypedef", premadeCodecTypeSpec_module_IntTypedef })
+        results = append(results, codecSpecWithFullName{ "module.UintTypedef", premadeCodecTypeSpec_module_UintTypedef })
+        results = append(results, codecSpecWithFullName{ "module.TypedefStruct", premadeCodecTypeSpec_module_TypedefStruct })
+        results = append(results, codecSpecWithFullName{ "module.StructWithDoubleUnderscores", premadeCodecTypeSpec_module_StructWithDoubleUnderscores })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

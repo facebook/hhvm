@@ -99,26 +99,45 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "module.MyEnum": premadeThriftType_module_MyEnum,
-            "string": premadeThriftType_string,
-            "module.MyStructNestedAnnotation": premadeThriftType_module_MyStructNestedAnnotation,
-            "module.MyUnion": premadeThriftType_module_MyUnion,
-            "i64": premadeThriftType_i64,
-            "module.list_string_6884": premadeThriftType_module_list_string_6884,
-            "module.MyStruct": premadeThriftType_module_MyStruct,
-            "module.SecretStruct": premadeThriftType_module_SecretStruct,
-            "module.MyException": premadeThriftType_module_MyException,
-            "module.AwesomeStruct": premadeThriftType_module_AwesomeStruct,
-            "module.FantasticStruct": premadeThriftType_module_FantasticStruct,
-            "void": premadeThriftType_void,
-            "bool": premadeThriftType_bool,
-            "i32": premadeThriftType_i32,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "module.MyEnum", premadeThriftType_module_MyEnum })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module.MyStructNestedAnnotation", premadeThriftType_module_MyStructNestedAnnotation })
+        results = append(results, thriftTypeWithFullName{ "module.MyUnion", premadeThriftType_module_MyUnion })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "module.list_string_6884", premadeThriftType_module_list_string_6884 })
+        results = append(results, thriftTypeWithFullName{ "module.MyStruct", premadeThriftType_module_MyStruct })
+        results = append(results, thriftTypeWithFullName{ "module.SecretStruct", premadeThriftType_module_SecretStruct })
+        results = append(results, thriftTypeWithFullName{ "module.MyException", premadeThriftType_module_MyException })
+        results = append(results, thriftTypeWithFullName{ "module.AwesomeStruct", premadeThriftType_module_AwesomeStruct })
+        results = append(results, thriftTypeWithFullName{ "module.FantasticStruct", premadeThriftType_module_FantasticStruct })
+        results = append(results, thriftTypeWithFullName{ "void", premadeThriftType_void })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -126,8 +145,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyStructNestedAnnotation").
     SetIsUnion(false).
     SetFields(
@@ -138,11 +157,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyUnion").
-    SetIsUnion(true),
-            metadata.NewThriftStruct().
+    SetIsUnion(true))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyStruct").
     SetIsUnion(false).
     SetFields(
@@ -193,8 +212,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_MyUnion),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.SecretStruct").
     SetIsUnion(false).
     SetFields(
@@ -210,8 +229,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

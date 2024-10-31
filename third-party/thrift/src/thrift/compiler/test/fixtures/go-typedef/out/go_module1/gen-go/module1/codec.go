@@ -491,28 +491,47 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "string": premadeCodecTypeSpec_string,
-            "module1.Plate": premadeCodecTypeSpec_module1_Plate,
-            "i32": premadeCodecTypeSpec_i32,
-            "module1.Year": premadeCodecTypeSpec_module1_Year,
-            "module1.Drivers": premadeCodecTypeSpec_module1_Drivers,
-            "module1.Accessory": premadeCodecTypeSpec_module1_Accessory,
-            "module1.PartName": premadeCodecTypeSpec_module1_PartName,
-            "module1.Automobile": premadeCodecTypeSpec_module1_Automobile,
-            "i64": premadeCodecTypeSpec_i64,
-            "module1.MapKey": premadeCodecTypeSpec_module1_MapKey,
-            "module1.MapContainer": premadeCodecTypeSpec_module1_MapContainer,
-            "module1.Car": premadeCodecTypeSpec_module1_Car,
-            "module1.Pair": premadeCodecTypeSpec_module1_Pair,
-            "module1.Collection": premadeCodecTypeSpec_module1_Collection,
-            "module1.State": premadeCodecTypeSpec_module1_State,
-            "module1.Enum": premadeCodecTypeSpec_module1_Enum,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module1.Plate", premadeCodecTypeSpec_module1_Plate })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module1.Year", premadeCodecTypeSpec_module1_Year })
+        results = append(results, codecSpecWithFullName{ "module1.Drivers", premadeCodecTypeSpec_module1_Drivers })
+        results = append(results, codecSpecWithFullName{ "module1.Accessory", premadeCodecTypeSpec_module1_Accessory })
+        results = append(results, codecSpecWithFullName{ "module1.PartName", premadeCodecTypeSpec_module1_PartName })
+        results = append(results, codecSpecWithFullName{ "module1.Automobile", premadeCodecTypeSpec_module1_Automobile })
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "module1.MapKey", premadeCodecTypeSpec_module1_MapKey })
+        results = append(results, codecSpecWithFullName{ "module1.MapContainer", premadeCodecTypeSpec_module1_MapContainer })
+        results = append(results, codecSpecWithFullName{ "module1.Car", premadeCodecTypeSpec_module1_Car })
+        results = append(results, codecSpecWithFullName{ "module1.Pair", premadeCodecTypeSpec_module1_Pair })
+        results = append(results, codecSpecWithFullName{ "module1.Collection", premadeCodecTypeSpec_module1_Collection })
+        results = append(results, codecSpecWithFullName{ "module1.State", premadeCodecTypeSpec_module1_State })
+        results = append(results, codecSpecWithFullName{ "module1.Enum", premadeCodecTypeSpec_module1_Enum })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

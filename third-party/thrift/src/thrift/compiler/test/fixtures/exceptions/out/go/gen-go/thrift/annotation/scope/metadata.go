@@ -111,29 +111,48 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "scope.Transitive": premadeThriftType_scope_Transitive,
-            "scope.Program": premadeThriftType_scope_Program,
-            "scope.Struct": premadeThriftType_scope_Struct,
-            "scope.Union": premadeThriftType_scope_Union,
-            "scope.Exception": premadeThriftType_scope_Exception,
-            "scope.Field": premadeThriftType_scope_Field,
-            "scope.Typedef": premadeThriftType_scope_Typedef,
-            "scope.Service": premadeThriftType_scope_Service,
-            "scope.Interaction": premadeThriftType_scope_Interaction,
-            "scope.Function": premadeThriftType_scope_Function,
-            "scope.EnumValue": premadeThriftType_scope_EnumValue,
-            "scope.Const": premadeThriftType_scope_Const,
-            "scope.Enum": premadeThriftType_scope_Enum,
-            "scope.Structured": premadeThriftType_scope_Structured,
-            "scope.Interface": premadeThriftType_scope_Interface,
-            "scope.RootDefinition": premadeThriftType_scope_RootDefinition,
-            "scope.Definition": premadeThriftType_scope_Definition,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "scope.Transitive", premadeThriftType_scope_Transitive })
+        results = append(results, thriftTypeWithFullName{ "scope.Program", premadeThriftType_scope_Program })
+        results = append(results, thriftTypeWithFullName{ "scope.Struct", premadeThriftType_scope_Struct })
+        results = append(results, thriftTypeWithFullName{ "scope.Union", premadeThriftType_scope_Union })
+        results = append(results, thriftTypeWithFullName{ "scope.Exception", premadeThriftType_scope_Exception })
+        results = append(results, thriftTypeWithFullName{ "scope.Field", premadeThriftType_scope_Field })
+        results = append(results, thriftTypeWithFullName{ "scope.Typedef", premadeThriftType_scope_Typedef })
+        results = append(results, thriftTypeWithFullName{ "scope.Service", premadeThriftType_scope_Service })
+        results = append(results, thriftTypeWithFullName{ "scope.Interaction", premadeThriftType_scope_Interaction })
+        results = append(results, thriftTypeWithFullName{ "scope.Function", premadeThriftType_scope_Function })
+        results = append(results, thriftTypeWithFullName{ "scope.EnumValue", premadeThriftType_scope_EnumValue })
+        results = append(results, thriftTypeWithFullName{ "scope.Const", premadeThriftType_scope_Const })
+        results = append(results, thriftTypeWithFullName{ "scope.Enum", premadeThriftType_scope_Enum })
+        results = append(results, thriftTypeWithFullName{ "scope.Structured", premadeThriftType_scope_Structured })
+        results = append(results, thriftTypeWithFullName{ "scope.Interface", premadeThriftType_scope_Interface })
+        results = append(results, thriftTypeWithFullName{ "scope.RootDefinition", premadeThriftType_scope_RootDefinition })
+        results = append(results, thriftTypeWithFullName{ "scope.Definition", premadeThriftType_scope_Definition })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -141,59 +160,59 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Transitive").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Program").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Struct").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Union").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Exception").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Field").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Typedef").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Service").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Interaction").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Function").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.EnumValue").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Const").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Enum").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Structured").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Interface").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.RootDefinition").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("scope.Definition").
-    SetIsUnion(false),
-        }
+    SetIsUnion(false))
+        return results
     },
 )
 

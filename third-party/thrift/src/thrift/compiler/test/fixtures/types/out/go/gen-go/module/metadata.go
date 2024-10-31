@@ -389,69 +389,88 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "module.has_bitwise_ops": premadeThriftType_module_has_bitwise_ops,
-            "module.is_unscoped": premadeThriftType_module_is_unscoped,
-            "module.MyForwardRefEnum": premadeThriftType_module_MyForwardRefEnum,
-            "module.empty_struct": premadeThriftType_module_empty_struct,
-            "string": premadeThriftType_string,
-            "module.decorated_struct": premadeThriftType_module_decorated_struct,
-            "i32": premadeThriftType_i32,
-            "module.set_i32_7194": premadeThriftType_module_set_i32_7194,
-            "module.map_i32_string_1261": premadeThriftType_module_map_i32_string_1261,
-            "module.ContainerStruct": premadeThriftType_module_ContainerStruct,
-            "module.CppTypeStruct": premadeThriftType_module_CppTypeStruct,
-            "i64": premadeThriftType_i64,
-            "module.VirtualStruct": premadeThriftType_module_VirtualStruct,
-            "module.MyStructWithForwardRefEnum": premadeThriftType_module_MyStructWithForwardRefEnum,
-            "bool": premadeThriftType_bool,
-            "module.TrivialNumeric": premadeThriftType_module_TrivialNumeric,
-            "module.TrivialNestedWithDefault": premadeThriftType_module_TrivialNestedWithDefault,
-            "module.ComplexString": premadeThriftType_module_ComplexString,
-            "module.ComplexNestedWithDefault": premadeThriftType_module_ComplexNestedWithDefault,
-            "byte": premadeThriftType_byte,
-            "i16": premadeThriftType_i16,
-            "module.MinPadding": premadeThriftType_module_MinPadding,
-            "module.MinPaddingWithCustomType": premadeThriftType_module_MinPaddingWithCustomType,
-            "module.MyDataItem": premadeThriftType_module_MyDataItem,
-            "module.MyStruct": premadeThriftType_module_MyStruct,
-            "module.Renaming": premadeThriftType_module_Renaming,
-            "binary": premadeThriftType_binary,
-            "module.TBinary": premadeThriftType_module_TBinary,
-            "module.TBinary_8623": premadeThriftType_module_TBinary_8623,
-            "module.SomeListOfTypeMap_2468": premadeThriftType_module_SomeListOfTypeMap_2468,
-            "module.AnnotatedTypes": premadeThriftType_module_AnnotatedTypes,
-            "module.ForwardUsageStruct": premadeThriftType_module_ForwardUsageStruct,
-            "module.ForwardUsageByRef": premadeThriftType_module_ForwardUsageByRef,
-            "module.ForwardUsageRoot": premadeThriftType_module_ForwardUsageRoot,
-            "module.IncompleteMapDep": premadeThriftType_module_IncompleteMapDep,
-            "module.IncompleteMap": premadeThriftType_module_IncompleteMap,
-            "module.CompleteMapDep": premadeThriftType_module_CompleteMapDep,
-            "module.CompleteMap": premadeThriftType_module_CompleteMap,
-            "module.IncompleteListDep": premadeThriftType_module_IncompleteListDep,
-            "module.IncompleteList": premadeThriftType_module_IncompleteList,
-            "module.CompleteListDep": premadeThriftType_module_CompleteListDep,
-            "module.CompleteList": premadeThriftType_module_CompleteList,
-            "module.AdaptedListDep": premadeThriftType_module_AdaptedListDep,
-            "module.AdaptedList": premadeThriftType_module_AdaptedList,
-            "module.DependentAdaptedListDep": premadeThriftType_module_DependentAdaptedListDep,
-            "module.DependentAdaptedList": premadeThriftType_module_DependentAdaptedList,
-            "module.list_i32_9187": premadeThriftType_module_list_i32_9187,
-            "module.set_i32_7070": premadeThriftType_module_set_i32_7070,
-            "module.map_i32_i32_9565": premadeThriftType_module_map_i32_i32_9565,
-            "module.string_5252": premadeThriftType_module_string_5252,
-            "module.i32_9314": premadeThriftType_module_i32_9314,
-            "module.AllocatorAware": premadeThriftType_module_AllocatorAware,
-            "module.AllocatorAware2": premadeThriftType_module_AllocatorAware2,
-            "module.IntTypedef": premadeThriftType_module_IntTypedef,
-            "module.UintTypedef": premadeThriftType_module_UintTypedef,
-            "module.TypedefStruct": premadeThriftType_module_TypedefStruct,
-            "module.StructWithDoubleUnderscores": premadeThriftType_module_StructWithDoubleUnderscores,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "module.has_bitwise_ops", premadeThriftType_module_has_bitwise_ops })
+        results = append(results, thriftTypeWithFullName{ "module.is_unscoped", premadeThriftType_module_is_unscoped })
+        results = append(results, thriftTypeWithFullName{ "module.MyForwardRefEnum", premadeThriftType_module_MyForwardRefEnum })
+        results = append(results, thriftTypeWithFullName{ "module.empty_struct", premadeThriftType_module_empty_struct })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module.decorated_struct", premadeThriftType_module_decorated_struct })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        results = append(results, thriftTypeWithFullName{ "module.set_i32_7194", premadeThriftType_module_set_i32_7194 })
+        results = append(results, thriftTypeWithFullName{ "module.map_i32_string_1261", premadeThriftType_module_map_i32_string_1261 })
+        results = append(results, thriftTypeWithFullName{ "module.ContainerStruct", premadeThriftType_module_ContainerStruct })
+        results = append(results, thriftTypeWithFullName{ "module.CppTypeStruct", premadeThriftType_module_CppTypeStruct })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "module.VirtualStruct", premadeThriftType_module_VirtualStruct })
+        results = append(results, thriftTypeWithFullName{ "module.MyStructWithForwardRefEnum", premadeThriftType_module_MyStructWithForwardRefEnum })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "module.TrivialNumeric", premadeThriftType_module_TrivialNumeric })
+        results = append(results, thriftTypeWithFullName{ "module.TrivialNestedWithDefault", premadeThriftType_module_TrivialNestedWithDefault })
+        results = append(results, thriftTypeWithFullName{ "module.ComplexString", premadeThriftType_module_ComplexString })
+        results = append(results, thriftTypeWithFullName{ "module.ComplexNestedWithDefault", premadeThriftType_module_ComplexNestedWithDefault })
+        results = append(results, thriftTypeWithFullName{ "byte", premadeThriftType_byte })
+        results = append(results, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
+        results = append(results, thriftTypeWithFullName{ "module.MinPadding", premadeThriftType_module_MinPadding })
+        results = append(results, thriftTypeWithFullName{ "module.MinPaddingWithCustomType", premadeThriftType_module_MinPaddingWithCustomType })
+        results = append(results, thriftTypeWithFullName{ "module.MyDataItem", premadeThriftType_module_MyDataItem })
+        results = append(results, thriftTypeWithFullName{ "module.MyStruct", premadeThriftType_module_MyStruct })
+        results = append(results, thriftTypeWithFullName{ "module.Renaming", premadeThriftType_module_Renaming })
+        results = append(results, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
+        results = append(results, thriftTypeWithFullName{ "module.TBinary", premadeThriftType_module_TBinary })
+        results = append(results, thriftTypeWithFullName{ "module.TBinary_8623", premadeThriftType_module_TBinary_8623 })
+        results = append(results, thriftTypeWithFullName{ "module.SomeListOfTypeMap_2468", premadeThriftType_module_SomeListOfTypeMap_2468 })
+        results = append(results, thriftTypeWithFullName{ "module.AnnotatedTypes", premadeThriftType_module_AnnotatedTypes })
+        results = append(results, thriftTypeWithFullName{ "module.ForwardUsageStruct", premadeThriftType_module_ForwardUsageStruct })
+        results = append(results, thriftTypeWithFullName{ "module.ForwardUsageByRef", premadeThriftType_module_ForwardUsageByRef })
+        results = append(results, thriftTypeWithFullName{ "module.ForwardUsageRoot", premadeThriftType_module_ForwardUsageRoot })
+        results = append(results, thriftTypeWithFullName{ "module.IncompleteMapDep", premadeThriftType_module_IncompleteMapDep })
+        results = append(results, thriftTypeWithFullName{ "module.IncompleteMap", premadeThriftType_module_IncompleteMap })
+        results = append(results, thriftTypeWithFullName{ "module.CompleteMapDep", premadeThriftType_module_CompleteMapDep })
+        results = append(results, thriftTypeWithFullName{ "module.CompleteMap", premadeThriftType_module_CompleteMap })
+        results = append(results, thriftTypeWithFullName{ "module.IncompleteListDep", premadeThriftType_module_IncompleteListDep })
+        results = append(results, thriftTypeWithFullName{ "module.IncompleteList", premadeThriftType_module_IncompleteList })
+        results = append(results, thriftTypeWithFullName{ "module.CompleteListDep", premadeThriftType_module_CompleteListDep })
+        results = append(results, thriftTypeWithFullName{ "module.CompleteList", premadeThriftType_module_CompleteList })
+        results = append(results, thriftTypeWithFullName{ "module.AdaptedListDep", premadeThriftType_module_AdaptedListDep })
+        results = append(results, thriftTypeWithFullName{ "module.AdaptedList", premadeThriftType_module_AdaptedList })
+        results = append(results, thriftTypeWithFullName{ "module.DependentAdaptedListDep", premadeThriftType_module_DependentAdaptedListDep })
+        results = append(results, thriftTypeWithFullName{ "module.DependentAdaptedList", premadeThriftType_module_DependentAdaptedList })
+        results = append(results, thriftTypeWithFullName{ "module.list_i32_9187", premadeThriftType_module_list_i32_9187 })
+        results = append(results, thriftTypeWithFullName{ "module.set_i32_7070", premadeThriftType_module_set_i32_7070 })
+        results = append(results, thriftTypeWithFullName{ "module.map_i32_i32_9565", premadeThriftType_module_map_i32_i32_9565 })
+        results = append(results, thriftTypeWithFullName{ "module.string_5252", premadeThriftType_module_string_5252 })
+        results = append(results, thriftTypeWithFullName{ "module.i32_9314", premadeThriftType_module_i32_9314 })
+        results = append(results, thriftTypeWithFullName{ "module.AllocatorAware", premadeThriftType_module_AllocatorAware })
+        results = append(results, thriftTypeWithFullName{ "module.AllocatorAware2", premadeThriftType_module_AllocatorAware2 })
+        results = append(results, thriftTypeWithFullName{ "module.IntTypedef", premadeThriftType_module_IntTypedef })
+        results = append(results, thriftTypeWithFullName{ "module.UintTypedef", premadeThriftType_module_UintTypedef })
+        results = append(results, thriftTypeWithFullName{ "module.TypedefStruct", premadeThriftType_module_TypedefStruct })
+        results = append(results, thriftTypeWithFullName{ "module.StructWithDoubleUnderscores", premadeThriftType_module_StructWithDoubleUnderscores })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -459,11 +478,11 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.empty_struct").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.decorated_struct").
     SetIsUnion(false).
     SetFields(
@@ -474,8 +493,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ContainerStruct").
     SetIsUnion(false).
     SetFields(
@@ -521,8 +540,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_i32),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.CppTypeStruct").
     SetIsUnion(false).
     SetFields(
@@ -533,8 +552,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_i32),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.VirtualStruct").
     SetIsUnion(false).
     SetFields(
@@ -545,8 +564,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_i64),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyStructWithForwardRefEnum").
     SetIsUnion(false).
     SetFields(
@@ -562,8 +581,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_MyForwardRefEnum),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.TrivialNumeric").
     SetIsUnion(false).
     SetFields(
@@ -579,8 +598,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.TrivialNestedWithDefault").
     SetIsUnion(false).
     SetFields(
@@ -596,8 +615,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_TrivialNumeric),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ComplexString").
     SetIsUnion(false).
     SetFields(
@@ -613,8 +632,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_map_string_i32),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ComplexNestedWithDefault").
     SetIsUnion(false).
     SetFields(
@@ -630,8 +649,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_ComplexString),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MinPadding").
     SetIsUnion(false).
     SetFields(
@@ -662,8 +681,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_byte),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MinPaddingWithCustomType").
     SetIsUnion(false).
     SetFields(
@@ -694,8 +713,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_byte),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyStruct").
     SetIsUnion(false).
     SetFields(
@@ -721,11 +740,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_MyDataItem),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.MyDataItem").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.Renaming").
     SetIsUnion(false).
     SetFields(
@@ -736,8 +755,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_i64),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.AnnotatedTypes").
     SetIsUnion(false).
     SetFields(
@@ -753,8 +772,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_SomeListOfTypeMap_2468),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ForwardUsageRoot").
     SetIsUnion(false).
     SetFields(
@@ -770,8 +789,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_module_ForwardUsageByRef),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ForwardUsageStruct").
     SetIsUnion(false).
     SetFields(
@@ -782,8 +801,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_module_ForwardUsageRoot),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.ForwardUsageByRef").
     SetIsUnion(false).
     SetFields(
@@ -794,8 +813,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_module_ForwardUsageRoot),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.IncompleteMap").
     SetIsUnion(false).
     SetFields(
@@ -806,11 +825,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_map_i32_module_IncompleteMapDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.IncompleteMapDep").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.CompleteMap").
     SetIsUnion(false).
     SetFields(
@@ -821,11 +840,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_map_i32_module_CompleteMapDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.CompleteMapDep").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.IncompleteList").
     SetIsUnion(false).
     SetFields(
@@ -836,11 +855,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_list_module_IncompleteListDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.IncompleteListDep").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.CompleteList").
     SetIsUnion(false).
     SetFields(
@@ -851,11 +870,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_list_module_CompleteListDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.CompleteListDep").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.AdaptedList").
     SetIsUnion(false).
     SetFields(
@@ -866,8 +885,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_list_module_AdaptedListDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.AdaptedListDep").
     SetIsUnion(false).
     SetFields(
@@ -878,8 +897,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_AdaptedList),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.DependentAdaptedList").
     SetIsUnion(false).
     SetFields(
@@ -890,8 +909,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_list_module_DependentAdaptedListDep),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.DependentAdaptedListDep").
     SetIsUnion(false).
     SetFields(
@@ -902,8 +921,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_i16),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.AllocatorAware").
     SetIsUnion(false).
     SetFields(
@@ -944,8 +963,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_i32_9314),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.AllocatorAware2").
     SetIsUnion(false).
     SetFields(
@@ -961,8 +980,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_i32),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.TypedefStruct").
     SetIsUnion(false).
     SetFields(
@@ -983,8 +1002,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_UintTypedef),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.StructWithDoubleUnderscores").
     SetIsUnion(false).
     SetFields(
@@ -995,8 +1014,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_i32),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

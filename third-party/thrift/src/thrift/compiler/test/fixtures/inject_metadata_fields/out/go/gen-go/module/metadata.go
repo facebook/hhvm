@@ -52,17 +52,36 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "module.Fields": premadeThriftType_module_Fields,
-            "module.FieldsInjectedToEmptyStruct": premadeThriftType_module_FieldsInjectedToEmptyStruct,
-            "module.FieldsInjectedToStruct": premadeThriftType_module_FieldsInjectedToStruct,
-            "module.FieldsInjectedWithIncludedStruct": premadeThriftType_module_FieldsInjectedWithIncludedStruct,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module.Fields", premadeThriftType_module_Fields })
+        results = append(results, thriftTypeWithFullName{ "module.FieldsInjectedToEmptyStruct", premadeThriftType_module_FieldsInjectedToEmptyStruct })
+        results = append(results, thriftTypeWithFullName{ "module.FieldsInjectedToStruct", premadeThriftType_module_FieldsInjectedToStruct })
+        results = append(results, thriftTypeWithFullName{ "module.FieldsInjectedWithIncludedStruct", premadeThriftType_module_FieldsInjectedWithIncludedStruct })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -70,8 +89,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.Fields").
     SetIsUnion(false).
     SetFields(
@@ -82,8 +101,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.FieldsInjectedToEmptyStruct").
     SetIsUnion(false).
     SetFields(
@@ -94,8 +113,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.FieldsInjectedToStruct").
     SetIsUnion(false).
     SetFields(
@@ -111,8 +130,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.FieldsInjectedWithIncludedStruct").
     SetIsUnion(false).
     SetFields(
@@ -138,8 +157,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

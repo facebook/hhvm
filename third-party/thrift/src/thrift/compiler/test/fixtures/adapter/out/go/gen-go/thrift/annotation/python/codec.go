@@ -194,20 +194,39 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "python.Py3Hidden": premadeCodecTypeSpec_python_Py3Hidden,
-            "string": premadeCodecTypeSpec_string,
-            "python.PyDeprecatedHidden": premadeCodecTypeSpec_python_PyDeprecatedHidden,
-            "python.Flags": premadeCodecTypeSpec_python_Flags,
-            "python.Name": premadeCodecTypeSpec_python_Name,
-            "python.Adapter": premadeCodecTypeSpec_python_Adapter,
-            "bool": premadeCodecTypeSpec_bool,
-            "python.UseCAPI": premadeCodecTypeSpec_python_UseCAPI,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "python.Py3Hidden", premadeCodecTypeSpec_python_Py3Hidden })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "python.PyDeprecatedHidden", premadeCodecTypeSpec_python_PyDeprecatedHidden })
+        results = append(results, codecSpecWithFullName{ "python.Flags", premadeCodecTypeSpec_python_Flags })
+        results = append(results, codecSpecWithFullName{ "python.Name", premadeCodecTypeSpec_python_Name })
+        results = append(results, codecSpecWithFullName{ "python.Adapter", premadeCodecTypeSpec_python_Adapter })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "python.UseCAPI", premadeCodecTypeSpec_python_UseCAPI })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

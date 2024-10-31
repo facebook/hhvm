@@ -147,28 +147,47 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "module1.Plate": premadeThriftType_module1_Plate,
-            "i32": premadeThriftType_i32,
-            "module1.Year": premadeThriftType_module1_Year,
-            "module1.Drivers": premadeThriftType_module1_Drivers,
-            "module1.Accessory": premadeThriftType_module1_Accessory,
-            "module1.PartName": premadeThriftType_module1_PartName,
-            "module1.Automobile": premadeThriftType_module1_Automobile,
-            "i64": premadeThriftType_i64,
-            "module1.MapKey": premadeThriftType_module1_MapKey,
-            "module1.MapContainer": premadeThriftType_module1_MapContainer,
-            "module1.Car": premadeThriftType_module1_Car,
-            "module1.Pair": premadeThriftType_module1_Pair,
-            "module1.Collection": premadeThriftType_module1_Collection,
-            "module1.State": premadeThriftType_module1_State,
-            "module1.Enum": premadeThriftType_module1_Enum,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module1.Plate", premadeThriftType_module1_Plate })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        results = append(results, thriftTypeWithFullName{ "module1.Year", premadeThriftType_module1_Year })
+        results = append(results, thriftTypeWithFullName{ "module1.Drivers", premadeThriftType_module1_Drivers })
+        results = append(results, thriftTypeWithFullName{ "module1.Accessory", premadeThriftType_module1_Accessory })
+        results = append(results, thriftTypeWithFullName{ "module1.PartName", premadeThriftType_module1_PartName })
+        results = append(results, thriftTypeWithFullName{ "module1.Automobile", premadeThriftType_module1_Automobile })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "module1.MapKey", premadeThriftType_module1_MapKey })
+        results = append(results, thriftTypeWithFullName{ "module1.MapContainer", premadeThriftType_module1_MapContainer })
+        results = append(results, thriftTypeWithFullName{ "module1.Car", premadeThriftType_module1_Car })
+        results = append(results, thriftTypeWithFullName{ "module1.Pair", premadeThriftType_module1_Pair })
+        results = append(results, thriftTypeWithFullName{ "module1.Collection", premadeThriftType_module1_Collection })
+        results = append(results, thriftTypeWithFullName{ "module1.State", premadeThriftType_module1_State })
+        results = append(results, thriftTypeWithFullName{ "module1.Enum", premadeThriftType_module1_Enum })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -176,8 +195,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module1.Automobile").
     SetIsUnion(false).
     SetFields(
@@ -218,8 +237,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_map_i32_module1_PartName),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module1.MapKey").
     SetIsUnion(false).
     SetFields(
@@ -235,8 +254,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module1.MapContainer").
     SetIsUnion(false).
     SetFields(
@@ -247,8 +266,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_map_module1_MapKey_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module1.Pair").
     SetIsUnion(false).
     SetFields(
@@ -264,8 +283,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module1_Car),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module1.Collection").
     SetIsUnion(false).
     SetFields(
@@ -281,8 +300,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_module1_Car),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

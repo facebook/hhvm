@@ -134,34 +134,53 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "cpp.RefType": premadeThriftType_cpp_RefType,
-            "cpp.EnumUnderlyingType": premadeThriftType_cpp_EnumUnderlyingType,
-            "string": premadeThriftType_string,
-            "cpp.Name": premadeThriftType_cpp_Name,
-            "cpp.Type": premadeThriftType_cpp_Type,
-            "cpp.Ref": premadeThriftType_cpp_Ref,
-            "bool": premadeThriftType_bool,
-            "cpp.Lazy": premadeThriftType_cpp_Lazy,
-            "cpp.DisableLazyChecksum": premadeThriftType_cpp_DisableLazyChecksum,
-            "cpp.Adapter": premadeThriftType_cpp_Adapter,
-            "cpp.PackIsset": premadeThriftType_cpp_PackIsset,
-            "cpp.MinimizePadding": premadeThriftType_cpp_MinimizePadding,
-            "cpp.ScopedEnumAsUnionType": premadeThriftType_cpp_ScopedEnumAsUnionType,
-            "cpp.FieldInterceptor": premadeThriftType_cpp_FieldInterceptor,
-            "cpp.UseOpEncode": premadeThriftType_cpp_UseOpEncode,
-            "cpp.EnumType": premadeThriftType_cpp_EnumType,
-            "cpp.Frozen2Exclude": premadeThriftType_cpp_Frozen2Exclude,
-            "cpp.Frozen2RequiresCompleteContainerParams": premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams,
-            "cpp.ProcessInEbThreadUnsafe": premadeThriftType_cpp_ProcessInEbThreadUnsafe,
-            "cpp.RuntimeAnnotation": premadeThriftType_cpp_RuntimeAnnotation,
-            "cpp.UseCursorSerialization": premadeThriftType_cpp_UseCursorSerialization,
-            "cpp.GenerateDeprecatedHeaderClientMethods": premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "cpp.RefType", premadeThriftType_cpp_RefType })
+        results = append(results, thriftTypeWithFullName{ "cpp.EnumUnderlyingType", premadeThriftType_cpp_EnumUnderlyingType })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "cpp.Name", premadeThriftType_cpp_Name })
+        results = append(results, thriftTypeWithFullName{ "cpp.Type", premadeThriftType_cpp_Type })
+        results = append(results, thriftTypeWithFullName{ "cpp.Ref", premadeThriftType_cpp_Ref })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "cpp.Lazy", premadeThriftType_cpp_Lazy })
+        results = append(results, thriftTypeWithFullName{ "cpp.DisableLazyChecksum", premadeThriftType_cpp_DisableLazyChecksum })
+        results = append(results, thriftTypeWithFullName{ "cpp.Adapter", premadeThriftType_cpp_Adapter })
+        results = append(results, thriftTypeWithFullName{ "cpp.PackIsset", premadeThriftType_cpp_PackIsset })
+        results = append(results, thriftTypeWithFullName{ "cpp.MinimizePadding", premadeThriftType_cpp_MinimizePadding })
+        results = append(results, thriftTypeWithFullName{ "cpp.ScopedEnumAsUnionType", premadeThriftType_cpp_ScopedEnumAsUnionType })
+        results = append(results, thriftTypeWithFullName{ "cpp.FieldInterceptor", premadeThriftType_cpp_FieldInterceptor })
+        results = append(results, thriftTypeWithFullName{ "cpp.UseOpEncode", premadeThriftType_cpp_UseOpEncode })
+        results = append(results, thriftTypeWithFullName{ "cpp.EnumType", premadeThriftType_cpp_EnumType })
+        results = append(results, thriftTypeWithFullName{ "cpp.Frozen2Exclude", premadeThriftType_cpp_Frozen2Exclude })
+        results = append(results, thriftTypeWithFullName{ "cpp.Frozen2RequiresCompleteContainerParams", premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams })
+        results = append(results, thriftTypeWithFullName{ "cpp.ProcessInEbThreadUnsafe", premadeThriftType_cpp_ProcessInEbThreadUnsafe })
+        results = append(results, thriftTypeWithFullName{ "cpp.RuntimeAnnotation", premadeThriftType_cpp_RuntimeAnnotation })
+        results = append(results, thriftTypeWithFullName{ "cpp.UseCursorSerialization", premadeThriftType_cpp_UseCursorSerialization })
+        results = append(results, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -169,8 +188,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Name").
     SetIsUnion(false).
     SetFields(
@@ -181,8 +200,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Type").
     SetIsUnion(false).
     SetFields(
@@ -198,8 +217,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Ref").
     SetIsUnion(false).
     SetFields(
@@ -210,8 +229,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_cpp_RefType),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Lazy").
     SetIsUnion(false).
     SetFields(
@@ -222,11 +241,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.DisableLazyChecksum").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -257,8 +276,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.PackIsset").
     SetIsUnion(false).
     SetFields(
@@ -269,14 +288,14 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.MinimizePadding").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.ScopedEnumAsUnionType").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.FieldInterceptor").
     SetIsUnion(false).
     SetFields(
@@ -292,11 +311,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.UseOpEncode").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.EnumType").
     SetIsUnion(false).
     SetFields(
@@ -307,26 +326,26 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_cpp_EnumUnderlyingType),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Frozen2Exclude").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.Frozen2RequiresCompleteContainerParams").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.ProcessInEbThreadUnsafe").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.RuntimeAnnotation").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.UseCursorSerialization").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("cpp.GenerateDeprecatedHeaderClientMethods").
-    SetIsUnion(false),
-        }
+    SetIsUnion(false))
+        return results
     },
 )
 

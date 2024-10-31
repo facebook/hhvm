@@ -1012,23 +1012,42 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "string": premadeCodecTypeSpec_string,
-            "module.GetEntityRequest": premadeCodecTypeSpec_module_GetEntityRequest,
-            "module.GetEntityResponse": premadeCodecTypeSpec_module_GetEntityResponse,
-            "module.NonComparableStruct": premadeCodecTypeSpec_module_NonComparableStruct,
-            "i64": premadeCodecTypeSpec_i64,
-            "bool": premadeCodecTypeSpec_bool,
-            "byte": premadeCodecTypeSpec_byte,
-            "i16": premadeCodecTypeSpec_i16,
-            "i32": premadeCodecTypeSpec_i32,
-            "double": premadeCodecTypeSpec_double,
-            "binary": premadeCodecTypeSpec_binary,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.GetEntityRequest", premadeCodecTypeSpec_module_GetEntityRequest })
+        results = append(results, codecSpecWithFullName{ "module.GetEntityResponse", premadeCodecTypeSpec_module_GetEntityResponse })
+        results = append(results, codecSpecWithFullName{ "module.NonComparableStruct", premadeCodecTypeSpec_module_NonComparableStruct })
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "byte", premadeCodecTypeSpec_byte })
+        results = append(results, codecSpecWithFullName{ "i16", premadeCodecTypeSpec_i16 })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "double", premadeCodecTypeSpec_double })
+        results = append(results, codecSpecWithFullName{ "binary", premadeCodecTypeSpec_binary })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

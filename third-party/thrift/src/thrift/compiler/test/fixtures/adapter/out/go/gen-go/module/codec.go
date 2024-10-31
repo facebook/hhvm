@@ -1962,94 +1962,113 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.Color": premadeCodecTypeSpec_module_Color,
-            "module.ThriftAdaptedEnum": premadeCodecTypeSpec_module_ThriftAdaptedEnum,
-            "string": premadeCodecTypeSpec_string,
-            "module.MyAnnotation": premadeCodecTypeSpec_module_MyAnnotation,
-            "i32": premadeCodecTypeSpec_i32,
-            "module.i32_5137": premadeCodecTypeSpec_module_i32_5137,
-            "module.SetWithAdapter": premadeCodecTypeSpec_module_SetWithAdapter,
-            "module.StringWithAdapter": premadeCodecTypeSpec_module_StringWithAdapter,
-            "module.ListWithElemAdapter": premadeCodecTypeSpec_module_ListWithElemAdapter,
-            "module.ListWithElemAdapter_withAdapter": premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter,
-            "module.ListWithElemAdapter_withAdapter_2312": premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312,
-            "module.map_string_ListWithElemAdapter_withAdapter_8454": premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454,
-            "binary": premadeCodecTypeSpec_binary,
-            "module.binary_5673": premadeCodecTypeSpec_module_binary_5673,
-            "i64": premadeCodecTypeSpec_i64,
-            "module.MyI64": premadeCodecTypeSpec_module_MyI64,
-            "module.DoubleTypedefI64": premadeCodecTypeSpec_module_DoubleTypedefI64,
-            "module.Foo": premadeCodecTypeSpec_module_Foo,
-            "module.Baz": premadeCodecTypeSpec_module_Baz,
-            "module.Foo_6868": premadeCodecTypeSpec_module_Foo_6868,
-            "module.Foo_3943": premadeCodecTypeSpec_module_Foo_3943,
-            "module.FooWithAdapter": premadeCodecTypeSpec_module_FooWithAdapter,
-            "module.FooWithAdapter_9317": premadeCodecTypeSpec_module_FooWithAdapter_9317,
-            "module.Baz_7352": premadeCodecTypeSpec_module_Baz_7352,
-            "module.DirectlyAdapted": premadeCodecTypeSpec_module_DirectlyAdapted,
-            "module.Bar": premadeCodecTypeSpec_module_Bar,
-            "module.IndependentDirectlyAdapted": premadeCodecTypeSpec_module_IndependentDirectlyAdapted,
-            "module.StructWithFieldAdapter": premadeCodecTypeSpec_module_StructWithFieldAdapter,
-            "module.TerseAdaptedFields": premadeCodecTypeSpec_module_TerseAdaptedFields,
-            "module.A": premadeCodecTypeSpec_module_A,
-            "module.AdaptedA": premadeCodecTypeSpec_module_AdaptedA,
-            "module.B": premadeCodecTypeSpec_module_B,
-            "module.Config": premadeCodecTypeSpec_module_Config,
-            "module.MyStruct": premadeCodecTypeSpec_module_MyStruct,
-            "module.DurationMs": premadeCodecTypeSpec_module_DurationMs,
-            "module.IOBuf": premadeCodecTypeSpec_module_IOBuf,
-            "module.CustomProtocolType": premadeCodecTypeSpec_module_CustomProtocolType,
-            "module.IndirectionString": premadeCodecTypeSpec_module_IndirectionString,
-            "bool": premadeCodecTypeSpec_bool,
-            "module.AdaptedBool": premadeCodecTypeSpec_module_AdaptedBool,
-            "module.AdaptedInteger": premadeCodecTypeSpec_module_AdaptedInteger,
-            "module.AdaptTestStruct": premadeCodecTypeSpec_module_AdaptTestStruct,
-            "byte": premadeCodecTypeSpec_byte,
-            "module.AdaptedByte": premadeCodecTypeSpec_module_AdaptedByte,
-            "i16": premadeCodecTypeSpec_i16,
-            "module.AdaptedShort": premadeCodecTypeSpec_module_AdaptedShort,
-            "module.AdaptedLong": premadeCodecTypeSpec_module_AdaptedLong,
-            "double": premadeCodecTypeSpec_double,
-            "module.AdaptedDouble": premadeCodecTypeSpec_module_AdaptedDouble,
-            "module.AdaptedString": premadeCodecTypeSpec_module_AdaptedString,
-            "module.AdaptedEnum": premadeCodecTypeSpec_module_AdaptedEnum,
-            "module.DoubleTypedefBool": premadeCodecTypeSpec_module_DoubleTypedefBool,
-            "module.AdaptTemplatedTestStruct": premadeCodecTypeSpec_module_AdaptTemplatedTestStruct,
-            "module.AdaptTemplatedNestedTestStruct": premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct,
-            "module.AdaptTestUnion": premadeCodecTypeSpec_module_AdaptTestUnion,
-            "module.AdaptedStruct": premadeCodecTypeSpec_module_AdaptedStruct,
-            "module.DirectlyAdaptedStruct": premadeCodecTypeSpec_module_DirectlyAdaptedStruct,
-            "module.AdaptedTypedef": premadeCodecTypeSpec_module_AdaptedTypedef,
-            "module.TypedefOfDirect": premadeCodecTypeSpec_module_TypedefOfDirect,
-            "module.StructFieldAdaptedStruct": premadeCodecTypeSpec_module_StructFieldAdaptedStruct,
-            "module.CircularStruct": premadeCodecTypeSpec_module_CircularStruct,
-            "module.CircularAdaptee": premadeCodecTypeSpec_module_CircularAdaptee,
-            "module.AdaptedCircularAdaptee": premadeCodecTypeSpec_module_AdaptedCircularAdaptee,
-            "module.DeclaredAfterStruct": premadeCodecTypeSpec_module_DeclaredAfterStruct,
-            "module.ReorderedStruct": premadeCodecTypeSpec_module_ReorderedStruct,
-            "module.RenamedStruct": premadeCodecTypeSpec_module_RenamedStruct,
-            "module.SameNamespaceStruct": premadeCodecTypeSpec_module_SameNamespaceStruct,
-            "module.HeapAllocated": premadeCodecTypeSpec_module_HeapAllocated,
-            "module.MoveOnly": premadeCodecTypeSpec_module_MoveOnly,
-            "module.AlsoMoveOnly": premadeCodecTypeSpec_module_AlsoMoveOnly,
-            "module.ApplyAdapter": premadeCodecTypeSpec_module_ApplyAdapter,
-            "module.TransitiveAdapted": premadeCodecTypeSpec_module_TransitiveAdapted,
-            "module.CountingInt": premadeCodecTypeSpec_module_CountingInt,
-            "module.CountingStruct": premadeCodecTypeSpec_module_CountingStruct,
-            "module.Person": premadeCodecTypeSpec_module_Person,
-            "module.Person2": premadeCodecTypeSpec_module_Person2,
-            "module.RenamedStructWithStructAdapterAndFieldAdapter": premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter,
-            "module.MyI32": premadeCodecTypeSpec_module_MyI32,
-            "module.StructWithAdapter": premadeCodecTypeSpec_module_StructWithAdapter,
-            "module.UnionWithAdapter": premadeCodecTypeSpec_module_UnionWithAdapter,
-            "module.MyI32_4873": premadeCodecTypeSpec_module_MyI32_4873,
-            "module.StringWithAdapter_7208": premadeCodecTypeSpec_module_StringWithAdapter_7208,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.Color", premadeCodecTypeSpec_module_Color })
+        results = append(results, codecSpecWithFullName{ "module.ThriftAdaptedEnum", premadeCodecTypeSpec_module_ThriftAdaptedEnum })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.MyAnnotation", premadeCodecTypeSpec_module_MyAnnotation })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module.i32_5137", premadeCodecTypeSpec_module_i32_5137 })
+        results = append(results, codecSpecWithFullName{ "module.SetWithAdapter", premadeCodecTypeSpec_module_SetWithAdapter })
+        results = append(results, codecSpecWithFullName{ "module.StringWithAdapter", premadeCodecTypeSpec_module_StringWithAdapter })
+        results = append(results, codecSpecWithFullName{ "module.ListWithElemAdapter", premadeCodecTypeSpec_module_ListWithElemAdapter })
+        results = append(results, codecSpecWithFullName{ "module.ListWithElemAdapter_withAdapter", premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter })
+        results = append(results, codecSpecWithFullName{ "module.ListWithElemAdapter_withAdapter_2312", premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312 })
+        results = append(results, codecSpecWithFullName{ "module.map_string_ListWithElemAdapter_withAdapter_8454", premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454 })
+        results = append(results, codecSpecWithFullName{ "binary", premadeCodecTypeSpec_binary })
+        results = append(results, codecSpecWithFullName{ "module.binary_5673", premadeCodecTypeSpec_module_binary_5673 })
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "module.MyI64", premadeCodecTypeSpec_module_MyI64 })
+        results = append(results, codecSpecWithFullName{ "module.DoubleTypedefI64", premadeCodecTypeSpec_module_DoubleTypedefI64 })
+        results = append(results, codecSpecWithFullName{ "module.Foo", premadeCodecTypeSpec_module_Foo })
+        results = append(results, codecSpecWithFullName{ "module.Baz", premadeCodecTypeSpec_module_Baz })
+        results = append(results, codecSpecWithFullName{ "module.Foo_6868", premadeCodecTypeSpec_module_Foo_6868 })
+        results = append(results, codecSpecWithFullName{ "module.Foo_3943", premadeCodecTypeSpec_module_Foo_3943 })
+        results = append(results, codecSpecWithFullName{ "module.FooWithAdapter", premadeCodecTypeSpec_module_FooWithAdapter })
+        results = append(results, codecSpecWithFullName{ "module.FooWithAdapter_9317", premadeCodecTypeSpec_module_FooWithAdapter_9317 })
+        results = append(results, codecSpecWithFullName{ "module.Baz_7352", premadeCodecTypeSpec_module_Baz_7352 })
+        results = append(results, codecSpecWithFullName{ "module.DirectlyAdapted", premadeCodecTypeSpec_module_DirectlyAdapted })
+        results = append(results, codecSpecWithFullName{ "module.Bar", premadeCodecTypeSpec_module_Bar })
+        results = append(results, codecSpecWithFullName{ "module.IndependentDirectlyAdapted", premadeCodecTypeSpec_module_IndependentDirectlyAdapted })
+        results = append(results, codecSpecWithFullName{ "module.StructWithFieldAdapter", premadeCodecTypeSpec_module_StructWithFieldAdapter })
+        results = append(results, codecSpecWithFullName{ "module.TerseAdaptedFields", premadeCodecTypeSpec_module_TerseAdaptedFields })
+        results = append(results, codecSpecWithFullName{ "module.A", premadeCodecTypeSpec_module_A })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedA", premadeCodecTypeSpec_module_AdaptedA })
+        results = append(results, codecSpecWithFullName{ "module.B", premadeCodecTypeSpec_module_B })
+        results = append(results, codecSpecWithFullName{ "module.Config", premadeCodecTypeSpec_module_Config })
+        results = append(results, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
+        results = append(results, codecSpecWithFullName{ "module.DurationMs", premadeCodecTypeSpec_module_DurationMs })
+        results = append(results, codecSpecWithFullName{ "module.IOBuf", premadeCodecTypeSpec_module_IOBuf })
+        results = append(results, codecSpecWithFullName{ "module.CustomProtocolType", premadeCodecTypeSpec_module_CustomProtocolType })
+        results = append(results, codecSpecWithFullName{ "module.IndirectionString", premadeCodecTypeSpec_module_IndirectionString })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedBool", premadeCodecTypeSpec_module_AdaptedBool })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedInteger", premadeCodecTypeSpec_module_AdaptedInteger })
+        results = append(results, codecSpecWithFullName{ "module.AdaptTestStruct", premadeCodecTypeSpec_module_AdaptTestStruct })
+        results = append(results, codecSpecWithFullName{ "byte", premadeCodecTypeSpec_byte })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedByte", premadeCodecTypeSpec_module_AdaptedByte })
+        results = append(results, codecSpecWithFullName{ "i16", premadeCodecTypeSpec_i16 })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedShort", premadeCodecTypeSpec_module_AdaptedShort })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedLong", premadeCodecTypeSpec_module_AdaptedLong })
+        results = append(results, codecSpecWithFullName{ "double", premadeCodecTypeSpec_double })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedDouble", premadeCodecTypeSpec_module_AdaptedDouble })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedString", premadeCodecTypeSpec_module_AdaptedString })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedEnum", premadeCodecTypeSpec_module_AdaptedEnum })
+        results = append(results, codecSpecWithFullName{ "module.DoubleTypedefBool", premadeCodecTypeSpec_module_DoubleTypedefBool })
+        results = append(results, codecSpecWithFullName{ "module.AdaptTemplatedTestStruct", premadeCodecTypeSpec_module_AdaptTemplatedTestStruct })
+        results = append(results, codecSpecWithFullName{ "module.AdaptTemplatedNestedTestStruct", premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct })
+        results = append(results, codecSpecWithFullName{ "module.AdaptTestUnion", premadeCodecTypeSpec_module_AdaptTestUnion })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedStruct", premadeCodecTypeSpec_module_AdaptedStruct })
+        results = append(results, codecSpecWithFullName{ "module.DirectlyAdaptedStruct", premadeCodecTypeSpec_module_DirectlyAdaptedStruct })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedTypedef", premadeCodecTypeSpec_module_AdaptedTypedef })
+        results = append(results, codecSpecWithFullName{ "module.TypedefOfDirect", premadeCodecTypeSpec_module_TypedefOfDirect })
+        results = append(results, codecSpecWithFullName{ "module.StructFieldAdaptedStruct", premadeCodecTypeSpec_module_StructFieldAdaptedStruct })
+        results = append(results, codecSpecWithFullName{ "module.CircularStruct", premadeCodecTypeSpec_module_CircularStruct })
+        results = append(results, codecSpecWithFullName{ "module.CircularAdaptee", premadeCodecTypeSpec_module_CircularAdaptee })
+        results = append(results, codecSpecWithFullName{ "module.AdaptedCircularAdaptee", premadeCodecTypeSpec_module_AdaptedCircularAdaptee })
+        results = append(results, codecSpecWithFullName{ "module.DeclaredAfterStruct", premadeCodecTypeSpec_module_DeclaredAfterStruct })
+        results = append(results, codecSpecWithFullName{ "module.ReorderedStruct", premadeCodecTypeSpec_module_ReorderedStruct })
+        results = append(results, codecSpecWithFullName{ "module.RenamedStruct", premadeCodecTypeSpec_module_RenamedStruct })
+        results = append(results, codecSpecWithFullName{ "module.SameNamespaceStruct", premadeCodecTypeSpec_module_SameNamespaceStruct })
+        results = append(results, codecSpecWithFullName{ "module.HeapAllocated", premadeCodecTypeSpec_module_HeapAllocated })
+        results = append(results, codecSpecWithFullName{ "module.MoveOnly", premadeCodecTypeSpec_module_MoveOnly })
+        results = append(results, codecSpecWithFullName{ "module.AlsoMoveOnly", premadeCodecTypeSpec_module_AlsoMoveOnly })
+        results = append(results, codecSpecWithFullName{ "module.ApplyAdapter", premadeCodecTypeSpec_module_ApplyAdapter })
+        results = append(results, codecSpecWithFullName{ "module.TransitiveAdapted", premadeCodecTypeSpec_module_TransitiveAdapted })
+        results = append(results, codecSpecWithFullName{ "module.CountingInt", premadeCodecTypeSpec_module_CountingInt })
+        results = append(results, codecSpecWithFullName{ "module.CountingStruct", premadeCodecTypeSpec_module_CountingStruct })
+        results = append(results, codecSpecWithFullName{ "module.Person", premadeCodecTypeSpec_module_Person })
+        results = append(results, codecSpecWithFullName{ "module.Person2", premadeCodecTypeSpec_module_Person2 })
+        results = append(results, codecSpecWithFullName{ "module.RenamedStructWithStructAdapterAndFieldAdapter", premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter })
+        results = append(results, codecSpecWithFullName{ "module.MyI32", premadeCodecTypeSpec_module_MyI32 })
+        results = append(results, codecSpecWithFullName{ "module.StructWithAdapter", premadeCodecTypeSpec_module_StructWithAdapter })
+        results = append(results, codecSpecWithFullName{ "module.UnionWithAdapter", premadeCodecTypeSpec_module_UnionWithAdapter })
+        results = append(results, codecSpecWithFullName{ "module.MyI32_4873", premadeCodecTypeSpec_module_MyI32_4873 })
+        results = append(results, codecSpecWithFullName{ "module.StringWithAdapter_7208", premadeCodecTypeSpec_module_StringWithAdapter_7208 })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

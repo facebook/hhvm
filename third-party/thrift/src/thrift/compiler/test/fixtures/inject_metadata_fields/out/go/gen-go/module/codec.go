@@ -182,17 +182,36 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "string": premadeCodecTypeSpec_string,
-            "module.Fields": premadeCodecTypeSpec_module_Fields,
-            "module.FieldsInjectedToEmptyStruct": premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct,
-            "module.FieldsInjectedToStruct": premadeCodecTypeSpec_module_FieldsInjectedToStruct,
-            "module.FieldsInjectedWithIncludedStruct": premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.Fields", premadeCodecTypeSpec_module_Fields })
+        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedToEmptyStruct", premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct })
+        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedToStruct", premadeCodecTypeSpec_module_FieldsInjectedToStruct })
+        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedWithIncludedStruct", premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

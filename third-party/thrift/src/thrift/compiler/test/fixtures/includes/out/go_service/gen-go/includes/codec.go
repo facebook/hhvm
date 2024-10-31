@@ -91,16 +91,35 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "i64": premadeCodecTypeSpec_i64,
-            "includes.Included": premadeCodecTypeSpec_includes_Included,
-            "includes.IncludedInt64": premadeCodecTypeSpec_includes_IncludedInt64,
-            "includes.TransitiveFoo": premadeCodecTypeSpec_includes_TransitiveFoo,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "includes.Included", premadeCodecTypeSpec_includes_Included })
+        results = append(results, codecSpecWithFullName{ "includes.IncludedInt64", premadeCodecTypeSpec_includes_IncludedInt64 })
+        results = append(results, codecSpecWithFullName{ "includes.TransitiveFoo", premadeCodecTypeSpec_includes_TransitiveFoo })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

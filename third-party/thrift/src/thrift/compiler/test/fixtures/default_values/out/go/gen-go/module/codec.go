@@ -208,16 +208,35 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "i32": premadeCodecTypeSpec_i32,
-            "module.TrivialStruct": premadeCodecTypeSpec_module_TrivialStruct,
-            "module.StructWithNoCustomDefaultValues": premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues,
-            "module.StructWithCustomDefaultValues": premadeCodecTypeSpec_module_StructWithCustomDefaultValues,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module.TrivialStruct", premadeCodecTypeSpec_module_TrivialStruct })
+        results = append(results, codecSpecWithFullName{ "module.StructWithNoCustomDefaultValues", premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues })
+        results = append(results, codecSpecWithFullName{ "module.StructWithCustomDefaultValues", premadeCodecTypeSpec_module_StructWithCustomDefaultValues })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

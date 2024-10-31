@@ -253,21 +253,40 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.B": premadeCodecTypeSpec_module_B,
-            "i32": premadeCodecTypeSpec_i32,
-            "module.A": premadeCodecTypeSpec_module_A,
-            "string": premadeCodecTypeSpec_string,
-            "module.U": premadeCodecTypeSpec_module_U,
-            "module.Bang": premadeCodecTypeSpec_module_Bang,
-            "module.lanyard": premadeCodecTypeSpec_module_lanyard,
-            "module.number": premadeCodecTypeSpec_module_number,
-            "void": premadeCodecTypeSpec_void,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.B", premadeCodecTypeSpec_module_B })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module.A", premadeCodecTypeSpec_module_A })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.U", premadeCodecTypeSpec_module_U })
+        results = append(results, codecSpecWithFullName{ "module.Bang", premadeCodecTypeSpec_module_Bang })
+        results = append(results, codecSpecWithFullName{ "module.lanyard", premadeCodecTypeSpec_module_lanyard })
+        results = append(results, codecSpecWithFullName{ "module.number", premadeCodecTypeSpec_module_number })
+        results = append(results, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

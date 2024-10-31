@@ -483,31 +483,50 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.EmptyEnum": premadeCodecTypeSpec_module_EmptyEnum,
-            "module.City": premadeCodecTypeSpec_module_City,
-            "module.Company": premadeCodecTypeSpec_module_Company,
-            "i32": premadeCodecTypeSpec_i32,
-            "string": premadeCodecTypeSpec_string,
-            "double": premadeCodecTypeSpec_double,
-            "module.Internship": premadeCodecTypeSpec_module_Internship,
-            "module.Range": premadeCodecTypeSpec_module_Range,
-            "module.struct1": premadeCodecTypeSpec_module_struct1,
-            "module.struct2": premadeCodecTypeSpec_module_struct2,
-            "module.struct3": premadeCodecTypeSpec_module_struct3,
-            "byte": premadeCodecTypeSpec_byte,
-            "module.struct4": premadeCodecTypeSpec_module_struct4,
-            "module.union1": premadeCodecTypeSpec_module_union1,
-            "module.union2": premadeCodecTypeSpec_module_union2,
-            "module.MyCompany": premadeCodecTypeSpec_module_MyCompany,
-            "module.MyStringIdentifier": premadeCodecTypeSpec_module_MyStringIdentifier,
-            "module.MyIntIdentifier": premadeCodecTypeSpec_module_MyIntIdentifier,
-            "module.MyMapIdentifier": premadeCodecTypeSpec_module_MyMapIdentifier,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.EmptyEnum", premadeCodecTypeSpec_module_EmptyEnum })
+        results = append(results, codecSpecWithFullName{ "module.City", premadeCodecTypeSpec_module_City })
+        results = append(results, codecSpecWithFullName{ "module.Company", premadeCodecTypeSpec_module_Company })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "double", premadeCodecTypeSpec_double })
+        results = append(results, codecSpecWithFullName{ "module.Internship", premadeCodecTypeSpec_module_Internship })
+        results = append(results, codecSpecWithFullName{ "module.Range", premadeCodecTypeSpec_module_Range })
+        results = append(results, codecSpecWithFullName{ "module.struct1", premadeCodecTypeSpec_module_struct1 })
+        results = append(results, codecSpecWithFullName{ "module.struct2", premadeCodecTypeSpec_module_struct2 })
+        results = append(results, codecSpecWithFullName{ "module.struct3", premadeCodecTypeSpec_module_struct3 })
+        results = append(results, codecSpecWithFullName{ "byte", premadeCodecTypeSpec_byte })
+        results = append(results, codecSpecWithFullName{ "module.struct4", premadeCodecTypeSpec_module_struct4 })
+        results = append(results, codecSpecWithFullName{ "module.union1", premadeCodecTypeSpec_module_union1 })
+        results = append(results, codecSpecWithFullName{ "module.union2", premadeCodecTypeSpec_module_union2 })
+        results = append(results, codecSpecWithFullName{ "module.MyCompany", premadeCodecTypeSpec_module_MyCompany })
+        results = append(results, codecSpecWithFullName{ "module.MyStringIdentifier", premadeCodecTypeSpec_module_MyStringIdentifier })
+        results = append(results, codecSpecWithFullName{ "module.MyIntIdentifier", premadeCodecTypeSpec_module_MyIntIdentifier })
+        results = append(results, codecSpecWithFullName{ "module.MyMapIdentifier", premadeCodecTypeSpec_module_MyMapIdentifier })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

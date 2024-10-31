@@ -73,22 +73,41 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "module.Fiery": premadeThriftType_module_Fiery,
-            "module.Serious": premadeThriftType_module_Serious,
-            "module.ComplexFieldNames": premadeThriftType_module_ComplexFieldNames,
-            "module.CustomFieldNames": premadeThriftType_module_CustomFieldNames,
-            "i32": premadeThriftType_i32,
-            "module.ExceptionWithPrimitiveField": premadeThriftType_module_ExceptionWithPrimitiveField,
-            "module.ExceptionWithStructuredAnnotation": premadeThriftType_module_ExceptionWithStructuredAnnotation,
-            "module.Banal": premadeThriftType_module_Banal,
-            "void": premadeThriftType_void,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module.Fiery", premadeThriftType_module_Fiery })
+        results = append(results, thriftTypeWithFullName{ "module.Serious", premadeThriftType_module_Serious })
+        results = append(results, thriftTypeWithFullName{ "module.ComplexFieldNames", premadeThriftType_module_ComplexFieldNames })
+        results = append(results, thriftTypeWithFullName{ "module.CustomFieldNames", premadeThriftType_module_CustomFieldNames })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        results = append(results, thriftTypeWithFullName{ "module.ExceptionWithPrimitiveField", premadeThriftType_module_ExceptionWithPrimitiveField })
+        results = append(results, thriftTypeWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeThriftType_module_ExceptionWithStructuredAnnotation })
+        results = append(results, thriftTypeWithFullName{ "module.Banal", premadeThriftType_module_Banal })
+        results = append(results, thriftTypeWithFullName{ "void", premadeThriftType_void })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -96,8 +115,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-        }
+        results := make([]*metadata.ThriftStruct, 0)
+        return results
     },
 )
 

@@ -674,26 +674,45 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "module.MyEnum": premadeCodecTypeSpec_module_MyEnum,
-            "string": premadeCodecTypeSpec_string,
-            "module.MyStructNestedAnnotation": premadeCodecTypeSpec_module_MyStructNestedAnnotation,
-            "module.MyUnion": premadeCodecTypeSpec_module_MyUnion,
-            "i64": premadeCodecTypeSpec_i64,
-            "module.list_string_6884": premadeCodecTypeSpec_module_list_string_6884,
-            "module.MyStruct": premadeCodecTypeSpec_module_MyStruct,
-            "module.SecretStruct": premadeCodecTypeSpec_module_SecretStruct,
-            "module.MyException": premadeCodecTypeSpec_module_MyException,
-            "module.AwesomeStruct": premadeCodecTypeSpec_module_AwesomeStruct,
-            "module.FantasticStruct": premadeCodecTypeSpec_module_FantasticStruct,
-            "void": premadeCodecTypeSpec_void,
-            "bool": premadeCodecTypeSpec_bool,
-            "i32": premadeCodecTypeSpec_i32,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "module.MyEnum", premadeCodecTypeSpec_module_MyEnum })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "module.MyStructNestedAnnotation", premadeCodecTypeSpec_module_MyStructNestedAnnotation })
+        results = append(results, codecSpecWithFullName{ "module.MyUnion", premadeCodecTypeSpec_module_MyUnion })
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "module.list_string_6884", premadeCodecTypeSpec_module_list_string_6884 })
+        results = append(results, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
+        results = append(results, codecSpecWithFullName{ "module.SecretStruct", premadeCodecTypeSpec_module_SecretStruct })
+        results = append(results, codecSpecWithFullName{ "module.MyException", premadeCodecTypeSpec_module_MyException })
+        results = append(results, codecSpecWithFullName{ "module.AwesomeStruct", premadeCodecTypeSpec_module_AwesomeStruct })
+        results = append(results, codecSpecWithFullName{ "module.FantasticStruct", premadeCodecTypeSpec_module_FantasticStruct })
+        results = append(results, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

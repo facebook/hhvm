@@ -317,23 +317,42 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "string": premadeCodecTypeSpec_string,
-            "hack.FieldWrapper": premadeCodecTypeSpec_hack_FieldWrapper,
-            "hack.Wrapper": premadeCodecTypeSpec_hack_Wrapper,
-            "hack.Adapter": premadeCodecTypeSpec_hack_Adapter,
-            "hack.SkipCodegen": premadeCodecTypeSpec_hack_SkipCodegen,
-            "hack.Name": premadeCodecTypeSpec_hack_Name,
-            "hack.UnionEnumAttributes": premadeCodecTypeSpec_hack_UnionEnumAttributes,
-            "hack.StructTrait": premadeCodecTypeSpec_hack_StructTrait,
-            "hack.Attributes": premadeCodecTypeSpec_hack_Attributes,
-            "hack.StructAsTrait": premadeCodecTypeSpec_hack_StructAsTrait,
-            "hack.ModuleInternal": premadeCodecTypeSpec_hack_ModuleInternal,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "hack.FieldWrapper", premadeCodecTypeSpec_hack_FieldWrapper })
+        results = append(results, codecSpecWithFullName{ "hack.Wrapper", premadeCodecTypeSpec_hack_Wrapper })
+        results = append(results, codecSpecWithFullName{ "hack.Adapter", premadeCodecTypeSpec_hack_Adapter })
+        results = append(results, codecSpecWithFullName{ "hack.SkipCodegen", premadeCodecTypeSpec_hack_SkipCodegen })
+        results = append(results, codecSpecWithFullName{ "hack.Name", premadeCodecTypeSpec_hack_Name })
+        results = append(results, codecSpecWithFullName{ "hack.UnionEnumAttributes", premadeCodecTypeSpec_hack_UnionEnumAttributes })
+        results = append(results, codecSpecWithFullName{ "hack.StructTrait", premadeCodecTypeSpec_hack_StructTrait })
+        results = append(results, codecSpecWithFullName{ "hack.Attributes", premadeCodecTypeSpec_hack_Attributes })
+        results = append(results, codecSpecWithFullName{ "hack.StructAsTrait", premadeCodecTypeSpec_hack_StructAsTrait })
+        results = append(results, codecSpecWithFullName{ "hack.ModuleInternal", premadeCodecTypeSpec_hack_ModuleInternal })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

@@ -489,34 +489,53 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "cpp.RefType": premadeCodecTypeSpec_cpp_RefType,
-            "cpp.EnumUnderlyingType": premadeCodecTypeSpec_cpp_EnumUnderlyingType,
-            "string": premadeCodecTypeSpec_string,
-            "cpp.Name": premadeCodecTypeSpec_cpp_Name,
-            "cpp.Type": premadeCodecTypeSpec_cpp_Type,
-            "cpp.Ref": premadeCodecTypeSpec_cpp_Ref,
-            "bool": premadeCodecTypeSpec_bool,
-            "cpp.Lazy": premadeCodecTypeSpec_cpp_Lazy,
-            "cpp.DisableLazyChecksum": premadeCodecTypeSpec_cpp_DisableLazyChecksum,
-            "cpp.Adapter": premadeCodecTypeSpec_cpp_Adapter,
-            "cpp.PackIsset": premadeCodecTypeSpec_cpp_PackIsset,
-            "cpp.MinimizePadding": premadeCodecTypeSpec_cpp_MinimizePadding,
-            "cpp.ScopedEnumAsUnionType": premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType,
-            "cpp.FieldInterceptor": premadeCodecTypeSpec_cpp_FieldInterceptor,
-            "cpp.UseOpEncode": premadeCodecTypeSpec_cpp_UseOpEncode,
-            "cpp.EnumType": premadeCodecTypeSpec_cpp_EnumType,
-            "cpp.Frozen2Exclude": premadeCodecTypeSpec_cpp_Frozen2Exclude,
-            "cpp.Frozen2RequiresCompleteContainerParams": premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams,
-            "cpp.ProcessInEbThreadUnsafe": premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe,
-            "cpp.RuntimeAnnotation": premadeCodecTypeSpec_cpp_RuntimeAnnotation,
-            "cpp.UseCursorSerialization": premadeCodecTypeSpec_cpp_UseCursorSerialization,
-            "cpp.GenerateDeprecatedHeaderClientMethods": premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "cpp.RefType", premadeCodecTypeSpec_cpp_RefType })
+        results = append(results, codecSpecWithFullName{ "cpp.EnumUnderlyingType", premadeCodecTypeSpec_cpp_EnumUnderlyingType })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "cpp.Name", premadeCodecTypeSpec_cpp_Name })
+        results = append(results, codecSpecWithFullName{ "cpp.Type", premadeCodecTypeSpec_cpp_Type })
+        results = append(results, codecSpecWithFullName{ "cpp.Ref", premadeCodecTypeSpec_cpp_Ref })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "cpp.Lazy", premadeCodecTypeSpec_cpp_Lazy })
+        results = append(results, codecSpecWithFullName{ "cpp.DisableLazyChecksum", premadeCodecTypeSpec_cpp_DisableLazyChecksum })
+        results = append(results, codecSpecWithFullName{ "cpp.Adapter", premadeCodecTypeSpec_cpp_Adapter })
+        results = append(results, codecSpecWithFullName{ "cpp.PackIsset", premadeCodecTypeSpec_cpp_PackIsset })
+        results = append(results, codecSpecWithFullName{ "cpp.MinimizePadding", premadeCodecTypeSpec_cpp_MinimizePadding })
+        results = append(results, codecSpecWithFullName{ "cpp.ScopedEnumAsUnionType", premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType })
+        results = append(results, codecSpecWithFullName{ "cpp.FieldInterceptor", premadeCodecTypeSpec_cpp_FieldInterceptor })
+        results = append(results, codecSpecWithFullName{ "cpp.UseOpEncode", premadeCodecTypeSpec_cpp_UseOpEncode })
+        results = append(results, codecSpecWithFullName{ "cpp.EnumType", premadeCodecTypeSpec_cpp_EnumType })
+        results = append(results, codecSpecWithFullName{ "cpp.Frozen2Exclude", premadeCodecTypeSpec_cpp_Frozen2Exclude })
+        results = append(results, codecSpecWithFullName{ "cpp.Frozen2RequiresCompleteContainerParams", premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams })
+        results = append(results, codecSpecWithFullName{ "cpp.ProcessInEbThreadUnsafe", premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe })
+        results = append(results, codecSpecWithFullName{ "cpp.RuntimeAnnotation", premadeCodecTypeSpec_cpp_RuntimeAnnotation })
+        results = append(results, codecSpecWithFullName{ "cpp.UseCursorSerialization", premadeCodecTypeSpec_cpp_UseCursorSerialization })
+        results = append(results, codecSpecWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

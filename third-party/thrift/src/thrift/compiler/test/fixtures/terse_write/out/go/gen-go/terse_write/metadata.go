@@ -134,32 +134,51 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "terse_write.MyEnum": premadeThriftType_terse_write_MyEnum,
-            "terse_write.MyStruct": premadeThriftType_terse_write_MyStruct,
-            "bool": premadeThriftType_bool,
-            "byte": premadeThriftType_byte,
-            "i16": premadeThriftType_i16,
-            "i32": premadeThriftType_i32,
-            "i64": premadeThriftType_i64,
-            "float": premadeThriftType_float,
-            "double": premadeThriftType_double,
-            "string": premadeThriftType_string,
-            "binary": premadeThriftType_binary,
-            "terse_write.MyUnion": premadeThriftType_terse_write_MyUnion,
-            "terse_write.MyStructWithCustomDefault": premadeThriftType_terse_write_MyStructWithCustomDefault,
-            "terse_write.StructLevelTerseStruct": premadeThriftType_terse_write_StructLevelTerseStruct,
-            "terse_write.FieldLevelTerseStruct": premadeThriftType_terse_write_FieldLevelTerseStruct,
-            "terse_write.TerseStructWithCustomDefault": premadeThriftType_terse_write_TerseStructWithCustomDefault,
-            "terse_write.MyInteger": premadeThriftType_terse_write_MyInteger,
-            "terse_write.AdaptedFields": premadeThriftType_terse_write_AdaptedFields,
-            "terse_write.WrappedFields": premadeThriftType_terse_write_WrappedFields,
-            "terse_write.TerseException": premadeThriftType_terse_write_TerseException,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "terse_write.MyEnum", premadeThriftType_terse_write_MyEnum })
+        results = append(results, thriftTypeWithFullName{ "terse_write.MyStruct", premadeThriftType_terse_write_MyStruct })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "byte", premadeThriftType_byte })
+        results = append(results, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "float", premadeThriftType_float })
+        results = append(results, thriftTypeWithFullName{ "double", premadeThriftType_double })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
+        results = append(results, thriftTypeWithFullName{ "terse_write.MyUnion", premadeThriftType_terse_write_MyUnion })
+        results = append(results, thriftTypeWithFullName{ "terse_write.MyStructWithCustomDefault", premadeThriftType_terse_write_MyStructWithCustomDefault })
+        results = append(results, thriftTypeWithFullName{ "terse_write.StructLevelTerseStruct", premadeThriftType_terse_write_StructLevelTerseStruct })
+        results = append(results, thriftTypeWithFullName{ "terse_write.FieldLevelTerseStruct", premadeThriftType_terse_write_FieldLevelTerseStruct })
+        results = append(results, thriftTypeWithFullName{ "terse_write.TerseStructWithCustomDefault", premadeThriftType_terse_write_TerseStructWithCustomDefault })
+        results = append(results, thriftTypeWithFullName{ "terse_write.MyInteger", premadeThriftType_terse_write_MyInteger })
+        results = append(results, thriftTypeWithFullName{ "terse_write.AdaptedFields", premadeThriftType_terse_write_AdaptedFields })
+        results = append(results, thriftTypeWithFullName{ "terse_write.WrappedFields", premadeThriftType_terse_write_WrappedFields })
+        results = append(results, thriftTypeWithFullName{ "terse_write.TerseException", premadeThriftType_terse_write_TerseException })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -167,11 +186,11 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.MyStruct").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.MyUnion").
     SetIsUnion(true).
     SetFields(
@@ -247,8 +266,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_terse_write_MyStruct),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.MyStructWithCustomDefault").
     SetIsUnion(false).
     SetFields(
@@ -259,8 +278,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_i64),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.StructLevelTerseStruct").
     SetIsUnion(false).
     SetFields(
@@ -341,8 +360,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_terse_write_MyUnion),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.FieldLevelTerseStruct").
     SetIsUnion(false).
     SetFields(
@@ -498,8 +517,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_terse_write_MyUnion),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.TerseStructWithCustomDefault").
     SetIsUnion(false).
     SetFields(
@@ -575,8 +594,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_terse_write_MyStructWithCustomDefault),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.AdaptedFields").
     SetIsUnion(false).
     SetFields(
@@ -597,8 +616,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_terse_write_MyInteger),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("terse_write.WrappedFields").
     SetIsUnion(false).
     SetFields(
@@ -609,8 +628,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_i32),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

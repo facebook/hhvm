@@ -88,22 +88,41 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "module.Animal": premadeThriftType_module_Animal,
-            "double": premadeThriftType_double,
-            "module.Color": premadeThriftType_module_Color,
-            "string": premadeThriftType_string,
-            "bool": premadeThriftType_bool,
-            "module.Vehicle": premadeThriftType_module_Vehicle,
-            "i64": premadeThriftType_i64,
-            "module.PersonID": premadeThriftType_module_PersonID,
-            "i16": premadeThriftType_i16,
-            "module.Person": premadeThriftType_module_Person,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "module.Animal", premadeThriftType_module_Animal })
+        results = append(results, thriftTypeWithFullName{ "double", premadeThriftType_double })
+        results = append(results, thriftTypeWithFullName{ "module.Color", premadeThriftType_module_Color })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "module.Vehicle", premadeThriftType_module_Vehicle })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "module.PersonID", premadeThriftType_module_PersonID })
+        results = append(results, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
+        results = append(results, thriftTypeWithFullName{ "module.Person", premadeThriftType_module_Person })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -111,8 +130,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.Color").
     SetIsUnion(false).
     SetFields(
@@ -138,8 +157,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_double),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.Vehicle").
     SetIsUnion(false).
     SetFields(
@@ -170,8 +189,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.Person").
     SetIsUnion(false).
     SetFields(
@@ -227,8 +246,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(true).
     SetType(premadeThriftType_list_module_Vehicle),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

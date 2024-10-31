@@ -356,28 +356,47 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "string": premadeCodecTypeSpec_string,
-            "rust.Name": premadeCodecTypeSpec_rust_Name,
-            "rust.Copy": premadeCodecTypeSpec_rust_Copy,
-            "rust.RequestContext": premadeCodecTypeSpec_rust_RequestContext,
-            "rust.Arc": premadeCodecTypeSpec_rust_Arc,
-            "rust.Box": premadeCodecTypeSpec_rust_Box,
-            "rust.Exhaustive": premadeCodecTypeSpec_rust_Exhaustive,
-            "rust.Ord": premadeCodecTypeSpec_rust_Ord,
-            "rust.NewType": premadeCodecTypeSpec_rust_NewType,
-            "rust.Type": premadeCodecTypeSpec_rust_Type,
-            "bool": premadeCodecTypeSpec_bool,
-            "rust.Serde": premadeCodecTypeSpec_rust_Serde,
-            "rust.Mod": premadeCodecTypeSpec_rust_Mod,
-            "rust.Adapter": premadeCodecTypeSpec_rust_Adapter,
-            "rust.Derive": premadeCodecTypeSpec_rust_Derive,
-            "rust.ServiceExn": premadeCodecTypeSpec_rust_ServiceExn,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "rust.Name", premadeCodecTypeSpec_rust_Name })
+        results = append(results, codecSpecWithFullName{ "rust.Copy", premadeCodecTypeSpec_rust_Copy })
+        results = append(results, codecSpecWithFullName{ "rust.RequestContext", premadeCodecTypeSpec_rust_RequestContext })
+        results = append(results, codecSpecWithFullName{ "rust.Arc", premadeCodecTypeSpec_rust_Arc })
+        results = append(results, codecSpecWithFullName{ "rust.Box", premadeCodecTypeSpec_rust_Box })
+        results = append(results, codecSpecWithFullName{ "rust.Exhaustive", premadeCodecTypeSpec_rust_Exhaustive })
+        results = append(results, codecSpecWithFullName{ "rust.Ord", premadeCodecTypeSpec_rust_Ord })
+        results = append(results, codecSpecWithFullName{ "rust.NewType", premadeCodecTypeSpec_rust_NewType })
+        results = append(results, codecSpecWithFullName{ "rust.Type", premadeCodecTypeSpec_rust_Type })
+        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        results = append(results, codecSpecWithFullName{ "rust.Serde", premadeCodecTypeSpec_rust_Serde })
+        results = append(results, codecSpecWithFullName{ "rust.Mod", premadeCodecTypeSpec_rust_Mod })
+        results = append(results, codecSpecWithFullName{ "rust.Adapter", premadeCodecTypeSpec_rust_Adapter })
+        results = append(results, codecSpecWithFullName{ "rust.Derive", premadeCodecTypeSpec_rust_Derive })
+        results = append(results, codecSpecWithFullName{ "rust.ServiceExn", premadeCodecTypeSpec_rust_ServiceExn })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

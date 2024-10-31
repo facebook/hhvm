@@ -62,17 +62,36 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     {{/program:thrift_metadata_types}}
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*{{program:metadata_qualifier}}ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *{{program:metadata_qualifier}}ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*{{program:metadata_qualifier}}ThriftType{
-            {{#program:thrift_metadata_types}}
-            {{#type:named?}}
-            "{{type:full_name}}": {{type:metadata_name}},
-            {{/type:named?}}
-            {{/program:thrift_metadata_types}}
+        results := make([]thriftTypeWithFullName, 0)
+        {{#program:thrift_metadata_types}}
+        {{#type:named?}}
+        results = append(results, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
+        {{/type:named?}}
+        {{/program:thrift_metadata_types}}
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*{{program:metadata_qualifier}}ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -80,13 +99,13 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*{{program:metadata_qualifier}}ThriftStruct{
-            {{#program:structs}}
-            {{^struct:exception?}}
-            {{> metadata/thrift_metadata_struct}},
-            {{/struct:exception?}}
-            {{/program:structs}}
-        }
+        results := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
+        {{#program:structs}}
+        {{^struct:exception?}}
+        results = append(results, {{> metadata/thrift_metadata_struct}})
+        {{/struct:exception?}}
+        {{/program:structs}}
+        return results
     },
 )
 

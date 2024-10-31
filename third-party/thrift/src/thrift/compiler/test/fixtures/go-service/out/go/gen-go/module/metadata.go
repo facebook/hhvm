@@ -95,23 +95,42 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "module.GetEntityRequest": premadeThriftType_module_GetEntityRequest,
-            "module.GetEntityResponse": premadeThriftType_module_GetEntityResponse,
-            "module.NonComparableStruct": premadeThriftType_module_NonComparableStruct,
-            "i64": premadeThriftType_i64,
-            "bool": premadeThriftType_bool,
-            "byte": premadeThriftType_byte,
-            "i16": premadeThriftType_i16,
-            "i32": premadeThriftType_i32,
-            "double": premadeThriftType_double,
-            "binary": premadeThriftType_binary,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "module.GetEntityRequest", premadeThriftType_module_GetEntityRequest })
+        results = append(results, thriftTypeWithFullName{ "module.GetEntityResponse", premadeThriftType_module_GetEntityResponse })
+        results = append(results, thriftTypeWithFullName{ "module.NonComparableStruct", premadeThriftType_module_NonComparableStruct })
+        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "byte", premadeThriftType_byte })
+        results = append(results, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
+        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        results = append(results, thriftTypeWithFullName{ "double", premadeThriftType_double })
+        results = append(results, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -119,8 +138,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.GetEntityRequest").
     SetIsUnion(false).
     SetFields(
@@ -131,8 +150,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.GetEntityResponse").
     SetIsUnion(false).
     SetFields(
@@ -143,8 +162,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("module.NonComparableStruct").
     SetIsUnion(false).
     SetFields(
@@ -165,8 +184,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_map_module_NonComparableStruct_i64),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

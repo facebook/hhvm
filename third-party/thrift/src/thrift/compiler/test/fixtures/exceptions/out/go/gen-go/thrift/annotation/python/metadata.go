@@ -64,20 +64,39 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "python.Py3Hidden": premadeThriftType_python_Py3Hidden,
-            "string": premadeThriftType_string,
-            "python.PyDeprecatedHidden": premadeThriftType_python_PyDeprecatedHidden,
-            "python.Flags": premadeThriftType_python_Flags,
-            "python.Name": premadeThriftType_python_Name,
-            "python.Adapter": premadeThriftType_python_Adapter,
-            "bool": premadeThriftType_bool,
-            "python.UseCAPI": premadeThriftType_python_UseCAPI,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "python.Py3Hidden", premadeThriftType_python_Py3Hidden })
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "python.PyDeprecatedHidden", premadeThriftType_python_PyDeprecatedHidden })
+        results = append(results, thriftTypeWithFullName{ "python.Flags", premadeThriftType_python_Flags })
+        results = append(results, thriftTypeWithFullName{ "python.Name", premadeThriftType_python_Name })
+        results = append(results, thriftTypeWithFullName{ "python.Adapter", premadeThriftType_python_Adapter })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -85,11 +104,11 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.Py3Hidden").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.PyDeprecatedHidden").
     SetIsUnion(false).
     SetFields(
@@ -100,11 +119,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.Flags").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.Name").
     SetIsUnion(false).
     SetFields(
@@ -115,8 +134,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -132,8 +151,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("python.UseCAPI").
     SetIsUnion(false).
     SetFields(
@@ -144,8 +163,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

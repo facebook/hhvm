@@ -85,23 +85,42 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "hack.FieldWrapper": premadeThriftType_hack_FieldWrapper,
-            "hack.Wrapper": premadeThriftType_hack_Wrapper,
-            "hack.Adapter": premadeThriftType_hack_Adapter,
-            "hack.SkipCodegen": premadeThriftType_hack_SkipCodegen,
-            "hack.Name": premadeThriftType_hack_Name,
-            "hack.UnionEnumAttributes": premadeThriftType_hack_UnionEnumAttributes,
-            "hack.StructTrait": premadeThriftType_hack_StructTrait,
-            "hack.Attributes": premadeThriftType_hack_Attributes,
-            "hack.StructAsTrait": premadeThriftType_hack_StructAsTrait,
-            "hack.ModuleInternal": premadeThriftType_hack_ModuleInternal,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "hack.FieldWrapper", premadeThriftType_hack_FieldWrapper })
+        results = append(results, thriftTypeWithFullName{ "hack.Wrapper", premadeThriftType_hack_Wrapper })
+        results = append(results, thriftTypeWithFullName{ "hack.Adapter", premadeThriftType_hack_Adapter })
+        results = append(results, thriftTypeWithFullName{ "hack.SkipCodegen", premadeThriftType_hack_SkipCodegen })
+        results = append(results, thriftTypeWithFullName{ "hack.Name", premadeThriftType_hack_Name })
+        results = append(results, thriftTypeWithFullName{ "hack.UnionEnumAttributes", premadeThriftType_hack_UnionEnumAttributes })
+        results = append(results, thriftTypeWithFullName{ "hack.StructTrait", premadeThriftType_hack_StructTrait })
+        results = append(results, thriftTypeWithFullName{ "hack.Attributes", premadeThriftType_hack_Attributes })
+        results = append(results, thriftTypeWithFullName{ "hack.StructAsTrait", premadeThriftType_hack_StructAsTrait })
+        results = append(results, thriftTypeWithFullName{ "hack.ModuleInternal", premadeThriftType_hack_ModuleInternal })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -109,8 +128,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.FieldWrapper").
     SetIsUnion(false).
     SetFields(
@@ -121,8 +140,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.Wrapper").
     SetIsUnion(false).
     SetFields(
@@ -143,8 +162,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -155,8 +174,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.SkipCodegen").
     SetIsUnion(false).
     SetFields(
@@ -167,8 +186,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.Name").
     SetIsUnion(false).
     SetFields(
@@ -184,8 +203,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.UnionEnumAttributes").
     SetIsUnion(false).
     SetFields(
@@ -196,8 +215,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.StructTrait").
     SetIsUnion(false).
     SetFields(
@@ -208,8 +227,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.Attributes").
     SetIsUnion(false).
     SetFields(
@@ -220,14 +239,14 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.StructAsTrait").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("hack.ModuleInternal").
-    SetIsUnion(false),
-        }
+    SetIsUnion(false))
+        return results
     },
 )
 

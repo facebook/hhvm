@@ -109,28 +109,47 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     )
 })
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
+// Helper type to allow us to store Thrift types in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type thriftTypeWithFullName struct {
+    fullName   string
+    thriftType *metadata.ThriftType
+}
+
+var premadeThriftTypesSliceOnce = sync.OnceValue(
+    func() []thriftTypeWithFullName {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return map[string]*metadata.ThriftType{
-            "string": premadeThriftType_string,
-            "rust.Name": premadeThriftType_rust_Name,
-            "rust.Copy": premadeThriftType_rust_Copy,
-            "rust.RequestContext": premadeThriftType_rust_RequestContext,
-            "rust.Arc": premadeThriftType_rust_Arc,
-            "rust.Box": premadeThriftType_rust_Box,
-            "rust.Exhaustive": premadeThriftType_rust_Exhaustive,
-            "rust.Ord": premadeThriftType_rust_Ord,
-            "rust.NewType": premadeThriftType_rust_NewType,
-            "rust.Type": premadeThriftType_rust_Type,
-            "bool": premadeThriftType_bool,
-            "rust.Serde": premadeThriftType_rust_Serde,
-            "rust.Mod": premadeThriftType_rust_Mod,
-            "rust.Adapter": premadeThriftType_rust_Adapter,
-            "rust.Derive": premadeThriftType_rust_Derive,
-            "rust.ServiceExn": premadeThriftType_rust_ServiceExn,
+        results := make([]thriftTypeWithFullName, 0)
+        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        results = append(results, thriftTypeWithFullName{ "rust.Name", premadeThriftType_rust_Name })
+        results = append(results, thriftTypeWithFullName{ "rust.Copy", premadeThriftType_rust_Copy })
+        results = append(results, thriftTypeWithFullName{ "rust.RequestContext", premadeThriftType_rust_RequestContext })
+        results = append(results, thriftTypeWithFullName{ "rust.Arc", premadeThriftType_rust_Arc })
+        results = append(results, thriftTypeWithFullName{ "rust.Box", premadeThriftType_rust_Box })
+        results = append(results, thriftTypeWithFullName{ "rust.Exhaustive", premadeThriftType_rust_Exhaustive })
+        results = append(results, thriftTypeWithFullName{ "rust.Ord", premadeThriftType_rust_Ord })
+        results = append(results, thriftTypeWithFullName{ "rust.NewType", premadeThriftType_rust_NewType })
+        results = append(results, thriftTypeWithFullName{ "rust.Type", premadeThriftType_rust_Type })
+        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        results = append(results, thriftTypeWithFullName{ "rust.Serde", premadeThriftType_rust_Serde })
+        results = append(results, thriftTypeWithFullName{ "rust.Mod", premadeThriftType_rust_Mod })
+        results = append(results, thriftTypeWithFullName{ "rust.Adapter", premadeThriftType_rust_Adapter })
+        results = append(results, thriftTypeWithFullName{ "rust.Derive", premadeThriftType_rust_Derive })
+        results = append(results, thriftTypeWithFullName{ "rust.ServiceExn", premadeThriftType_rust_ServiceExn })
+        return results
+    },
+)
+
+var premadeThriftTypesMapOnce = sync.OnceValue(
+    func() map[string]*metadata.ThriftType {
+        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
+        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        for _, value := range thriftTypesWithFullName {
+            results[value.fullName] = value.thriftType
         }
+        return results
     },
 )
 
@@ -138,8 +157,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftStruct{
-            metadata.NewThriftStruct().
+        results := make([]*metadata.ThriftStruct, 0)
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Name").
     SetIsUnion(false).
     SetFields(
@@ -150,29 +169,29 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Copy").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.RequestContext").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Arc").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Box").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Exhaustive").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Ord").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.NewType").
-    SetIsUnion(false),
-            metadata.NewThriftStruct().
+    SetIsUnion(false))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Type").
     SetIsUnion(false).
     SetFields(
@@ -183,8 +202,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Serde").
     SetIsUnion(false).
     SetFields(
@@ -195,8 +214,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Mod").
     SetIsUnion(false).
     SetFields(
@@ -207,8 +226,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -219,8 +238,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.Derive").
     SetIsUnion(false).
     SetFields(
@@ -231,8 +250,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_list_string),
         },
-    ),
-            metadata.NewThriftStruct().
+    ))
+        results = append(results, metadata.NewThriftStruct().
     SetName("rust.ServiceExn").
     SetIsUnion(false).
     SetFields(
@@ -243,8 +262,8 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_bool),
         },
-    ),
-        }
+    ))
+        return results
     },
 )
 

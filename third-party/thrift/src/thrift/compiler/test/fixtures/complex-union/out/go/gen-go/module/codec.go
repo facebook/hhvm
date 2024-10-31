@@ -408,26 +408,45 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
+// Helper type to allow us to store codec specs in a slice at compile time,
+// and put them in a map at runtime. See comment at the top of template
+// about a compilation limitation that affects map literals.
+type codecSpecWithFullName struct {
+    fullName string
+    typeSpec *thrift.TypeSpec
+}
+
+var premadeCodecSpecsSliceOnce = sync.OnceValue(
+    func() []codecSpecWithFullName {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
-        return map[string]*thrift.TypeSpec{
-            "i64": premadeCodecTypeSpec_i64,
-            "string": premadeCodecTypeSpec_string,
-            "i16": premadeCodecTypeSpec_i16,
-            "module.containerTypedef": premadeCodecTypeSpec_module_containerTypedef,
-            "module.ComplexUnion": premadeCodecTypeSpec_module_ComplexUnion,
-            "module.ListUnion": premadeCodecTypeSpec_module_ListUnion,
-            "binary": premadeCodecTypeSpec_binary,
-            "module.DataUnion": premadeCodecTypeSpec_module_DataUnion,
-            "i32": premadeCodecTypeSpec_i32,
-            "module.Val": premadeCodecTypeSpec_module_Val,
-            "module.ValUnion": premadeCodecTypeSpec_module_ValUnion,
-            "module.VirtualComplexUnion": premadeCodecTypeSpec_module_VirtualComplexUnion,
-            "module.NonCopyableStruct": premadeCodecTypeSpec_module_NonCopyableStruct,
-            "module.NonCopyableUnion": premadeCodecTypeSpec_module_NonCopyableUnion,
+        results := make([]codecSpecWithFullName, 0)
+        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        results = append(results, codecSpecWithFullName{ "i16", premadeCodecTypeSpec_i16 })
+        results = append(results, codecSpecWithFullName{ "module.containerTypedef", premadeCodecTypeSpec_module_containerTypedef })
+        results = append(results, codecSpecWithFullName{ "module.ComplexUnion", premadeCodecTypeSpec_module_ComplexUnion })
+        results = append(results, codecSpecWithFullName{ "module.ListUnion", premadeCodecTypeSpec_module_ListUnion })
+        results = append(results, codecSpecWithFullName{ "binary", premadeCodecTypeSpec_binary })
+        results = append(results, codecSpecWithFullName{ "module.DataUnion", premadeCodecTypeSpec_module_DataUnion })
+        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        results = append(results, codecSpecWithFullName{ "module.Val", premadeCodecTypeSpec_module_Val })
+        results = append(results, codecSpecWithFullName{ "module.ValUnion", premadeCodecTypeSpec_module_ValUnion })
+        results = append(results, codecSpecWithFullName{ "module.VirtualComplexUnion", premadeCodecTypeSpec_module_VirtualComplexUnion })
+        results = append(results, codecSpecWithFullName{ "module.NonCopyableStruct", premadeCodecTypeSpec_module_NonCopyableStruct })
+        results = append(results, codecSpecWithFullName{ "module.NonCopyableUnion", premadeCodecTypeSpec_module_NonCopyableUnion })
+        return results
+    },
+)
+
+var premadeCodecSpecsMapOnce = sync.OnceValue(
+    func() map[string]*thrift.TypeSpec {
+        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
+        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        for _, value := range codecSpecsWithFullName {
+            results[value.fullName] = value.typeSpec
         }
+        return results
     },
 )
 

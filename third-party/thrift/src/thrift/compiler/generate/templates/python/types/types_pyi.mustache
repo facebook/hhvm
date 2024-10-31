@@ -123,14 +123,21 @@ class {{> structs/unadapted_name}}({{!
 {{#program:generate_immutable_types}}
     class Type(enum.Enum):
         EMPTY: {{> structs/unadapted_name}}.Type = ...
+    {{#struct:fields_ordered_by_id}}
+        {{field:py_name}}: {{> structs/unadapted_name}}.Type = ...
+    {{/struct:fields_ordered_by_id}}
 {{/program:generate_immutable_types}}
 {{#program:generate_mutable_types}}
     class FbThriftUnionFieldEnum(enum.Enum):
         EMPTY: {{> structs/unadapted_name}}.FbThriftUnionFieldEnum = ...
-{{/program:generate_mutable_types}}
     {{#struct:fields_ordered_by_id}}
-        {{field:py_name}}: {{> structs/unadapted_name}}.Type = ...
+        {{field:py_name}}: {{> structs/unadapted_name}}.FbThriftUnionFieldEnum = ...
     {{/struct:fields_ordered_by_id}}
+{{/program:generate_mutable_types}}
+
+{{#program:generate_immutable_types}}
+    FbThriftUnionFieldEnum = Type
+{{/program:generate_immutable_types}}
 
 {{#program:generate_immutable_types}}
     @classmethod

@@ -68,7 +68,12 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
     def test_creation(self) -> None:
         # Without any arguments, creates empty union (with value None).
         u = TestUnionImmutable()
+        self.assertIs(
+            u.fbthrift_current_field, TestUnionImmutable.FbThriftUnionFieldEnum.EMPTY
+        )
         self.assertIs(u.type, TestUnionImmutable.Type.EMPTY)
+        # Type is an alias for FbThriftUnionFieldEnum
+        self.assertIs(u.fbthrift_current_field, TestUnionImmutable.Type.EMPTY)
         self.assertIsNone(u.value)
         with self.assertRaisesRegex(
             AttributeError, "Union contains a value of type EMPTY, not string_field"
@@ -80,6 +85,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # field for this Union, and a non-None value whose type is valid for that field,
         # should create a new instance with that field (and value) set.
         u2 = TestUnionImmutable(string_field="Hello, world!")
+        self.assertIs(
+            u2.fbthrift_current_field,
+            TestUnionImmutable.FbThriftUnionFieldEnum.string_field,
+        )
         self.assertIs(u2.type, TestUnionImmutable.Type.string_field)
         self.assertEqual(u2.value, "Hello, world!")
         self.assertEqual(u2.string_field, "Hello, world!")
@@ -231,6 +240,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
     def test_from_value_ambiguous_int_bool(self) -> None:
         union_int_bool_1 = TestUnionAmbiguousFromValueIntBoolImmutable.fromValue(1)
         self.assertIs(
+            union_int_bool_1.fbthrift_current_field,
+            TestUnionAmbiguousFromValueIntBoolImmutable.FbThriftUnionFieldEnum.int_field,
+        )
+        self.assertIs(
             union_int_bool_1.type,
             TestUnionAmbiguousFromValueIntBoolImmutable.Type.int_field,
         )
@@ -240,6 +253,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         # BAD: fromValue(bool) populates an int field if it comes before bool.
         union_int_bool_2 = TestUnionAmbiguousFromValueIntBoolImmutable.fromValue(True)
+        self.assertIs(
+            union_int_bool_2.fbthrift_current_field,
+            TestUnionAmbiguousFromValueIntBoolImmutable.FbThriftUnionFieldEnum.int_field,
+        )
         self.assertIs(
             union_int_bool_2.type,
             TestUnionAmbiguousFromValueIntBoolImmutable.Type.int_field,
@@ -253,6 +270,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # a bool field if seen first.
         union_bool_int_1 = TestUnionAmbiguousFromValueBoolIntImmutable.fromValue(1)
         self.assertIs(
+            union_bool_int_1.fbthrift_current_field,
+            TestUnionAmbiguousFromValueBoolIntImmutable.FbThriftUnionFieldEnum.int_field,
+        )
+        self.assertIs(
             union_bool_int_1.type,
             TestUnionAmbiguousFromValueBoolIntImmutable.Type.int_field,
         )
@@ -262,6 +283,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         _thrift_serialization_round_trip(self, immutable_serializer, union_bool_int_1)
 
         union_bool_int_2 = TestUnionAmbiguousFromValueBoolIntImmutable.fromValue(True)
+        self.assertIs(
+            union_bool_int_2.fbthrift_current_field,
+            TestUnionAmbiguousFromValueBoolIntImmutable.FbThriftUnionFieldEnum.bool_field,
+        )
         self.assertIs(
             union_bool_int_2.type,
             TestUnionAmbiguousFromValueBoolIntImmutable.Type.bool_field,
@@ -275,6 +300,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # BAD: fromValue(int) populated a float field if it comes before int.
         union_float_int_1 = TestUnionAmbiguousFromValueFloatIntImmutable.fromValue(1)
         self.assertIs(
+            union_float_int_1.fbthrift_current_field,
+            TestUnionAmbiguousFromValueFloatIntImmutable.FbThriftUnionFieldEnum.float_field,
+        )
+        self.assertIs(
             union_float_int_1.type,
             TestUnionAmbiguousFromValueFloatIntImmutable.Type.float_field,
         )
@@ -283,6 +312,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         _thrift_serialization_round_trip(self, immutable_serializer, union_float_int_1)
 
         union_float_int_2 = TestUnionAmbiguousFromValueFloatIntImmutable.fromValue(1.0)
+        self.assertIs(
+            union_float_int_2.fbthrift_current_field,
+            TestUnionAmbiguousFromValueFloatIntImmutable.FbThriftUnionFieldEnum.float_field,
+        )
         self.assertIs(
             union_float_int_2.type,
             TestUnionAmbiguousFromValueFloatIntImmutable.Type.float_field,
@@ -294,11 +327,21 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
     def test_field_name_conflict(self) -> None:
         # By setting class type `Type` attr after field attrs, we get the desired behavior
         self.assertEqual(
+            TestUnionAmbiguousTypeFieldNameImmutable().fbthrift_current_field,
+            # pyre-ignore[16]: There are 2 `Type`s
+            TestUnionAmbiguousTypeFieldNameImmutable().FbThriftUnionFieldEnum.EMPTY,
+        )
+        self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable().type,
             # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable().Type.EMPTY,
         )
 
+        self.assertEqual(
+            TestUnionAmbiguousTypeFieldNameImmutable(Type=3).fbthrift_current_field,
+            # pyre-ignore[16]: There are 2 `Type`s
+            TestUnionAmbiguousTypeFieldNameImmutable.FbThriftUnionFieldEnum.Type,
+        )
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable(Type=3).type,
             # pyre-ignore[16]: There are 2 `Type`s
@@ -360,6 +403,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
     def test_adapted_types(self) -> None:
         u1 = TestUnionAdaptedTypesImmutable()
+        self.assertIs(
+            u1.fbthrift_current_field,
+            TestUnionAdaptedTypesImmutable.FbThriftUnionFieldEnum.EMPTY,
+        )
         self.assertIs(u1.type, TestUnionAdaptedTypesImmutable.Type.EMPTY)
         self.assertIsNone(u1.value)
         _thrift_serialization_round_trip(self, immutable_serializer, u1)
@@ -376,6 +423,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         u2 = TestUnionAdaptedTypesImmutable(
             adapted_i32_to_datetime=datetime.fromtimestamp(1718728839)
+        )
+        self.assertIs(
+            u2.fbthrift_current_field,
+            TestUnionAdaptedTypesImmutable.FbThriftUnionFieldEnum.adapted_i32_to_datetime,
         )
         self.assertIs(
             u2.type, TestUnionAdaptedTypesImmutable.Type.adapted_i32_to_datetime
@@ -419,6 +470,10 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         _thrift_serialization_round_trip(self, immutable_serializer, u2)
 
         u3 = TestUnionAdaptedTypesImmutable(non_adapted_i32=1718728839)
+        self.assertIs(
+            u3.fbthrift_current_field,
+            TestUnionAdaptedTypesImmutable.FbThriftUnionFieldEnum.non_adapted_i32,
+        )
         self.assertIs(u3.type, TestUnionAdaptedTypesImmutable.Type.non_adapted_i32)
         self.assertIs(u3.value, u3.non_adapted_i32)
         self.assertEqual(u3.non_adapted_i32, 1718728839)

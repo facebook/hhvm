@@ -1778,6 +1778,8 @@ class UnionMeta(type):
                 Type (class enum.Enum): Enumeration of all fields declared for this
                     Thrift union (see `_gen_union_field_enum_members()`).
 
+                FbThriftUnionFieldEnum: Alias for Type
+
             At the instance level (see also `Union`):
                 A property for every field in the Thrift union, with its corresponding
                 `py_name`.
@@ -1798,10 +1800,16 @@ class UnionMeta(type):
                 field_info.py_name,
                 _make_fget_union(field_info.id, field_info.adapter_info),
             )
+        FbThriftUnionFieldEnum = enum.Enum(union_name, _gen_union_field_enum_members(field_infos))
+        type.__setattr__(
+            klass,
+            "FbThriftUnionFieldEnum",
+            FbThriftUnionFieldEnum,
+        )
         type.__setattr__(
             klass,
             "Type",
-            enum.Enum(union_name, _gen_union_field_enum_members(field_infos)),
+            FbThriftUnionFieldEnum,
         )
         return klass
 

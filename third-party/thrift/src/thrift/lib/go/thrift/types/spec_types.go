@@ -37,7 +37,7 @@ type StructSpec struct {
 	Name               string
 	IsUnion            bool
 	IsException        bool
-	FieldSpecs         []*FieldSpec
+	FieldSpecs         []FieldSpec // Concrete (non-pointer) struct type is intentional
 	FieldSpecIDToIndex map[int16]int
 }
 

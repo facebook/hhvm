@@ -66,7 +66,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "TrivialStruct",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -84,7 +84,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "StructWithNoCustomDefaultValues",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -147,7 +147,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "StructWithCustomDefaultValues",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),

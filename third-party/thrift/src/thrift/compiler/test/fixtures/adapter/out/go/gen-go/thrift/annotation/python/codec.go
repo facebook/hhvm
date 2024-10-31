@@ -97,7 +97,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Py3Hidden",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -106,7 +106,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "PyDeprecatedHidden",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -124,7 +124,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Flags",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -133,7 +133,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Name",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -151,7 +151,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Adapter",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -178,7 +178,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "UseCAPI",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),

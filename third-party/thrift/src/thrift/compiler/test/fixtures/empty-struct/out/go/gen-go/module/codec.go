@@ -51,7 +51,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Empty",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -60,7 +60,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Nada",
     IsUnion:            true,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },

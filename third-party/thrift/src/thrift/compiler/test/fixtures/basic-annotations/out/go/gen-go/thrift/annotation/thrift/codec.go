@@ -217,7 +217,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Experimental",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -226,7 +226,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "ReserveIds",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.LIST),
@@ -253,7 +253,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "RequiresBackwardCompatibility",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -271,7 +271,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "TerseWrite",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -280,7 +280,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Box",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -289,7 +289,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Mixin",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -298,7 +298,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "SerializeInFieldIdOrder",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -307,7 +307,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "BitmaskEnum",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -316,7 +316,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "ExceptionMessage",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -325,7 +325,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "InternBox",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -334,7 +334,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Serial",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -343,7 +343,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Uri",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -361,7 +361,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Priority",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -379,7 +379,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "DeprecatedUnvalidatedAnnotations",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.MAP),
@@ -397,7 +397,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "AllowReservedIdentifier",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -406,7 +406,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "AllowReservedFilename",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },

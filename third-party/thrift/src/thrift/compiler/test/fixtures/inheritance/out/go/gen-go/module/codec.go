@@ -48,7 +48,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqMyRootDoRoot",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -57,7 +57,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respMyRootDoRoot",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -66,7 +66,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqMyNodeDoMid",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -75,7 +75,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respMyNodeDoMid",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -84,7 +84,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqMyLeafDoLeaf",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -93,7 +93,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respMyLeafDoLeaf",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },

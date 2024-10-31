@@ -203,7 +203,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Name",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -221,7 +221,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Type",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -248,7 +248,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Ref",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -266,7 +266,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Lazy",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -284,7 +284,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "DisableLazyChecksum",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -293,7 +293,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Adapter",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -347,7 +347,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "PackIsset",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -365,7 +365,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "MinimizePadding",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -374,7 +374,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "ScopedEnumAsUnionType",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -383,7 +383,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "FieldInterceptor",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -410,7 +410,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "UseOpEncode",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -419,7 +419,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "EnumType",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -437,7 +437,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Frozen2Exclude",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -446,7 +446,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Frozen2RequiresCompleteContainerParams",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -455,7 +455,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "ProcessInEbThreadUnsafe",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -464,7 +464,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "RuntimeAnnotation",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -473,7 +473,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "UseCursorSerialization",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -482,7 +482,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "GenerateDeprecatedHeaderClientMethods",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },

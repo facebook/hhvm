@@ -46,7 +46,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqExtendTestServiceCheck",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -64,7 +64,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respExtendTestServiceCheck",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.BOOL),

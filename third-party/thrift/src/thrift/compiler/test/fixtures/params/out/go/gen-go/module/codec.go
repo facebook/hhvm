@@ -147,7 +147,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqNestedContainersMapList",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.MAP),
@@ -165,7 +165,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respNestedContainersMapList",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -174,7 +174,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqNestedContainersMapSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.MAP),
@@ -192,7 +192,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respNestedContainersMapSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -201,7 +201,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqNestedContainersListMap",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.LIST),
@@ -219,7 +219,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respNestedContainersListMap",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -228,7 +228,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqNestedContainersListSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.LIST),
@@ -246,7 +246,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respNestedContainersListSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -255,7 +255,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqNestedContainersTurtles",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.LIST),
@@ -273,7 +273,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respNestedContainersTurtles",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },

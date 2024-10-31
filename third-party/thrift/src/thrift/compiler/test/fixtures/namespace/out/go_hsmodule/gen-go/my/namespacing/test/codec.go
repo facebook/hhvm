@@ -52,7 +52,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "HsFoo",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -70,7 +70,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqHsTestServiceInit",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -88,7 +88,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respHsTestServiceInit",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I64),

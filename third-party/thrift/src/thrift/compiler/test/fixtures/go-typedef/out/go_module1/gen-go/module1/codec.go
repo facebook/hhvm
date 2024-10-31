@@ -214,7 +214,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Automobile",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -286,7 +286,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "MapKey",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -313,7 +313,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "MapContainer",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.MAP),
@@ -331,7 +331,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Pair",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -358,7 +358,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Collection",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.LIST),
@@ -385,7 +385,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqFinderByPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -403,7 +403,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respFinderByPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -421,7 +421,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqFinderAliasByPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -439,7 +439,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respFinderAliasByPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -457,7 +457,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqFinderPreviousPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -475,7 +475,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respFinderPreviousPlate",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRING),

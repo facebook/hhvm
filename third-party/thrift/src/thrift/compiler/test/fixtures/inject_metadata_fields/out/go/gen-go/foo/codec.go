@@ -50,7 +50,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "Fields",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   100,
             WireType:             thrift.Type(thrift.STRING),

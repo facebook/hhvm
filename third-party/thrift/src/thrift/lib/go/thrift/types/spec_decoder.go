@@ -47,7 +47,7 @@ func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 		var fieldSpec *FieldSpec
 		fieldSpecIndex, found := spec.FieldSpecIDToIndex[fieldID]
 		if found {
-			fieldSpec = spec.FieldSpecs[fieldSpecIndex]
+			fieldSpec = &spec.FieldSpecs[fieldSpecIndex]
 		}
 
 		if !found || wireType != fieldSpec.WireType {

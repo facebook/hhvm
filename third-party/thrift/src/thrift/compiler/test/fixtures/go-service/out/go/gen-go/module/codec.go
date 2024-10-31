@@ -195,7 +195,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "GetEntityRequest",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -213,7 +213,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "GetEntityResponse",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -231,7 +231,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "NonComparableStruct",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -267,7 +267,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetEntity",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -285,7 +285,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetEntity",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -303,7 +303,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetBool",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -312,7 +312,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetBool",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.BOOL),
@@ -330,7 +330,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetByte",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -339,7 +339,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetByte",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.BYTE),
@@ -357,7 +357,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetI16",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -366,7 +366,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetI16",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I16),
@@ -384,7 +384,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetI32",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -393,7 +393,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetI32",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -411,7 +411,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetI64",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -420,7 +420,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetI64",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I64),
@@ -438,7 +438,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetDouble",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -447,7 +447,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetDouble",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.DOUBLE),
@@ -465,7 +465,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetString",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -474,7 +474,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetString",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRING),
@@ -492,7 +492,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetBinary",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -501,7 +501,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetBinary",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.STRING),
@@ -519,7 +519,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetMap",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -528,7 +528,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetMap",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.MAP),
@@ -546,7 +546,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -555,7 +555,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetSet",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.SET),
@@ -573,7 +573,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetList",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
     },
     FieldSpecIDToIndex: map[int16]int{
     },
@@ -582,7 +582,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetList",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.LIST),
@@ -600,7 +600,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetLegacyStuff",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   -2,
             WireType:             thrift.Type(thrift.I64),
@@ -636,7 +636,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetLegacyStuff",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -654,7 +654,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetCtxCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -672,7 +672,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetCtxCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -690,7 +690,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetCtx1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -717,7 +717,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetCtx1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -735,7 +735,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetContextCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -753,7 +753,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetContextCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -771,7 +771,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetOutCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -789,7 +789,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetOutCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -807,7 +807,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetOut1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -834,7 +834,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetOut1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -852,7 +852,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetInCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -870,7 +870,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetInCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -888,7 +888,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetIn1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -915,7 +915,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetIn1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -933,7 +933,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetErrCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -951,7 +951,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetErrCollision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),
@@ -969,7 +969,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "reqGetEntityGetErr1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -996,7 +996,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     Name:               "respGetEntityGetErr1Collision",
     IsUnion:            false,
     IsException:        false,
-    FieldSpecs:         []*thrift.FieldSpec{
+    FieldSpecs:         []thrift.FieldSpec{
         {
             ID:                   0,
             WireType:             thrift.Type(thrift.I32),

@@ -45,7 +45,7 @@ func WriteStructSpec(d Encoder, srcStruct Struct, spec *StructSpec) error {
 			return PrependError(fmt.Sprintf("%s field %d write error: ", structReflectType.Name(), fieldSpec.ID), err)
 		}
 
-		fieldWriteErr := writeFieldSpec(d, fieldSrcValue, fieldSpec)
+		fieldWriteErr := writeFieldSpec(d, fieldSrcValue, &fieldSpec)
 		if fieldWriteErr != nil {
 			return fieldWriteErr
 		}

@@ -1209,6 +1209,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32[999]
 
         # `get()`
@@ -1217,6 +1218,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(None, s.unqualified_map_string_i32.get("Not Exists"))
         self.assertEqual(
             "MyDefaultValue",
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32.get("Not Exists", "MyDefaultValue"),
         )
 
@@ -1224,6 +1226,7 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32.get(999, "MyDefaultValue")
 
         # `__setitem__()`
@@ -1237,11 +1240,13 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32["a"] = "Not an integer"
 
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32[999] = 11
 
         # `__iter__()`

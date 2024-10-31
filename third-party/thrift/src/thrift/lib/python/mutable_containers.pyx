@@ -677,6 +677,14 @@ cdef class MutableMap:
             return 'i{}'
         return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", self.items()))}}}'
 
+    @classmethod
+    def __class_getitem__(cls, _):
+        """
+        PEP 560 – Core support for typing module and generic types
+        It enables generic types like `MutableSet[T]`
+        """
+        return cls
+
 
 MutableMapping.register(MutableMap)
 

@@ -336,6 +336,9 @@ class MapMutablePythonTests(unittest.TestCase):
         # TODO(T194526180): mutable thrift-python should not raise
         self.assertIn(0, cmap.colorMap)
 
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(0), self.Color.red)
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(1), self.Color.blue)
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(2), None)

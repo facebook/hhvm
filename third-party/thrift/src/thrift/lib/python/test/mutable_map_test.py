@@ -33,6 +33,15 @@ from thrift.python.mutable_types import to_thrift_list
 from thrift.python.types import typeinfo_i32, typeinfo_string
 
 
+def _create_MutableMap_str_i32(map: dict[str, int]) -> MutableMap[str, int]:
+    """
+    Helper function to create and return a `MutableMap`.
+    The return type annotation enables Pyre type checking support.
+    """
+    # pyre-ignore[6]: Incompatible parameter type
+    return MutableMap(typeinfo_string, typeinfo_i32, map)
+
+
 class MutableMapTest(unittest.TestCase):
     def test_smoke(self) -> None:
         mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
@@ -73,7 +82,7 @@ class MutableMapTest(unittest.TestCase):
                 pass
 
     def test_empty_eq(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         self.assertEqual(mutable_map, mutable_map)
         self.assertEqual(mutable_map, MutableMap(typeinfo_string, typeinfo_i32, {}))
         self.assertEqual(mutable_map, {})
@@ -85,33 +94,35 @@ class MutableMapTest(unittest.TestCase):
             _ = mutable_map == MutableMap(typeinfo_i32, typeinfo_string, {})
 
     def test_setitem(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
         self.assertEqual({"A": 65, "a": 97}, mutable_map)
 
     def test_setitem_wrong_type(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         # Wrong key type
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_map[1] = 65
 
         # Wrong value type
         with self.assertRaisesRegex(TypeError, "is not a <class 'int'>"):
+            # pyre-ignore[6]: Intentional for test
             mutable_map["A"] = "str"
 
         self.assertEqual({}, mutable_map)
 
     def test_setitem_i32_overflow(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         with self.assertRaises(OverflowError):
             mutable_map["max"] = 2**31
 
     def test_delitem(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
         self.assertEqual({"A": 65, "a": 97}, mutable_map)
@@ -121,6 +132,7 @@ class MutableMapTest(unittest.TestCase):
 
         # Key is not expected type but MutableMap raises key error
         with self.assertRaisesRegex(KeyError, "1"):
+            # pyre-ignore[6]: Intentional for test
             del mutable_map[1]
 
         self.assertEqual({"A": 65, "a": 97}, mutable_map)
@@ -130,7 +142,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual({}, mutable_map)
 
     def test_getitem(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
 
@@ -141,14 +153,15 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual(97, mutable_map["a"])
 
     def test_getitem_wrong_type(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             _ = mutable_map[1]
 
     def test_iter(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
 
@@ -160,7 +173,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual(0, len(python_set))
 
     def test_iter_next(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
         mutable_map["last"] = 999
@@ -181,7 +194,7 @@ class MutableMapTest(unittest.TestCase):
             next(iter2)
 
     def test_get(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
 
@@ -195,22 +208,24 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual(999, mutable_map.get("not_exists", 999))
 
     def test_get_wrong_type(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
 
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_map.get(123)
 
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_map.get(123, "default_value")
 
     def test_contains(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         mutable_map["A"] = 65
         mutable_map["a"] = 97
 
@@ -220,7 +235,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn("y", mutable_map)
 
     def test_contains_wrong_type(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
         self.assertNotIn(1, mutable_map)
 
         mutable_map["A"] = 65
@@ -228,7 +243,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertIn("A", mutable_map)
 
     def test_keys(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.keys(), MapKeysView)
         self.assertEqual(0, len(mutable_map.keys()))
@@ -257,7 +272,7 @@ class MutableMapTest(unittest.TestCase):
             _ = 1 in mutable_map.keys()
 
     def test_keys_view(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         # The `keys()` method returns a view of the map's keys. Any modifications
         # made to the map will be reflected in the `keys_view`.
@@ -284,7 +299,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn("a", keys_view)
 
     def test_items(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.items(), MapItemsView)
         self.assertEqual(0, len(mutable_map.items()))
@@ -312,15 +327,17 @@ class MutableMapTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             _ = (1, 97) in mutable_map.items()
 
         with self.assertRaisesRegex(
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             _ = ("a", "Not an integer") in mutable_map.items()
 
     def test_items_view(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         # The `items()` method returns a view of the map's items. Any modifications
         # made to the map will be reflected in the `items_view`.
@@ -347,7 +364,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn(("a", 97), items_view)
 
     def test_values(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.values(), MapValuesView)
         self.assertEqual(0, len(mutable_map.values()))
@@ -376,7 +393,7 @@ class MutableMapTest(unittest.TestCase):
         _ = "Not an integer" in mutable_map.values()
 
     def test_values_view(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         # The `values()` method returns a view of the map's values. Any modifications
         # made to the map will be reflected in the `values_view`.
@@ -450,7 +467,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual(mutable_map, mutable_map_unpickled)
 
     def test_pop(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         mutable_map["A"] = 65
         mutable_map["a"] = 97
@@ -475,7 +492,7 @@ class MutableMapTest(unittest.TestCase):
             mutable_map.pop(123)
 
     def test_popitem(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         for char in string.ascii_letters:
             mutable_map[char] = ord(char)
@@ -487,7 +504,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual(0, len(mutable_map))
 
     def test_setdefault(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         self.assertEqual(65, mutable_map.setdefault("A", 65))
         self.assertEqual(65, mutable_map["A"])
@@ -537,7 +554,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual([11, 12, 13], value_A)
 
     def test_update(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         mutable_map["A"] = 65
         mutable_map["a"] = 97
@@ -558,7 +575,7 @@ class MutableMapTest(unittest.TestCase):
         self.assertEqual({"A": 65, "a": 97, "B": 66, "b": 98}, mutable_map)
 
     def test_update_exception(self) -> None:
-        mutable_map = MutableMap(typeinfo_string, typeinfo_i32, {})
+        mutable_map = _create_MutableMap_str_i32({})
 
         mutable_map["A"] = 65
         mutable_map["a"] = 97

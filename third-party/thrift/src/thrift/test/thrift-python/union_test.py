@@ -328,7 +328,6 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         # By setting class type `Type` attr after field attrs, we get the desired behavior
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable().fbthrift_current_field,
-            # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable().FbThriftUnionFieldEnum.EMPTY,
         )
         self.assertEqual(
@@ -339,7 +338,6 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
 
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable(Type=3).fbthrift_current_field,
-            # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable.FbThriftUnionFieldEnum.Type,
         )
         self.assertEqual(

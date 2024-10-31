@@ -203,7 +203,6 @@ class UnionTests(unittest.TestCase):
             self.assertIsInstance(
                 self.Integers(tiny=2).fbthrift_current_field, enum.Enum
             )
-            # pyre-ignore[16]
             self.assertTrue(issubclass(self.Integers.FbThriftUnionFieldEnum, enum.Enum))
         else:
             self.assertIsInstance(self.Integers(tiny=2).type, enum.Enum)

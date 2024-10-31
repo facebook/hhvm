@@ -427,7 +427,6 @@ class MutableMapTest(unittest.TestCase):
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
         mutable_map = MutableMap(
             typeinfo_i32,
-            # pyre-ignore[19]
             MutableListTypeInfo(typeinfo_i32),
             # pyre-ignore[6]
             internal_map,
@@ -455,7 +454,6 @@ class MutableMapTest(unittest.TestCase):
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
         mutable_map = MutableMap(
             typeinfo_i32,
-            # pyre-ignore[19]
             MutableListTypeInfo(typeinfo_i32),
             # pyre-ignore[6]
             internal_map,
@@ -527,7 +525,6 @@ class MutableMapTest(unittest.TestCase):
     def test_setdefault_container_value(self) -> None:
         mutable_map = MutableMap(
             typeinfo_string,
-            # pyre-ignore[19]:
             MutableListTypeInfo(typeinfo_i32),
             {},
         )

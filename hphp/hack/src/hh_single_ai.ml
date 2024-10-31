@@ -149,22 +149,10 @@ let parse_options () =
 let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
       (* Get parse errors *)
-      let _ =
-        Errors.run_in_context fn (fun () ->
-            let popt = Provider_context.get_popt ctx in
-            let parsed_file =
-              Full_fidelity_ast.defensive_program popt fn contents
-            in
-            let ast =
-              let { Parser_return.ast; _ } = parsed_file in
-              if popt.ParserOptions.deregister_php_stdlib then
-                Nast.deregister_ignored_attributes ast
-              else
-                ast
-            in
-            Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            ())
-      in
+      Errors.run_in_context fn (fun () ->
+          let popt = Provider_context.get_popt ctx in
+          let _ = Full_fidelity_ast.defensive_program popt fn contents in
+          ());
       match Direct_decl_utils.direct_decl_parse_and_cache ctx fn with
       | None -> failwith "no file contents"
       | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls)

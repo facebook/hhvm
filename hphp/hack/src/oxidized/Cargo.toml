@@ -35,7 +35,7 @@ regex = "1.9.2"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml_attr" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
-serde_json = { version = "1.0.125", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
 strum = { version = "0.26.2", features = ["derive"] }
 thiserror = "1.0.64"
 toml = "0.8.4"

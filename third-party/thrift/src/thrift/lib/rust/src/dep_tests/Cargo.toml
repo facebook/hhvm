@@ -18,6 +18,6 @@ fbthrift = { version = "0.0.1+unstable", path = "../.." }
 fbthrift_test_if = { version = "0.0.1+unstable", path = "cargo_thrift" }
 fbthrift_test_if_clients = { version = "0.0.1+unstable", path = "cargo_thrift/clients" }
 proptest = "1.0"
-serde_json = { version = "1.0.125", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
 test_competing_defaults_if = { version = "0.0.1+unstable", path = "cargo_thrift_comdef" }
 test_deprecated_optional_with_default_is_some_if = { version = "0.0.1+unstable", path = "cargo_thrift_optdef" }

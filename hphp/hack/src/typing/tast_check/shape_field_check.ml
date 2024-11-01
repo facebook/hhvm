@@ -16,7 +16,7 @@ module SN = Naming_special_names
  * a boolean to track if the shape was optional or not.
  *)
 let shapes_key_exists env shape field_name =
-  let check pos shape_kind fields =
+  let check env pos shape_kind fields =
     match TShapeMap.find_opt field_name fields with
     | None ->
       if is_nothing shape_kind then
@@ -36,19 +36,18 @@ let shapes_key_exists env shape field_name =
         else
           `Unknown
   in
-  let tenv = Tast_env.tast_env_as_typing_env env in
   let shape = Tast_env.strip_dynamic env shape in
-  let (_, _, shape) = Typing_utils.strip_supportdyn tenv shape in
-  let (_, shape) = Tast_env.expand_type env shape in
+  let (_, shape) = Tast_env.strip_supportdyn env shape in
+  let (env, shape) = Tast_env.expand_type env shape in
   match get_node shape with
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields } ->
-    (check (get_pos shape) shape_kind fields, false)
+    (check env (get_pos shape) shape_kind fields, false)
   | Toption maybe_shape ->
-    let (_, shape) = Tast_env.expand_type env maybe_shape in
+    let (env, shape) = Tast_env.expand_type env maybe_shape in
     (match get_node shape with
     | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fields }
       ->
-      (check (get_pos shape) shape_kind fields, true)
+      (check env (get_pos shape) shape_kind fields, true)
     | _ -> (`Unknown, true))
   | _ -> (`Unknown, false)
 

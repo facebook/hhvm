@@ -157,11 +157,11 @@ func main() {
 }
 
 func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
-	socket, err := thrift.NewServerSocket(addr)
+	listener, err := thrift.NewListener(addr)
 	if err != nil {
 		return nil, nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDUpgradeToRocket), socket.Addr(), nil
+	return thrift.NewSimpleServer(processor, listener, thrift.TransportIDUpgradeToRocket), listener.Addr(), nil
 }
 
 type dataConformanceServiceHandler struct {

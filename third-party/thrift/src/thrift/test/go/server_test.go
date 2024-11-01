@@ -37,13 +37,13 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	ctx, cancel := context.WithCancel(context.Background())
 	processor := thrifttest.NewThriftTestProcessor(handler)
 
-	transport, err := thrift.NewServerSocket("[::]:0")
+	listener, err := thrift.NewListener("[::]:0")
 	if err != nil {
 		return cancel, nil, fmt.Errorf("failed to open test socket: %w", err)
 	}
-	taddr := transport.Addr()
+	taddr := listener.Addr()
 
-	server := thrift.NewSimpleServer(processor, transport, thrift.TransportIDHeader)
+	server := thrift.NewSimpleServer(processor, listener, thrift.TransportIDHeader)
 	go func(server thrift.Server) {
 		err = server.ServeContext(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {

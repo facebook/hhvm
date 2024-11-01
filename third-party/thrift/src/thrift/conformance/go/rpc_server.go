@@ -64,11 +64,11 @@ func main() {
 }
 
 func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
-	socket, err := thrift.NewServerSocket(addr)
+	listener, err := thrift.NewListener(addr)
 	if err != nil {
 		return nil, nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDRocket), socket.Addr(), nil
+	return thrift.NewSimpleServer(processor, listener, thrift.TransportIDRocket), listener.Addr(), nil
 }
 
 type rpcConformanceServiceHandler struct {

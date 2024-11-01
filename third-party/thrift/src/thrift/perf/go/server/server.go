@@ -45,11 +45,11 @@ func Serve(addr string) error {
 }
 
 func newServer(processor thrift.Processor, addr string) (thrift.Server, error) {
-	socket, err := thrift.NewServerSocket(addr)
+	listener, err := thrift.NewListener(addr)
 	if err != nil {
 		return nil, err
 	}
-	return thrift.NewSimpleServer(processor, socket, thrift.TransportIDUpgradeToRocket), nil
+	return thrift.NewSimpleServer(processor, listener, thrift.TransportIDUpgradeToRocket), nil
 }
 
 // Echo - does echo

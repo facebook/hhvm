@@ -197,33 +197,28 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "module.Metasyntactic", premadeCodecTypeSpec_module_Metasyntactic })
-        results = append(results, codecSpecWithFullName{ "module.MyEnum1", premadeCodecTypeSpec_module_MyEnum1 })
-        results = append(results, codecSpecWithFullName{ "module.MyEnum2", premadeCodecTypeSpec_module_MyEnum2 })
-        results = append(results, codecSpecWithFullName{ "module.MyEnum3", premadeCodecTypeSpec_module_MyEnum3 })
-        results = append(results, codecSpecWithFullName{ "module.MyEnum4", premadeCodecTypeSpec_module_MyEnum4 })
-        results = append(results, codecSpecWithFullName{ "module.MyBitmaskEnum1", premadeCodecTypeSpec_module_MyBitmaskEnum1 })
-        results = append(results, codecSpecWithFullName{ "module.MyBitmaskEnum2", premadeCodecTypeSpec_module_MyBitmaskEnum2 })
-        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        results = append(results, codecSpecWithFullName{ "module.SomeStruct", premadeCodecTypeSpec_module_SomeStruct })
-        results = append(results, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Metasyntactic", premadeCodecTypeSpec_module_Metasyntactic })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyEnum1", premadeCodecTypeSpec_module_MyEnum1 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyEnum2", premadeCodecTypeSpec_module_MyEnum2 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyEnum3", premadeCodecTypeSpec_module_MyEnum3 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyEnum4", premadeCodecTypeSpec_module_MyEnum4 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyBitmaskEnum1", premadeCodecTypeSpec_module_MyBitmaskEnum1 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyBitmaskEnum2", premadeCodecTypeSpec_module_MyBitmaskEnum2 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.SomeStruct", premadeCodecTypeSpec_module_SomeStruct })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

@@ -116,37 +116,32 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        results = append(results, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
-        results = append(results, thriftTypeWithFullName{ "module.containerTypedef", premadeThriftType_module_containerTypedef })
-        results = append(results, thriftTypeWithFullName{ "module.ComplexUnion", premadeThriftType_module_ComplexUnion })
-        results = append(results, thriftTypeWithFullName{ "module.ListUnion", premadeThriftType_module_ListUnion })
-        results = append(results, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
-        results = append(results, thriftTypeWithFullName{ "module.DataUnion", premadeThriftType_module_DataUnion })
-        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-        results = append(results, thriftTypeWithFullName{ "module.Val", premadeThriftType_module_Val })
-        results = append(results, thriftTypeWithFullName{ "module.ValUnion", premadeThriftType_module_ValUnion })
-        results = append(results, thriftTypeWithFullName{ "module.VirtualComplexUnion", premadeThriftType_module_VirtualComplexUnion })
-        results = append(results, thriftTypeWithFullName{ "module.NonCopyableStruct", premadeThriftType_module_NonCopyableStruct })
-        results = append(results, thriftTypeWithFullName{ "module.NonCopyableUnion", premadeThriftType_module_NonCopyableUnion })
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i16", premadeThriftType_i16 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.containerTypedef", premadeThriftType_module_containerTypedef })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ComplexUnion", premadeThriftType_module_ComplexUnion })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ListUnion", premadeThriftType_module_ListUnion })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "binary", premadeThriftType_binary })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.DataUnion", premadeThriftType_module_DataUnion })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Val", premadeThriftType_module_Val })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ValUnion", premadeThriftType_module_ValUnion })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.VirtualComplexUnion", premadeThriftType_module_VirtualComplexUnion })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.NonCopyableStruct", premadeThriftType_module_NonCopyableStruct })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.NonCopyableUnion", premadeThriftType_module_NonCopyableUnion })
+
+        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -154,8 +149,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*metadata.ThriftStruct, 0)
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.ComplexUnion").
     SetIsUnion(true).
     SetFields(
@@ -192,7 +187,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.ListUnion").
     SetIsUnion(true).
     SetFields(
@@ -209,7 +204,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_list_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.DataUnion").
     SetIsUnion(true).
     SetFields(
@@ -226,7 +221,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.Val").
     SetIsUnion(false).
     SetFields(
@@ -248,7 +243,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_module_containerTypedef),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.ValUnion").
     SetIsUnion(true).
     SetFields(
@@ -265,7 +260,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_module_Val),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.VirtualComplexUnion").
     SetIsUnion(true).
     SetFields(
@@ -282,7 +277,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.NonCopyableStruct").
     SetIsUnion(false).
     SetFields(
@@ -294,7 +289,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_i64),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("module.NonCopyableUnion").
     SetIsUnion(true).
     SetFields(
@@ -306,7 +301,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_module_NonCopyableStruct),
         },
     ))
-        return results
+        return fbthriftThriftStructs
     },
 )
 

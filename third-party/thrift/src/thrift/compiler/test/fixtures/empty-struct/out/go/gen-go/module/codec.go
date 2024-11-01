@@ -75,25 +75,20 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "module.Empty", premadeCodecTypeSpec_module_Empty })
-        results = append(results, codecSpecWithFullName{ "module.Nada", premadeCodecTypeSpec_module_Nada })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Empty", premadeCodecTypeSpec_module_Empty })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Nada", premadeCodecTypeSpec_module_Nada })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

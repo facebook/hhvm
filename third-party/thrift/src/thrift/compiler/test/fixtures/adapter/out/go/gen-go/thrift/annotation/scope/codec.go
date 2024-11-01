@@ -330,40 +330,35 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "scope.Transitive", premadeCodecTypeSpec_scope_Transitive })
-        results = append(results, codecSpecWithFullName{ "scope.Program", premadeCodecTypeSpec_scope_Program })
-        results = append(results, codecSpecWithFullName{ "scope.Struct", premadeCodecTypeSpec_scope_Struct })
-        results = append(results, codecSpecWithFullName{ "scope.Union", premadeCodecTypeSpec_scope_Union })
-        results = append(results, codecSpecWithFullName{ "scope.Exception", premadeCodecTypeSpec_scope_Exception })
-        results = append(results, codecSpecWithFullName{ "scope.Field", premadeCodecTypeSpec_scope_Field })
-        results = append(results, codecSpecWithFullName{ "scope.Typedef", premadeCodecTypeSpec_scope_Typedef })
-        results = append(results, codecSpecWithFullName{ "scope.Service", premadeCodecTypeSpec_scope_Service })
-        results = append(results, codecSpecWithFullName{ "scope.Interaction", premadeCodecTypeSpec_scope_Interaction })
-        results = append(results, codecSpecWithFullName{ "scope.Function", premadeCodecTypeSpec_scope_Function })
-        results = append(results, codecSpecWithFullName{ "scope.EnumValue", premadeCodecTypeSpec_scope_EnumValue })
-        results = append(results, codecSpecWithFullName{ "scope.Const", premadeCodecTypeSpec_scope_Const })
-        results = append(results, codecSpecWithFullName{ "scope.Enum", premadeCodecTypeSpec_scope_Enum })
-        results = append(results, codecSpecWithFullName{ "scope.Structured", premadeCodecTypeSpec_scope_Structured })
-        results = append(results, codecSpecWithFullName{ "scope.Interface", premadeCodecTypeSpec_scope_Interface })
-        results = append(results, codecSpecWithFullName{ "scope.RootDefinition", premadeCodecTypeSpec_scope_RootDefinition })
-        results = append(results, codecSpecWithFullName{ "scope.Definition", premadeCodecTypeSpec_scope_Definition })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Transitive", premadeCodecTypeSpec_scope_Transitive })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Program", premadeCodecTypeSpec_scope_Program })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Struct", premadeCodecTypeSpec_scope_Struct })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Union", premadeCodecTypeSpec_scope_Union })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Exception", premadeCodecTypeSpec_scope_Exception })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Field", premadeCodecTypeSpec_scope_Field })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Typedef", premadeCodecTypeSpec_scope_Typedef })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Service", premadeCodecTypeSpec_scope_Service })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Interaction", premadeCodecTypeSpec_scope_Interaction })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Function", premadeCodecTypeSpec_scope_Function })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.EnumValue", premadeCodecTypeSpec_scope_EnumValue })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Const", premadeCodecTypeSpec_scope_Const })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Enum", premadeCodecTypeSpec_scope_Enum })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Structured", premadeCodecTypeSpec_scope_Structured })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Interface", premadeCodecTypeSpec_scope_Interface })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.RootDefinition", premadeCodecTypeSpec_scope_RootDefinition })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Definition", premadeCodecTypeSpec_scope_Definition })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

@@ -72,31 +72,26 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        results = append(results, thriftTypeWithFullName{ "python.Py3Hidden", premadeThriftType_python_Py3Hidden })
-        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        results = append(results, thriftTypeWithFullName{ "python.PyDeprecatedHidden", premadeThriftType_python_PyDeprecatedHidden })
-        results = append(results, thriftTypeWithFullName{ "python.Flags", premadeThriftType_python_Flags })
-        results = append(results, thriftTypeWithFullName{ "python.Name", premadeThriftType_python_Name })
-        results = append(results, thriftTypeWithFullName{ "python.Adapter", premadeThriftType_python_Adapter })
-        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-        results = append(results, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3Hidden", premadeThriftType_python_Py3Hidden })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.PyDeprecatedHidden", premadeThriftType_python_PyDeprecatedHidden })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Flags", premadeThriftType_python_Flags })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Name", premadeThriftType_python_Name })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Adapter", premadeThriftType_python_Adapter })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
+
+        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -104,11 +99,11 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*metadata.ThriftStruct, 0)
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.Py3Hidden").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.PyDeprecatedHidden").
     SetIsUnion(false).
     SetFields(
@@ -120,10 +115,10 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.Flags").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.Name").
     SetIsUnion(false).
     SetFields(
@@ -135,7 +130,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -152,7 +147,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("python.UseCAPI").
     SetIsUnion(false).
     SetFields(
@@ -164,7 +159,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        return results
+        return fbthriftThriftStructs
     },
 )
 

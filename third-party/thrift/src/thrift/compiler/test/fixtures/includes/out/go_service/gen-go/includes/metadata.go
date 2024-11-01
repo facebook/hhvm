@@ -57,27 +57,22 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        results = append(results, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
-        results = append(results, thriftTypeWithFullName{ "includes.Included", premadeThriftType_includes_Included })
-        results = append(results, thriftTypeWithFullName{ "includes.IncludedInt64", premadeThriftType_includes_IncludedInt64 })
-        results = append(results, thriftTypeWithFullName{ "includes.TransitiveFoo", premadeThriftType_includes_TransitiveFoo })
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i64", premadeThriftType_i64 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.Included", premadeThriftType_includes_Included })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.IncludedInt64", premadeThriftType_includes_IncludedInt64 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "includes.TransitiveFoo", premadeThriftType_includes_TransitiveFoo })
+
+        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -85,8 +80,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*metadata.ThriftStruct, 0)
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("includes.Included").
     SetIsUnion(false).
     SetFields(
@@ -103,7 +98,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(transitive.GetMetadataThriftType("transitive.Foo")),
         },
     ))
-        return results
+        return fbthriftThriftStructs
     },
 )
 

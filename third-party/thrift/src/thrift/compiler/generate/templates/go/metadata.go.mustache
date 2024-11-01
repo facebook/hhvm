@@ -70,28 +70,23 @@ type thriftTypeWithFullName struct {
     thriftType *{{program:metadata_qualifier}}ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        {{#program:thrift_metadata_types}}
-        {{#type:named?}}
-        results = append(results, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
-        {{/type:named?}}
-        {{/program:thrift_metadata_types}}
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*{{program:metadata_qualifier}}ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        {{#program:thrift_metadata_types}}
+        {{#type:named?}}
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
+        {{/type:named?}}
+        {{/program:thrift_metadata_types}}
+
+        fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -99,13 +94,13 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
+        fbthriftThriftStructs := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
         {{#program:structs}}
         {{^struct:exception?}}
-        results = append(results, {{> metadata/thrift_metadata_struct}})
+        fbthriftThriftStructs = append(fbthriftThriftStructs, {{> metadata/thrift_metadata_struct}})
         {{/struct:exception?}}
         {{/program:structs}}
-        return results
+        return fbthriftThriftStructs
     },
 )
 

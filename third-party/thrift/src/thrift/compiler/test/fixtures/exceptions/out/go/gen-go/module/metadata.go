@@ -81,33 +81,28 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        results = append(results, thriftTypeWithFullName{ "module.Fiery", premadeThriftType_module_Fiery })
-        results = append(results, thriftTypeWithFullName{ "module.Serious", premadeThriftType_module_Serious })
-        results = append(results, thriftTypeWithFullName{ "module.ComplexFieldNames", premadeThriftType_module_ComplexFieldNames })
-        results = append(results, thriftTypeWithFullName{ "module.CustomFieldNames", premadeThriftType_module_CustomFieldNames })
-        results = append(results, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
-        results = append(results, thriftTypeWithFullName{ "module.ExceptionWithPrimitiveField", premadeThriftType_module_ExceptionWithPrimitiveField })
-        results = append(results, thriftTypeWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeThriftType_module_ExceptionWithStructuredAnnotation })
-        results = append(results, thriftTypeWithFullName{ "module.Banal", premadeThriftType_module_Banal })
-        results = append(results, thriftTypeWithFullName{ "void", premadeThriftType_void })
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Fiery", premadeThriftType_module_Fiery })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Serious", premadeThriftType_module_Serious })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ComplexFieldNames", premadeThriftType_module_ComplexFieldNames })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.CustomFieldNames", premadeThriftType_module_CustomFieldNames })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "i32", premadeThriftType_i32 })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ExceptionWithPrimitiveField", premadeThriftType_module_ExceptionWithPrimitiveField })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeThriftType_module_ExceptionWithStructuredAnnotation })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Banal", premadeThriftType_module_Banal })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "void", premadeThriftType_void })
+
+        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -115,8 +110,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*metadata.ThriftStruct, 0)
-        return results
+        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
+        return fbthriftThriftStructs
     },
 )
 

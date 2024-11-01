@@ -421,43 +421,38 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "thrift.RpcPriority", premadeCodecTypeSpec_thrift_RpcPriority })
-        results = append(results, codecSpecWithFullName{ "thrift.Experimental", premadeCodecTypeSpec_thrift_Experimental })
-        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        results = append(results, codecSpecWithFullName{ "thrift.ReserveIds", premadeCodecTypeSpec_thrift_ReserveIds })
-        results = append(results, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
-        results = append(results, codecSpecWithFullName{ "thrift.RequiresBackwardCompatibility", premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility })
-        results = append(results, codecSpecWithFullName{ "thrift.TerseWrite", premadeCodecTypeSpec_thrift_TerseWrite })
-        results = append(results, codecSpecWithFullName{ "thrift.Box", premadeCodecTypeSpec_thrift_Box })
-        results = append(results, codecSpecWithFullName{ "thrift.Mixin", premadeCodecTypeSpec_thrift_Mixin })
-        results = append(results, codecSpecWithFullName{ "thrift.SerializeInFieldIdOrder", premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder })
-        results = append(results, codecSpecWithFullName{ "thrift.BitmaskEnum", premadeCodecTypeSpec_thrift_BitmaskEnum })
-        results = append(results, codecSpecWithFullName{ "thrift.ExceptionMessage", premadeCodecTypeSpec_thrift_ExceptionMessage })
-        results = append(results, codecSpecWithFullName{ "thrift.InternBox", premadeCodecTypeSpec_thrift_InternBox })
-        results = append(results, codecSpecWithFullName{ "thrift.Serial", premadeCodecTypeSpec_thrift_Serial })
-        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        results = append(results, codecSpecWithFullName{ "thrift.Uri", premadeCodecTypeSpec_thrift_Uri })
-        results = append(results, codecSpecWithFullName{ "thrift.Priority", premadeCodecTypeSpec_thrift_Priority })
-        results = append(results, codecSpecWithFullName{ "thrift.DeprecatedUnvalidatedAnnotations", premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations })
-        results = append(results, codecSpecWithFullName{ "thrift.AllowReservedIdentifier", premadeCodecTypeSpec_thrift_AllowReservedIdentifier })
-        results = append(results, codecSpecWithFullName{ "thrift.AllowReservedFilename", premadeCodecTypeSpec_thrift_AllowReservedFilename })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.RpcPriority", premadeCodecTypeSpec_thrift_RpcPriority })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Experimental", premadeCodecTypeSpec_thrift_Experimental })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.ReserveIds", premadeCodecTypeSpec_thrift_ReserveIds })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.RequiresBackwardCompatibility", premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.TerseWrite", premadeCodecTypeSpec_thrift_TerseWrite })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Box", premadeCodecTypeSpec_thrift_Box })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Mixin", premadeCodecTypeSpec_thrift_Mixin })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.SerializeInFieldIdOrder", premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.BitmaskEnum", premadeCodecTypeSpec_thrift_BitmaskEnum })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.ExceptionMessage", premadeCodecTypeSpec_thrift_ExceptionMessage })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.InternBox", premadeCodecTypeSpec_thrift_InternBox })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Serial", premadeCodecTypeSpec_thrift_Serial })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Uri", premadeCodecTypeSpec_thrift_Uri })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Priority", premadeCodecTypeSpec_thrift_Priority })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.DeprecatedUnvalidatedAnnotations", premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.AllowReservedIdentifier", premadeCodecTypeSpec_thrift_AllowReservedIdentifier })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.AllowReservedFilename", premadeCodecTypeSpec_thrift_AllowReservedFilename })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

@@ -142,45 +142,40 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesSliceOnce = sync.OnceValue(
-    func() []thriftTypeWithFullName {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-        results := make([]thriftTypeWithFullName, 0)
-        results = append(results, thriftTypeWithFullName{ "cpp.RefType", premadeThriftType_cpp_RefType })
-        results = append(results, thriftTypeWithFullName{ "cpp.EnumUnderlyingType", premadeThriftType_cpp_EnumUnderlyingType })
-        results = append(results, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        results = append(results, thriftTypeWithFullName{ "cpp.Name", premadeThriftType_cpp_Name })
-        results = append(results, thriftTypeWithFullName{ "cpp.Type", premadeThriftType_cpp_Type })
-        results = append(results, thriftTypeWithFullName{ "cpp.Ref", premadeThriftType_cpp_Ref })
-        results = append(results, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-        results = append(results, thriftTypeWithFullName{ "cpp.Lazy", premadeThriftType_cpp_Lazy })
-        results = append(results, thriftTypeWithFullName{ "cpp.DisableLazyChecksum", premadeThriftType_cpp_DisableLazyChecksum })
-        results = append(results, thriftTypeWithFullName{ "cpp.Adapter", premadeThriftType_cpp_Adapter })
-        results = append(results, thriftTypeWithFullName{ "cpp.PackIsset", premadeThriftType_cpp_PackIsset })
-        results = append(results, thriftTypeWithFullName{ "cpp.MinimizePadding", premadeThriftType_cpp_MinimizePadding })
-        results = append(results, thriftTypeWithFullName{ "cpp.ScopedEnumAsUnionType", premadeThriftType_cpp_ScopedEnumAsUnionType })
-        results = append(results, thriftTypeWithFullName{ "cpp.FieldInterceptor", premadeThriftType_cpp_FieldInterceptor })
-        results = append(results, thriftTypeWithFullName{ "cpp.UseOpEncode", premadeThriftType_cpp_UseOpEncode })
-        results = append(results, thriftTypeWithFullName{ "cpp.EnumType", premadeThriftType_cpp_EnumType })
-        results = append(results, thriftTypeWithFullName{ "cpp.Frozen2Exclude", premadeThriftType_cpp_Frozen2Exclude })
-        results = append(results, thriftTypeWithFullName{ "cpp.Frozen2RequiresCompleteContainerParams", premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams })
-        results = append(results, thriftTypeWithFullName{ "cpp.ProcessInEbThreadUnsafe", premadeThriftType_cpp_ProcessInEbThreadUnsafe })
-        results = append(results, thriftTypeWithFullName{ "cpp.RuntimeAnnotation", premadeThriftType_cpp_RuntimeAnnotation })
-        results = append(results, thriftTypeWithFullName{ "cpp.UseCursorSerialization", premadeThriftType_cpp_UseCursorSerialization })
-        results = append(results, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
-        return results
-    },
-)
-
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := premadeThriftTypesSliceOnce()
-        results := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+        // Relies on premade Thrift types initialization
+        premadeThriftTypesInitOnce()
+
+        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RefType", premadeThriftType_cpp_RefType })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnumUnderlyingType", premadeThriftType_cpp_EnumUnderlyingType })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Name", premadeThriftType_cpp_Name })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Type", premadeThriftType_cpp_Type })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Ref", premadeThriftType_cpp_Ref })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Lazy", premadeThriftType_cpp_Lazy })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.DisableLazyChecksum", premadeThriftType_cpp_DisableLazyChecksum })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Adapter", premadeThriftType_cpp_Adapter })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.PackIsset", premadeThriftType_cpp_PackIsset })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.MinimizePadding", premadeThriftType_cpp_MinimizePadding })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.ScopedEnumAsUnionType", premadeThriftType_cpp_ScopedEnumAsUnionType })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.FieldInterceptor", premadeThriftType_cpp_FieldInterceptor })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.UseOpEncode", premadeThriftType_cpp_UseOpEncode })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnumType", premadeThriftType_cpp_EnumType })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Frozen2Exclude", premadeThriftType_cpp_Frozen2Exclude })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.Frozen2RequiresCompleteContainerParams", premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.ProcessInEbThreadUnsafe", premadeThriftType_cpp_ProcessInEbThreadUnsafe })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RuntimeAnnotation", premadeThriftType_cpp_RuntimeAnnotation })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.UseCursorSerialization", premadeThriftType_cpp_UseCursorSerialization })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
+
+        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
-            results[value.fullName] = value.thriftType
+            fbthriftThriftTypesMap[value.fullName] = value.thriftType
         }
-        return results
+        return fbthriftThriftTypesMap
     },
 )
 
@@ -188,8 +183,8 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        results := make([]*metadata.ThriftStruct, 0)
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Name").
     SetIsUnion(false).
     SetFields(
@@ -201,7 +196,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Type").
     SetIsUnion(false).
     SetFields(
@@ -218,7 +213,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Ref").
     SetIsUnion(false).
     SetFields(
@@ -230,7 +225,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_cpp_RefType),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Lazy").
     SetIsUnion(false).
     SetFields(
@@ -242,10 +237,10 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.DisableLazyChecksum").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -277,7 +272,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.PackIsset").
     SetIsUnion(false).
     SetFields(
@@ -289,13 +284,13 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.MinimizePadding").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.ScopedEnumAsUnionType").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.FieldInterceptor").
     SetIsUnion(false).
     SetFields(
@@ -312,10 +307,10 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.UseOpEncode").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.EnumType").
     SetIsUnion(false).
     SetFields(
@@ -327,25 +322,25 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_cpp_EnumUnderlyingType),
         },
     ))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Frozen2Exclude").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.Frozen2RequiresCompleteContainerParams").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.ProcessInEbThreadUnsafe").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.RuntimeAnnotation").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.UseCursorSerialization").
     SetIsUnion(false))
-        results = append(results, metadata.NewThriftStruct().
+        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
     SetName("cpp.GenerateDeprecatedHeaderClientMethods").
     SetIsUnion(false))
-        return results
+        return fbthriftThriftStructs
     },
 )
 

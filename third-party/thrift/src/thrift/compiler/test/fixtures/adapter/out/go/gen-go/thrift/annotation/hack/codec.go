@@ -325,34 +325,29 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        results = append(results, codecSpecWithFullName{ "hack.FieldWrapper", premadeCodecTypeSpec_hack_FieldWrapper })
-        results = append(results, codecSpecWithFullName{ "hack.Wrapper", premadeCodecTypeSpec_hack_Wrapper })
-        results = append(results, codecSpecWithFullName{ "hack.Adapter", premadeCodecTypeSpec_hack_Adapter })
-        results = append(results, codecSpecWithFullName{ "hack.SkipCodegen", premadeCodecTypeSpec_hack_SkipCodegen })
-        results = append(results, codecSpecWithFullName{ "hack.Name", premadeCodecTypeSpec_hack_Name })
-        results = append(results, codecSpecWithFullName{ "hack.UnionEnumAttributes", premadeCodecTypeSpec_hack_UnionEnumAttributes })
-        results = append(results, codecSpecWithFullName{ "hack.StructTrait", premadeCodecTypeSpec_hack_StructTrait })
-        results = append(results, codecSpecWithFullName{ "hack.Attributes", premadeCodecTypeSpec_hack_Attributes })
-        results = append(results, codecSpecWithFullName{ "hack.StructAsTrait", premadeCodecTypeSpec_hack_StructAsTrait })
-        results = append(results, codecSpecWithFullName{ "hack.ModuleInternal", premadeCodecTypeSpec_hack_ModuleInternal })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.FieldWrapper", premadeCodecTypeSpec_hack_FieldWrapper })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Wrapper", premadeCodecTypeSpec_hack_Wrapper })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Adapter", premadeCodecTypeSpec_hack_Adapter })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.SkipCodegen", premadeCodecTypeSpec_hack_SkipCodegen })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Name", premadeCodecTypeSpec_hack_Name })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.UnionEnumAttributes", premadeCodecTypeSpec_hack_UnionEnumAttributes })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.StructTrait", premadeCodecTypeSpec_hack_StructTrait })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Attributes", premadeCodecTypeSpec_hack_Attributes })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.StructAsTrait", premadeCodecTypeSpec_hack_StructAsTrait })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.ModuleInternal", premadeCodecTypeSpec_hack_ModuleInternal })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

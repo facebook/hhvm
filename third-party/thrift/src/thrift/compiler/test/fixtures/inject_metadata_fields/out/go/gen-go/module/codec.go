@@ -190,28 +190,23 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        results = append(results, codecSpecWithFullName{ "module.Fields", premadeCodecTypeSpec_module_Fields })
-        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedToEmptyStruct", premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct })
-        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedToStruct", premadeCodecTypeSpec_module_FieldsInjectedToStruct })
-        results = append(results, codecSpecWithFullName{ "module.FieldsInjectedWithIncludedStruct", premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Fields", premadeCodecTypeSpec_module_Fields })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.FieldsInjectedToEmptyStruct", premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.FieldsInjectedToStruct", premadeCodecTypeSpec_module_FieldsInjectedToStruct })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.FieldsInjectedWithIncludedStruct", premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

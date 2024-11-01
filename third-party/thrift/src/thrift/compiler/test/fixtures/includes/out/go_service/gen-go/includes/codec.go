@@ -99,27 +99,22 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
-        results = append(results, codecSpecWithFullName{ "includes.Included", premadeCodecTypeSpec_includes_Included })
-        results = append(results, codecSpecWithFullName{ "includes.IncludedInt64", premadeCodecTypeSpec_includes_IncludedInt64 })
-        results = append(results, codecSpecWithFullName{ "includes.TransitiveFoo", premadeCodecTypeSpec_includes_TransitiveFoo })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "includes.Included", premadeCodecTypeSpec_includes_Included })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "includes.IncludedInt64", premadeCodecTypeSpec_includes_IncludedInt64 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "includes.TransitiveFoo", premadeCodecTypeSpec_includes_TransitiveFoo })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

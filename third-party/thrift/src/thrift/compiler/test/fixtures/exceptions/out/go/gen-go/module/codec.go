@@ -423,33 +423,28 @@ type codecSpecWithFullName struct {
     typeSpec *thrift.TypeSpec
 }
 
-var premadeCodecSpecsSliceOnce = sync.OnceValue(
-    func() []codecSpecWithFullName {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-        results := make([]codecSpecWithFullName, 0)
-        results = append(results, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        results = append(results, codecSpecWithFullName{ "module.Fiery", premadeCodecTypeSpec_module_Fiery })
-        results = append(results, codecSpecWithFullName{ "module.Serious", premadeCodecTypeSpec_module_Serious })
-        results = append(results, codecSpecWithFullName{ "module.ComplexFieldNames", premadeCodecTypeSpec_module_ComplexFieldNames })
-        results = append(results, codecSpecWithFullName{ "module.CustomFieldNames", premadeCodecTypeSpec_module_CustomFieldNames })
-        results = append(results, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        results = append(results, codecSpecWithFullName{ "module.ExceptionWithPrimitiveField", premadeCodecTypeSpec_module_ExceptionWithPrimitiveField })
-        results = append(results, codecSpecWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation })
-        results = append(results, codecSpecWithFullName{ "module.Banal", premadeCodecTypeSpec_module_Banal })
-        results = append(results, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
-        return results
-    },
-)
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        codecSpecsWithFullName := premadeCodecSpecsSliceOnce()
-        results := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
+        // Relies on premade codec specs initialization
+        premadeCodecSpecsInitOnce()
+
+        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Fiery", premadeCodecTypeSpec_module_Fiery })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Serious", premadeCodecTypeSpec_module_Serious })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ComplexFieldNames", premadeCodecTypeSpec_module_ComplexFieldNames })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.CustomFieldNames", premadeCodecTypeSpec_module_CustomFieldNames })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ExceptionWithPrimitiveField", premadeCodecTypeSpec_module_ExceptionWithPrimitiveField })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Banal", premadeCodecTypeSpec_module_Banal })
+        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
+
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
         for _, value := range codecSpecsWithFullName {
-            results[value.fullName] = value.typeSpec
+            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
         }
-        return results
+        return fbthriftTypeSpecsMap
     },
 )
 

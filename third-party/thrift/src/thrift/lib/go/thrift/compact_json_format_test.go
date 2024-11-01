@@ -713,3 +713,7 @@ func TestWriteJSONProtocolMap(t *testing.T) {
 	}
 	trans.Close()
 }
+
+func TestCompactJSONProtocolUnmatchedBeginEnd(t *testing.T) {
+	UnmatchedBeginEndProtocolTest(t, NewCompactJSONFormat)
+}

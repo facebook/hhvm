@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -32,12 +33,13 @@ import (
 type _ParseContext int
 
 const (
-	_CONTEXT_IN_TOPLEVEL          _ParseContext = 1
-	_CONTEXT_IN_LIST_FIRST        _ParseContext = 2
-	_CONTEXT_IN_LIST              _ParseContext = 3
-	_CONTEXT_IN_OBJECT_FIRST      _ParseContext = 4
-	_CONTEXT_IN_OBJECT_NEXT_KEY   _ParseContext = 5
-	_CONTEXT_IN_OBJECT_NEXT_VALUE _ParseContext = 6
+	_CONTEXT_INVALID              _ParseContext = iota
+	_CONTEXT_IN_TOPLEVEL                        // 1
+	_CONTEXT_IN_LIST_FIRST                      // 2
+	_CONTEXT_IN_LIST                            // 3
+	_CONTEXT_IN_OBJECT_FIRST                    // 4
+	_CONTEXT_IN_OBJECT_NEXT_KEY                 // 5
+	_CONTEXT_IN_OBJECT_NEXT_VALUE               // 6
 )
 
 func (p _ParseContext) String() string {
@@ -58,6 +60,32 @@ func (p _ParseContext) String() string {
 	return "UNKNOWN-PARSE-CONTEXT"
 }
 
+type jsonContextStack []_ParseContext
+
+func (s *jsonContextStack) push(v _ParseContext) {
+	*s = append(*s, v)
+}
+
+func (s jsonContextStack) peek() (v _ParseContext, ok bool) {
+	l := len(s)
+	if l <= 0 {
+		return
+	}
+	return s[l-1], true
+}
+
+func (s *jsonContextStack) pop() (v _ParseContext, ok bool) {
+	l := len(*s)
+	if l <= 0 {
+		return
+	}
+	v = (*s)[l-1]
+	*s = (*s)[0 : l-1]
+	return v, true
+}
+
+var errEmptyJSONContextStack = types.NewProtocolExceptionWithType(types.INVALID_DATA, errors.New("Unexpected empty json protocol context stack"))
+
 // JSON protocol implementation for thrift.
 //
 // This protocol produces/consumes a simple output format
@@ -66,8 +94,8 @@ func (p _ParseContext) String() string {
 type simpleJSONFormat struct {
 	buffer io.ReadWriteCloser
 
-	parseContextStack []int
-	dumpContext       []int
+	parseContextStack jsonContextStack
+	dumpContext       jsonContextStack
 
 	writer *bufio.Writer
 	reader *bufio.Reader
@@ -85,8 +113,7 @@ func newSimpleJSONFormat(buffer io.ReadWriteCloser) *simpleJSONFormat {
 		writer: bufio.NewWriter(buffer),
 		reader: bufio.NewReader(buffer),
 	}
-	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
-	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
+	v.resetContextStack()
 	return v
 }
 
@@ -524,7 +551,10 @@ func (p *simpleJSONFormat) Close() error {
 }
 
 func (p *simpleJSONFormat) OutputPreValue() error {
-	cxt := _ParseContext(p.dumpContext[len(p.dumpContext)-1])
+	cxt, ok := p.dumpContext.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	switch cxt {
 	case _CONTEXT_IN_LIST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		if _, e := p.write(types.JSON_COMMA); e != nil {
@@ -539,20 +569,23 @@ func (p *simpleJSONFormat) OutputPreValue() error {
 }
 
 func (p *simpleJSONFormat) OutputPostValue() error {
-	cxt := _ParseContext(p.dumpContext[len(p.dumpContext)-1])
+	cxt, ok := p.dumpContext.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	switch cxt {
 	case _CONTEXT_IN_LIST_FIRST:
-		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
-		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_LIST))
+		p.dumpContext.pop()
+		p.dumpContext.push(_CONTEXT_IN_LIST)
 	case _CONTEXT_IN_OBJECT_FIRST:
-		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
-		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
+		p.dumpContext.pop()
+		p.dumpContext.push(_CONTEXT_IN_OBJECT_NEXT_VALUE)
 	case _CONTEXT_IN_OBJECT_NEXT_KEY:
-		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
-		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
+		p.dumpContext.pop()
+		p.dumpContext.push(_CONTEXT_IN_OBJECT_NEXT_VALUE)
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
-		p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
-		p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_NEXT_KEY))
+		p.dumpContext.pop()
+		p.dumpContext.push(_CONTEXT_IN_OBJECT_NEXT_KEY)
 	}
 	return nil
 }
@@ -567,7 +600,11 @@ func (p *simpleJSONFormat) OutputBool(value bool) error {
 	} else {
 		v = string(types.JSON_FALSE)
 	}
-	switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
+	cxt, ok := p.dumpContext.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
+	switch cxt {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
 	}
@@ -599,8 +636,12 @@ func (p *simpleJSONFormat) OutputF64(value float64) error {
 	} else if math.IsInf(value, -1) {
 		v = string(types.JSON_QUOTE) + types.JSON_NEGATIVE_INFINITY + string(types.JSON_QUOTE)
 	} else {
+		cxt, ok := p.dumpContext.peek()
+		if !ok {
+			return errEmptyJSONContextStack
+		}
 		v = strconv.FormatFloat(value, 'g', -1, 64)
-		switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
+		switch cxt {
 		case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 			v = string(types.JSON_QUOTE) + v + string(types.JSON_QUOTE)
 		}
@@ -623,8 +664,12 @@ func (p *simpleJSONFormat) OutputF32(value float32) error {
 	} else if math.IsInf(float64(value), -1) {
 		v = string(types.JSON_QUOTE) + types.JSON_NEGATIVE_INFINITY + string(types.JSON_QUOTE)
 	} else {
+		cxt, ok := p.dumpContext.peek()
+		if !ok {
+			return errEmptyJSONContextStack
+		}
 		v = strconv.FormatFloat(float64(value), 'g', -1, 32)
-		switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
+		switch cxt {
 		case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 			v = string(types.JSON_QUOTE) + v + string(types.JSON_QUOTE)
 		}
@@ -639,8 +684,12 @@ func (p *simpleJSONFormat) OutputI64(value int64) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
+	cxt, ok := p.dumpContext.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	v := strconv.FormatInt(value, 10)
-	switch _ParseContext(p.dumpContext[len(p.dumpContext)-1]) {
+	switch cxt {
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
 		v = jsonQuote(v)
 	}
@@ -672,7 +721,7 @@ func (p *simpleJSONFormat) OutputObjectBegin() error {
 	if _, e := p.write(types.JSON_LBRACE); e != nil {
 		return types.NewProtocolException(e)
 	}
-	p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_OBJECT_FIRST))
+	p.dumpContext.push(_CONTEXT_IN_OBJECT_FIRST)
 	return nil
 }
 
@@ -680,7 +729,10 @@ func (p *simpleJSONFormat) OutputObjectEnd() error {
 	if _, e := p.write(types.JSON_RBRACE); e != nil {
 		return types.NewProtocolException(e)
 	}
-	p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
+	_, ok := p.dumpContext.pop()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	if e := p.OutputPostValue(); e != nil {
 		return e
 	}
@@ -694,7 +746,7 @@ func (p *simpleJSONFormat) OutputListBegin() error {
 	if _, e := p.write(types.JSON_LBRACKET); e != nil {
 		return types.NewProtocolException(e)
 	}
-	p.dumpContext = append(p.dumpContext, int(_CONTEXT_IN_LIST_FIRST))
+	p.dumpContext.push(_CONTEXT_IN_LIST_FIRST)
 	return nil
 }
 
@@ -702,7 +754,10 @@ func (p *simpleJSONFormat) OutputListEnd() error {
 	if _, e := p.write(types.JSON_RBRACKET); e != nil {
 		return types.NewProtocolException(e)
 	}
-	p.dumpContext = p.dumpContext[:len(p.dumpContext)-1]
+	_, ok := p.dumpContext.pop()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	if e := p.OutputPostValue(); e != nil {
 		return e
 	}
@@ -726,7 +781,10 @@ func (p *simpleJSONFormat) ParsePreValue() error {
 	if e := p.readNonSignificantWhitespace(); e != nil {
 		return types.NewProtocolException(e)
 	}
-	cxt := _ParseContext(p.parseContextStack[len(p.parseContextStack)-1])
+	cxt, ok := p.parseContextStack.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	b, _ := p.reader.Peek(1)
 	switch cxt {
 	case _CONTEXT_IN_LIST:
@@ -783,17 +841,20 @@ func (p *simpleJSONFormat) ParsePostValue() error {
 	if e := p.readNonSignificantWhitespace(); e != nil {
 		return types.NewProtocolException(e)
 	}
-	cxt := _ParseContext(p.parseContextStack[len(p.parseContextStack)-1])
+	cxt, ok := p.parseContextStack.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	switch cxt {
 	case _CONTEXT_IN_LIST_FIRST:
-		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
-		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_LIST))
+		p.parseContextStack.pop()
+		p.parseContextStack.push(_CONTEXT_IN_LIST)
 	case _CONTEXT_IN_OBJECT_FIRST, _CONTEXT_IN_OBJECT_NEXT_KEY:
-		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
-		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_OBJECT_NEXT_VALUE))
+		p.parseContextStack.pop()
+		p.parseContextStack.push(_CONTEXT_IN_OBJECT_NEXT_VALUE)
 	case _CONTEXT_IN_OBJECT_NEXT_VALUE:
-		p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
-		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_OBJECT_NEXT_KEY))
+		p.parseContextStack.pop()
+		p.parseContextStack.push(_CONTEXT_IN_OBJECT_NEXT_KEY)
 	}
 	return nil
 }
@@ -966,7 +1027,7 @@ func (p *simpleJSONFormat) ParseObjectStart() (bool, error) {
 	}
 	if len(b) > 0 && b[0] == types.JSON_LBRACE[0] {
 		p.reader.ReadByte()
-		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_OBJECT_FIRST))
+		p.parseContextStack.push(_CONTEXT_IN_OBJECT_FIRST)
 		return false, nil
 	} else if p.safePeekContains(types.JSON_NULL) {
 		return true, nil
@@ -979,7 +1040,10 @@ func (p *simpleJSONFormat) ParseObjectEnd() error {
 	if isNull, err := p.readIfNull(); isNull || err != nil {
 		return err
 	}
-	cxt := _ParseContext(p.parseContextStack[len(p.parseContextStack)-1])
+	cxt, ok := p.parseContextStack.peek()
+	if !ok {
+		return errEmptyJSONContextStack
+	}
 	if (cxt != _CONTEXT_IN_OBJECT_FIRST) && (cxt != _CONTEXT_IN_OBJECT_NEXT_KEY) {
 		e := fmt.Errorf("Expected to be in the Object Context, but not in Object Context (%d)", cxt)
 		return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
@@ -997,7 +1061,7 @@ func (p *simpleJSONFormat) ParseObjectEnd() error {
 			// do nothing
 		}
 	}
-	p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
+	p.parseContextStack.pop()
 	return p.ParsePostValue()
 }
 
@@ -1011,7 +1075,7 @@ func (p *simpleJSONFormat) ParseListBegin() (isNull bool, err error) {
 		return false, err
 	}
 	if len(b) >= 1 && b[0] == types.JSON_LBRACKET[0] {
-		p.parseContextStack = append(p.parseContextStack, int(_CONTEXT_IN_LIST_FIRST))
+		p.parseContextStack.push(_CONTEXT_IN_LIST_FIRST)
 		p.reader.ReadByte()
 		isNull = false
 	} else if p.safePeekContains(types.JSON_NULL) {
@@ -1040,7 +1104,7 @@ func (p *simpleJSONFormat) ParseListEnd() error {
 	if isNull, err := p.readIfNull(); isNull || err != nil {
 		return err
 	}
-	cxt := _ParseContext(p.parseContextStack[len(p.parseContextStack)-1])
+	cxt, _ := p.parseContextStack.peek()
 	if cxt != _CONTEXT_IN_LIST {
 		e := fmt.Errorf("Expected to be in the List Context, but not in List Context (%d)", cxt)
 		return types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
@@ -1058,7 +1122,7 @@ func (p *simpleJSONFormat) ParseListEnd() error {
 			// do nothing
 		}
 	}
-	p.parseContextStack = p.parseContextStack[:len(p.parseContextStack)-1]
+	p.parseContextStack.pop()
 	if _ParseContext(p.parseContextStack[len(p.parseContextStack)-1]) == _CONTEXT_IN_TOPLEVEL {
 		return nil
 	}
@@ -1308,8 +1372,8 @@ func (p *simpleJSONFormat) safePeekContains(b []byte) bool {
 
 // Reset the context stack to its initial state.
 func (p *simpleJSONFormat) resetContextStack() {
-	p.parseContextStack = []int{int(_CONTEXT_IN_TOPLEVEL)}
-	p.dumpContext = []int{int(_CONTEXT_IN_TOPLEVEL)}
+	p.parseContextStack = jsonContextStack{_CONTEXT_IN_TOPLEVEL}
+	p.dumpContext = jsonContextStack{_CONTEXT_IN_TOPLEVEL}
 }
 
 func (p *simpleJSONFormat) write(b []byte) (int, error) {

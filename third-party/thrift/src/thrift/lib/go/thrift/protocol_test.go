@@ -822,3 +822,88 @@ func ReadWriteStruct(t testing.TB, p types.Format, buffer io.ReadWriter) {
 	WriteStruct(t, p, buffer)
 	ReadStruct(t, p, buffer)
 }
+
+func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWriteCloser) types.Format) {
+	// NOTE: not all protocol implementations do strict state check to
+	// return an error on unmatched Begin/End calls.
+	// This test is only meant to make sure that those unmatched Begin/End
+	// calls won't cause panic. There's no real "test" here.
+	trans := NewMemoryBuffer()
+	t.Run("Read", func(t *testing.T) {
+		t.Run("Message", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadMessageEnd()
+			p.ReadMessageEnd()
+		})
+		t.Run("Struct", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadStructEnd()
+			p.ReadStructEnd()
+		})
+		t.Run("Field", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadFieldEnd()
+			p.ReadFieldEnd()
+		})
+		t.Run("Map", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadMapEnd()
+			p.ReadMapEnd()
+		})
+		t.Run("List", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadListEnd()
+			p.ReadListEnd()
+		})
+		t.Run("Set", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.ReadSetEnd()
+			p.ReadSetEnd()
+		})
+	})
+	t.Run("Write", func(t *testing.T) {
+		t.Run("Message", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteMessageEnd()
+			p.WriteMessageEnd()
+		})
+		t.Run("Struct", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteStructEnd()
+			p.WriteStructEnd()
+		})
+		t.Run("Field", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteFieldEnd()
+			p.WriteFieldEnd()
+		})
+		t.Run("Map", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteMapEnd()
+			p.WriteMapEnd()
+		})
+		t.Run("List", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteListEnd()
+			p.WriteListEnd()
+		})
+		t.Run("Set", func(t *testing.T) {
+			trans.Reset()
+			p := formatFactory(trans)
+			p.WriteSetEnd()
+			p.WriteSetEnd()
+		})
+	})
+	trans.Close()
+}

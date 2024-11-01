@@ -56,8 +56,7 @@ var _ types.Format = (*compactJSONFormat)(nil)
 // NewCompactJSONFormat creates a new compact JSON Format.
 func NewCompactJSONFormat(buffer io.ReadWriteCloser) types.Format {
 	v := &compactJSONFormat{simpleJSONFormat: newSimpleJSONFormat(buffer)}
-	v.parseContextStack = append(v.parseContextStack, int(_CONTEXT_IN_TOPLEVEL))
-	v.dumpContext = append(v.dumpContext, int(_CONTEXT_IN_TOPLEVEL))
+	v.resetContextStack()
 	return v
 }
 

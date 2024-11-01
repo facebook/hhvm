@@ -56,15 +56,17 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertEqual(1, digits.data[0].fbthrift_current_value)
         self.assertEqual(1, digits.data[1].fbthrift_current_value)
 
-        # Updating the `digit` instance will update all three instances.
+        # The variables `digit`, `digits.data[0]`  and `digits.data[1]` are
+        # bound to the same instance, so updating `digit` will affect the others.
         digit.small = 5
         self.assertEqual(5, digit.fbthrift_current_value)
         self.assertEqual(5, digits.data[0].fbthrift_current_value)
         self.assertEqual(5, digits.data[1].fbthrift_current_value)
 
-        # Updating through the `digits.data[0]` instance reveals a caching issue.
-        # All of them should have the current value of 10.
+        # The variables `digit`, `digits.data[0]`  and `digits.data[1]` are
+        # bound to the same instance, so updating `digits.data[0]` will affect
+        # the others.
         digits.data[0].medium = 10
-        self.assertEqual(5, digit.fbthrift_current_value)
+        self.assertEqual(10, digit.fbthrift_current_value)
         self.assertEqual(10, digits.data[0].fbthrift_current_value)
         self.assertEqual(10, digits.data[1].fbthrift_current_value)

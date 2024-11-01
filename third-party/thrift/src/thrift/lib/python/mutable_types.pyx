@@ -824,6 +824,7 @@ cdef object _fbthrift_compare_union_less(
 cdef class MutableUnion(MutableStructOrUnion):
     def __cinit__(self):
         self._fbthrift_data = createMutableUnionDataHolder()
+        self._fbthrift_data.append(self)
 
     def __init__(self, **kwargs):
         self_type = type(self)
@@ -1003,14 +1004,47 @@ cdef class MutableUnion(MutableStructOrUnion):
         )
 
     def __copy__(self):
-        return self._fbthrift_create(copy.copy(self._fbthrift_data))
+        # When `copy` is called on an instance (`self`), the instance must
+        # already be populated in `_fbthrift_data`.
+        assert len(self._fbthrift_data) == 3
+        return self._fbthrift_create(copy.copy(self._fbthrift_data[:-1]))
+
+    def __deepcopy__(self, memo):
+        # When `deepcopy` is called on an instance (`self`), the instance must
+        # already be populated in `_fbthrift_data`.
+        assert len(self._fbthrift_data) == 3
+        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
 
     @classmethod
     def _fbthrift_create(cls, data):
+        if cls._fbthrift_has_union_instance(data):
+            # An instance of `MutableUnion` has already created for given
+            # `._fbthrift_data`, just return the previous instance.
+            return data[-1]
+
         cdef MutableUnion inst = cls.__new__(cls)
         inst._fbthrift_data = data
         inst._fbthrift_update_current_field_attributes()
+        # Append `MutableUnion` instance, see `_fbthrift_has_union_instance()`
+        inst._fbthrift_data.append(inst)
         return inst
+
+    @classmethod
+    def _fbthrift_has_union_instance(cls, list fbthrift_data):
+        """
+        `MutableUnion._fbthrift_data` is populated by multiple sources, such as
+        `MutableUnion.__cinit__()` or `MutableUnion._fbthrift_deserialize()`.
+        It stores the `fbthrift_current_field` and `fbthrift_current_value`.
+        If a `MutableUnion` instance is created for a specific `_fbthrift_data`,
+        that instance is appended as the last element. The instance is not
+        considered by the serialization/deserialization logic; it ensures
+        consistency between the union instances that have the same
+        `_fbthrift_data` in the mutable thrift-python runtime.
+
+        This function returns `True` if the given `_fbthrift_data` contains a
+        `MutableUnion` instance.
+        """
+        return len(fbthrift_data) == 3 and isinstance(fbthrift_data[2], cls)
 
     __hash__ = None
 

@@ -612,8 +612,11 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         self.assertTrue(issubclass(fields_enum_type, enum.Enum))
         self.assertIsInstance(fields_enum_type, enum.EnumMeta)
 
-        # NOTE: Name differs from immutable version
-        self.assertEqual(fields_enum_type.__name__, "FbThriftUnionFieldEnum_TestUnion")
+        # Even though the name of the union class itself is not
+        # the best name for the FbThriftUnionFieldEnum,
+        # to ensure consistency between the immutable and mutable versions,
+        # it must have that name:
+        self.assertEqual(fields_enum_type.__name__, "TestUnion")
 
         # NOTE: "empty" value for mutable is different from immutable.
         self.assertCountEqual(

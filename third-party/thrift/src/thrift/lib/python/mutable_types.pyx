@@ -665,7 +665,7 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
                                         field_info.py_name,
                                         field_info.qualifier,
                                         field_info.idl_type,
-                                        field_info.adapter_info)) 
+                                        field_info.adapter_info))
         else:
             primitive_types.append((field_index,
                                     field_info.py_name,
@@ -957,7 +957,7 @@ cdef class MutableUnion(MutableStructOrUnion):
             assert field_internal_data is None
 
         # DO_BEFORE(aristidis,20240701): Determine logic for accessing adapted fields
-        # in unions (there seems to be a discrepancy with structs, see 
+        # in unions (there seems to be a discrepancy with structs, see
         # `MutableStruct._fbthrift_get_field_value()`).
         if field_internal_data is None:
             return None
@@ -1198,7 +1198,7 @@ class MutableUnionMeta(type):
         )
 
         union_class_namespace["FbThriftUnionFieldEnum"] = enum.Enum(
-            f"FbThriftUnionFieldEnum_{union_name}",
+            f"{union_name}",
             _gen_mutable_union_field_enum_members(field_infos)
         )
 

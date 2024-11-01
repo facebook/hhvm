@@ -178,10 +178,20 @@ class HTTPBinaryCodec : public HTTPCodec {
   ParseResult parseTrailers(folly::io::Cursor& cursor,
                             size_t remaining,
                             HeaderDecodeInfo& decodeInfo);
-  ParseResult parseHeadersHelper(folly::io::Cursor& cursor,
-                                 size_t remaining,
-                                 HeaderDecodeInfo& decodeInfo,
-                                 bool isTrailers);
+  ParseResult parseSingleHeaderHelper(folly::io::Cursor& cursor,
+                                      HeaderDecodeInfo& decodeInfo,
+                                      size_t& parsed,
+                                      size_t& remaining,
+                                      size_t& numHeaders);
+  ParseResult parseKnownLengthHeadersHelper(folly::io::Cursor& cursor,
+                                            size_t remaining,
+                                            HeaderDecodeInfo& decodeInfo,
+                                            bool isTrailers);
+  ParseResult parseIndeterminateLengthHeadersHelper(
+      folly::io::Cursor& cursor,
+      size_t remaining,
+      HeaderDecodeInfo& decodeInfo,
+      bool isTrailers);
   size_t generateHeaderHelper(folly::io::QueueAppender& appender,
                               const HTTPHeaders& headers);
 

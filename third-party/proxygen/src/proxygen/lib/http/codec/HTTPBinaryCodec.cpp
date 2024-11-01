@@ -190,10 +190,49 @@ ParseResult HTTPBinaryCodec::parseResponseControlData(folly::io::Cursor& cursor,
   return ParseResult(statusCode->second);
 }
 
-ParseResult HTTPBinaryCodec::parseHeadersHelper(folly::io::Cursor& cursor,
-                                                size_t remaining,
-                                                HeaderDecodeInfo& decodeInfo,
-                                                bool isTrailers) {
+ParseResult HTTPBinaryCodec::parseSingleHeaderHelper(
+    folly::io::Cursor& cursor,
+    HeaderDecodeInfo& decodeInfo,
+    size_t& parsed,
+    size_t& remaining,
+    size_t& numHeaders) {
+  std::string headerName;
+  auto headerNameRes =
+      parseKnownLengthString(cursor, remaining, "headerName", headerName);
+  if (headerNameRes.parseResultState_ == ParseResultState::ERROR ||
+      headerNameRes.parseResultState_ ==
+          ParseResultState::WAITING_FOR_MORE_DATA) {
+    return headerNameRes;
+  }
+  parsed += headerNameRes.bytesParsed_;
+  remaining -= headerNameRes.bytesParsed_;
+
+  std::string headerValue;
+  auto headerValueRes =
+      parseKnownLengthString(cursor, remaining, "headerValue", headerValue);
+  if (headerValueRes.parseResultState_ == ParseResultState::ERROR ||
+      headerValueRes.parseResultState_ ==
+          ParseResultState::WAITING_FOR_MORE_DATA) {
+    return headerValueRes;
+  }
+  parsed += headerValueRes.bytesParsed_;
+  remaining -= headerValueRes.bytesParsed_;
+
+  if (!decodeInfo.onHeader(proxygen::HPACKHeaderName(headerName),
+                           headerValue) ||
+      !decodeInfo.parsingError.empty()) {
+    return ParseResult(fmt::format("Error parsing field section (Error: {})",
+                                   decodeInfo.parsingError));
+  }
+  numHeaders++;
+  return ParseResult(ParseResultState::DONE);
+}
+
+ParseResult HTTPBinaryCodec::parseKnownLengthHeadersHelper(
+    folly::io::Cursor& cursor,
+    size_t remaining,
+    HeaderDecodeInfo& decodeInfo,
+    bool isTrailers) {
   size_t parsed = 0;
 
   // Parse length of headers and advance cursor
@@ -212,52 +251,60 @@ ParseResult HTTPBinaryCodec::parseHeadersHelper(folly::io::Cursor& cursor,
     return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
 
-  auto numHeaders = 0;
+  size_t numHeaders = 0;
   while (parsed < lengthOfHeaders->first) {
-    std::string headerName;
-    auto headerNameRes =
-        parseKnownLengthString(cursor, remaining, "headerName", headerName);
-    if (headerNameRes.parseResultState_ == ParseResultState::ERROR ||
-        headerNameRes.parseResultState_ ==
-            ParseResultState::WAITING_FOR_MORE_DATA) {
-      return headerNameRes;
+    auto result = parseSingleHeaderHelper(
+        cursor, decodeInfo, parsed, remaining, numHeaders);
+    if (result.parseResultState_ == ParseResultState::ERROR ||
+        result.parseResultState_ == ParseResultState::WAITING_FOR_MORE_DATA) {
+      return result;
     }
-    parsed += headerNameRes.bytesParsed_;
-    remaining -= headerNameRes.bytesParsed_;
-
-    std::string headerValue;
-    auto headerValueRes =
-        parseKnownLengthString(cursor, remaining, "headerValue", headerValue);
-    if (headerValueRes.parseResultState_ == ParseResultState::ERROR ||
-        headerValueRes.parseResultState_ ==
-            ParseResultState::WAITING_FOR_MORE_DATA) {
-      return headerValueRes;
-    }
-    parsed += headerValueRes.bytesParsed_;
-    remaining -= headerValueRes.bytesParsed_;
-
-    if (!decodeInfo.onHeader(proxygen::HPACKHeaderName(headerName),
-                             headerValue) ||
-        !decodeInfo.parsingError.empty()) {
-      return ParseResult(fmt::format("Error parsing field section (Error: {})",
-                                     decodeInfo.parsingError));
-    }
-    numHeaders++;
-  }
-  if (numHeaders < 1 && !isTrailers) {
-    return ParseResult(
-        fmt::format("Number of headers (key value pairs) should be >= 1. "
-                    "Header count is {}",
-                    numHeaders));
   }
 
+  return ParseResult(parsed);
+}
+
+ParseResult HTTPBinaryCodec::parseIndeterminateLengthHeadersHelper(
+    folly::io::Cursor& cursor,
+    size_t remaining,
+    HeaderDecodeInfo& decodeInfo,
+    bool isTrailers) {
+  size_t parsed = 0;
+
+  auto currentByte = cursor.peek().data();
+  size_t numHeaders = 0;
+  // Continue parsing headers until we reach the Content Terminator field (0)
+  while (currentByte != nullptr && *currentByte != 0x00) {
+    auto result = parseSingleHeaderHelper(
+        cursor, decodeInfo, parsed, remaining, numHeaders);
+    if (result.parseResultState_ == ParseResultState::ERROR ||
+        result.parseResultState_ == ParseResultState::WAITING_FOR_MORE_DATA) {
+      return result;
+    }
+    // If we have reached the end of the cursor at this point, we must be
+    // waiting for more data since we haven't seen a Content Terminator field
+    // yet
+    if (cursor.isAtEnd()) {
+      return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
+    }
+    currentByte = cursor.peek().data();
+  }
+  // Skip over the Content Terminator field
+  parsed++;
+  remaining--;
+  cursor.skip(1);
   return ParseResult(parsed);
 }
 
 ParseResult HTTPBinaryCodec::parseHeaders(folly::io::Cursor& cursor,
                                           size_t remaining,
                                           HeaderDecodeInfo& decodeInfo) {
-  return parseHeadersHelper(cursor, remaining, decodeInfo, false);
+  if (knownLength_) {
+    return parseKnownLengthHeadersHelper(cursor, remaining, decodeInfo, false);
+  } else {
+    return parseIndeterminateLengthHeadersHelper(
+        cursor, remaining, decodeInfo, false);
+  }
 }
 
 ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
@@ -291,7 +338,12 @@ ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
 ParseResult HTTPBinaryCodec::parseTrailers(folly::io::Cursor& cursor,
                                            size_t remaining,
                                            HeaderDecodeInfo& decodeInfo) {
-  return parseHeadersHelper(cursor, remaining, decodeInfo, true);
+  if (knownLength_) {
+    return parseKnownLengthHeadersHelper(cursor, remaining, decodeInfo, true);
+  } else {
+    return parseIndeterminateLengthHeadersHelper(
+        cursor, remaining, decodeInfo, true);
+  }
 }
 
 size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
@@ -337,9 +389,9 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
         // TODO(T118289674) - Currently, the OHAI protocol doesn't support
         // informational responses
         // (https://ietf-wg-ohai.github.io/oblivious-http/draft-ietf-ohai-ohttp.html#name-informational-responses).
-        // Since we are primarily building this codec for an MVP 3rd Party OHAI
-        // proxy, we will skip parsing the INFORMATIONAL_RESPONSE for now and we
-        // can implement this later for complete functionality.
+        // Since we are primarily building this codec for an MVP 3rd Party
+        // OHAI proxy, we will skip parsing the INFORMATIONAL_RESPONSE for now
+        // and we can implement this later for complete functionality.
         state_ = ParseState::CONTROL_DATA;
         break;
 

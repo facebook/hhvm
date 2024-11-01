@@ -132,6 +132,9 @@ def report_summary(exp_file: Iterator[AnyStr], act_file: Iterator[AnyStr]):
         act[fn] = content
     exp_keys = set(exp.keys())
     act_keys = set(act.keys())
+    # pyre-fixme[6]: For 1st argument expected
+    #  `pyre_extensions.PyreReadOnly[Iterable[SupportsRichComparisonT]]` but got
+    #  `Set[Optional[str]]`.
     all_keys = sorted(exp_keys.union(act_keys))
 
     for k in all_keys:

@@ -208,6 +208,10 @@ class TSocketBase(TTransportBase):
         if fcntl is None:
             return
 
+        # Skip if fcntl.fcntl is not available (this can happen in env like Pyodide)
+        if not hasattr(fcntl, "fcntl"):
+            return
+
         flags = fcntl.fcntl(handle, fcntl.F_GETFD, 0)
         if flags < 0:
             raise IOError("Error in retrieving file options")

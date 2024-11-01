@@ -43,7 +43,8 @@ class ParseResult {
 /* The HTTPBinaryCodec class is an implementation of the "Binary Representation
  * of HTTP Messages" RFC -
  * (https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-binary-message-01).
- * We currently only support the "Known Length Messages" mode.
+ * We support both the "Known Length Messages" and "Indeterminate-Length
+ * Messages" modes of the RFC.
  */
 class HTTPBinaryCodec : public HTTPCodec {
  public:
@@ -144,6 +145,16 @@ class HTTPBinaryCodec : public HTTPCodec {
    *    Known-Length Field Section (..),
    *    Known-Length Content (..),
    *    Known-Length Field Section (..),
+   *    Padding (..),
+   *  }
+   *
+   * Message with Indeterminate-Length {
+   *    Framing Indicator (i) = 2,
+   *    Indeterminate-Length Informational Response (..),
+   *    Control Data (..),
+   *    Indeterminate-Length Field Section (..),
+   *    Indeterminate-Length Content (..),
+   *    Indeterminate-Length Field Section (..),
    *    Padding (..),
    *  }
    */

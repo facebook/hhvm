@@ -92,8 +92,8 @@ TEST_F(HTTPBinaryCodecTest, testParseFramingIndicatorSuccess) {
 
   EXPECT_EQ(
       upstreamBinaryCodec_->parseFramingIndicator(cursor, request, knownLength)
-          .error_,
-      "Unsupported indeterminate length Binary HTTP Request");
+          .bytesParsed_,
+      1);
   EXPECT_EQ(request, false);
   EXPECT_EQ(knownLength, false);
 }

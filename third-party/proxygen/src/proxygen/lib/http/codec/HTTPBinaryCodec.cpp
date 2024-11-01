@@ -70,10 +70,6 @@ ParseResult HTTPBinaryCodec::parseFramingIndicator(folly::io::Cursor& cursor,
   request = ((framingIndicator->first & 0x01) == 0);
   // Set knownLength to true if framingIndicator is 0 or 1
   knownLength = ((framingIndicator->first & 0x02) == 0);
-  if (!knownLength) {
-    return ParseResult(
-        std::string("Unsupported indeterminate length Binary HTTP Request"));
-  }
   return ParseResult(parsed);
 }
 

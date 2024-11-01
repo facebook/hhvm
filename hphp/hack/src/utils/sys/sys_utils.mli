@@ -244,6 +244,8 @@ module Poll : sig
       | Pollnval
   end
 
+  exception Poll_exception of Flags.error list
+
   (** Wait for a file descriptor to be ready for reading.
       Returns true if ready, false if it timed out. *)
   val wait_fd_read :

@@ -654,6 +654,8 @@ module Poll = struct
       res
   end
 
+  exception Poll_exception of Flags.error list
+
   let make_poll_timeout_ms (t : int option) : Poll.poll_timeout =
     match t with
     | Some t -> Poll.Milliseconds t
@@ -663,7 +665,7 @@ module Poll = struct
       (flags : Poll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
       (bool, Flags.error list) result =
     let timeout = make_poll_timeout_ms timeout_ms in
-    let poll = Poll.create () in
+    let poll = Poll.create ~maxfds:1 () in
     Poll.set_index poll 0 fd flags;
     let _nready = Poll.poll poll 1 timeout in
     let rflags = Poll.get_revents poll 0 in

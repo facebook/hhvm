@@ -122,7 +122,18 @@ module.exports = {
             'fb/features/streaming/multicasting',
           ],
         },
-        'fb/features/interactions',
+        {
+          type: 'category',
+          label: 'Interactions',
+          link: {
+            type: 'doc',
+            id: 'fb/features/interactions/index',
+          },
+          items: [
+            'fb/features/interactions/terminal-errors',
+          ],
+
+        },
         'features/adapters',
         'features/exception',
         'features/compatibility',

@@ -24,7 +24,7 @@ feature in different languages.
 | [Serialization](/features/serialization/index.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Universal names](/features/universal-name.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Streaming](/fb/features/streaming/index.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Supported/> |
-| [Interactions](/fb/features/interactions.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> |
+| [Interactions](/fb/features/interactions/index.md) | <Supported/> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> | <Partial>Client[^1]</Partial> |
 | [Adapters](/features/adapters.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Dynamic values (Any)](/features/any.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |
 | [Terse write](/features/terse-write.md) | <Supported/> | <Supported/> | <Supported/> | <Supported/> |

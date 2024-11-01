@@ -583,7 +583,7 @@ TEST_F(LexerTest, i64_past_min_more_digits) {
 }
 
 TEST_F(LexerTest, string_literal) {
-  auto lexer = make_lexer("{{ \"hello world\" \"second string\" }}");
+  auto lexer = make_lexer(R"({{ "hello world" "second string" }})");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::string_literal, "hello world"},
@@ -608,7 +608,7 @@ TEST_F(LexerTest, string_literal_empty) {
 }
 
 TEST_F(LexerTest, string_literal_escapes) {
-  auto lexer = make_lexer("{{ \"hello \\n \\r\\t \\' \\\" world\" }}");
+  auto lexer = make_lexer(R"({{ "hello \n \r\t \' \" world" }})");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::string_literal, "hello \n \r\t ' \" world"},
@@ -620,7 +620,7 @@ TEST_F(LexerTest, string_literal_escapes) {
 }
 
 TEST_F(LexerTest, string_literal_bad_escape) {
-  auto lexer = make_lexer("{{ \"hello \\f world\" }}");
+  auto lexer = make_lexer(R"({{ "hello \f world" }})");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::error, {}},

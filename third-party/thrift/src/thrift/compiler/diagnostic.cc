@@ -52,7 +52,7 @@ fmt::format_context::iterator fmt::formatter<diagnostic>::format(
   if (d.fixit_hint()) {
     fmt::format_to(
         out,
-        " fix: [original: \"{}\"][replacement: \"{}\"]",
+        R"( fix: [original: "{}"][replacement: "{}"])",
         d.fixit_hint()->original(),
         d.fixit_hint()->replacement());
   }

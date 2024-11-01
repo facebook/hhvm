@@ -113,8 +113,8 @@ void t_json_generator::generate_program() {
   f_out_.open(fname.c_str());
   indent(f_out_) << "{" << endl;
   indent_up();
-  indent(f_out_) << "\"__fbthrift\": {\"@" << "generated\": 0}," << endl;
-  indent(f_out_) << "\"thrift_module\" : \"" << module_name << "\"";
+  indent(f_out_) << R"("__fbthrift": {"@)" << "generated\": 0}," << endl;
+  indent(f_out_) << R"("thrift_module" : ")" << module_name << "\"";
 
   if (!program_->consts().empty()) {
     f_out_ << "," << endl << indent() << "\"constants\" : {" << endl;
@@ -297,23 +297,23 @@ string t_json_generator::type_to_spec_args(const t_type* ttype) {
     }
     return "\"" + module + ttype->get_name() + "\"";
   } else if (ttype->is_map()) {
-    return "{ \"key_type\" : { \"type_enum\" : \"" +
+    return R"({ "key_type" : { "type_enum" : ")" +
         type_to_string(((t_map*)ttype)->get_key_type()) +
-        "\", \"spec_args\" : " +
+        R"(", "spec_args" : )" +
         type_to_spec_args(((t_map*)ttype)->get_key_type()) +
-        " }, \"val_type\" : { \"type_enum\" : \"" +
+        R"( }, "val_type" : { "type_enum" : ")" +
         type_to_string(((t_map*)ttype)->get_val_type()) +
-        "\", \"spec_args\" : " +
+        R"(", "spec_args" : )" +
         type_to_spec_args(((t_map*)ttype)->get_val_type()) + "} } ";
   } else if (ttype->is_set()) {
-    return "{ \"type_enum\" : \"" +
+    return R"({ "type_enum" : ")" +
         type_to_string(((t_set*)ttype)->get_elem_type()) +
-        "\", \"spec_args\" : " +
+        R"(", "spec_args" : )" +
         type_to_spec_args(((t_set*)ttype)->get_elem_type()) + "} ";
   } else if (ttype->is_list()) {
-    return "{ \"type_enum\" : \"" +
+    return R"({ "type_enum" : ")" +
         type_to_string(((t_list*)ttype)->get_elem_type()) +
-        "\", \"spec_args\" : " +
+        R"(", "spec_args" : )" +
         type_to_spec_args(((t_list*)ttype)->get_elem_type()) + "} ";
   }
 
@@ -339,7 +339,7 @@ string t_json_generator::type_name(const t_type* ttype) {
  * Prints out the provided type spec
  */
 void t_json_generator::print_type(const t_type* ttype) {
-  indent(f_out_) << "\"type_enum\" : \"" << type_to_string(ttype) << "\","
+  indent(f_out_) << R"("type_enum" : ")" << type_to_string(ttype) << "\","
                  << endl;
   indent(f_out_) << "\"spec_args\" : " << type_to_spec_args(ttype);
 }
@@ -516,7 +516,7 @@ void t_json_generator::print_node_annotations(
 void t_json_generator::generate_include(const t_program* included_program) {
   indent(f_out_) << "\"" << included_program->get_name() << "\" : {" << endl;
   indent_up();
-  indent(f_out_) << "\"path\" : \""
+  indent(f_out_) << R"("path" : ")"
                  << included_program->include_prefix() +
           included_program->name() + ".thrift"
                  << "\"" << endl;

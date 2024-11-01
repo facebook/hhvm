@@ -2405,7 +2405,7 @@ void t_mstch_rust_generator::generate_program() {
     }
     if (crate_name_option && pieces[0] != *crate_name_option) {
       throw std::runtime_error(fmt::format(
-          "`namespace rust` disagrees with rust_crate_name option: \"{}\" vs \"{}\"",
+          R"(`namespace rust` disagrees with rust_crate_name option: "{}" vs "{}")",
           pieces[0],
           *crate_name_option));
     }

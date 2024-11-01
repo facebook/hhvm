@@ -953,7 +953,7 @@ void t_cocoa_generator::generate_cocoa_struct_implementation(
     out << indent() << "- (instancetype) init" << std::endl;
     scope_up(out);
     out << indent() << "return [super initWithName: @\"" << cocoa_prefix_
-        << tstruct->name() << "\" reason: @\"unknown\" userInfo: nil];"
+        << tstruct->name() << R"(" reason: @"unknown" userInfo: nil];)"
         << std::endl;
     scope_down(out);
     out << std::endl;
@@ -3037,7 +3037,7 @@ std::string t_cocoa_generator::format_string_for_type(const t_type* type) {
         throw std::runtime_error("NO T_VOID CONSTRUCT");
       case t_primitive_type::TYPE_STRING:
       case t_primitive_type::TYPE_BINARY:
-        return "\\\"%@\\\"";
+        return R"(\"%@\")";
       case t_primitive_type::TYPE_BOOL:
         return "%i";
       case t_primitive_type::TYPE_BYTE:

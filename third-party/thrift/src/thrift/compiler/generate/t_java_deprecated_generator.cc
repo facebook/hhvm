@@ -2102,8 +2102,8 @@ void t_java_deprecated_generator::generate_java_struct_tostring(
         << "String indentStr = prettyPrint ? "
            "TBaseHelper.getIndentedString(indent) "
         << ": \"\";" << endl;
-    out << indent() << "String newLine = prettyPrint ? \"\\n\" : \"\";" << endl;
-    out << indent() << "String space = prettyPrint ? \" \" : \"\";" << endl;
+    out << indent() << R"(String newLine = prettyPrint ? "\n" : "";)" << endl;
+    out << indent() << R"(String space = prettyPrint ? " " : "";)" << endl;
     out << indent() << "StringBuilder sb = new StringBuilder(\""
         << tstruct->get_name() << "\");" << endl;
     out << indent() << "sb.append(space);" << endl;

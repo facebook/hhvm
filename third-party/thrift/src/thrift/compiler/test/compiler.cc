@@ -116,9 +116,9 @@ std::vector<diagnostic> extract_expected_diagnostics(
     std::string diagnostic_severity_and_line(
         "#\\s*expected-(?P<type>error|warning)@?(?P<linenum>[+-]?\\d+)?");
     std::string diagnostic_fixit(
-        "\\s*(?:#original\\[(?P<original>.*?)\\])?\\s*(?:#replacement\\[(?P<replacement>.*?)\\])?@?(?P<column>\\d+)?");
+        R"(\s*(?:#original\[(?P<original>.*?)\])?\s*(?:#replacement\[(?P<replacement>.*?)\])?@?(?P<column>\d+)?)");
     std::string diagnostic_message_and_name(
-        ":\\s*(?P<message>.*?)\\s*(?:\\[(?P<name>.*)\\])?$");
+        R"(:\s*(?P<message>.*?)\s*(?:\[(?P<name>.*)\])?$)");
 
     if (re2::RE2::PartialMatch(
             line,

@@ -1136,7 +1136,7 @@ string t_py_generator::render_string(const string& value) {
 
   std::ostringstream out;
   // If string contains multiple lines, then wrap it in triple quotes """
-  std::string wrap(escaped.find("\n") == std::string::npos ? "\"" : "\"\"\"");
+  std::string wrap(escaped.find("\n") == std::string::npos ? "\"" : R"(""")");
   out << wrap << escaped << wrap;
   return out.str();
 }
@@ -1853,7 +1853,7 @@ void t_py_generator::generate_py_struct_definition(
     }
 
     out << indent() << "  return \"%s(%s)\" % (self.__class__.__name__, "
-        << "\"\\n\" + \",\\n\".join(L) if L else '')" << endl
+        << R"("\n" + ",\n".join(L) if L else ''))" << endl
         << endl;
 
     // Equality and inequality methods that compare by value
@@ -1898,7 +1898,7 @@ void t_py_generator::generate_py_struct_definition(
         << endl
         << indent() << "    L.append('    %s=%s' % (key, value))" << endl
         << indent() << "  return \"%s(\\n%s)\" % (self.__class__.__name__, "
-        << "\"\\n\" + \",\\n\".join(L) if L else '')" << endl
+        << R"("\n" + ",\n".join(L) if L else ''))" << endl
         << endl;
 
     // Equality method that compares each attribute by value and type,

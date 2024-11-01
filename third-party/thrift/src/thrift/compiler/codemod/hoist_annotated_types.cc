@@ -319,7 +319,7 @@ class hoist_annotated_types {
         10000;
     auto name = type->get_full_name();
     // Removes scope prefix | ids of inner types.
-    static const re2::RE2 stripNoise("(\\b\\w+?\\.|_\\d+\\b)");
+    static const re2::RE2 stripNoise(R"((\b\w+?\.|_\d+\b))");
     static const re2::RE2 addUnderscores("[<,]");
     static const re2::RE2 stripNonAlnum("\\W+");
     re2::RE2::GlobalReplace(&name, stripNoise, "");

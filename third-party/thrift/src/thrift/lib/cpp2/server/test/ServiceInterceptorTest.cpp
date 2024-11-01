@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <stdexcept>
+
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <folly/coro/Baton.h>
 #include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
@@ -154,6 +157,8 @@ struct TestHandler
           }
         });
   }
+
+  folly::coro::Task<void> co_fireAndForget(std::int32_t) override { co_return; }
 };
 
 using InterceptorList = std::vector<std::shared_ptr<ServiceInterceptorBase>>;
@@ -448,6 +453,45 @@ CO_TEST_P(ServiceInterceptorTestP, BasicVoidReturn) {
     EXPECT_EQ(interceptor->onConnectionCount, valueIfNotHttp2(1));
     EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(1));
   }
+}
+
+CO_TEST_P(ServiceInterceptorTestP, BasicOneWay) {
+  struct OneWayInterceptor : ServiceInterceptorCountWithRequestState {
+    using Base = ServiceInterceptorCountWithRequestState;
+
+    explicit OneWayInterceptor(folly::coro::Baton& fireAndForgetBaton)
+        : Base("OneWayInterceptor"), fireAndForgetBaton_(fireAndForgetBaton) {}
+
+    folly::coro::Task<void> onResponse(
+        RequestState* requestState,
+        ConnectionState* connectionState,
+        ResponseInfo responseInfo) override {
+      co_await Base::onResponse(
+          requestState, connectionState, std::move(responseInfo));
+      fireAndForgetBaton_.post();
+    }
+
+   private:
+    folly::coro::Baton& fireAndForgetBaton_;
+  };
+
+  folly::coro::Baton fireAndForgetBaton;
+  auto interceptor =
+      std::make_shared<OneWayInterceptor>(std::ref(fireAndForgetBaton));
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_fireAndForget(5);
+  co_await fireAndForgetBaton;
+
+  EXPECT_EQ(interceptor->onRequestCount, 1);
+  // oneway methods should invoke onResponse even though there is technically no
+  // response sent back to the client
+  EXPECT_EQ(interceptor->onResponseCount, 1);
 }
 
 CO_TEST_P(ServiceInterceptorTestP, NonTrivialRequestState) {

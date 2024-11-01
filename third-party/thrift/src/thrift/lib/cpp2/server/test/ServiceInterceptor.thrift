@@ -56,4 +56,6 @@ service ServiceInterceptorTest {
 
   @cpp.ProcessInEbThreadUnsafe
   string echo_eb(1: string str);
+
+  oneway void fireAndForget(1: i32 ignored);
 }

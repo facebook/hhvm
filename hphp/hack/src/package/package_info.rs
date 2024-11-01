@@ -31,13 +31,14 @@ impl PackageInfo {
         filename: &str,
     ) -> Result<PackageInfo> {
         let mut errors = vec![];
-        let root = if !root.is_empty() {
+        let canonicalized_root = if !root.is_empty() {
             Path::new(root)
                 .canonicalize()
                 .with_context(|| format!("Failed to canonicalize root path: {}", root))?
         } else {
             PathBuf::new()
         };
+        let mut root = PathBuf::from(root);
         let contents = std::fs::read_to_string(filename)
             .with_context(|| format!("Failed to read config file with path: {}", filename))?;
         let mut config: Config = toml::from_str(&contents)
@@ -62,27 +63,31 @@ impl PackageInfo {
                     }
 
                     let rel_path = Path::new(dir.strip_prefix("//").unwrap_or(dir));
-                    let abs_path = Path::new(filename)
+                    let mut abs_path = Path::new(filename)
                         .parent()
                         .expect("Package config path must be valid")
                         .join(rel_path);
 
                     if strict {
-                        let path_exists = abs_path.canonicalize().is_ok();
-                        if !path_exists {
-                            errors
-                                .push(Error::invalid_include_path(abs_path.clone(), span.clone()));
-                        } else {
-                            let metadata = std::fs::metadata(&abs_path).unwrap();
-                            if metadata.is_dir() && !dir.ends_with("/") {
+                        let canonicalized_abs_path = abs_path.canonicalize();
+                        match canonicalized_abs_path {
+                            Ok(p) => {
+                                let metadata = std::fs::metadata(&p).unwrap();
+                                if metadata.is_dir() && !dir.ends_with("/") {
+                                    errors
+                                        .push(Error::invalid_include_path(p.clone(), span.clone()));
+                                }
+                                abs_path = p;
+                            }
+                            Err(_) => {
                                 errors.push(Error::invalid_include_path(
                                     abs_path.clone(),
                                     span.clone(),
                                 ));
                             }
                         }
+                        root = canonicalized_root.clone();
                     }
-
                     let new_dir = abs_path
                         .as_path()
                         .strip_prefix(root.clone())

@@ -1,6 +1,6 @@
 ERROR: File "crash.bad.php", line 12, characters 43-45:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "crash.bad.php", line 12, characters 20-21:
+  File "Shapes.hhi", line 42, characters 19-24:
   The type of the field `a` in this shape doesn't allow any values
   File "crash.bad.php", line 12, characters 35-37:
   It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx`
@@ -8,7 +8,7 @@ You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
     via this generic `Tv`
 ERROR: File "crash.bad.php", line 13, characters 43-45:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-  File "crash.bad.php", line 13, characters 20-21:
+  File "Shapes.hhi", line 42, characters 19-24:
   The type of the field `b` in this shape doesn't allow any values
   File "crash.bad.php", line 13, characters 35-37:
   It is nothing because type parameter `Tv` of `idx` could not be determined. Please add explicit type parameters to the invocation of `idx`

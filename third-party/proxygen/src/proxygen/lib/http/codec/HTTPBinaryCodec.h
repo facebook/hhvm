@@ -186,6 +186,7 @@ class HTTPBinaryCodec : public HTTPCodec {
     PADDING = 6,
   };
   ParseState state_;
+  bool parserWaitingForMoreData_{false};
   bool parserPaused_;
   folly::Optional<std::string> parseError_{folly::none};
 

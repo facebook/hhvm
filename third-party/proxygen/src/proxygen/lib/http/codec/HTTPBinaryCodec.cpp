@@ -11,6 +11,16 @@
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <quic/codec/QuicInteger.h>
 
+#define HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult)           \
+  if ((parseResult).parseResultState_ == ParseResultState::ERROR) { \
+    parseError_ = (parseResult).error_;                             \
+    break;                                                          \
+  } else if ((parseResult).parseResultState_ ==                     \
+             ParseResultState::WAITING_FOR_MORE_DATA) {             \
+    parserWaitingForMoreData_ = true;                               \
+    break;                                                          \
+  }
+
 namespace proxygen {
 
 namespace {
@@ -43,7 +53,7 @@ ParseResult HTTPBinaryCodec::parseFramingIndicator(folly::io::Cursor& cursor,
   // Parse the framingIndicator and advance the cursor
   auto framingIndicator = quic::decodeQuicInteger(cursor);
   if (!framingIndicator) {
-    return ParseResult(std::string("Failure to parse Framing Indicator"));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Increase parsed by the number of bytes read
   parsed += framingIndicator->second;
@@ -77,13 +87,14 @@ ParseResult HTTPBinaryCodec::parseKnownLengthString(
   // Parse the encodedStringLength and advance cursor
   auto encodedStringLength = quic::decodeQuicInteger(cursor);
   if (!encodedStringLength) {
-    return ParseResult(fmt::format("Failure to parse: {} length", stringName));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Increase parsed by the number of bytes read
   parsed += encodedStringLength->second;
-  // Check that we have not gone beyond "remaining"
+  // If this would cause us to go beyond "remaining", we need to wait for more
+  // data
   if (encodedStringLength->first > remaining - parsed) {
-    return ParseResult(fmt::format("Failure to parse: {}", stringName));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
 
   // Handle edge case where field is not present/has length 0
@@ -108,7 +119,8 @@ ParseResult HTTPBinaryCodec::parseRequestControlData(folly::io::Cursor& cursor,
   // Parse method
   std::string method;
   auto methodRes = parseKnownLengthString(cursor, remaining, "method", method);
-  if (methodRes.parseResultState_ == ParseResultState::ERROR) {
+  if (methodRes.parseResultState_ == ParseResultState::ERROR ||
+      methodRes.parseResultState_ == ParseResultState::WAITING_FOR_MORE_DATA) {
     return methodRes;
   }
   parsed += methodRes.bytesParsed_;
@@ -118,7 +130,8 @@ ParseResult HTTPBinaryCodec::parseRequestControlData(folly::io::Cursor& cursor,
   // Parse scheme
   std::string scheme;
   auto schemeRes = parseKnownLengthString(cursor, remaining, "scheme", scheme);
-  if (schemeRes.parseResultState_ == ParseResultState::ERROR) {
+  if (schemeRes.parseResultState_ == ParseResultState::ERROR ||
+      schemeRes.parseResultState_ == ParseResultState::WAITING_FOR_MORE_DATA) {
     return schemeRes;
   }
   parsed += schemeRes.bytesParsed_;
@@ -136,7 +149,9 @@ ParseResult HTTPBinaryCodec::parseRequestControlData(folly::io::Cursor& cursor,
   std::string authority;
   auto authorityRes =
       parseKnownLengthString(cursor, remaining, "authority", authority);
-  if (authorityRes.parseResultState_ == ParseResultState::ERROR) {
+  if (authorityRes.parseResultState_ == ParseResultState::ERROR ||
+      authorityRes.parseResultState_ ==
+          ParseResultState::WAITING_FOR_MORE_DATA) {
     return authorityRes;
   }
   parsed += authorityRes.bytesParsed_;
@@ -145,7 +160,8 @@ ParseResult HTTPBinaryCodec::parseRequestControlData(folly::io::Cursor& cursor,
   // Parse path
   std::string path;
   auto pathRes = parseKnownLengthString(cursor, remaining, "path", path);
-  if (pathRes.parseResultState_ == ParseResultState::ERROR) {
+  if (pathRes.parseResultState_ == ParseResultState::ERROR ||
+      pathRes.parseResultState_ == ParseResultState::WAITING_FOR_MORE_DATA) {
     return pathRes;
   }
   // Set relative path to msg URL
@@ -167,7 +183,7 @@ ParseResult HTTPBinaryCodec::parseResponseControlData(folly::io::Cursor& cursor,
   // Parse statusCode and advance cursor
   auto statusCode = quic::decodeQuicInteger(cursor);
   if (!statusCode) {
-    return ParseResult(std::string("Failure to parse response status code"));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Sanity check status code
   if (statusCode->first < 200 || statusCode->first > 599) {
@@ -187,25 +203,17 @@ ParseResult HTTPBinaryCodec::parseHeadersHelper(folly::io::Cursor& cursor,
   // Parse length of headers and advance cursor
   auto lengthOfHeaders = quic::decodeQuicInteger(cursor);
   if (!lengthOfHeaders) {
-    return ParseResult(std::string("Failure to parse number of headers"));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Check that we had enough bytes to parse lengthOfHeaders
   if (remaining < lengthOfHeaders->second) {
-    return ParseResult(
-        fmt::format("Header parsing underflowed! Not enough space ({} bytes "
-                    "remaining) to parse the length of headers ({} bytes)",
-                    remaining,
-                    lengthOfHeaders->second));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Increase parsed and decrease remaining by the number of bytes read
   parsed += lengthOfHeaders->second;
   remaining -= lengthOfHeaders->second;
   if (remaining < lengthOfHeaders->first) {
-    return ParseResult(fmt::format(
-        "Header parsing underflowed! Headers length in bytes ({}) is "
-        "inconsistent with remaining buffer length ({})",
-        lengthOfHeaders->first,
-        remaining));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
 
   auto numHeaders = 0;
@@ -213,7 +221,9 @@ ParseResult HTTPBinaryCodec::parseHeadersHelper(folly::io::Cursor& cursor,
     std::string headerName;
     auto headerNameRes =
         parseKnownLengthString(cursor, remaining, "headerName", headerName);
-    if (headerNameRes.parseResultState_ == ParseResultState::ERROR) {
+    if (headerNameRes.parseResultState_ == ParseResultState::ERROR ||
+        headerNameRes.parseResultState_ ==
+            ParseResultState::WAITING_FOR_MORE_DATA) {
       return headerNameRes;
     }
     parsed += headerNameRes.bytesParsed_;
@@ -222,7 +232,9 @@ ParseResult HTTPBinaryCodec::parseHeadersHelper(folly::io::Cursor& cursor,
     std::string headerValue;
     auto headerValueRes =
         parseKnownLengthString(cursor, remaining, "headerValue", headerValue);
-    if (headerValueRes.parseResultState_ == ParseResultState::ERROR) {
+    if (headerValueRes.parseResultState_ == ParseResultState::ERROR ||
+        headerValueRes.parseResultState_ ==
+            ParseResultState::WAITING_FOR_MORE_DATA) {
       return headerValueRes;
     }
     parsed += headerValueRes.bytesParsed_;
@@ -259,7 +271,7 @@ ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
   // Parse the contentLength and advance cursor
   auto contentLength = quic::decodeQuicInteger(cursor);
   if (!contentLength) {
-    return ParseResult(std::string("Failure to parse content length"));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
   // Increase parsed by the number of bytes read
   parsed += contentLength->second;
@@ -268,7 +280,7 @@ ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
   }
   // Check that we have not gone beyond "remaining"
   if (contentLength->first > remaining - parsed) {
-    return ParseResult(std::string("Failure to parse content"));
+    return ParseResult(ParseResultState::WAITING_FOR_MORE_DATA);
   }
 
   // Write the data to msgBody_ and then advance the cursor
@@ -287,6 +299,8 @@ ParseResult HTTPBinaryCodec::parseTrailers(folly::io::Cursor& cursor,
 }
 
 size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
+  parserWaitingForMoreData_ = false;
+
   bufferedIngress_.append(buf.clone());
   const auto len = bufferedIngress_.chainLength();
 
@@ -294,17 +308,15 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
   folly::io::Cursor cursor(bufferedIngress_.front());
   auto bufLen = bufferedIngress_.chainLength();
 
-  while (!parseError_ && !parserPaused_ && parsedTot < bufLen) {
+  while (!parseError_ && !parserPaused_ && !parserWaitingForMoreData_ &&
+         parsedTot < bufLen) {
     size_t parsed = 0;
     ParseResult parseResult(ParseResultState::INITIALIZED);
     switch (state_) {
       case ParseState::FRAMING_INDICATOR:
         // FRAMING_INDICATOR should be the first item that is parsed
         parseResult = parseFramingIndicator(cursor, request_, knownLength_);
-        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
-          parseError_ = parseResult.error_;
-          break;
-        }
+        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         // If the framing indicator is for a request, then the
         // TransportDirection should be UPSTREAM and vice versa.
@@ -336,11 +348,13 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
         break;
 
       case ParseState::CONTROL_DATA:
-        decodeInfo_.init(request_,
-                         false /* isRequestTrailers */,
-                         true /* validate */,
-                         true /* strictValidation */,
-                         false /* allowEmptyPath */);
+        if (!decodeInfo_.msg) {
+          decodeInfo_.init(request_,
+                           false /* isRequestTrailers */,
+                           true /* validate */,
+                           true /* strictValidation */,
+                           false /* allowEmptyPath */);
+        }
         // The control data has a different format based on request/response
         if (request_) {
           parseResult = parseRequestControlData(
@@ -349,10 +363,7 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
           parseResult = parseResponseControlData(
               cursor, bufLen - parsedTot, *decodeInfo_.msg);
         }
-        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
-          parseError_ = parseResult.error_;
-          break;
-        }
+        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::HEADERS_SECTION;
         break;
@@ -360,10 +371,7 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
       case ParseState::HEADERS_SECTION:
         CHECK(decodeInfo_.msg);
         parseResult = parseHeaders(cursor, bufLen - parsedTot, decodeInfo_);
-        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
-          parseError_ = parseResult.error_;
-          break;
-        }
+        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::CONTENT;
         msg_ = std::move(decodeInfo_.msg);
@@ -372,10 +380,7 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       case ParseState::CONTENT:
         parseResult = parseContent(cursor, bufLen - parsedTot);
-        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
-          parseError_ = parseResult.error_;
-          break;
-        }
+        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::TRAILERS_SECTION;
         if (msgBody_) {
@@ -384,16 +389,15 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
         break;
 
       case ParseState::TRAILERS_SECTION:
-        decodeInfo_.init(request_,
-                         true /* isRequestTrailers */,
-                         true /* validate */,
-                         true /* strictValidation */,
-                         false /* allowEmptyPath */);
-        parseResult = parseTrailers(cursor, bufLen - parsedTot, decodeInfo_);
-        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
-          parseError_ = parseResult.error_;
-          break;
+        if (!decodeInfo_.msg) {
+          decodeInfo_.init(request_,
+                           true /* isRequestTrailers */,
+                           true /* validate */,
+                           true /* strictValidation */,
+                           false /* allowEmptyPath */);
         }
+        parseResult = parseTrailers(cursor, bufLen - parsedTot, decodeInfo_);
+        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
         trailers_ =
             std::make_unique<HTTPHeaders>(decodeInfo_.msg->getHeaders());
         parsed += parseResult.bytesParsed_;

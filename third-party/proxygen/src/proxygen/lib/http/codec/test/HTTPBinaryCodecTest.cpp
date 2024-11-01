@@ -115,7 +115,7 @@ TEST_F(HTTPBinaryCodecTest, testParseFramingIndicatorFailure) {
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataSuccess) {
-  // Format is `.GET.https.www.example.com./hello.txt` where `.` represents
+  // Format is `*GET*https*www.example.com*/hello.txt` where `*` represents
   // the length of each subsequent string
   const std::vector<uint8_t> controlDataRequest{
       0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73,
@@ -137,10 +137,10 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataSuccess) {
   EXPECT_EQ(msg.getURL(), "/hello.txt");
 }
 
-TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
-  // Format is `.GET.https.www.example.com./hello.txt` where `.` before
+TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataWaiting) {
+  // Format is `*GET*https*www.example.com*/hello.txt` where `*` before
   // /hello.txt is value 11 instead of value 10, which should cause the parsing
-  // to error
+  // to wait for more data
   const std::vector<uint8_t> controlDataInvalidRequest{
       0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73,
       0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70,
@@ -154,27 +154,30 @@ TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseRequestControlData(
                     cursor, controlDataInvalidRequest.size(), msg)
-                .error_,
-            "Failure to parse: path");
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
+}
 
-  // Format is `.GET.httpt.www.example.com./hello.txt` where `.` represents the
+TEST_F(HTTPBinaryCodecTest, testParseRequestControlDataFailure) {
+  // Format is `*GET*http*www.example.com*/hello.txt` where `*` represents the
   // length of each subsequent string.
   const std::vector<uint8_t> controlDataInvalidScheme{
       0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x74,
       0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70,
       0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6d, 0x0a, 0x2f, 0x68, 0x65,
       0x6c, 0x6c, 0x6f, 0x2e, 0x74, 0x78, 0x74};
-  controlDataIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
+  auto controlDataIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
       controlDataInvalidScheme.data(), controlDataInvalidScheme.size()));
-  cursor = folly::io::Cursor(controlDataIOBuf.get());
+  auto cursor = folly::io::Cursor(controlDataIOBuf.get());
 
+  HTTPMessage msg;
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseRequestControlData(
                     cursor, controlDataInvalidScheme.size(), msg)
                 .error_,
             "Failure to parse: scheme. Should be 'http' or 'https'");
 
-  // Format is `.GET.https.www.example.com.hello.tx[\x1]` where `.` represents
+  // Format is `*GET*https*www.example.com*hello.tx[\x1]` where `*` represents
   // the length of each subsequent string.
   const std::vector<uint8_t> controlDataInvalidPath{
       0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73, 0x0f, 0x77,
@@ -239,9 +242,9 @@ TEST_F(HTTPBinaryCodecTest, testParseResponseControlDataFailure) {
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseHeadersSuccess) {
-  // Format is `..user-agent.curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
-  // zlib/1.2.3.host.www.example.com.accept-language.en, mi` where `.`
-  // represents the length of the each subsequent string. The first `.` is
+  // Format is `**user-agent*curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
+  // zlib/1.2.3*host*www.example.com*accept-language*en, mi` where `*`
+  // represents the length of the each subsequent string. The first `*` is
   // actually a Quic Integer that takes 2 bytes (and encodes the length of the
   // overall header as 108)
   const std::vector<uint8_t> headers{
@@ -298,10 +301,12 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
           ->parseHeaders(cursor, invalidHeadersCount.size(), decodeInfo)
           .error_,
       "Number of headers (key value pairs) should be >= 1. Header count is 0");
-
-  // Format is `..user-agent.curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
-  // zlib/1.2.3.host.www.example.com.accept-language.en, mi` where the `.` after
-  // accept-language is value 7 instead of 6 which should cause parsing to fail
+}
+TEST_F(HTTPBinaryCodecTest, testParseHeadersWaiting) {
+  // Format is `**user-agent*curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l
+  // zlib/1.2.3*host*www.example.com*accept-language.en, mi` where the `*` after
+  // accept-language is value 7 instead of 6 which should cause parsing to wait
+  // to get more data
   const std::vector<uint8_t> invalidHeadersLength{
       0x40, 0x6c, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x61, 0x67, 0x65,
       0x6e, 0x74, 0x34, 0x63, 0x75, 0x72, 0x6c, 0x2f, 0x37, 0x2e, 0x31,
@@ -313,16 +318,22 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
       0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6d, 0x0f,
       0x61, 0x63, 0x63, 0x65, 0x70, 0x74, 0x2d, 0x6c, 0x61, 0x6e, 0x67,
       0x75, 0x61, 0x67, 0x65, 0x07, 0x65, 0x6e, 0x2c, 0x20, 0x6d, 0x69};
-  headersIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
+  auto headersIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
       invalidHeadersLength.data(), invalidHeadersLength.size()));
-  cursor = folly::io::Cursor(headersIOBuf.get());
+  auto cursor = folly::io::Cursor(headersIOBuf.get());
 
+  HeaderDecodeInfo decodeInfo;
+  decodeInfo.init(true /* request */,
+                  false /* isRequestTrailers */,
+                  true /* validate */,
+                  false /* strictValidation */,
+                  false /* allowEmptyPath */);
   EXPECT_EQ(upstreamBinaryCodec_
                 ->parseHeaders(cursor, invalidHeadersLength.size(), decodeInfo)
-                .error_,
-            "Failure to parse: headerValue");
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
 
-  // Format is `..a.b` where the first `.` represents a too long length
+  // Format is `**a*b` where the first `*` represents a too long length
   const std::vector<uint8_t> invalidHeadersUnderflow{
       0x09, 0x01, 0x61, 0x01, 0x62};
   headersIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
@@ -332,11 +343,10 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseHeaders(cursor, invalidHeadersUnderflow.size(), decodeInfo)
-          .error_,
-      "Header parsing underflowed! Headers length in bytes (9) is "
-      "inconsistent with remaining buffer length (4)");
+          .parseResultState_,
+      ParseResultState::WAITING_FOR_MORE_DATA);
 
-  // Format is `.` where the first `.` represents an underflowed quic integer
+  // Format is `*` where the first `*` represents an underflowed quic integer
   const std::vector<uint8_t> invalidHeadersUnderflowQuic{0x99};
   headersIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
       invalidHeadersUnderflowQuic.data(), invalidHeadersUnderflowQuic.size()));
@@ -345,12 +355,12 @@ TEST_F(HTTPBinaryCodecTest, testParseHeadersFailure) {
   EXPECT_EQ(
       upstreamBinaryCodec_
           ->parseHeaders(cursor, invalidHeadersUnderflowQuic.size(), decodeInfo)
-          .error_,
-      "Failure to parse number of headers");
+          .parseResultState_,
+      ParseResultState::WAITING_FOR_MORE_DATA);
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
-  // Format is `.hello`
+  // Format is `*hello`
   const std::vector<uint8_t> content{
       0x07, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a};
   auto contentIOBuf = folly::IOBuf::wrapBuffer(
@@ -365,7 +375,7 @@ TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
 }
 
 TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
-  // Format is `.hello` where . is value 8 instead of 7
+  // Format is `*hello` where * is value 8 instead of 7
   const std::vector<uint8_t> contentInvalid{
       0x08, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a};
   auto contentIOBuf = folly::IOBuf::wrapBuffer(
@@ -373,15 +383,15 @@ TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
   folly::io::Cursor cursor(contentIOBuf.get());
 
   HTTPMessage msg;
-  EXPECT_EQ(
-      upstreamBinaryCodec_->parseContent(cursor, contentInvalid.size()).error_,
-      "Failure to parse content");
+  EXPECT_EQ(upstreamBinaryCodec_->parseContent(cursor, contentInvalid.size())
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
 }
 
 TEST_F(HTTPBinaryCodecTest, testOnIngressSuccess) {
-  // Format is `..GET.https.www.example.com./hello.txt..user-agent.curl/7.16.3
+  // Format is `**GET*https.www.example.com*/hello.txt**user-agent*curl/7.16.3
   // libcurl/7.16.3 OpenSSL/0.9.7l
-  // zlib/1.2.3.host.www.example.com.accept-language.en, mi`
+  // zlib/1.2.3*host*www.example.com*accept-language.en, mi`
   const std::vector<uint8_t> binaryHTTPMessage{
       0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73, 0x0f,
       0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e,
@@ -423,7 +433,7 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccess) {
 }
 
 TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessForControlData) {
-  // Format is `..GET.https.www.example.com./`
+  // Format is `**GET*https*www.example.com*/`
   const std::vector<uint8_t> binaryHTTPMessage{
       0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74,
       0x70, 0x73, 0x0b, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c,
@@ -447,9 +457,9 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessForControlData) {
 }
 
 TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessChunkedOnBoundaryMessage) {
-  // Format is chunk1 = `..GET`, chunk2 =
-  // `.https.www.example.com./hello.txt..user-agent.curl/7.16.3 libcurl/7.16.3
-  // OpenSSL/0.9.7l zlib/1.2.3.host.www.example.com.accept-language.en, mi`
+  // Format is chunk1 = `**GET`, chunk2 =
+  // `*https*www.example.com*/hello.txt**user-agent*curl/7.16.3 libcurl/7.16.3
+  // OpenSSL/0.9.7l zlib/1.2.3.host*www.example.com*accept-language*en, mi`
   const std::vector<uint8_t> binaryHTTPMessageChunk1{
       0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70,
       0x73, 0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d,
@@ -497,11 +507,58 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessChunkedOnBoundaryMessage) {
   EXPECT_EQ(httpHeaders.getSingleOrEmpty("accept-language"), "en, mi");
 }
 
-TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
-  // Format is `..GET.https.www.example.com./hello.txt..user-agent.curl/7.16.3
+TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessOneByteChunks) {
+  // Format is `**GET*https.www.example.com*/hello.txt**user-agent*curl/7.16.3
   // libcurl/7.16.3 OpenSSL/0.9.7l
-  // zlib/1.2.3.host.www.example.com.accept-language.en, mi` where the last `.`
-  // is value 10 instead of 6
+  // zlib/1.2.3*host*www.example.com*accept-language*en, mi`
+  const std::vector<uint8_t> binaryHTTPMessage{
+      0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73, 0x0f,
+      0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e,
+      0x63, 0x6f, 0x6d, 0x0a, 0x2f, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e, 0x74,
+      0x78, 0x74, 0x40, 0x6c, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x61, 0x67,
+      0x65, 0x6e, 0x74, 0x34, 0x63, 0x75, 0x72, 0x6c, 0x2f, 0x37, 0x2e, 0x31,
+      0x36, 0x2e, 0x33, 0x20, 0x6c, 0x69, 0x62, 0x63, 0x75, 0x72, 0x6c, 0x2f,
+      0x37, 0x2e, 0x31, 0x36, 0x2e, 0x33, 0x20, 0x4f, 0x70, 0x65, 0x6e, 0x53,
+      0x53, 0x4c, 0x2f, 0x30, 0x2e, 0x39, 0x2e, 0x37, 0x6c, 0x20, 0x7a, 0x6c,
+      0x69, 0x62, 0x2f, 0x31, 0x2e, 0x32, 0x2e, 0x33, 0x04, 0x68, 0x6f, 0x73,
+      0x74, 0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c,
+      0x65, 0x2e, 0x63, 0x6f, 0x6d, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x70, 0x74,
+      0x2d, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x06, 0x65, 0x6e,
+      0x2c, 0x20, 0x6d, 0x69, 0x00, 0x00};
+  auto binaryHTTPMessageIOBuf = folly::IOBuf::wrapBuffer(
+      folly::ByteRange(binaryHTTPMessage.data(), binaryHTTPMessage.size()));
+  folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
+
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodec_->setCallback(&callback);
+  for (auto& byte : binaryHTTPMessage) {
+    auto stp = folly::IOBuf::wrapBuffer(folly::ByteRange(&byte, 1));
+    upstreamBinaryCodec_->onIngress(*stp);
+  }
+  upstreamBinaryCodec_->onIngressEOF();
+
+  // Check onError was not called for the callback
+  EXPECT_EQ(callback.lastParseError, nullptr);
+
+  // Check msg and header fields
+  EXPECT_EQ(callback.msg->isSecure(), true);
+  EXPECT_EQ(callback.msg->getMethod(), proxygen::HTTPMethod::GET);
+  EXPECT_EQ(callback.msg->getURL(), "/hello.txt");
+  HTTPHeaders httpHeaders = callback.msg->getHeaders();
+  EXPECT_EQ(httpHeaders.exists("user-agent"), true);
+  EXPECT_EQ(httpHeaders.exists("host"), true);
+  EXPECT_EQ(httpHeaders.exists("accept-language"), true);
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("user-agent"),
+            "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("host"), "www.example.com");
+  EXPECT_EQ(httpHeaders.getSingleOrEmpty("accept-language"), "en, mi");
+}
+
+TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
+  // Format is `**GET*https*www.example.com*/hello.txt**user-agent*curl/7.16.3
+  // libcurl/7.16.3 OpenSSL/0.9.7l
+  // zlib/1.2.3*host*www.example.com*accept-language*en, mi` where the last `*`
+  // is value 7 instead of 6
   const std::vector<uint8_t> binaryInvalidHTTPMessage{
       0x00, 0x03, 0x47, 0x45, 0x54, 0x05, 0x68, 0x74, 0x74, 0x70, 0x73, 0x0f,
       0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e,
@@ -514,8 +571,8 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
       0x69, 0x62, 0x2f, 0x31, 0x2e, 0x32, 0x2e, 0x33, 0x04, 0x68, 0x6f, 0x73,
       0x74, 0x0f, 0x77, 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c,
       0x65, 0x2e, 0x63, 0x6f, 0x6d, 0x0f, 0x61, 0x63, 0x63, 0x65, 0x70, 0x74,
-      0x2d, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x0a, 0x65, 0x6e,
-      0x2c, 0x20, 0x6d, 0x69, 0x00, 0x00};
+      0x2d, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x07, 0x65, 0x6e,
+      0x2c, 0x20, 0x6d, 0x69};
   auto binaryHTTPMessageIOBuf = folly::IOBuf::wrapBuffer(folly::ByteRange(
       binaryInvalidHTTPMessage.data(), binaryInvalidHTTPMessage.size()));
   folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
@@ -527,7 +584,7 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
 
   // Check onError was called with the correct error
   EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
-            "Invalid Message: Failure to parse: headerValue");
+            "Incomplete message received");
 }
 
 TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {

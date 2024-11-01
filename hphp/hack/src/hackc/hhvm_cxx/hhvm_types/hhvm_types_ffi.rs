@@ -132,6 +132,7 @@ pub mod ffi {
         T_nothing = 29,
         T_dynamic = 30,
         T_union = 31,
+        T_recursiveUnion = 32,
 
         // The following kinds needs class/alias resolution, and
         // are generally not exposed to the users.

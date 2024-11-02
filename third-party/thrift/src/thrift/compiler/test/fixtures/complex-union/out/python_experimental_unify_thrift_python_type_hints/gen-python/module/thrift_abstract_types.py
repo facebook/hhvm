@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import enum as _enum
+
 
 import folly.iobuf as _fbthrift_iobuf
 
@@ -45,6 +47,21 @@ class ComplexUnion(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: ComplexUnion.FbThriftUnionFieldEnum = 0
+        intValue: ComplexUnion.FbThriftUnionFieldEnum = 1
+        intListValue: ComplexUnion.FbThriftUnionFieldEnum = 2
+        stringListValue: ComplexUnion.FbThriftUnionFieldEnum = 3
+        stringValue: ComplexUnion.FbThriftUnionFieldEnum = 5
+        typedefValue: ComplexUnion.FbThriftUnionFieldEnum = 9
+        stringRef: ComplexUnion.FbThriftUnionFieldEnum = 14
+
+    FbThriftUnionFieldEnum.__name__ = "ComplexUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int, _typing.Sequence[int], _typing.Sequence[str], str, _typing.Mapping[int, str], str]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class ListUnion(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -61,6 +78,17 @@ class ListUnion(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ListUnion": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: ListUnion.FbThriftUnionFieldEnum = 0
+        intListValue: ListUnion.FbThriftUnionFieldEnum = 2
+        stringListValue: ListUnion.FbThriftUnionFieldEnum = 3
+
+    FbThriftUnionFieldEnum.__name__ = "ListUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _typing.Sequence[int], _typing.Sequence[str]]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class DataUnion(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -76,6 +104,17 @@ class DataUnion(_abc.ABC):
     def _to_py3(self) -> "module.types.DataUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: DataUnion.FbThriftUnionFieldEnum = 0
+        binaryData: DataUnion.FbThriftUnionFieldEnum = 1
+        stringData: DataUnion.FbThriftUnionFieldEnum = 2
+
+    FbThriftUnionFieldEnum.__name__ = "DataUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, bytes, str]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 class Val(_abc.ABC):
     @property
@@ -114,6 +153,17 @@ class ValUnion(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ValUnion": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: ValUnion.FbThriftUnionFieldEnum = 0
+        v1: ValUnion.FbThriftUnionFieldEnum = 1
+        v2: ValUnion.FbThriftUnionFieldEnum = 2
+
+    FbThriftUnionFieldEnum.__name__ = "ValUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, Val, Val]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class VirtualComplexUnion(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -129,6 +179,17 @@ class VirtualComplexUnion(_abc.ABC):
     def _to_py3(self) -> "module.types.VirtualComplexUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: VirtualComplexUnion.FbThriftUnionFieldEnum = 0
+        thingOne: VirtualComplexUnion.FbThriftUnionFieldEnum = 1
+        thingTwo: VirtualComplexUnion.FbThriftUnionFieldEnum = 2
+
+    FbThriftUnionFieldEnum.__name__ = "VirtualComplexUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, str, str]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 class NonCopyableStruct(_abc.ABC):
     @property
@@ -157,5 +218,15 @@ class NonCopyableUnion(_abc.ABC):
     def _to_py3(self) -> "module.types.NonCopyableUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableUnion": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: NonCopyableUnion.FbThriftUnionFieldEnum = 0
+        s: NonCopyableUnion.FbThriftUnionFieldEnum = 1
+
+    FbThriftUnionFieldEnum.__name__ = "NonCopyableUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, NonCopyableStruct]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 containerTypedef = _typing.Mapping[int, str]

@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.enums.module.thrift_abstract_types
+import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -20,7 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@test.fixtures.enums.module.thrift_abstract_types.SomeStruct.register
+@_fbthrift_abstract_types.SomeStruct.register
 class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -102,7 +102,7 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.SomeStruct, self)
 
 
-@test.fixtures.enums.module.thrift_abstract_types.MyStruct.register
+@_fbthrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

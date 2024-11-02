@@ -1197,9 +1197,10 @@ class MutableUnionMeta(type):
             union_name, field_infos
         )
 
-        union_class_namespace["FbThriftUnionFieldEnum"] = enum.Enum(
-            f"{union_name}",
-            _gen_mutable_union_field_enum_members(field_infos)
+        union_class_namespace["FbThriftUnionFieldEnum"] = (
+            union_class_namespace.pop('_fbthrift_union_field_enum')
+                if "_fbthrift_union_field_enum" in union_class_namespace
+                else enum.Enum(f"{union_name}", _gen_mutable_union_field_enum_members(field_infos))
         )
 
         slots = [field_info.py_name for field_info in field_infos]

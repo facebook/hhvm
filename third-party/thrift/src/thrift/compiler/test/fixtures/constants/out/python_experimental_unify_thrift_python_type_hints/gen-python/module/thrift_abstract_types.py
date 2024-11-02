@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import enum as _enum
+
 
 import folly.iobuf as _fbthrift_iobuf
 
@@ -171,6 +173,17 @@ class union1(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: union1.FbThriftUnionFieldEnum = 0
+        i: union1.FbThriftUnionFieldEnum = 1
+        d: union1.FbThriftUnionFieldEnum = 2
+
+    FbThriftUnionFieldEnum.__name__ = "union1"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class union2(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -192,6 +205,19 @@ class union2(_abc.ABC):
     def _to_py3(self) -> "module.types.union2": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.union2": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: union2.FbThriftUnionFieldEnum = 0
+        i: union2.FbThriftUnionFieldEnum = 1
+        d: union2.FbThriftUnionFieldEnum = 2
+        s: union2.FbThriftUnionFieldEnum = 3
+        u: union2.FbThriftUnionFieldEnum = 4
+
+    FbThriftUnionFieldEnum.__name__ = "union2"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float, struct1, union1]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 MyCompany = Company
 MyStringIdentifier = str

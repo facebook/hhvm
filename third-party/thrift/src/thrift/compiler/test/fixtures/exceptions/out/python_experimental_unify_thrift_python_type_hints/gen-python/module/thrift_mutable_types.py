@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -20,7 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@module.thrift_abstract_types.Fiery.register
+@_fbthrift_abstract_types.Fiery.register
 class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -76,7 +76,7 @@ class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
             return thrift.util.converter.to_py_struct(py_asyncio_types.Fiery, self)
 
 
-@module.thrift_abstract_types.Serious.register
+@_fbthrift_abstract_types.Serious.register
 class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -132,7 +132,7 @@ class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             return thrift.util.converter.to_py_struct(py_asyncio_types.Serious, self)
 
 
-@module.thrift_abstract_types.ComplexFieldNames.register
+@_fbthrift_abstract_types.ComplexFieldNames.register
 class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -199,7 +199,7 @@ class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexFieldNames, self)
 
 
-@module.thrift_abstract_types.CustomFieldNames.register
+@_fbthrift_abstract_types.CustomFieldNames.register
 class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -266,7 +266,7 @@ class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFieldNames, self)
 
 
-@module.thrift_abstract_types.ExceptionWithPrimitiveField.register
+@_fbthrift_abstract_types.ExceptionWithPrimitiveField.register
 class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -333,7 +333,7 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.
             return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithPrimitiveField, self)
 
 
-@module.thrift_abstract_types.ExceptionWithStructuredAnnotation.register
+@_fbthrift_abstract_types.ExceptionWithStructuredAnnotation.register
 class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -400,7 +400,7 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_excep
             return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithStructuredAnnotation, self)
 
 
-@module.thrift_abstract_types.Banal.register
+@_fbthrift_abstract_types.Banal.register
 class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
     )

@@ -8,13 +8,13 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.basic.module.thrift_abstract_types
+import test.fixtures.basic.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@test.fixtures.basic.module.thrift_abstract_types.MyStruct.register
+@_fbthrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -156,7 +156,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.Containers.register
+@_fbthrift_abstract_types.Containers.register
 class Containers(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -232,7 +232,7 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Containers, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.MyDataItem.register
+@_fbthrift_abstract_types.MyDataItem.register
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -275,7 +275,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.MyUnion.register
+@_fbthrift_abstract_types.MyUnion.register
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -324,6 +324,9 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         ),
     )
 
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.MyUnion.FbThriftUnionFieldEnum
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyUnion"
@@ -362,7 +365,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.MyException.register
+@_fbthrift_abstract_types.MyException.register
 class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -449,7 +452,7 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyException, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.MyExceptionWithMessage.register
+@_fbthrift_abstract_types.MyExceptionWithMessage.register
 class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -543,7 +546,7 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyExceptionWithMessage, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.ReservedKeyword.register
+@_fbthrift_abstract_types.ReservedKeyword.register
 class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -597,7 +600,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ReservedKeyword, self)
 
 
-@test.fixtures.basic.module.thrift_abstract_types.UnionToBeRenamed.register
+@_fbthrift_abstract_types.UnionToBeRenamed.register
 class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -612,6 +615,9 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.UnionToBeRenamed.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

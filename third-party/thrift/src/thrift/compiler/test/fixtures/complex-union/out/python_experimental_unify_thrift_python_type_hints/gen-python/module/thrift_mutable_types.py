@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -20,7 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@module.thrift_abstract_types.ComplexUnion.register
+@_fbthrift_abstract_types.ComplexUnion.register
 class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -91,6 +91,9 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.ComplexUnion.FbThriftUnionFieldEnum
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.ComplexUnion"
@@ -124,7 +127,7 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexUnion, self)
 
 
-@module.thrift_abstract_types.ListUnion.register
+@_fbthrift_abstract_types.ListUnion.register
 class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -150,6 +153,9 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             14, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.ListUnion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -184,7 +190,7 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ListUnion, self)
 
 
-@module.thrift_abstract_types.DataUnion.register
+@_fbthrift_abstract_types.DataUnion.register
 class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -210,6 +216,9 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.DataUnion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -244,7 +253,7 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.DataUnion, self)
 
 
-@module.thrift_abstract_types.Val.register
+@_fbthrift_abstract_types.Val.register
 class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -315,7 +324,7 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Val, self)
 
 
-@module.thrift_abstract_types.ValUnion.register
+@_fbthrift_abstract_types.ValUnion.register
 class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -341,6 +350,9 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.ValUnion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -375,7 +387,7 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ValUnion, self)
 
 
-@module.thrift_abstract_types.VirtualComplexUnion.register
+@_fbthrift_abstract_types.VirtualComplexUnion.register
 class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -401,6 +413,9 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.VirtualComplexUnion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -435,7 +450,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
             return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualComplexUnion, self)
 
 
-@module.thrift_abstract_types.NonCopyableStruct.register
+@_fbthrift_abstract_types.NonCopyableStruct.register
 class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -484,7 +499,7 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
             return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableStruct, self)
 
 
-@module.thrift_abstract_types.NonCopyableUnion.register
+@_fbthrift_abstract_types.NonCopyableUnion.register
 class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -499,6 +514,9 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.NonCopyableUnion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

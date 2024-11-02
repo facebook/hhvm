@@ -8,13 +8,13 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@module.thrift_abstract_types.Internship.register
+@_fbthrift_abstract_types.Internship.register
 class Internship(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -112,7 +112,7 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Internship, self)
 
 
-@module.thrift_abstract_types.Range.register
+@_fbthrift_abstract_types.Range.register
 class Range(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -177,7 +177,7 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Range, self)
 
 
-@module.thrift_abstract_types.struct1.register
+@_fbthrift_abstract_types.struct1.register
 class struct1(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -242,7 +242,7 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct1, self)
 
 
-@module.thrift_abstract_types.struct2.register
+@_fbthrift_abstract_types.struct2.register
 class struct2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -329,7 +329,7 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct2, self)
 
 
-@module.thrift_abstract_types.struct3.register
+@_fbthrift_abstract_types.struct3.register
 class struct3(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -405,7 +405,7 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct3, self)
 
 
-@module.thrift_abstract_types.struct4.register
+@_fbthrift_abstract_types.struct4.register
 class struct4(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -481,7 +481,7 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct4, self)
 
 
-@module.thrift_abstract_types.union1.register
+@_fbthrift_abstract_types.union1.register
 class union1(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -507,6 +507,9 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
             7, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.union1.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -546,7 +549,7 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.union1, self)
 
 
-@module.thrift_abstract_types.union2.register
+@_fbthrift_abstract_types.union2.register
 class union2(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -594,6 +597,9 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.union2.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

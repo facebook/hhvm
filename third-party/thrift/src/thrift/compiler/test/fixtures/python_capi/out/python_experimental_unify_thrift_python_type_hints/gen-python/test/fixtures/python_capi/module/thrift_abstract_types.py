@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import enum as _enum
+
 
 import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.type.id.thrift_abstract_types
@@ -410,6 +412,22 @@ class Onion(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.Onion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: Onion.FbThriftUnionFieldEnum = 0
+        myEnum: Onion.FbThriftUnionFieldEnum = 1
+        myStruct: Onion.FbThriftUnionFieldEnum = 2
+        myString: Onion.FbThriftUnionFieldEnum = 4
+        intSet: Onion.FbThriftUnionFieldEnum = 6
+        doubleList: Onion.FbThriftUnionFieldEnum = 8
+        strMap: Onion.FbThriftUnionFieldEnum = 9
+        adapted_int: Onion.FbThriftUnionFieldEnum = 10
+
+    FbThriftUnionFieldEnum.__name__ = "Onion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, MyEnum, PrimitiveStruct, str, _typing.AbstractSet[int], _typing.Sequence[float], _typing.Mapping[bytes, str], int]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 uint64 = int
 ui64 = int

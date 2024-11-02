@@ -666,3 +666,43 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # Rather than pull in py-deprecated types, just check that the method exists.
         self.assertTrue(hasattr(TestStructAbstract, "_to_py_deprecated"))
         self.assertTrue(hasattr(TestUnionAbstract, "_to_py_deprecated"))
+
+    @parameterized.expand(
+        [
+            (
+                "immutable_union",
+                TestUnionImmutable(),
+                TestUnionImmutable(string_field="Hello, world!"),
+            ),
+            (
+                "mutable_union",
+                TestUnionMutable(),
+                TestUnionMutable(string_field="Hello, world!"),
+            ),
+        ],
+    )
+    def test_create_union(
+        self,
+        test_name: str,
+        empty_union: TestUnionAbstract,
+        string_field_union: TestUnionAbstract,
+    ) -> None:
+        self.assertEqual(
+            empty_union.fbthrift_current_field,
+            TestUnionAbstract.FbThriftUnionFieldEnum.EMPTY,
+        )
+        self.assertIsNone(empty_union.fbthrift_current_value)
+        with self.assertRaises(AttributeError):
+            empty_union.string_field
+
+        self.assertIs(
+            string_field_union.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+        self.assertEqual(string_field_union.fbthrift_current_value, "Hello, world!")
+        self.assertEqual(string_field_union.string_field, "Hello, world!")
+        # Trying to access any other field should raise an error.
+        with self.assertRaises(
+            AttributeError,
+        ):
+            string_field_union.int_field

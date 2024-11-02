@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -20,7 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@module.thrift_abstract_types.Limits.register
+@_fbthrift_abstract_types.Limits.register
 class Limits(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

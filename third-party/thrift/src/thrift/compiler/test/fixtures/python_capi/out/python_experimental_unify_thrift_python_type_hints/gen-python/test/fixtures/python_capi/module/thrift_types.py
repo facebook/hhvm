@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.python_capi.module.thrift_abstract_types
+import test.fixtures.python_capi.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -22,7 +22,7 @@ import test.fixtures.python_capi.serialized_dep.thrift_types
 import test.fixtures.python_capi.thrift_dep.thrift_types
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.MyStruct.register
+@_fbthrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -153,7 +153,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.MyDataItem.register
+@_fbthrift_abstract_types.MyDataItem.register
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -207,7 +207,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.TransitiveDoubler.register
+@_fbthrift_abstract_types.TransitiveDoubler.register
 class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -250,7 +250,7 @@ class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.TransitiveDoubler, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.DoubledPair.register
+@_fbthrift_abstract_types.DoubledPair.register
 class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -315,7 +315,7 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.DoubledPair, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.StringPair.register
+@_fbthrift_abstract_types.StringPair.register
 class StringPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -380,7 +380,7 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.StringPair, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.EmptyStruct.register
+@_fbthrift_abstract_types.EmptyStruct.register
 class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -423,7 +423,7 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.EmptyStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.PrimitiveStruct.register
+@_fbthrift_abstract_types.PrimitiveStruct.register
 class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -642,7 +642,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.PrimitiveStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.AdaptedFields.register
+@_fbthrift_abstract_types.AdaptedFields.register
 class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -729,7 +729,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedFields, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.ListStruct.register
+@_fbthrift_abstract_types.ListStruct.register
 class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -871,7 +871,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ListStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.SetStruct.register
+@_fbthrift_abstract_types.SetStruct.register
 class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -991,7 +991,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.SetStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.MapStruct.register
+@_fbthrift_abstract_types.MapStruct.register
 class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1144,7 +1144,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MapStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.ComposeStruct.register
+@_fbthrift_abstract_types.ComposeStruct.register
 class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1297,7 +1297,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComposeStruct, self)
 
 
-@test.fixtures.python_capi.module.thrift_abstract_types.Onion.register
+@_fbthrift_abstract_types.Onion.register
 class Onion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1378,6 +1378,9 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
             5, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_union_field_enum = _fbthrift_abstract_types.Onion.FbThriftUnionFieldEnum
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

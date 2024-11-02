@@ -8,13 +8,13 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@module.thrift_abstract_types.FooStreamEx.register
+@_fbthrift_abstract_types.FooStreamEx.register
 class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
@@ -57,7 +57,7 @@ class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooStreamEx, self)
 
 
-@module.thrift_abstract_types.FooEx.register
+@_fbthrift_abstract_types.FooEx.register
 class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
@@ -100,7 +100,7 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx, self)
 
 
-@module.thrift_abstract_types.FooEx2.register
+@_fbthrift_abstract_types.FooEx2.register
 class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )

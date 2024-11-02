@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.interactions.module.thrift_abstract_types
+import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -16,7 +16,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import test.fixtures.another_interactions.shared.thrift_types
 
 
-@test.fixtures.interactions.module.thrift_abstract_types.CustomException.register
+@_fbthrift_abstract_types.CustomException.register
 class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(

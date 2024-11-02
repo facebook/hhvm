@@ -17,5 +17,12 @@
 }}{{!
 Typing for a union field
 }}_typing.Union[None{{#struct:fields_ordered_by_id}}{{!
-  }}, {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
+  }}, {{#field:type}}{{!
+    Do not use adapted abstract types until abstract types support them.
+  }}{{#program:generate_abstract_types}}{{!
+  }}{{> types/unadapted_pep484_type}}{{!
+  }}{{/program:generate_abstract_types}}{{!
+  }}{{^program:generate_abstract_types}}{{!
+  }}{{> types/pep484_type}}{{!
+  }}{{/program:generate_abstract_types}}{{/field:type}}{{!
   }}{{/struct:fields_ordered_by_id}}]

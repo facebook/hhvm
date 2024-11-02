@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import enum as _enum
+
 
 import folly.iobuf as _fbthrift_iobuf
 
@@ -118,6 +120,19 @@ class MyUnion(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: MyUnion.FbThriftUnionFieldEnum = 0
+        myEnum: MyUnion.FbThriftUnionFieldEnum = 1
+        myStruct: MyUnion.FbThriftUnionFieldEnum = 2
+        myDataItem: MyUnion.FbThriftUnionFieldEnum = 3
+        floatSet: MyUnion.FbThriftUnionFieldEnum = 4
+
+    FbThriftUnionFieldEnum.__name__ = "MyUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, MyEnum, MyStruct, MyDataItem, _typing.AbstractSet[float]]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class MyException(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -193,6 +208,16 @@ class UnionToBeRenamed(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.basic.module.types.UnionToBeRenamed": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: UnionToBeRenamed.FbThriftUnionFieldEnum = 0
+        reserved_field: UnionToBeRenamed.FbThriftUnionFieldEnum = 1
+
+    FbThriftUnionFieldEnum.__name__ = "UnionToBeRenamed"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem

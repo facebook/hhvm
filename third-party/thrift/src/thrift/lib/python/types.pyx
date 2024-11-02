@@ -1800,7 +1800,13 @@ class UnionMeta(type):
                 field_info.py_name,
                 _make_fget_union(field_info.id, field_info.adapter_info),
             )
-        FbThriftUnionFieldEnum = enum.Enum(union_name, _gen_union_field_enum_members(field_infos))
+
+        FbThriftUnionFieldEnum = (
+            union_class_namespace.pop('_fbthrift_union_field_enum')
+                if "_fbthrift_union_field_enum" in union_class_namespace
+                else enum.Enum(union_name, _gen_union_field_enum_members(field_infos))
+        )
+
         type.__setattr__(
             klass,
             "FbThriftUnionFieldEnum",
@@ -1811,6 +1817,7 @@ class UnionMeta(type):
             "Type",
             FbThriftUnionFieldEnum,
         )
+
         return klass
 
     def __dir__(cls):

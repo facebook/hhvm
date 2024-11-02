@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import enum as _enum
+
 
 import folly.iobuf as _fbthrift_iobuf
 
@@ -334,6 +336,21 @@ class MyUnion(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: MyUnion.FbThriftUnionFieldEnum = 0
+        myEnum: MyUnion.FbThriftUnionFieldEnum = 1
+        myStruct: MyUnion.FbThriftUnionFieldEnum = 2
+        myDataItem: MyUnion.FbThriftUnionFieldEnum = 3
+        complexNestedStruct: MyUnion.FbThriftUnionFieldEnum = 4
+        longValue: MyUnion.FbThriftUnionFieldEnum = 5
+        intValue: MyUnion.FbThriftUnionFieldEnum = 6
+
+    FbThriftUnionFieldEnum.__name__ = "MyUnion"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, MyEnum, MyStruct, MyDataItem, ComplexNestedStruct, int, int]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
+
 class MyUnionFloatFieldThrowExp(_abc.ABC):
     @property
     @_abc.abstractmethod
@@ -355,6 +372,19 @@ class MyUnionFloatFieldThrowExp(_abc.ABC):
     def _to_py3(self) -> "module.types.MyUnionFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFloatFieldThrowExp": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 0
+        myEnum: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 1
+        setFloat: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 2
+        myDataItem: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 3
+        complexNestedStruct: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 4
+
+    FbThriftUnionFieldEnum.__name__ = "MyUnionFloatFieldThrowExp"
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, MyEnum, _typing.Sequence[_typing.Sequence[float]], MyDataItem, ComplexNestedStruct]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+
 
 class ComplexNestedStruct(_abc.ABC):
     @property

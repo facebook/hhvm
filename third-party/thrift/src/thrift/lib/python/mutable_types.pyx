@@ -286,6 +286,8 @@ cdef class MutableStruct(MutableStructOrUnion):
         self._initStructListWithValues(kwargs)
         cdef MutableStructInfo mutable_struct_info = type(self)._fbthrift_mutable_struct_info
         self._fbthrift_field_cache = [None] * len(mutable_struct_info.fields)
+        # Append `MutableStruct` instance, see `_fbthrift_has_struct_instance()`
+        self._fbthrift_data.append(self)
 
     def __init__(self, **kwargs):
         pass
@@ -302,10 +304,10 @@ cdef class MutableStruct(MutableStructOrUnion):
         return self_copy
 
     def __deepcopy__(self, memo):
-        has_instance = self._fbthrift_has_struct_instance(self._fbthrift_data)
-        # we do not need to deep copy the instance and the field-cache (last element)
-        fbthrift_data = self._fbthrift_data[:-1] if has_instance else self._fbthrift_data
-        return self._fbthrift_create(copy.deepcopy(fbthrift_data))
+        # When `deepcopy` is called on an instance (`self`), the instance must
+        # already be populated in `_fbthrift_data`.
+        assert self._fbthrift_has_struct_instance(self._fbthrift_data)
+        return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
 
     cdef _initStructListWithValues(self, kwargs) except *:
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
@@ -342,9 +344,6 @@ cdef class MutableStruct(MutableStructOrUnion):
                 self._fbthrift_data,
                 mutable_struct_info.cpp_obj.get().getStructInfo()
         )
-
-        # Append `MutableStruct` instance, see `_fbthrift_has_struct_instance()`
-        self._fbthrift_data.append(self)
 
     cdef _fbthrift_set_field_value(self, int16_t index, object value):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info

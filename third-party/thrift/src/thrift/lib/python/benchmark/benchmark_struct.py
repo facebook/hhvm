@@ -39,16 +39,32 @@ inst = MyStruct(
     val_i64=64,
     val_string="hello world",
     val_binary=b"hello world",
-    val_list={val_list},
-    val_set={val_set},
-    val_map={val_map},
+    val_list=to_thrift_list({val_list}),
+    val_set=to_thrift_set({val_set}),
+    val_map=to_thrift_map({val_map}),
 )
+"""
+
+NOOP_CONTAINER_WRAPPERS = """
+def to_thrift_list(l):
+    return l
+
+def to_thrift_set(s):
+    return s
+
+def to_thrift_map(m):
+    return m
 """
 
 
 def get_import(flavor) -> str:
     return (
         f"from thrift.benchmark.struct.{NAMESPACES[flavor]} import MyStruct, Included"
+        + (
+            "\nfrom thrift.python.mutable_types import to_thrift_list, to_thrift_set, to_thrift_map"
+            if flavor == "mutable-python"
+            else NOOP_CONTAINER_WRAPPERS
+        )
     )
 
 
@@ -103,7 +119,7 @@ def benchmark_field_access():
         init_statement = INIT_STATEMENT_MyStruct.format(
             val_list=val_list, val_set=val_set, val_map={}
         )
-        setup = f"{get_import(flavor)}; {init_statement}"
+        setup = f"{get_import(flavor)}\n{init_statement}"
         if cached:
             setup = f"{setup}\n{access}"
         timer = timeit.Timer(
@@ -172,20 +188,20 @@ val_map = {
 }
 
 val_map_structs = {
-    k: Included(vals=[f"str_{i}_{k}" for i in range(10)])
+    k: Included(vals=to_thrift_list([f"str_{i}_{k}" for i in range(10)]))
     for k in range(30)
 }
 inst = MyStruct(
-    val_list=list(range(30)),
-    str_list = [f"str_{i}" for i in range(30, 60)],
-    val_set=set(range(30)),
-    val_map=val_map,
-    val_map_structs=val_map_structs,
+    val_list=to_thrift_list(list(range(30))),
+    str_list = to_thrift_list([f"str_{i}" for i in range(30, 60)]),
+    val_set=to_thrift_set(set(range(30))),
+    val_map=to_thrift_map(val_map),
+    val_map_structs=to_thrift_map(val_map_structs),
 )
 """
 
     def benchmark_single(flavor, st, cached) -> str:
-        setup = f"{get_import(flavor)}; {INIT_FOR_CONTAINER}"
+        setup = f"{get_import(flavor)}\n{INIT_FOR_CONTAINER}"
         if cached:
             setup = f"{setup}\n{st}"
         timer = timeit.Timer(

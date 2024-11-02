@@ -265,11 +265,8 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn("x", mutable_map.keys())
         self.assertNotIn("y", mutable_map.keys())
 
-        # `MapKeysView.__contains__()` raises `TypeError` on key type mismatch.
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            _ = 1 in mutable_map.keys()
+        # `MapKeysView.__contains__()` returns `False` on key type mismatch.
+        self.assertNotIn(1, mutable_map.keys())
 
     def test_keys_view(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})
@@ -322,19 +319,10 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn(("A", 66), mutable_map.items())
         self.assertNotIn(("B", 65), mutable_map.items())
 
-        # `MapItemsView.__contains__()` raises `TypeError` on key or value type
+        # `MapItemsView.__contains__()` returns `False` on key or value type
         # mismatch.
-        with self.assertRaisesRegex(
-            TypeError, "Expected type <class 'str'>, got: <class 'int'>"
-        ):
-            # pyre-ignore[6]: Intentional for test
-            _ = (1, 97) in mutable_map.items()
-
-        with self.assertRaisesRegex(
-            TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
-        ):
-            # pyre-ignore[6]: Intentional for test
-            _ = ("a", "Not an integer") in mutable_map.items()
+        self.assertNotIn((1, 97), mutable_map.items())
+        self.assertNotIn(("a", "Not an integer"), mutable_map.items())
 
     def test_items_view(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})

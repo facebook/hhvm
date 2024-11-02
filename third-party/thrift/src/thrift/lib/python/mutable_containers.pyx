@@ -701,7 +701,11 @@ cdef class MapKeysView:
         if key is None:
             return False
 
-        internal_key = self._key_typeinfo.to_internal_data(key)
+        try:
+            internal_key = self._key_typeinfo.to_internal_data(key)
+        except (TypeError, OverflowError):
+            return False
+
         return internal_key in self._dict_keys
 
     def __iter__(self):
@@ -721,8 +725,12 @@ cdef class MapItemsView:
         if item is None:
             return False
 
-        internal_item = (self._key_typeinfo.to_internal_data(item[0]),
-                         self._val_typeinfo.to_internal_data(item[1]))
+        try:
+            internal_item = (self._key_typeinfo.to_internal_data(item[0]),
+                             self._val_typeinfo.to_internal_data(item[1]))
+        except (TypeError, OverflowError):
+            return False
+
         return internal_item in self._dict_items
 
     def __iter__(self):

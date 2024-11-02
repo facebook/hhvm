@@ -947,6 +947,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s2.unqualified_map_string_i32 = to_thrift_map(my_map)
         my_map["c"] = 3
         self.assertEqual(3, len(my_map))
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MutableMap[str, int]`.
         self.assertEqual(2, len(s2.unqualified_map_string_i32))
 
         s3 = TestStructAllThriftContainerTypesMutable(
@@ -1163,6 +1165,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             unqualified_map_string_i32=to_thrift_map({"a": 1, "b": 2})
         )
 
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MutableMap[str, int]`.
         self.assertEqual(2, len(s.unqualified_map_string_i32))
         self.assertEqual({"a": 1, "b": 2}, s.unqualified_map_string_i32)
 
@@ -1258,6 +1262,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(0, len(python_set))
 
         # `keys()`
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapKeysView[str]`.
         self.assertEqual(3, len(s.unqualified_map_string_i32.keys()))
 
         python_set = {"a", "b", "c"}
@@ -1267,15 +1273,21 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `keys()` returns a view
         keys = s.unqualified_map_string_i32.keys()
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapKeysView[str]`.
         self.assertEqual(3, len(keys))
         self.assertEqual({"a", "b", "c"}, set(keys))
 
         s.unqualified_map_string_i32["d"] = 4
 
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapKeysView[str]`.
         self.assertEqual(4, len(keys))
         self.assertEqual({"a", "b", "c", "d"}, set(keys))
 
         # `values()`
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapValuesView[int]`.
         self.assertEqual(4, len(s.unqualified_map_string_i32.values()))
 
         python_list = [1, 2, 3, 4]
@@ -1284,15 +1296,21 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `values()` returns a view
         values = s.unqualified_map_string_i32.values()
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapValuesView[int]`.
         self.assertEqual(4, len(values))
         self.assertEqual([1, 2, 3, 4], sorted(values))
 
         s.unqualified_map_string_i32["e"] = 5
 
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapValuesView[int]`.
         self.assertEqual(5, len(values))
         self.assertEqual([1, 2, 3, 4, 5], sorted(values))
 
         # `items()`
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapItemsView[str, int]`.
         self.assertEqual(5, len(s.unqualified_map_string_i32.items()))
         self.assertEqual(
             [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5)],
@@ -1301,6 +1319,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         # `items()` returns a view
         items = s.unqualified_map_string_i32.items()
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapItemsView[str, int]`.
         self.assertEqual(5, len(items))
         self.assertEqual(
             [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5)],
@@ -1309,6 +1329,8 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
 
         s.unqualified_map_string_i32["f"] = 6
 
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `MapItemsView[str, int]`.
         self.assertEqual(6, len(items))
         self.assertEqual(
             [("a", 1), ("b", 2), ("c", 3), ("d", 4), ("e", 5), ("f", 6)],

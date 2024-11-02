@@ -583,6 +583,8 @@ class PythonCapiContainerTemplateParity(PythonCapiFixture):
         )
 
     def assert_set_equal(self, a: PythonStruct, b: PythonStruct) -> None:
+        # pyre-fixme[6]: For 1st argument expected
+        #  `pyre_extensions.PyreReadOnly[Sized]` but got `PythonStruct`.
         self.assertEqual(len(a), len(b))
         for field_name, a_val in a:
             b_fld = getattr(b, field_name)

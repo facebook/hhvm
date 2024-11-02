@@ -102,10 +102,10 @@ ResultErrno<folly::Unit> Command::run(
   PduBuffer output_pdu_buffer;
   if (persistent) {
     for (;;) {
-      auto res = passPduToStdout(
+      auto result = passPduToStdout(
           stream, buffer, output_format, output_pdu_buffer, pretty);
-      if (res.hasError()) {
-        return res;
+      if (result.hasError()) {
+        return result;
       }
     }
   } else {

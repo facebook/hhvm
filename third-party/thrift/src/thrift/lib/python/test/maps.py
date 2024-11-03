@@ -145,14 +145,18 @@ class MapTests(unittest.TestCase):
         self.assertEqual(x["test"], "value")
         self.assertEqual(x[MyStringEnum.test], "value")
         with self.assertRaises(KeyError):
+            # pyre-ignore[6]: Intentional for test
             x[5]
         with self.assertRaises(KeyError):
+            # pyre-ignore[6]: Intentional for test
             x[x]
 
     def test_get(self) -> None:
         x = self.StrStrMap({"test": "value"})
         self.assertEqual(x.get("test"), "value")
+        # pyre-ignore[6]: Intentional for test
         self.assertIs(x.get(5), None)
+        # pyre-ignore[6]: Intentional for test
         self.assertIs(x.get(x), None)
 
     def test_contains(self) -> None:
@@ -313,11 +317,16 @@ class MapImmutablePythonTests(unittest.TestCase):
         self.assertIn(1, cmap.colorMap)
         self.assertNotIn(2, cmap.colorMap)
         # gross
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap[0], self.Color.red)
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap[1], self.Color.blue)
 
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(0), self.Color.red)
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(1), self.Color.blue)
+        # pyre-ignore[6]: Intentional for test
         self.assertEqual(cmap.colorMap.get(2), None)
 
 

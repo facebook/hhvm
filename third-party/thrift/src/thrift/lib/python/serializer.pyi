@@ -30,6 +30,7 @@ def serialize_iobuf(strct: sT, protocol: Protocol = Protocol.COMPACT) -> IOBuf: 
 def serialize(struct: sT, protocol: Protocol = Protocol.COMPACT) -> bytes: ...
 def deserialize_with_length(
     klass: typing.Type[sT],
+    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = Protocol.COMPACT,
     *,
@@ -37,6 +38,7 @@ def deserialize_with_length(
 ) -> typing.Tuple[sT, int]: ...
 def deserialize(
     klass: typing.Type[sT],
+    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: typing.Union[bytes, bytearray, IOBuf, memoryview],
     protocol: Protocol = Protocol.COMPACT,
     *,

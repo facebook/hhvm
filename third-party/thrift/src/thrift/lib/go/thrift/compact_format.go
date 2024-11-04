@@ -38,6 +38,7 @@ const (
 type compactType byte
 
 const (
+	COMPACT_STOP          = 0x00
 	COMPACT_BOOLEAN_TRUE  = 0x01
 	COMPACT_BOOLEAN_FALSE = 0x02
 	COMPACT_BYTE          = 0x03
@@ -53,26 +54,20 @@ const (
 	COMPACT_FLOAT         = 0x0D
 )
 
-var (
-	typeToCompactType map[types.Type]compactType
-)
-
-func init() {
-	typeToCompactType = map[types.Type]compactType{
-		types.STOP:   types.STOP,
-		types.BOOL:   COMPACT_BOOLEAN_TRUE,
-		types.BYTE:   COMPACT_BYTE,
-		types.I16:    COMPACT_I16,
-		types.I32:    COMPACT_I32,
-		types.I64:    COMPACT_I64,
-		types.DOUBLE: COMPACT_DOUBLE,
-		types.FLOAT:  COMPACT_FLOAT,
-		types.STRING: COMPACT_BINARY,
-		types.LIST:   COMPACT_LIST,
-		types.SET:    COMPACT_SET,
-		types.MAP:    COMPACT_MAP,
-		types.STRUCT: COMPACT_STRUCT,
-	}
+var typeToCompactType = map[types.Type]compactType{
+	types.STOP:   COMPACT_STOP,
+	types.BOOL:   COMPACT_BOOLEAN_TRUE,
+	types.BYTE:   COMPACT_BYTE,
+	types.I16:    COMPACT_I16,
+	types.I32:    COMPACT_I32,
+	types.I64:    COMPACT_I64,
+	types.DOUBLE: COMPACT_DOUBLE,
+	types.FLOAT:  COMPACT_FLOAT,
+	types.STRING: COMPACT_BINARY,
+	types.LIST:   COMPACT_LIST,
+	types.SET:    COMPACT_SET,
+	types.MAP:    COMPACT_MAP,
+	types.STRUCT: COMPACT_STRUCT,
 }
 
 type compactFormat struct {
@@ -237,7 +232,7 @@ func (p *compactEncoder) writeFieldBeginInternal(name string, typeID types.Type,
 func (p *compactEncoder) WriteFieldEnd() error { return nil }
 
 func (p *compactEncoder) WriteFieldStop() error {
-	err := p.writeByteDirect(types.STOP)
+	err := p.writeByteDirect(COMPACT_STOP)
 	return types.NewProtocolException(err)
 }
 
@@ -422,7 +417,7 @@ func (p *compactDecoder) ReadFieldBegin() (name string, typeID types.Type, id in
 	}
 
 	// if it's a stop, then we can return immediately, as the struct is over.
-	if (t & 0x0f) == types.STOP {
+	if (t & 0x0f) == COMPACT_STOP {
 		return "", types.STOP, 0, nil
 	}
 	// mask off the 4 MSB of the type header. it could contain a field id delta.
@@ -798,7 +793,7 @@ func (p *compactDecoder) isBoolType(b byte) bool {
 // Type value.
 func compactToThriftType(t compactType) (types.Type, error) {
 	switch byte(t) & 0x0f {
-	case types.STOP:
+	case COMPACT_STOP:
 		return types.STOP, nil
 	case COMPACT_BOOLEAN_FALSE, COMPACT_BOOLEAN_TRUE:
 		return types.BOOL, nil

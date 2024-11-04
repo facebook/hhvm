@@ -15,6 +15,7 @@
   (pps ppx_deriving.std))
  (libraries
   exec_command
+  poll
   process_types
   utils_core
   utils_ocaml_overrides

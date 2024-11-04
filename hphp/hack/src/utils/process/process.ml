@@ -92,7 +92,7 @@ let rec maybe_consume
     let start_t = Unix.time () in
     Option.iter !fd_ref ~f:(fun fd ->
         match
-          Sys_utils.Poll.wait_fd_read_non_intr
+          Poll.wait_fd_read_non_intr
             fd
             ~timeout_ms:(Some (Int.of_float max_time * 1000))
         with
@@ -111,7 +111,7 @@ let rec maybe_consume
             let consumed_t = Unix.time () -. start_t in
             let max_time = max_time -. consumed_t in
             maybe_consume ~max_time fd_ref acc
-        | Error flags -> raise (Sys_utils.Poll.Poll_exception flags))
+        | Error flags -> raise (Poll.Poll_exception flags))
 
 (** Read data from stdout and stderr until EOF is reached. Waits for
     process to terminate returns the stderr and stdout

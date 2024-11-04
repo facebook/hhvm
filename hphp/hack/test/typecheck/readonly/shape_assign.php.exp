@@ -1,0 +1,24 @@
+ERROR: File "shape_assign.php", line 24, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+ERROR: File "shape_assign.php", line 25, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+ERROR: File "shape_assign.php", line 24, characters 3-4:
+Variable `$a` is undefined, or not always defined. (Naming[2050])
+  File "shape_assign.php", line 22, characters 54-55:
+  Did you mean `$x` instead?
+ERROR: File "shape_assign.php", line 25, characters 3-4:
+Variable `$b` is undefined, or not always defined. (Naming[2050])
+  File "shape_assign.php", line 22, characters 54-55:
+  Did you mean `$x` instead?
+ERROR: File "shape_assign.php", line 23, characters 3-34:
+Invalid assignment (Typing[4110])
+  File "shape_assign.php", line 23, characters 16-17:
+  Expected `nothing`
+  File "shape_assign.php", line 22, characters 37-39:
+  But got `Foo`
+ERROR: File "shape_assign.php", line 23, characters 3-34:
+Invalid assignment (Typing[4110])
+  File "shape_assign.php", line 23, characters 27-28:
+  Expected `nothing`
+  File "shape_assign.php", line 22, characters 49-51:
+  But got `Foo`

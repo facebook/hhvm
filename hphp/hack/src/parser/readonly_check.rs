@@ -473,6 +473,13 @@ fn check_assignment_validity(
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
             }
         }
+        // shape assignment
+        aast::Expr_::Shape(l) => {
+            let exprs = &mut **l;
+            for (_field_name, e) in exprs.iter_mut() {
+                check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            }
+        }
         // directly assigning to a class static is always valid (locally) as long as
         // the rhs is explicit on its readonlyness
         aast::Expr_::ClassGet(_) => {

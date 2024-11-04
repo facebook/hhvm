@@ -734,7 +734,7 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
             "Incomplete message received");
 }
 
-TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {
+TEST_F(HTTPBinaryCodecTest, testGenerateKnownLengthHeaders) {
   // Create HTTPMessage and encode it to a buffer
   HTTPMessage msgEncoded;
   msgEncoded.setMethod("GET");
@@ -754,6 +754,40 @@ TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {
   upstreamBinaryCodecKnownLength_->setCallback(&callback);
   upstreamBinaryCodecKnownLength_->onIngress(*writeBuffer.front());
   upstreamBinaryCodecKnownLength_->onIngressEOF();
+
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
+  EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
+  headersEncoded.forEach([&headersDecoded](const std::string& headerName,
+                                           const std::string& headerValue) {
+    EXPECT_EQ(headersDecoded.exists(headerName), true);
+    EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
+  });
+}
+
+TEST_F(HTTPBinaryCodecTest, testGenerateIndeterminateLengthHeaders) {
+  // Create HTTPMessage and encode it to a buffer
+  HTTPMessage msgEncoded;
+  msgEncoded.setMethod("GET");
+  msgEncoded.setSecure(true);
+  msgEncoded.setURL("/hello.txt");
+  HTTPHeaders& headersEncoded = msgEncoded.getHeaders();
+  headersEncoded.set("user-agent",
+                     "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  headersEncoded.set("host", "www.example.com");
+  headersEncoded.set("accept-language", "en, mi");
+
+  folly::IOBufQueue writeBuffer;
+  upstreamBinaryCodecIndeterminateLength_->generateHeader(
+      writeBuffer, 0, msgEncoded);
+
+  // Now, decode the HTTPMessage from the buffer and check values
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodecIndeterminateLength_->setCallback(&callback);
+  upstreamBinaryCodecIndeterminateLength_->onIngress(*writeBuffer.front());
+  upstreamBinaryCodecIndeterminateLength_->onIngressEOF();
 
   EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
   EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());

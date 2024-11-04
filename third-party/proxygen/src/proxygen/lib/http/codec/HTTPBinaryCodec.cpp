@@ -567,22 +567,30 @@ void HTTPBinaryCodec::onIngressEOF() {
 
 size_t HTTPBinaryCodec::generateHeaderHelper(folly::io::QueueAppender& appender,
                                              const HTTPHeaders& headers) {
-  // Calculate the number of bytes it will take to encode all the headers
-  size_t headersLength = 0;
-  headers.forEach([&](folly::StringPiece name, folly::StringPiece value) {
-    auto nameSize = name.size();
-    auto valueSize = value.size();
-    headersLength += quic::getQuicIntegerSize(nameSize).value() + nameSize +
-                     quic::getQuicIntegerSize(valueSize).value() + valueSize;
-  });
 
-  // Encode all the headers
-  auto lengthOfAllHeaders = encodeInteger(headersLength, appender);
-  headersLength += lengthOfAllHeaders.value();
+  size_t headersLength = 0;
+  if (knownLength_) {
+    // Calculate the number of bytes it will take to encode all the headers
+    headers.forEach([&](folly::StringPiece name, folly::StringPiece value) {
+      auto nameSize = name.size();
+      auto valueSize = value.size();
+      headersLength += quic::getQuicIntegerSize(nameSize).value() + nameSize +
+                       quic::getQuicIntegerSize(valueSize).value() + valueSize;
+    });
+
+    // Encode all the headers
+    auto lengthOfAllHeaders = encodeInteger(headersLength, appender);
+    headersLength += lengthOfAllHeaders.value();
+  }
+
   headers.forEach([&](folly::StringPiece name, folly::StringPiece value) {
     encodeString(name, appender);
     encodeString(value, appender);
   });
+
+  if (!knownLength_) {
+    encodeInteger(0, appender);
+  }
 
   return headersLength;
 }
@@ -597,9 +605,14 @@ void HTTPBinaryCodec::generateHeader(
   folly::io::QueueAppender appender(&writeBuf, queueAppenderMaxGrowth);
   if (transportDirection_ == TransportDirection::UPSTREAM) {
     // Encode Framing Indicator for Request
-    encodeInteger(folly::to<uint64_t>(
-                      HTTPBinaryCodec::FramingIndicator::REQUEST_KNOWN_LENGTH),
-                  appender);
+    encodeInteger(
+        folly::to<uint64_t>(
+            knownLength_
+                ? HTTPBinaryCodec::FramingIndicator::REQUEST_KNOWN_LENGTH
+                : HTTPBinaryCodec::FramingIndicator::
+                      REQUEST_INDETERMINATE_LENGTH),
+        appender);
+
     // Encode Request Control Data
     encodeString(msg.getMethodString(), appender);
     encodeString(msg.isSecure() ? "https" : "http", appender);
@@ -612,9 +625,13 @@ void HTTPBinaryCodec::generateHeader(
     }
     encodeString(pathWithQueryString, appender);
   } else {
-    encodeInteger(folly::to<uint64_t>(
-                      HTTPBinaryCodec::FramingIndicator::RESPONSE_KNOWN_LENGTH),
-                  appender);
+    encodeInteger(
+        folly::to<uint64_t>(
+            knownLength_
+                ? HTTPBinaryCodec::FramingIndicator::RESPONSE_KNOWN_LENGTH
+                : HTTPBinaryCodec::FramingIndicator::
+                      RESPONSE_INDETERMINATE_LENGTH),
+        appender);
     // Response Control Data
     encodeInteger(msg.getStatusCode(), appender);
   }

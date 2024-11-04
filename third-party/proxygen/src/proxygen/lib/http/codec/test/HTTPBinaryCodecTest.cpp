@@ -801,7 +801,7 @@ TEST_F(HTTPBinaryCodecTest, testGenerateIndeterminateLengthHeaders) {
   });
 }
 
-TEST_F(HTTPBinaryCodecTest, testGenerateBody) {
+TEST_F(HTTPBinaryCodecTest, testGenerateKnownLengthBody) {
   // Create Test Body and encode
   std::string body = "Sample Test Body!";
   std::unique_ptr<folly::IOBuf> testBody =
@@ -821,7 +821,29 @@ TEST_F(HTTPBinaryCodecTest, testGenerateBody) {
             "Sample Test Body!");
 }
 
-TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequest) {
+TEST_F(HTTPBinaryCodecTest, testGenerateIndeterminateLengthBody) {
+  // Create Test Body and encode
+  std::string body = "Sample Test Body!";
+  std::unique_ptr<folly::IOBuf> testBody =
+      folly::IOBuf::wrapBuffer(body.data(), body.size());
+
+  folly::IOBufQueue writeBuffer;
+  upstreamBinaryCodecIndeterminateLength_->generateBody(
+      writeBuffer, 0, std::move(testBody), folly::none, true);
+
+  // Decode Test Body and check
+  folly::io::Cursor cursor(writeBuffer.front());
+  HTTPMessage msg;
+  // 18 bytes + 1 for the Content Terminator
+  EXPECT_EQ(upstreamBinaryCodecIndeterminateLength_->parseContent(cursor, 19)
+                .bytesParsed_,
+            19);
+  EXPECT_EQ(
+      upstreamBinaryCodecIndeterminateLength_->getMsgBody().to<std::string>(),
+      "Sample Test Body!");
+}
+
+TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeKnownLengthRequest) {
   // Create full request encode it to a buffer
   folly::IOBufQueue writeBuffer;
 
@@ -912,6 +934,119 @@ TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequestEmptyBody) {
   upstreamBinaryCodecKnownLength_->setCallback(&callback);
   upstreamBinaryCodecKnownLength_->onIngress(*writeBuffer.front());
   upstreamBinaryCodecKnownLength_->onIngressEOF();
+
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
+  EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
+  headersEncoded.forEach([&headersDecoded](const std::string& headerName,
+                                           const std::string& headerValue) {
+    EXPECT_EQ(headersDecoded.exists(headerName), true);
+    EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
+  });
+
+  auto trailersDecoded = *callback.msg->getTrailers();
+  EXPECT_EQ(trailersDecoded.size(), 1);
+  EXPECT_EQ(trailersDecoded.exists("test-trailer"), true);
+  EXPECT_EQ(trailersDecoded.getSingleOrEmpty("test-trailer"),
+            "test-trailer-value");
+}
+
+TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeIndeterminateLengthRequest) {
+  // Create full request encode it to a buffer
+  folly::IOBufQueue writeBuffer;
+
+  // Encode Framing Indicator, Control Data, and Headers
+  HTTPMessage msgEncoded;
+  msgEncoded.setMethod("POST");
+  msgEncoded.setSecure(false);
+  msgEncoded.setURL("/hello.txt");
+  HTTPHeaders& headersEncoded = msgEncoded.getHeaders();
+  headersEncoded.set("user-agent",
+                     "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  headersEncoded.set("host", "www.example.com");
+  headersEncoded.set("accept-language", "en, mi");
+  upstreamBinaryCodecIndeterminateLength_->generateHeader(
+      writeBuffer, 0, msgEncoded);
+
+  // Encode Body
+  std::string body = "Sample Test Body!";
+  std::unique_ptr<folly::IOBuf> testBody =
+      folly::IOBuf::wrapBuffer(body.data(), body.size());
+  upstreamBinaryCodecIndeterminateLength_->generateBody(
+      writeBuffer, 0, std::move(testBody), folly::none, true);
+
+  // Encode Trailing Headers
+  std::unique_ptr<HTTPHeaders> trailersEncoded =
+      std::make_unique<HTTPHeaders>();
+  trailersEncoded->set("test-trailer", "test-trailer-value");
+  msgEncoded.setTrailers(std::move(trailersEncoded));
+  upstreamBinaryCodecIndeterminateLength_->generateTrailers(
+      writeBuffer, 0, *msgEncoded.getTrailers());
+
+  // Now, decode the request and check values
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodecIndeterminateLength_->setCallback(&callback);
+  upstreamBinaryCodecIndeterminateLength_->onIngress(*writeBuffer.front());
+  upstreamBinaryCodecIndeterminateLength_->onIngressEOF();
+
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
+  EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
+  headersEncoded.forEach([&headersDecoded](const std::string& headerName,
+                                           const std::string& headerValue) {
+    EXPECT_EQ(headersDecoded.exists(headerName), true);
+    EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
+  });
+
+  EXPECT_EQ(callback.data_.move()->to<std::string>(), "Sample Test Body!");
+
+  auto trailersDecoded = *callback.msg->getTrailers();
+  EXPECT_EQ(trailersDecoded.size(), 1);
+  EXPECT_EQ(trailersDecoded.exists("test-trailer"), true);
+  EXPECT_EQ(trailersDecoded.getSingleOrEmpty("test-trailer"),
+            "test-trailer-value");
+}
+
+TEST_F(HTTPBinaryCodecTest,
+       testEncodeAndDecodeIndeterminateLengthRequestEmptyBody) {
+  // Create full request encode it to a buffer
+  folly::IOBufQueue writeBuffer;
+
+  // Encode Framing Indicator, Control Data, and Headers
+  HTTPMessage msgEncoded;
+  msgEncoded.setMethod("POST");
+  msgEncoded.setSecure(false);
+  msgEncoded.setURL("/hello.txt");
+  HTTPHeaders& headersEncoded = msgEncoded.getHeaders();
+  headersEncoded.set("user-agent",
+                     "curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3");
+  headersEncoded.set("host", "www.example.com");
+  headersEncoded.set("accept-language", "en, mi");
+  upstreamBinaryCodecIndeterminateLength_->generateHeader(
+      writeBuffer, 0, msgEncoded);
+
+  // Encode Empty Body
+  std::unique_ptr<folly::IOBuf> emptyBody;
+  upstreamBinaryCodecIndeterminateLength_->generateBody(
+      writeBuffer, 0, std::move(emptyBody), folly::none, true);
+
+  // Encode Trailing Headers
+  std::unique_ptr<HTTPHeaders> trailersEncoded =
+      std::make_unique<HTTPHeaders>();
+  trailersEncoded->set("test-trailer", "test-trailer-value");
+  msgEncoded.setTrailers(std::move(trailersEncoded));
+  upstreamBinaryCodecIndeterminateLength_->generateTrailers(
+      writeBuffer, 0, *msgEncoded.getTrailers());
+
+  // Now, decode the request and check values
+  FakeHTTPCodecCallback callback;
+  upstreamBinaryCodecIndeterminateLength_->setCallback(&callback);
+  upstreamBinaryCodecIndeterminateLength_->onIngress(*writeBuffer.front());
+  upstreamBinaryCodecIndeterminateLength_->onIngressEOF();
 
   EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
   EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());

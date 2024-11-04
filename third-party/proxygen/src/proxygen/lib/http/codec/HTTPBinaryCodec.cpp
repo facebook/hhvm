@@ -677,6 +677,11 @@ size_t HTTPBinaryCodec::generatePadding(folly::IOBufQueue& writeBuf,
 }
 
 size_t HTTPBinaryCodec::generateEOM(folly::IOBufQueue& writeBuf, StreamID txn) {
+  if (!knownLength_) {
+    folly::io::QueueAppender appender(&writeBuf, queueAppenderMaxGrowth);
+    encodeInteger(0, appender);
+    return 1;
+  }
   return 0;
 }
 

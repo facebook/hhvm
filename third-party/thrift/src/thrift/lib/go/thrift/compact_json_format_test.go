@@ -533,7 +533,7 @@ func TestWriteJSONProtocolList(t *testing.T) {
 	thetype := "list"
 	trans := NewMemoryBuffer()
 	p := NewCompactJSONFormat(trans)
-	p.WriteListBegin(types.Type(types.DOUBLE), len(doubleValues))
+	p.WriteListBegin(types.DOUBLE, len(doubleValues))
 	for _, value := range doubleValues {
 		if e := p.WriteDouble(value); e != nil {
 			t.Fatalf("Unable to write %s value %v due to error: %s", thetype, value, e.Error())
@@ -587,7 +587,7 @@ func TestWriteJSONProtocolSet(t *testing.T) {
 	thetype := "set"
 	trans := NewMemoryBuffer()
 	p := NewCompactJSONFormat(trans)
-	p.WriteSetBegin(types.Type(types.DOUBLE), len(doubleValues))
+	p.WriteSetBegin(types.DOUBLE, len(doubleValues))
 	for _, value := range doubleValues {
 		if e := p.WriteDouble(value); e != nil {
 			t.Fatalf("Unable to write %s value %v due to error: %s", thetype, value, e.Error())
@@ -641,7 +641,7 @@ func TestWriteJSONProtocolMap(t *testing.T) {
 	thetype := "map"
 	trans := NewMemoryBuffer()
 	p := NewCompactJSONFormat(trans)
-	p.WriteMapBegin(types.Type(types.I32), types.Type(types.DOUBLE), len(doubleValues))
+	p.WriteMapBegin(types.I32, types.DOUBLE, len(doubleValues))
 	for k, value := range doubleValues {
 		if e := p.WriteI32(int32(k)); e != nil {
 			t.Fatalf("Unable to write %s key int32 value %v due to error: %s", thetype, k, e.Error())

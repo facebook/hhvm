@@ -124,8 +124,7 @@ func (p *binaryEncoder) WriteFieldEnd() error {
 }
 
 func (p *binaryEncoder) WriteFieldStop() error {
-	e := p.WriteByte(types.STOP)
-	return e
+	return p.WriteByte(byte(types.STOP))
 }
 
 func (p *binaryEncoder) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
@@ -304,7 +303,7 @@ func (p *binaryDecoder) ReadFieldBegin() (name string, typeID types.Type, seqID 
 	if err != nil {
 		return name, typeID, seqID, err
 	}
-	if t != types.STOP {
+	if typeID != types.STOP {
 		seqID, err = p.ReadI16()
 	}
 	return name, typeID, seqID, err

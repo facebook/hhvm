@@ -535,7 +535,7 @@ func (p *compactJSONFormat) writeElemListBegin(elemType types.Type, size int) er
 }
 
 func (p *compactJSONFormat) TypeIdToString(fieldType types.Type) (string, error) {
-	switch byte(fieldType) {
+	switch fieldType {
 	case types.BOOL:
 		return "tf", nil
 	case types.BYTE:
@@ -569,31 +569,31 @@ func (p *compactJSONFormat) TypeIdToString(fieldType types.Type) (string, error)
 func (p *compactJSONFormat) StringToTypeId(fieldType string) (types.Type, error) {
 	switch fieldType {
 	case "tf":
-		return types.Type(types.BOOL), nil
+		return types.BOOL, nil
 	case "i8":
-		return types.Type(types.BYTE), nil
+		return types.BYTE, nil
 	case "i16":
-		return types.Type(types.I16), nil
+		return types.I16, nil
 	case "i32":
-		return types.Type(types.I32), nil
+		return types.I32, nil
 	case "i64":
-		return types.Type(types.I64), nil
+		return types.I64, nil
 	case "dbl":
-		return types.Type(types.DOUBLE), nil
+		return types.DOUBLE, nil
 	case "flt":
-		return types.Type(types.FLOAT), nil
+		return types.FLOAT, nil
 	case "str":
-		return types.Type(types.STRING), nil
+		return types.STRING, nil
 	case "rec":
-		return types.Type(types.STRUCT), nil
+		return types.STRUCT, nil
 	case "map":
-		return types.Type(types.MAP), nil
+		return types.MAP, nil
 	case "set":
-		return types.Type(types.SET), nil
+		return types.SET, nil
 	case "lst":
-		return types.Type(types.LIST), nil
+		return types.LIST, nil
 	}
 
 	e := fmt.Errorf("Unknown type identifier: %s", fieldType)
-	return types.Type(types.STOP), types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
+	return types.STOP, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 }

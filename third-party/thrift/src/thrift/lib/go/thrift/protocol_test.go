@@ -298,7 +298,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) type
 }
 
 func ReadBool(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.BOOL)
+	thetype := types.BOOL
 	thelen := len(boolValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -329,7 +329,7 @@ func ReadBool(t testing.TB, p types.Format, trans io.Reader) {
 }
 
 func WriteBool(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.BOOL)
+	thetype := types.BOOL
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
@@ -357,7 +357,7 @@ func ReadWriteBool(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteByte(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.BYTE)
+	thetype := types.BYTE
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
@@ -380,7 +380,7 @@ func WriteByte(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadByte(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.BYTE)
+	thetype := types.BYTE
 	thelen := len(byteValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -416,7 +416,7 @@ func ReadWriteByte(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteI16(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.I16)
+	thetype := types.I16
 	thelen := len(int16Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int16Values {
@@ -427,7 +427,7 @@ func WriteI16(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadI16(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.I16)
+	thetype := types.I16
 	thelen := len(int16Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -463,7 +463,7 @@ func ReadWriteI16(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteI32(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.I32)
+	thetype := types.I32
 	thelen := len(int32Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int32Values {
@@ -474,7 +474,7 @@ func WriteI32(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadI32(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.I32)
+	thetype := types.I32
 	thelen := len(int32Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -509,7 +509,7 @@ func ReadWriteI32(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteI64(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.I64)
+	thetype := types.I64
 	thelen := len(int64Values)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range int64Values {
@@ -520,7 +520,7 @@ func WriteI64(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadI64(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.I64)
+	thetype := types.I64
 	thelen := len(int64Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -556,7 +556,7 @@ func ReadWriteI64(t testing.TB, p types.Format, trans io.ReadWriter) {
 
 func WriteDouble(t testing.TB, p types.Format, trans io.Writer) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
-	thetype := types.Type(types.DOUBLE)
+	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range doubleValues {
@@ -569,7 +569,7 @@ func WriteDouble(t testing.TB, p types.Format, trans io.Writer) {
 
 func ReadDouble(t testing.TB, p types.Format, trans io.Reader) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
-	thetype := types.Type(types.DOUBLE)
+	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
@@ -608,7 +608,7 @@ func ReadWriteDouble(t testing.TB, p types.Format, trans io.ReadWriter) {
 func WriteFloat(t testing.TB, p types.Format, trans io.Writer) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
 
-	thetype := types.Type(types.FLOAT)
+	thetype := types.FLOAT
 	thelen := len(floatValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range floatValues {
@@ -622,7 +622,7 @@ func WriteFloat(t testing.TB, p types.Format, trans io.Writer) {
 func ReadFloat(t testing.TB, p types.Format, trans io.Reader) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
 
-	thetype := types.Type(types.FLOAT)
+	thetype := types.FLOAT
 	thelen := len(floatValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -661,7 +661,7 @@ func ReadWriteFloat(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteString(t testing.TB, p types.Format, trans io.Writer) {
-	thetype := types.Type(types.STRING)
+	thetype := types.STRING
 	thelen := len(stringValues)
 	p.WriteListBegin(thetype, thelen)
 	for _, v := range stringValues {
@@ -672,7 +672,7 @@ func WriteString(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadString(t testing.TB, p types.Format, trans io.Reader) {
-	thetype := types.Type(types.STRING)
+	thetype := types.STRING
 	thelen := len(stringValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()

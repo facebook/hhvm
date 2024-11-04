@@ -20,26 +20,26 @@ package types
 type Type byte
 
 const (
-	STOP   = 0
-	VOID   = 1
-	BOOL   = 2
-	BYTE   = 3
-	DOUBLE = 4
-	I16    = 6
-	I32    = 8
-	I64    = 10
-	STRING = 11
-	STRUCT = 12
-	MAP    = 13
-	SET    = 14
-	LIST   = 15
-	UTF8   = 16
-	UTF16  = 17
-	STREAM = 18
-	FLOAT  = 19
+	STOP   Type = 0
+	VOID   Type = 1
+	BOOL   Type = 2
+	BYTE   Type = 3
+	DOUBLE Type = 4
+	I16    Type = 6
+	I32    Type = 8
+	I64    Type = 10
+	STRING Type = 11
+	STRUCT Type = 12
+	MAP    Type = 13
+	SET    Type = 14
+	LIST   Type = 15
+	UTF8   Type = 16
+	UTF16  Type = 17
+	STREAM Type = 18
+	FLOAT  Type = 19
 )
 
-var typeNames = map[int]string{
+var typeNames = map[Type]string{
 	STOP:   "STOP",
 	VOID:   "VOID",
 	BOOL:   "BOOL",
@@ -60,7 +60,7 @@ var typeNames = map[int]string{
 }
 
 func (p Type) String() string {
-	if s, ok := typeNames[int(p)]; ok {
+	if s, ok := typeNames[p]; ok {
 		return s
 	}
 	return "Unknown"

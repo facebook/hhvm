@@ -66,6 +66,9 @@ impl Visitor {
     fn add_local_defs_from_lvalue(&mut self, Expr(_, _, e): &Expr) {
         match e {
             Expr_::List(lv) => lv.iter().for_each(|e| self.add_local_defs_from_lvalue(e)),
+            Expr_::Shape(lv) => lv
+                .iter()
+                .for_each(|(_, e)| self.add_local_defs_from_lvalue(e)),
             Expr_::Lvar(box lid) => self.add_local_def(lid.clone()),
             _ => {}
         }

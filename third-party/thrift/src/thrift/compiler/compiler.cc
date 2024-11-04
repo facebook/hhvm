@@ -73,8 +73,7 @@ constexpr bool bundle_annotations() {
 #ifdef THRIFT_OSS
   return false;
 #else
-  // Bundling is temporarily disabled because of issues with configerator.
-  return false;
+  return true;
 #endif
 }
 
@@ -737,8 +736,8 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   auto found_or_error = source_manager::path_or_error();
   if (bundle_annotations()) {
     const std::string scope_path = "thrift/annotation/scope.thrift";
-    found_or_error =
-        source_mgr.find_include_file(scope_path, "", pparams.incl_searchpath);
+    found_or_error = source_mgr.find_include_file(
+        scope_path, input_filename, pparams.incl_searchpath);
     if (found_or_error.index() != 0) {
       // Fall back to the bundled annotation file.
       std::string_view content =

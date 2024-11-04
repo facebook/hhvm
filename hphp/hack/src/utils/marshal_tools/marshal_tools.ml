@@ -109,8 +109,8 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let rec write fd ~buffer ~offset ~size =
     match Poll.wait_fd_write_non_intr ~timeout_ms:None fd with
     | Error flags -> raise (Poll.Poll_exception flags)
-    | Ok false -> 0
-    | Ok true ->
+    | Ok `Timeout -> 0
+    | Ok `Ok ->
       (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.write call can also be interrupted. If the write
        * is interrupted before any bytes are written, the call fails with EINTR. Otherwise, the call
        * succeeds and returns the number of bytes written.
@@ -130,8 +130,8 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let rec read fd ~buffer ~offset ~size =
     match Poll.wait_fd_read_non_intr ~timeout_ms:None fd with
     | Error flags -> raise (Poll.Poll_exception flags)
-    | Ok false -> 0
-    | Ok true ->
+    | Ok `Timeout -> 0
+    | Ok `Ok ->
       (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.read call can also be interrupted. If the read
        * is interrupted before any bytes are read, the call fails with EINTR. Otherwise, the call
        * succeeds and returns the number of bytes read.

@@ -96,8 +96,8 @@ let rec maybe_consume
             fd
             ~timeout_ms:(Some (Int.of_float max_time * 1000))
         with
-        | Ok false -> ()
-        | Ok true ->
+        | Ok `Timeout -> ()
+        | Ok `Ok ->
           let bytes_read = Unix.read fd buffer 0 chunk_size in
           if bytes_read = 0 then (
             (* EOF reached. *)

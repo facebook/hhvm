@@ -3,7 +3,7 @@ These are the options that exists for HHVM
 If you add a new section you need to update generate_configs in
 hphp/runtime/base/configs/TARGETS
 
-The format can be found in hphp/tools/configs/generate-configs.rs
+The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Autoload
 

@@ -107,7 +107,7 @@ func (x *CustomException) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // message
+        case (id == 1 && wireType == thrift.STRING):  // message
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -799,7 +799,7 @@ func (x *respInteractWithSharedDoSomeSimilarThings) Read(p thrift.Decoder) error
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.STRUCT)):  // success
+        case (id == 0 && wireType == thrift.STRUCT):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)

@@ -127,7 +127,7 @@ func (x *IncludesAlso) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // also
+        case (id == 1 && wireType == thrift.STRUCT):  // also
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

@@ -197,7 +197,7 @@ func (x *Name) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // value
+        case (id == 1 && wireType == thrift.STRING):  // value
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -360,9 +360,9 @@ func (x *Type) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // template
+        case (id == 2 && wireType == thrift.STRING):  // template
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -483,7 +483,7 @@ func (x *Ref) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // type
+        case (id == 1 && wireType == thrift.I32):  // type
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -602,7 +602,7 @@ func (x *Lazy) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // ref
+        case (id == 1 && wireType == thrift.BOOL):  // ref
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -969,15 +969,15 @@ func (x *Adapter) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // adaptedType
+        case (id == 2 && wireType == thrift.STRING):  // adaptedType
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // underlyingName
+        case (id == 3 && wireType == thrift.STRING):  // underlyingName
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // extraNamespace
+        case (id == 4 && wireType == thrift.STRING):  // extraNamespace
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.Type(thrift.BOOL)):  // moveOnly
+        case (id == 5 && wireType == thrift.BOOL):  // moveOnly
             fieldReadErr = x.readField5(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1100,7 +1100,7 @@ func (x *PackIsset) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // atomic
+        case (id == 1 && wireType == thrift.BOOL):  // atomic
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1407,9 +1407,9 @@ func (x *FieldInterceptor) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.BOOL)):  // noinline
+        case (id == 2 && wireType == thrift.BOOL):  // noinline
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1602,7 +1602,7 @@ func (x *EnumType) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // type
+        case (id == 1 && wireType == thrift.I32):  // type
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

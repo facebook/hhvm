@@ -306,13 +306,13 @@ func (x *Color) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.DOUBLE)):  // red
+        case (id == 1 && wireType == thrift.DOUBLE):  // red
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.DOUBLE)):  // green
+        case (id == 2 && wireType == thrift.DOUBLE):  // green
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.DOUBLE)):  // blue
+        case (id == 3 && wireType == thrift.DOUBLE):  // blue
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.DOUBLE)):  // alpha
+        case (id == 4 && wireType == thrift.DOUBLE):  // alpha
             fieldReadErr = x.readField4(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -678,15 +678,15 @@ func (x *Vehicle) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // color
+        case (id == 1 && wireType == thrift.STRUCT):  // color
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // licensePlate
+        case (id == 2 && wireType == thrift.STRING):  // licensePlate
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // description
+        case (id == 3 && wireType == thrift.STRING):  // description
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 4 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.Type(thrift.BOOL)):  // hasAC
+        case (id == 5 && wireType == thrift.BOOL):  // hasAC
             fieldReadErr = x.readField5(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1413,25 +1413,25 @@ func (x *Person) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 2 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.I16)):  // age
+        case (id == 3 && wireType == thrift.I16):  // age
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // address
+        case (id == 4 && wireType == thrift.STRING):  // address
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.Type(thrift.STRUCT)):  // favoriteColor
+        case (id == 5 && wireType == thrift.STRUCT):  // favoriteColor
             fieldReadErr = x.readField5(p)
-        case (id == 6 && wireType == thrift.Type(thrift.SET)):  // friends
+        case (id == 6 && wireType == thrift.SET):  // friends
             fieldReadErr = x.readField6(p)
-        case (id == 7 && wireType == thrift.Type(thrift.I64)):  // bestFriend
+        case (id == 7 && wireType == thrift.I64):  // bestFriend
             fieldReadErr = x.readField7(p)
-        case (id == 8 && wireType == thrift.Type(thrift.MAP)):  // petNames
+        case (id == 8 && wireType == thrift.MAP):  // petNames
             fieldReadErr = x.readField8(p)
-        case (id == 9 && wireType == thrift.Type(thrift.I32)):  // afraidOfAnimal
+        case (id == 9 && wireType == thrift.I32):  // afraidOfAnimal
             fieldReadErr = x.readField9(p)
-        case (id == 10 && wireType == thrift.Type(thrift.LIST)):  // vehicles
+        case (id == 10 && wireType == thrift.LIST):  // vehicles
             fieldReadErr = x.readField10(p)
         default:
             fieldReadErr = p.Skip(wireType)

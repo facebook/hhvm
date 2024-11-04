@@ -224,9 +224,9 @@ func (x *Included) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // MyIntField
+        case (id == 1 && wireType == thrift.I64):  // MyIntField
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // MyTransitiveField
+        case (id == 2 && wireType == thrift.STRUCT):  // MyTransitiveField
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)

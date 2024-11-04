@@ -252,9 +252,9 @@ func (x *reqMyServiceQuery) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // s
+        case (id == 1 && wireType == thrift.STRUCT):  // s
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // i
+        case (id == 2 && wireType == thrift.STRUCT):  // i
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -541,9 +541,9 @@ func (x *reqMyServiceHasArgDocs) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // s
+        case (id == 1 && wireType == thrift.STRUCT):  // s
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // i
+        case (id == 2 && wireType == thrift.STRUCT):  // i
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)

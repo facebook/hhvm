@@ -217,7 +217,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "plate",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -225,7 +225,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   2,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "previous_plate",
             ReflectIndex:         1,
             IsOptional:           true,
@@ -233,7 +233,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: true,
         },        {
             ID:                   3,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "first_plate",
             ReflectIndex:         2,
             IsOptional:           true,
@@ -241,7 +241,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: true,
         },        {
             ID:                   4,
-            WireType:             thrift.Type(thrift.I32),
+            WireType:             thrift.I32,
             Name:                 "year",
             ReflectIndex:         3,
             IsOptional:           false,
@@ -249,7 +249,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   5,
-            WireType:             thrift.Type(thrift.LIST),
+            WireType:             thrift.LIST,
             Name:                 "drivers",
             ReflectIndex:         4,
             IsOptional:           false,
@@ -257,7 +257,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   6,
-            WireType:             thrift.Type(thrift.LIST),
+            WireType:             thrift.LIST,
             Name:                 "Accessories",
             ReflectIndex:         5,
             IsOptional:           false,
@@ -265,7 +265,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   7,
-            WireType:             thrift.Type(thrift.MAP),
+            WireType:             thrift.MAP,
             Name:                 "PartNames",
             ReflectIndex:         6,
             IsOptional:           false,
@@ -298,7 +298,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.I64),
+            WireType:             thrift.I64,
             Name:                 "num",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -306,7 +306,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   2,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "strval",
             ReflectIndex:         1,
             IsOptional:           false,
@@ -329,7 +329,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.MAP),
+            WireType:             thrift.MAP,
             Name:                 "mapval",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -350,7 +350,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRUCT),
+            WireType:             thrift.STRUCT,
             Name:                 "automobile",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -358,7 +358,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: true,
         },        {
             ID:                   2,
-            WireType:             thrift.Type(thrift.STRUCT),
+            WireType:             thrift.STRUCT,
             Name:                 "car",
             ReflectIndex:         1,
             IsOptional:           false,
@@ -381,7 +381,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.LIST),
+            WireType:             thrift.LIST,
             Name:                 "automobiles",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -389,7 +389,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             MustBeSetToSerialize: false,
         },        {
             ID:                   2,
-            WireType:             thrift.Type(thrift.LIST),
+            WireType:             thrift.LIST,
             Name:                 "cars",
             ReflectIndex:         1,
             IsOptional:           false,
@@ -412,7 +412,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "plate",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -433,7 +433,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   0,
-            WireType:             thrift.Type(thrift.STRUCT),
+            WireType:             thrift.STRUCT,
             Name:                 "success",
             ReflectIndex:         0,
             IsOptional:           true,
@@ -454,7 +454,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "plate",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -475,7 +475,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   0,
-            WireType:             thrift.Type(thrift.STRUCT),
+            WireType:             thrift.STRUCT,
             Name:                 "success",
             ReflectIndex:         0,
             IsOptional:           true,
@@ -496,7 +496,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "plate",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -517,7 +517,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   0,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "success",
             ReflectIndex:         0,
             IsOptional:           true,

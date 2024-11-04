@@ -149,9 +149,9 @@ func (x *DoSomethingResult) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // s_res
+        case (id == 1 && wireType == thrift.STRING):  // s_res
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // i_res
+        case (id == 2 && wireType == thrift.I32):  // i_res
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)

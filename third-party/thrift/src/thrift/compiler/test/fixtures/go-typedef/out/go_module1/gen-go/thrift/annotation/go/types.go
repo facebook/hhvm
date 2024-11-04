@@ -105,7 +105,7 @@ func (x *Name) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -224,7 +224,7 @@ func (x *Tag) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // tag
+        case (id == 1 && wireType == thrift.STRING):  // tag
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

@@ -236,11 +236,11 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // MyIncludedField
+        case (id == 1 && wireType == thrift.STRUCT):  // MyIncludedField
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRUCT)):  // MyOtherIncludedField
+        case (id == 2 && wireType == thrift.STRUCT):  // MyOtherIncludedField
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.I64)):  // MyIncludedInt
+        case (id == 3 && wireType == thrift.I64):  // MyIncludedInt
             fieldReadErr = x.readField3(p)
         default:
             fieldReadErr = p.Skip(wireType)

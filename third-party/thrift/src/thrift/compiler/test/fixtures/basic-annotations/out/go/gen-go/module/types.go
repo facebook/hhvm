@@ -257,7 +257,7 @@ func (x *MyStructNestedAnnotation) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -916,23 +916,23 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // abstract
+        case (id == 1 && wireType == thrift.STRING):  // abstract
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.I64)):  // major
+        case (id == 2 && wireType == thrift.I64):  // major
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.STRING)):  // annotation_with_quote
+        case (id == 3 && wireType == thrift.STRING):  // annotation_with_quote
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.STRING)):  // class_
+        case (id == 4 && wireType == thrift.STRING):  // class_
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.Type(thrift.STRING)):  // annotation_with_trailing_comma
+        case (id == 5 && wireType == thrift.STRING):  // annotation_with_trailing_comma
             fieldReadErr = x.readField5(p)
-        case (id == 6 && wireType == thrift.Type(thrift.STRING)):  // empty_annotations
+        case (id == 6 && wireType == thrift.STRING):  // empty_annotations
             fieldReadErr = x.readField6(p)
-        case (id == 7 && wireType == thrift.Type(thrift.I32)):  // my_enum
+        case (id == 7 && wireType == thrift.I32):  // my_enum
             fieldReadErr = x.readField7(p)
-        case (id == 8 && wireType == thrift.Type(thrift.LIST)):  // cpp_type_annotation
+        case (id == 8 && wireType == thrift.LIST):  // cpp_type_annotation
             fieldReadErr = x.readField8(p)
-        case (id == 9 && wireType == thrift.Type(thrift.STRUCT)):  // my_union
+        case (id == 9 && wireType == thrift.STRUCT):  // my_union
             fieldReadErr = x.readField9(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1103,9 +1103,9 @@ func (x *SecretStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // password
+        case (id == 2 && wireType == thrift.STRING):  // password
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1333,7 +1333,7 @@ func (x *respMyServicePing) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // myExcept
+        case (id == 1 && wireType == thrift.STRUCT):  // myExcept
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1546,7 +1546,7 @@ func (x *respMyServiceGetRandomData) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.STRING)):  // success
+        case (id == 0 && wireType == thrift.STRING):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1667,7 +1667,7 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1806,7 +1806,7 @@ func (x *respMyServiceHasDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.BOOL)):  // success
+        case (id == 0 && wireType == thrift.BOOL):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1927,7 +1927,7 @@ func (x *reqMyServiceGoGetDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -2066,7 +2066,7 @@ func (x *respMyServiceGoGetDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.STRING)):  // success
+        case (id == 0 && wireType == thrift.STRING):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -2231,9 +2231,9 @@ func (x *reqMyServicePutDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+        case (id == 2 && wireType == thrift.STRING):  // data
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -2480,9 +2480,9 @@ func (x *reqMyServiceLobDataById) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I64)):  // id
+        case (id == 1 && wireType == thrift.I64):  // id
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // data
+        case (id == 2 && wireType == thrift.STRING):  // data
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -3397,7 +3397,7 @@ func (x *respBadServiceBar) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.I32)):  // success
+        case (id == 0 && wireType == thrift.I32):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)

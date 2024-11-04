@@ -172,7 +172,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "name",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -270,7 +270,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "name",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -291,7 +291,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.BOOL),
+            WireType:             thrift.BOOL,
             Name:                 "enabled",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -312,7 +312,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "name",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -333,7 +333,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.STRING),
+            WireType:             thrift.STRING,
             Name:                 "name",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -354,7 +354,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.LIST),
+            WireType:             thrift.LIST,
             Name:                 "derives",
             ReflectIndex:         0,
             IsOptional:           false,
@@ -375,7 +375,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
-            WireType:             thrift.Type(thrift.BOOL),
+            WireType:             thrift.BOOL,
             Name:                 "anyhow_to_application_exn",
             ReflectIndex:         0,
             IsOptional:           false,

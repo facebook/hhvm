@@ -21,7 +21,7 @@
 }}
 {
     ID:                   {{field:key}},
-    WireType:             thrift.Type({{#field:type}}{{> common/ttype}}{{/field:type}}),
+    WireType:             {{#field:type}}{{> common/ttype}}{{/field:type}},
     Name:                 "{{field:name}}",
     ReflectIndex:         {{field:index}},
     IsOptional:           {{#field:optional?}}true{{/field:optional?}}{{^field:optional?}}false{{/field:optional?}},

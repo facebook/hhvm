@@ -105,7 +105,7 @@ func (x *InjectMetadataFields) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // type
+        case (id == 1 && wireType == thrift.STRING):  // type
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

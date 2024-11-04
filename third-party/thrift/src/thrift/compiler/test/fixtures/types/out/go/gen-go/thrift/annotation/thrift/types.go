@@ -359,9 +359,9 @@ func (x *ReserveIds) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // ids
+        case (id == 1 && wireType == thrift.LIST):  // ids
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.MAP)):  // id_ranges
+        case (id == 2 && wireType == thrift.MAP):  // id_ranges
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -481,7 +481,7 @@ func (x *RequiresBackwardCompatibility) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // field_name
+        case (id == 1 && wireType == thrift.BOOL):  // field_name
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1176,7 +1176,7 @@ func (x *Uri) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // value
+        case (id == 1 && wireType == thrift.STRING):  // value
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1296,7 +1296,7 @@ func (x *Priority) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // level
+        case (id == 1 && wireType == thrift.I32):  // level
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1468,7 +1468,7 @@ func (x *DeprecatedUnvalidatedAnnotations) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // items
+        case (id == 1 && wireType == thrift.MAP):  // items
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

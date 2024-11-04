@@ -192,7 +192,7 @@ func (x *reqNestedContainersMapList) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // foo
+        case (id == 1 && wireType == thrift.MAP):  // foo
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -476,7 +476,7 @@ func (x *reqNestedContainersMapSet) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.MAP)):  // foo
+        case (id == 1 && wireType == thrift.MAP):  // foo
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -760,7 +760,7 @@ func (x *reqNestedContainersListMap) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+        case (id == 1 && wireType == thrift.LIST):  // foo
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1027,7 +1027,7 @@ func (x *reqNestedContainersListSet) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+        case (id == 1 && wireType == thrift.LIST):  // foo
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1415,7 +1415,7 @@ func (x *reqNestedContainersTurtles) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.LIST)):  // foo
+        case (id == 1 && wireType == thrift.LIST):  // foo
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

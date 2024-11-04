@@ -149,9 +149,9 @@ func (x *Accessory) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // InventoryId
+        case (id == 1 && wireType == thrift.I32):  // InventoryId
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // Name
+        case (id == 2 && wireType == thrift.STRING):  // Name
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -315,9 +315,9 @@ func (x *PartName) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // InventoryId
+        case (id == 1 && wireType == thrift.I32):  // InventoryId
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // Name
+        case (id == 2 && wireType == thrift.STRING):  // Name
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)

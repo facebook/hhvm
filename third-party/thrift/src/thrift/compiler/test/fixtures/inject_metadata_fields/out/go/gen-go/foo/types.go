@@ -217,11 +217,11 @@ func (x *Fields) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 100 && wireType == thrift.Type(thrift.STRING)):  // injected_field
+        case (id == 100 && wireType == thrift.STRING):  // injected_field
             fieldReadErr = x.readField100(p)
-        case (id == 101 && wireType == thrift.Type(thrift.STRING)):  // injected_structured_annotation_field
+        case (id == 101 && wireType == thrift.STRING):  // injected_structured_annotation_field
             fieldReadErr = x.readField101(p)
-        case (id == 102 && wireType == thrift.Type(thrift.STRING)):  // injected_unstructured_annotation_field
+        case (id == 102 && wireType == thrift.STRING):  // injected_unstructured_annotation_field
             fieldReadErr = x.readField102(p)
         default:
             fieldReadErr = p.Skip(wireType)

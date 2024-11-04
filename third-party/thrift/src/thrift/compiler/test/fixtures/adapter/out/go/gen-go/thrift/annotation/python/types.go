@@ -177,7 +177,7 @@ func (x *PyDeprecatedHidden) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // reason
+        case (id == 1 && wireType == thrift.STRING):  // reason
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -368,7 +368,7 @@ func (x *Name) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -531,9 +531,9 @@ func (x *Adapter) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRING)):  // name
+        case (id == 1 && wireType == thrift.STRING):  // name
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.STRING)):  // typeHint
+        case (id == 2 && wireType == thrift.STRING):  // typeHint
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -653,7 +653,7 @@ func (x *UseCAPI) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.BOOL)):  // serialize
+        case (id == 1 && wireType == thrift.BOOL):  // serialize
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

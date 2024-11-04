@@ -602,13 +602,13 @@ func (x *SomeStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // reasonable
+        case (id == 1 && wireType == thrift.I32):  // reasonable
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // fine
+        case (id == 2 && wireType == thrift.I32):  // fine
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.Type(thrift.I32)):  // questionable
+        case (id == 3 && wireType == thrift.I32):  // questionable
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.Type(thrift.SET)):  // tags
+        case (id == 4 && wireType == thrift.SET):  // tags
             fieldReadErr = x.readField4(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -875,13 +875,13 @@ func (x *MyStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.I32)):  // me2_3
+        case (id == 1 && wireType == thrift.I32):  // me2_3
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.Type(thrift.I32)):  // me3_n3
+        case (id == 2 && wireType == thrift.I32):  // me3_n3
             fieldReadErr = x.readField2(p)
-        case (id == 4 && wireType == thrift.Type(thrift.I32)):  // me1_t1
+        case (id == 4 && wireType == thrift.I32):  // me1_t1
             fieldReadErr = x.readField4(p)
-        case (id == 6 && wireType == thrift.Type(thrift.I32)):  // me1_t2
+        case (id == 6 && wireType == thrift.I32):  // me1_t2
             fieldReadErr = x.readField6(p)
         default:
             fieldReadErr = p.Skip(wireType)

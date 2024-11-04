@@ -132,7 +132,7 @@ func (x *reqExtendTestServiceCheck) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.Type(thrift.STRUCT)):  // struct1
+        case (id == 1 && wireType == thrift.STRUCT):  // struct1
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -271,7 +271,7 @@ func (x *respExtendTestServiceCheck) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 0 && wireType == thrift.Type(thrift.BOOL)):  // success
+        case (id == 0 && wireType == thrift.BOOL):  // success
             fieldReadErr = x.readField0(p)
         default:
             fieldReadErr = p.Skip(wireType)

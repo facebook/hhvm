@@ -470,7 +470,7 @@ TEST_F(HTTPBinaryCodecTest, testParseIndeterminateLengthHeadersWaiting) {
       ParseResultState::WAITING_FOR_MORE_DATA);
 }
 
-TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
+TEST_F(HTTPBinaryCodecTest, testParseContentKnownLengthSuccess) {
   // Format is `*hello`
   const std::vector<uint8_t> content{
       0x07, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a};
@@ -487,7 +487,7 @@ TEST_F(HTTPBinaryCodecTest, testParseContentSuccess) {
             "hello\r\n");
 }
 
-TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
+TEST_F(HTTPBinaryCodecTest, testParseContentKnownLengthFailure) {
   // Format is `*hello` where * is value 8 instead of 7
   const std::vector<uint8_t> contentInvalid{
       0x08, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a};
@@ -497,6 +497,39 @@ TEST_F(HTTPBinaryCodecTest, testParseContentFailure) {
 
   HTTPMessage msg;
   EXPECT_EQ(upstreamBinaryCodecKnownLength_
+                ->parseContent(cursor, contentInvalid.size())
+                .parseResultState_,
+            ParseResultState::WAITING_FOR_MORE_DATA);
+}
+
+TEST_F(HTTPBinaryCodecTest, testParseContentIndeterminateLengthSuccess) {
+  // Format is `*hello0`
+  const std::vector<uint8_t> content{
+      0x07, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a, 0x00};
+  auto contentIOBuf = folly::IOBuf::wrapBuffer(
+      folly::ByteRange(content.data(), content.size()));
+  folly::io::Cursor cursor(contentIOBuf.get());
+
+  HTTPMessage msg;
+  EXPECT_EQ(upstreamBinaryCodecIndeterminateLength_
+                ->parseContent(cursor, content.size())
+                .bytesParsed_,
+            content.size());
+  EXPECT_EQ(
+      upstreamBinaryCodecIndeterminateLength_->getMsgBody().to<std::string>(),
+      "hello\r\n");
+}
+
+TEST_F(HTTPBinaryCodecTest, testParseContentIndeterminateLengthWaiting) {
+  // Format is `*hello` where * is value 8 instead of 7
+  const std::vector<uint8_t> contentInvalid{
+      0x08, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x0d, 0x0a};
+  auto contentIOBuf = folly::IOBuf::wrapBuffer(
+      folly::ByteRange(contentInvalid.data(), contentInvalid.size()));
+  folly::io::Cursor cursor(contentIOBuf.get());
+
+  HTTPMessage msg;
+  EXPECT_EQ(upstreamBinaryCodecIndeterminateLength_
                 ->parseContent(cursor, contentInvalid.size())
                 .parseResultState_,
             ParseResultState::WAITING_FOR_MORE_DATA);

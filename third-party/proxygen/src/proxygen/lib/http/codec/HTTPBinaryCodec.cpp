@@ -309,6 +309,15 @@ ParseResult HTTPBinaryCodec::parseHeaders(folly::io::Cursor& cursor,
 
 ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
                                           size_t remaining) {
+  if (knownLength_) {
+    return parseKnownLengthContentHelper(cursor, remaining);
+  } else {
+    return parseIndeterminateLengthContentHelper(cursor, remaining);
+  }
+}
+
+ParseResult HTTPBinaryCodec::parseSingleContentHelper(folly::io::Cursor& cursor,
+                                                      size_t remaining) {
   size_t parsed = 0;
 
   // Parse the contentLength and advance cursor
@@ -328,10 +337,59 @@ ParseResult HTTPBinaryCodec::parseContent(folly::io::Cursor& cursor,
 
   // Write the data to msgBody_ and then advance the cursor
   msgBody_ = std::make_unique<folly::IOBuf>();
-  cursor.clone(*msgBody_.get(), contentLength->first);
+  if (contentLength->first > 0 && msgBody_) {
+    cursor.cloneAtMost(*msgBody_.get(), contentLength->first);
+  }
 
   // Increase parsed by the number of bytes read
   parsed += contentLength->first;
+  return ParseResult(parsed);
+}
+
+ParseResult HTTPBinaryCodec::parseKnownLengthContentHelper(
+    folly::io::Cursor& cursor, size_t remaining) {
+  auto parseResult = parseSingleContentHelper(cursor, remaining);
+  if (parseResult.parseResultState_ == ParseResultState::DONE && msgBody_ &&
+      callback_) {
+    callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
+  }
+  return parseResult;
+}
+
+ParseResult HTTPBinaryCodec::parseIndeterminateLengthContentHelper(
+    folly::io::Cursor& cursor, size_t remaining) {
+  // If the content length is indeterminate, then we need to parse the
+  // body piece by piece, calling onBody each time when we parse a piece
+  const unsigned char* currentByte;
+  ParseResult parseResult(ParseResultState::INITIALIZED);
+  size_t parsed = 0;
+  do {
+    // Parse the next body chunk
+    parseResult = parseSingleContentHelper(cursor, remaining);
+    if (parseResult.parseResultState_ == ParseResultState::ERROR ||
+        parseResult.parseResultState_ ==
+            ParseResultState::WAITING_FOR_MORE_DATA) {
+      return parseResult;
+    }
+    // After successfully processing a body chunk, we call onBody
+    parsed += parseResult.bytesParsed_;
+    if (msgBody_ && callback_) {
+      callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
+    }
+    // If we have reached the end of the cursor at this point, we must
+    // be waiting for more data since we haven't seen a Content
+    // Terminator field yet
+    if (cursor.isAtEnd()) {
+      return ParseResult(parsed, ParseResultState::WAITING_FOR_MORE_DATA);
+    }
+    // Update the currentByte to the next byte in the cursor to check
+    // if we have reached the end of all the bodies
+    currentByte = cursor.peek().data();
+  } while (currentByte != nullptr && *currentByte != 0x00);
+  // If we finished parsing all the content, then we can skip over the Content
+  // Terminator field and then return
+  parsed++;
+  cursor.skip(1);
   return ParseResult(parsed);
 }
 
@@ -428,12 +486,17 @@ size_t HTTPBinaryCodec::onIngress(const folly::IOBuf& buf) {
 
       case ParseState::CONTENT:
         parseResult = parseContent(cursor, bufLen - parsedTot);
-        HANDLE_ERROR_OR_WAITING_PARSE_RESULT(parseResult);
+        if (parseResult.parseResultState_ == ParseResultState::ERROR) {
+          parseError_ = parseResult.error_;
+          break;
+        } else if (parseResult.parseResultState_ ==
+                   ParseResultState::WAITING_FOR_MORE_DATA) {
+          parsed += parseResult.bytesParsed_;
+          parserWaitingForMoreData_ = true;
+          break;
+        }
         parsed += parseResult.bytesParsed_;
         state_ = ParseState::TRAILERS_SECTION;
-        if (msgBody_) {
-          callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
-        }
         break;
 
       case ParseState::TRAILERS_SECTION:

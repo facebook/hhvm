@@ -28,6 +28,10 @@ class ParseResult {
   explicit ParseResult(size_t bytesParsed)
       : parseResultState_(ParseResultState::DONE), bytesParsed_(bytesParsed) {
   }
+  explicit ParseResult(size_t bytesParsed,
+                       const ParseResultState& parseResultState)
+      : parseResultState_(parseResultState), bytesParsed_(bytesParsed) {
+  }
   explicit ParseResult(const ParseResultState& parseResultState)
       : parseResultState_(parseResultState) {
   }
@@ -175,6 +179,12 @@ class HTTPBinaryCodec : public HTTPCodec {
                            size_t remaining,
                            HeaderDecodeInfo& decodeInfo);
   ParseResult parseContent(folly::io::Cursor& cursor, size_t remaining);
+  ParseResult parseSingleContentHelper(folly::io::Cursor& cursor,
+                                       size_t remaining);
+  ParseResult parseKnownLengthContentHelper(folly::io::Cursor& cursor,
+                                            size_t remaining);
+  ParseResult parseIndeterminateLengthContentHelper(folly::io::Cursor& cursor,
+                                                    size_t remaining);
   ParseResult parseTrailers(folly::io::Cursor& cursor,
                             size_t remaining,
                             HeaderDecodeInfo& decodeInfo);
@@ -221,7 +231,7 @@ class HTTPBinaryCodec : public HTTPCodec {
   const size_t queueAppenderMaxGrowth = 256;
 
   // This callback_ will be how we return decoded responses to the caller
-  HTTPCodec::Callback* callback_;
+  HTTPCodec::Callback* callback_ = nullptr;
 
   StreamID ingressTxnID_;
 

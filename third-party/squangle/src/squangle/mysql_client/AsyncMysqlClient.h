@@ -53,22 +53,18 @@
 #include "squangle/mysql_client/MysqlClientBase.h"
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
-#include "squangle/mysql_client/Row.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
 
 #include <atomic>
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <queue>
 #include <string>
 #include <thread>
 #include <unordered_map>
 
 #include <folly/Exception.h>
 #include <folly/Portability.h>
-#include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>

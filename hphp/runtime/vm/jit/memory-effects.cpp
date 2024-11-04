@@ -830,11 +830,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case IterGetKeyArr:
-  case IterGetValArr: {
-    auto const fp = inst.src(1);
-    auto const iter = aiter_pos(fp, inst.extra<IterData>()->args.iterId);
-    return may_load_store(AElemAny | iter, AEmpty);
-  }
+  case IterGetValArr:
+    return PureLoad { AElemAny };
 
   case IterInitArr:
   case IterInitObj:

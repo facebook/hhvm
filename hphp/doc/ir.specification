@@ -2775,7 +2775,7 @@ ReqBindJmp and CallFuncEntry.
   stack frame S1 to the starting position of base S0, then the instruction
   returns true.
 
-| IterNextArr<IterData>, D(Bool), S(ArrLike) S(FramePtr), LA
+| IterNextArr<IterArgs>, D(Bool), S(ArrLike) S(FramePtr), LA
 
   Advances the iterator variable IterArgs.iterId inside the stack frame S1,
   using the base S0.
@@ -2783,15 +2783,15 @@ ReqBindJmp and CallFuncEntry.
   If the iterator has reached the end, this instruction frees the iterator
   variable and returns false. Otherwise, it returns true.
 
-| IterGetKeyArr<IterData>, DIterKey, S(ArrLike) S(FramePtr), LA
+| IterGetKeyArr<IterArgs>, DIterKey, S(ArrLike) S(Int), LA
 
-  Get the key at the position of the iterator variable IterArgs.iterId inside
-  the stack frame S1 using the base S0.
+  Get the key at the iterator position S1 using the base S0. IterArgs.flags
+  determines the interpretation of the position.
 
-| IterGetValArr<IterData>, DIterVal, S(ArrLike) S(FramePtr), LA
+| IterGetValArr<IterArgs>, DIterVal, S(ArrLike) S(Int), LA
 
-  Get the value at the position of the iterator variable IterArgs.iterId inside
-  the stack frame S1 using the base S0.
+  Get the value at the iterator position S1 using the base S0. IterArgs.flags
+  determines the interpretation of the position.
 
 | IterInitObj<IterArgs>, D(Bool), S(Obj) S(FramePtr), LA
 

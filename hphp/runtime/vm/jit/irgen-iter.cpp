@@ -183,10 +183,10 @@ void emitIterGetKey(IRGS& env, IterArgs ita, int32_t baseLocalId) {
   assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
   if (base->isA(TObj)) return emitIterObjGet(env, base, s_key.get());
 
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
   auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
 
   if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
-    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
     if (base->isA(TVec)) {
       push(env, pos);
     } else if (base->isA(TDict)) {
@@ -205,12 +205,11 @@ void emitIterGetKey(IRGS& env, IterArgs ita, int32_t baseLocalId) {
   }
 
   if (base->type().arrSpec().bespoke()) {
-    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
     pushIncRef(env, gen(env, BespokeIterGetKey, base, pos));
     return;
   }
 
-  pushIncRef(env, gen(env, IterGetKeyArr, IterData(ita), base, fp(env)));
+  pushIncRef(env, gen(env, IterGetKeyArr, IterData(ita), base, pos));
 }
 
 void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
@@ -218,11 +217,11 @@ void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
   assertx(base->type().subtypeOfAny(TVec, TDict, TKeyset, TObj));
   if (base->isA(TObj)) return emitIterObjGet(env, base, s_current.get());
 
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
   auto const baseConst = has_flag(ita.flags, IterArgs::Flags::BaseConst);
   auto const withKeys = has_flag(ita.flags, IterArgs::Flags::WithKeys);
 
   if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
-    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
     if (base->isA(TVec)) {
       if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
         auto const elm = gen(env, IntAsPtrToElem, pos);
@@ -246,12 +245,11 @@ void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
   }
 
   if (base->type().arrSpec().bespoke()) {
-    auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
     pushIncRef(env, gen(env, BespokeIterGetVal, base, pos));
     return;
   }
 
-  pushIncRef(env, gen(env, IterGetValArr, IterData(ita), base, fp(env)));
+  pushIncRef(env, gen(env, IterGetValArr, IterData(ita), base, pos));
 }
 
 void emitIterInit(IRGS& env, IterArgs ita,

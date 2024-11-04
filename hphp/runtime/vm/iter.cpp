@@ -283,46 +283,49 @@ int64_t iter_next_array_generic(Iter* iter, const ArrayData* ad) {
 //////////////////////////////////////////////////////////////////////
 
 template<bool BaseConst, bool WithKeys>
-TypedValue iter_get_key_array(Iter* iter, ArrayData* ad) noexcept {
-  TRACE(2, "%s: I %p, ad %p\n", __func__, iter, ad);
+TypedValue iter_get_key_array(ArrayData* ad, ssize_t pos) noexcept {
+  TRACE(2, "%s: ad %p pos %p\n", __func__, ad, (void*)pos);
   // Can't use this function without WithKeys.
   always_assert(WithKeys);
 
   switch (ad->kind()) {
     case ArrayData::kVecKind:
-      return make_tv<KindOfInt64>(iter->getPos());
+      return make_tv<KindOfInt64>(pos);
     case ArrayData::kDictKind: {
       auto const& elm = BaseConst
-        ? *iter->m_dict_elm
-        : VanillaDict::as(ad)->data()[iter->getPos()];
+        ? *reinterpret_cast<VanillaDictElm*>(pos)
+        : VanillaDict::as(ad)->data()[pos];
       return elm.getKey();
     }
     case ArrayData::kKeysetKind: {
       auto const& elm = BaseConst
-        ? *iter->m_keyset_elm
-        : VanillaKeyset::asSet(ad)->data()[iter->getPos()];
+        ? *reinterpret_cast<VanillaKeysetElm*>(pos)
+        : VanillaKeyset::asSet(ad)->data()[pos];
       return *elm.datatv();
     }
     case ArrayData::kBespokeDictKind:
       if (isStructDict(BespokeArray::asBespoke(ad))) {
-        return StructDict::GetPosKey(StructDict::As(ad), iter->getPos());
+        return StructDict::GetPosKey(StructDict::As(ad), pos);
       }
       [[fallthrough]];
     case ArrayData::kBespokeVecKind:
     case ArrayData::kBespokeKeysetKind:
-      return ad->nvGetKey(iter->getPos());
+      return ad->nvGetKey(pos);
     case ArrayData::kNumKinds:
       not_reached();
   }
 }
 
-template TypedValue iter_get_key_array<false, true>(Iter*, ArrayData*) noexcept;
-template TypedValue iter_get_key_array<true, false>(Iter*, ArrayData*) noexcept;
-template TypedValue iter_get_key_array<true, true>(Iter*, ArrayData*) noexcept;
+template
+TypedValue iter_get_key_array<false, true>(ArrayData*, ssize_t) noexcept;
+template
+TypedValue iter_get_key_array<true, false>(ArrayData*, ssize_t) noexcept;
+template
+TypedValue iter_get_key_array<true, true>(ArrayData*, ssize_t) noexcept;
 
 template<bool BaseConst, bool WithKeys>
-TypedValue iter_get_value_array(Iter* iter, ArrayData* ad) noexcept {
-  TRACE(2, "%s: I %p, ad %p\n", __func__, iter, ad);
+TypedValue iter_get_value_array(ArrayData* ad, ssize_t pos) noexcept {
+  TRACE(2, "%s: ad %p pos %p\n", __func__, ad, (void*)pos);
   // If the array is mutable, we don't care about WithKeys. We set it to true to
   // reduce the number of template instantiations.
   always_assert(BaseConst || WithKeys);
@@ -330,39 +333,39 @@ TypedValue iter_get_value_array(Iter* iter, ArrayData* ad) noexcept {
   switch (ad->kind()) {
     case ArrayData::kVecKind:
       return BaseConst && !WithKeys && VanillaVec::stores_unaligned_typed_values
-        ? *iter->m_unaligned_elm
-        : VanillaVec::GetPosVal(ad, iter->getPos());
+        ? *reinterpret_cast<UnalignedTypedValue*>(pos)
+        : VanillaVec::GetPosVal(ad, pos);
     case ArrayData::kDictKind: {
       auto const& elm = BaseConst
-        ? *iter->m_dict_elm
-        : VanillaDict::as(ad)->data()[iter->getPos()];
+        ? *reinterpret_cast<VanillaDictElm*>(pos)
+        : VanillaDict::as(ad)->data()[pos];
       return *elm.datatv();
     }
     case ArrayData::kKeysetKind: {
       auto const& elm = BaseConst
-        ? *iter->m_keyset_elm
-        : VanillaKeyset::asSet(ad)->data()[iter->getPos()];
+        ? *reinterpret_cast<VanillaKeysetElm*>(pos)
+        : VanillaKeyset::asSet(ad)->data()[pos];
       return *elm.datatv();
     }
     case ArrayData::kBespokeDictKind:
       if (isStructDict(BespokeArray::asBespoke(ad))) {
-        return StructDict::GetPosVal(StructDict::As(ad), iter->getPos());
+        return StructDict::GetPosVal(StructDict::As(ad), pos);
       }
       [[fallthrough]];
     case ArrayData::kBespokeVecKind:
     case ArrayData::kBespokeKeysetKind:
-      return ad->nvGetVal(iter->getPos());
+      return ad->nvGetVal(pos);
     case ArrayData::kNumKinds:
       not_reached();
   }
 }
 
 template
-TypedValue iter_get_value_array<false, true>(Iter*, ArrayData*) noexcept;
+TypedValue iter_get_value_array<false, true>(ArrayData*, ssize_t) noexcept;
 template
-TypedValue iter_get_value_array<true, false>(Iter*, ArrayData*) noexcept;
+TypedValue iter_get_value_array<true, false>(ArrayData*, ssize_t) noexcept;
 template
-TypedValue iter_get_value_array<true, true>(Iter*, ArrayData*) noexcept;
+TypedValue iter_get_value_array<true, true>(ArrayData*, ssize_t) noexcept;
 
 template<bool BaseConst, bool WithKeys>
 int64_t iter_init_array(Iter* iter, ArrayData* ad) noexcept {

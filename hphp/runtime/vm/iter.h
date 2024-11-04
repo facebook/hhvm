@@ -136,9 +136,9 @@ struct alignas(16) Iter {
  *   Get the value at the position of the iterator. Does not IncRef the value.
  */
 template<bool BaseConst, bool WithKeys>
-NEVER_INLINE TypedValue iter_get_key_array(Iter*, ArrayData*) noexcept;
+NEVER_INLINE TypedValue iter_get_key_array(ArrayData*, ssize_t) noexcept;
 template<bool BaseConst, bool WithKeys>
-NEVER_INLINE TypedValue iter_get_value_array(Iter*, ArrayData*) noexcept;
+NEVER_INLINE TypedValue iter_get_value_array(ArrayData*, ssize_t) noexcept;
 template<bool BaseConst, bool WithKeys>
 NEVER_INLINE int64_t iter_init_array(Iter*, ArrayData*) noexcept;
 template<bool BaseConst, bool WithKeys>

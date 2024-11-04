@@ -4406,9 +4406,9 @@ OPTBLD_INLINE void iopIterBase() {
 
 OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, TypedValue* base) {
   if (isArrayLikeType(type(base))) {
-    auto it = frame_iter(vmfp(), ita.iterId);
     auto const arr = val(base).parr;
-    auto const key = iter_select(iter_get_key_array, ita.flags)(it, arr);
+    auto const pos = frame_iter(vmfp(), ita.iterId)->getPos();
+    auto const key = iter_select(iter_get_key_array, ita.flags)(arr, pos);
     tvDup(key, *vmStack().allocTV());
     return;
   }
@@ -4420,9 +4420,9 @@ OPTBLD_INLINE void iopIterGetKey(const IterArgs& ita, TypedValue* base) {
 
 OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, TypedValue* base) {
   if (isArrayLikeType(type(base))) {
-    auto it = frame_iter(vmfp(), ita.iterId);
     auto const arr = val(base).parr;
-    auto const value = iter_select(iter_get_value_array, ita.flags)(it, arr);
+    auto const pos = frame_iter(vmfp(), ita.iterId)->getPos();
+    auto const value = iter_select(iter_get_value_array, ita.flags)(arr, pos);
     tvDup(value, *vmStack().allocTV());
     return;
   }

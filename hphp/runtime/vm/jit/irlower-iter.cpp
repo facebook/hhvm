@@ -68,7 +68,7 @@ void implIterArr(
   CallSpec target,
   CallDest dstInfo
 ) {
-  assertx(inst->is(IterGetKeyArr, IterGetValArr, IterInitArr, IterNextArr));
+  assertx(inst->is(IterInitArr, IterNextArr));
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterId = inst->extra<IterData>()->args.iterId;
   auto const args = argGroup(env, inst)
@@ -152,14 +152,18 @@ void cgProfileIterInit(IRLS& env, const IRInstruction* inst) {
 void cgIterGetKeyArr(IRLS& env, const IRInstruction* inst) {
   auto const flags = inst->extra<IterData>()->args.flags;
   auto const target = CallSpec::direct(iter_select(iter_get_key_array, flags));
-  implIterArr(env, inst, target, callDestTV(env, inst));
+  auto const dstInfo = callDestTV(env, inst);
+  auto const args = argGroup(env, inst).ssa(0 /* arr */).ssa(1 /* pos */);
+  cgCallHelper(vmain(env), env, target, dstInfo, SyncOptions::None, args);
 }
 
 void cgIterGetValArr(IRLS& env, const IRInstruction* inst) {
   auto const flags = inst->extra<IterData>()->args.flags;
   auto const target =
     CallSpec::direct(iter_select(iter_get_value_array, flags));
-  implIterArr(env, inst, target, callDestTV(env, inst));
+  auto const dstInfo = callDestTV(env, inst);
+  auto const args = argGroup(env, inst).ssa(0 /* arr */).ssa(1 /* pos */);
+  cgCallHelper(vmain(env), env, target, dstInfo, SyncOptions::None, args);
 }
 
 void cgIterInitArr(IRLS& env, const IRInstruction* inst) {

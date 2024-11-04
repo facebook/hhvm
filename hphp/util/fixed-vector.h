@@ -67,7 +67,8 @@ struct FixedVector {
     swap(fv);
   }
 
-  FixedVector& operator=(FixedVector<T>&& fv) {
+  FixedVector& operator=(FixedVector<T, Alloc>&& fv)
+  {
     swap(fv);
     return *this;
   }

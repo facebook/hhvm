@@ -1106,7 +1106,7 @@ let create_nasts ctx files_info =
   Relative_path.Map.mapi ~f:build_nast files_info
 
 (** This is an almost-pure function which returns what we get out of parsing.
-The only side-effect it has is on the global errors list. *)
+The only side-effect it has is on the global errors list and the AST provider. *)
 let parse_and_name ctx files_contents =
   Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
       (* Get parse errors. *)

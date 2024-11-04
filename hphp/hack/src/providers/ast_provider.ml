@@ -9,13 +9,6 @@
 
 open Hh_prelude
 
-(*****************************************************************************)
-(* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
-(*****************************************************************************)
-
-(* We store only the names and declarations in the ParserHeap.
-   The full flag in each function runs a full parsing with method bodies. *)
-
 type parse_type =
   | Decl
   | Full
@@ -68,6 +61,9 @@ let parse
   in
   (err, { result with Parser_return.ast })
 
+(** Look up ast in LocalParserCache.
+  If not found, look up in Ide_parser_cache.
+  If not found, actually parse the file. *)
 let get_from_local_cache ~full ctx file_name =
   let with_no_err ast = (Errors.empty, ast) in
   let fn = Relative_path.to_absolute file_name in
@@ -75,7 +71,7 @@ let get_from_local_cache ~full ctx file_name =
   | Some ast -> with_no_err ast
   | None ->
     let popt = Provider_context.get_popt ctx in
-    let f contents =
+    let parse contents =
       let contents =
         if FindUtils.file_filter fn then
           contents
@@ -103,7 +99,7 @@ let get_from_local_cache ~full ctx file_name =
     let (err, ast) =
       Option.value_map
         ~default:(with_no_err [])
-        ~f
+        ~f:parse
         (File_provider.get_contents file_name)
     in
     let ast =
@@ -201,8 +197,8 @@ let get_ast_with_error ~(full : bool) ctx path =
       (Errors.empty, [])
   in
 
-  (* If there's a ctx, and this file is in the ctx, then use ctx. *)
-  (* Otherwise, the way we fetch/cache ASTs depends on the provider. *)
+  (* If there's a ctx, and this file is in the ctx, then use ctx.
+     Otherwise, the way we fetch/cache ASTs depends on the provider. *)
   let entry_opt =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
@@ -223,22 +219,27 @@ let get_ast_with_error ~(full : bool) ctx path =
       ( Provider_backend.Rust_provider_backend _
       | Provider_backend.Shared_memory
       | Provider_backend.Pessimised_shared_memory _ ) ) -> begin
-    (* Note that we might be looking up the shared ParserHeap directly, *)
-    (* or maybe into a local-change-stack due to quarantine. *)
+    (* Note that we might be looking up the shared ParserHeap directly,
+       or maybe into a local-change-stack due to quarantine. *)
+    (* The following code makes sure to only cache `Decl`/non-full ASTs
+       in the ParserHeap, for memory consumption reasons (I assume).
+       As of today, we only ever store `Full` ASTs in the ParserHeap for testing,
+       via `provide_ast_hint`. *)
     match (ParserHeap.get path, full) with
+    | (Some (ast, Decl), false)
+    | (Some (ast, Full), (true | false)) ->
+      (* It's in the parser-heap! hurrah! *)
+      (Errors.empty, ast)
     | (None, true)
     | (Some (_, Decl), true) ->
-      (* If we need full, and parser-heap can't provide it, then we *)
-      (* don't want to write a full decl into the parser heap. *)
+      (* If we need full, and parser-heap can't provide it, then we
+         don't want to write a full decl into the parser heap. *)
       get_from_local_cache ~full ctx path
     | (None, false) ->
       (* This is the case where we will write into the parser heap. *)
       let (err, ast) = get_from_local_cache ~full ctx path in
       if Errors.is_empty err then ParserHeap.add path (ast, Decl);
       (err, ast)
-    | (Some (ast, _), _) ->
-      (* It's in the parser-heap! hurrah! *)
-      (Errors.empty, ast)
   end
   | (_, Provider_backend.Analysis) -> begin
     (* Zoncolan has its own caching layers and does not make use of Hack's.

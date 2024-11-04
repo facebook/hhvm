@@ -7,7 +7,8 @@
  *
  *)
 
-(** All functions in this file will throw unless you've already called set_root
+(** Sets the root path of the repository.
+All functions in this file will throw unless you've already called set_root
 at the start of your process. *)
 val set_root : Path.t -> unit
 
@@ -15,6 +16,7 @@ val set_root : Path.t -> unit
 to disable progress-logging and error-streaming. *)
 val disable : unit -> unit
 
+(** Disposition of hh_server *)
 type disposition =
   | DStopped
       (** Hh_server has failed in some way, so will be unable to handle future work until it's been fixed. *)
@@ -110,8 +112,8 @@ val try_delete : unit -> unit
   the typecheck that is currently underway or most recently completed, from its
   start to its end. It will still be able to read the file descriptor through
   to its end even if, in the meantime, a new typecheck has started and the old
-  file has been unlinked. Note that a given file-descriptor will only ever point
-  to a file which monitonically grows.
+  file has been unlinked. Note that a given file descriptor will only ever point
+  to a file which monotonically grows.
 
   The server can have its typecheck interrupted. Some interruptions like watchman
   will cause the current typecheck to be cancelled, then a new typecheck started.

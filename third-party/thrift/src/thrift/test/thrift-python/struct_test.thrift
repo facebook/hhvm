@@ -143,6 +143,15 @@ struct TestStructContainerAssignment {
   8: map<i32, list<i32>> map_int_to_list_int;
 }
 
+exception TestExceptionAsListElement {
+  1: string string_field;
+  2: list<i32> list_int;
+}
+
+exception TestExceptionWithContainer {
+  1: list<TestExceptionAsListElement> list_exception;
+}
+
 struct TestStructAdaptedTypes {
   @python.Adapter{
     name = "thrift.python.test.adapters.datetime.DatetimeAdapter",

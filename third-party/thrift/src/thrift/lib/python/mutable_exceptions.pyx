@@ -104,6 +104,8 @@ cdef class MutableGeneratedError(Error):
 
         self._initStructListWithValues(kwargs)
         self._fbthrift_field_cache = [None] * len(struct_info.fields)
+        # Append `MutableGeneratedError` instance, see `_fbthrift_has_exception_instance()`
+        self._fbthrift_data.append(self)
 
     def __init__(self, *args, **kwargs):
         pass
@@ -253,6 +255,22 @@ cdef class MutableGeneratedError(Error):
 
     @classmethod
     def _fbthrift_create(cls, data):
+        if cls._fbthrift_has_exception_instance(data):
+            # An instance of `MutableGeneratedError` has already created for
+            # given `._fbthrift_data`, just return the previous instance.
+            return data[-1]
+
         cdef MutableGeneratedError inst = cls.__new__(cls)
         inst._fbthrift_data = data
+        # Append `MutableGeneratedError` instance,
+        # see `_fbthrift_has_exception_instance()`
+        inst._fbthrift_data.append(inst)
         return inst
+
+    @classmethod
+    def _fbthrift_has_exception_instance(cls, list fbthrift_data):
+        """
+        Implementation of exceptions and structs are very similar.
+        See `MutableStructInfo._fbthrift_has_struct_instance()`
+        """
+        return len(fbthrift_data) and isinstance(fbthrift_data[-1], cls)

@@ -40,12 +40,14 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Also = &thrift.StructSpec{
-    Name:               "Also",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Also",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
 })

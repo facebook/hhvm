@@ -45,57 +45,69 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_reqMyRootDoRoot = &thrift.StructSpec{
-    Name:               "reqMyRootDoRoot",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "reqMyRootDoRoot",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_respMyRootDoRoot = &thrift.StructSpec{
-    Name:               "respMyRootDoRoot",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "respMyRootDoRoot",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_reqMyNodeDoMid = &thrift.StructSpec{
-    Name:               "reqMyNodeDoMid",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "reqMyNodeDoMid",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_respMyNodeDoMid = &thrift.StructSpec{
-    Name:               "respMyNodeDoMid",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "respMyNodeDoMid",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_reqMyLeafDoLeaf = &thrift.StructSpec{
-    Name:               "reqMyLeafDoLeaf",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "reqMyLeafDoLeaf",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_respMyLeafDoLeaf = &thrift.StructSpec{
-    Name:               "respMyLeafDoLeaf",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "respMyLeafDoLeaf",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
 })

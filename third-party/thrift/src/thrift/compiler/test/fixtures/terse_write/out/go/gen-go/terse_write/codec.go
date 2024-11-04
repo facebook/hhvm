@@ -205,19 +205,21 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_MyStruct = &thrift.StructSpec{
-    Name:               "MyStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "MyStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
     },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
     },
 }
     premadeStructSpec_MyUnion = &thrift.StructSpec{
-    Name:               "MyUnion",
-    IsUnion:            true,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "MyUnion",
+    IsUnion:              true,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -331,7 +333,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyStruct,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -347,12 +349,28 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         13: 12,
         14: 13,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "bool_field": 0,
+        "byte_field": 1,
+        "short_field": 2,
+        "int_field": 3,
+        "long_field": 4,
+        "float_field": 5,
+        "double_field": 6,
+        "string_field": 7,
+        "binary_field": 8,
+        "enum_field": 9,
+        "list_field": 10,
+        "set_field": 11,
+        "map_field": 12,
+        "struct_field": 13,
+    },
 }
     premadeStructSpec_MyStructWithCustomDefault = &thrift.StructSpec{
-    Name:               "MyStructWithCustomDefault",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "MyStructWithCustomDefault",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -362,15 +380,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_i64,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "field1": 0,
     },
 }
     premadeStructSpec_StructLevelTerseStruct = &thrift.StructSpec{
-    Name:               "StructLevelTerseStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "StructLevelTerseStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -492,7 +513,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyUnion,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -509,12 +530,29 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         14: 13,
         15: 14,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "bool_field": 0,
+        "byte_field": 1,
+        "short_field": 2,
+        "int_field": 3,
+        "long_field": 4,
+        "float_field": 5,
+        "double_field": 6,
+        "string_field": 7,
+        "binary_field": 8,
+        "enum_field": 9,
+        "list_field": 10,
+        "set_field": 11,
+        "map_field": 12,
+        "struct_field": 13,
+        "union_field": 14,
+    },
 }
     premadeStructSpec_FieldLevelTerseStruct = &thrift.StructSpec{
-    Name:               "FieldLevelTerseStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "FieldLevelTerseStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -756,7 +794,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyUnion,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -788,12 +826,44 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         29: 28,
         30: 29,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "terse_bool_field": 0,
+        "terse_byte_field": 1,
+        "terse_short_field": 2,
+        "terse_int_field": 3,
+        "terse_long_field": 4,
+        "terse_float_field": 5,
+        "terse_double_field": 6,
+        "terse_string_field": 7,
+        "terse_binary_field": 8,
+        "terse_enum_field": 9,
+        "terse_list_field": 10,
+        "terse_set_field": 11,
+        "terse_map_field": 12,
+        "terse_struct_field": 13,
+        "bool_field": 14,
+        "byte_field": 15,
+        "short_field": 16,
+        "int_field": 17,
+        "long_field": 18,
+        "float_field": 19,
+        "double_field": 20,
+        "string_field": 21,
+        "binary_field": 22,
+        "enum_field": 23,
+        "list_field": 24,
+        "set_field": 25,
+        "map_field": 26,
+        "struct_field": 27,
+        "terse_union_field": 28,
+        "union_field": 29,
+    },
 }
     premadeStructSpec_TerseStructWithCustomDefault = &thrift.StructSpec{
-    Name:               "TerseStructWithCustomDefault",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "TerseStructWithCustomDefault",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.BOOL),
@@ -907,7 +977,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -923,12 +993,28 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         13: 12,
         14: 13,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "bool_field": 0,
+        "byte_field": 1,
+        "short_field": 2,
+        "int_field": 3,
+        "long_field": 4,
+        "float_field": 5,
+        "double_field": 6,
+        "string_field": 7,
+        "binary_field": 8,
+        "enum_field": 9,
+        "list_field": 10,
+        "set_field": 11,
+        "map_field": 12,
+        "struct_field": 13,
+    },
 }
     premadeStructSpec_AdaptedFields = &thrift.StructSpec{
-    Name:               "AdaptedFields",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "AdaptedFields",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -954,17 +1040,22 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyInteger,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "field1": 0,
+        "field2": 1,
+        "field3": 2,
+    },
 }
     premadeStructSpec_WrappedFields = &thrift.StructSpec{
-    Name:               "WrappedFields",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "WrappedFields",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -974,15 +1065,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_i32,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "field1": 0,
     },
 }
     premadeStructSpec_TerseException = &thrift.StructSpec{
-    Name:               "TerseException",
-    IsUnion:            false,
-    IsException:        true,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "TerseException",
+    IsUnion:              false,
+    IsException:          true,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRING),
@@ -992,8 +1086,11 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "msg": 0,
     },
 }
 })

@@ -98,10 +98,10 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_SomeStruct = &thrift.StructSpec{
-    Name:               "SomeStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "SomeStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -135,18 +135,24 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_set_i32,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
         4: 3,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "reasonable": 0,
+        "fine": 1,
+        "questionable": 2,
+        "tags": 3,
+    },
 }
     premadeStructSpec_MyStruct = &thrift.StructSpec{
-    Name:               "MyStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "MyStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -180,11 +186,17 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_module_MyEnum1,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         4: 2,
         6: 3,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "me2_3": 0,
+        "me3_n3": 1,
+        "me1_t1": 2,
+        "me1_t2": 3,
     },
 }
 })

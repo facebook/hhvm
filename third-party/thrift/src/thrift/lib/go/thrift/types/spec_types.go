@@ -34,11 +34,12 @@ type FieldSpec struct {
 
 // StructSpec is a spec for a stuct.
 type StructSpec struct {
-	Name               string
-	IsUnion            bool
-	IsException        bool
-	FieldSpecs         []FieldSpec // Concrete (non-pointer) struct type is intentional
-	FieldSpecIDToIndex map[int16]int
+	Name                 string
+	IsUnion              bool
+	IsException          bool
+	FieldSpecs           []FieldSpec // Concrete (non-pointer) struct type is intentional
+	FieldSpecIDToIndex   map[int16]int
+	FieldSpecNameToIndex map[string]int
 }
 
 // CodecPrimitiveType is an enum for all primitive types used by codec.

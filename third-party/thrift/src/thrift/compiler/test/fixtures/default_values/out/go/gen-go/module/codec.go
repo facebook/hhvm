@@ -63,10 +63,10 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_TrivialStruct = &thrift.StructSpec{
-    Name:               "TrivialStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "TrivialStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -76,15 +76,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_i32,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "int_value": 0,
     },
 }
     premadeStructSpec_StructWithNoCustomDefaultValues = &thrift.StructSpec{
-    Name:               "StructWithNoCustomDefaultValues",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "StructWithNoCustomDefaultValues",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -134,7 +137,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_module_TrivialStruct,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -142,12 +145,20 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         5: 4,
         6: 5,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "unqualified_integer": 0,
+        "optional_integer": 1,
+        "required_integer": 2,
+        "unqualified_struct": 3,
+        "optional_struct": 4,
+        "required_struct": 5,
+    },
 }
     premadeStructSpec_StructWithCustomDefaultValues = &thrift.StructSpec{
-    Name:               "StructWithCustomDefaultValues",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "StructWithCustomDefaultValues",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I32),
@@ -197,13 +208,21 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_module_TrivialStruct,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
         4: 3,
         5: 4,
         6: 5,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "unqualified_integer": 0,
+        "optional_integer": 1,
+        "required_integer": 2,
+        "unqualified_struct": 3,
+        "optional_struct": 4,
+        "required_struct": 5,
     },
 }
 })

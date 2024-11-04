@@ -73,10 +73,10 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Fields = &thrift.StructSpec{
-    Name:               "Fields",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Fields",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   100,
             WireType:             thrift.Type(thrift.STRING),
@@ -86,15 +86,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         100: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "injected_field": 0,
     },
 }
     premadeStructSpec_FieldsInjectedToEmptyStruct = &thrift.StructSpec{
-    Name:               "FieldsInjectedToEmptyStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "FieldsInjectedToEmptyStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   -1100,
             WireType:             thrift.Type(thrift.STRING),
@@ -104,15 +107,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         -1100: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "injected_field": 0,
     },
 }
     premadeStructSpec_FieldsInjectedToStruct = &thrift.StructSpec{
-    Name:               "FieldsInjectedToStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "FieldsInjectedToStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   -1100,
             WireType:             thrift.Type(thrift.STRING),
@@ -130,16 +136,20 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         -1100: 0,
         1: 1,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "injected_field": 0,
+        "string_field": 1,
+    },
 }
     premadeStructSpec_FieldsInjectedWithIncludedStruct = &thrift.StructSpec{
-    Name:               "FieldsInjectedWithIncludedStruct",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "FieldsInjectedWithIncludedStruct",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   -1102,
             WireType:             thrift.Type(thrift.STRING),
@@ -173,11 +183,17 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         -1102: 0,
         -1101: 1,
         -1100: 2,
         1: 3,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "injected_unstructured_annotation_field": 0,
+        "injected_structured_annotation_field": 1,
+        "injected_field": 2,
+        "string_field": 3,
     },
 }
 })

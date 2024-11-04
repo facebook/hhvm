@@ -129,10 +129,10 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Color = &thrift.StructSpec{
-    Name:               "Color",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Color",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.DOUBLE),
@@ -166,18 +166,24 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_double,
             MustBeSetToSerialize: false,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
         4: 3,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "red": 0,
+        "green": 1,
+        "blue": 2,
+        "alpha": 3,
+    },
 }
     premadeStructSpec_Vehicle = &thrift.StructSpec{
-    Name:               "Vehicle",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Vehicle",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.STRUCT),
@@ -219,19 +225,26 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_bool,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
         4: 3,
         5: 4,
     },
+    FieldSpecNameToIndex: map[string]int{
+        "color": 0,
+        "licensePlate": 1,
+        "description": 2,
+        "name": 3,
+        "hasAC": 4,
+    },
 }
     premadeStructSpec_Person = &thrift.StructSpec{
-    Name:               "Person",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Person",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   1,
             WireType:             thrift.Type(thrift.I64),
@@ -313,7 +326,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_list_module_Vehicle,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         1: 0,
         2: 1,
         3: 2,
@@ -324,6 +337,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         8: 7,
         9: 8,
         10: 9,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "id": 0,
+        "name": 1,
+        "age": 2,
+        "address": 3,
+        "favoriteColor": 4,
+        "friends": 5,
+        "bestFriend": 6,
+        "petNames": 7,
+        "afraidOfAnimal": 8,
+        "vehicles": 9,
     },
 }
 })

@@ -47,10 +47,10 @@ var (
 // Premade struct specs initializer
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Fields = &thrift.StructSpec{
-    Name:               "Fields",
-    IsUnion:            false,
-    IsException:        false,
-    FieldSpecs:         []thrift.FieldSpec{
+    Name:                 "Fields",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
         {
             ID:                   100,
             WireType:             thrift.Type(thrift.STRING),
@@ -76,10 +76,15 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             ValueTypeSpec:        premadeCodecTypeSpec_string,
             MustBeSetToSerialize: true,
         },    },
-    FieldSpecIDToIndex: map[int16]int{
+    FieldSpecIDToIndex:   map[int16]int{
         100: 0,
         101: 1,
         102: 2,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "injected_field": 0,
+        "injected_structured_annotation_field": 1,
+        "injected_unstructured_annotation_field": 2,
     },
 }
 })

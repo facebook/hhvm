@@ -224,14 +224,12 @@ bool checkConstraint(const T& ctx,
 
 template<class TCtx, class TBound1, class TBound2>
 bool checkUBConstraints(const TCtx& ctx,
-                        const TBound1& hhbc,
+                        const TBound1& hhbcUBs,
                         const TBound2& src,
                         FactsStore* fs) {
-  if (hhbc.isTop()) return true;
+  if (hhbcUBs.empty()) return true;
 
-  auto const& hhbcUBs = hhbc.m_constraints;
   auto const& srcUBs = src.m_constraints;
-
   if (hhbcUBs.size() != srcUBs.size()) {
     Logger::FError("Upper bound constraints for {} have mismatched length",
                    ctx.show());
@@ -267,7 +265,7 @@ bool checkFuncConstraints(const FuncEmitter* hhbc,
     if (!checkConstraint(ctx, hhbcTC, srcTC, fs)) status = false;
 
     auto const& hhbcUBs = hhbcParam.upperBounds;
-    if (!hhbcUBs.isTop()) {
+    if (!hhbcUBs.empty()) {
       if (!src->hasParamsWithMultiUBs()) {
         Logger::FError("Cannot find upper bounds for {}", ctx.show());
         status = false;

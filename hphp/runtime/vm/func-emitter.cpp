@@ -369,10 +369,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     Func::ParamInfo pi = params[i];
     fParams.push_back(pi);
     auto const& fromUBs = params[i].upperBounds;
-    if (!fromUBs.isTop()) {
-      auto& ub = f->extShared()->m_paramUBs[i];
-      ub.m_constraints.resize(fromUBs.m_constraints.size());
-      std::copy(fromUBs.m_constraints.begin(), fromUBs.m_constraints.end(), ub.m_constraints.begin());
+    if (!fromUBs.empty()) {
+      f->extShared()->m_paramUBs[i] = VMTypeIntersectionConstraint(fromUBs);
       f->shared()->m_allFlags.m_hasParamsWithMultiUBs = true;
     }
   }
@@ -397,10 +395,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_userAttributes = userAttributes;
   f->shared()->m_retTypeConstraint = retTypeConstraint;
   f->shared()->m_retUserType = retUserType;
-  if (!retUpperBounds.isTop()) {
-    f->extShared()->m_returnUBs.m_constraints.resize(retUpperBounds.m_constraints.size());
-    std::copy(retUpperBounds.m_constraints.begin(), retUpperBounds.m_constraints.end(),
-              f->extShared()->m_returnUBs.m_constraints.begin());
+  if (!retUpperBounds.empty()) {
+    f->extShared()->m_returnUBs = VMTypeIntersectionConstraint(
+        retUpperBounds
+    );
     f->shared()->m_allFlags.m_hasReturnWithMultiUBs = true;
   }
   f->shared()->m_originalFilename = originalFullName;

@@ -2159,16 +2159,16 @@ std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
 /*
  * type-info       : maybe-string-literal type-constraint
  */
-std::tuple<const StringData*, TypeConstraint, UpperBoundVec>
+std::tuple<const StringData*, TypeConstraint, std::vector<TypeConstraint>>
 parse_type_info(AsmState& as) {
   auto const userType = read_maybe_litstr(as);
   auto const typeConstraint = parse_type_constraint(as);
-  UpperBoundVec ubs;
+  std::vector<TypeConstraint> ubs;
   while (true) {
     as.in.skipWhitespace();
     if (as.in.peek() != ',') break;
     as.in.getc();
-    ubs.add(parse_type_constraint(as));
+    ubs.emplace_back(parse_type_constraint(as));
   }
   return {userType, typeConstraint, ubs};
 }
@@ -2239,7 +2239,7 @@ void parse_parameter_list(AsmState& as) {
     param.userType = userType;
     param.typeConstraint = tc;
     param.upperBounds = std::move(ubs);
-    if (!param.upperBounds.isTop()) as.fe->hasParamsWithMultiUBs = true;
+    if (!param.upperBounds.empty()) as.fe->hasParamsWithMultiUBs = true;
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2372,7 +2372,7 @@ void parse_function(AsmState& as) {
   as.fe->retUserType = userType;
   as.fe->retTypeConstraint = tc;
   as.fe->retUpperBounds = std::move(ubs);
-  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.isTop();
+  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.empty();
 
   as.fe->userAttributes = userAttrs;
 
@@ -2425,7 +2425,7 @@ void parse_method(AsmState& as) {
   as.fe->retUserType = userType;
   as.fe->retTypeConstraint = tc;
   as.fe->retUpperBounds = std::move(ubs);
-  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.isTop();
+  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.empty();
 
   as.fe->userAttributes = userAttrs;
 

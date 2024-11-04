@@ -53,8 +53,6 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
-  using UpperBoundVec = TypeIntersectionConstraint;
-  using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo() {}
 
@@ -65,7 +63,7 @@ struct FuncEmitter {
       sd(upperBounds);
     }
 
-    UpperBoundVec upperBounds;
+    std::vector<TypeConstraint> upperBounds;
   };
 
   using ParamInfoVec = std::vector<ParamInfo>;
@@ -341,7 +339,7 @@ public:
 
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
-  UpperBoundVec retUpperBounds;
+  std::vector<TypeConstraint> retUpperBounds;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 

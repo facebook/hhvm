@@ -83,7 +83,7 @@ struct PreClass : AtomicCountable {
          Attr attrs,
          const StringData* userType,
          const TypeConstraint& typeConstraint,
-         const TypeIntersectionConstraint& ubs,
+         const UpperBoundVec& ubs,
          const StringData* docComment,
          const TypedValue& val,
          RepoAuthType repoAuthType,

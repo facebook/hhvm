@@ -694,7 +694,9 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       pinfo.defaultValue = param.defaultValue;
       pinfo.typeConstraint = param.typeConstraint;
       pinfo.userType = param.userTypeConstraint;
-      pinfo.upperBounds = param.upperBounds;
+      for (auto const& ub : param.upperBounds.m_constraints) {
+        pinfo.upperBounds.emplace_back(ub);
+      }
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
@@ -971,7 +973,10 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
 
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
-  fe.retUpperBounds = func.returnUBs;
+  fe.retUpperBounds.reserve(func.returnUBs.m_constraints.size());
+  for (auto& c : func.returnUBs.m_constraints) {
+    fe.retUpperBounds.emplace_back(c);
+  }
   fe.originalFilename =
     func.originalFilename ? func.originalFilename :
     func.originalUnit ? func.originalUnit : nullptr;
@@ -1194,7 +1199,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       attrs,
       prop.userType,
       prop.typeConstraint,
-      prop.ubs,
+      prop.ubs.asVec(),
       prop.docComment,
       &prop.val,
       makeRat(propTy),

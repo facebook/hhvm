@@ -498,9 +498,9 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
   auto ub = getRelevantUpperBounds(typeConstraint, classUbs, classUbs, {});
 
   auto needsMultiUBs = false;
-  if (ub.isSimple() && !hasReifiedGenerics) {
-    typeConstraint = ub.asSimple();
-  } else if (!ub.isTop()) {
+  if (ub.size() == 1 && !hasReifiedGenerics) {
+    typeConstraint = ub[0];
+  } else if (!ub.empty()) {
     needsMultiUBs = true;
   }
 
@@ -515,15 +515,18 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
   auto const name = toStaticString(p.name._0);
   ITRACE(2, "Translating property {} {}\n", name, tv.pretty());
 
-  ts.pce->addProperty(name,
-                      p.flags,
-                      userTy,
-                      typeConstraint,
-                      needsMultiUBs ? std::move(ub) : UpperBoundVec{},
-                      heredoc,
-                      &tv,
-                      HPHP::RepoAuthType{},
-                      userAttributes);
+  ts.pce->addProperty(
+    name,
+    p.flags,
+    userTy,
+    typeConstraint,
+    needsMultiUBs
+      ? std::move(ub) : std::vector<TypeConstraint>(),
+    heredoc,
+    &tv,
+    HPHP::RepoAuthType{},
+    userAttributes
+  );
 }
 
 void translateClassBody(TranslationState& ts,
@@ -552,7 +555,7 @@ void translateUbs(const hhbc::UpperBound& ub, UpperBoundMap& ubs) {
 
   auto infos = range(ub.bounds);
   for (auto const& i : infos) {
-    ubs[name].m_constraints.emplace_back(translateTypeInfo(i).second);
+    ubs[name].emplace_back(translateTypeInfo(i).second);
   }
 }
 
@@ -1002,14 +1005,14 @@ void upperBoundsHelper(TranslationState& ts,
                        const UpperBoundMap& ubs,
                        const UpperBoundMap& classUbs,
                        const TParamNameVec& shadowedTParams,
-                       TypeIntersectionConstraint& upperBounds,
+                       std::vector<TypeConstraint>& upperBounds,
                        TypeConstraint& tc,
                        bool hasReifiedGenerics,
                        bool isParam) {
   auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
-  if (currUBs.isSimple() && !hasReifiedGenerics) {
-    tc = currUBs.asSimple();
-  } else if (!currUBs.isTop()) {
+  if (currUBs.size() == 1 && !hasReifiedGenerics) {
+    tc = currUBs[0];
+  } else if (!currUBs.empty()) {
     upperBounds = std::move(currUBs);
     if (isParam) {
       ts.fe->hasParamsWithMultiUBs = true;
@@ -1024,7 +1027,7 @@ bool upperBoundsHelper(TranslationState& ts,
                        const UpperBoundMap& ubs,
                        const UpperBoundMap& classUbs,
                        const TParamNameVec& shadowedTParams,
-                       TypeIntersectionConstraint& upperBounds,
+                       std::vector<TypeConstraint>& upperBounds,
                        TypeConstraint& tc,
                        const UserAttributeMap& userAttrs,
                        bool isParam) {

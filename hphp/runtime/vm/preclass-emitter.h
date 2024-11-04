@@ -45,9 +45,6 @@ struct BuiltinObjExtents {
 
 struct PreClassEmitter {
   using MethodVec = std::vector<FuncEmitter*>;
-  using UpperBoundVec = TypeIntersectionConstraint;
-  using UpperBoundMap =
-    std::unordered_map<const StringData*, TypeIntersectionConstraint>;
 
   struct Prop {
     Prop()
@@ -64,7 +61,7 @@ struct PreClassEmitter {
          Attr attrs,
          const StringData* userType,
          const TypeConstraint& typeConstraint,
-         const UpperBoundVec& ubs,
+         const std::vector<TypeConstraint>& ubs,
          const StringData* docComment,
          const TypedValue* val,
          RepoAuthType repoAuthType,
@@ -75,7 +72,7 @@ struct PreClassEmitter {
     Attr attrs() const { return m_attrs; }
     const StringData* userType() const { return m_userType; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
-    const UpperBoundVec& upperBounds() const { return m_ubs; }
+    const std::vector<TypeConstraint>& upperBounds() const { return m_ubs; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
@@ -104,7 +101,7 @@ struct PreClassEmitter {
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
     TypeConstraint m_typeConstraint;
-    UpperBoundVec m_ubs{};
+    std::vector<TypeConstraint> m_ubs{};
     UserAttributeMap m_userAttributes;
   };
 
@@ -244,7 +241,7 @@ struct PreClassEmitter {
                    Attr attrs,
                    const StringData* userType,
                    const TypeConstraint& typeConstraint,
-                   const UpperBoundVec& ubs,
+                   const std::vector<TypeConstraint>& ubs,
                    const StringData* docComment,
                    const TypedValue* val,
                    RepoAuthType,

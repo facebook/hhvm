@@ -43,14 +43,15 @@ void checkSize(TypedValue tv, uint64_t& available) {
   }
 }
 
-UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
-                                     const UpperBoundMap& ubs,
-                                     const UpperBoundMap& class_ubs,
-                                     const TParamNameVec& shadowed_tparams) {
-  if (!tc.isTypeVar()) return UpperBoundVec{};
+std::vector<TypeConstraint> getRelevantUpperBounds(
+  const TypeConstraint& tc,
+  const UpperBoundMap& ubs,
+  const UpperBoundMap& class_ubs,
+  const TParamNameVec& shadowed_tparams) {
+  if (!tc.isTypeVar()) return std::vector<TypeConstraint>();
 
-  auto const applyFlags = [&](UpperBoundVec ret) {
-    for (auto& ub : ret.m_constraints) {
+  auto const applyFlags = [&](std::vector<TypeConstraint> ret) {
+    for (auto& ub : ret) {
       applyFlagsToUB(ub, tc);
     }
     return ret;
@@ -65,7 +66,7 @@ UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
     if (it != class_ubs.end()) return applyFlags(it->second);
   }
 
-  return UpperBoundVec{};
+  return std::vector<TypeConstraint>();
 }
 
 }

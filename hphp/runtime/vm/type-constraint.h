@@ -693,6 +693,13 @@ struct TypeIntersectionConstraintT {
     m_constraints.emplace_back(std::move(tc));
   }
 
+  explicit TypeIntersectionConstraintT(
+      std::vector<TypeConstraint> constraints) {
+    for (auto& tc : constraints) {
+      m_constraints.emplace_back(std::move(tc));
+    }
+  }
+
   template<class SerDe>
   void serde(SerDe& sd) {
     sd(m_constraints);
@@ -713,6 +720,14 @@ struct TypeIntersectionConstraintT {
 
   void add(TypeConstraint tc) {
     m_constraints.emplace_back(std::move(tc));
+  }
+
+  std::vector<TypeConstraint> asVec() const {
+    auto constraints = std::vector<TypeConstraint>(m_constraints.size());
+    for (auto const& c : m_constraints) {
+      constraints.emplace_back(c);
+    }
+    return constraints;
   }
 };
 

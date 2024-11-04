@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ASIO_SOCKET_EVENT_H
-#define incl_HPHP_ASIO_SOCKET_EVENT_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <folly/io/async/EventBase.h>
@@ -26,5 +25,3 @@ extern folly::Singleton<AsioEventBase> s_asio_event_base;
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-
-#endif // incl_HPHP_ASIO_SOCKET_EVENT_H

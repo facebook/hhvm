@@ -29,7 +29,7 @@
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/unit-parser.h"
-#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
+#include "hphp/util/configs/autoload.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"

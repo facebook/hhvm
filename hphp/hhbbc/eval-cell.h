@@ -28,7 +28,7 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 
-#include "hphp/util/configs/jit.h" // @manual=//hphp/util/configs:jit
+#include "hphp/util/configs/jit.h"
 
 namespace HPHP::HHBBC {
 

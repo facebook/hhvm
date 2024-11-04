@@ -62,7 +62,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
+#include "hphp/util/configs/autoload.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"

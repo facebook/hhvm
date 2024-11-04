@@ -53,7 +53,7 @@
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/configs/autoload.h" // @manual=//hphp/util/configs:autoload
+#include "hphp/util/configs/autoload.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"

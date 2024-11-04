@@ -222,22 +222,22 @@ bool checkConstraint(const T& ctx,
   return false;
 }
 
-template<class TCtx, class TBound1, class TBound2>
-bool checkUBConstraints(const TCtx& ctx,
-                        const TBound1& hhbcUBs,
-                        const TBound2& srcUBs,
-                        FactsStore* fs) {
-  if (hhbcUBs.empty()) return true;
+template<class TCtx>
+bool checkConstraints(const TCtx& ctx,
+                      const TypeIntersectionConstraint& hhbcTys,
+                      const TypeIntersectionConstraint& srcTys,
+                      FactsStore* fs) {
+  if (hhbcTys.size() == 0) return true;
 
-  if (hhbcUBs.size() != srcUBs.size()) {
-    Logger::FError("Upper bound constraints for {} have mismatched length",
+  if (hhbcTys.size() != srcTys.size()) {
+    Logger::FError("Type constraints for {} have mismatched length",
                    ctx.show());
     return false;
   }
 
   bool status = true;
-  for (uint32_t i = 0; i < hhbcUBs.size(); ++i) {
-    if (!checkConstraint(ctx, hhbcUBs[i], srcUBs[i], fs)) status = false;
+  for (uint32_t i = 0; i < hhbcTys.size(); ++i) {
+    if (!checkConstraint(ctx, hhbcTys.range().at(i), srcTys.range().at(i), fs)) status = false;
   }
 
   return status;
@@ -253,7 +253,9 @@ bool checkFuncConstraints(const FuncEmitter* hhbc,
     fs
   );
   if (src->numParams() != hhbc->params.size()) {
-    Logger::FError("Parameter count mismatch for {}", src->fullName()->data());
+    Logger::FError(
+        "Parameter count mismatch for {}", src->fullName()->data()
+    );
     return false;
   }
 
@@ -262,19 +264,12 @@ bool checkFuncConstraints(const FuncEmitter* hhbc,
     auto const& hhbcParam = hhbc->params[i];
     auto const& srcParam = src->params()[i];
 
-    auto const& hhbcTC = hhbcParam.typeConstraints.main();
-    auto const& srcTC = srcParam.typeConstraints.main();
-    if (!checkConstraint(ctx, hhbcTC, srcTC, fs)) status = false;
-
-    auto const& hhbcUBs = hhbcParam.typeConstraints.ubs();
-    if (!hhbcUBs.empty()) {
-      auto const srcUBs = src->params()[i].typeConstraints.ubs();
-      if (srcUBs.empty()) {
-        Logger::FError("Cannot find upper bounds for {}", ctx.show());
-        status = false;
-        continue;
-      }
-      if (!checkUBConstraints(ctx, hhbcUBs, srcUBs, fs)) status = false;
+    if (!checkConstraints(
+          ctx,
+          hhbcParam.typeConstraints,
+          srcParam.typeConstraints,
+          fs)) {
+      status = false;
     }
   }
   return status;
@@ -309,16 +304,12 @@ bool checkPropConstraints(const PropTC& ctx,
                           const PreClassEmitter::Prop& hhbcProp,
                           const TProp& srcProp,
                           FactsStore* fs) {
-  bool status = true;
-
-  auto const& hhbcTC = hhbcProp.typeConstraints().main();
-  auto const& hhbcUBs = hhbcProp.typeConstraints().ubs();
-  auto const& srcTC = srcProp.typeConstraints.main();
-  auto const& srcUBs = srcProp.typeConstraints.ubs();
-  if (!checkConstraint(ctx, hhbcTC, srcTC, fs)) status = false;
-  if (!checkUBConstraints(ctx, hhbcUBs, srcUBs, fs)) status = false;
-
-  return status;
+  return checkConstraints(
+    ctx,
+    hhbcProp.typeConstraints(),
+    srcProp.typeConstraints,
+    fs
+  );
 }
 
 bool checkClassConstraints(const PreClassEmitter* hhbc,

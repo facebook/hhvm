@@ -535,12 +535,20 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   }
 
   auto const& sprop = class_->staticProperties()[lookup.slot];
-  auto const& tc = sprop.typeConstraints.main();
   // TODO(T61738946): We can remove the temporary here once we no longer coerce
   // class_meth types.
   auto tmp = value;
-  if (Cfg::Eval::CheckPropTypeHints > 0 && tc.isCheckable()) {
-    tc.verifyStaticProperty(tmp.asTypedValue(), class_, sprop.cls, prop.get());
+  if (Cfg::Eval::CheckPropTypeHints > 0 ) {
+    for (auto const& tc : sprop.typeConstraints.range()) {
+      if (tc.isCheckable()) {
+        tc.verifyStaticProperty(
+            tmp.asTypedValue(),
+            class_,
+            sprop.cls,
+            prop.get()
+        );
+      }
+    }
   }
   tvAsVariant(lookup.val) = tmp;
 }

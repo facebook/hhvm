@@ -8,9 +8,9 @@
 
 #include "squangle/mysql_client/Row.h"
 
+#include <folly/Conv.h>
 #include <re2/re2.h>
 #include <chrono>
-#include <numeric>
 
 namespace facebook::common::mysql_client {
 
@@ -45,12 +45,49 @@ std::shared_ptr<RowFields> EphemeralRowFields::makeBufferedFields() const {
       std::move(field_types));
 }
 
-folly::StringPiece EphemeralRow::operator[](size_t col) const {
-  return row_->column(col);
+InternalRow::Type EphemeralRow::getType(size_t col) const {
+  return row_->columnType(col);
+}
+
+bool EphemeralRow::getBool(size_t col) const {
+  return row_->columnBool(col);
+}
+
+int64_t EphemeralRow::getInt64(size_t col) const {
+  return row_->columnInt64(col);
+}
+
+uint64_t EphemeralRow::getUInt64(size_t col) const {
+  return row_->columnUInt64(col);
+}
+
+double EphemeralRow::getDouble(size_t col) const {
+  return row_->columnDouble(col);
+}
+
+folly::StringPiece EphemeralRow::getString(size_t col) const {
+  return row_->columnString(col);
+}
+
+std::string EphemeralRow::convertToString(size_t col) const {
+  switch (getType(col)) {
+    case common::mysql_client::InternalRow::Type::Null:
+      return "<null>";
+    case common::mysql_client::InternalRow::Type::Bool:
+      return folly::to<std::string>(getBool(col));
+    case common::mysql_client::InternalRow::Type::Int64:
+      return folly::to<std::string>(getInt64(col));
+    case common::mysql_client::InternalRow::Type::UInt64:
+      return folly::to<std::string>(getUInt64(col));
+    case common::mysql_client::InternalRow::Type::Double:
+      return folly::to<std::string>(getDouble(col));
+    case common::mysql_client::InternalRow::Type::String:
+      return getString(col).str();
+  }
 }
 
 bool EphemeralRow::isNull(size_t col) const {
-  return row_->isNull(col);
+  return getType(col) == InternalRow::Type::Null;
 }
 
 int EphemeralRow::numFields() const {
@@ -122,40 +159,150 @@ folly::dynamic Row::getDynamic(size_t l) const {
       case MYSQL_TYPE_ENUM:
       case MYSQL_TYPE_YEAR:
         if (row_block_->getFieldFlags(l) & UNSIGNED_FLAG) {
-          return folly::dynamic(
-              row_block_->getField<unsigned long>(row_number_, l));
+          return folly::dynamic(row_block_->getField<uint64_t>(row_number_, l));
         }
-        return folly::dynamic(row_block_->getField<long>(row_number_, l));
+        return folly::dynamic(row_block_->getField<int64_t>(row_number_, l));
 
       // folly::dynamic::Type::STRING
       default:
         return folly::dynamic(
-            row_block_->getField<std::string>(row_number_, l));
+            row_block_->getField<folly::StringPiece>(row_number_, l));
     }
   } catch (const std::exception&) {
     // If we failed to parse (NULL int, etc), try again as a string
-    return folly::dynamic(row_block_->getField<std::string>(row_number_, l));
+    return folly::dynamic(
+        row_block_->getField<folly::StringPiece>(row_number_, l));
   }
 }
 
 template <>
+bool RowBlock::getField(size_t row, size_t field_num) const {
+  CHECK_LT(row, rows_.size());
+  CHECK_LT(field_num, row_fields_info_->numFields());
+  CHECK(!isNull(row, field_num));
+
+  return rows_[row].as<bool>(field_num, [&](const auto& arg) {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, bool>) {
+      return arg;
+    } else if constexpr (
+        (std::is_same_v<T, int64_t>) || (std::is_same_v<T, uint64_t>) ||
+        (std::is_same_v<T, double>) ||
+        (std::is_same_v<T, folly::StringPiece>)) {
+      return folly::to<bool>(arg);
+    }
+
+    throw std::runtime_error("Invalid type");
+    return false;
+  });
+}
+
+template <>
+int64_t RowBlock::getField(size_t row, size_t field_num) const {
+  CHECK_LT(row, rows_.size());
+  CHECK_LT(field_num, row_fields_info_->numFields());
+  CHECK(!isNull(row, field_num));
+
+  if (isDate(row, field_num)) {
+    return getDateField(row, field_num);
+  }
+
+  return rows_[row].as<int64_t>(field_num, [&](const auto& arg) {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, int64_t>) {
+      return arg;
+    } else if constexpr (
+        (std::is_same_v<T, bool>) || (std::is_same_v<T, uint64_t>) ||
+        (std::is_same_v<T, double>) ||
+        (std::is_same_v<T, folly::StringPiece>)) {
+      return folly::to<int64_t>(arg);
+    }
+
+    return (int64_t)0;
+  });
+}
+
+template <>
+uint64_t RowBlock::getField(size_t row, size_t field_num) const {
+  CHECK_LT(row, rows_.size());
+  CHECK_LT(field_num, row_fields_info_->numFields());
+  CHECK(!isNull(row, field_num));
+
+  return rows_[row].as<uint64_t>(field_num, [&](const auto& arg) {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, uint64_t>) {
+      return arg;
+    } else if constexpr (
+        (std::is_same_v<T, bool>) || (std::is_same_v<T, int64_t>) ||
+        (std::is_same_v<T, double>) ||
+        (std::is_same_v<T, folly::StringPiece>)) {
+      return folly::to<uint64_t>(arg);
+    }
+
+    return (uint64_t)0;
+  });
+}
+
+template <>
+double RowBlock::getField(size_t row, size_t field_num) const {
+  CHECK_LT(row, rows_.size());
+  CHECK_LT(field_num, row_fields_info_->numFields());
+  CHECK(!isNull(row, field_num));
+
+  return rows_[row].as<double>(field_num, [&](const auto& arg) {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, double>) {
+      return arg;
+    } else if constexpr (
+        (std::is_same_v<T, bool>) || (std::is_same_v<T, int64_t>) ||
+        (std::is_same_v<T, uint64_t>) ||
+        (std::is_same_v<T, folly::StringPiece>)) {
+      return folly::to<double>(arg);
+    }
+
+    return 0.0;
+  });
+}
+
+template <>
 folly::StringPiece RowBlock::getField(size_t row, size_t field_num) const {
-  size_t entry = row * row_fields_info_->numFields() + field_num;
-  if (null_values_[entry]) {
-    return folly::StringPiece(nullptr, nullptr);
+  CHECK_LT(row, rows_.size());
+  CHECK_LT(field_num, row_fields_info_->numFields());
+
+  if (isNull(row, field_num)) {
+    return folly::StringPiece();
   }
 
-  size_t field_size;
+  return rows_[row].as<folly::StringPiece>(field_num, [&](const auto& arg) {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, folly::StringPiece>) {
+      return arg;
+    } else if constexpr (
+        (std::is_same_v<T, bool>) || (std::is_same_v<T, int64_t>) ||
+        (std::is_same_v<T, uint64_t>) || (std::is_same_v<T, std::string>)) {
+      const auto& data = string_store_.getString(
+          RowColumnKey(row, field_num),
+          [&]() { return folly::to<std::string>(arg); });
+      return folly::StringPiece(data);
+    }
 
-  if (entry == field_offsets_.size() - 1) {
-    field_size = buffer_.size() - field_offsets_[entry];
-  } else {
-    field_size = field_offsets_[entry + 1] - field_offsets_[entry];
-  }
+    return folly::StringPiece();
+  });
+}
 
-  return field_size != 0
-      ? folly::StringPiece(&buffer_[field_offsets_[entry]], field_size)
-      : folly::StringPiece();
+template <>
+folly::fbstring RowBlock::getField(size_t row, size_t field_num) const {
+  return folly::fbstring(getField<folly::StringPiece>(row, field_num));
+}
+
+template <>
+std::string_view RowBlock::getField(size_t row, size_t field_num) const {
+  return std::string_view(getField<folly::StringPiece>(row, field_num));
+}
+
+template <>
+std::string RowBlock::getField(size_t row, size_t field_num) const {
+  return std::string(getField<folly::StringPiece>(row, field_num));
 }
 
 template <>
@@ -171,14 +318,6 @@ std::chrono::microseconds RowBlock::getField(size_t row, size_t field_num)
     const {
   auto field_value = getField<folly::StringPiece>(row, field_num);
   return parseTimeOnly(field_value, getFieldType(field_num));
-}
-
-template <>
-time_t RowBlock::getField(size_t row, size_t field_num) const {
-  if (isDate(row, field_num)) {
-    return getDateField(row, field_num);
-  }
-  return folly::to<time_t>(getField<folly::StringPiece>(row, field_num));
 }
 
 time_t RowBlock::getDateField(size_t row, size_t field_num) const {

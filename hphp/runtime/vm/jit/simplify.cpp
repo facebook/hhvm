@@ -1030,7 +1030,7 @@ SSATmp* simplifyDivInt(State& env, const IRInstruction* inst) {
   auto log2 = [](int64_t a) {
     assertx(a > 0);
     return folly::findLastSet<uint64_t>(a) - 1;
-  };  
+  };
   auto const dividend = inst->src(0);
   auto const divisor  = inst->src(1);
   // X / X -> 1
@@ -3533,6 +3533,71 @@ SSATmp* simplifyBespokeIterGetVal(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyIterGetKeyArr(State& env, const IRInstruction* inst) {
+  auto const base = inst->src(0);
+  auto const pos = inst->src(1);
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const baseConst = has_flag(flags, IterArgs::Flags::BaseConst);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    if (base->isA(TVec)) return pos;
+    if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      return gen(env, LdPtrIterKey, TInt | TStr, base, elm);
+    }
+    if (base->isA(TKeyset)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      return gen(env, LdPtrIterVal, TInt | TStr, base, elm);
+    }
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    return gen(env, BespokeIterGetKey, base, pos);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyIterGetValArr(State& env, const IRInstruction* inst) {
+  auto const base = inst->src(0);
+  auto const pos = inst->src(1);
+  auto const flags = inst->extra<IterData>()->args.flags;
+  auto const baseConst = has_flag(flags, IterArgs::Flags::BaseConst);
+  auto const withKeys = has_flag(flags, IterArgs::Flags::WithKeys);
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    if (base->isA(TVec)) {
+      if (baseConst && !withKeys && VanillaVec::stores_unaligned_typed_values) {
+        auto const elm = gen(env, IntAsPtrToElem, pos);
+        return gen(env, LdPtrIterVal, TInitCell, base, elm);
+      }
+      return gen(env, LdVecElem, base, pos);
+    }
+    if (base->isA(TDict)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetDictPtrIter, base, pos);
+      return gen(env, LdPtrIterVal, TInitCell, base, elm);
+    }
+    if (base->isA(TKeyset)) {
+      auto const elm = baseConst
+        ? gen(env, IntAsPtrToElem, pos)
+        : gen(env, GetKeysetPtrIter, base, pos);
+      return gen(env, LdPtrIterVal, TInt | TStr, base, elm);
+    }
+  }
+
+  if (base->type().arrSpec().bespoke()) {
+    return gen(env, BespokeIterGetVal, base, pos);
+  }
+
+  return nullptr;
+}
+
 // Simplify layout-specific bespoke helpers.
 
 SSATmp* simplifyLdMonotypeDictTombstones(
@@ -4225,6 +4290,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(BespokeIterEnd)
       X(BespokeIterGetKey)
       X(BespokeIterGetVal)
+      X(IterGetKeyArr)
+      X(IterGetValArr)
       X(LdMonotypeDictTombstones)
       X(LdMonotypeDictKey)
       X(LdMonotypeDictVal)

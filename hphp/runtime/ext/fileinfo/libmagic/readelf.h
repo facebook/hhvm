@@ -31,8 +31,7 @@
  * non-elf hosts to determine if an elf binary is stripped.
  * Note: cobbled from the linux header file, with modifications
  */
-#ifndef __fake_elf_h__
-#define  __fake_elf_h__
+#pragma once
 
 #include <stdint.h>
 
@@ -321,5 +320,3 @@ typedef struct {
 #define  AV_386_SSSE3    0x00400000
 #define  AV_386_SSE4_1    0x00800000
 #define  AV_386_SSE4_2    0x01000000
-
-#endif

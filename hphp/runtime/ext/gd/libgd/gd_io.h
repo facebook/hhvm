@@ -1,5 +1,4 @@
-#ifndef GD_IO_H
-#define GD_IO_H 1
+#pragma once
 
 #include <stdio.h>
 
@@ -40,5 +39,3 @@ int gdGetInt(int *result, gdIOCtx *ctx);
 
 int gdSeek(gdIOCtx *ctx, const int);
 long gdTell(gdIOCtx *ctx);
-
-#endif

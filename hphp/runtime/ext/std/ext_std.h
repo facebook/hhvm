@@ -1,5 +1,4 @@
-#ifndef HPHP_EXT_STD_H
-#define HPHP_EXT_STD_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -75,5 +74,3 @@ struct StandardExtension final : Extension {
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-
-#endif // HPHP_EXT_STD_H

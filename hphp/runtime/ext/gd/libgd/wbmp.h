@@ -9,8 +9,7 @@
 **
 ** Header file
 */
-#ifndef __WBMP_H
-#define __WBMP_H  1
+#pragma once
 
 /* WBMP struct
 ** -----------
@@ -42,5 +41,3 @@ int     readwbmp( int (*getin)(void *in), void *in, Wbmp **wbmp );
 int   writewbmp( Wbmp *wbmp, void (*putout)( int c, void *out), void *out);
 void    freewbmp( Wbmp *wbmp );
 void    printwbmp( Wbmp *wbmp );
-
-#endif

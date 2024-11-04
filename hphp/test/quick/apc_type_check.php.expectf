@@ -1,0 +1,16 @@
+string(36) "apc_type_check_run_id exists?: false"
+string(13) "Stored to apc"
+object(A) (2) {
+  ["86reified_prop"]=>
+  vec(1) {
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+  ["x"]=>
+  int(1)
+}
+string(35) "apc_type_check_run_id exists?: true"
+
+Catchable fatal error: Property 'A::x' upper-bounded by type string, int assigned in %s

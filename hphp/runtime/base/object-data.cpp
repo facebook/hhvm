@@ -57,7 +57,6 @@
 #include <vector>
 
 namespace HPHP {
-
 //////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(runtime);
@@ -85,13 +84,17 @@ void verifyTypeHint(const Class* thisCls,
 ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
   if (Cfg::Eval::CheckPropTypeHints <= 0) return;
-  if (!prop || prop->typeConstraints.main().isMixedResolved()) return;
-  raise_property_typehint_unset_error(
-    prop->cls,
-    prop->name,
-    prop->typeConstraints.main().isSoft(),
-    prop->typeConstraints.main().isUpperBound()
-  );
+  if (!prop) return;
+  for (auto const& tc : prop->typeConstraints.range()) {
+    if (!tc.isMixedResolved()) {
+      raise_property_typehint_unset_error(
+        prop->cls,
+        prop->name,
+        tc.isSoft(),
+        tc.isUpperBound()
+      );
+    }
+  }
 }
 
 }
@@ -126,8 +129,6 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
 
   // If we're not hard enforcing, then the prop might contain anything.
   if (Cfg::Eval::CheckPropTypeHints <= 2) return true;
-  if (!propDecl.typeConstraints.main().isCheckable() ||
-      propDecl.typeConstraints.main().isSoft()) return true;
   if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
     return true;
   }

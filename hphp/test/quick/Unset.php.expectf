@@ -1,0 +1,14 @@
+::
+::
+::
+::
+::
+::
+:1:
+:1:
+:1:
+::
+::
+::
+
+Catchable fatal error: Unsetting property 'A::mynum' with type annotation in %shphp/test/quick/Unset.php on line 41

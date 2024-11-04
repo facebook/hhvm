@@ -175,22 +175,21 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
                                                const Class::Prop& prop) const {
   assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val.tv()));
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (!tc.isCheckable()) continue;
+    if (UNLIKELY(type(val) == KindOfUninit)) {
+      if ((prop.attrs & AttrLateInit) || tc.isMixedResolved()) continue;
+      raise_property_typehint_unset_error(
+        prop.cls,
+        prop.name,
+        tc.isSoft(),
+        tc.isUpperBound()
+      );
+      return;
+    }
 
-  auto const& tc = prop.typeConstraints.main();
-  if (!tc.isCheckable()) return;
-
-  if (UNLIKELY(type(val) == KindOfUninit)) {
-    if ((prop.attrs & AttrLateInit) || tc.isMixedResolved()) return;
-    raise_property_typehint_unset_error(
-      prop.cls,
-      prop.name,
-      tc.isSoft(),
-      tc.isUpperBound()
-    );
-    return;
+    tc.verifyProperty(val, m_cls, prop.cls, prop.name);
   }
-
-  tc.verifyProperty(val, m_cls, prop.cls, prop.name);
 
   if (debug && RuntimeOption::RepoAuthoritative) {
     // The fact that uninitialized LateInit props are uninit isn't

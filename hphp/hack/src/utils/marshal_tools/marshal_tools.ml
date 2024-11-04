@@ -107,11 +107,10 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let ( >>= ) a f = f a
 
   let rec write fd ~buffer ~offset ~size =
-    match Poll.wait_fd_write_non_intr ~timeout_ms:None fd with
-    | Error flags -> raise (Poll.Poll_exception flags)
-    | Ok `Timeout -> 0
-    | Ok `Ok ->
-      (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.write call can also be interrupted. If the write
+    match Sys_utils.select_non_intr [] [fd] [] (-1.) with
+    | (_, [], _) -> 0
+    | _ ->
+      (* Sys_utils.select_non_intr handles EINTR, but the Unix.write call can also be interrupted. If the write
        * is interrupted before any bytes are written, the call fails with EINTR. Otherwise, the call
        * succeeds and returns the number of bytes written.
        *)
@@ -128,11 +127,10 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
    * preamble and one or more for the data). Any read after the first might block.
    *)
   let rec read fd ~buffer ~offset ~size =
-    match Poll.wait_fd_read_non_intr ~timeout_ms:None fd with
-    | Error flags -> raise (Poll.Poll_exception flags)
-    | Ok `Timeout -> 0
-    | Ok `Ok ->
-      (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.read call can also be interrupted. If the read
+    match Sys_utils.select_non_intr [fd] [] [] (-1.) with
+    | ([], _, _) -> 0
+    | _ ->
+      (* Sys_utils.select_non_intr handles EINTR, but the Unix.read call can also be interrupted. If the read
        * is interrupted before any bytes are read, the call fails with EINTR. Otherwise, the call
        * succeeds and returns the number of bytes read.
        *)

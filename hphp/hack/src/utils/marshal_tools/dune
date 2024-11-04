@@ -3,7 +3,7 @@
  (wrapped false)
  (modules marshal_tools)
  (libraries
-  poll
+  sys_utils
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

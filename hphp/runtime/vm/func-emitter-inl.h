@@ -161,8 +161,8 @@ inline void FuncEmitter::freeIterator(Id id) {
   assertx(id == m_nextFreeIterator);
 }
 
-inline void FuncEmitter::appendParam(const StringData* name_2,
-                                     const ParamInfo& info) {
+inline void FuncEmitter::appendParam(
+  const StringData* name_2, const Func::ParamInfo& info) {
   allocVarId(name_2);
   params.push_back(info);
 }

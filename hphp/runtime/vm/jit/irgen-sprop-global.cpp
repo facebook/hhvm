@@ -68,7 +68,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   auto knownType = TCell;
   if (Cfg::Eval::CheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
+    knownType = typeFromPropTC(prop.typeConstraints.main(), cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -169,8 +169,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   return {
     checkedAddr,
     knownType,
-    &prop.typeConstraint,
-    &prop.ubs,
+    &prop.typeConstraints,
     slot,
   };
 
@@ -233,7 +232,6 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     propAddr,
     knownType,
     nullptr,
-    nullptr,
     kInvalidSlot
   };
 }
@@ -267,12 +265,11 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
   const LdClsPropOptions opts { op, true, true, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
-  if (lookup.tc) {
+  if (lookup.typeConstraints) {
     value = verifyPropType(
       env,
       ssaCls,
-      lookup.tc,
-      lookup.ubs,
+      lookup.typeConstraints,
       lookup.slot,
       value,
       ssaPropName,
@@ -309,12 +306,11 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
   auto const lhs = gen(env, LdMem, lookup.knownType, lookup.propPtr);
 
   auto const finish = [&] (SSATmp* value) {
-    if (lookup.tc) {
+    if (lookup.typeConstraints) {
       value = verifyPropType(
         env,
         ssaCls,
-        lookup.tc,
-        lookup.ubs,
+        lookup.typeConstraints,
         lookup.slot,
         value,
         ssaPropName,
@@ -392,12 +388,11 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
   assertx(result->isA(TUncounted));
   assertx(!result->type().maybe(TClsMeth));
 
-  if (lookup.tc) {
+  if (lookup.typeConstraints) {
     verifyPropType(
       env,
       ssaCls,
-      lookup.tc,
-      lookup.ubs,
+      lookup.typeConstraints,
       lookup.slot,
       result,
       ssaPropName,
@@ -528,8 +523,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         val = verifyPropType(
           env,
           cns(env, ctx),
-          &prop.typeConstraint,
-          &prop.ubs,
+          &prop.typeConstraints,
           slot,
           val,
           cns(env, propName),
@@ -561,8 +555,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         val = verifyPropType(
           env,
           cls,
-          &prop.typeConstraint,
-          &prop.ubs,
+          &prop.typeConstraints,
           slot,
           val,
           cns(env, propName),

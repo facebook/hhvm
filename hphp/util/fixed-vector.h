@@ -49,8 +49,30 @@ struct FixedVector {
    */
   explicit FixedVector() {}
 
-  FixedVector(const FixedVector& fv) = delete;
-  FixedVector& operator=(const FixedVector&) = delete;
+  FixedVector(const FixedVector& fv) {
+    auto const neededSize = fv.size();
+    auto const ptr = neededSize > 0 ?
+      std::allocator_traits<Allocator>::allocate(m_impl, neededSize) :
+      nullptr;
+    size_t i = 0;
+    try {
+      for (; i < neededSize; ++i) {
+        std::allocator_traits<Allocator>::construct(
+          m_impl,
+          &ptr[i],
+          fv[i]
+        );
+      }
+    } catch (...) {
+      for (size_t j = 0; j < i; ++j) {
+        std::allocator_traits<Allocator>::destroy(m_impl, &ptr[j]);
+      }
+      std::allocator_traits<Allocator>::deallocate(m_impl, ptr, neededSize);
+      throw;
+    }
+    assert(i == neededSize);
+    m_impl.m_sp.set(neededSize, ptr);
+  }
 
   /*
    * Create a FixedVector using the supplied std::vector as a starting
@@ -63,17 +85,20 @@ struct FixedVector {
     move(std::move(sourceVec));
   }
 
-  FixedVector(FixedVector<T>&& fv) {
+  FixedVector(FixedVector&& fv) noexcept {
     swap(fv);
   }
 
-  FixedVector& operator=(FixedVector<T, Alloc>&& fv)
-  {
+  FixedVector& operator=(FixedVector&& fv) {
     swap(fv);
     return *this;
   }
 
   ~FixedVector() {
+    clear();
+  }
+
+  void clear() {
     T* p = m_impl.m_sp.ptr();
     for (uint32_t i = 0, sz = size(); i < sz; ++i) {
       std::allocator_traits<Allocator>::destroy(m_impl, &p[i]);
@@ -118,6 +143,10 @@ struct FixedVector {
 
   void swap(FixedVector& fv) {
     std::swap(m_impl, fv.m_impl);
+  }
+
+  static constexpr size_t implOff() {
+    return offsetof(FixedVector, m_impl);
   }
 
 private:

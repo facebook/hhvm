@@ -450,11 +450,11 @@ inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
 }
 
 inline const TypeConstraint& Class::declPropTypeConstraint(Slot index) const {
-  return m_declProperties[index].typeConstraint;
+  return m_declProperties[index].typeConstraints.main();
 }
 
 inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
-  return m_staticProperties[index].typeConstraint;
+  return m_staticProperties[index].typeConstraints.main();
 }
 
 inline bool Class::hasDeepInitProps() const {
@@ -810,8 +810,8 @@ inline Class* Class::lookup(const StringData* name) {
  *         will also load cls. see Class::avail()
  *     For function translations, these are only invalidated when the unit
  *         they are defined in changes. Therefore, we'd need to ensure that
- *         all classes loaded as a result of loading cls are contained inside 
- *         the unit. 
+ *         all classes loaded as a result of loading cls are contained inside
+ *         the unit.
  *     As a conservative approximation of this, we are currently just checking
  *     if ctx is a subtype of cls, but we can certainly do better.
  */

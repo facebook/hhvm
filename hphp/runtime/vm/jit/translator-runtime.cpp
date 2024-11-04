@@ -225,7 +225,7 @@ void VerifyParamTypeCls(ObjectData* obj,
 void VerifyParamTypeCallable(TypedValue value, const Func* func,
                              int32_t paramId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    auto const& tc = func->params()[paramId].typeConstraint;
+    auto const& tc = func->params()[paramId].typeConstraints.main();
     assertx(tc.isCallable());
     VerifyParamTypeFail(value, nullptr, func, paramId, &tc);
   }
@@ -266,8 +266,8 @@ void VerifyRetTypeCls(ObjectData* obj,
 void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
     auto const& tc = retId == TypeConstraint::ReturnId
-      ? func->returnTypeConstraint()
-      : func->params()[retId].typeConstraint;
+      ? func->returnTypeConstraints().main()
+      : func->params()[retId].typeConstraints.main();
     assertx(tc.isCallable());
     VerifyRetTypeFail(value, nullptr, func, retId, &tc);
   }

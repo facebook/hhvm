@@ -448,6 +448,45 @@ void addConstant(TranslationState& ts,
                       isAbstract);
 }
 
+TypeIntersectionConstraint upperBoundsHelper(
+  const UpperBoundMap& ubs,
+  const UpperBoundMap& classUbs,
+  const TParamNameVec& shadowedTParams,
+  const TypeConstraint& tc,
+  bool hasReifiedGenerics
+) {
+  auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
+  if (currUBs.size() != 1 || hasReifiedGenerics) {
+    currUBs.emplace(currUBs.begin(), tc);
+  }
+  assertx(!currUBs.empty());
+  return TypeIntersectionConstraint(std::move(currUBs));
+}
+
+template <bool checkPce=false>
+std::pair<bool, TypeIntersectionConstraint> upperBoundsHelper(
+  TranslationState& ts,
+  const UpperBoundMap& ubs,
+  const UpperBoundMap& classUbs,
+  const TParamNameVec& shadowedTParams,
+  const TypeConstraint& tc,
+  const UserAttributeMap& userAttrs
+) {
+  auto const hasReifiedGenerics = [&]() {
+    if (userAttrs.find(s___Reified.get()) != userAttrs.end()) return true;
+    if (checkPce) {
+      return ts.pce->userAttributes().find(s___Reified.get()) !=
+             ts.pce->userAttributes().end();
+    }
+    return false;
+  }();
+
+  return std::make_pair(
+    hasReifiedGenerics,
+    upperBoundsHelper(ubs, classUbs, shadowedTParams, tc, hasReifiedGenerics)
+  );
+}
+
 void translateClassConstant(TranslationState& ts, const hhbc::Constant& c) {
   auto const name = toStaticString(c.name._0);
   auto const tv = maybe(c.value);
@@ -491,18 +530,11 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
 
   auto [userTy, typeConstraint] = translateTypeInfo(p.type_info);
 
-  auto const hasReifiedGenerics =
-    userAttributes.find(s___Reified.get()) != userAttributes.end();
-
+   auto const hasReifiedGenerics =
+       userAttributes.find(s___Reified.get()) != userAttributes.end();
   // T112889109: Passing in {} as the third argument here exposes a gcc compiler bug.
-  auto ub = getRelevantUpperBounds(typeConstraint, classUbs, classUbs, {});
-
-  auto needsMultiUBs = false;
-  if (ub.size() == 1 && !hasReifiedGenerics) {
-    typeConstraint = ub[0];
-  } else if (!ub.empty()) {
-    needsMultiUBs = true;
-  }
+  auto tic = upperBoundsHelper(
+      classUbs, classUbs, {}, typeConstraint, hasReifiedGenerics);
 
   auto const tv = maybeOrElse(p.initial_value,
     [&](hhbc::TypedValue& s) {
@@ -515,13 +547,12 @@ void translateProperty(TranslationState& ts, const hhbc::Property& p, const Uppe
   auto const name = toStaticString(p.name._0);
   ITRACE(2, "Translating property {} {}\n", name, tv.pretty());
 
+  assertx(!tic.isTop());
   ts.pce->addProperty(
     name,
     p.flags,
     userTy,
-    typeConstraint,
-    needsMultiUBs
-      ? std::move(ub) : std::vector<TypeConstraint>(),
+    std::move(tic),
     heredoc,
     &tv,
     HPHP::RepoAuthType{},
@@ -995,54 +1026,10 @@ void translateInstruction(TranslationState& ts, const Instruct& i) {
 
 void translateDefaultParameterValue(TranslationState& ts,
                                     const hhbc::DefaultValue& dv,
-                                    FuncEmitter::ParamInfo& param) {
+                                    Func::ParamInfo& param) {
   auto const str = toStaticString(dv.expr);
   ts.labelMap[dv.label].dvInits.push_back(ts.fe->params.size());
   parse_default_value(param, str);
-}
-
-void upperBoundsHelper(TranslationState& ts,
-                       const UpperBoundMap& ubs,
-                       const UpperBoundMap& classUbs,
-                       const TParamNameVec& shadowedTParams,
-                       std::vector<TypeConstraint>& upperBounds,
-                       TypeConstraint& tc,
-                       bool hasReifiedGenerics,
-                       bool isParam) {
-  auto currUBs = getRelevantUpperBounds(tc, ubs, classUbs, shadowedTParams);
-  if (currUBs.size() == 1 && !hasReifiedGenerics) {
-    tc = currUBs[0];
-  } else if (!currUBs.empty()) {
-    upperBounds = std::move(currUBs);
-    if (isParam) {
-      ts.fe->hasParamsWithMultiUBs = true;
-    } else {
-      ts.fe->hasReturnWithMultiUBs = true;
-    }
-  }
-}
-
-template <bool checkPce=false>
-bool upperBoundsHelper(TranslationState& ts,
-                       const UpperBoundMap& ubs,
-                       const UpperBoundMap& classUbs,
-                       const TParamNameVec& shadowedTParams,
-                       std::vector<TypeConstraint>& upperBounds,
-                       TypeConstraint& tc,
-                       const UserAttributeMap& userAttrs,
-                       bool isParam) {
-  auto const hasReifiedGenerics = [&]() {
-    if (userAttrs.find(s___Reified.get()) != userAttrs.end()) return true;
-    if (checkPce) {
-      return ts.pce->userAttributes().find(s___Reified.get()) !=
-             ts.pce->userAttributes().end();
-    }
-    return false;
-  }();
-
-  upperBoundsHelper(ts, ubs, classUbs, shadowedTParams,
-                    upperBounds, tc, hasReifiedGenerics, isParam);
-  return hasReifiedGenerics;
 }
 
 void translateParameter(TranslationState& ts,
@@ -1052,7 +1039,7 @@ void translateParameter(TranslationState& ts,
                         bool hasReifiedGenerics,
                         const hhbc::ParamEntry& e) {
   auto& p = e.param;
-  FuncEmitter::ParamInfo param;
+  Func::ParamInfo param;
   translateUserAttributes(p.user_attributes, param.userAttributes);
   if (p.is_variadic) {
     assertx(ts.fe->attrs & AttrVariadicParam);
@@ -1061,17 +1048,18 @@ void translateParameter(TranslationState& ts,
   if (p.is_inout) param.setFlag(Func::ParamInfo::Flags::InOut);
   if (p.is_readonly) param.setFlag(Func::ParamInfo::Flags::Readonly);
   if (p.is_optional) param.setFlag(Func::ParamInfo::Flags::Optional);
-  std::tie(param.userType, param.typeConstraint)  = maybeOrElse(p.type_info,
+
+  TypeConstraint tc;
+  std::tie(param.userType, tc) =  maybeOrElse(p.type_info,
       [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
-  upperBoundsHelper(ts, ubs, classUbs, shadowedTParams, param.upperBounds,
-                    param.typeConstraint, hasReifiedGenerics, true);
-
+  param.typeConstraints = upperBoundsHelper(
+    ubs, classUbs, shadowedTParams, tc, hasReifiedGenerics);
+  assertx(!param.typeConstraints.isTop());
   auto const dv = maybe(e.dv);
   if (dv) translateDefaultParameterValue(ts, dv.value(), param);
   auto const name = toNamedLocalStaticString(p.name);
-
   ts.fe->appendParam(name, param);
 }
 
@@ -1084,7 +1072,6 @@ void translateFunctionBody(TranslationState& ts,
   ts.fe->isMemoizeWrapper = b.is_memoize_wrapper | b.is_memoize_wrapper_lsb;
   ts.fe->isMemoizeWrapperLSB = b.is_memoize_wrapper_lsb;
   ts.fe->setNumIterators(b.num_iters);
-
   auto params = range(b.repr.params);
   for (auto const& p : params) {
     translateParameter(ts, ubs, classUbs, shadowedTParams, hasReifiedGenerics, p);
@@ -1244,11 +1231,12 @@ void translateFunction(TranslationState& ts,
       [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
       [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
-  auto const hasReifiedGenerics =
-    upperBoundsHelper(ts, ubs, {}, {},ts.fe->retUpperBounds, retTypeInfo.second,
-                      userAttrs, false);
+  auto [hasReifiedGenerics, tic] =
+    upperBoundsHelper(ts, ubs, {}, {}, retTypeInfo.second, userAttrs);
+  assertx(!tic.isTop());
 
-  std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
+  ts.fe->retUserType = retTypeInfo.first;
+  ts.fe->retTypeConstraints = std::move(tic);
   ts.srcLoc = locationFromSpan(f.body.span);
   translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
   checkNative(ts);
@@ -1293,13 +1281,14 @@ void translateMethod(TranslationState& ts,
     [&](hhbc::TypeInfo& ti) {return translateTypeInfo(ti);},
     [&]() {return std::make_pair(nullptr, TypeConstraint{});});
 
-  auto const hasReifiedGenerics =
+  auto [hasReifiedGenerics, tic] =
     upperBoundsHelper<true>(ts, ubs, classUbs, shadowedTParams,
-                            ts.fe->retUpperBounds, retTypeInfo.second, userAttrs,
-                            false);
+        retTypeInfo.second, userAttrs);
 
+  assertx(!tic.isTop());
   ts.srcLoc = locationFromSpan(m.body.span);
-  std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
+  ts.fe->retUserType = retTypeInfo.first;
+  ts.fe->retTypeConstraints = std::move(tic);
   translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
   checkNative(ts);
 }

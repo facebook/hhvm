@@ -176,7 +176,7 @@ void fixup_default_values(T& state, FuncEmitter* fe) {
   }
 }
 
-void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str);
+void parse_default_value(Func::ParamInfo& param, const StringData* str);
 
 // Sets output on success; throws on failure.
 void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output);

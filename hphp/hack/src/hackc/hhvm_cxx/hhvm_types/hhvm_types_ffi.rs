@@ -82,7 +82,9 @@ pub mod ffi {
     #[derive(Debug, Copy, Clone, Hash, Serialize)]
     enum TypeConstraintFlags {
         NoFlags = 0x0,
-        Nullable = 0x1,
+        SingleTypeConstraint = 0x1,
+        Nullable = 0x2,
+        Union = 0x4,
         TypeVar = 0x8,
         Soft = 0x10,
         TypeConstant = 0x20,

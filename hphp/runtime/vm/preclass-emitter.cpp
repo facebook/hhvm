@@ -35,23 +35,23 @@ const StaticString s_SoftInternal("__SoftInternal");
 //=============================================================================
 // PreClassEmitter::Prop.
 
-PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
-                            const StringData* n,
-                            Attr attrs,
-                            const StringData* userType,
-                            const TypeConstraint& typeConstraint,
-                            const std::vector<TypeConstraint>& ubs,
-                            const StringData* docComment,
-                            const TypedValue* val,
-                            RepoAuthType repoAuthType,
-                            UserAttributeMap userAttributes)
+PreClassEmitter::Prop::Prop(
+  const PreClassEmitter* pce,
+  const StringData* n,
+  Attr attrs,
+  const StringData* userType,
+  TypeIntersectionConstraint&& typeConstraints,
+  const StringData* docComment,
+  const TypedValue* val,
+  RepoAuthType repoAuthType,
+  UserAttributeMap userAttributes
+)
   : m_name(n)
   , m_attrs(attrs)
   , m_userType(userType)
   , m_docComment(docComment)
   , m_repoAuthType(repoAuthType)
-  , m_typeConstraint(typeConstraint)
-  , m_ubs(ubs)
+  , m_typeConstraints(std::move(typeConstraints))
   , m_userAttributes(userAttributes)
 {
   memcpy(&m_val, val, sizeof(TypedValue));
@@ -110,15 +110,17 @@ bool PreClassEmitter::addMethod(FuncEmitter* method) {
   return true;
 }
 
-bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
-                                  const StringData* userType,
-                                  const TypeConstraint& typeConstraint,
-                                  const std::vector<TypeConstraint>& ubs,
-                                  const StringData* docComment,
-                                  const TypedValue* val,
-                                  RepoAuthType repoAuthType,
-                                  UserAttributeMap userAttributes) {
-  assertx(typeConstraint.validForProp());
+bool PreClassEmitter::addProperty(
+  const StringData* n,
+  Attr attrs,
+  const StringData* userType,
+  TypeIntersectionConstraint&& typeConstraints,
+  const StringData* docComment,
+  const TypedValue* val,
+  RepoAuthType repoAuthType,
+  UserAttributeMap userAttributes
+) {
+  assertx(typeConstraints.main().validForProp());
   PropMap::Builder::const_iterator it = m_propMap.find(n);
   if (it != m_propMap.end()) {
     return false;
@@ -128,8 +130,7 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
     n,
     attrs,
     userType,
-    typeConstraint,
-    ubs,
+    std::move(typeConstraints),
     docComment,
     val,
     repoAuthType,
@@ -304,12 +305,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     TypedValue tvInit;
     tvWriteUninit(tvInit);
 
-    propBuild.add(s_coeffectsProp.get(), PreClass::Prop(pc.get(),
+    propBuild.add(
+      s_coeffectsProp.get(),
+      PreClass::Prop(pc.get(),
       s_coeffectsProp.get(),
       AttrPrivate|AttrSystemInitialValue,
       staticEmptyString(),
-      TypeConstraint(),
-      {},
+      TypeIntersectionConstraint(TypeConstraint()),
       staticEmptyString(),
       tvInit,
       RepoAuthType{},
@@ -318,19 +320,22 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   }
   for (unsigned i = 0; i < m_propMap.size(); ++i) {
     const Prop& prop = m_propMap[i];
-    propBuild.add(prop.name(), PreClass::Prop(pc.get(),
-                                              prop.name(),
-                                              prop.attrs(),
-                                              prop.userType(),
-                                              prop.typeConstraint(),
-                                              VMTypeIntersectionConstraint(
-                                                prop.upperBounds()
-                                              ),
-                                              prop.docComment(),
-                                              prop.val(),
-                                              prop.repoAuthType(),
-                                              prop.userAttributes()));
+    assertx(!prop.typeConstraints().isTop());
+    propBuild.add(
+      prop.name(),
+      PreClass::Prop(
+        pc.get(),
+        prop.name(),
+        prop.attrs(),
+        prop.userType(),
+        TypeIntersectionConstraint(prop.typeConstraints()),
+        prop.docComment(),
+        prop.val(),
+        prop.repoAuthType(),
+        prop.userAttributes())
+    );
   }
+
   pc->m_properties.create(propBuild);
 
   PreClass::ConstMap::Builder constBuild;

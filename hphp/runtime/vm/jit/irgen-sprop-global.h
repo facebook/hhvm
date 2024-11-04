@@ -36,8 +36,6 @@ namespace HPHP {
 struct Class;
 struct StringData;
 struct TypeConstraint;
-template<typename T> struct TypeIntersectionConstraintT;
-using VMTypeIntersectionConstraint = TypeIntersectionConstraintT<VMCompactVector<TypeConstraint>>;
 
 namespace jit {
 
@@ -50,8 +48,7 @@ namespace irgen {
 struct ClsPropLookup {
   SSATmp* propPtr;
   Type knownType;
-  const TypeConstraint* tc;
-  const VMTypeIntersectionConstraint* ubs;
+  const TypeIntersectionConstraint* typeConstraints;
   Slot slot;
 };
 

@@ -85,7 +85,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     false,
     ReadonlyOp::Any
   );
-  assertx(lookup.tc->isInt());
+  assertx(lookup.typeConstraints->main().isInt());
   auto const sprop = lookup.propPtr;
   assertx(sprop);
 
@@ -186,9 +186,8 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
       auto const anyUnresolved = [&] {
         for (Slot slot = 0; slot < props.size(); ++slot) {
           auto const& prop = props[slot];
-          if (prop.typeConstraint.isUnresolved()) return true;
-          for (auto const& ub : prop.ubs.m_constraints) {
-            if (ub.isUnresolved()) return true;
+          for (auto const& tc : prop.typeConstraints.range()) {
+            if (tc.isUnresolved()) return true;
           }
         }
         return false;
@@ -207,9 +206,8 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
           continue;
         }
         auto const isAnyCheckable = [&] {
-          if (prop.typeConstraint.isCheckable()) return true;
-          for (auto const& ub : prop.ubs.m_constraints) {
-            if (ub.isCheckable()) return true;
+          for (auto const& tc : prop.typeConstraints.range()) {
+            if (tc.isCheckable()) return true;
           }
           return false;
         }();
@@ -221,8 +219,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         verifyPropType(
           env,
           cns(env, cls),
-          &prop.typeConstraint,
-          &prop.ubs,
+          &prop.typeConstraints,
           slot,
           cns(env, tv),
           cns(env, makeStaticString(prop.name)),

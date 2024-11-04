@@ -174,20 +174,18 @@ struct Param {
   BlockId dvEntryPoint;
 
   /*
-   * Information about the parameter's typehint, if any.
-   *
-   * NOTE: this is represented in the repo as a string type name and
-   * some TypeConstraint::Flags.
-   */
-  TypeConstraint typeConstraint;
-
-  /*
    * User-visible version of the type constraint as a string.
    * Propagated for reflection.
    */
   LSString userTypeConstraint;
 
-  TypeIntersectionConstraint upperBounds;
+  /*
+   * Information about the parameter's typehint and upperbounds, if any.
+   *
+   * NOTE: this is represented in the repo as a string type name and
+   * some TypeConstraint::Flags.
+   */
+  TypeIntersectionConstraint typeConstraints;
 
   /*
    * Each parameter of a func can have arbitrary user attributes.
@@ -418,26 +416,20 @@ struct Func : FuncBase {
   bool isReadonlyThis : 1;
 
   /*
-   * Type parameter upper bounds. May be enforced and used for optimizations.
-   */
-  bool hasParamsWithMultiUBs : 1;
-  bool hasReturnWithMultiUBs : 1;
-
-  /*
    * Method was originally declared in a trait with Module Level Trait semantics
    * (e.g. the <<__ModuleLevelTrait>> attribute was specified on the original trait).
    */
   bool fromModuleLevelTrait : 1;
   bool requiresFromOriginalModule : 1;
 
-  TypeIntersectionConstraint returnUBs;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type
-   * constraint via the VerifyRetType* instructions.
+   * constraint via the VerifyRetType* instructions. This field also includes
+   * any upperbounds computed for the return type.
    */
-  TypeConstraint retTypeConstraint;
+  TypeIntersectionConstraint retTypeConstraints;
 
   /*
    * Static coeffects in bit encoding
@@ -502,8 +494,7 @@ struct Prop {
   LSString docComment;
 
   LSString userType;
-  TypeConstraint typeConstraint;
-  TypeIntersectionConstraint ubs;
+  TypeIntersectionConstraint typeConstraints;
 
   /*
    * The default value of the property, for properties with scalar

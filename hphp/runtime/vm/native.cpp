@@ -189,7 +189,7 @@ void callFuncImpl(const Func* const func,
                   TypedValue& ret) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
-  auto retType = func->returnTypeConstraint().asSystemlibType();
+  auto retType = func->returnTypeConstraints().main().asSystemlibType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
@@ -311,7 +311,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
 
     auto const tv = args(i);
 
-    auto tc = pi.typeConstraint;
+    auto tc = pi.typeConstraints.main();
     auto targetType = pi.builtinType();
 
     if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
@@ -647,7 +647,7 @@ static bool tcCheckNativeIO(
     return checkDT(tv->m_type);
   }
 
-  auto const& tc = pinfo.typeConstraint;
+  auto const& tc = pinfo.typeConstraints.main();
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
       tc.isArrayLike() || tc.isClassname() || tc.isTypeVar()) {
@@ -714,7 +714,7 @@ const char* checkTypeFunc(const NativeSig& sig,
       continue;
     }
 
-    if (!tcCheckNative(pInfo.typeConstraint, argTy)) {
+    if (!tcCheckNative(pInfo.typeConstraints.main(), argTy)) {
       return kInvalidArgTypeMessage;
     }
   }

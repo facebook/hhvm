@@ -207,7 +207,7 @@ bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
     return false;
   }
 
-  auto const& tc = func->retTypeConstraint;
+  auto const& tc = func->retTypeConstraints.main();
   auto const message = Native::checkTypeFunc(info.sig, tc, func);
 
   if (message) {

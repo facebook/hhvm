@@ -2159,18 +2159,18 @@ std::vector<TypeConstraint> parse_type_constraint_union(AsmState& as) {
 /*
  * type-info       : maybe-string-literal type-constraint
  */
-std::tuple<const StringData*, TypeConstraint, std::vector<TypeConstraint>>
+std::tuple<const StringData*, std::vector<TypeConstraint>>
 parse_type_info(AsmState& as) {
   auto const userType = read_maybe_litstr(as);
-  auto const typeConstraint = parse_type_constraint(as);
-  std::vector<TypeConstraint> ubs;
+
+  std::vector<TypeConstraint> tcs;
   while (true) {
+    tcs.emplace_back(parse_type_constraint(as));
     as.in.skipWhitespace();
     if (as.in.peek() != ',') break;
     as.in.getc();
-    ubs.emplace_back(parse_type_constraint(as));
   }
-  return {userType, typeConstraint, ubs};
+  return {userType, std::move(tcs)};
 }
 
 /*
@@ -2201,7 +2201,7 @@ void parse_parameter_list(AsmState& as) {
   bool seenVariadic = false;
 
   for (;;) {
-    FuncEmitter::ParamInfo param;
+    Func::ParamInfo param;
 
     as.in.skipWhitespace();
     int ch = as.in.peek();
@@ -2235,11 +2235,11 @@ void parse_parameter_list(AsmState& as) {
       param.setFlag(Func::ParamInfo::Flags::Readonly);
     }
 
-    auto [userType, tc, ubs] = parse_type_info(as);
+    auto [userType, typeConstraints] = parse_type_info(as);
     param.userType = userType;
-    param.typeConstraint = tc;
-    param.upperBounds = std::move(ubs);
-    if (!param.upperBounds.empty()) as.fe->hasParamsWithMultiUBs = true;
+    param.typeConstraints = TypeIntersectionConstraint(
+        std::move(typeConstraints)
+    );
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2357,7 +2357,7 @@ void parse_function(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto [userType, tc, ubs] = parse_type_info(as);
+  auto [userType, typeConstraints] = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".function must have a name");
@@ -2370,10 +2370,9 @@ void parse_function(AsmState& as) {
   as.fe->init(line0, line1, attrs, nullptr);
 
   as.fe->retUserType = userType;
-  as.fe->retTypeConstraint = tc;
-  as.fe->retUpperBounds = std::move(ubs);
-  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.empty();
-
+  as.fe->retTypeConstraints = TypeIntersectionConstraint(
+    std::move(typeConstraints)
+  );
   as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
@@ -2407,7 +2406,7 @@ void parse_method(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto [userType, tc, ubs] = parse_type_info(as);
+  auto [userType, typeConstraints] = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".method requires a method name");
@@ -2423,10 +2422,9 @@ void parse_method(AsmState& as) {
   as.fe->init(line0, line1, attrs, nullptr);
 
   as.fe->retUserType = userType;
-  as.fe->retTypeConstraint = tc;
-  as.fe->retUpperBounds = std::move(ubs);
-  as.fe->hasReturnWithMultiUBs = !as.fe->retUpperBounds.empty();
-
+  as.fe->retTypeConstraints = TypeIntersectionConstraint(
+    std::move(typeConstraints)
+  );
   as.fe->userAttributes = userAttrs;
 
   parse_parameter_list(as);
@@ -2509,7 +2507,7 @@ void parse_property(AsmState& as) {
 
   auto const heredoc = makeDocComment(parse_maybe_long_string(as));
 
-  auto [userType, tc, ubs] = parse_type_info(as);
+  auto [userType, typeConstraints] = parse_type_info(as);
 
   std::string name;
   as.in.skipSpaceTab();
@@ -2524,8 +2522,7 @@ void parse_property(AsmState& as) {
       makeStaticString(name),
       attrs,
       userType ? userType : staticEmptyString(),
-      tc,
-      std::move(ubs),
+      TypeIntersectionConstraint(std::move(typeConstraints)),
       heredoc,
       &tvInit,
       RepoAuthType{},
@@ -3339,7 +3336,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   return ue;
 }
 
-void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
+void parse_default_value(Func::ParamInfo& param, const StringData* str) {
   param.phpCode = str;
   TypedValue tv;
   tvWriteUninit(tv);
@@ -3353,7 +3350,7 @@ void parse_default_value(FuncEmitter::ParamInfo& param, const StringData* str) {
   } else if (str->size() == 5 && !tstrcmp("false", str->data())) {
     tv = make_tv<KindOfBoolean>(false);
   }
-  auto utype = param.typeConstraint.underlyingDataType();
+  auto utype = param.typeConstraints.main().underlyingDataType();
   if (tv.m_type == KindOfUninit &&
       (!utype || *utype == KindOfInt64 || *utype == KindOfDouble)) {
     int64_t ival;

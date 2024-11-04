@@ -957,18 +957,13 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 
   auto const addType =
     [&] (KeyI::UnresolvedTypes& u,
-         const TypeConstraint& tc,
-         const php::Class* cls = nullptr,
-         const TypeIntersectionConstraint* ubs = nullptr) {
+         const folly::Range<const TypeConstraint*>& tcs,
+         const php::Class* cls = nullptr) {
     // Skip names which match the current class name. We don't need to
     // report these as it's implicit.
-    if (tc.isUnresolved() && (!cls || !cls->name->tsame(tc.typeName()))) {
-      u.emplace(tc.typeName());
-    }
-    if (!ubs) return;
-    for (auto const& ub : ubs->m_constraints) {
-      if (ub.isUnresolved() && (!cls || !cls->name->tsame(ub.typeName()))) {
-        u.emplace(ub.typeName());
+    for (auto const& tc : tcs) {
+      if (tc.isUnresolved() && (!cls || !cls->name->tsame(tc.typeName()))) {
+        u.emplace(tc.typeName());
       }
     }
   };
@@ -977,9 +972,9 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
                                  const php::Func& f,
                                  const php::Class* cls = nullptr) {
     for (auto const& p : f.params) {
-      addType(u, p.typeConstraint, cls, &p.upperBounds);
+      addType(u, p.typeConstraints.range(), cls);
     }
-    addType(u, f.retTypeConstraint, cls, &f.returnUBs);
+    addType(u, f.retTypeConstraints.range(), cls);
   };
 
   if (parsed.unit) {
@@ -1025,7 +1020,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       has86init |= is_86init_func(*m);
     }
     for (auto const& p : c->properties) {
-      addType(types, p.typeConstraint, c.get(), &p.ubs);
+      addType(types, p.typeConstraints.range(), c.get());
     }
 
     auto const d = Index::Input::makeDeps(*c);
@@ -1060,7 +1055,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       assertx(!is_closure(*c));
       auto tc = c->enumBaseTy;
       assertx(!tc.isNullable());
-      addType(types, tc, nullptr);
+      addType(types, folly::Range<const TypeConstraint*>(&tc, &tc + 1), nullptr);
       if (tc.isMixed()) tc.setType(AnnotType::ArrayKey);
       typeMapping.emplace(TypeMapping{c->name, tc, false, true});
     }

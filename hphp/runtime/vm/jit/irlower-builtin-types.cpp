@@ -169,14 +169,9 @@ static TypedValue verifyPropAll(const Class* cls, Slot slot, TypedValue val) {
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->declProperties()[slot];
-  auto const& tc = prop.typeConstraint;
-  if (tc.isCheckable()) {
-    val = verifyPropImpl(cls, slot, &tc, val);
-    assertx(tvIsPlausible(val));
-  }
-  for (auto const& ub : prop.ubs.m_constraints) {
-    if (ub.isCheckable()) {
-      val = verifyPropImpl(cls, slot, &ub, val);
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      val = verifyPropImpl(cls, slot, &tc, val);
       assertx(tvIsPlausible(val));
     }
   }
@@ -203,14 +198,9 @@ static TypedValue verifySPropAll(const Class* cls, Slot slot, TypedValue val) {
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));
   auto const& prop = cls->staticProperties()[slot];
-  auto const& tc = prop.typeConstraint;
-  if (tc.isCheckable()) {
-    val = verifySPropImpl(cls, slot, &tc, val);
-    assertx(tvIsPlausible(val));
-  }
-  for (auto const& ub : prop.ubs.m_constraints) {
-    if (ub.isCheckable()) {
-      val = verifySPropImpl(cls, slot, &ub, val);
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      val = verifySPropImpl(cls, slot, &tc, val);
       assertx(tvIsPlausible(val));
     }
   }

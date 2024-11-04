@@ -67,8 +67,8 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.
     for (auto const& prop : cls->declProperties()) {
-      always_assert(!prop.typeConstraint.isCheckable());
-      always_assert(!(prop.attrs & AttrLateInit));
+        always_assert(!prop.typeConstraints.main().isCheckable());
+        always_assert(!(prop.attrs & AttrLateInit));
     }
   }
 

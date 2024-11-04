@@ -326,6 +326,7 @@ struct TypeConstraint {
    * Predicates for various properties of the type constraint.
    */
   bool isNullable() const { return contains(m_flags, TypeConstraintFlags::Nullable); }
+  bool isSingleTypeConstraint() const { return contains(m_flags, TypeConstraintFlags::SingleTypeConstraint); }
   bool isSoft()     const { return contains(m_flags, TypeConstraintFlags::Soft); }
   bool isTypeVar()  const { return contains(m_flags, TypeConstraintFlags::TypeVar); }
   bool isTypeConstant() const { return contains(m_flags, TypeConstraintFlags::TypeConstant); }
@@ -518,6 +519,10 @@ struct TypeConstraint {
     return maybeStringCompatible();
   }
 
+  static constexpr size_t flagsOff() {
+    return offsetof(TypeConstraint, m_flags);
+  }
+
   /**
    * Return the correct `DataType` that represents this type constraint as used
    * as a type within systemlib, specifically in the context of a `__Native`
@@ -630,6 +635,7 @@ private:
 };
 
 static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");
+static_assert(CheckSize<VMFixedVector<TypeConstraint>, use_lowptr ? 8 : 8>(), "");
 
 /// This is an iterator for TypeConstraint - see eachTypeConstraintInUnion().
 struct TcUnionPieceIterator {
@@ -680,61 +686,239 @@ inline TcUnionPieceView eachClassTypeConstraintInUnion(const TypeConstraint& tc)
   return TcUnionPieceView(tc, TcUnionPieceView::Kind::ClassesOnly);
 }
 
-/// TypeIntersectionConstraintT is generally used for upper-bounds. It's
-/// templated so we can have a common implementation with different vector
-/// representation (std::vector, TinyVector, VMCompactVector) based on need.
-template<typename VectorT>
-struct TypeIntersectionConstraintT {
-  VectorT m_constraints;
+/*
+ * TypeIntersectionConstraint is a class designed to efficiently manage a
+ * collection of type constraints. For cases with only one constraint, it
+ * optimizes storage by holding the constraint inline. When multiple
+ * constraints are present, it utilizes a FixedVector, which requires a
+ * predetermined size, to store them effectively.
+ */
+struct TypeIntersectionConstraint {
+  TypeIntersectionConstraint() = default;
 
-  TypeIntersectionConstraintT() = default;
-
-  explicit TypeIntersectionConstraintT(TypeConstraint tc) {
-    m_constraints.emplace_back(std::move(tc));
+  explicit TypeIntersectionConstraint(TypeConstraint&& tc) {
+    m_u.m_typeConstraint = std::move(tc);
+    m_u.m_typeConstraint.addFlags(TypeConstraintFlags::SingleTypeConstraint);
+    assertx(mainPtr());
   }
 
-  explicit TypeIntersectionConstraintT(
-      std::vector<TypeConstraint> constraints) {
-    for (auto& tc : constraints) {
-      m_constraints.emplace_back(std::move(tc));
+  explicit TypeIntersectionConstraint(
+    std::vector<TypeConstraint>&& constraints) {
+    if (constraints.size() == 1) {
+      auto& tc = constraints[0];
+      m_u.m_typeConstraint = std::move(tc);
+      m_u.m_typeConstraint.addFlags(TypeConstraintFlags::SingleTypeConstraint);
+      assertx(mainPtr());
+    } else {
+      m_u.m_constraints = std::move(constraints);
+    }
+  }
+
+  TypeIntersectionConstraint(const TypeIntersectionConstraint& other) {
+    if (!other.isTop()) {
+      if (other.isSimple()) {
+        auto tc = other.asSimple();
+        m_u.m_typeConstraint = std::move(tc);
+        m_u.m_typeConstraint.addFlags(TypeConstraintFlags::SingleTypeConstraint);
+      } else {
+        m_u.m_constraints = other.asVec();
+      }
+    }
+  }
+
+  TypeIntersectionConstraint& operator=(
+    const TypeIntersectionConstraint& other) {
+    if (this != &other) {
+      this->~TypeIntersectionConstraint();
+      new (this)TypeIntersectionConstraint(other);
+    }
+    return *this;
+  }
+
+  ~TypeIntersectionConstraint() {
+    if (!isSimple()) {
+      m_u.m_constraints.~FixedVector();
+    } else {
+      m_u.m_typeConstraint.~TypeConstraint();
     }
   }
 
   template<class SerDe>
   void serde(SerDe& sd) {
-    sd(m_constraints);
+    bool simple = false;
+    if constexpr (!SerDe::deserializing) {
+      simple = isSimple();
+    }
+    sd(simple);
+    if (simple) {
+      if constexpr (SerDe::deserializing) {
+        m_u.m_typeConstraint = TypeConstraint();
+      }
+      sd(m_u.m_typeConstraint);
+      assertx(mainPtr());
+    } else {
+      sd(m_u.m_constraints);
+      assertx(mainPtr());
+    }
   }
 
-  bool isTop() const { return m_constraints.empty(); }
-  bool isSimple() const { return m_constraints.size() == 1; }
+  std::string show() const {
+    if (isTop()) return "<empty>";
+    std::ostringstream os;
+    for (auto const& tc : range()) {
+      os << tc.debugName() << ",";
+    }
+    return os.str();
+  }
+
+  template<typename T>
+  static const TypeConstraint* mainPtr(const T& tcs) {
+    assertx(tcs.size() > 0);
+    const TypeConstraint* main = &tcs[0];
+    for (auto const& tc : tcs) {
+      if (!tc.isUpperBound()) {
+        assertx(main == &tc);
+      }
+    }
+    assertx(main);
+    return main;
+  }
+
+  static const TypeConstraint& main(
+    const std::vector<TypeConstraint>& tcs) {
+    return *(TypeIntersectionConstraint::mainPtr(tcs));
+  }
+
+  template<typename T>
+  static std::vector<TypeConstraint> ubs(const T& tcs) {
+    std::vector<TypeConstraint> ubs;
+    if (tcs.size() > 1) {
+      for (auto const& tc : tcs) {
+        if (tc.isUpperBound()) {
+          ubs.emplace_back(tc);
+        }
+      }
+    }
+    return ubs;
+  }
+
+  /*
+   * This function serves as a temporary measure until all instances of
+   * TypeConstraint are updated to consider both the main type constraint and
+   * the upper bounds. The function includes asserts to verify that there is
+   * precisely one main constraint.
+   */
+  const TypeConstraint& main() const {
+    assertx(!isTop());
+    return *mainPtr();
+  }
+
+  const TypeConstraint* mainPtr() const {
+    if (isSimple()) {
+      return &m_u.m_typeConstraint;
+    }
+    return TypeIntersectionConstraint::mainPtr(m_u.m_constraints);
+  }
+
+  std::vector<TypeConstraint> ubs() const {
+    if (isTop() || isSimple()) {
+      // Keep the current semantics where the main type constraint and the
+      // upperbounds are treated separately.
+      return std::vector<TypeConstraint>();
+    }
+    return TypeIntersectionConstraint::ubs(m_u.m_constraints);
+  }
+
+  bool isTop() const {
+    return !isSimple() && m_u.m_constraints.empty();
+  }
+
+  bool isSimple() const {
+    return contains(
+      m_u.m_typeConstraint.flags(),
+      TypeConstraintFlags::SingleTypeConstraint
+    );
+  }
 
   const TypeConstraint& asSimple() const {
     assertx(isSimple());
-    return m_constraints[0];
-  }
-
-  TypeConstraint& asSimpleMut() {
-    assertx(isSimple());
-    return m_constraints[0];
-  }
-
-  void add(TypeConstraint tc) {
-    m_constraints.emplace_back(std::move(tc));
+    return m_u.m_typeConstraint;
   }
 
   std::vector<TypeConstraint> asVec() const {
-    auto constraints = std::vector<TypeConstraint>(m_constraints.size());
-    for (auto const& c : m_constraints) {
-      constraints.emplace_back(c);
+    std::vector<TypeConstraint> constraints;
+    if (isSimple()) {
+      constraints.emplace_back(asSimple());
+    } else {
+      constraints.reserve(m_u.m_constraints.size());
+      for (auto const& c : m_u.m_constraints) {
+        constraints.emplace_back(c);
+      }
     }
+    assertx(!constraints.empty());
     return constraints;
   }
+
+  size_t size() const {
+    return isSimple() ? 1 : m_u.m_constraints.size();
+  }
+
+  void update(
+    folly::Range<const TypeConstraint*>::iterator it,
+    TypeConstraint tc
+  ) {
+    // Propagate the tag bit for the union
+    tc.addFlags(it->flags() & TypeConstraintFlags::SingleTypeConstraint);
+    *(const_cast<TypeConstraint*>(it)) = std::move(tc);
+  }
+
+  const folly::Range<const TypeConstraint*> range() const {
+    if (isSimple()) {
+      auto start = &m_u.m_typeConstraint;
+      return folly::Range<const TypeConstraint*>(start, start + 1);
+    }
+    return folly::Range<const TypeConstraint*>(
+      m_u.m_constraints.begin(),
+      m_u.m_constraints.end()
+    );
+  }
+
+  void forEachMutable(std::function<void(TypeConstraint&)> f) {
+    for (auto& tc : mutableRange()) {
+      auto flags = tc.flags() & TypeConstraintFlags::SingleTypeConstraint;
+      f(tc);
+      tc.addFlags(flags);
+    }
+  }
+
+  private:
+  folly::Range<TypeConstraint*> mutableRange() {
+    if (isSimple()) {
+      TypeConstraint* start = &(m_u.m_typeConstraint);
+      return folly::Range<TypeConstraint*>(start, start + 1);
+    }
+    return folly::Range<TypeConstraint*>(
+      m_u.m_constraints.begin(),
+      m_u.m_constraints.end()
+    );
+  }
+
+  union TypeConstraints {
+    VMFixedVector<TypeConstraint> m_constraints;
+    TypeConstraint m_typeConstraint;
+    TypeConstraints() : m_constraints(VMFixedVector<TypeConstraint>()) {}
+    ~TypeConstraints() {}
+  } m_u;
 };
 
-using TinyTypeIntersectionConstraint = TypeIntersectionConstraintT<TinyVector<TypeConstraint>>;
-using TypeIntersectionConstraint = TypeIntersectionConstraintT<CompactVector<TypeConstraint>>;
-using StdTypeIntersectionConstraint = TypeIntersectionConstraintT<std::vector<TypeConstraint>>;
-using VMTypeIntersectionConstraint = TypeIntersectionConstraintT<VMCompactVector<TypeConstraint>>;
+
+static_assert(CheckSize<TypeIntersectionConstraint, use_lowptr ? 16 : 32>(), "");
+
+static_assert(
+    TypeConstraint::flagsOff() == VMFixedVector<TypeConstraint>::implOff(),
+    "The LSB these fields is used to tag the union in TypeIntersectionConstraint");
+static_assert(std::endian::native == std::endian::little,
+    "LSB of TypeConstraint::m_flags and CompactTaggedPtr align only on little-endian ");
 
 //////////////////////////////////////////////////////////////////////
 

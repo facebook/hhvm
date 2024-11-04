@@ -139,7 +139,7 @@ struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
 using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
 using UBMap =
-  std::unordered_map<const StringData*, StdTypeIntersectionConstraint>;
+  std::unordered_map<const StringData*, TypeIntersectionConstraint>;
 struct FuncInfo {
   FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
 
@@ -531,15 +531,15 @@ std::string opt_type_constraint(const TypeConstraint& tc) {
   return folly::format("<{}> ", type_constraint(tc)).str();
 }
 
-std::string type_info(const StringData* userType, const TypeConstraint& tc,
-                      const VMTypeIntersectionConstraint& ubs) {
+std::string type_info(const StringData* userType,
+                      const TypeIntersectionConstraint& tcs) {
   std::string utype = userType ? escaped(userType) : "N";
-  auto ret = folly::format("{} {}", utype, opt_type_constraint(tc)).str();
-  for (auto const& ub : ubs.m_constraints) {
-    ret += ", ";
-    ret += opt_type_constraint(ub);
+  std::string constraints = "";
+  for (auto const& tc : tcs.range()) {
+    if (constraints != "") constraints += ", ";
+    constraints += opt_type_constraint(tc);
   }
-  return ret;
+  return folly::format("{} {}", utype, constraints).str();
 }
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
@@ -577,10 +577,7 @@ std::string func_param_list(const FuncInfo& finfo) {
     }
     ret += type_info(
       func->params()[i].userType,
-      func->params()[i].typeConstraint,
-      func->hasParamsWithMultiUBs() && func->paramUBs().contains(i)
-        ? func->paramUBs().at(i)
-        : Func::UpperBoundVec{}
+      func->params()[i].typeConstraints
     );
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
@@ -618,8 +615,7 @@ void print_func(Output& out, const Func* func) {
     format_line_pair(func),
     type_info(
       func->returnUserType(),
-      func->returnTypeConstraint(),
-      func->hasReturnWithMultiUBs() ? func->returnUBs() : Func::UpperBoundVec{}
+      func->returnTypeConstraints()
     ),
     func->name(),
     func_param_list(finfo),
@@ -685,7 +681,7 @@ void print_prop_or_field_impl(Output& out, const T& f) {
     RuntimeOption::EvalDisassemblerPropDocComments
       ? opt_escaped_long(f.docComment())
       : std::string(""),
-    type_info(f.userType(), f.typeConstraint(), f.upperBounds()),
+    type_info(f.userType(), f.typeConstraints()),
     f.name()->data());
   indented(out, [&] {
       out.fmtln("{};", member_tv_initializer(f.val()));
@@ -703,8 +699,7 @@ void print_method(Output& out, const Func* func) {
     format_line_pair(func),
     type_info(
       func->returnUserType(),
-      func->returnTypeConstraint(),
-      func->hasReturnWithMultiUBs() ? func->returnUBs() : Func::UpperBoundVec{}
+      func->returnTypeConstraints()
     ),
     func->name(),
     func_param_list(finfo),
@@ -797,10 +792,11 @@ void print_cls(Output& out, const PreClass* cls) {
   }
   UBMap cls_ubs;
   for (auto const& prop : cls->allProperties()) {
-    if (prop.upperBounds().isTop()) continue;
-    auto& v = cls_ubs[prop.typeConstraint().typeName()];
+    if (prop.typeConstraints().ubs().empty()) continue;
+    auto const key = prop.typeConstraints().main().typeName();
+    auto& v = cls_ubs[key];
     if (v.isTop()) {
-      v.m_constraints.assign(std::begin(prop.upperBounds().m_constraints), std::end(prop.upperBounds().m_constraints));
+      v = prop.typeConstraints();
     }
   }
 

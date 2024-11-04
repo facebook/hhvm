@@ -45,23 +45,12 @@ void verifyParamType(const Func* func, int32_t id, tv_lval val,
                      TGetCtx getCtx) {
   assertx(id < func->numNonVariadicParams());
   assertx(func->numParams() == int(func->params().size()));
-  const TypeConstraint& tc = func->params()[id].typeConstraint;
-  if (tc.isCheckable()) {
-    auto const ctx = tc.isThis() ? getCtx() : nullptr;
-    tc.verifyParam(val, ctx, func, id);
-  }
-  if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
-    auto const it = ubs.find(id);
-    if (it != ubs.end()) {
-      for (auto const& ub : it->second.m_constraints) {
-        if (ub.isCheckable()) {
-          auto const ctx = ub.isThis() ? getCtx() : nullptr;
-          ub.verifyParam(val, ctx, func, id);
-        }
+    for (auto const& tc : func->params()[id].typeConstraints.range()) {
+      if (tc.isCheckable()) {
+        auto const ctx = tc.isThis() ? getCtx() : nullptr;
+        tc.verifyParam(val, ctx, func, id);
       }
     }
-  }
 }
 
 /*

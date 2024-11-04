@@ -3378,11 +3378,9 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
   }
   if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
-    auto const& tc = sprop.typeConstraint;
-    if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
-    for (auto const& ub : sprop.ubs.m_constraints) {
-      if (ub.isCheckable()) {
-        ub.verifyStaticProperty(tv1, cls, sprop.cls, name);
+    for (auto const& tc : sprop.typeConstraints.range()) {
+      if (tc.isCheckable()) {
+        tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
       }
     }
   }
@@ -3442,12 +3440,12 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
   auto const& sprop = cls->staticProperties()[slot];
-  if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
+  if (setOpNeedsTypeCheck(sprop.typeConstraints.main(), op, val)) {
     TypedValue temp;
     tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setopBody(&temp, op, fr);
-    sprop.typeConstraint.verifyStaticProperty(
+    sprop.typeConstraints.main().verifyStaticProperty(
       &temp, cls, sprop.cls, name
     );
     always_assert(cls->sPropLink(slot).isLocal());
@@ -3500,7 +3498,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   auto const checkable_sprop = [&]() -> const Class::SProp* {
     if (Cfg::Eval::CheckPropTypeHints <= 0) return nullptr;
     auto const& sprop = ss.cls->staticProperties()[ss.slot];
-    return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
+    return sprop.typeConstraints.main().isCheckable() ? &sprop : nullptr;
   }();
 
   auto const val = ss.val;
@@ -3510,7 +3508,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);
     SCOPE_FAIL { tvDecRefGen(&result); };
-    checkable_sprop->typeConstraint.verifyStaticProperty(
+    checkable_sprop->typeConstraints.main().verifyStaticProperty(
       &temp,
       ss.cls,
       checkable_sprop->cls,
@@ -4673,21 +4671,10 @@ OPTBLD_INLINE void iopVerifyOutType(local_var param) {
   auto const paramId = param.index;
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
-  auto const& tc = func->params()[paramId].typeConstraint;
-  if (tc.isCheckable()) {
-    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-    tc.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
-  }
-  if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
-    auto const it = ubs.find(paramId);
-    if (it != ubs.end()) {
-      for (auto const& ub : it->second.m_constraints) {
-        if (ub.isCheckable()) {
-          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
-          ub.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
-        }
-      }
+  for (auto const& tc : func->params()[paramId].typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+      tc.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
     }
   }
 }
@@ -4696,18 +4683,10 @@ namespace {
 
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   const auto func = vmfp()->func();
-  const auto tc = func->returnTypeConstraint();
-  if (tc.isCheckable()) {
-    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-    tc.verifyReturn(vmStack().indC(ind), ctx, func);
-  }
-  if (func->hasReturnWithMultiUBs()) {
-    auto const& ubs = func->returnUBs();
-    for (auto const& ub : ubs.m_constraints) {
-      if (ub.isCheckable()) {
-        auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
-        ub.verifyReturn(vmStack().indC(ind), ctx, func);
-      }
+  for (auto const& tc : func->returnTypeConstraints().range()) {
+    if (tc.isCheckable()) {
+      auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+      tc.verifyReturn(vmStack().indC(ind), ctx, func);
     }
   }
 }
@@ -4744,7 +4723,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
   const auto func = vmfp()->func();
-  const auto tc = func->returnTypeConstraint();
+  const auto tc = func->returnTypeConstraints().main();
   auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
   tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
 }
@@ -5223,7 +5202,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto ret = cls->getSPropData(slot);
         if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& sprop = cls->staticProperties()[slot];
-          auto const& tc = sprop.typeConstraint;
+          auto const& tc = sprop.typeConstraints.main();
           if (tc.isCheckable()) {
             tc.verifyStaticProperty(fr, cls, sprop.cls, sprop.name);
           }
@@ -5240,7 +5219,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto ret = (*propVec)[index].val;
         if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& prop = cls->declProperties()[slot];
-          auto const& tc = prop.typeConstraint;
+          auto const& tc = prop.typeConstraints.main();
           if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
         }
         return ret;

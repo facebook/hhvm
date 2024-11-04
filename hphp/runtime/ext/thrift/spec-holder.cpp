@@ -198,7 +198,7 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
             if (cls->numDeclProperties() < spec.size()) return false;
             auto const& prop = cls->declProperties()[spec.size()];
             if (!s__type.equal(prop.name)) return false;
-            return prop.typeConstraint.alwaysPasses(KindOfInt64);
+            return prop.typeConstraints.main().alwaysPasses(KindOfInt64);
           }();
         }
         if (!*endPropOk) return false;

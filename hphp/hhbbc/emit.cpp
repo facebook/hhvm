@@ -690,13 +690,10 @@ void emit_locals_and_params(FuncEmitter& fe, const php::Func& func,
       assertx(!loc.killed);
       assertx(!loc.unusedName);
       auto& param = func.params[id];
-      FuncEmitter::ParamInfo pinfo;
+      Func::ParamInfo pinfo;
       pinfo.defaultValue = param.defaultValue;
-      pinfo.typeConstraint = param.typeConstraint;
+      pinfo.typeConstraints = param.typeConstraints;
       pinfo.userType = param.userTypeConstraint;
-      for (auto const& ub : param.upperBounds.m_constraints) {
-        pinfo.upperBounds.emplace_back(ub);
-      }
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       if (param.inout) pinfo.setFlag(Func::ParamInfo::Flags::InOut);
@@ -973,10 +970,7 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
 
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
-  fe.retUpperBounds.reserve(func.returnUBs.m_constraints.size());
-  for (auto& c : func.returnUBs.m_constraints) {
-    fe.retUpperBounds.emplace_back(c);
-  }
+  fe.retTypeConstraints = func.retTypeConstraints;
   fe.originalFilename =
     func.originalFilename ? func.originalFilename :
     func.originalUnit ? func.originalUnit : nullptr;
@@ -989,8 +983,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isNative = func.isNative;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
-  fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
-  fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
 
   for (auto& name : func.staticCoeffects) fe.staticCoeffects.push_back(name);
   for (auto& rule : func.coeffectRules)   fe.coeffectRules.push_back(rule);
@@ -1006,8 +998,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
       fe.repoAwaitedReturnType = make_repo_type(awaitedTy);
     }
   }
-
-  fe.retTypeConstraint = func.retTypeConstraint;
 
   fe.maxStackCells = info.maxStackDepth +
                      fe.numLocals() +
@@ -1198,8 +1188,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       prop.name,
       attrs,
       prop.userType,
-      prop.typeConstraint,
-      prop.ubs.asVec(),
+      TypeIntersectionConstraint(prop.typeConstraints),
       prop.docComment,
       &prop.val,
       makeRat(propTy),

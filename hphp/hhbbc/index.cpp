@@ -118,8 +118,8 @@ const StaticString s_Traversable("HH\\Traversable");
 // HHBBC consumes a LOT of memory, so we keep representation types small.
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
-static_assert(CheckSize<php::Param, use_lowptr ? 64 : 96>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 184 : 232>(), "");
+static_assert(CheckSize<php::Param, use_lowptr ? 56: 88>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 176: 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -286,14 +286,14 @@ PropState make_unknown_propstate(const IIndex& index,
       elem.ty = adjust_type_for_prop(
         index,
         cls,
-        &prop.typeConstraint,
+        prop.typeConstraints.mainPtr(),
         TCell
       );
       if (prop.attrs & AttrSystemInitialValue) {
         auto initial = loosen_all(from_cell(prop.val));
         if (!initial.subtypeOf(BUninit)) elem.ty |= initial;
       }
-      elem.tc = &prop.typeConstraint;
+      elem.tc = prop.typeConstraints.mainPtr();
       elem.attrs = prop.attrs;
       elem.everModified = true;
     }
@@ -8071,7 +8071,7 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (int i) {
-    auto const& constraint = finfo->func->params[i].typeConstraint;
+    auto const& constraint = finfo->func->params[i].typeConstraints.main();
     if (constraint.hasConstraint() &&
         !constraint.isTypeVar() &&
         !constraint.isTypeConstant()) {
@@ -8212,7 +8212,7 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (size_t i) {
-    auto const& constraint = func.params[i].typeConstraint;
+    auto const& constraint = func.params[i].typeConstraints.main();
     if (constraint.hasConstraint() &&
         !constraint.isTypeVar() &&
         !constraint.isTypeConstant()) {
@@ -8375,7 +8375,7 @@ Type initial_type_for_public_sprop(const Index& index,
   return adjust_type_for_prop(
     IndexAdaptor { index },
     cls,
-    &prop.typeConstraint,
+    prop.typeConstraints.mainPtr(),
     ty
   );
 }
@@ -8407,7 +8407,10 @@ Type lookup_public_prop_impl(
 
   // Get a type corresponding to its declared type-hint (if any).
   auto ty = adjust_type_for_prop(
-    IndexAdaptor { *data.m_index }, *knownCls, &prop->typeConstraint, TCell
+    IndexAdaptor { *data.m_index },
+    *knownCls,
+    prop->typeConstraints.mainPtr(),
+    TCell
   );
   // We might have to include the initial value which might be outside of the
   // type-hint.
@@ -8474,7 +8477,7 @@ PropMergeResult prop_tc_effects(const Index& index,
                                 const php::Prop& prop,
                                 const Type& val,
                                 bool checkUB) {
-  assertx(prop.typeConstraint.validForProp());
+  assertx(prop.typeConstraints.main().validForProp());
 
   using R = PropMergeResult;
 
@@ -8502,7 +8505,7 @@ PropMergeResult prop_tc_effects(const Index& index,
   };
 
   // First check the main type-constraint.
-  auto result = check(prop.typeConstraint, val);
+  auto result = check(prop.typeConstraints.main(), val);
   // If we're not checking generics upper-bounds, or if we already
   // know we'll fail, we're done.
   if (!checkUB || result.throws == TriBool::Yes) {
@@ -8512,7 +8515,7 @@ PropMergeResult prop_tc_effects(const Index& index,
   // Otherwise check every generic upper-bound. We'll feed the
   // narrowed type into each successive round. If we reach the point
   // where we'll know we'll definitely fail, just stop.
-  for (auto const& ub : prop.ubs.m_constraints) {
+  for (auto const& ub : prop.typeConstraints.ubs()) {
     auto r = check(ub, result.adjusted);
     result.throws &= r.throws;
     result.adjusted = std::move(r.adjusted);
@@ -8562,7 +8565,7 @@ PropLookupResult lookup_static_impl(IndexData& data,
             adjust_type_for_prop(
               IndexAdaptor { *data.m_index },
               *ci->cls,
-              &prop.typeConstraint,
+              prop.typeConstraints.mainPtr(),
               TInitCell
             ),
             initial_type_for_public_sprop(*data.m_index, *ci->cls, prop)
@@ -11656,15 +11659,16 @@ private:
                                       php::Func& func,
                                       TSStringSet* uses) {
     for (auto& p : func.params) {
-      update_type_constraint(index, p.typeConstraint, false, uses);
-      for (auto& ub : p.upperBounds.m_constraints) {
-        update_type_constraint(index, ub, false, uses);
+      p.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
+        update_type_constraint(index, tc, false, uses);
+      });
+    }
+
+    func.retTypeConstraints.forEachMutable(
+      [&](TypeConstraint& tc) {
+        update_type_constraint(index, tc, false, uses);
       }
-    }
-    update_type_constraint(index, func.retTypeConstraint, false, uses);
-    for (auto& ub : func.returnUBs.m_constraints) {
-      update_type_constraint(index, ub, false, uses);
-    }
+    );
   }
 
   static void update_type_constraints(const LocalIndex& index,
@@ -11675,10 +11679,9 @@ private:
     }
     for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
     for (auto& prop : cls.properties) {
-      update_type_constraint(index, prop.typeConstraint, true, uses);
-      for (auto& ub : prop.ubs.m_constraints) {
-        update_type_constraint(index, ub, true, uses);
-      }
+      prop.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
+        update_type_constraint(index, tc, true, uses);
+      });
     }
   }
 
@@ -11741,26 +11744,17 @@ private:
           // This property's type-constraint might not have been
           // resolved (if the parent is not on the output list for
           // this job), so do so here.
-          update_type_constraint(
-            index,
-            parentProp->typeConstraint,
-            true,
-            nullptr
-          );
+          parentProp->typeConstraints.forEachMutable([&](TypeConstraint& tc) {
+            update_type_constraint(index, tc, true, nullptr);
+          });
 
           // This check is safe, but conservative. It might miss a few
           // rare cases, but it's sufficient and doesn't require class
           // hierarchies.
-          if (prop.typeConstraint.maybeInequivalentForProp(
-                parentProp->typeConstraint
-              )) {
-            return false;
-          }
-
-          for (auto const& ub : prop.ubs.m_constraints) {
-            for (auto& pub : parentProp->ubs.m_constraints) {
-              update_type_constraint(index, pub, true, nullptr);
-              if (ub.maybeInequivalentForProp(pub)) return false;
+          auto tcs = prop.typeConstraints.range();
+          for (auto it = tcs.begin(); it != tcs.end(); ++it) {
+            for (auto ptc : parentProp->typeConstraints.range()) {
+              if (it->maybeInequivalentForProp(ptc)) return false;
             }
           }
         }
@@ -11777,7 +11771,7 @@ private:
       auto const nullable = [&] {
         if (isClosure) return true;
         if (!(prop.attrs & AttrSystemInitialValue)) return false;
-        return prop.typeConstraint.defaultValue().m_type == KindOfNull;
+        return prop.typeConstraints.main().defaultValue().m_type == KindOfNull;
       }();
 
       attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
@@ -11795,7 +11789,7 @@ private:
         if (prop.name == s_86reified_prop.get()) {
           return get_default_value_of_reified_list(cls.userAttributes);
         }
-        return prop.typeConstraint.defaultValue();
+        return prop.typeConstraints.main().defaultValue();
       }();
     }
   }
@@ -14450,7 +14444,7 @@ protected:
           if (prop.name == s_86reified_prop.get()) {
             return get_default_value_of_reified_list(cls.userAttributes);
           }
-          return prop.typeConstraint.defaultValue();
+          return prop.typeConstraints.main().defaultValue();
         }();
       }
     }
@@ -15569,19 +15563,23 @@ private:
 
   static void unresolve_missing(const LocalIndex& index, php::Func& func) {
     for (auto& p : func.params) {
-      unresolve_missing(index, p.typeConstraint);
-      for (auto& ub : p.upperBounds.m_constraints) unresolve_missing(index, ub);
+      p.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
+        unresolve_missing(index, tc);
+      });
     }
-    unresolve_missing(index, func.retTypeConstraint);
-    for (auto& ub : func.returnUBs.m_constraints) unresolve_missing(index, ub);
+
+    func.retTypeConstraints.forEachMutable([&](TypeConstraint& tc) {
+      unresolve_missing(index, tc);
+    });
   }
 
   static void unresolve_missing(const LocalIndex& index, php::Class& cls) {
     if (cls.attrs & AttrEnum) unresolve_missing(index, cls.enumBaseTy);
     for (auto& meth : cls.methods) unresolve_missing(index, *meth);
     for (auto& prop : cls.properties) {
-      unresolve_missing(index, prop.typeConstraint);
-      for (auto& ub : prop.ubs.m_constraints) unresolve_missing(index, ub);
+      prop.typeConstraints.forEachMutable([&](TypeConstraint& tc) {
+        unresolve_missing(index, tc);
+      });
     }
   }
 
@@ -15646,24 +15644,22 @@ private:
         return unctx(std::move(lookup.upper));
       };
 
-      auto const process = [&] (const TypeConstraint& tc,
-                                const TypeIntersectionConstraint& ubs) {
+      auto const process = [&] (const TypeIntersectionConstraint& tcs) {
         auto ret = TInitCell;
-        ret = intersection_of(std::move(ret), make_type(tc));
-        for (auto const& ub : ubs.m_constraints) {
-          ret = intersection_of(std::move(ret), make_type(ub));
+        for (auto const& tc : tcs.range()) {
+          ret = intersection_of(std::move(ret), make_type(tc));
         }
         return ret;
       };
 
-      auto ret = process(f.retTypeConstraint, f.returnUBs);
+      auto ret = process(f.retTypeConstraints);
       if (f.hasInOutArgs && !ret.is(BBottom)) {
         std::vector<Type> types;
         types.reserve(f.params.size() + 1);
         types.emplace_back(std::move(ret));
         for (auto const& p : f.params) {
           if (!p.inout) continue;
-          auto t = process(p.typeConstraint, p.upperBounds);
+          auto t = process(p.typeConstraints);
           if (t.is(BBottom)) return TBottom;
           types.emplace_back(std::move(t));
         }
@@ -15707,9 +15703,8 @@ private:
 
         // Any property with an unresolved type-constraint here might
         // fatal when we initialize the class.
-        if (prop.typeConstraint.isUnresolved()) return false;
-        for (auto const& ub : prop.ubs.m_constraints) {
-          if (ub.isUnresolved()) return false;
+        for (auto const& tc : prop.typeConstraints.range()) {
+          if (tc.isUnresolved()) return false;
         }
 
         if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return true;
@@ -15752,9 +15747,8 @@ private:
           return unctx(std::move(lookup.lower));
         };
 
-        if (!initial.subtypeOf(make_type(prop.typeConstraint))) return false;
-        for (auto const& ub : prop.ubs.m_constraints) {
-          if (!initial.subtypeOf(make_type(ub))) return false;
+        for (auto const& tc : prop.typeConstraints.range()) {
+          if (!initial.subtypeOf(make_type(tc))) return false;
         }
         return true;
       }();
@@ -19450,7 +19444,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
             adjust_type_for_prop(
               IndexAdaptor { *this },
               *cls,
-              &prop.typeConstraint,
+              prop.typeConstraints.mainPtr(),
               TInitCell
             ),
             initial_type_for_public_sprop(*this, *cls, prop)
@@ -19475,7 +19469,7 @@ PropState Index::lookup_public_statics(const php::Class* cls) const {
       prop.name,
       PropStateElem{
         std::move(ty),
-        &prop.typeConstraint,
+        prop.typeConstraints.mainPtr(),
         prop.attrs,
         everModified
       }
@@ -20091,9 +20085,8 @@ void Index::update_prop_initial_values(const Context& ctx,
     auto& prop = props[idx];
 
     auto const allResolved = [&] {
-      if (prop.typeConstraint.isUnresolved()) return false;
-      for (auto const& ub : prop.ubs.m_constraints) {
-        if (ub.isUnresolved()) return false;
+      for (auto const& tc : prop.typeConstraints.range()) {
+        if (tc.isUnresolved()) return false;
       }
       return true;
     };
@@ -20235,7 +20228,7 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
         auto newType = adjust_type_for_prop(
           IndexAdaptor { *this },
           *cinfo->cls,
-          &prop.typeConstraint,
+          prop.typeConstraints.mainPtr(),
           unctx(union_of(std::move(knownClsType), std::move(unknownClsType)))
         );
 

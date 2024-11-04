@@ -97,7 +97,7 @@ struct classBucket {
 
 std::array<classBucket, kNumBuckets> s_classes;
 classBucket& getBucket(const StringData* s) {
-  auto const idx = Cfg::Eval::SynchronizeClassLoading 
+  auto const idx = Cfg::Eval::SynchronizeClassLoading
     ? s->hash() % kNumBuckets : 0;
   return s_classes[idx];
 }
@@ -969,7 +969,7 @@ void Class::initSProps() const {
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto const& sProp = m_staticProperties[slot];
-    assertx(sProp.typeConstraint.validForProp());
+    assertx(sProp.typeConstraints.main().validForProp());
 
     if (m_sPropCache[slot].isPersistent()) continue;
 
@@ -978,21 +978,13 @@ void Class::initSProps() const {
     auto val = sProp.val;
 
     if (declaredOnThisClass(sProp)) {
-      sProp.typeConstraint.validForPropResolved(sProp.cls, sProp.name);
+      sProp.typeConstraints.main().validForPropResolved(sProp.cls, sProp.name);
       if (Cfg::Eval::CheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
           sProp.val.m_type != KindOfUninit) {
-        if (sProp.typeConstraint.isCheckable()) {
-          sProp.typeConstraint.verifyStaticProperty(
-            &val,
-            this,
-            sProp.cls,
-            sProp.name
-          );
-        }
-        for (auto const& ub : sProp.ubs.m_constraints) {
-          if (ub.isCheckable()) {
-            ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
+        for (auto const& tc : sProp.typeConstraints.range()) {
+          if (tc.isCheckable()) {
+            tc.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
           }
         }
       }
@@ -1048,12 +1040,9 @@ void Class::checkPropInitialValues() const {
 
   for (Slot slot = 0; slot < m_declProperties.size(); ++slot) {
     auto const& prop = m_declProperties[slot];
-    auto const& tc = prop.typeConstraint;
-
-    assertx(tc.validForProp());
-    tc.validForPropResolved(prop.cls, prop.name);
-    for (auto const& ub : prop.ubs.m_constraints) {
-      ub.validForPropResolved(prop.cls, prop.name);
+    for (auto const& tc : prop.typeConstraints.range()) {
+      assertx(tc.validForProp());
+      tc.validForPropResolved(prop.cls, prop.name);
     }
 
     if (Cfg::Eval::CheckPropTypeHints <= 0) continue;
@@ -1062,10 +1051,9 @@ void Class::checkPropInitialValues() const {
     auto const rval = m_declPropInit[index].val;
     if (type(rval) == KindOfUninit) continue;
     auto tv = rval.tv();
-    if (tc.isCheckable()) tc.verifyProperty(&tv, this, prop.cls, prop.name);
-    for (auto const& ub : prop.ubs.m_constraints) {
-      if (ub.isCheckable()) {
-        ub.verifyProperty(&tv, this, prop.cls, prop.name);
+    for (auto const& tc : prop.typeConstraints.range()) {
+      if (tc.isCheckable()) {
+        tc.verifyProperty(&tv, this, prop.cls, prop.name);
       }
     }
 
@@ -1113,8 +1101,8 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
 
   auto const& oldProp = m_parent->m_declProperties[slot];
 
-  auto const& oldTC = oldProp.typeConstraint;
-  auto const& newTC = prop.typeConstraint;
+  auto const& oldTC = oldProp.typeConstraints.main();
+  auto const& newTC = prop.typeConstraints.main();
 
   if (!oldTC.equivalentForProp(newTC)) {
     auto const oldTCName =
@@ -1138,11 +1126,12 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     );
   }
 
-  if (!prop.ubs.isTop() || !oldProp.ubs.isTop()) {
+  if (!prop.typeConstraints.ubs().empty()
+      || !oldProp.typeConstraints.ubs().empty()) {
     std::vector<TypeConstraint> newTCs = {newTC};
-    for (auto const& ub : prop.ubs.m_constraints) newTCs.push_back(ub);
+    for (auto const& ub : prop.typeConstraints.ubs()) newTCs.push_back(ub);
     std::vector<TypeConstraint> oldTCs = {oldTC};
-    for (auto const& ub : oldProp.ubs.m_constraints) oldTCs.push_back(ub);
+    for (auto const& ub : oldProp.typeConstraints.ubs()) oldTCs.push_back(ub);
 
     for (auto const& ub : newTCs) {
       if (std::none_of(oldTCs.begin(), oldTCs.end(),
@@ -1450,13 +1439,15 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
       if (Cfg::Eval::CheckPropTypeHints > 2) {
         auto const typeOk = [&]{
           auto skipCheck =
-            !decl.typeConstraint.isCheckable() ||
-            decl.typeConstraint.isSoft() ||
+            !decl.typeConstraints.main().isCheckable() ||
+            decl.typeConstraints.main().isSoft() ||
             (sProp->m_type == KindOfNull &&
              !(decl.attrs & AttrNoImplicitNullable));
 
-          auto res = skipCheck ? true : decl.typeConstraint.assertCheck(sProp);
-          for (auto const& ub : decl.ubs.m_constraints) {
+          auto res = skipCheck
+            ? true
+            : decl.typeConstraints.main().assertCheck(sProp);
+          for (auto const& ub : decl.typeConstraints.ubs()) {
             if (ub.isCheckable() && !ub.isSoft()) {
               res = res && ub.assertCheck(sProp);
             }
@@ -3026,8 +3017,7 @@ void Class::setProperties() {
       prop.cls                 = parentProp.cls;
       prop.baseCls             = parentProp.baseCls;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
-      prop.typeConstraint      = parentProp.typeConstraint;
-      prop.ubs                 = parentProp.ubs;
+      prop.typeConstraints     = parentProp.typeConstraints;
       prop.name                = parentProp.name;
       prop.repoAuthType        = parentProp.repoAuthType;
 
@@ -3048,13 +3038,12 @@ void Class::setProperties() {
 
       // Alias parent's static property.
       SProp sProp;
-      sProp.preProp        = parentProp.preProp;
-      sProp.name           = parentProp.name;
-      sProp.attrs          = parentProp.attrs | AttrNoBadRedeclare;
-      sProp.typeConstraint = parentProp.typeConstraint;
-      sProp.ubs            = parentProp.ubs;
-      sProp.cls            = parentProp.cls;
-      sProp.repoAuthType   = parentProp.repoAuthType;
+      sProp.preProp         = parentProp.preProp;
+      sProp.name            = parentProp.name;
+      sProp.attrs           = parentProp.attrs | AttrNoBadRedeclare;
+      sProp.typeConstraints = parentProp.typeConstraints;
+      sProp.cls             = parentProp.cls;
+      sProp.repoAuthType    = parentProp.repoAuthType;
       tvWriteUninit(sProp.val);
       curSPropMap.add(sProp.name, sProp);
     }
@@ -3182,21 +3171,20 @@ void Class::setProperties() {
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
         }
 
-        auto const& tc = preProp->typeConstraint();
+        auto const& tc = preProp->typeConstraints().main();
         if (Cfg::Eval::CheckPropTypeHints > 0 &&
             !(preProp->attrs() & AttrNoBadRedeclare) &&
-            (tc.maybeInequivalentForProp(prop.typeConstraint) ||
-             !preProp->upperBounds().isTop() ||
-             !prop.ubs.isTop())) {
+            (tc.maybeInequivalentForProp(prop.typeConstraints.main()) ||
+             !preProp->typeConstraints().ubs().empty() ||
+             !prop.typeConstraints.ubs().empty())) {
           // If this property isn't obviously not redeclaring a property in
           // the parent, we need to check that when we initialize the class.
           prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
           m_allFlags.m_selfMaybeRedefsPropTy = true;
           m_allFlags.m_maybeRedefsPropTy = true;
         }
-        prop.typeConstraint = tc;
 
-        prop.ubs = preProp->upperBounds();
+        prop.typeConstraints = preProp->typeConstraints();
         prop.repoAuthType = preProp->repoAuthType();
 
         if (preProp->attrs() & AttrNoImplicitNullable) {
@@ -3589,22 +3577,20 @@ void Class::importTraitStaticProp(
 template<typename XProp>
 void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
   auto const& tv = preProp->val();
-  auto const& tc = preProp->typeConstraint();
   assertx(
     !(preProp->attrs() & AttrSystemInitialValue) ||
     tv.m_type != KindOfNull ||
     !(preProp->attrs() & AttrNoImplicitNullable)
   );
-  assertx(tc.validForProp());
 
   auto const alwaysPassesAll = [&] {
-    if (!tc.alwaysPasses(&tv)) return false;
-    auto const& ubs = preProp->upperBounds();
-    for (auto const& ub : ubs.m_constraints) {
-      if (!ub.alwaysPasses(&tv)) return false;
+    for (auto const& tc : preProp->typeConstraints().range()) {
+      assertx(tc.validForProp());
+      if (!tc.alwaysPasses(&tv)) return false;
     }
     return true;
   }();
+
   if (alwaysPassesAll) {
     prop.attrs |= AttrInitialSatisfiesTC;
     return;
@@ -3634,8 +3620,7 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
                              AttrNoBadRedeclare;
   // This is the first class to declare this property
   prop.cls                 = this;
-  prop.typeConstraint      = preProp->typeConstraint();
-  prop.ubs                 = preProp->upperBounds();
+  prop.typeConstraints     = preProp->typeConstraints();
   prop.repoAuthType        = preProp->repoAuthType();
 
   // Check if this property's initial value needs to be type checked at
@@ -4952,7 +4937,7 @@ Class* newClassImpl(const PreClass* preClass,
       }
       return res;
     };
-    
+
     while (true) {
       auto const didAcquire = [&] {
         auto expected = bucket.inProgress.load();

@@ -76,7 +76,7 @@ struct c_Collection;
 
 // Unique identifier for every Class*
 struct ClassId {
-  
+
   using Id = uint32_t;
   static constexpr Id Invalid = std::numeric_limits<uint32_t>::max();
   explicit ClassId(Id id) : m_id(id) {}
@@ -201,7 +201,6 @@ struct Class : AtomicCountable {
   /*
    * Instance property information.
    */
-  using UpperBoundVec = PreClass::UpperBoundVec;
   struct Prop {
     const PreClass::Prop* preProp;
     /*
@@ -210,8 +209,7 @@ struct Class : AtomicCountable {
      * was nothing interesting known.)
      */
     RepoAuthType repoAuthType;
-    TypeConstraint typeConstraint;
-    UpperBoundVec  ubs;
+    TypeIntersectionConstraint typeConstraints;
 
     LowStringPtr name;
    private:
@@ -254,8 +252,7 @@ struct Class : AtomicCountable {
   struct SProp {
     const PreClass::Prop* preProp;
     RepoAuthType repoAuthType;
-    TypeConstraint typeConstraint;
-    UpperBoundVec ubs;
+    TypeIntersectionConstraint typeConstraints;
 
     LowStringPtr name;
 
@@ -1261,7 +1258,7 @@ public:
   rds::Handle classHandle() const;
   rds::Handle classIdHandle() const;
   rds::Link<ClassId, rds::Mode::Normal> classIdLink() const;
-  
+
 
   /*
    * Get and set the RDS-cached class with this class's name.

@@ -52,21 +52,7 @@ struct NativeFunctionInfo;
 struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
-
-  struct ParamInfo : public Func::ParamInfo {
-    ParamInfo() {}
-
-    template<class SerDe>
-    void serde(SerDe& sd) {
-      Func::ParamInfo* parent = this;
-      parent->serde(sd);
-      sd(upperBounds);
-    }
-
-    std::vector<TypeConstraint> upperBounds;
-  };
-
-  using ParamInfoVec = std::vector<ParamInfo>;
+  using ParamInfoVec = std::vector<Func::ParamInfo>;
   using EHEntVec = std::vector<EHEnt>;
 
   using CoeffectRuleVec = std::vector<CoeffectRule>;
@@ -162,7 +148,7 @@ struct FuncEmitter {
   /*
    * Add a parameter and corresponding named local.
    */
-  void appendParam(const StringData* name, const ParamInfo& info);
+  void appendParam(const StringData* name, const Func::ParamInfo& info);
 
   /*
    * Get the local variable name -> id map.
@@ -337,9 +323,8 @@ public:
   ParamInfoVec params;
   int16_t maxStackCells{0};
 
-  TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
-  std::vector<TypeConstraint> retUpperBounds;
+  TypeIntersectionConstraint retTypeConstraints;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;
 
@@ -356,8 +341,6 @@ public:
       bool isNative            : 1;
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
-      bool hasParamsWithMultiUBs : 1;
-      bool hasReturnWithMultiUBs : 1;
       bool requiresFromOriginalModule : 1;
     };
   };

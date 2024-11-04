@@ -58,7 +58,7 @@ inline void Func::ParamInfo::serde(SerDe& sd) {
   sd(funcletOff)
     (defaultValue)
     (phpCode)
-    (typeConstraint)
+    (typeConstraints)
     (flags)
     (userAttributes)
     (userType)
@@ -74,7 +74,8 @@ inline bool Func::ParamInfo::hasScalarDefaultValue() const {
 }
 
 inline bool Func::ParamInfo::hasTrivialDefaultValue() const {
-  return hasScalarDefaultValue() && typeConstraint.alwaysPasses(&defaultValue);
+  return hasScalarDefaultValue()
+    && typeConstraints.main().alwaysPasses(&defaultValue);
 }
 
 inline bool Func::ParamInfo::isInOut() const {
@@ -110,7 +111,7 @@ inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
 }
 
 inline MaybeDataType Func::ParamInfo::builtinType() const {
-  return isVariadic() ? KindOfVec : typeConstraint.asSystemlibType();
+  return isVariadic() ? KindOfVec : typeConstraints.main().asSystemlibType();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -378,21 +379,12 @@ inline bool Func::hasUntrustedReturnType() const {
   return shared()->m_allFlags.m_isUntrustedReturnType;
 }
 
-inline const TypeConstraint& Func::returnTypeConstraint() const {
-  return shared()->m_retTypeConstraint;
+inline const TypeIntersectionConstraint& Func::returnTypeConstraints() const {
+  return shared()->m_retTypeConstraints;
 }
 
 inline const StringData* Func::returnUserType() const {
   return shared()->m_retUserType;
-}
-
-inline bool Func::hasReturnWithMultiUBs() const {
-  return shared()->m_allFlags.m_hasReturnWithMultiUBs;
-}
-
-inline const Func::UpperBoundVec& Func::returnUBs() const {
-  assertx(hasReturnWithMultiUBs());
-  return extShared()->m_returnUBs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -435,15 +427,6 @@ inline uint64_t Func::inOutBits() const {
 
 inline bool Func::takesInOutParams() const {
   return m_inoutBits != 0;
-}
-
-inline bool Func::hasParamsWithMultiUBs() const {
-  return shared()->m_allFlags.m_hasParamsWithMultiUBs;
-}
-
-inline const Func::ParamUBMap& Func::paramUBs() const {
-  assertx(hasParamsWithMultiUBs());
-  return extShared()->m_paramUBs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

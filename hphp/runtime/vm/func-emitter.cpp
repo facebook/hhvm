@@ -324,8 +324,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     m_bclen >= Func::kSmallDeltaLimit ||
     m_sn >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
-    hasParamsWithMultiUBs ||
-    hasReturnWithMultiUBs ||
     dynCallSampleRate ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
@@ -334,8 +332,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   f->m_shared.reset(
     needsExtendedSharedData
-      ? new Func::ExtendedSharedData(m_bc, m_bclen, preClass, m_sn, line1, line2,
-                                     !containsCalls)
+      ? new Func::ExtendedSharedData(m_bc, m_bclen, preClass,
+                                     m_sn, line1, line2, !containsCalls)
       : new Func::SharedData(m_bc, m_bclen, preClass, m_sn, line1, line2,
                              !containsCalls)
   );
@@ -364,17 +362,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     assertx(ex->m_originalModuleName);
   }
 
-  std::vector<Func::ParamInfo> fParams;
-  for (unsigned i = 0; i < params.size(); ++i) {
-    Func::ParamInfo pi = params[i];
-    fParams.push_back(pi);
-    auto const& fromUBs = params[i].upperBounds;
-    if (!fromUBs.empty()) {
-      f->extShared()->m_paramUBs[i] = VMTypeIntersectionConstraint(fromUBs);
-      f->shared()->m_allFlags.m_hasParamsWithMultiUBs = true;
-    }
-  }
-
+  std::vector<Func::ParamInfo> fParams = params;
   auto const originalFullName =
     (!originalFilename ||
      !RuntimeOption::RepoAuthoritative ||
@@ -393,14 +381,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_allFlags.m_isGenerator = isGenerator;
   f->shared()->m_allFlags.m_isPairGenerator = isPairGenerator;
   f->shared()->m_userAttributes = userAttributes;
-  f->shared()->m_retTypeConstraint = retTypeConstraint;
+  f->shared()->m_retTypeConstraints = retTypeConstraints;
   f->shared()->m_retUserType = retUserType;
-  if (!retUpperBounds.empty()) {
-    f->extShared()->m_returnUBs = VMTypeIntersectionConstraint(
-        retUpperBounds
-    );
-    f->shared()->m_allFlags.m_hasReturnWithMultiUBs = true;
-  }
   f->shared()->m_originalFilename = originalFullName;
   f->shared()->m_allFlags.m_isGenerated = HPHP::is_generated(name);
   f->shared()->m_repoReturnType = repoReturnType;
@@ -743,9 +725,8 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
       }
     )
     (userAttributes)
-    (retTypeConstraint)
+    (retTypeConstraints)
     (retUserType)
-    (retUpperBounds)
     (originalFilename)
     (originalModuleName)
     (coeffectRules)

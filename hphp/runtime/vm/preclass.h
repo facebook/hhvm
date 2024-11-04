@@ -68,9 +68,6 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  */
 struct PreClass : AtomicCountable {
   friend struct PreClassEmitter;
-  using UpperBoundVec = VMTypeIntersectionConstraint;
-  using UpperBoundMap = vm_flat_map<const StringData*, UpperBoundVec>;
-
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
@@ -78,24 +75,26 @@ struct PreClass : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    Prop(PreClass* preClass,
-         const StringData* name,
-         Attr attrs,
-         const StringData* userType,
-         const TypeConstraint& typeConstraint,
-         const UpperBoundVec& ubs,
-         const StringData* docComment,
-         const TypedValue& val,
-         RepoAuthType repoAuthType,
-         UserAttributeMap userAttributes);
+    Prop(
+      PreClass* preClass,
+      const StringData* name,
+      Attr attrs,
+      const StringData* userType,
+      TypeIntersectionConstraint&& constraints,
+      const StringData* docComment,
+      const TypedValue& val,
+      RepoAuthType repoAuthType,
+      UserAttributeMap userAttributes
+    );
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
     Attr              attrs()          const { return m_attrs; }
     const StringData* userType()       const { return m_userType; }
-    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
-    const UpperBoundVec& upperBounds() const { return m_ubs; }
+    const TypeIntersectionConstraint& typeConstraints() const {
+      return m_typeConstraints;
+    }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
@@ -109,8 +108,7 @@ struct PreClass : AtomicCountable {
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
-    TypeConstraint m_typeConstraint;
-    UpperBoundVec m_ubs;
+    TypeIntersectionConstraint m_typeConstraints;
     UserAttributeMap m_userAttributes;
   };
 

@@ -18,6 +18,7 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/copy-ptr.h"
+#include "hphp/util/fixed-vector.h"
 #include "hphp/util/insertion-ordered-map.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/tiny-vector.h"
@@ -262,6 +263,11 @@ struct BlobEncoder {
     encodeOrderedContainer(vec, extra...);
   }
 
+  template<typename T, typename A, typename... Extra>
+  void encode(const FixedVector<T, A>& vec, const Extra&... extra) {
+    encodeOrderedContainer(vec, extra...);
+  }
+
   template<typename T, size_t S, size_t M, typename A, typename... Extra>
   void encode(const TinyVector<T, S, M, A>& vec, const Extra&... extra) {
     encodeOrderedContainer(vec, extra...);
@@ -493,7 +499,7 @@ struct BlobEncoder {
 
   std::vector<char>&& take() { return std::move(m_blob); }
 
-private:
+  private:
   template<typename Cont, typename... Extra>
   void encodeOrderedContainer(const Cont& cont, Extra... extra) {
     if (cont.size() >= 0xffffffffu) {
@@ -728,6 +734,13 @@ struct BlobDecoder {
   template<typename T, typename A, typename... Extra>
   void decode(CompactVector<T, A>& vec, Extra... extra) {
     decodeVecContainer(vec, extra...);
+  }
+
+  template<typename T, typename A, typename... Extra>
+  void decode(FixedVector<T, A>& fvec, Extra... extra) {
+    std::vector<T> vec;
+    decodeVecContainer(vec, extra...);
+    fvec = FixedVector<T, A>(std::move(vec));
   }
 
   template<typename T, size_t S, size_t M, typename A, typename... Extra>
@@ -1017,7 +1030,7 @@ struct BlobDecoder {
     return *this;
   }
 
-private:
+  private:
   template<typename Cont, typename... Extra>
   void decodeMapContainer(Cont& cont, const Extra&... extra) {
     cont.clear();

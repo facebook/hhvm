@@ -60,9 +60,8 @@ template <typename SerDe> void ExnNode::serde(SerDe& sd) {
 template <typename SerDe> void Param::serde(SerDe& sd) {
   sd(defaultValue)
     (dvEntryPoint)
-    (typeConstraint)
     (userTypeConstraint)
-    (upperBounds)
+    (typeConstraints)
     (userAttributes)
     (phpCode)
     ;
@@ -104,8 +103,7 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
     (originalUnit)
     (originalClass)
     (originalModuleName)
-    (returnUBs)
-    (retTypeConstraint)
+    (retTypeConstraints)
     (requiredCoeffects)
     (coeffectEscapes)
     (staticCoeffects)
@@ -129,8 +127,6 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   SERDE_BITFIELD(hasCreateCl, sd);
   SERDE_BITFIELD(isReadonlyReturn, sd);
   SERDE_BITFIELD(isReadonlyThis, sd);
-  SERDE_BITFIELD(hasParamsWithMultiUBs, sd);
-  SERDE_BITFIELD(hasReturnWithMultiUBs, sd);
   SERDE_BITFIELD(fromModuleLevelTrait, sd);
   SERDE_BITFIELD(requiresFromOriginalModule, sd);
 
@@ -179,8 +175,7 @@ template <typename SerDe> void Prop::serde(SerDe& sd) {
     (userAttributes)
     (docComment)
     (userType)
-    (typeConstraint)
-    (ubs)
+    (typeConstraints)
     (val)
     ;
 }

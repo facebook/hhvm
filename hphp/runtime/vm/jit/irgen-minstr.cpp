@@ -72,7 +72,6 @@ enum class SimpleOp {
 // Property information.
 
 struct PropInfo {
-  using UpperBoundVec = PreClass::UpperBoundVec;
   PropInfo(Slot slot,
            uint16_t index,
            bool isConst,
@@ -80,8 +79,7 @@ struct PropInfo {
            bool lateInit,
            bool lateInitCheck,
            Type knownType,
-           const HPHP::TypeConstraint* typeConstraint,
-           const UpperBoundVec* ubs,
+           const HPHP::TypeIntersectionConstraint* typeConstraints,
            const Class::Prop* objProp,
            const Class* propClass)
     : slot{slot}
@@ -91,8 +89,7 @@ struct PropInfo {
     , lateInit{lateInit}
     , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
-    , typeConstraint{typeConstraint}
-    , ubs{ubs}
+    , typeConstraints{typeConstraints}
     , objProp{objProp}
     , propClass{propClass}
   {}
@@ -104,8 +101,7 @@ struct PropInfo {
   bool lateInit{false};
   bool lateInitCheck{false};
   Type knownType{TCell};
-  const HPHP::TypeConstraint* typeConstraint{nullptr};
-  const UpperBoundVec* ubs{nullptr};
+  const HPHP::TypeIntersectionConstraint* typeConstraints{nullptr};
   const Class::Prop* objProp{nullptr};
   const Class* propClass{nullptr};
 
@@ -117,7 +113,7 @@ Type knownTypeForProp(const Class::Prop& prop,
                       bool ignoreLateInit) {
   auto knownType = TCell;
   if (Cfg::Eval::CheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraint, propCls, ctx, false);
+    knownType = typeFromPropTC(prop.typeConstraints.main(), propCls, ctx, false);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -201,8 +197,7 @@ getPropertyOffset(IRGS& env,
     prop.attrs & AttrLateInit,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
-    &prop.typeConstraint,
-    &prop.ubs,
+    &prop.typeConstraints,
     &prop,
     prop.cls
   );
@@ -1158,8 +1153,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     SSATmp* newVal = verifyPropType(
       env,
       gen(env, LdObjClass, base),
-      propInfo->typeConstraint,
-      propInfo->ubs,
+      propInfo->typeConstraints,
       propInfo->slot,
       value,
       key,
@@ -1815,7 +1809,7 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
   // here because the classes they refer to may not yet be defined. We return
   // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
   // because subtypes of Object are going to be countable anyway.
-  auto const& tc = prop.typeConstraint;
+  auto const& tc = prop.typeConstraints.main();
   if (tc.isSubObject() || tc.isThis() || tc.isUnresolved()) return true;
   if (prop.repoAuthType.name()) return true;
   auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
@@ -2091,8 +2085,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       verifyPropType(
         env,
         gen(env, LdObjClass, base),
-        propInfo->typeConstraint,
-        propInfo->ubs,
+        propInfo->typeConstraints,
         propInfo->slot,
         result,
         key,
@@ -2131,13 +2124,13 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
      */
     auto const fast = [&]{
       if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
-      if (!propInfo->typeConstraint ||
-          !propInfo->typeConstraint->isCheckable()) {
+      if (!propInfo->typeConstraints ||
+          !propInfo->typeConstraints->main().isCheckable()) {
         return true;
       }
       if (op != SetOpOp::ConcatEqual) return false;
       if (propInfo->knownType <= TStr) return true;
-      return propInfo->typeConstraint->alwaysPasses(KindOfString);
+      return propInfo->typeConstraints->main().alwaysPasses(KindOfString);
     }();
 
     if (!fast) {

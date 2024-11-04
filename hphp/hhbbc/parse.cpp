@@ -624,9 +624,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
       php::Param {
         param.defaultValue,
         NoBlockId,
-        param.typeConstraint,
         param.userType,
-        TypeIntersectionConstraint(param.upperBounds),
+        param.typeConstraints,
         param.userAttributes,
         param.phpCode,
         param.isInOut(),
@@ -684,10 +683,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
-  ret->retTypeConstraint  = fe.retTypeConstraint;
-  ret->hasParamsWithMultiUBs = fe.hasParamsWithMultiUBs;
-  ret->hasReturnWithMultiUBs = fe.hasReturnWithMultiUBs;
-  ret->returnUBs          = TypeIntersectionConstraint(fe.retUpperBounds);
+  ret->retTypeConstraints = fe.retTypeConstraints;
   ret->originalFilename   = fe.originalFilename;
   ret->originalModuleName = unit->moduleName;
 
@@ -927,7 +923,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   auto& propMap = pce.propMap();
   for (size_t idx = 0; idx < propMap.size(); ++idx) {
     auto& prop = propMap[idx];
-    assertx(prop.typeConstraint().validForProp());
+    assertx(prop.typeConstraints().main().validForProp());
     ret->properties.push_back(
       php::Prop {
         prop.name(),
@@ -939,8 +935,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         prop.userAttributes(),
         prop.docComment(),
         prop.userType(),
-        prop.typeConstraint(),
-        TypeIntersectionConstraint(prop.upperBounds()),
+        TypeIntersectionConstraint(prop.typeConstraints()),
         prop.val()
       }
     );

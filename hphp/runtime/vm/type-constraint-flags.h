@@ -23,15 +23,21 @@ enum class TypeConstraintFlags : uint16_t {
   NoFlags = 0x0,
 
   /*
+   * Reserved. This bit is used by TypeIntersectionConstraint to discriminate
+   * its union member.
+   */
+  SingleTypeConstraint = 0x1,
+
+  /*
    * Nullable type hints check they are either the specified type,
    * or null.
    */
-  Nullable = 0x1,
+  Nullable = 0x2,
 
   /*
    * Indicates a union
    */
-  Union = 0x2,
+  Union = 0x4,
 
   /*
    * Indicates that a type constraint is a type variable. For example,
@@ -79,6 +85,8 @@ enum class TypeConstraintFlags : uint16_t {
    */
   UpperBound = 0x200,
 };
+
+static_assert(uint8_t(TypeConstraintFlags::SingleTypeConstraint) == 0x1);
 
 constexpr TypeConstraintFlags
 operator|(TypeConstraintFlags a, TypeConstraintFlags b) {

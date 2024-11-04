@@ -28,7 +28,7 @@ Type native_function_return_type(const php::Func* f) {
 
   // Infer the type from the HNI declaration
   auto t = [&]{
-    auto const hni = f->retTypeConstraint.asSystemlibType();
+    auto const hni = f->retTypeConstraints.main().asSystemlibType();
     return hni ? from_DataType(*hni) : TInitCell;
   }();
 
@@ -50,13 +50,13 @@ Type native_function_return_type(const php::Func* f) {
   for (auto const& p : f->params) {
     if (!p.inout) continue;
     auto const dt =
-      Native::builtinOutType(p.typeConstraint, p.userAttributes);
+      Native::builtinOutType(p.typeConstraints.main(), p.userAttributes);
     if (!dt) {
       types.emplace_back(TInitCell);
       continue;
     }
     auto t = from_DataType(*dt);
-    if (p.typeConstraint.isNullable()) t = opt(std::move(t));
+    if (p.typeConstraints.main().isNullable()) t = opt(std::move(t));
     types.emplace_back(remove_uninit(std::move(t)));
   }
   std::reverse(types.begin()+1, types.end());

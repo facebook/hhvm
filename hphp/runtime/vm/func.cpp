@@ -615,8 +615,10 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     for (uint32_t i = 0; i < params.size(); ++i) {
       auto const& param = params[i];
       out << " Param: " << localVarName(i)->data();
-      if (param.typeConstraint.hasConstraint()) {
-        out << " " << param.typeConstraint.displayName(cls(), true);
+      for (auto const& tc : param.typeConstraints.range()) {
+        if (tc.hasConstraint()) {
+          out << " " << param.typeConstraints.main().displayName(cls(), true);
+        }
       }
       if (param.userType) {
         out << " (" << param.userType->data() << ")";
@@ -630,11 +632,11 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << std::endl;
     }
 
-    if (returnTypeConstraint().hasConstraint() ||
+    if (returnTypeConstraints().main().hasConstraint() ||
         (returnUserType() && !returnUserType()->empty())) {
       out << " Ret: ";
-      if (returnTypeConstraint().hasConstraint()) {
-        out << " " << returnTypeConstraint().displayName(cls(), true);
+      if (returnTypeConstraints().main().hasConstraint()) {
+        out << " " << returnTypeConstraints().main().displayName(cls(), true);
       }
       if (returnUserType() && !returnUserType()->empty()) {
         out << " (" << returnUserType()->data() << ")";
@@ -732,9 +734,6 @@ Func::SharedData::SharedData(BCPtr bc, Offset bclen,
   m_allFlags.m_memoizeICType = Func::MemoizeICType::MakeICInaccessible;
   m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
   m_allFlags.m_hasReifiedGenerics = false;
-  m_allFlags.m_hasParamsWithMultiUBs = false;
-  m_allFlags.m_hasReturnWithMultiUBs = false;
-
   m_bclenSmall = std::min<uint32_t>(bclen, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
   m_sn = std::min<uint32_t>(sn, kSmallDeltaLimit);

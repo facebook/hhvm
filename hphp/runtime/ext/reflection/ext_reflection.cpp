@@ -535,7 +535,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   }
 
   auto const& sprop = class_->staticProperties()[lookup.slot];
-  auto const& tc = sprop.typeConstraint;
+  auto const& tc = sprop.typeConstraints.main();
   // TODO(T61738946): We can remove the temporary here once we no longer coerce
   // class_meth types.
   auto tmp = value;
@@ -755,11 +755,11 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_name, make_tv<KindOfPersistentString>(func->localNames()[i]));
 
     auto const nonExtendedConstraint =
-      fpi.typeConstraint.hasConstraint() &&
-      !fpi.typeConstraint.isDisplayNullable() &&
-      !fpi.typeConstraint.isSoft();
+      fpi.typeConstraints.main().hasConstraint() &&
+      !fpi.typeConstraints.main().isDisplayNullable() &&
+      !fpi.typeConstraints.main().isSoft();
     auto const type = nonExtendedConstraint
-      ? fpi.typeConstraint.typeName()
+      ? fpi.typeConstraints.main().typeName()
       : staticEmptyString();
 
     param.set(s_type, make_tv<KindOfPersistentString>(type));
@@ -770,7 +770,8 @@ static Array get_function_param_info(const Func* func) {
 
     // callable typehint considered builtin; stdClass typehint is not
     auto const isBuiltinTC =
-      fpi.typeConstraint.isCallable() || fpi.typeConstraint.isPrecise();
+      fpi.typeConstraints.main().isCallable()
+      || fpi.typeConstraints.main().isPrecise();
     param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(isBuiltinTC));
 
     param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
@@ -783,7 +784,7 @@ static Array get_function_param_info(const Func* func) {
         )
       );
     }
-    if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
+    if (!nonExtendedConstraint || fpi.typeConstraints.main().isNullable()) {
       param.set(s_nullable, make_tv<KindOfBoolean>(true));
       param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {
@@ -821,10 +822,10 @@ static Array get_function_param_info(const Func* func) {
   for (int i = func->numParams() - 1; i >= 0; i--) {
     const Func::ParamInfo& fpi = params[i];
     auto& param = asArrRef(arr.lval(i));
-    
+
     isOptional = isOptional && (param.exists(s_default) || fpi.isOptional() ||
-                 param.exists(s_is_variadic));    
-    param.set(s_is_optional, isOptional);    
+                 param.exists(s_is_variadic));
+    param.set(s_is_optional, isOptional);
   }
   return arr;
 }
@@ -853,7 +854,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
   auto name = HHVM_MN(ReflectionFunctionAbstract, getReturnTypeHint)(this_);
   if (name && !name.empty()) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-    auto retType = func->returnTypeConstraint();
+    auto retType = func->returnTypeConstraints().main();
     if (retType.isNullable()) {
       retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {

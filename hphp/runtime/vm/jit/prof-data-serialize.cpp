@@ -607,7 +607,7 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
   pd->forEachProfilingFunc([&](auto const& func) {
     always_assert(func);
     for (auto const& p : func->params()) {
-      if (auto const ne = p.typeConstraint.anyNamedType()) {
+      if (auto const ne = p.typeConstraints.main().anyNamedType()) {
         write_seen_type(ser, ne);
       }
     }

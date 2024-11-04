@@ -964,16 +964,11 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
                                       const Type& initial) {
     if (is_closure(*ctx.cls)) return false;
     if (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) return false;
-    if (!initial.moreRefined(
-          lookup_constraint(index, ctx, prop.typeConstraint, initial).lower
-        )) {
-      return true;
-    }
     return std::any_of(
-      begin(prop.ubs.m_constraints), end(prop.ubs.m_constraints),
-      [&] (const TypeConstraint& ub) {
+      prop.typeConstraints.range().begin(), prop.typeConstraints.range().end(),
+      [&] (const TypeConstraint& tc) {
         return !initial.moreRefined(
-          lookup_constraint(index, ctx, ub, initial).lower
+          lookup_constraint(index, ctx, tc, initial).lower
         );
       }
     );
@@ -1026,11 +1021,12 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
          */
         t = TBottom;
       } else if (!(prop.attrs & AttrSystemInitialValue)) {
-        t = adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, t);
+        t = adjust_type_for_prop(
+            index, *ctx.cls, prop.typeConstraints.mainPtr(), t);
       }
       auto& elem = clsAnalysis.privateProperties[prop.name];
       elem.ty = std::move(t);
-      elem.tc = &prop.typeConstraint;
+      elem.tc = prop.typeConstraints.mainPtr();
       elem.attrs = prop.attrs;
       elem.everModified = false;
     } else {
@@ -1041,10 +1037,11 @@ ClassAnalysis analyze_class(const IIndex& index, const Context& ctx) {
         ? TBottom
         : (prop.attrs & AttrSystemInitialValue)
           ? cellTy
-          : adjust_type_for_prop(index, *ctx.cls, &prop.typeConstraint, cellTy);
+          : adjust_type_for_prop(
+              index, *ctx.cls, prop.typeConstraints.mainPtr(), cellTy);
       auto& elem = clsAnalysis.privateStatics[prop.name];
       elem.ty = std::move(t);
-      elem.tc = &prop.typeConstraint;
+      elem.tc = prop.typeConstraints.mainPtr();
       elem.attrs = prop.attrs;
       elem.everModified = false;
     }
@@ -1772,14 +1769,11 @@ std::tuple<Type, bool, bool> verify_param_type(const IIndex& index,
   assertx(paramId < ctx.func->params.size());
   auto const& pinfo = ctx.func->params[paramId];
 
-  std::vector<const TypeConstraint*> tcs{&pinfo.typeConstraint};
-  for (auto const& tc : pinfo.upperBounds.m_constraints) tcs.push_back(&tc);
-
   auto refined = TInitCell;
   auto noop = true;
   auto effectFree = true;
-  for (auto const tc : tcs) {
-    auto const lookup = lookup_constraint(index, ctx, *tc, t);
+  for (auto const& tc : pinfo.typeConstraints.range()) {
+    auto const lookup = lookup_constraint(index, ctx, tc, t);
     if (t.moreRefined(lookup.lower)) {
       refined = intersection_of(std::move(refined), t);
       continue;

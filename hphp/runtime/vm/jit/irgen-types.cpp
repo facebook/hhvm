@@ -150,7 +150,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * quite a bit depending on what the type-constraint represents, this function
  * is heavily templatized.
  *
- * Returns the potentially updated value after parameter type check 
+ * Returns the potentially updated value after parameter type check
  * and any coersions
  *
  * The lambda parameters are as follows:
@@ -201,7 +201,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
   // Check `val` against `tc` using `result` as a rule.
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> SSATmp* {
     assertx(val->type().isKnownDataType());
-    
+
     switch (result) {
       case AnnotAction::Pass:
         return val;
@@ -336,10 +336,10 @@ SSATmp* verifyTypeImpl(IRGS& env,
           [&] {
             if (checkCls->hasConstVal(TCls)) {
               // we know that val is an instance of checkCls, use that refine val's type
-              return gen(env, AssertType, Type::SubObj(checkCls->clsVal()), val);   
+              return gen(env, AssertType, Type::SubObj(checkCls->clsVal()), val);
             } else {
               return val;
-            }      
+            }
           },
           [&] {
             hint(env, Block::Hint::Unlikely);
@@ -347,7 +347,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
             return val;
           }
         );
-      } 
+      }
       verifyCls(val, checkCls);
     }
     return val;
@@ -1427,25 +1427,14 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   };
 
   auto const val = topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
-  auto const& tc = (id == TypeConstraint::ReturnId)
-    ? func->returnTypeConstraint()
-    : func->params()[id].typeConstraint;
   assertx(ind >= 0);
-  auto updatedVal = verifyFunc(tc, val);
+  auto const& tic = (id == TypeConstraint::ReturnId)
+    ? func->returnTypeConstraints()
+    : func->params()[id].typeConstraints;
 
-  if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
-    auto const& ubs = func->returnUBs();
-    for (auto const& ub : ubs.m_constraints) {
-      updatedVal = verifyFunc(ub, updatedVal);
-    }
-  } else if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
-    auto const it = ubs.find(id);
-    if (it != ubs.end()) {
-      for (auto const& ub : it->second.m_constraints) {
-        updatedVal = verifyFunc(ub, updatedVal);
-      }
-    }
+  auto updatedVal = val;
+  for (auto const& tc : tic.range()) {
+    updatedVal = verifyFunc(tc, updatedVal);
   }
 
   if (updatedVal != val) {
@@ -1530,18 +1519,11 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
     );
   };
   auto const val = topC(env, offset, DataTypeGeneric);
-  auto const& tc = func->params()[id].typeConstraint;
-  auto updatedVal = verifyFunc(tc, val);
-  if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
-    auto const it = ubs.find(id);
-    if (it != ubs.end()) {
-      for (auto const& ub : it->second.m_constraints) {
-        updatedVal = verifyFunc(ub, updatedVal);
-      }
-    }
+  auto updatedVal = val;
+  for (auto const& tc : func->params()[id].typeConstraints.range()) {
+    updatedVal = verifyFunc(tc, updatedVal);
   }
-  
+
   if (updatedVal != val) {
     auto const irspRelOffset = offsetFromIRSP(env, offset);
     gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updatedVal);
@@ -1552,8 +1534,7 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
 
 SSATmp* verifyPropType(IRGS& env,
                        SSATmp* cls,
-                       const HPHP::TypeConstraint* tc,
-                       const Class::UpperBoundVec* ubs,
+                       const TypeIntersectionConstraint* tcs,
                        Slot slot,
                        SSATmp* val,
                        SSATmp* name,
@@ -1627,9 +1608,9 @@ SSATmp* verifyPropType(IRGS& env,
       fallback
     );
   };
-  auto updatedVal = verifyFunc(tc, val);
-  for (auto const& ub : ubs->m_constraints) {
-    updatedVal = verifyFunc(&ub, updatedVal);
+  auto updatedVal = val;
+  for (auto const& tc : tcs->range()) {
+    updatedVal = verifyFunc(&tc, updatedVal);
   }
 
   return updatedVal;
@@ -1655,7 +1636,7 @@ void emitVerifyRetTypeTS(IRGS& env) {
 
 void emitVerifyRetNonNullC(IRGS& env) {
   auto const func = curFunc(env);
-  auto const& tc = func->returnTypeConstraint();
+  auto const& tc = func->returnTypeConstraints().main();
   always_assert(!tc.isNullable());
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }

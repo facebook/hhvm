@@ -60,8 +60,7 @@ struct PreClassEmitter {
          const StringData* n,
          Attr attrs,
          const StringData* userType,
-         const TypeConstraint& typeConstraint,
-         const std::vector<TypeConstraint>& ubs,
+         TypeIntersectionConstraint&& typeConstraints,
          const StringData* docComment,
          const TypedValue* val,
          RepoAuthType repoAuthType,
@@ -71,8 +70,9 @@ struct PreClassEmitter {
     const StringData* name() const { return m_name; }
     Attr attrs() const { return m_attrs; }
     const StringData* userType() const { return m_userType; }
-    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
-    const std::vector<TypeConstraint>& upperBounds() const { return m_ubs; }
+    const TypeIntersectionConstraint& typeConstraints() const {
+      return m_typeConstraints;
+    }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
@@ -85,8 +85,7 @@ struct PreClassEmitter {
         (m_docComment)
         (m_val)
         (m_repoAuthType)
-        (m_typeConstraint)
-        (m_ubs)
+        (m_typeConstraints)
         (m_userAttributes)
         ;
     }
@@ -100,8 +99,7 @@ struct PreClassEmitter {
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
-    TypeConstraint m_typeConstraint;
-    std::vector<TypeConstraint> m_ubs{};
+    TypeIntersectionConstraint m_typeConstraints{};
     UserAttributeMap m_userAttributes;
   };
 
@@ -237,31 +235,37 @@ struct PreClassEmitter {
     return m_enumIncludes;
   }
   bool addMethod(FuncEmitter* method);
-  bool addProperty(const StringData* n,
-                   Attr attrs,
-                   const StringData* userType,
-                   const TypeConstraint& typeConstraint,
-                   const std::vector<TypeConstraint>& ubs,
-                   const StringData* docComment,
-                   const TypedValue* val,
-                   RepoAuthType,
-                   UserAttributeMap);
-  bool addConstant(const StringData* n,
-                   const StringData* cls,
-                   const TypedValue* val,
-                   Array resolvedTypeStructure,
-                   ConstModifiers::Kind kind,
-                   Const::Invariance invariance,
-                   bool fromTrait,
-                   bool isAbstract);
-  bool addContextConstant(const StringData* n,
-                          Const::CoeffectsVec coeffects,
-                          bool isAbstract,
-                          bool fromTrait = false);
-  bool addAbstractConstant(const StringData* n,
-                           ConstModifiers::Kind kind =
-                             ConstModifiers::Kind::Value,
-                           bool fromTrait = false);
+  bool addProperty(
+    const StringData* n,
+    Attr attrs,
+    const StringData* userType,
+    TypeIntersectionConstraint&& typeConstraints,
+    const StringData* docComment,
+    const TypedValue* val,
+    RepoAuthType,
+    UserAttributeMap
+  );
+  bool addConstant(
+    const StringData* n,
+    const StringData* cls,
+    const TypedValue* val,
+    Array resolvedTypeStructure,
+    ConstModifiers::Kind kind,
+    Const::Invariance invariance,
+    bool fromTrait,
+    bool isAbstract
+  );
+  bool addContextConstant(
+    const StringData* n,
+    Const::CoeffectsVec coeffects,
+    bool isAbstract,
+    bool fromTrait = false
+  );
+  bool addAbstractConstant(
+    const StringData* n,
+    ConstModifiers::Kind kind =
+    ConstModifiers::Kind::Value,
+    bool fromTrait = false);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

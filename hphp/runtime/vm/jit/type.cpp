@@ -1129,17 +1129,9 @@ Type typeFromFuncParam(const Func* func, uint32_t paramId) {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };
 
-  auto const& tc = func->params()[paramId].typeConstraint;
-
-  auto t = typeFromTCImpl(tc, getThisType, func->cls()) & TInitCell;
-  if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
-    auto const it = ubs.find(paramId);
-    if (it != ubs.end()) {
-      for (auto const& ub : it->second.m_constraints) {
-        t &= typeFromTCImpl(ub, getThisType, func->cls());
-      }
-    }
+  auto t = TInitCell;
+  for (auto const& tc : func->params()[paramId].typeConstraints.range()) {
+    t &= typeFromTCImpl(tc, getThisType, func->cls());
   }
 
   return t;
@@ -1149,7 +1141,7 @@ Type typeFromFuncReturn(const Func* func) {
   // Assert this here since we're modifying the behaviour of
   // typeFromTCImpl below which should only be done for builtins
   assertx(func->isCPPBuiltin());
-  auto& tc = func->returnTypeConstraint();
+  auto& tc = func->returnTypeConstraints().main();
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };

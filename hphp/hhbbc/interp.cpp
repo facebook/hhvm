@@ -2491,7 +2491,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   Optional<Type> resolvedClsTy;
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
-    auto const& tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
+    auto const& tc = env.ctx.func->params[op.nloc1.id].typeConstraints.main();
     if (tc.isSubObject()) {
       auto const rcls = env.index.resolve_class(tc.clsName());
       assertx(rcls.has_value());
@@ -5127,8 +5127,6 @@ bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
 
 }
 
-using TCVec = std::vector<const TypeConstraint*>;
-
 void in(ISS& env, const bc::VerifyParamType& op) {
   auto [newTy, remove, effectFree] =
     verify_param_type(env.index, env.ctx, op.loc1, topC(env));
@@ -5152,7 +5150,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
     popC(env);
     return;
   }
-  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
+  auto const constraint = env.ctx.func->params[op.loc1].typeConstraints.main();
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
@@ -5192,9 +5190,9 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   popC(env);
 }
 
-void verifyRetImpl(ISS& env, const TCVec& tcs,
+void verifyRetImpl(ISS& env, const TypeIntersectionConstraint& tcs,
                    bool reduce_nullonly, bool ts_flavor) {
-  assertx(!tcs.empty());
+  assertx(!tcs.isTop());
   // If it is the ts flavor, then second thing on the stack, otherwise
   // first.
   auto stackT = topC(env, (int)ts_flavor);
@@ -5206,8 +5204,8 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     reduce_nullonly &&
     stackT.couldBe(BInitNull) &&
     !stackT.subtypeOf(BInitNull);
-  for (auto const& tc : tcs) {
-    auto const type = lookup_constraint(env.index, env.ctx, *tc, stackT);
+  for (auto const& tc : tcs.range()) {
+    auto const type = lookup_constraint(env.index, env.ctx, tc, stackT);
     if (stackT.moreRefined(type.lower)) {
       refined = intersection_of(std::move(refined), stackT);
       continue;
@@ -5223,7 +5221,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     remove = false;
     if (nullonly) {
       nullonly =
-        (!ts_flavor || tc->isThis()) &&
+        (!ts_flavor || tc.isThis()) &&
         unopt(stackT).moreRefined(type.lower);
     }
 
@@ -5289,18 +5287,12 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
-  TCVec tcs;
   auto const& pinfo = env.ctx.func->params[op.loc1];
-  tcs.push_back(&pinfo.typeConstraint);
-  for (auto const& t : pinfo.upperBounds.m_constraints) tcs.push_back(&t);
-  verifyRetImpl(env, tcs, false, false);
+  verifyRetImpl(env, pinfo.typeConstraints, false, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
-  TCVec tcs;
-  tcs.push_back(&env.ctx.func->retTypeConstraint);
-  for (auto const& t : env.ctx.func->returnUBs.m_constraints) tcs.push_back(&t);
-  verifyRetImpl(env, tcs, true, false);
+  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
@@ -5310,11 +5302,12 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
     popC(env);
     return;
   }
-  auto const constraint = env.ctx.func->retTypeConstraint;
+  auto const& retTypeConstraint = env.ctx.func->retTypeConstraints.main();
+
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !couldHaveReifiedType(env, constraint)) {
+      !couldHaveReifiedType(env, retTypeConstraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
   }
   if (auto const inputTS = tv(a)) {
@@ -5345,13 +5338,11 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       }
     }
   }
-  TCVec tcs {&constraint};
-  for (auto const& t : env.ctx.func->returnUBs.m_constraints) tcs.push_back(&t);
-  verifyRetImpl(env, tcs, true, true);
+  verifyRetImpl(env, env.ctx.func->retTypeConstraints, true, true);
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC&) {
-  auto const constraint = env.ctx.func->retTypeConstraint;
+  auto const& constraint = env.ctx.func->retTypeConstraints.main();
   if (constraint.isSoft()) return;
 
   auto stackT = topC(env);
@@ -5684,10 +5675,10 @@ void in(ISS& env, const bc::InitProp& op) {
     };
 
     auto const [refined, effectFree] = [&] () -> std::pair<Type, bool> {
-      auto [refined, effectFree] = refine(prop.typeConstraint);
-      for (auto ub : prop.ubs.m_constraints) {
+      auto [refined, effectFree] = refine(prop.typeConstraints.main());
+      for (auto const& tc : prop.typeConstraints.ubs()) {
         if (!effectFree) break;
-        auto [refined2, effectFree2] = refine(ub);
+        auto [refined2, effectFree2] = refine(tc);
         refined &= refined2;
         if (refined.is(BBottom)) effectFree = false;
         effectFree &= effectFree2;

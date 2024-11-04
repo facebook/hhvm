@@ -75,12 +75,9 @@ void verifyTypeHint(const Class* thisCls,
   assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
   if (!prop || Cfg::Eval::CheckPropTypeHints <= 0) return;
-  if (prop->typeConstraint.isCheckable()) {
-    prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
-  }
-  for (auto const& ub : prop->ubs.m_constraints) {
-    if (ub.isCheckable()) {
-      ub.verifyProperty(val, thisCls, prop->cls, prop->name);
+  for (auto const& tc : prop->typeConstraints.range()) {
+    if (tc.isCheckable()) {
+      tc.verifyProperty(val, thisCls, prop->cls, prop->name);
     }
   }
 }
@@ -88,12 +85,12 @@ void verifyTypeHint(const Class* thisCls,
 ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
   if (Cfg::Eval::CheckPropTypeHints <= 0) return;
-  if (!prop || prop->typeConstraint.isMixedResolved()) return;
+  if (!prop || prop->typeConstraints.main().isMixedResolved()) return;
   raise_property_typehint_unset_error(
     prop->cls,
     prop->name,
-    prop->typeConstraint.isSoft(),
-    prop->typeConstraint.isUpperBound()
+    prop->typeConstraints.main().isSoft(),
+    prop->typeConstraints.main().isUpperBound()
   );
 }
 
@@ -129,17 +126,16 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
 
   // If we're not hard enforcing, then the prop might contain anything.
   if (Cfg::Eval::CheckPropTypeHints <= 2) return true;
-  if (!propDecl.typeConstraint.isCheckable() ||
-      propDecl.typeConstraint.isSoft()) return true;
+  if (!propDecl.typeConstraints.main().isCheckable() ||
+      propDecl.typeConstraints.main().isSoft()) return true;
   if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
     return true;
   }
   if (prop.type() == KindOfUninit && (propDecl.attrs & AttrLateInit)) {
     return true;
   }
-  if (!assertATypeHint(propDecl.typeConstraint, prop)) return false;
-  for (auto const& ub : propDecl.ubs.m_constraints) {
-    if (!assertATypeHint(ub, prop)) return false;
+  for (auto const& tc : propDecl.typeConstraints.range()) {
+    if (!assertATypeHint(tc, prop)) return false;
   }
   return true;
 }
@@ -1449,12 +1445,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     }
 
     auto const needsCheck = lookup.prop && [&] {
-      auto const& tc = lookup.prop->typeConstraint;
-      if (setOpNeedsTypeCheck(tc, op, prop)) {
-        return true;
-      }
-      for (auto& ub : lookup.prop->ubs.m_constraints) {
-        if (setOpNeedsTypeCheck(ub, op, prop)) return true;
+      for (auto& tc : lookup.prop->typeConstraints.range()) {
+        if (setOpNeedsTypeCheck(tc, op, prop)) return true;
       }
       return false;
     }();
@@ -1529,9 +1521,8 @@ TypedValue ObjectData::incDecProp(const MemberLookupContext& ctx, IncDecOp op, c
     auto const fast = [&]{
       if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
       auto const isAnyCheckable = lookup.prop && [&] {
-        if (lookup.prop->typeConstraint.isCheckable()) return true;
-        for (auto const& ub : lookup.prop->ubs.m_constraints) {
-          if (ub.isCheckable()) return true;
+        for (auto const& tc : lookup.prop->typeConstraints.range()) {
+          if (tc.isCheckable()) return true;
         }
         return false;
       }();

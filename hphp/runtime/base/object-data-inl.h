@@ -176,7 +176,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
   assertx(Cfg::Eval::CheckPropTypeHints > 0);
   assertx(tvIsPlausible(val.tv()));
 
-  auto const& tc = prop.typeConstraint;
+  auto const& tc = prop.typeConstraints.main();
   if (!tc.isCheckable()) return;
 
   if (UNLIKELY(type(val) == KindOfUninit)) {

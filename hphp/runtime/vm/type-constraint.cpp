@@ -402,6 +402,9 @@ void TypeConstraint::serdeUnion(SerDe& sd) {
   }
 }
 
+template void TypeConstraint::serdeSingle(BlobEncoder&);
+template void TypeConstraint::serdeSingle(BlobDecoder&);
+
 template void TypeConstraint::serdeUnion(BlobEncoder&);
 template void TypeConstraint::serdeUnion(BlobDecoder&);
 
@@ -414,9 +417,6 @@ void TypeConstraint::serdeSingle(SerDe& sd)  {
     m_u.single.class_.init(m_u.single.type);
   }
 }
-
-template void TypeConstraint::serdeSingle(BlobEncoder&);
-template void TypeConstraint::serdeSingle(BlobDecoder&);
 
 ClassConstraint::ClassConstraint(LowStringPtr typeName)
   : ClassConstraint(NamePtr{}, typeName, nullptr) {
@@ -794,7 +794,8 @@ std::string show(TypeConstraintFlags flags) {
   bitName(res, flags, TypeConstraintFlags::DisplayNullable, "DisplayNullable");
   bitName(res, flags, TypeConstraintFlags::UpperBound, "UpperBound");
   bitName(res, flags, TypeConstraintFlags::Union, "Union");
-  assertx(flags == TypeConstraintFlags::NoFlags);
+  assertx(flags == TypeConstraintFlags::NoFlags
+      || flags == TypeConstraintFlags::SingleTypeConstraint);
   return res;
 }
 
@@ -1571,7 +1572,7 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
 void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
                                          const Class* ctx,
                                          const Func* func) const {
-  const auto DEBUG_ONLY tc = func->returnTypeConstraint();
+  const auto DEBUG_ONLY tc = func->returnTypeConstraints().main();
   assertx(!tc.isNullable());
   if (UNLIKELY(tvIsNull(tv))) {
     verifyReturnFail(tv, ctx, func);
@@ -1974,7 +1975,8 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
 
 bool tcCouldBeReified(const Func* func, uint32_t paramId) {
   auto const& tc = paramId == TypeConstraint::ReturnId
-    ? func->returnTypeConstraint() : func->params()[paramId].typeConstraint;
+    ? func->returnTypeConstraints().main()
+    : func->params()[paramId].typeConstraints.main();
   auto const isReifiedGenericInClosure = [&] {
     if (!func->isClosureBody()) return false;
     auto const lNames = func->localNames();

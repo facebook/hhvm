@@ -171,14 +171,12 @@ struct Func final {
     LowStringPtr userType{nullptr};
     // offset of dvi funclet from cti section base.
     Offset ctiFunclet{kInvalidOffset};
-    TypeConstraint typeConstraint;
+    TypeIntersectionConstraint typeConstraints;
     UserAttributeMap userAttributes;
   };
 
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
-  using UpperBoundVec = VMTypeIntersectionConstraint;
-  using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
   using CoeffectRules = VMFixedVector<CoeffectRule>;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -493,16 +491,12 @@ public:
   /*
    * The TypeConstraint of the return.
    */
-  const TypeConstraint& returnTypeConstraint() const;
+  const TypeIntersectionConstraint& returnTypeConstraints() const;
 
   /*
    * The user-annotated Hack return type.
    */
   const StringData* returnUserType() const;
-
-  bool hasReturnWithMultiUBs() const;
-  const UpperBoundVec& returnUBs() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -564,10 +558,6 @@ public:
    * arguments.
    */
   uint32_t numInOutParamsForArgs(int32_t numArgs) const;
-
-  bool hasParamsWithMultiUBs() const;
-
-  const ParamUBMap& paramUBs() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
@@ -1387,8 +1377,6 @@ private:
         MemoizeICType m_memoizeICType : 2;
         bool m_isPhpLeafFn : 1;
         bool m_hasReifiedGenerics : 1;
-        bool m_hasParamsWithMultiUBs : 1;
-        bool m_hasReturnWithMultiUBs : 1;
       };
       uint16_t m_allFlags;
     };
@@ -1402,8 +1390,8 @@ private:
     UserAttributeMap m_userAttributes;
     // The link can be bound for const Func.
     mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;
-    TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
     LowStringPtr m_originalFilename;
+    TypeIntersectionConstraint m_retTypeConstraints;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;
 
@@ -1447,7 +1435,7 @@ private:
   struct ExtendedSharedData : SharedData {
     template<class... Args>
     explicit ExtendedSharedData(Args&&... args)
-      : SharedData(std::forward<Args>(args)...)
+    : SharedData(std::forward<Args>(args)...)
     {
       m_allFlags.m_hasExtendedSharedData = true;
     }
@@ -1458,8 +1446,6 @@ private:
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
     ReifiedGenericsInfo m_reifiedGenericsInfo;
-    ParamUBMap m_paramUBs;
-    UpperBoundVec m_returnUBs;
     CoeffectRules m_coeffectRules;
     Offset m_bclen;  // Only read if SharedData::m_bclen is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
@@ -1469,7 +1455,7 @@ private:
     LowStringPtr m_docComment;
     LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 328>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 256 : 296>(), "");
 
   /*
    * SharedData accessors for internal use.

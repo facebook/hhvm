@@ -223,7 +223,7 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
         auto const data = AttrData { AttrTrait };
 
         if (!cls_or_obj->isA(TObj)) {
-          gen(env, JmpNZero, taken, gen(env, ClassHasAttr, data, lhs)); 
+          gen(env, JmpNZero, taken, gen(env, ClassHasAttr, data, lhs));
         }
 
         auto const rhs = gen(env, CheckNonNull, taken, rhsOpt);
@@ -487,7 +487,7 @@ SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
     auto const cls = gen(env, LdObjClass, val);
     return gen(env, LdClsName, cls);
   }
-  
+
   return nullptr;
 }
 
@@ -1467,7 +1467,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
  */
 Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
-  auto const& tc = pi.typeConstraint;
+  auto const& tc = pi.typeConstraints.main();
   if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
     // If we're dealing with an array-like interface, then there's no need to
     // check the input type: it's going to be mixed on the C++ side anyhow.
@@ -1662,7 +1662,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
   auto const genFail = [&](uint32_t param, SSATmp* val) {
     auto const expected_type = [&]{
-      auto const& tc = callee->params()[param].typeConstraint;
+      auto const& tc = callee->params()[param].typeConstraints.main();
       if (tc.isVecOrDict()) return s_vec_or_dict.get();
       auto const dt = param_target_type(callee, param).value_or(TUninit) - TNull;
       return getDataTypeString(dt.toDataType()).get();
@@ -1921,7 +1921,7 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isInOut(i));
 
   auto const& pinfo = builtin->params()[i];
-  auto const& tc = pinfo.typeConstraint;
+  auto const& tc = pinfo.typeConstraints.main();
   if (auto const dt = Native::builtinOutType(tc, pinfo.userAttributes)) {
     const auto ty = Type{*dt};
     return tc.isNullable() ? ty | TInitNull : ty;

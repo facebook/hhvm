@@ -75,17 +75,17 @@ class TestMcrouterBasic(TestMcrouterBasicBase):
         # Stats with args
         args = ["detailed", "cmd-error", "servers", "suspect_servers", "count"]
         for arg in args:
-            res = mcr.issue_command_and_read_all("stats{0}\r\n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats{arg}\r\n")
             self.assertTrue("CLIENT_ERROR" in res)
-            res = mcr.issue_command_and_read_all("stats {0}\r\n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats {arg}\r\n")
             self.assertTrue("END" in res)
-            res = mcr.issue_command_and_read_all("stats {0} \r\n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats {arg} \r\n")
             self.assertTrue("END" in res)
-            res = mcr.issue_command_and_read_all("stats{0}\n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats{arg}\n")
             self.assertTrue("CLIENT_ERROR" in res)
-            res = mcr.issue_command_and_read_all("stats {0}\n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats {arg}\n")
             self.assertTrue("END" in res)
-            res = mcr.issue_command_and_read_all("stats {0} \n".format(arg))
+            res = mcr.issue_command_and_read_all(f"stats {arg} \n")
             self.assertTrue("END" in res)
 
         # Stats with invalid arg
@@ -1124,7 +1124,7 @@ class TestMcrouterPortOverride(McrouterTestCase):
     def test_portoverride(self):
         mc = self.add_server(Memcached())
         self.port_map = {}
-        extra_args = ["--config-params", "PORT:{}".format(mc.getport())]
+        extra_args = ["--config-params", f"PORT:{mc.getport()}"]
         mcr = self.add_mcrouter(self.config, extra_args=extra_args)
         self.assertTrue(mcr.set("key", "value"))
         self.assertEqual(mcr.get("key"), "value")

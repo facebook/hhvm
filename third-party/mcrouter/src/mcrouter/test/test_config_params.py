@@ -61,7 +61,7 @@ class TestConstShardHash(McrouterTestCase):
     def test_config_params(self):
         mc = self.add_server(Memcached())
         self.port_map = {}
-        extra_args = ["--config-params", "PORT:{},POOL:A".format(mc.getport())]
+        extra_args = ["--config-params", f"PORT:{mc.getport()},POOL:A"]
         mcrouter = self.add_mcrouter(self.config, extra_args=extra_args)
 
         self.assertTrue(mcrouter.set("key", "value"))

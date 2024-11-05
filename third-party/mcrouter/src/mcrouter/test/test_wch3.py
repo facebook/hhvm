@@ -49,7 +49,7 @@ class TestWCH3(McrouterTestCase):
         request_counts = defaultdict(int)
         n = 20000
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             resp = int(self.mcrouter.get(key))
             respB = int(self.mcrouter.get("/test/B/" + key))
             respC = int(self.mcrouter.get("/test/C/" + key))

@@ -42,7 +42,7 @@ class OutputCheckerTestCase(unittest.TestCase):
             line = line.decode()
             stderr += line
             if re.search(bad, line):
-                self.fail("bad regex matched '{}'".format(line.strip()))
+                self.fail(f"bad regex matched '{line.strip()}'")
 
             if re.search(good, line):
                 signal.alarm(0)

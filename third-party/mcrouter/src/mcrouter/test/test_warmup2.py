@@ -109,7 +109,7 @@ class TestWarmup2(McrouterTestCase):
 
 class TestWarmup2AppendPrependTouch(TestWarmup2):
     def __init__(self, *args, **kwargs):
-        super(TestWarmup2AppendPrependTouch, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.use_mock_mc = True
 
     def test_warmup_append_prepend(self):

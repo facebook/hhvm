@@ -239,7 +239,7 @@ class TestMcrouterForwardedErrors(McrouterTestCase):
     def test_early_server_reply(self):
         value_len = 1024 * 1024 * 4
         value = "a" * value_len
-        cmd_header = "set test:key 0 0 {}\r\n".format(value_len)
+        cmd_header = f"set test:key 0 0 {value_len}\r\n"
         cmd = cmd_header + value + "\r\n"
         error = "SERVER_ERROR out of memory"
         self.server.setError(error)

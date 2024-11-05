@@ -31,10 +31,9 @@ class BaseDirectory:
 
 
 def MCPopen(cmd, stdout=None, stderr=None, env=None, pass_fds=()):
-    if sys.version_info >= (3, 2):  # Python 3.2 supports pass_fds
-        return subprocess.Popen(
-            cmd, stdout=stdout, stderr=stderr, env=env, pass_fds=pass_fds
-        )
+    return subprocess.Popen(
+        cmd, stdout=stdout, stderr=stderr, env=env, pass_fds=pass_fds
+    )
     return subprocess.Popen(cmd, stdout=stdout, stderr=stderr, env=env)
 
 
@@ -98,9 +97,9 @@ class ProcessBase:
         if hasattr(self, "log"):
             print(self.base_dir)
             try:
-                with open(self.log, "r") as log_f:
+                with open(self.log) as log_f:
                     log = log_f.read()
-            except IOError:
+            except OSError:
                 log = ""
         else:
             log = ""
@@ -118,11 +117,11 @@ class ProcessBase:
 
         log = self.get_log()
         if log:
-            print("{} ({}) log:\n{}".format(self, self.cmd_line, log))
+            print(f"{self} ({self.cmd_line}) log:\n{log}")
         if stdout:
-            print("{} ({}) stdout:\n{}".format(self, self.cmd_line, stdout.decode()))
+            print(f"{self} ({self.cmd_line}) stdout:\n{stdout.decode()}")
         if stderr:
-            print("{} ({}) stderr:\n{}".format(self, self.cmd_line, stderr.decode()))
+            print(f"{self} ({self.cmd_line}) stderr:\n{stderr.decode()}")
 
 
 class MCProcess(ProcessBase):
@@ -144,7 +143,7 @@ class MCProcess(ProcessBase):
         self.versionPing = versionPing
         if cmd is not None and "-s" in cmd:
             if os.path.exists(addr):
-                raise Exception("file path {} already exists".format(addr))
+                raise Exception(f"file path {addr} already exists")
             self.addr = addr
             self.port = 0
             self.addr_family = socket.AF_UNIX
@@ -259,7 +258,7 @@ class MCProcess(ProcessBase):
                     if res == Result.OK:
                         return
                 except Exception as e:
-                    print("Error on sending mcVersion in Thrift: {}".format(e))
+                    print(f"Error on sending mcVersion in Thrift: {e}")
                 retry_count += 1
                 if self.max_retries and retry_count >= self.max_retries:
                     raise RuntimeError(
@@ -271,12 +270,12 @@ class MCProcess(ProcessBase):
         try:
             if self.socket:
                 self.socket.close()
-        except IOError:
+        except OSError:
             pass
         try:
             if self.fd:
                 self.fd.close()
-        except IOError:
+        except OSError:
             pass
         self.fd = self.socket = None
 
@@ -338,7 +337,7 @@ class MCProcess(ProcessBase):
                 return line
             else:
                 self.connect()
-                raise Exception('Unexpected response "{}" ({})'.format(line, keys))
+                raise Exception(f'Unexpected response "{line}" ({keys})')
 
     def get(self, keys, return_all_info=False):
         return self._get("get", keys, expect_cas=False, return_all_info=return_all_info)
@@ -366,7 +365,7 @@ class MCProcess(ProcessBase):
         #    multi = False
         #    keys = [keys]
         res = {}
-        self._sendall("metaget {}\r\n".format(keys))
+        self._sendall(f"metaget {keys}\r\n")
 
         while True:
             line = self._fdreadline().strip()
@@ -409,7 +408,7 @@ class MCProcess(ProcessBase):
         try:
             self.socket.recv(1)
             return False
-        except socket.timeout:
+        except TimeoutError:
             pass
         return True
 
@@ -474,7 +473,7 @@ class MCProcess(ProcessBase):
     def delete(self, key, exptime=None, noreply=False):
         exptime_str = ""
         if exptime is not None:
-            exptime_str = " {}".format(exptime)
+            exptime_str = f" {exptime}"
         self._sendall(
             "delete {}{}{}\r\n".format(
                 key, exptime_str, (" noreply" if noreply else "")
@@ -590,7 +589,7 @@ class MCProcess(ProcessBase):
     def stats(self, spec=None):
         q = "stats\r\n"
         if spec:
-            q = "stats {spec}\r\n".format(spec=spec)
+            q = f"stats {spec}\r\n"
         self._sendall(q)
 
         s = {}
@@ -611,7 +610,7 @@ class MCProcess(ProcessBase):
     def raw_stats(self, spec=None):
         q = "stats\r\n"
         if spec:
-            q = "stats {spec}\r\n".format(spec=spec)
+            q = f"stats {spec}\r\n"
         self._sendall(q)
 
         s = []
@@ -666,7 +665,7 @@ class MCProcess(ProcessBase):
         if delay is None:
             self._sendall("flush_all\r\n")
         else:
-            self._sendall("flush_all {}\r\n".format(delay))
+            self._sendall(f"flush_all {delay}\r\n")
         return self._fdreadline().rstrip()
 
 
@@ -698,9 +697,7 @@ def sub_port(s, substitute_ports, port_map):
                         port_map[port] = substitute_ports[len(port_map)]
                     else:
                         if port not in substitute_ports:
-                            raise Exception(
-                                "Port {} not in substitute port map".format(port)
-                            )
+                            raise Exception(f"Port {port} not in substitute port map")
                         port_map[port] = substitute_ports[port]
                 else:
                     raise Exception(
@@ -854,14 +851,14 @@ class Mcrouter(McrouterBase):
             base_dir = BaseDirectory("mcrouter")
 
         if replace_map:
-            with open(config, "r") as config_file:
+            with open(config) as config_file:
                 replaced_config = replace_strings(config_file.read(), replace_map)
             (_, config) = tempfile.mkstemp(dir=base_dir.path)
             with open(config, "w") as config_file:
                 config_file.write(replaced_config)
 
         if substitute_config_ports:
-            with open(config, "r") as config_file:
+            with open(config) as config_file:
                 replaced_config = replace_ports(
                     config_file.read(), substitute_config_ports
                 )
@@ -902,14 +899,14 @@ class Mcrouter(McrouterBase):
             def is_alive():
                 pid = get_pid()
                 if pid:
-                    return os.path.exists("/proc/{}".format(pid))
+                    return os.path.exists(f"/proc/{pid}")
                 return False
 
             self.terminate = terminate
             self.is_alive = is_alive
 
         if substitute_config_smc_ports and sr_mock_smc_config:
-            with open(sr_mock_smc_config, "r") as config_file:
+            with open(sr_mock_smc_config) as config_file:
                 replaced_config = replace_ports(
                     config_file.read(), substitute_config_smc_ports
                 )

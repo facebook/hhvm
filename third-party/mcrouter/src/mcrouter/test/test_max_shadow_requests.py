@@ -16,7 +16,7 @@ class TimeoutServer(MockServer):
     amount of bytes and waiting for timeout seconds"""
 
     def __init__(self, expected_key, timeout):
-        super(TimeoutServer, self).__init__()
+        super().__init__()
         self.expected_bytes = len("get \r\n")
         self.expected_bytes += len(expected_key)
         self.timeout = timeout

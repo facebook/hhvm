@@ -46,13 +46,9 @@ class TestAsyncFiles(McrouterTestCase):
             # Sleep between retry intervals
             time.sleep(sleep_interval)
 
-        self.assertTrue(fileStatExists, "{} doesn't exist".format(file_stat))
-        self.assertTrue(
-            fileStartupExists, "{} doesn't exist".format(file_startup_options)
-        )
-        self.assertTrue(
-            fileConfigExists, "{} doesn't exist".format(file_config_sources)
-        )
+        self.assertTrue(fileStatExists, f"{file_stat} doesn't exist")
+        self.assertTrue(fileStartupExists, f"{file_startup_options} doesn't exist")
+        self.assertTrue(fileConfigExists, f"{file_config_sources} doesn't exist")
 
         return (file_stat, file_startup_options, file_config_sources)
 
@@ -85,7 +81,7 @@ class TestAsyncFiles(McrouterTestCase):
         self.assertEqual(len(asynclog_files), 1)
         foundPool = False
 
-        with open(asynclog_files[0], "r") as f:
+        with open(asynclog_files[0]) as f:
             for line in f.readlines():
                 if self.asynclog_name in line:
                     foundPool = True

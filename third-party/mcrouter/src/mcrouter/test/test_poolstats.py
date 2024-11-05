@@ -59,7 +59,7 @@ class TestPoolStats(McrouterTestCase):
     def check_pool_stats(self, stats_dir):
         file_stat = os.path.join(stats_dir, self.stat_prefix + "stats")
         verifiedStats = 0
-        with open(file_stat, "r") as f:
+        with open(file_stat) as f:
             for line in f.readlines():
                 # Expect all east requests to fail because it
                 # is running SleepServer
@@ -120,13 +120,13 @@ class TestPoolStats(McrouterTestCase):
         for i in range(0, n):
             m = i % 4
             if m == 0:
-                key = "twmemcache.CI.west:{}:|#|id=123".format(i)
+                key = f"twmemcache.CI.west:{i}:|#|id=123"
             elif m == 1:
-                key = "twmemcache.CI.west.1:{}:|#|id=123".format(i)
+                key = f"twmemcache.CI.west.1:{i}:|#|id=123"
             elif m == 2:
-                key = "twmemcache.CI.north:{}:|#|id=123".format(i)
+                key = f"twmemcache.CI.north:{i}:|#|id=123"
             else:
-                key = "twmemcache.CI.east:{}:|#|id=123".format(i)
+                key = f"twmemcache.CI.east:{i}:|#|id=123"
             self.mcrouter.get(key)
         self.assertGreater(int(self.mcrouter.stats()["cmd_get_count"]), 0)
         time.sleep(11)

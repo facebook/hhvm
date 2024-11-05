@@ -39,7 +39,7 @@ class TestMcrouterProcessingTime(McrouterTestCase):
         time.sleep(0.5)
         stat = self.mcrouter.stats()
         self.mcrouter.terminate()
-        scuba_samples = open(self.debug_file, "r").readlines()
+        scuba_samples = open(self.debug_file).readlines()
         # One error sampler plus three main sampler.
         self.assertEqual(len(scuba_samples), 4)
         self.assertGreaterEqual(int(stat["processing_time_us"]), 200000)

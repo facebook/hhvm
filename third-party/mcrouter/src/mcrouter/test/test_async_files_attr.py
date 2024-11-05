@@ -35,15 +35,15 @@ class TestAsyncFilesAttr(McrouterTestCase):
 
         self.assertTrue(
             self.wait_for_file(file_stat, retries=10, interval=1),
-            "{} doesn't exist".format(file_stat),
+            f"{file_stat} doesn't exist",
         )
         self.assertTrue(
             self.wait_for_file(file_startup_options, retries=10, interval=1),
-            "{} doesn't exist".format(file_startup_options),
+            f"{file_startup_options} doesn't exist",
         )
         self.assertTrue(
             self.wait_for_file(file_config_sources, retries=10, interval=1),
-            "{} doesn't exist".format(file_config_sources),
+            f"{file_config_sources} doesn't exist",
         )
 
         return (file_stat, file_startup_options, file_config_sources)
@@ -64,7 +64,7 @@ class TestAsyncFilesAttr(McrouterTestCase):
         spool_dir = mcrouter.get_async_spool_dir()
         self.assertTrue(
             self.wait_noempty_dir(spool_dir, retries=10),
-            "Not found any async log files under {}".format(spool_dir),
+            f"Not found any async log files under {spool_dir}",
         )
         # check async spool for failed delete
         asynclog_files = []
@@ -75,7 +75,7 @@ class TestAsyncFilesAttr(McrouterTestCase):
         self.assertEqual(len(asynclog_files), 1)
 
         # asynclog v2 should have attributes
-        with open(asynclog_files[0], "r") as f:
+        with open(asynclog_files[0]) as f:
             file_json = json.load(f)
             self.assertEqual(file_json[3]["a"]["a1"], 1000)
             self.assertEqual(file_json[3]["a"]["a2"], 2000)

@@ -40,7 +40,7 @@ class TestDeterministicFailoverNoFailure(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 0):
-            key = "key_{}".format(i)
+            key = f"key_{i}"
             self.mcrouter.get(key)
         time.sleep(5)
         stats = self.mcrouter.stats("all")
@@ -68,7 +68,7 @@ class TestDeterministicFailoverAllSleepServers(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 10):
-            key = "key_{}_abc_{}".format(i, 17 * i)
+            key = f"key_{i}_abc_{17 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")
@@ -119,7 +119,7 @@ class TestDeterministicFailoverAllSleepServersSamePool(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 10):
-            key = "key_{}_hYgGEs_{}_kBVq9Z_{}".format(13 * i, i, 71 * i, i)
+            key = f"key_{13 * i}_hYgGEs_{i}_kBVq9Z_{71 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")
@@ -177,7 +177,7 @@ class TestDeterministicFailoverAllSleepServersSharedConfig(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 8):
-            key = "key_{}_hYgGEs_{}_kBVq9Z_{}".format(13 * i, i, 71 * i, i)
+            key = f"key_{13 * i}_hYgGEs_{i}_kBVq9Z_{71 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")
@@ -233,7 +233,7 @@ class TestDeterministicFailoverAllSleepServersFailureDomains(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 8):
-            key = "key_{}_hYgGEs_{}_kBVq9Z_{}".format(13 * i, i, 71 * i, i)
+            key = f"key_{13 * i}_hYgGEs_{i}_kBVq9Z_{71 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")
@@ -292,7 +292,7 @@ class TestDeterministicFailoverSmallerFailoverPool(McrouterTestCase):
 
     def test_deterministic_failover(self):
         for i in range(0, 10):
-            key = "key_{}_abc_{}".format(i, 11 * i)
+            key = f"key_{i}_abc_{11 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")

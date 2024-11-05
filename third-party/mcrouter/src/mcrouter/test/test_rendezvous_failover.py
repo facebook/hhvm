@@ -31,7 +31,7 @@ class TestRendezvousFailoverNoFailure(McrouterTestCase):
 
     def test_rendezvous_failover(self):
         for i in range(0, 0):
-            key = "key_{}".format(i)
+            key = f"key_{i}"
             self.mcrouter.get(key)
         time.sleep(5)
         stats = self.mcrouter.stats("all")
@@ -59,7 +59,7 @@ class TestRendezvousFailoverAllSleepServers(McrouterTestCase):
 
     def test_rendezvous_failover(self):
         for i in range(0, 10):
-            key = "key_{}_abc_{}".format(i, 17 * i)
+            key = f"key_{i}_abc_{17 * i}"
             self.mcrouter.get(key)
             time.sleep(1)
             stats = self.mcrouter.stats("all")

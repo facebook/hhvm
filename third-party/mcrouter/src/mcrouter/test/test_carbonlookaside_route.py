@@ -165,44 +165,44 @@ class TestCarbonLookasideRouteBasic(McrouterTestCase):
         n = 20
         # Insert 20 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
         # Get the 20 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         # Query carbonlookaside directly with the configured prefix
         # that the items have indeed been stored.
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertTrue(self.mc.get(key))
         # Query the items through mcrouter and check that they are there
         # This query will be fed from carbonlookaside.
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
 
     def test_carbonlookaside_larger(self):
         n = 200
         # Insert 200 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
         # Get the 200 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         # Query carbonlookaside directly with the configured prefix
         # that the items have indeed been stored.
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertTrue(self.mc.get(key))
         # Query the items through mcrouter and check that they are there
         # This query will be fed from carbonlookaside.
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
 
 
@@ -226,22 +226,22 @@ class TestCarbonLookasideRouteExpiry(McrouterTestCase):
         n = 20
         # Insert 20 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
         # Get the 20 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         # Query carbonlookaside directly with the configured prefix
         # that the items have indeed been stored.
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertTrue(self.mc.get(key))
         time.sleep(3)
         # Query carbonlookaside directly and check they have expired
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertFalse(self.mc.get(key))
 
 
@@ -265,21 +265,21 @@ class TestCarbonLookasideRouteNoExpiry(McrouterTestCase):
         n = 20
         # Insert 20 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value", exptime=2))
         # Get the 20 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         time.sleep(4)
         # Items should have expired in memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertFalse(self.mc.get(key))
         # Items still available in carbonlookaside through mcrouter
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key))
 
 
@@ -303,44 +303,44 @@ class TestCarbonLookasideRouteLeases(McrouterTestCase):
         n = 20
         # Insert 20 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
         # Get the 20 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         # Query carbonlookaside directly with the configured prefix
         # that the items have indeed been stored.
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertTrue(self.mc.get(key))
         # Query the items through mcrouter and check that they are there
         # This query will be fed from carbonlookaside.
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
 
     def test_carbonlookaside_larger_leases(self):
         n = 200
         # Insert 200 items into memcache
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
         # Get the 200 items from memcache, they will be set in
         # carbonlookaside
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
         # Query carbonlookaside directly with the configured prefix
         # that the items have indeed been stored.
         for i in range(0, n):
-            key = "{}someprefix:{}:|#|id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:|#|id=123"
             self.assertTrue(self.mc.get(key))
         # Query the items through mcrouter and check that they are there
         # This query will be fed from carbonlookaside.
         for i in range(0, n):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
 
 
@@ -477,13 +477,13 @@ class TestCarbonLookasideRouteExpiryMsTTL(McrouterTestCase):
 
         # Insert n items into memcache
         for i in range(0, self.n):
-            key = "someprefix:{}:id=123".format(i)
+            key = f"someprefix:{i}:id=123"
             self.assertTrue(self.mcrouter.set(key, "value"))
 
         # Get the n items from memcache, they will be set in
         # carbonlookaside. Then delete them from memcache.
         for i in range(0, self.n):
-            key = "someprefix:{}:id=123".format(i)
+            key = f"someprefix:{i}:id=123"
             self.assertTrue(self.mcrouter.get(key), "value")
             self.assertTrue(self.mc.delete(key))
 
@@ -495,5 +495,5 @@ class TestCarbonLookasideRouteExpiryMsTTL(McrouterTestCase):
         time.sleep(0.5)
         # Query carbonlookaside directly and check they have expired
         for i in range(0, self.n):
-            key = "{}someprefix:{}:id=123".format(self.prefix, i)
+            key = f"{self.prefix}someprefix:{i}:id=123"
             self.assertFalse(self.mc.get(key), "value")

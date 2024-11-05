@@ -34,7 +34,7 @@ class TestServiceInfo(McrouterTestCase):
 
     def _check_route_handles(self, op):
         # Test a key 'abc,def' with a comma
-        cmd = "__mcrouter__.route_handles({},abc,def)".format(op)
+        cmd = f"__mcrouter__.route_handles({op},abc,def)"
         rh = self.mcrouter.get(cmd)
         self.assertTrue("root" in rh)
         self.assertTrue("127.0.0.1" in rh)

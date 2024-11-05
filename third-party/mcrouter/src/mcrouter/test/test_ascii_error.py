@@ -29,7 +29,7 @@ class ExtraValueServer(MockServer):
     additional reply"""
 
     def __init__(self, expected_key):
-        super(ExtraValueServer, self).__init__()
+        super().__init__()
         self.expected_key = expected_key
         self.expected_bytes = len("get " + expected_key + "\r\n")
 

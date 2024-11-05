@@ -41,7 +41,7 @@ class TestDumpConfig(McrouterTestCase):
         shutil.copyfile(self.invalid_config, config_path)
 
     def _get_dumped_config_root(self):
-        return "{}/mcrouter/0".format(self.config_dump_root.path)
+        return f"{self.config_dump_root.path}/mcrouter/0"
 
     def test_dump_config(self):
         """
@@ -60,7 +60,7 @@ class TestDumpConfig(McrouterTestCase):
         dumped_config_files = os.listdir(dumped_config_root)
         self.assertEqual(1, len(dumped_config_files))
 
-        dumped_config_file = "{}/{}".format(dumped_config_root, dumped_config_files[0])
+        dumped_config_file = f"{dumped_config_root}/{dumped_config_files[0]}"
         with open(mcrouter.config) as original_file:
             with open(dumped_config_file) as dumped_file:
                 self.assertEqual(original_file.read(), dumped_file.read())
@@ -89,7 +89,7 @@ class TestDumpConfig(McrouterTestCase):
         dumped_config_root = self._get_dumped_config_root()
         dumped_config_files = os.listdir(dumped_config_root)
         self.assertEqual(1, len(dumped_config_files))
-        dumped_config_file = "{}/{}".format(dumped_config_root, dumped_config_files[0])
+        dumped_config_file = f"{dumped_config_root}/{dumped_config_files[0]}"
         with open(self.valid_config) as original_file:
             with open(dumped_config_file) as dumped_file:
                 self.assertEqual(original_file.read(), dumped_file.read())

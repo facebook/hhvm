@@ -55,7 +55,7 @@ class MockServer(threading.Thread):
                 client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 self.runServer(client, address)
                 client.close()
-            except IOError as e:
+            except OSError as e:
                 if e.errno == errno.EWOULDBLOCK:
                     time.sleep(0.1)
                 else:
@@ -179,7 +179,7 @@ class TkoServer(MockServer):
             if self.step % (2 * self.period) >= self.period:
                 time.sleep(self.tmo)
             self.step += 1
-            if cmd.startswith("get {}\r\n".format(self.hitcmd)):
+            if cmd.startswith(f"get {self.hitcmd}\r\n"):
                 msg = "VALUE hit 0 {}\r\n{}\r\nEND\r\n".format(
                     len(str(self.port)),
                     str(self.port),

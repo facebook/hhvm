@@ -60,7 +60,7 @@ class TestNoReply(TestNoReplyBase):
 
 class TestNoReplyAppendPrepend(TestNoReplyBase):
     def __init__(self, *args, **kwargs):
-        super(TestNoReplyAppendPrepend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.use_mock_mc = True
 
     def test_affix_noreply(self):

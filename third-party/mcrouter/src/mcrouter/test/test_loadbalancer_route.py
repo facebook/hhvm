@@ -39,7 +39,7 @@ class TestLoadBalancerRoute(McrouterTestCase):
 
     def test_loadbalancer(self):
         for i in range(0, self.num_reqs):
-            key = "someprefix:{}:|#|id=123".format(i)
+            key = f"someprefix:{i}:|#|id=123"
             self.assertTrue(not self.mcrouter.get(key))
 
         self.assertGreater(int(self.mcrouter.stats()["cmd_get_count"]), 0)
@@ -47,7 +47,7 @@ class TestLoadBalancerRoute(McrouterTestCase):
         rates = self.getExpectedRates()
         for i in range(8):
             count = self.getServerCmdGetCount(self.mc[i])
-            print("server {} req count: {}".format(i, count))
+            print(f"server {i} req count: {count}")
             self.assertAlmostEqual(count / self.num_reqs, rates[i], delta=self.delta)
             sum += count
         self.assertEqual(sum, self.num_reqs)

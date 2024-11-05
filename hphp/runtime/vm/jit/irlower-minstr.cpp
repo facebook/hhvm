@@ -1119,7 +1119,7 @@ void cgSetNewElemKeyset(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   BUILD_OPTAB(KEYSET_SETNEWELEM_HELPER_TABLE, getKeyType(key));
 
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
+  auto args = argGroup(env, inst).ssa(0).memberKeyIS(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);

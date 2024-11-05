@@ -3358,7 +3358,7 @@ fields of that struct for holding intermediate values.
 
 | SetNewElemVec,    ND, S(Lval) S(InitCell), NF
 
-| SetNewElemKeyset, ND, S(Lval) S(Int,Str), NF
+| SetNewElemKeyset, ND, S(Lval) S(InitCell), NF
 
   Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 

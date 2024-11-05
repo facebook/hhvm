@@ -579,6 +579,12 @@ inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
   return VanillaKeyset::AddToSet(a, s);
 }
 
+inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, TypedValue key) {
+  if (tvIsInt(key)) return keysetSetNewElemImplPre(a, key.m_data.num);
+  if (tvIsString(key)) return keysetSetNewElemImplPre(a, key.m_data.pstr);
+  throwInvalidArrayKeyException(&key, a);
+}
+
 template<KeyType keyType>
 void keysetSetNewElemImpl(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
@@ -595,6 +601,7 @@ void keysetSetNewElemImpl(tv_lval base, key_type<keyType> key) {
 
 #define KEYSET_SETNEWELEM_HELPER_TABLE(m)       \
   /* name              keyType      */          \
+  m(keysetSetNewElemC, KeyType::Any)            \
   m(keysetSetNewElemI, KeyType::Int)            \
   m(keysetSetNewElemS, KeyType::Str)            \
 

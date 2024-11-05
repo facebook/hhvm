@@ -48,8 +48,7 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
 }
 
 SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
-  assertx (key->type().isKnownDataType());
-  if (key->isA(TCls)) {
+  auto const handleCls = [&] (SSATmp* cls) {
     if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
@@ -59,9 +58,9 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
           SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
           cns(env, makeStaticString(msg)));
     }
-    return gen(env, LdClsName, key);
-  }
-  if (key->isA(TLazyCls)) {
+    return gen(env, LdClsName, cls);
+  };
+  auto const handleLazyCls = [&] (SSATmp* lazyCls) {
     if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
       std::string msg;
       string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
@@ -71,10 +70,21 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
           SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
           cns(env, makeStaticString(msg)));
     }
-    return gen(env, LdLazyClsName, key);
-  }
-  assertx(!key->type().maybe(TCls | TLazyCls));
-  return key;
+    return gen(env, LdLazyClsName, lazyCls);
+  };
+
+  if (key->isA(TCls)) return handleCls(key);
+  if (key->isA(TLazyCls)) return handleLazyCls(key);
+  if (!key->type().maybe(TCls | TLazyCls)) return key;
+
+  return cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, TCls, taken, key); },
+    [&] (SSATmp* cls) { return handleCls(cls); },
+    [&] (Block* taken) { return gen(env, CheckType, TLazyCls, taken, key); },
+    [&] (SSATmp* lazyCls) { return handleLazyCls(lazyCls); },
+    [&] { return key; }
+  );
 }
 
 void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {

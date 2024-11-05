@@ -142,6 +142,9 @@ folly::dynamic Row::getDynamic(folly::StringPiece l) const {
 folly::dynamic Row::getDynamic(size_t l) const {
   enum_field_types type = row_block_->getFieldType(l);
   try {
+    if (row_block_->isNull(row_number_, l)) {
+      return folly::dynamic(folly::StringPiece());
+    }
     switch (type) {
       // folly::dynamic::Type::DOUBLE
       case MYSQL_TYPE_DECIMAL:

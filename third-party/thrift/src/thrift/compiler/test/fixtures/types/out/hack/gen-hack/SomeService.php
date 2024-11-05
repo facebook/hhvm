@@ -100,8 +100,8 @@ trait SomeServiceClientBase {
     $args = \apache\thrift\fixtures\types\SomeService_bounce_map_args::fromShape(shape(
       'm' => $m,
     ));
-    await $this->asyncHandler_->genBefore("SomeService", "bounce_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, "SomeService" );
+    await $this->asyncHandler_->genBefore(SomeServiceStaticMetadata::THRIFT_SVC_NAME, "bounce_map", $args);
+    $currentseqid = $this->sendImplHelper($args, "bounce_map", false, SomeServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options);
   }
 
@@ -119,8 +119,8 @@ trait SomeServiceClientBase {
     $args = \apache\thrift\fixtures\types\SomeService_binary_keyed_map_args::fromShape(shape(
       'r' => new Vector($r),
     ));
-    await $this->asyncHandler_->genBefore("SomeService", "binary_keyed_map", $args);
-    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, "SomeService" );
+    await $this->asyncHandler_->genBefore(SomeServiceStaticMetadata::THRIFT_SVC_NAME, "binary_keyed_map", $args);
+    $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, SomeServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options);
   }
 
@@ -129,10 +129,14 @@ trait SomeServiceClientBase {
 class SomeServiceAsyncClient extends \ThriftClientBase implements SomeServiceAsyncClientIf {
   use SomeServiceClientBase;
 
+  const string THRIFT_SVC_NAME = SomeServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf {
   use SomeServiceClientBase;
+
+  const string THRIFT_SVC_NAME = SomeServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -642,6 +646,8 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
 }
 
 class SomeServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'SomeService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

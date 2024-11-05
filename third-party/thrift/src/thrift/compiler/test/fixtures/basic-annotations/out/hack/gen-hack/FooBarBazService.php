@@ -113,8 +113,8 @@ trait FooBarBazServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "FooBarBazService" );
+    await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -130,8 +130,8 @@ trait FooBarBazServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "FooBarBazService" );
+    await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
   }
 
@@ -147,8 +147,8 @@ trait FooBarBazServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = FooBarBazService_baz_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooBarBazService", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "FooBarBazService" );
+    await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "baz", $args);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
   }
 
@@ -157,10 +157,14 @@ trait FooBarBazServiceClientBase {
 class FooBarBazServiceAsyncClient extends \ThriftClientBase implements FooBarBazServiceAsyncClientIf {
   use FooBarBazServiceClientBase;
 
+  const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FooBarBazServiceClient extends \ThriftClientBase implements FooBarBazServiceClientIf {
   use FooBarBazServiceClientBase;
+
+  const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -168,7 +172,7 @@ abstract class FooBarBazServiceAsyncProcessorBase extends \ThriftAsyncProcessor 
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooBarBazServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooBarBazService';
+  const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
@@ -230,7 +234,7 @@ abstract class FooBarBazServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooBarBazServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooBarBazServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooBarBazService';
+  const string THRIFT_SVC_NAME = FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_foo(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('foo');
@@ -695,6 +699,8 @@ class FooBarBazService_baz_result extends \ThriftSyncStructWithoutResult impleme
 }
 
 class FooBarBazServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FooBarBazService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

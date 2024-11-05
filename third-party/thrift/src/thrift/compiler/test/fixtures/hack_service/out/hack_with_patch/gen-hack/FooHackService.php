@@ -48,16 +48,22 @@ trait FooHackServiceClientBase {
 class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServiceAsyncClientIf {
   use FooHackServiceClientBase;
 
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceClientIf {
   use FooHackServiceClientBase;
+
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
 
 class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FooHackService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

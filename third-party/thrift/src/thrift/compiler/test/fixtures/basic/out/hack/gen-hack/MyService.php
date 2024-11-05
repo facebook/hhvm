@@ -231,8 +231,8 @@ internal trait MyServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
@@ -248,8 +248,8 @@ internal trait MyServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "getRandomData", $args);
-    $currentseqid = $this->sendImplHelper($args, "getRandomData", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getRandomData", $args);
+    $currentseqid = $this->sendImplHelper($args, "getRandomData", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options);
   }
 
@@ -267,8 +267,8 @@ internal trait MyServiceClientBase {
     $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
       'sink' => $sink,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "sink", $args);
-    $currentseqid = $this->sendImplHelper($args, "sink", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "sink", $args);
+    $currentseqid = $this->sendImplHelper($args, "sink", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
   }
 
@@ -288,8 +288,8 @@ internal trait MyServiceClientBase {
       'id' => $id,
       'data' => $data,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "putDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "putDataById", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "putDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "putDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
   }
 
@@ -307,8 +307,8 @@ internal trait MyServiceClientBase {
     $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "hasDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "hasDataById", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "hasDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "hasDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options);
   }
 
@@ -326,8 +326,8 @@ internal trait MyServiceClientBase {
     $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
       'id' => $id,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "getDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataById", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options);
   }
 
@@ -345,8 +345,8 @@ internal trait MyServiceClientBase {
     $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "deleteDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "deleteDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
   }
 
@@ -366,8 +366,8 @@ internal trait MyServiceClientBase {
       'id' => $id,
       'data' => $data,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "lobDataById", $args);
-    $currentseqid = $this->sendImplHelper($args, "lobDataById", true, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "lobDataById", $args);
+    $currentseqid = $this->sendImplHelper($args, "lobDataById", true, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitNoResponse($rpc_options);
   }
 
@@ -376,10 +376,14 @@ internal trait MyServiceClientBase {
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
+
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -387,7 +391,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -527,7 +531,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -1980,6 +1984,8 @@ class MyService_lobDataById_args implements \IThriftSyncStruct, \IThriftStructMe
 }
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'MyService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

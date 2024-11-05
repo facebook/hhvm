@@ -95,8 +95,8 @@ internal trait TestServiceWithMethodAnnotationClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, "TestServiceWithMethodAnnotation" );
+    await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options);
   }
 
@@ -112,8 +112,8 @@ internal trait TestServiceWithMethodAnnotationClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithMethodAnnotation", "testMethodWithoutAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, "TestServiceWithMethodAnnotation" );
+    await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithoutAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
   }
 
@@ -122,10 +122,14 @@ internal trait TestServiceWithMethodAnnotationClientBase {
 class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase implements TestServiceWithMethodAnnotationAsyncClientIf {
   use TestServiceWithMethodAnnotationClientBase;
 
+  const string THRIFT_SVC_NAME = TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements TestServiceWithMethodAnnotationClientIf {
   use TestServiceWithMethodAnnotationClientBase;
+
+  const string THRIFT_SVC_NAME = TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -364,6 +368,8 @@ class TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result extends
 }
 
 class TestServiceWithMethodAnnotationStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'TestServiceWithMethodAnnotation';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

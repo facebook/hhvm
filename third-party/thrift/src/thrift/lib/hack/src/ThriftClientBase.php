@@ -27,6 +27,8 @@ abstract class ThriftClientBase implements IThriftClient {
 
   protected int $seqid_ = 0;
 
+  abstract const string THRIFT_SVC_NAME;
+
   final public static function factory(
   ): (string, (function(TProtocol, ?TProtocol, ?IThriftAsyncChannel): this)) {
     return tuple(

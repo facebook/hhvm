@@ -80,8 +80,8 @@ internal trait FB303ServiceClientBase {
     $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
-    await $this->asyncHandler_->genBefore("FB303Service", "renamed_rpc", $args);
-    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, "FB303Service" );
+    await $this->asyncHandler_->genBefore(FB303ServiceStaticMetadata::THRIFT_SVC_NAME, "renamed_rpc", $args);
+    $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, FB303ServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
   }
 
@@ -90,10 +90,14 @@ internal trait FB303ServiceClientBase {
 class FB303ServiceAsyncClient extends \ThriftClientBase implements FB303ServiceAsyncClientIf {
   use FB303ServiceClientBase;
 
+  const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClientIf {
   use FB303ServiceClientBase;
+
+  const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -101,7 +105,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FB303ServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FB303Service';
+  const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
@@ -131,7 +135,7 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FB303ServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FB303Service';
+  const string THRIFT_SVC_NAME = FB303ServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
@@ -384,6 +388,8 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
 }
 
 class FB303ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FB303Service';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

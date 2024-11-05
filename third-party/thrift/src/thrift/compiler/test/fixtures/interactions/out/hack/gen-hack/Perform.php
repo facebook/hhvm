@@ -90,8 +90,8 @@ trait PerformClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Perform_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Perform", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Perform" );
+    await $this->asyncHandler_->genBefore(PerformStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, PerformStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(Perform_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -100,16 +100,22 @@ trait PerformClientBase {
 class PerformAsyncClient extends \ThriftClientBase implements PerformAsyncClientIf {
   use PerformClientBase;
 
+  const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PerformClient extends \ThriftClientBase implements PerformClientIf {
   use PerformClientBase;
+
+  const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // INTERACTION HANDLERS
 
 class Perform_MyInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -349,6 +355,8 @@ $rpc_options->setInteractionId($this->interactionId);
 }
 
 class Perform_MyInteractionFast extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -587,6 +595,8 @@ $rpc_options->setInteractionId($this->interactionId);
 }
 
 class Perform_SerialInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = PerformStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -2214,6 +2224,8 @@ class Perform_SerialInteraction_frobnicate_result extends \ThriftSyncStructWitho
 }
 
 class PerformStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Perform';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

@@ -71,8 +71,8 @@ trait FactoriesClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Factories_foo_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Factories", "foo", $args);
-    $currentseqid = $this->sendImplHelper($args, "foo", false, "Factories" );
+    await $this->asyncHandler_->genBefore(FactoriesStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
+    $currentseqid = $this->sendImplHelper($args, "foo", false, FactoriesStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
@@ -81,10 +81,14 @@ trait FactoriesClientBase {
 class FactoriesAsyncClient extends \ThriftClientBase implements FactoriesAsyncClientIf {
   use FactoriesClientBase;
 
+  const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FactoriesClient extends \ThriftClientBase implements FactoriesClientIf {
   use FactoriesClientBase;
+
+  const string THRIFT_SVC_NAME = FactoriesStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -195,6 +199,8 @@ class Factories_foo_result extends \ThriftSyncStructWithoutResult implements \IT
 }
 
 class FactoriesStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Factories';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

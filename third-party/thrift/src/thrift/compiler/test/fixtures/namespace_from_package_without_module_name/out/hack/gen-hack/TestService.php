@@ -79,8 +79,8 @@ trait TestServiceClientBase {
     $args = \test\namespace_from_package_without_module_name\TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
-    await $this->asyncHandler_->genBefore("TestService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false, "TestService" );
+    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
+    $currentseqid = $this->sendImplHelper($args, "init", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -89,10 +89,14 @@ trait TestServiceClientBase {
 class TestServiceAsyncClient extends \ThriftClientBase implements TestServiceAsyncClientIf {
   use TestServiceClientBase;
 
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceClient extends \ThriftClientBase implements TestServiceClientIf {
   use TestServiceClientBase;
+
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -100,7 +104,7 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
@@ -130,7 +134,7 @@ abstract class TestServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_init(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
@@ -349,6 +353,8 @@ class TestService_init_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'TestService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

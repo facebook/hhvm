@@ -152,8 +152,8 @@ trait RaiserClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_doBland_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Raiser", "doBland", $args);
-    $currentseqid = $this->sendImplHelper($args, "doBland", false, "Raiser" );
+    await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doBland", $args);
+    $currentseqid = $this->sendImplHelper($args, "doBland", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(Raiser_doBland_result::class, "doBland", true, $currentseqid, $rpc_options);
   }
 
@@ -172,8 +172,8 @@ trait RaiserClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_doRaise_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Raiser", "doRaise", $args);
-    $currentseqid = $this->sendImplHelper($args, "doRaise", false, "Raiser" );
+    await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doRaise", $args);
+    $currentseqid = $this->sendImplHelper($args, "doRaise", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(Raiser_doRaise_result::class, "doRaise", true, $currentseqid, $rpc_options);
   }
 
@@ -189,8 +189,8 @@ trait RaiserClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_get200_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Raiser", "get200", $args);
-    $currentseqid = $this->sendImplHelper($args, "get200", false, "Raiser" );
+    await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get200", $args);
+    $currentseqid = $this->sendImplHelper($args, "get200", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(Raiser_get200_result::class, "get200", false, $currentseqid, $rpc_options);
   }
 
@@ -209,8 +209,8 @@ trait RaiserClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Raiser_get500_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("Raiser", "get500", $args);
-    $currentseqid = $this->sendImplHelper($args, "get500", false, "Raiser" );
+    await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get500", $args);
+    $currentseqid = $this->sendImplHelper($args, "get500", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(Raiser_get500_result::class, "get500", false, $currentseqid, $rpc_options);
   }
 
@@ -219,10 +219,14 @@ trait RaiserClientBase {
 class RaiserAsyncClient extends \ThriftClientBase implements RaiserAsyncClientIf {
   use RaiserClientBase;
 
+  const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
   use RaiserClientBase;
+
+  const string THRIFT_SVC_NAME = RaiserStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -901,6 +905,8 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
 }
 
 class RaiserStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Raiser';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

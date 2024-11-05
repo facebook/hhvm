@@ -98,8 +98,8 @@ trait MyServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("MyService", "first", $args);
-    $currentseqid = $this->sendImplHelper($args, "first", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "first", $args);
+    $currentseqid = $this->sendImplHelper($args, "first", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
   }
 
@@ -117,8 +117,8 @@ trait MyServiceClientBase {
     $args = \test\fixtures\basic-structured-annotations\MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "second", $args);
+    $currentseqid = $this->sendImplHelper($args, "second", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
@@ -127,10 +127,14 @@ trait MyServiceClientBase {
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
+
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -449,6 +453,8 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'MyService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

@@ -159,8 +159,8 @@ trait NestedContainersClientBase {
         $_val0 ==> new Vector($_val0)
       ),
     ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapList", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapList", false, "NestedContainers" );
+    await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "mapList", $args);
+    $currentseqid = $this->sendImplHelper($args, "mapList", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
   }
 
@@ -178,8 +178,8 @@ trait NestedContainersClientBase {
     $args = NestedContainers_mapSet_args::fromShape(shape(
       'foo' => new Map($foo),
     ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "mapSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "mapSet", false, "NestedContainers" );
+    await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "mapSet", $args);
+    $currentseqid = $this->sendImplHelper($args, "mapSet", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
   }
 
@@ -199,8 +199,8 @@ trait NestedContainersClientBase {
         $_val0 ==> new Map($_val0)
       ),
     ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listMap", $args);
-    $currentseqid = $this->sendImplHelper($args, "listMap", false, "NestedContainers" );
+    await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "listMap", $args);
+    $currentseqid = $this->sendImplHelper($args, "listMap", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
   }
 
@@ -218,8 +218,8 @@ trait NestedContainersClientBase {
     $args = NestedContainers_listSet_args::fromShape(shape(
       'foo' => new Vector($foo),
     ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "listSet", $args);
-    $currentseqid = $this->sendImplHelper($args, "listSet", false, "NestedContainers" );
+    await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "listSet", $args);
+    $currentseqid = $this->sendImplHelper($args, "listSet", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
   }
 
@@ -243,8 +243,8 @@ trait NestedContainersClientBase {
         )
       ),
     ));
-    await $this->asyncHandler_->genBefore("NestedContainers", "turtles", $args);
-    $currentseqid = $this->sendImplHelper($args, "turtles", false, "NestedContainers" );
+    await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "turtles", $args);
+    $currentseqid = $this->sendImplHelper($args, "turtles", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
   }
 
@@ -253,10 +253,14 @@ trait NestedContainersClientBase {
 class NestedContainersAsyncClient extends \ThriftClientBase implements NestedContainersAsyncClientIf {
   use NestedContainersClientBase;
 
+  const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class NestedContainersClient extends \ThriftClientBase implements NestedContainersClientIf {
   use NestedContainersClientBase;
+
+  const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -264,7 +268,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as NestedContainersAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'NestedContainers';
+  const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
@@ -358,7 +362,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as NestedContainersIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = NestedContainersStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'NestedContainers';
+  const string THRIFT_SVC_NAME = NestedContainersStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_mapList(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('mapList');
@@ -1431,6 +1435,8 @@ class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult imp
 }
 
 class NestedContainersStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'NestedContainers';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

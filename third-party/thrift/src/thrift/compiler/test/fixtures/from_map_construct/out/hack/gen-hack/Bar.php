@@ -95,8 +95,8 @@ trait BarClientBase {
       'd' => $d,
       'e' => $e,
     ));
-    await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
+    await $this->asyncHandler_->genBefore(BarStaticMetadata::THRIFT_SVC_NAME, "baz", $args);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, BarStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
   }
 
@@ -105,10 +105,14 @@ trait BarClientBase {
 class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
+
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -116,7 +120,7 @@ abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BarAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'Bar';
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
@@ -146,7 +150,7 @@ abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BarIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'Bar';
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
@@ -489,6 +493,8 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
 }
 
 class BarStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Bar';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

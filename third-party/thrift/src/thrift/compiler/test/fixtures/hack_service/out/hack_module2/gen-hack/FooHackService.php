@@ -48,10 +48,14 @@ trait FooHackServiceClientBase {
 class FooHackServiceAsyncClient extends \ThriftClientBase implements FooHackServiceAsyncClientIf {
   use FooHackServiceClientBase;
 
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceClientIf {
   use FooHackServiceClientBase;
+
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -59,7 +63,7 @@ abstract class FooHackServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooHackServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooHackService';
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooHackServiceStaticMetadata::class);
@@ -73,7 +77,7 @@ abstract class FooHackServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as FooHackServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FooHackServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooHackService';
+  const string THRIFT_SVC_NAME = FooHackServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, FooHackServiceStaticMetadata::class);
@@ -88,6 +92,8 @@ class FooHackServiceProcessor extends FooHackServiceSyncProcessor {}
 // HELPER FUNCTIONS AND STRUCTURES
 
 class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FooHackService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

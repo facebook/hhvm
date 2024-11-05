@@ -83,8 +83,8 @@ trait TestServiceClientBase {
     $args = \hack_ns2\TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    await $this->asyncHandler_->genBefore("TestService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "TestService" );
+    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -93,10 +93,14 @@ trait TestServiceClientBase {
 class TestServiceAsyncClient extends \foo\hack_ns\FooHackServiceAsyncClient implements TestServiceAsyncClientIf {
   use TestServiceClientBase;
 
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceClient extends \foo\hack_ns\FooHackServiceClient implements TestServiceClientIf {
   use TestServiceClientBase;
+
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -104,7 +108,7 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -138,7 +142,7 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as TestServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = TestServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'TestService';
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -371,6 +375,8 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'TestService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

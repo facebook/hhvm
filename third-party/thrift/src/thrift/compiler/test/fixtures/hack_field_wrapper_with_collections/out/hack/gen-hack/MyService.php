@@ -102,8 +102,8 @@ trait MyServiceClientBase {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "func", $args);
+    $currentseqid = $this->sendImplHelper($args, "func", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(MyService_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -123,8 +123,8 @@ trait MyServiceClientBase {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "func1", $args);
-    $currentseqid = $this->sendImplHelper($args, "func1", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "func1", $args);
+    $currentseqid = $this->sendImplHelper($args, "func1", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options);
   }
 
@@ -133,10 +133,14 @@ trait MyServiceClientBase {
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
+
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -627,6 +631,8 @@ class MyService_func1_result extends \ThriftSyncStructWithResult implements \ITh
 }
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'MyService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

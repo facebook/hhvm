@@ -5550,13 +5550,16 @@ void t_hack_generator::_generate_sendImplHelper(
     std::ofstream& out,
     const t_function* tfunction,
     const t_service* tservice) {
+  std::string long_name = php_servicename_mangle(mangled_services_, tservice);
   const std::string& tservice_name =
-      (tservice->is_interaction() ? service_name_ : tservice->name());
+      (tservice->is_interaction()
+           ? "\"" + service_name_ + "\""
+           : long_name + "StaticMetadata::THRIFT_SVC_NAME");
   out << "$this->sendImplHelper($args, " << "\"" << find_hack_name(tfunction)
       << "\", "
       << (tfunction->qualifier() == t_function_qualifier::oneway ? "true"
                                                                  : "false")
-      << ", \"" << tservice_name << "\" " << ");\n";
+      << ", " << tservice_name << " );\n";
 }
 
 /**
@@ -5683,8 +5686,8 @@ void t_hack_generator::generate_service_processor(
              << "  const classname<\\IThriftServiceStaticMetadata> "
                 "SERVICE_METADATA_CLASS = "
              << long_name << "StaticMetadata::class;\n"
-             << indent() << "  const string THRIFT_SVC_NAME = '"
-             << tservice->get_name() << "';\n\n";
+             << indent() << "  const string THRIFT_SVC_NAME = " << long_name
+             << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
 
   indent_up();
 
@@ -5900,6 +5903,9 @@ void t_hack_generator::generate_service_helpers(
              << "StaticMetadata implements \\IThriftServiceStaticMetadata {\n";
   indent_up();
 
+  f_service_ << indent() << "const string THRIFT_SVC_NAME = '"
+             << tservice->name() << "';\n\n";
+
   // Expose service metadata
   f_service_ << indent() << "public static function getServiceMetadata()[]: "
              << "\\tmeta_ThriftService {\n";
@@ -5994,6 +6000,9 @@ void t_hack_generator::generate_service_interactions(
                       service_name + "_" + interaction->name())
                << " extends \\ThriftClientBase {\n";
     indent_up();
+    f_service_ << indent() << "const string THRIFT_SVC_NAME = "
+               << php_servicename_mangle(mangle, tservice)
+               << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
 
     f_service_ << indent() << "private \\InteractionId $interactionId;\n\n";
 
@@ -7120,7 +7129,8 @@ void t_hack_generator::_generate_service_client_children(
       << " implements " << long_name << interface_suffix << "If {\n"
       << "  use " << long_name << "ClientBase;\n\n";
   indent_up();
-
+  out << indent() << "const string THRIFT_SVC_NAME = " << long_name
+      << "StaticMetadata::THRIFT_SVC_NAME;\n\n";
   indent_down();
   out << "}\n\n";
 }
@@ -7144,8 +7154,11 @@ void t_hack_generator::_generate_service_client_child_fn(
 
   std::string funname =
       find_hack_name(tfunction) + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
+  std::string long_name = php_servicename_mangle(mangled_services_, tservice);
   const std::string& tservice_name =
-      (tservice->is_interaction() ? service_name_ : tservice->name());
+      (tservice->is_interaction()
+           ? "\"" + service_name_ + "\""
+           : long_name + "StaticMetadata::THRIFT_SVC_NAME");
   std::string return_typehint =
       type_to_typehint(tfunction->return_type().get_type());
 
@@ -7179,8 +7192,8 @@ void t_hack_generator::_generate_service_client_child_fn(
   }
 
   _generate_args(out, tservice, tfunction);
-  indent(out) << "await $this->asyncHandler_->genBefore(\"" << tservice_name
-              << "\", \"" << generate_rpc_function_name(tservice, tfunction)
+  indent(out) << "await $this->asyncHandler_->genBefore(" << tservice_name
+              << ", \"" << generate_rpc_function_name(tservice, tfunction)
               << "\", $args);\n";
   _generate_current_seq_id(out, tservice, tfunction);
 

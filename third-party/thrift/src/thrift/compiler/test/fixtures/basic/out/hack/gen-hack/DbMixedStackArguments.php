@@ -101,8 +101,8 @@ internal trait DbMixedStackArgumentsClientBase {
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey0_args::fromShape(shape(
       'key' => $key,
     ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey0", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, "DbMixedStackArguments" );
+    await $this->asyncHandler_->genBefore(DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME, "getDataByKey0", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options);
   }
 
@@ -120,8 +120,8 @@ internal trait DbMixedStackArgumentsClientBase {
     $args = \test\fixtures\basic\DbMixedStackArguments_getDataByKey1_args::fromShape(shape(
       'key' => $key,
     ));
-    await $this->asyncHandler_->genBefore("DbMixedStackArguments", "getDataByKey1", $args);
-    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, "DbMixedStackArguments" );
+    await $this->asyncHandler_->genBefore(DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME, "getDataByKey1", $args);
+    $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options);
   }
 
@@ -130,10 +130,14 @@ internal trait DbMixedStackArgumentsClientBase {
 class DbMixedStackArgumentsAsyncClient extends \ThriftClientBase implements DbMixedStackArgumentsAsyncClientIf {
   use DbMixedStackArgumentsClientBase;
 
+  const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedStackArgumentsClientIf {
   use DbMixedStackArgumentsClientBase;
+
+  const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -141,7 +145,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as DbMixedStackArgumentsAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
+  const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
@@ -187,7 +191,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as DbMixedStackArgumentsIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
+  const string THRIFT_SVC_NAME = DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
@@ -614,6 +618,8 @@ class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithRe
 }
 
 class DbMixedStackArgumentsStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

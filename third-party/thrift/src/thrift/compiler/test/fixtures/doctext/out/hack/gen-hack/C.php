@@ -139,8 +139,8 @@ trait CClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_f_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("C", "f", $args);
-    $currentseqid = $this->sendImplHelper($args, "f", false, "C" );
+    await $this->asyncHandler_->genBefore(CStaticMetadata::THRIFT_SVC_NAME, "f", $args);
+    $currentseqid = $this->sendImplHelper($args, "f", false, CStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
   }
 
@@ -159,7 +159,7 @@ trait CClientBase {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = C_numbers_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("C", "numbers", $args);
-    $currentseqid = $this->sendImplHelper($args, "numbers", false, "C" );
+    $currentseqid = $this->sendImplHelper($args, "numbers", false, CStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(C_numbers_FirstResponse::class, C_numbers_StreamResponse::class, "numbers", true, $currentseqid, $rpc_options);
   }
 
@@ -183,8 +183,8 @@ trait CClientBase {
       'b' => $b,
       'c' => $c,
     ));
-    await $this->asyncHandler_->genBefore("C", "thing", $args);
-    $currentseqid = $this->sendImplHelper($args, "thing", false, "C" );
+    await $this->asyncHandler_->genBefore(CStaticMetadata::THRIFT_SVC_NAME, "thing", $args);
+    $currentseqid = $this->sendImplHelper($args, "thing", false, CStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options);
   }
 
@@ -193,10 +193,14 @@ trait CClientBase {
 class CAsyncClient extends \ThriftClientBase implements CAsyncClientIf {
   use CClientBase;
 
+  const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class CClient extends \ThriftClientBase implements CClientIf {
   use CClientBase;
+
+  const string THRIFT_SVC_NAME = CStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -738,6 +742,8 @@ class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStru
 }
 
 class CStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'C';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

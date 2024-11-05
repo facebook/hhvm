@@ -95,8 +95,8 @@ internal trait TestServiceWithServiceAnnotationClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, "TestServiceWithServiceAnnotation" );
+    await $this->asyncHandler_->genBefore(TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithServiceAnnotation", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options);
   }
 
@@ -112,8 +112,8 @@ internal trait TestServiceWithServiceAnnotationClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("TestServiceWithServiceAnnotation", "testMethodWithServiceAnnotation2", $args);
-    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, "TestServiceWithServiceAnnotation" );
+    await $this->asyncHandler_->genBefore(TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithServiceAnnotation2", $args);
+    $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
   }
 
@@ -122,10 +122,14 @@ internal trait TestServiceWithServiceAnnotationClientBase {
 class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase implements TestServiceWithServiceAnnotationAsyncClientIf {
   use TestServiceWithServiceAnnotationClientBase;
 
+  const string THRIFT_SVC_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implements TestServiceWithServiceAnnotationClientIf {
   use TestServiceWithServiceAnnotationClientBase;
+
+  const string THRIFT_SVC_NAME = TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -364,6 +368,8 @@ class TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result e
 }
 
 class TestServiceWithServiceAnnotationStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'TestServiceWithServiceAnnotation';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

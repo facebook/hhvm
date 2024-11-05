@@ -123,8 +123,8 @@ trait PrimitivesServiceClientBase {
       'param0' => $param0,
       'param1' => $param1,
     ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "init", $args);
-    $currentseqid = $this->sendImplHelper($args, "init", false, "PrimitivesService" );
+    await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
+    $currentseqid = $this->sendImplHelper($args, "init", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options);
   }
 
@@ -141,8 +141,8 @@ trait PrimitivesServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("PrimitivesService", "method_that_throws", $args);
-    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, "PrimitivesService" );
+    await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
+    $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options);
   }
 
@@ -160,8 +160,8 @@ trait PrimitivesServiceClientBase {
     $args = PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,
     ));
-    await $this->asyncHandler_->genBefore("PrimitivesService", "return_void_method", $args);
-    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, "PrimitivesService" );
+    await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "return_void_method", $args);
+    $currentseqid = $this->sendImplHelper($args, "return_void_method", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
@@ -170,10 +170,14 @@ trait PrimitivesServiceClientBase {
 class PrimitivesServiceAsyncClient extends \ThriftClientBase implements PrimitivesServiceAsyncClientIf {
   use PrimitivesServiceClientBase;
 
+  const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PrimitivesServiceClient extends \ThriftClientBase implements PrimitivesServiceClientIf {
   use PrimitivesServiceClientBase;
+
+  const string THRIFT_SVC_NAME = PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -648,6 +652,8 @@ class PrimitivesService_return_void_method_result extends \ThriftSyncStructWitho
 }
 
 class PrimitivesServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'PrimitivesService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

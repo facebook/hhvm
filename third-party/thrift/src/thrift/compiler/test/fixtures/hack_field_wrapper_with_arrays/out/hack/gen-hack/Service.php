@@ -78,8 +78,8 @@ trait ServiceClientBase {
       'arg1' => $arg1,
       'arg2' => $arg2,
     ));
-    await $this->asyncHandler_->genBefore("Service", "func", $args);
-    $currentseqid = $this->sendImplHelper($args, "func", false, "Service" );
+    await $this->asyncHandler_->genBefore(ServiceStaticMetadata::THRIFT_SVC_NAME, "func", $args);
+    $currentseqid = $this->sendImplHelper($args, "func", false, ServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options);
   }
 
@@ -88,10 +88,14 @@ trait ServiceClientBase {
 class ServiceAsyncClient extends \ThriftClientBase implements ServiceAsyncClientIf {
   use ServiceClientBase;
 
+  const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class ServiceClient extends \ThriftClientBase implements ServiceClientIf {
   use ServiceClientBase;
+
+  const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -99,7 +103,7 @@ abstract class ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as ServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = ServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'Service';
+  const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_func(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
@@ -129,7 +133,7 @@ abstract class ServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as ServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = ServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'Service';
+  const string THRIFT_SVC_NAME = ServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_func(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('func');
@@ -404,6 +408,8 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
 }
 
 class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Service';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

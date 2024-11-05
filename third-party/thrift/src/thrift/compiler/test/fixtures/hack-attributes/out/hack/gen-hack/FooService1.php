@@ -75,8 +75,8 @@ trait FooService1ClientBase {
     $args = \test\fixtures\jsenum\FooService1_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    await $this->asyncHandler_->genBefore("FooService1", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "FooService1" );
+    await $this->asyncHandler_->genBefore(FooService1StaticMetadata::THRIFT_SVC_NAME, "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, FooService1StaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -86,11 +86,15 @@ trait FooService1ClientBase {
 class FooService1AsyncClient extends \ThriftClientBase implements FooService1AsyncClientIf {
   use FooService1ClientBase;
 
+  const string THRIFT_SVC_NAME = FooService1StaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 <<Oncalls('thrift')>>
 class FooService1Client extends \ThriftClientBase implements FooService1ClientIf {
   use FooService1ClientBase;
+
+  const string THRIFT_SVC_NAME = FooService1StaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -247,6 +251,8 @@ class FooService1_ping_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class FooService1StaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FooService1';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

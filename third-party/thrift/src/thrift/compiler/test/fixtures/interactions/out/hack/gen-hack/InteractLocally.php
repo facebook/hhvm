@@ -53,16 +53,22 @@ trait InteractLocallyClientBase {
 class InteractLocallyAsyncClient extends \ThriftClientBase implements InteractLocallyAsyncClientIf {
   use InteractLocallyClientBase;
 
+  const string THRIFT_SVC_NAME = InteractLocallyStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class InteractLocallyClient extends \ThriftClientBase implements InteractLocallyClientIf {
   use InteractLocallyClientBase;
+
+  const string THRIFT_SVC_NAME = InteractLocallyStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // INTERACTION HANDLERS
 
 class InteractLocally_SharedInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = InteractLocallyStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -612,6 +618,8 @@ class InteractLocally_SharedInteraction_tear_down_result extends \ThriftSyncStru
 }
 
 class InteractLocallyStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'InteractLocally';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

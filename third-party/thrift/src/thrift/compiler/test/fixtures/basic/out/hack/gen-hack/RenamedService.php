@@ -78,8 +78,8 @@ internal trait RenamedServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("FooService", "simple_rpc", $args);
-    $currentseqid = $this->sendImplHelper($args, "simple_rpc", false, "FooService" );
+    await $this->asyncHandler_->genBefore(RenamedServiceStaticMetadata::THRIFT_SVC_NAME, "simple_rpc", $args);
+    $currentseqid = $this->sendImplHelper($args, "simple_rpc", false, RenamedServiceStaticMetadata::THRIFT_SVC_NAME );
     await $this->genAwaitResponse(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
   }
 
@@ -88,10 +88,14 @@ internal trait RenamedServiceClientBase {
 class RenamedServiceAsyncClient extends \ThriftClientBase implements RenamedServiceAsyncClientIf {
   use RenamedServiceClientBase;
 
+  const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceClientIf {
   use RenamedServiceClientBase;
+
+  const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -99,7 +103,7 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as RenamedServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooService';
+  const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
@@ -129,7 +133,7 @@ abstract class RenamedServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as RenamedServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'FooService';
+  const string THRIFT_SVC_NAME = RenamedServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
@@ -294,6 +298,8 @@ class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult implem
 }
 
 class RenamedServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'FooService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

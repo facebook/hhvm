@@ -84,8 +84,8 @@ trait InteractWithSharedClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("InteractWithShared", "do_some_similar_things", $args);
-    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, "InteractWithShared" );
+    await $this->asyncHandler_->genBefore(InteractWithSharedStaticMetadata::THRIFT_SVC_NAME, "do_some_similar_things", $args);
+    $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, InteractWithSharedStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options);
   }
 
@@ -94,16 +94,22 @@ trait InteractWithSharedClientBase {
 class InteractWithSharedAsyncClient extends \ThriftClientBase implements InteractWithSharedAsyncClientIf {
   use InteractWithSharedClientBase;
 
+  const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class InteractWithSharedClient extends \ThriftClientBase implements InteractWithSharedClientIf {
   use InteractWithSharedClientBase;
+
+  const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // INTERACTION HANDLERS
 
 class InteractWithShared_MyInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -343,6 +349,8 @@ $rpc_options->setInteractionId($this->interactionId);
 }
 
 class InteractWithShared_SharedInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = InteractWithSharedStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -1718,6 +1726,8 @@ class InteractWithShared_SharedInteraction_tear_down_result extends \ThriftSyncS
 }
 
 class InteractWithSharedStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'InteractWithShared';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

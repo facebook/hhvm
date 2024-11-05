@@ -79,8 +79,8 @@ trait TestServiceClientBase {
     $args = \hack_ns2\TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    await $this->asyncHandler_->genBefore("TestService", "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, "TestService" );
+    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
+    $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
@@ -89,10 +89,14 @@ trait TestServiceClientBase {
 class TestServiceAsyncClient extends \FooHackServiceAsyncClient implements TestServiceAsyncClientIf {
   use TestServiceClientBase;
 
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class TestServiceClient extends \FooHackServiceClient implements TestServiceClientIf {
   use TestServiceClientBase;
+
+  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -249,6 +253,8 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'TestService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

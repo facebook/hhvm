@@ -198,7 +198,7 @@ trait PubSubStreamingServiceClientBase {
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstream", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstream", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "returnstream", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstream_FirstResponse::class, PubSubStreamingService_returnstream_StreamResponse::class, "returnstream", true, $currentseqid, $rpc_options);
   }
 
@@ -217,7 +217,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "streamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "streamthrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "streamthrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_streamthrows_FirstResponse::class, PubSubStreamingService_streamthrows_StreamResponse::class, "streamthrows", true, $currentseqid, $rpc_options);
   }
 
@@ -237,7 +237,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "servicethrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
   }
 
@@ -258,7 +258,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
-    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
   }
 
@@ -278,7 +278,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "boththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "boththrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "boththrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_boththrows_FirstResponse::class, PubSubStreamingService_boththrows_StreamResponse::class, "boththrows", true, $currentseqid, $rpc_options);
   }
 
@@ -297,7 +297,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamstreamthrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamstreamthrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamstreamthrows_FirstResponse::class, PubSubStreamingService_responseandstreamstreamthrows_StreamResponse::class, "responseandstreamstreamthrows", false, $currentseqid, $rpc_options);
   }
 
@@ -317,7 +317,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamservicethrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamservicethrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamservicethrows_FirstResponse::class, PubSubStreamingService_responseandstreamservicethrows_StreamResponse::class, "responseandstreamservicethrows", false, $currentseqid, $rpc_options);
   }
 
@@ -337,7 +337,7 @@ trait PubSubStreamingServiceClientBase {
       'foo' => $foo,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "responseandstreamboththrows", $args);
-    $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "responseandstreamboththrows", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_responseandstreamboththrows_FirstResponse::class, PubSubStreamingService_responseandstreamboththrows_StreamResponse::class, "responseandstreamboththrows", false, $currentseqid, $rpc_options);
   }
 
@@ -358,7 +358,7 @@ trait PubSubStreamingServiceClientBase {
       'i32_to' => $i32_to,
     ));
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "returnstreamFast", $args);
-    $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false, "PubSubStreamingService" );
+    $currentseqid = $this->sendImplHelper($args, "returnstreamFast", false, PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitStreamResponse(PubSubStreamingService_returnstreamFast_FirstResponse::class, PubSubStreamingService_returnstreamFast_StreamResponse::class, "returnstreamFast", true, $currentseqid, $rpc_options);
   }
 
@@ -367,10 +367,14 @@ trait PubSubStreamingServiceClientBase {
 class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements PubSubStreamingServiceAsyncClientIf {
   use PubSubStreamingServiceClientBase;
 
+  const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubStreamingServiceClientIf {
   use PubSubStreamingServiceClientBase;
+
+  const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -378,7 +382,7 @@ abstract class PubSubStreamingServiceAsyncProcessorBase extends \ThriftAsyncProc
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as PubSubStreamingServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'PubSubStreamingService';
+  const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
@@ -392,7 +396,7 @@ abstract class PubSubStreamingServiceSyncProcessorBase extends \ThriftSyncProces
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as PubSubStreamingServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = PubSubStreamingServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'PubSubStreamingService';
+  const string THRIFT_SVC_NAME = PubSubStreamingServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, PubSubStreamingServiceStaticMetadata::class);
@@ -2726,6 +2730,8 @@ class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncS
 }
 
 class PubSubStreamingServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'PubSubStreamingService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

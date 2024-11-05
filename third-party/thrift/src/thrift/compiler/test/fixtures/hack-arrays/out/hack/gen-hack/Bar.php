@@ -80,8 +80,8 @@ trait BarClientBase {
         $_val0 ==> dict($_val0)
       ),
     ));
-    await $this->asyncHandler_->genBefore("Bar", "baz", $args);
-    $currentseqid = $this->sendImplHelper($args, "baz", false, "Bar" );
+    await $this->asyncHandler_->genBefore(BarStaticMetadata::THRIFT_SVC_NAME, "baz", $args);
+    $currentseqid = $this->sendImplHelper($args, "baz", false, BarStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options);
   }
 
@@ -90,10 +90,14 @@ trait BarClientBase {
 class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
   use BarClientBase;
 
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BarClient extends \ThriftClientBase implements BarClientIf {
   use BarClientBase;
+
+  const string THRIFT_SVC_NAME = BarStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -331,6 +335,8 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
 }
 
 class BarStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'Bar';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

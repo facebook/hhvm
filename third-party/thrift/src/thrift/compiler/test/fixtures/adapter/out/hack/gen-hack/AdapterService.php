@@ -98,8 +98,8 @@ trait AdapterServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("AdapterService", "count", $args);
-    $currentseqid = $this->sendImplHelper($args, "count", false, "AdapterService" );
+    await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
+    $currentseqid = $this->sendImplHelper($args, "count", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options);
   }
 
@@ -117,8 +117,8 @@ trait AdapterServiceClientBase {
     $args = \facebook\thrift\test\AdapterService_adaptedTypes_args::fromShape(shape(
       'arg' => $arg,
     ));
-    await $this->asyncHandler_->genBefore("AdapterService", "adaptedTypes", $args);
-    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, "AdapterService" );
+    await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "adaptedTypes", $args);
+    $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options);
   }
 
@@ -127,10 +127,14 @@ trait AdapterServiceClientBase {
 class AdapterServiceAsyncClient extends \ThriftClientBase implements AdapterServiceAsyncClientIf {
   use AdapterServiceClientBase;
 
+  const string THRIFT_SVC_NAME = AdapterServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceClientIf {
   use AdapterServiceClientBase;
+
+  const string THRIFT_SVC_NAME = AdapterServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -531,6 +535,8 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
 }
 
 class AdapterServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'AdapterService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return \tmeta_ThriftService::fromShape(
       shape(

@@ -73,8 +73,8 @@ trait MyServiceClientBase {
     $args = MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
-    await $this->asyncHandler_->genBefore("MyService", "second", $args);
-    $currentseqid = $this->sendImplHelper($args, "second", false, "MyService" );
+    await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "second", $args);
+    $currentseqid = $this->sendImplHelper($args, "second", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
   }
 
@@ -83,10 +83,14 @@ trait MyServiceClientBase {
 class MyServiceAsyncClient extends \ThriftClientBase implements MyServiceAsyncClientIf {
   use MyServiceClientBase;
 
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
   use MyServiceClientBase;
+
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
@@ -94,7 +98,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_second(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
@@ -124,7 +128,7 @@ abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as MyServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'MyService';
+  const string THRIFT_SVC_NAME = MyServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_second(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('second');
@@ -400,6 +404,8 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
 }
 
 class MyServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'MyService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

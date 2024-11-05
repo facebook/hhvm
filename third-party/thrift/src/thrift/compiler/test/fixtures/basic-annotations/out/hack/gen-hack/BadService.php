@@ -78,8 +78,8 @@ trait BadServiceClientBase {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = BadService_bar_args::withDefaultValues();
-    await $this->asyncHandler_->genBefore("BadService", "bar", $args);
-    $currentseqid = $this->sendImplHelper($args, "bar", false, "BadService" );
+    await $this->asyncHandler_->genBefore(BadServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
+    $currentseqid = $this->sendImplHelper($args, "bar", false, BadServiceStaticMetadata::THRIFT_SVC_NAME );
     return await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options);
   }
 
@@ -88,16 +88,22 @@ trait BadServiceClientBase {
 class BadServiceAsyncClient extends \ThriftClientBase implements BadServiceAsyncClientIf {
   use BadServiceClientBase;
 
+  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
+
 }
 
 class BadServiceClient extends \ThriftClientBase implements BadServiceClientIf {
   use BadServiceClientBase;
+
+  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // INTERACTION HANDLERS
 
 class BadService_BadInteraction extends \ThriftClientBase {
+  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
+
   private \InteractionId $interactionId;
 
   public function __construct(\TProtocol $input, ?\TProtocol $output = null, ?\IThriftMigrationAsyncChannel $channel = null)[leak_safe] {
@@ -171,7 +177,7 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BadServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'BadService';
+  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
@@ -201,7 +207,7 @@ abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
   use \GetThriftServiceMetadata;
   abstract const type TThriftIf as BadServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
-  const string THRIFT_SVC_NAME = 'BadService';
+  const string THRIFT_SVC_NAME = BadServiceStaticMetadata::THRIFT_SVC_NAME;
 
   protected function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
@@ -532,6 +538,8 @@ class BadService_BadInteraction_foo_result extends \ThriftSyncStructWithoutResul
 }
 
 class BadServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+  const string THRIFT_SVC_NAME = 'BadService';
+
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
     return tmeta_ThriftService::fromShape(
       shape(

@@ -40,6 +40,7 @@
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/blob-encoder.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/file.h"
 #include "hphp/util/trace.h"
 #include <iterator>
@@ -439,7 +440,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     );
 
     if (ex->m_nativeFuncPtr) {
-      if (UNLIKELY(RO::EvalRecordReplay)) {
+      if (UNLIKELY(Cfg::Eval::RecordReplay)) {
         rr::addNativeFuncAttrs(ex->m_nativeFuncPtr, attrs);
       }
       if (info.sig.ret == Native::NativeSig::Type::MixedTV  ||

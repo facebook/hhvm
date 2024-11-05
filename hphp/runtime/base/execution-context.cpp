@@ -81,6 +81,7 @@
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 #include "hphp/zend/zend-math.h"
@@ -893,7 +894,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       m_deferredErrors = empty_vec_array();
       SCOPE_EXIT { m_deferredErrors = empty_vec_array(); };
-      if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+      if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
         Recorder::onUserErrorHandlerEntry(
           e.getMessage(), backtrace, errnum, swallowExceptions);
       }
@@ -1408,11 +1409,11 @@ void ExecutionContext::requestInit() {
   vmStack().requestInit();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
-  if (UNLIKELY(RO::EvalRecordReplay)) {
-    if (RO::EvalRecordSampleRate) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
+    if (Cfg::Eval::RecordSampleRate) {
       m_recorder.emplace();
       m_recorder->requestInit();
-    } else if (RO::EvalReplay) {
+    } else if (Cfg::Eval::Replay) {
       Replayer::requestInit();
     }
   }
@@ -1460,8 +1461,8 @@ void ExecutionContext::requestInit() {
   // merged.
   autoTypecheckRequestInit();
 
-  if (!RO::RepoAuthoritative && RO::EvalSampleRequestTearing) {
-    if (StructuredLog::coinflip(RO::EvalSampleRequestTearing)) {
+  if (!RO::RepoAuthoritative && Cfg::Eval::SampleRequestTearing) {
+    if (StructuredLog::coinflip(Cfg::Eval::SampleRequestTearing)) {
       m_requestStartForTearing.emplace();
       Timer::GetRealtimeTime(*m_requestStartForTearing);
     }
@@ -1474,11 +1475,11 @@ void ExecutionContext::requestExit() {
   autoTypecheckRequestExit();
   HHProf::Request::FinishProfiling();
 
-  if (UNLIKELY(RO::EvalRecordReplay)) {
-    if (RO::EvalRecordSampleRate) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
+    if (Cfg::Eval::RecordSampleRate) {
       m_recorder->requestExit();
       m_recorder.reset();
-    } else if (RO::EvalReplay) {
+    } else if (Cfg::Eval::Replay) {
       Replayer::requestExit();
     }
   }

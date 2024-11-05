@@ -885,48 +885,9 @@ struct RuntimeOption {
   F(int32_t, NoticeOnCoerceForStrConcat, 0)                             \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(int32_t, NoticeOnCoerceForStrConcat2, 0)                            \
-  F(string, TaoMigrationOverride, std::string(""))                      \
-  F(string, SRRouteMigrationOverride, std::string(""))                  \
-  F(int32_t, SampleRequestTearing, 0)                                   \
-  F(int32_t, RequestTearingSkewMicros, 1500)                            \
-  F(bool,    SampleRequestTearingForce, true)                           \
-  F(bool, EnableAbstractContextConstants, true)                         \
-  /* The maximum number of resolved variants allowed in a single case
-     type. This value is determined after flattening. */                \
-  F(uint32_t, MaxCaseTypeVariants, 48)                                  \
-  F(uint32_t, LogSlowWatchmanQueriesMsec, 500)                          \
-  F(uint32_t, LogSlowWatchmanQueriesRate, 1)                            \
-  F(uint32_t, StartOptionLogRate, 0)                                    \
-  F(std::string, StartOptionLogCache, "/tmp/hhvm-options-%{user}-%{hash}")\
-  F(uint64_t, StartOptionLogWindow, 86400)                              \
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
-  F(bool, RecordReplay, false)                                          \
-  /* Format: _SUPERGLOBAL.Key=Value[&_SUPERGLOBAL.Key=Value...] */      \
-  /* Example: _SERVER.SCRIPT_URL=/foo&_POST.key=value */                \
-  F(string, RecordSampleFilter, std::string(""))                        \
-  F(uint64_t, RecordSampleRate, 0)                                      \
-  F(string, RecordDir, std::string(""))                                 \
-  F(bool, Replay, false)                                                \
-  F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
-  F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
-  F(bool, AutoloadEagerSyncUnitCache, true)                             \
-  F(bool, AutoloadEagerReloadUnitCache, true)                           \
-  F(bool, AutoloadInitEarly, false)                                     \
-  /* Whether we should dump the request headers into $_SERVER */        \
-  F(bool, SetHeadersInServerSuperGlobal, true)                          \
-  /* Whether we should stop parsing cookies out of the headers and
-     setting it into a few super globals - including fully removing
-     the existance of the $_COOKIE superglobal */                       \
-  F(bool, DisableParsedCookies, false)                                  \
-  /* Whether to remove the existence of the REQUEST superglobal */      \
-  F(bool, DisableRequestSuperglobal, false)                             \
-  /* Enables the non-surprise flag based implementation of
-     fb_intercept2 */                                                   \
-  F(bool, FastMethodIntercept, false)                                   \
-  F(bool, LogHttpServerSignalSource, true)                              \
   F(bool, CrashOnStaticAnalysisError, debug)                            \
-  F(bool, ReplaceTrivialBuiltins, false)                                \
   /* */
 
 private:

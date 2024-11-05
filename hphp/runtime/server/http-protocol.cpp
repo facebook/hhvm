@@ -21,6 +21,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
@@ -196,11 +197,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   php_global_set(s__GET, emptyArr);
   php_global_set(s__POST, emptyArr);
   php_global_set(s__FILES, emptyArr);
-  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+  if (!Cfg::Eval::DisableRequestSuperglobal) {
     php_global_set(s__REQUEST, emptyArr);
   }
   php_global_set(s__ENV, emptyArr);
-  if (!RuntimeOption::EvalDisableParsedCookies) {
+  if (!Cfg::Eval::DisableParsedCookies) {
     php_global_set(s__COOKIE, emptyArr);
   }
 
@@ -240,10 +241,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   auto REQUESTarr = empty_dict_array();
   auto COOKIEarr = empty_dict_array();
   SCOPE_EXIT {
-    if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+    if (!Cfg::Eval::DisableRequestSuperglobal) {
       php_global_set(s__REQUEST, REQUESTarr);
     }
-    if (!RuntimeOption::EvalDisableParsedCookies) {
+    if (!Cfg::Eval::DisableParsedCookies) {
       php_global_set(s__COOKIE, COOKIEarr);
     }
   };
@@ -261,7 +262,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                         FILESarr, transport, r);
 
   // Cookie
-  if (!RuntimeOption::EvalDisableParsedCookies) {
+  if (!Cfg::Eval::DisableParsedCookies) {
     PrepareCookieVariable(COOKIEarr, transport);
   }
 
@@ -269,7 +270,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   init_server_request_time(SERVERarr);
   PrepareServerVariable(SERVERarr, transport, r, vhost);
 
-  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+  if (!Cfg::Eval::DisableRequestSuperglobal) {
     // Request
     PrepareRequestVariables(REQUESTarr,
                             GETarr,
@@ -285,7 +286,7 @@ void HttpProtocol::PrepareRequestVariables(Array& request,
 
   CopyParams(request, get);
   CopyParams(request, post);
-  // if EvalDisableParsedCookies is set this is just a no-op
+  // if Cfg::Eval::DisableParsedCookies is set this is just a no-op
   CopyParams(request, cookie);
 }
 
@@ -699,7 +700,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   std::string contentType = transport->getHeader("Content-Type");
   std::string contentLength = transport->getHeader("Content-Length");
 
-  if (RuntimeOption::EvalSetHeadersInServerSuperGlobal) {
+  if (Cfg::Eval::SetHeadersInServerSuperGlobal) {
     // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
     // Content-Type, Authorization), since the CGI "spec" merely says the server
     // "may" exclude them; this is not what APE does, but it's harmless.

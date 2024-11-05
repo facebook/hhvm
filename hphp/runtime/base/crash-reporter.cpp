@@ -36,6 +36,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -407,7 +408,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       Logger::FError("Core dumped: {}", strsignal(sig));
       Logger::FError("Stack trace in {}", RuntimeOption::StackTraceFilename);
 
-      if (RO::EvalDumpStacktraceToErrorLogOnCrash) {
+      if (Cfg::Eval::DumpStacktraceToErrorLogOnCrash) {
         stacktraceFile = fopen(RuntimeOption::StackTraceFilename.c_str(), "r");
         if (stacktraceFile) {
           char line[256];

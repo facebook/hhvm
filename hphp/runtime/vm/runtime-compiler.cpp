@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/sha1.h"
 
 #include "hphp/zend/zend-string.h"
@@ -153,7 +154,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   assertx(ue);
   ue->logDeclInfo();
 
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay && ue->m_sn == -1)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay && ue->m_sn == -1)) {
     if (codeSource != CodeSource::Eval) {
       ue->m_sn = Replayer::onParse(filename);
     }
@@ -247,12 +248,12 @@ Unit* compile_string(const char* s,
 Unit* get_systemlib(const std::string& path, const Extension* extension) {
   assertx(path[0] == '/' && path[1] == ':');
 
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
     Recorder::onCompileSystemlibString(path.c_str());
   }
 
   if (RuntimeOption::RepoAuthoritative &&
-      !(RO::EvalRecordReplay && RO::EvalReplay)) {
+      !(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     if (auto u = lookupSyslibUnit(makeStaticString(path))) {
       return u;
     }

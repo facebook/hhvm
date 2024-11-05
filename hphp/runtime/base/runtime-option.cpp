@@ -57,6 +57,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/hardware-counter.h"
@@ -269,7 +270,7 @@ RepoOptionStats::RepoOptionStats(const std::string& configPath,
   auto const repo =
     configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
   auto const packagePath = repo / kPackagesToml;
-  if (std::filesystem::exists(packagePath) || RO::EvalRecordReplay) {
+  if (std::filesystem::exists(packagePath) || Cfg::Eval::RecordReplay) {
     struct stat package;
     if (wrapped_stat(packagePath.string().data(), &package) == 0) {
       m_packageStat = package;
@@ -358,8 +359,8 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
 
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
-  if (is_cli_server_mode() || RO::EvalRecordReplay) {
-    wrapper = Stream::getWrapperFromURI(path, nullptr, !RO::EvalRecordReplay);
+  if (is_cli_server_mode() || Cfg::Eval::RecordReplay) {
+    wrapper = Stream::getWrapperFromURI(path, nullptr, !Cfg::Eval::RecordReplay);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
   auto const wrapped_open = [&](const char* path) -> Optional<String> {
@@ -455,7 +456,7 @@ CONFIGS_FOR_REPOOPTIONSFLAGS()
 namespace {
 std::string getCacheBreakerSchemaHash(std::string_view root,
                                       const RepoOptionsFlags& flags) {
-  std::string optsHash = RO::EvalIncludeReopOptionsInFactsCacheBreaker
+  std::string optsHash = Cfg::Eval::IncludeReopOptionsInFactsCacheBreaker
       ? flags.cacheKeySha1().toString()
       : flags.getFactsCacheBreaker();
 
@@ -551,7 +552,7 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file), m_in
 
   filterNamespaces();
   if (!m_path.empty()) {
-    if (UNLIKELY(RO::EvalRecordReplay)) {
+    if (UNLIKELY(Cfg::Eval::RecordReplay)) {
       const String path{m_path.parent_path().c_str()};
       m_repo = Stream::getWrapperFromURI(path)->realpath(path).toCppString();
     } else {
@@ -951,7 +952,7 @@ std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 static void setResourceLimit(int resource, const IniSetting::Map& ini,
                              const Hdf& rlimit, const char* nodeName) {
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     return;
   }
   if (!Config::GetString(ini, rlimit, nodeName).empty()) {
@@ -1659,7 +1660,7 @@ void RuntimeOption::Load(
     EVALFLAGS()
 #undef F
 
-    if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
       return Replayer::onRuntimeOptionLoad(ini, config, cmd);
     }
 
@@ -1670,7 +1671,7 @@ void RuntimeOption::Load(
     }
 
     // Fast method intercept is currently unsupported on ARM.
-    if (arch() == Arch::ARM) EvalFastMethodIntercept = false;
+    if (arch() == Arch::ARM) Cfg::Eval::FastMethodIntercept = false;
 
     if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().
@@ -2150,7 +2151,7 @@ void RuntimeOption::Load(
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
 
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
     Recorder::onRuntimeOptionLoad(ini, config, cmd);
   }
 }

@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,10 +36,10 @@ AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
 }
 
 bool AsioExternalThreadEventQueue::hasReceived() {
-  if (UNLIKELY(RO::EvalRecordReplay)) {
-    if (RO::EvalRecordSampleRate) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
+    if (Cfg::Eval::RecordSampleRate) {
       Recorder::onHasReceived(m_received);
-    } else if (RO::EvalReplay) {
+    } else if (Cfg::Eval::Replay) {
       return Replayer::onHasReceived();
     }
   }
@@ -83,12 +84,12 @@ bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitH
  */
 bool AsioExternalThreadEventQueue::tryReceiveSome() {
   assertx(!m_received);
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     return (m_received = Replayer::onTryReceiveSome());
   }
   m_received = m_queue.exchange(nullptr);
   assertx(m_received != K_CONSUMER_WAITING);
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
     Recorder::onTryReceiveSome(m_received);
   }
   return m_received;
@@ -96,11 +97,11 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
 
 bool AsioExternalThreadEventQueue::receiveSomeUntil(
     std::chrono::time_point<std::chrono::steady_clock> waketime) {
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     return (m_received = Replayer::onReceiveSomeUntil());
   }
   receiveSomeUntilImpl(waketime);
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
     Recorder::onReceiveSomeUntil(m_received);
   }
   return m_received;

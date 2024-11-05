@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/struct-log.h"
 
 namespace HPHP {
@@ -46,8 +47,8 @@ void logSlowQuery(const watchman::QueryResult& res,
   };
 
   auto const incDur = dur(preLockTime, finTime);
-  if (incDur < RO::EvalLogSlowWatchmanQueriesMsec ||
-      !StructuredLog::coinflip(RO::EvalLogSlowWatchmanQueriesRate)) {
+  if (incDur < Cfg::Eval::LogSlowWatchmanQueriesMsec ||
+      !StructuredLog::coinflip(Cfg::Eval::LogSlowWatchmanQueriesRate)) {
     return;
   }
 
@@ -56,7 +57,7 @@ void logSlowQuery(const watchman::QueryResult& res,
   auto const lockDur = dur(preLockTime, preExecTime);
 
   StructuredLogEntry ent;
-  ent.setInt("sample_rate", RO::EvalLogSlowWatchmanQueriesRate);
+  ent.setInt("sample_rate", Cfg::Eval::LogSlowWatchmanQueriesRate);
   ent.setInt("duration_ms", incDur);
   ent.setInt("run_ms", runDur);
   ent.setInt("schedule_ms", schedDur);
@@ -170,7 +171,7 @@ void logSlowQuery(const watchman::QueryResult& res,
 
 InitFiniNode registerLogger(
   [] {
-    if (RO::EvalLogSlowWatchmanQueriesRate) {
+    if (Cfg::Eval::LogSlowWatchmanQueriesRate) {
       Watchman::setProfiler(logSlowQuery);
     }
   },

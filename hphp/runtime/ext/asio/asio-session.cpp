@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -376,10 +377,10 @@ bool AsioSession::processSleepEvents() {
   bool woken = false;
   auto now = TimePoint::clock::now();
 
-  if (UNLIKELY(RO::EvalRecordReplay)) {
-    if (RO::EvalRecordSampleRate) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay)) {
+    if (Cfg::Eval::RecordSampleRate) {
       Recorder::onProcessSleepEvents(now.time_since_epoch().count());
-    } else if (RO::EvalReplay) {
+    } else if (Cfg::Eval::Replay) {
       now = TimePoint{TimePoint::duration{Replayer::onProcessSleepEvents()}};
     }
   }

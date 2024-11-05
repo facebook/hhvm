@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/configs/eval.h"
 
 #include <type_traits>
 
@@ -90,12 +91,12 @@ struct Extension;
  */
 
 #define REGISTER_NATIVE_FUNC(functable, name, f) do { \
-  if (RO::EvalRecordReplay) { \
-    if (RO::EvalRecordSampleRate) { \
+  if (Cfg::Eval::RecordReplay) { \
+    if (Cfg::Eval::RecordSampleRate) { \
       const auto wrapper{Recorder::wrapNativeFunc<f>(name)}; \
       Native::registerNativeFunc(functable, name, wrapper); \
       break; \
-    } else if (RO::EvalReplay) { \
+    } else if (Cfg::Eval::Replay) { \
       const auto wrapper{Replayer::wrapNativeFunc<f>(name)}; \
       Native::registerNativeFunc(functable, name, wrapper); \
       break; \

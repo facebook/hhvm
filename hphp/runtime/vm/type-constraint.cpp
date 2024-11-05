@@ -317,11 +317,11 @@ TypeConstraint TypeConstraint::UnionBuilder::finish() && {
     }
   }
 
-  if (m_classes.m_list.size() > RuntimeOption::EvalMaxCaseTypeVariants) {
+  if (m_classes.m_list.size() > Cfg::Eval::MaxCaseTypeVariants) {
     auto msg = folly::sformat(
       "Case type '{}' exceeds allowed variants of {} ({} requested)",
       m_typeName,
-      RuntimeOption::EvalMaxCaseTypeVariants,
+      Cfg::Eval::MaxCaseTypeVariants,
       m_classes.m_list.size());
     raise_error(msg);
   }

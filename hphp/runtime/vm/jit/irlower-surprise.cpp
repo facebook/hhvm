@@ -43,6 +43,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit::irlower {
@@ -132,7 +133,7 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
 
   auto const done = v.makeBlock();
   auto const handleSurprise = label(env, inst->taken());
-  if (RO::EvalFastMethodIntercept && extra->func->isInterceptable()) {
+  if (Cfg::Eval::FastMethodIntercept && extra->func->isInterceptable()) {
     v << interceptjcc{CC_AE, sf, {done, handleSurprise}};
   } else {
     v << jcc{CC_AE, sf, {done, handleSurprise}};

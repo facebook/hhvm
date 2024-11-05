@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 
 namespace HPHP {
@@ -60,7 +61,7 @@ void FactsFactory::setInstance(FactsFactory* instance) {
 namespace {
 
 FactsStore* getFactsForRequest() {
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+  if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     return Replayer::onGetFactsForRequest();
   }
 
@@ -89,7 +90,7 @@ FactsStore* getFactsForRequest() {
     // because this call itself calls into PerfLogger under the hood,
     // where we do timing and exception logging.
     map->ensureUpdated();
-    if (UNLIKELY(RO::EvalRecordReplay && RO::EvalRecordSampleRate)) {
+    if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::RecordSampleRate)) {
       Recorder::onGetFactsForRequest(map);
     }
     return map;
@@ -240,7 +241,7 @@ AutoloadHandler::loadFromMapImpl(const String& name,
   try {
     VMRegAnchor _;
     bool initial;
-    auto const eagerSync = RO::EvalAutoloadEagerSyncUnitCache && m_map;
+    auto const eagerSync = Cfg::Eval::AutoloadEagerSyncUnitCache && m_map;
     auto const unit = lookupUnit(fileRes->m_path.get(), fileRes->m_info, "",
                                  &initial, nullptr,
                                  RuntimeOption::TrustAutoloaderPath,

@@ -44,7 +44,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/debugger.h"
-#include "hphp/util/configs/php7.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
@@ -931,12 +931,12 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
 std::pair<NonRepoUnitCache*, Stream::Wrapper*>
 getNonRepoCacheWithWrapper(const StringData* rpath) {
   // If this isn't a CLI server request, this is a normal file access
-  if (!is_cli_server_mode() && !RO::EvalRecordReplay) {
+  if (!is_cli_server_mode() && !Cfg::Eval::RecordReplay) {
     return std::make_pair(&s_nonRepoUnitCache, nullptr);
   }
 
   // If the server cannot access rpath attempt to open the unit on the client
-  if (RO::EvalRecordReplay || access(rpath->data(), R_OK) == -1) {
+  if (Cfg::Eval::RecordReplay || access(rpath->data(), R_OK) == -1) {
     auto wrapper = Stream::getWrapperFromURI(StrNR{rpath});
     if (!wrapper || !wrapper->isNormalFileStream()) {
       return std::make_pair(nullptr, nullptr);
@@ -956,7 +956,7 @@ const StringData* resolveRequestedPath(const StringData* requestedPath,
       return makeStaticString(p);
     }
     std::string rp;
-    if (UNLIKELY(RO::EvalRecordReplay)) {
+    if (UNLIKELY(Cfg::Eval::RecordReplay)) {
       const String path{requestedPath->data()};
       rp = Stream::getWrapperFromURI(path)->realpath(path).toCppString();
     } else {
@@ -1133,7 +1133,7 @@ void logTearing(const CachedFilePtr& ptr) {
     auto const s = *g_context->m_requestStartForTearing;
     constexpr uint64_t sec_to_ns = 1000000000;
 
-    auto const skew = RO::EvalRequestTearingSkewMicros * 1000;
+    auto const skew = Cfg::Eval::RequestTearingSkewMicros * 1000;
     auto const skew_ns = skew % sec_to_ns;
     auto const skew_s = skew / sec_to_ns;
 
@@ -1272,7 +1272,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
 
-  if (RuntimeOption::EvalEnableDecl || RuntimeOption::EvalAutoloadInitEarly) {
+  if (RuntimeOption::EvalEnableDecl || Cfg::Eval::AutoloadInitEarly) {
     // Initialize AutoloadHandler before we parse the file so HhvmDeclProvider
     // can respond to queries from HackC.
     AutoloadHandler::s_instance.getCheck();
@@ -1390,13 +1390,13 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
     return lookupUnitRepoAuth(path, nullptr).unit != nullptr;
   }
 
-  if (!RO::EvalRecordReplay && statSyscall(path->data(), s) == 0) {
+  if (!Cfg::Eval::RecordReplay && statSyscall(path->data(), s) == 0) {
     // The call explicitly populates the struct for dirs, but returns
     // false for them because it is geared toward file includes.
     return allow_dir || !S_ISDIR(s->st_mode);
   }
 
-  if (w && (w != &s_file_stream_wrapper || RO::EvalRecordReplay)) {
+  if (w && (w != &s_file_stream_wrapper || Cfg::Eval::RecordReplay)) {
     // We only allow normal file streams, which cannot re-enter.
     assertx(w->isNormalFileStream());
     if (w->stat(StrNR(path), s) == 0) return allow_dir || !S_ISDIR(s->st_mode);
@@ -2026,7 +2026,7 @@ void unitCacheSyncRepo(AutoloadMap* map,
   }
 
   if (updated.empty() ||
-      !RO::EvalAutoloadEagerReloadUnitCache ||
+      !Cfg::Eval::AutoloadEagerReloadUnitCache ||
       !unitPrefetchingEnabled()) {
     return;
   }

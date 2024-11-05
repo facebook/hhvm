@@ -41,6 +41,7 @@
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
@@ -85,7 +86,7 @@ folly::MicroSpinLock HttpServer::StatsLock;
 static const int kTermSignals[] = { SIGHUP, SIGINT, SIGTERM, SIGUSR1 };
 
 void log_signal(int sig, siginfo_t* info) {
-  if (!RO::EvalLogHttpServerSignalSource) return;
+  if (!Cfg::Eval::LogHttpServerSignalSource) return;
 
   auto const sname = strsignal(sig);
   std::string pname = "<unknown>";

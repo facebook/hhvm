@@ -39,6 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
@@ -468,7 +469,7 @@ void Unit::merge() {
 
 void Unit::logTearing(int64_t nsecs) {
   assertx(!RO::RepoAuthoritative);
-  assertx(RO::EvalSampleRequestTearing);
+  assertx(Cfg::Eval::SampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
   auto repoRoot = repoOptions->dir();
@@ -511,7 +512,7 @@ void Unit::logTearing(int64_t nsecs) {
   ent.setInt("debuggers", debuggerCount);
 
   // always generate logs
-  ent.force_init = RO::EvalSampleRequestTearingForce;
+  ent.force_init = Cfg::Eval::SampleRequestTearingForce;
 
   FTRACE(2, "Tearing in {} ({} ns)\n", tpath.data(), nsecs);
 

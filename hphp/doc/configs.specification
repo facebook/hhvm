@@ -275,6 +275,79 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- std::string Eval.TaoMigrationOverride = "", UNKNOWN
+
+- std::string Eval.SRRouteMigrationOverride = "", UNKNOWN
+
+- int32_t Eval.SampleRequestTearing = 0, UNKNOWN
+
+- int32_t Eval.RequestTearingSkewMicros = 1500, UNKNOWN
+
+- bool Eval.SampleRequestTearingForce = true, UNKNOWN
+
+- bool Eval.EnableAbstractContextConstants = true, UNKNOWN, unitcacheflag
+
+- uint32_t Eval.MaxCaseTypeVariants = 48, UNKNOWN
+
+  The maximum number of resolved variants allowed in a single case
+  type. This value is determined after flattening.
+
+- uint32_t Eval.LogSlowWatchmanQueriesMsec = 500, UNKNOWN
+
+- uint32_t Eval.LogSlowWatchmanQueriesRate = 1, UNKNOWN
+
+- uint32_t Eval.StartOptionLogRate = 0, UNKNOWN
+
+- std::string Eval.StartOptionLogCache = "/tmp/hhvm-options-%{user}-%{hash}", UNKNOWN
+
+- uint64_t Eval.StartOptionLogWindow = 86400, UNKNOWN
+
+- bool Eval.RecordReplay = false, UNKNOWN
+
+- std::string Eval.RecordSampleFilter = "", UNKNOWN
+
+  Format: _SUPERGLOBAL.Key=Value[&_SUPERGLOBAL.Key=Value...]
+  Example: _SERVER.SCRIPT_URL=/foo&_POST.key=value
+
+- uint64_t Eval.RecordSampleRate = 0, UNKNOWN
+
+- std::string Eval.RecordDir = "", UNKNOWN
+
+- bool Eval.Replay = false, UNKNOWN
+
+- bool Eval.DumpStacktraceToErrorLogOnCrash = true, UNKNOWN
+
+- bool Eval.IncludeReopOptionsInFactsCacheBreaker = false, UNKNOWN
+
+- bool Eval.AutoloadEagerSyncUnitCache = true, UNKNOWN
+
+- bool Eval.AutoloadEagerReloadUnitCache = true, UNKNOWN
+
+- bool Eval.AutoloadInitEarly = false, UNKNOWN
+
+- bool Eval.SetHeadersInServerSuperGlobal = true, UNKNOWN
+
+  Whether we should dump the request headers into $_SERVER
+
+- bool Eval.DisableParsedCookies = false, UNKNOWN
+
+  Whether we should stop parsing cookies out of the headers and
+  setting it into a few super globals - including fully removing
+  the existance of the $_COOKIE superglobal
+
+- bool Eval.DisableRequestSuperglobal = false, UNKNOWN
+
+  Whether to remove the existence of the REQUEST superglobal
+
+- bool Eval.FastMethodIntercept = false, UNKNOWN
+
+  Enables the non-surprise flag based implementation of
+  fb_intercept2
+
+- bool Eval.LogHttpServerSignalSource = true, UNKNOWN
+
+- bool Eval.ReplaceTrivialBuiltins = false, UNKNOWN
+
 - bool Eval.ReflectionMissConstantFromIncludedEnumsNotice = false, fzn
 
   Whether ReflectionClass::getConstants raises notice if it misses constants from

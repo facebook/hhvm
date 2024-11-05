@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/act-rec.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/ringbuffer.h"
 
 #include <atomic>
@@ -78,7 +79,7 @@ struct EventHook {
   static void DoMemoryThresholdCallback();
 
   static inline bool checkSurpriseFlagsAndIntercept(const Func* func) {
-    if (RO::EvalFastMethodIntercept) {
+    if (Cfg::Eval::FastMethodIntercept) {
       return checkSurpriseFlags() ||
         (func->maybeIntercepted() && is_intercepted(func));
     } else {

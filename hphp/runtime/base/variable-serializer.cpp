@@ -43,6 +43,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/rds-local.h"
 
@@ -2440,7 +2441,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
           }
         } catch (const Object &e) {
-          if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+          if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
             throw;
           }
           assertx(e->instanceof(SystemLib::getErrorClass()) ||

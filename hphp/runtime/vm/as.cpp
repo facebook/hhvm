@@ -2619,7 +2619,7 @@ void parse_context_constant(AsmState& as) {
   as.in.expectWs(';');
 
   // T112974443: temporarily drop the abstract ones until runtime is fixed
-  if (isAbstract && !RuntimeOption::EvalEnableAbstractContextConstants) return;
+  if (isAbstract && !Cfg::Eval::EnableAbstractContextConstants) return;
 
   DEBUG_ONLY auto added =
     as.pce->addContextConstant(makeStaticString(name), std::move(coeffects),

@@ -103,6 +103,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/embedded-data.h"
@@ -2238,7 +2239,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     } else {
 
-      if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+      if (UNLIKELY(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
         file = Replayer::getEntryPoint();
         new_argv[0] = file.data();
       }

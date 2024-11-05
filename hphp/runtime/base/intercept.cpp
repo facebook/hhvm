@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/jit/tc-intercept.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
@@ -65,7 +67,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
 bool register_intercept_surprise_flags(const Variant& callback,
                                        Func *const interceptedFunc) {
-  assertx(!RO::EvalFastMethodIntercept);
+  assertx(!Cfg::Eval::FastMethodIntercept);
 
   if (!callback.toBoolean()) {
     if (!s_intercept_data->empty()) {
@@ -95,7 +97,7 @@ bool register_intercept_surprise_flags(const Variant& callback,
 
 bool register_intercept_fast_method_intercept(const Variant& callback,
                                               Func *const interceptedFunc) {
-  assertx(RO::EvalFastMethodIntercept);
+  assertx(Cfg::Eval::FastMethodIntercept);
   auto interceptedFuncId = interceptedFunc->getFuncId();
 
   if (!callback.toBoolean()) {
@@ -190,7 +192,7 @@ bool register_intercept(const String& name, const Variant& callback) {
     StructuredLog::log("hhvm_intercept_function", entry);
   }
 
-  if (RO::EvalFastMethodIntercept) {
+  if (Cfg::Eval::FastMethodIntercept) {
     return register_intercept_fast_method_intercept(callback, interceptedFunc);
   } else {
     return register_intercept_surprise_flags(callback, interceptedFunc);
@@ -217,7 +219,7 @@ Variant* get_intercept_handler(const Func* func) {
 }
 
 void reset_all_intercepted_functions() {
-  if (RO::EvalFastMethodIntercept && !s_intercept_data->empty()) {
+  if (Cfg::Eval::FastMethodIntercept && !s_intercept_data->empty()) {
     auto& handlers = s_intercept_data->intercept_handlers();
     for (auto& h: handlers) {
       jit::tc::stopInterceptFunc(h.first->getFuncId());

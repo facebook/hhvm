@@ -34,6 +34,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/logger.h"
@@ -894,16 +895,16 @@ size_t doHash(IniSetting::OptionData& data) {
 
 void logSettings() {
   if (RO::RepoAuthoritative) return;
-  if (!StructuredLog::coinflip(RO::EvalStartOptionLogRate)) return;
+  if (!StructuredLog::coinflip(Cfg::Eval::StartOptionLogRate)) return;
 
   auto const hash = IniSetting::HashAll(RO::EvalStartOptionLogOptions,
                                         RO::EvalStartOptionLogExcludeOptions);
-  if (!RO::EvalStartOptionLogCache.empty()) {
-    auto name = RO::EvalStartOptionLogCache;
+  if (!Cfg::Eval::StartOptionLogCache.empty()) {
+    auto name = Cfg::Eval::StartOptionLogCache;
     replacePlaceholders(name, {{"%{hash}", folly::to<std::string>(hash)}});
     struct stat s;
     if (statSyscall(name.data(), &s) != 0) {
-      if (time(nullptr) - s.st_mtim.tv_sec < RO::EvalStartOptionLogWindow) {
+      if (time(nullptr) - s.st_mtim.tv_sec < Cfg::Eval::StartOptionLogWindow) {
         return;
       }
     }
@@ -919,7 +920,7 @@ void logSettings() {
   ent.force_init = true;
   ent.setStr("cmd_line", Process::GetAppName());
   ent.setInt("server_mode", RO::ServerExecutionMode() ? 1 : 0);
-  ent.setInt("sample_rate", RO::EvalStartOptionLogRate);
+  ent.setInt("sample_rate", Cfg::Eval::StartOptionLogRate);
   ent.setInt("hash", hash);
   ent.setProcessUuid("hhvm_uuid");
   IniSetting::Log(ent,

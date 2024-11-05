@@ -101,7 +101,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(RepoDebugInfo)                              \
   R(EvalAllowHhas)                              \
   R(EvalAssemblerMaxScalarSize)                 \
-  R(EvalEnableAbstractContextConstants)         \
   R(EvalUnitCacheBreaker)                       \
   R(EvalEnableDecl)                             \
 

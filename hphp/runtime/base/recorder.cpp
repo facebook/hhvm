@@ -61,6 +61,7 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
@@ -74,7 +75,7 @@ using namespace rr;
 namespace {
   static struct DefaultWriter final : public Recorder::Writer {
     void write(const std::vector<char>& recording) override {
-      const auto dir{std::filesystem::canonical(RO::EvalRecordDir)};
+      const auto dir{std::filesystem::canonical(Cfg::Eval::RecordDir)};
       std::filesystem::create_directory(dir);
       const auto name{std::to_string(folly::Random::rand64()) + ".hhr"};
       std::ofstream ofs{dir / name, std::ios::binary};
@@ -222,7 +223,7 @@ void Recorder::requestInit() {
     default:
       return;
   }
-  if (UNLIKELY(m_enabled = folly::Random::oneIn64(RO::EvalRecordSampleRate))) {
+  if (UNLIKELY(m_enabled = folly::Random::oneIn64(Cfg::Eval::RecordSampleRate))) {
     m_factsStore = Array::CreateDict();
     m_globals = Array::CreateDict();
     m_streamWrapper = getStreamWrapper();
@@ -247,9 +248,9 @@ struct Recorder::DebuggerHook final : public HPHP::DebuggerHook {
     static const auto filters{[] {
       std::unordered_map<std::string_view,
         std::unordered_map<std::string_view, std::string_view>> filters_;
-      if (!RO::EvalRecordSampleFilter.empty()) {
+      if (!Cfg::Eval::RecordSampleFilter.empty()) {
         std::vector<std::string_view> parts;
-        folly::split('&', RO::EvalRecordSampleFilter, parts, true);
+        folly::split('&', Cfg::Eval::RecordSampleFilter, parts, true);
         for (const auto& part : parts) {
           std::string_view k1, k2, v;
           folly::split<false>('=', part, k1, v);

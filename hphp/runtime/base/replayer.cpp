@@ -65,6 +65,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/blob-encoder.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/optional.h"
 
 namespace HPHP {
@@ -208,8 +209,8 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   replayer.m_streamWrapper = recording[String("streamWrapper")].asCArrRef();
   replayer.m_unitSns = recording[String("unitSns")].asCArrRef();
   RuntimeOption::Load(newIni, newHdf, {}, {}, nullptr, replayer.m_entryPoint);
-  RO::EvalRecordSampleRate = 0;
-  RO::EvalReplay = true;
+  Cfg::Eval::RecordSampleRate = 0;
+  Cfg::Eval::Replay = true;
   RO::EvalUnitPrefetcherMaxThreads = 0;
   hdf = newHdf;
   ini = newIni;

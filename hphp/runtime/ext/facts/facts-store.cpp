@@ -569,7 +569,7 @@ struct FactsStoreImpl final
     if (res.hasException()) {
       res.throwUnlessValue();
     }
-    if (RO::EvalAutoloadEagerSyncUnitCache && m_watcher) {
+    if (Cfg::Eval::AutoloadEagerSyncUnitCache && m_watcher) {
       unitCacheSetSync();
     }
   }
@@ -1086,7 +1086,7 @@ struct FactsStoreImpl final
         ? getFreshDelta(std::move(delta))
         : getIncrementalDelta(std::move(delta));
 
-    if (RO::EvalAutoloadEagerSyncUnitCache) {
+    if (Cfg::Eval::AutoloadEagerSyncUnitCache) {
       unitCacheSyncRepo(this, m_root, alteredPathsAndHashes, deletedPaths);
     }
 

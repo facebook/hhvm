@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"
 
@@ -475,7 +476,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   assertx(!isResumed(ar));
 
   const Func* func = ar->func();
-  if (LIKELY(!RO::EvalFastMethodIntercept && !func->maybeIntercepted())) {
+  if (LIKELY(!Cfg::Eval::FastMethodIntercept && !func->maybeIntercepted())) {
     return true;
   }
   assertx(func->isInterceptable() && func->maybeIntercepted());
@@ -758,8 +759,8 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
   const Func* func = ar->func();
   auto const flags = handle_request_surprise();
 
-  if ((RO::EvalFastMethodIntercept && func->maybeIntercepted() && is_intercepted(func))
-      || (!RO::EvalFastMethodIntercept && (flags & InterceptFlag))) {
+  if ((Cfg::Eval::FastMethodIntercept && func->maybeIntercepted() && is_intercepted(func))
+      || (!Cfg::Eval::FastMethodIntercept && (flags & InterceptFlag))) {
     if (!RunInterceptHandler(const_cast<ActRec*>(ar))) {
       assertx(func->isInterceptable());
       return false;

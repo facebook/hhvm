@@ -514,7 +514,7 @@ void translateCtxConstant(TranslationState& ts, const hhbc::CtxConstant& c) {
   }
 
   // T112974443: temporarily drop the abstract ones until runtime is fixed
-  if (isAbstract && !RuntimeOption::EvalEnableAbstractContextConstants) return;
+  if (isAbstract && !Cfg::Eval::EnableAbstractContextConstants) return;
   DEBUG_ONLY auto added =
     ts.pce->addContextConstant(name, std::move(coeffects), isAbstract);
   assertx(added);

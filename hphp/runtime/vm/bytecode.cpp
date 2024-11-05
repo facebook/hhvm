@@ -294,12 +294,12 @@ void createGlobalNVTable() {
   nvTable->set(s__SERVER.get(),            arr.asTypedValue());
   nvTable->set(s__GET.get(),               arr.asTypedValue());
   nvTable->set(s__POST.get(),              arr.asTypedValue());
-  if (!RuntimeOption::EvalDisableParsedCookies) {
+  if (!Cfg::Eval::DisableParsedCookies) {
     nvTable->set(s__COOKIE.get(),          arr.asTypedValue());
   }
   nvTable->set(s__FILES.get(),             arr.asTypedValue());
   nvTable->set(s__ENV.get(),               arr.asTypedValue());
-  if (!RuntimeOption::EvalDisableRequestSuperglobal) {
+  if (!Cfg::Eval::DisableRequestSuperglobal) {
     nvTable->set(s__REQUEST.get(),           arr.asTypedValue());
   }
   nvTable->set(s_HTTP_RAW_POST_DATA.get(), init_null_variant.asTypedValue());

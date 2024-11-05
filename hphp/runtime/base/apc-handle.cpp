@@ -72,7 +72,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         );
       }
       auto const serialize_func =
-        RuntimeOption::EvalAPCSerializeFuncs &&
+        Cfg::Eval::APCSerializeFuncs &&
         // Right now cls_meth() can serialize as an array, and attempting to
         // recursively serialize elements in the array will eventually attempt
         // to serialize a method pointer.
@@ -151,7 +151,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       return APCArray::MakeSharedEmptyVec();
 
     case KindOfClsMeth:
-      if (RO::EvalAPCSerializeClsMeth) {
+      if (Cfg::Eval::APCSerializeClsMeth) {
         auto const meth = val(cell).pclsmeth;
         if (meth->getCls()->isPersistent()) {
           auto const value = new APCTypedValue(meth);

@@ -114,7 +114,7 @@ void NamedType::removeClass(Class* goner) {
   auto head = m_clsList;
   if (!head) return;
 
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (Cfg::Eval::EnableReverseDataMap) {
     // This deregisters Classes registered to data_map in Unit::defClass().
     data_map::deregister(goner);
   }
@@ -176,7 +176,7 @@ T* insertNamedEntity(const StringData* str, typename T::Map* map) {
   checkAHMSubMaps(*map, "named entity table", signaled);
 
   auto const ne = &res.first->second;
-  if (res.second && RuntimeOption::EvalEnableReverseDataMap) {
+  if (res.second && Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(ne);
   }
   return ne;

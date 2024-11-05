@@ -1379,7 +1379,7 @@ OPTBLD_INLINE void iopClsCnsL(tv_lval local) {
 
 String toStringWithNotice(const Variant& c) {
   static ConvNoticeLevel notice_level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+    flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
   return c.toString(notice_level, s_ConvNoticeReasonConcat.get());
 }
 

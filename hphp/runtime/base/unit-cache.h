@@ -101,7 +101,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(RepoDebugInfo)                              \
   R(EvalAllowHhas)                              \
   R(EvalAssemblerMaxScalarSize)                 \
-  R(EvalUnitCacheBreaker)                       \
   R(EvalEnableDecl)                             \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,

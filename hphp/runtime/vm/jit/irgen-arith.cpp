@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP::jit::irgen {
@@ -489,7 +490,7 @@ template<class PreDecRef> void implConcat(
     [&] (SSATmp* s, DecRefProfileId locId) {
       if (s->isA(TStr)) return s;
       const ConvNoticeLevel notice_level =
-        flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+        flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
       auto const ret = gen(
         env,
         ConvTVToStr,
@@ -562,7 +563,7 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t4 = n == 4 ? popC(env) : nullptr;
 
   const ConvNoticeLevel level =
-    flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
+    flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat);
   const auto convData = ConvNoticeData{level, s_ConvNoticeReasonConcat.get()};
   auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, convData, t4);
   auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, convData, t3);

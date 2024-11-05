@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/file.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"
@@ -888,7 +889,7 @@ TypedValue dynamicFun(const StringData* fun) {
     }
   }
   if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
-    auto const level = RuntimeOption::EvalDynamicFunLevel;
+    auto const level = Cfg::Eval::DynamicFunLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Function {} not marked dynamic", fun->data())
@@ -965,7 +966,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
     }
   }
   if (!func->isDynamicallyCallable() && DA == DynamicAttr::Require) {
-    auto const level = RuntimeOption::EvalDynamicClsMethLevel;
+    auto const level = Cfg::Eval::DynamicClsMethLevel;
     if (level == 2) {
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat("Method {}::{} not marked dynamic",
@@ -1337,12 +1338,12 @@ bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
 void HHVM_FUNCTION(check_dynamically_callable_inst_method, StringArg cls,
                                                            StringArg meth) {
   if (is_dynamically_callable_inst_method_impl(cls.get(), meth.get())) return;
-  if (RO::EvalDynamicMethCallerLevel == 0) return;
+  if (Cfg::Eval::DynamicMethCallerLevel == 0) return;
   auto const msg = folly::sformat(
     "dynamic_meth_caller(): {}::{} is not a dynamically "
     "callable instance method",
     cls.get(), meth.get());
-  if (RO::EvalDynamicMethCallerLevel == 1) {
+  if (Cfg::Eval::DynamicMethCallerLevel == 1) {
     raise_warning(msg);
     return;
   }

@@ -186,7 +186,7 @@ StringData* insertStaticString(StringData* sd,
     auto const allocSize = sd->size() + kStringOverhead
                          + (symbol ? sizeof(SymbolPrefix) : 0);
     MemoryStats::LogAlloc(AllocKind::StaticString, allocSize);
-    if (RuntimeOption::EvalEnableReverseDataMap) {
+    if (Cfg::Eval::EnableReverseDataMap) {
       data_map::register_start(sd);
     }
     static std::atomic<bool> signaled{false};

@@ -246,13 +246,13 @@ public:
   /*
    * Bind the given filepath as the Unit's pre-request filepath. The
    * Unit should not have an already bound filepath and
-   * EvalReuseUnitsByHash should be set.
+   * Cfg::Eval::ReuseUnitsByHash should be set.
    */
   void bindPerRequestFilepath(const StringData*);
 
   /*
    * Mark this Unit as having per-request filepaths. This allocates a
-   * new rds handle to store the path. EvalReuseUnitsByHash must be
+   * new rds handle to store the path. Cfg::Eval::ReuseUnitsByHash must be
    * set.
    */
   void makeFilepathPerRequest();

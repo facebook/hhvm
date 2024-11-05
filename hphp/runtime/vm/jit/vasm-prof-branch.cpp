@@ -43,6 +43,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/struct-log.h"
 
@@ -70,7 +71,7 @@ rds::Link<uint32_t, rds::Mode::Local> s_counter;
  */
 void reset_counter() {
   assertx(s_counter.bound());
-  *s_counter = RuntimeOption::EvalProfBranchSampleFreq;
+  *s_counter = Cfg::Eval::ProfBranchSampleFreq;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

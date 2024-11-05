@@ -2870,11 +2870,11 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
     EventHook::Enable();
   }
 
-  auto const pme_freq = RuntimeOption::EvalPerfMemEventRequestFreq;
+  auto const pme_freq = Cfg::Eval::PerfMemEventRequestFreq;
   if (pme_freq > 0 && folly::Random::rand32(pme_freq) == 0) {
     // Enable memory access sampling for this request.
     perf_event_enable(
-      RuntimeOption::EvalPerfMemEventSampleFreq,
+      Cfg::Eval::PerfMemEventSampleFreq,
       [] (PerfEvent) { setSurpriseFlag(PendingPerfEventFlag); }
     );
   }
@@ -3033,7 +3033,7 @@ void hphp_session_exit() {
   jit::mcgen::checkSerializeOptProf();
   jit::tc::requestExit();
 
-  if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
     // Update the timestamp of any Unit we touched in this request. We
     // defer this until the end of the request to prevent Units from
     // being considered "expired" while a request is still using it.

@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/exception.h"
 
 #include "hphp/zend/zend-string.h"
@@ -268,7 +269,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
 
   // TODO(T68458896): heapSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, ad->heapSize());
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(ad);
   }
 

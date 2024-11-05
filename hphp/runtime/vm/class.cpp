@@ -4880,7 +4880,7 @@ void setupClass(Class* newClass, NamedType* nameList) {
     [&] { nameList->pushClass(newClass); }
   );
 
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (Cfg::Eval::EnableReverseDataMap) {
     // The corresponding deregister is in NamedType::removeClass().
     data_map::register_start(newClass);
     for (unsigned i = 0, n = newClass->numMethods(); i < n; i++) {

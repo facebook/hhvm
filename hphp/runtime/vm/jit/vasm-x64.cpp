@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 
 #include <algorithm>
@@ -1271,7 +1272,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   assertx(checkWidths(unit));
 
   if (unit.context && unit.context->kind == TransKind::Optimize &&
-      RuntimeOption::EvalProfBranchSampleFreq > 0) {
+      Cfg::Eval::ProfBranchSampleFreq > 0) {
     // Even when branch profiling is on, we still only want to profile
     // non-profiling translations of PHP functions.  We also require that we
     // can spill, so that we can generate arbitrary profiling code, and also to

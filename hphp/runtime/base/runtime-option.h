@@ -35,6 +35,7 @@
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hacklang.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/php7.h"
@@ -826,65 +827,6 @@ struct RuntimeOption {
   F(bool, UnixServerAssumeRepoRealpath, true)                           \
   /* Options for testing */                                             \
   F(bool, TrashFillOnRequestExit, false)                                \
-  /********************                                                 \
-   | Profiling flags. |                                                 \
-   ********************/                                                \
-  /* Whether to maintain the address-to-VM-object mapping. */           \
-  F(bool, EnableReverseDataMap, true)                                   \
-  /* Turn on perf-mem-event sampling roughly every this many requests.  \
-   * To maintain the same overall sampling rate, the ratio between the  \
-   * request and sample frequencies should be kept constant. */         \
-  F(uint32_t, PerfMemEventRequestFreq, 0)                               \
-  /* Sample this many memory instructions per second.  This should be   \
-   * kept low to avoid the risk of collecting a sample while we're      \
-   * processing a previous sample. */                                   \
-  F(uint32_t, PerfMemEventSampleFreq, 80)                               \
-  /* Sampling frequency for TC branch profiling. */                     \
-  F(uint32_t, ProfBranchSampleFreq, 0)                                  \
-  /* Record the first N units loaded via StructuredLog::log()        */ \
-  F(uint64_t, RecordFirstUnits, 0)                                      \
-  /* More aggressively reuse already compiled units based on SHA1    */ \
-  F(bool, CheckUnitSHA1, true)                                          \
-  F(bool, ReuseUnitsByHash, false)                                      \
-  F(bool, UseEdenFS, true)                                              \
-  /* Arbitrary string to force different unit-cache hashes */           \
-  F(std::string, UnitCacheBreaker, "")                                  \
-  /* When dynamic_fun is called on a function not marked as
-     __DynamicallyCallable:
-
-     0 - do nothing
-     1 - raise a warning
-     2 - throw */                                                       \
-  F(uint64_t, DynamicFunLevel, 1)                                       \
-  /* When dynamic_class_meth is called on a method not marked as
-     __DynamicallyCallable:
-
-     0 - do nothing
-     1 - raise a warning
-     2 - throw */                                                       \
-  F(uint64_t, DynamicClsMethLevel, 1)                                   \
-  /* When dynamic_meth_caller is called on a static method or
-     a method not marked as __DynamicallyCallable:
-
-     0 - do nothing
-     1 - raise a warning
-     2 - throw */                                                       \
-  F(uint64_t, DynamicMethCallerLevel, 1)                                \
-  F(bool, APCSerializeFuncs, true)                                      \
-  F(bool, APCSerializeClsMeth, true)                                    \
-  F(bool, LogOnIsArrayFunction, false)                                  \
-  /* Unit prefetching options */                                        \
-  F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \
-  F(uint32_t, UnitPrefetcherMinThreads, 0)                              \
-  F(uint32_t, UnitPrefetcherIdleThreadTimeoutSecs, 60)                  \
-  /* Delete any Unit not used in last N seconds */                      \
-  F(uint32_t, IdleUnitTimeoutSecs, 0)                                   \
-  /* Don't reap total Units below threshold */                          \
-  F(uint32_t, IdleUnitMinThreshold, 0)                                  \
-  /* 0 nothing, 1 notice, 2 error */                                    \
-  F(int32_t, NoticeOnCoerceForStrConcat, 0)                             \
-  /* 0 nothing, 1 notice, 2 error */                                    \
-  F(int32_t, NoticeOnCoerceForStrConcat2, 0)                            \
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   F(bool, CrashOnStaticAnalysisError, debug)                            \
@@ -1016,7 +958,7 @@ inline bool isJitSerializing() {
 }
 
 inline bool unitPrefetchingEnabled() {
-  return RO::EvalUnitPrefetcherMaxThreads > 0;
+  return Cfg::Eval::UnitPrefetcherMaxThreads > 0;
 }
 
 inline StringToIntMap coeffectEnforcementLevelsDefaults() {

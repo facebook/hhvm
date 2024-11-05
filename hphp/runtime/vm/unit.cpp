@@ -126,7 +126,7 @@ Unit::Unit()
 }
 
 Unit::~Unit() {
-  if (RuntimeOption::EvalEnableReverseDataMap &&
+  if (Cfg::Eval::EnableReverseDataMap &&
       m_mergeState.load(std::memory_order_acquire) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
@@ -382,7 +382,7 @@ void Unit::initialMerge() {
     return;
   }
 
-  auto const nrecord = RuntimeOption::EvalRecordFirstUnits;
+  auto const nrecord = Cfg::Eval::RecordFirstUnits;
   if (s_loadedUnits.load(std::memory_order_acquire) < nrecord) {
     auto const index = s_loadedUnits.fetch_add(1, std::memory_order_acq_rel);
     if (index < nrecord) {
@@ -396,7 +396,7 @@ void Unit::initialMerge() {
     }
   }
 
-  if (RuntimeOption::EvalEnableReverseDataMap) {
+  if (Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(this);
   }
 

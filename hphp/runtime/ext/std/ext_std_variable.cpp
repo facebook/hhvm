@@ -31,6 +31,7 @@
 #include "hphp/runtime/server/http-protocol.h"
 
 #include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/logger.h"
 
@@ -125,7 +126,7 @@ bool HHVM_FUNCTION(HH_is_php_array, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  if (RO::EvalLogOnIsArrayFunction) {
+  if (Cfg::Eval::LogOnIsArrayFunction) {
     raise_notice("call to deprecated builtin is_array()");
   }
   return is_any_array(v.asTypedValue());

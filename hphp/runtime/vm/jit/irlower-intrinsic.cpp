@@ -51,6 +51,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
@@ -1016,7 +1017,7 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 
 void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
 
   auto const handle = inst->extra<LdUnitPerRequestFilepath>()->handle;
   assertx(rds::isNormalHandle(handle));

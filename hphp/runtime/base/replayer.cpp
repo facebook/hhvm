@@ -211,7 +211,7 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   RuntimeOption::Load(newIni, newHdf, {}, {}, nullptr, replayer.m_entryPoint);
   Cfg::Eval::RecordSampleRate = 0;
   Cfg::Eval::Replay = true;
-  RO::EvalUnitPrefetcherMaxThreads = 0;
+  Cfg::Eval::UnitPrefetcherMaxThreads = 0;
   hdf = newHdf;
   ini = newIni;
   if (RO::RepoAuthoritative) {

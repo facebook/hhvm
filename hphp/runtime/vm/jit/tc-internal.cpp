@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/logger.h"
@@ -250,7 +251,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   s_TCisFull.store(true, std::memory_order_release);
 
   if (main_under && !s_did_log.test_and_set() &&
-      RuntimeOption::EvalProfBranchSampleFreq == 0) {
+      Cfg::Eval::ProfBranchSampleFreq == 0) {
     // If we ran out of TC space in cold or frozen but not in main,
     // something unexpected is happening and we should take note of
     // it. We skip this logging if TC branch profiling is on, since

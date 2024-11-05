@@ -275,6 +275,94 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- bool Eval.EnableReverseDataMap = true, UNKNOWN
+
+  Whether to maintain the address-to-VM-object mapping.
+
+- uint32_t Eval.PerfMemEventRequestFreq = 0, UNKNOWN
+
+  Turn on perf-mem-event sampling roughly every this many requests.
+  To maintain the same overall sampling rate, the ratio between the
+  request and sample frequencies should be kept constant.
+
+- uint32_t Eval.PerfMemEventSampleFreq = 80, UNKNOWN
+
+  Sample this many memory instructions per second.  This should be
+  kept low to avoid the risk of collecting a sample while we're
+  processing a previous sample.
+
+- uint32_t Eval.ProfBranchSampleFreq = 0, UNKNOWN
+
+  Sampling frequency for TC branch profiling.
+
+- uint64_t Eval.RecordFirstUnits = 0, UNKNOWN
+
+  Record the first N units loaded via StructuredLog::log()
+
+- bool Eval.CheckUnitSHA1 = true, UNKNOWN
+
+  More aggressively reuse already compiled units based on SHA1
+
+- bool Eval.ReuseUnitsByHash = false, UNKNOWN
+
+- bool Eval.UseEdenFS = true, UNKNOWN
+
+- std::string Eval.UnitCacheBreaker = "", UNKNOWN, unitcacheflag
+
+  Arbitrary string to force different unit-cache hashes
+
+- uint64_t Eval.DynamicFunLevel = 1, UNKNOWN
+
+  When dynamic_fun is called on a function not marked as
+  __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- uint64_t Eval.DynamicClsMethLevel = 1, UNKNOWN
+
+  When dynamic_class_meth is called on a method not marked as
+  __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- uint64_t Eval.DynamicMethCallerLevel = 1, UNKNOWN
+
+  When dynamic_meth_caller is called on a static method or
+  a method not marked as __DynamicallyCallable:
+  0 - do nothing
+  1 - raise a warning
+  2 - throw
+
+- bool Eval.APCSerializeFuncs = true, UNKNOWN
+
+- bool Eval.APCSerializeClsMeth = true, UNKNOWN
+
+- bool Eval.LogOnIsArrayFunction = false, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherMaxThreads = 0, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherMinThreads = 0, UNKNOWN
+
+- uint32_t Eval.UnitPrefetcherIdleThreadTimeoutSecs = 60, UNKNOWN
+
+- uint32_t Eval.IdleUnitTimeoutSecs = 0, UNKNOWN
+
+  Delete any Unit not used in last N seconds
+
+- uint32_t Eval.IdleUnitMinThreshold = 0, UNKNOWN
+
+  Don't reap total Units below threshold
+
+- int32_t Eval.NoticeOnCoerceForStrConcat = 0, UNKNOWN
+
+  0 nothing, 1 notice, 2 error
+
+- int32_t Eval.NoticeOnCoerceForStrConcat2 = 0, UNKNOWN
+
+  0 nothing, 1 notice, 2 error
+
 - std::string Eval.TaoMigrationOverride = "", UNKNOWN
 
 - std::string Eval.SRRouteMigrationOverride = "", UNKNOWN

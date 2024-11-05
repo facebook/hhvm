@@ -30,6 +30,8 @@
 #include "hphp/runtime/vm/rclass-meth-data.h"
 #include "hphp/runtime/vm/rfunc-data.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <algorithm>
 #include <type_traits>
 
@@ -1514,7 +1516,7 @@ inline void concat_assign(Variant &v1, const char* s2) = delete;
 inline void concat_assign(tv_lval lhs, const String& s2) {
   if (!tvIsString(lhs)) {
     const auto notice_level =
-      flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat2);
+      flagToConvNoticeLevel(Cfg::Eval::NoticeOnCoerceForStrConcat2);
     tvCastToStringInPlace(lhs, notice_level, s_ConvNoticeReasonConcat.get());
   }
   asStrRef(lhs) += s2;

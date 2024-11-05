@@ -90,8 +90,8 @@ bool DataWalker::visitTypedValue(TypedValue rval,
                                  DataFeature& features,
                                  PointerSet& visited,
                                  PointerMap* seenArrs) const {
-  auto const serialize_funcs = RuntimeOption::EvalAPCSerializeFuncs;
-  auto const serialize_clsmeth = RO::EvalAPCSerializeClsMeth;
+  auto const serialize_funcs = Cfg::Eval::APCSerializeFuncs;
+  auto const serialize_clsmeth = Cfg::Eval::APCSerializeClsMeth;
 
   if (rval.m_type == KindOfObject) {
     features.hasNonPersistable = true;

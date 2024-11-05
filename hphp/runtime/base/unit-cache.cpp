@@ -412,7 +412,7 @@ bool isChanged(const struct stat* old_st, const struct stat* new_st) {
 Optional<SHA1> getHashForFile(const std::string& relPath,
                               Stream::Wrapper* wrapper,
                               const std::filesystem::path& root) {
-  if (RO::EvalUseEdenFS) {
+  if (Cfg::Eval::UseEdenFS) {
     if (auto const h = getHashFromEden(relPath.data(), wrapper)) return SHA1{*h};
   }
 
@@ -582,7 +582,7 @@ UnitChange changeReason(
 bool canBeBoundToPath(const Unit* unit, const StringData* path) {
   assertx(unit);
   assertx(path->isStatic());
-  if (!RuntimeOption::EvalReuseUnitsByHash) return true;
+  if (!Cfg::Eval::ReuseUnitsByHash) return true;
   auto const p = unit->perRequestFilepath();
   if (!p) return true;
   assertx(p->isStatic());
@@ -592,7 +592,7 @@ bool canBeBoundToPath(const Unit* unit, const StringData* path) {
 bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
                       const StringData* path) {
   assertx(path->isStatic());
-  if (!RuntimeOption::EvalReuseUnitsByHash) return true;
+  if (!Cfg::Eval::ReuseUnitsByHash) return true;
   if (!cachedUnit || !cachedUnit->cu.unit) return true;
   return canBeBoundToPath(cachedUnit->cu.unit, path);
 }
@@ -652,7 +652,7 @@ bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
 void releaseFromHashCache(Unit* unit) {
   assertx(unit);
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(unit->hasPerRequestFilepath());
 
   // Capture the SHA1 first from the Unit. If the release drops the
@@ -791,7 +791,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       };
     };
 
-    if (RuntimeOption::EvalReuseUnitsByHash) {
+    if (Cfg::Eval::ReuseUnitsByHash) {
       // We're re-using Units according to their hash:
 
       auto const cachedFilePtr = [&] {
@@ -1053,9 +1053,9 @@ folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
   struct PrefetcherExecutor : folly::CPUThreadPoolExecutor {
     PrefetcherExecutor()
       : folly::CPUThreadPoolExecutor(
-          {RO::EvalUnitPrefetcherMaxThreads,
-           std::min(RO::EvalUnitPrefetcherMinThreads,
-                    RO::EvalUnitPrefetcherMaxThreads)},
+          {Cfg::Eval::UnitPrefetcherMaxThreads,
+           std::min(Cfg::Eval::UnitPrefetcherMinThreads,
+                    Cfg::Eval::UnitPrefetcherMaxThreads)},
           std::make_unique<
             folly::PriorityUnboundedBlockingQueue<
               folly::CPUThreadPoolExecutor::CPUTask
@@ -1065,7 +1065,7 @@ folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
         )
     {
       setThreadDeathTimeout(
-        std::chrono::seconds{RO::EvalUnitPrefetcherIdleThreadTimeoutSecs}
+        std::chrono::seconds{Cfg::Eval::UnitPrefetcherIdleThreadTimeoutSecs}
       );
     }
   };
@@ -1213,7 +1213,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
       }
       return AutoloadHandler::s_instance->getAutoloadMap();
     }();
-    auto orig = (RuntimeOption::EvalCheckUnitSHA1 && !forceNewUnit)
+    auto orig = (Cfg::Eval::CheckUnitSHA1 && !forceNewUnit)
       ? cachedUnit.copy()
       : CachedFilePtr{};
     return createUnitFromFile(rpath, CodeSource::User,
@@ -1333,7 +1333,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
   }
 
   if (cu.unit) {
-    if (RuntimeOption::EvalIdleUnitTimeoutSecs > 0 &&
+    if (Cfg::Eval::IdleUnitTimeoutSecs > 0 &&
         !forPrefetch) {
       // Mark this Unit as being used by this request. This will keep
       // the Unit from being reaped until this request ends. We defer
@@ -1344,7 +1344,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
       g_context->m_touchedUnits.emplace(cu.unit);
     }
 
-    if (RuntimeOption::EvalReuseUnitsByHash &&
+    if (Cfg::Eval::ReuseUnitsByHash &&
         !forPrefetch &&
         cu.unit->hasPerRequestFilepath()) {
       // If this isn't for a prefetch, we're going to actively use
@@ -1537,7 +1537,7 @@ Optional<SHA1> getHashForFile(const std::string& path,
 
 Optional<std::string> getHashFromEden(const char* path,
                                       Stream::Wrapper* wrapper) {
-  assertx(RO::EvalUseEdenFS);
+  assertx(Cfg::Eval::UseEdenFS);
   assertx(path);
   if (wrapper) {
     // We only allow normal file streams, which cannot re-enter
@@ -1932,7 +1932,7 @@ void prefetchUnit(StringData* requestedPath,
       // The Unit doesn't already exist, or the file has
       // changed. Either way, we need to create a new Unit.
       auto ptr = [&] {
-        auto orig = RuntimeOption::EvalCheckUnitSHA1
+        auto orig = Cfg::Eval::CheckUnitSHA1
           ? cachedUnit.copy()
           : CachedFilePtr{};
         FileLoadFlags flags;
@@ -2096,7 +2096,7 @@ void unitCacheSyncRepo(AutoloadMap* map,
         // changed. Either way, we need to create a new Unit.
         Unit* releaseUnit = nullptr;
         auto ptr = [&] {
-          auto orig = RuntimeOption::EvalCheckUnitSHA1
+          auto orig = Cfg::Eval::CheckUnitSHA1
             ? cachedUnit.copy()
             : CachedFilePtr{};
           FileLoadFlags flags;
@@ -2193,7 +2193,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
       g_context->getRepoOptionsForCurrentFrame()
     );
   }
-  if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
     // Mark this Unit like we do for normal Units
     acc->second->setLastTouchRequest(Treadmill::getRequestStartTime());
     g_context->m_touchedUnits.emplace(acc->second);
@@ -2245,7 +2245,7 @@ namespace {
  */
 struct UnitReaper {
   UnitReaper()
-    : m_timeout{RO::EvalIdleUnitTimeoutSecs}
+    : m_timeout{Cfg::Eval::IdleUnitTimeoutSecs}
     , m_interval{std::min<std::chrono::seconds>(m_timeout, kMaxInterval)}
     , m_thread{&UnitReaper::run, this}
   {}
@@ -2279,7 +2279,7 @@ private:
 
   void reapPathCaches(Clock::time_point now,
                       Treadmill::Clock::time_point oldestRequest) {
-    auto const threshold = RO::EvalIdleUnitMinThreshold;
+    auto const threshold = Cfg::Eval::IdleUnitMinThreshold;
 
     // Do a quick check if the total size of the caches is below the
     // threshold. If so, we know there's nothing to do.
@@ -2445,7 +2445,7 @@ private:
   }
 
   void run() {
-    assertx(RO::EvalIdleUnitTimeoutSecs > 0);
+    assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
     assertx(!RO::RepoAuthoritative);
 
     hphp_thread_init();
@@ -2484,7 +2484,7 @@ UnitReaper* s_unit_reaper = nullptr;
 InitFiniNode s_unit_reaper_init(
   [] {
     assertx(!s_unit_reaper);
-    if (RO::EvalIdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+    if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
       s_unit_reaper = new UnitReaper();
     }
   },
@@ -2497,7 +2497,7 @@ InitFiniNode s_unit_reaper_init(
 // before moduleShutdown().
 void shutdownUnitReaper() {
   if (!s_unit_reaper) return;
-  assertx(RO::EvalIdleUnitTimeoutSecs > 0);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(!RO::RepoAuthoritative);
   delete s_unit_reaper;
   s_unit_reaper = nullptr;
@@ -2551,7 +2551,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
   auto const file_hash_str = [&] {
     // If there's no emitter cache hook, we're always going to have to
     // read the file contents, so there's no point in deferring.
-    if (!forceEager && g_unit_emitter_cache_hook && RO::EvalUseEdenFS) {
+    if (!forceEager && g_unit_emitter_cache_hook && Cfg::Eval::UseEdenFS) {
       if (auto const h = getHashFromEden(m_path, m_wrapper)) return *h;
     }
     load();

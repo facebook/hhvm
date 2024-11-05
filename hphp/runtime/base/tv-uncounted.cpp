@@ -60,7 +60,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
 
   switch (type) {
     case KindOfFunc:
-      if (RO::EvalAPCSerializeFuncs) {
+      if (Cfg::Eval::APCSerializeFuncs) {
         assertx(data.pfunc->isPersistent());
         break;
       }
@@ -91,7 +91,7 @@ void ConvertTvToUncounted(tv_lval source, const MakeUncountedEnv& env) {
       break;
 
     case KindOfClsMeth: {
-      if (RO::EvalAPCSerializeClsMeth) {
+      if (Cfg::Eval::APCSerializeClsMeth) {
         assertx(data.pclsmeth->getCls()->isPersistent());
         break;
       }

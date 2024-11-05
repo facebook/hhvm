@@ -45,7 +45,7 @@
 
 #include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
-#include "hphp/util/configs/php7.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hdf.h"
@@ -762,7 +762,7 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
                       : Options::UseSubprocess::Never)
     .setCacheExecs(Option::ExternWorkerUseExecCache)
     .setCleanup(Option::ExternWorkerCleanup)
-    .setUseEdenFS(RO::EvalUseEdenFS)
+    .setUseEdenFS(Cfg::Eval::UseEdenFS)
     .setUseRichClient(Option::ExternWorkerUseRichClient)
     .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
     .setUseP2P(Option::ExternWorkerUseP2P)

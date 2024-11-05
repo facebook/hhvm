@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,7 +86,7 @@ inline const StringData* Unit::perRequestFilepath() const {
   auto const u = getExtended();
   if (!u->m_perRequestFilepath.bound()) return nullptr;
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   if (!u->m_perRequestFilepath.isInit()) return nullptr;
   return *u->m_perRequestFilepath;
 }
@@ -107,7 +109,7 @@ inline void Unit::bindPerRequestFilepath(const StringData* p) {
   assertx(p);
   assertx(p->isStatic());
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
   assertx(u->m_perRequestFilepath.bound());
@@ -117,7 +119,7 @@ inline void Unit::bindPerRequestFilepath(const StringData* p) {
 
 inline void Unit::makeFilepathPerRequest() {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalReuseUnitsByHash);
+  assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
   assertx(!u->m_perRequestFilepath.bound());
@@ -165,7 +167,7 @@ inline void Unit::setNextCachedByHash(Unit* u) {
 inline void
 Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(requestStartTime != Treadmill::kNoStartTime);
   assertx(m_extended);
   auto u = getExtended();
@@ -181,7 +183,7 @@ Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
 
 inline void Unit::setLastTouchTime(TouchClock::time_point now) {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto u = getExtended();
   auto old = u->m_lastTouchTime.load();
@@ -193,7 +195,7 @@ inline void Unit::setLastTouchTime(TouchClock::time_point now) {
 inline std::pair<Treadmill::Clock::time_point, Unit::TouchClock::time_point>
 Unit::getLastTouch() const {
   assertx(!RuntimeOption::RepoAuthoritative);
-  assertx(RuntimeOption::EvalIdleUnitTimeoutSecs > 0);
+  assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto const u = getExtended();
   return std::make_pair(

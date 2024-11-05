@@ -14,7 +14,6 @@ use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
 use hhbc::ParamEntry;
-use hhbc::Rule;
 use hhbc::SymbolRefs;
 use hhbc::TypeConstant;
 use hhbc::TypedValue;
@@ -32,8 +31,8 @@ use crate::helpers::*;
 ///   1. Instructs with side-effects exist and are in the same order.
 ///
 ///   2. Instructs that can mutate COW datatypes (dict, vec, keyset, string)
-///   have the same COW behavior (if a datatype would have been mutated in-place
-///   in a_unit it should be mutated in-place in b_unit).
+///      have the same COW behavior (if a datatype would have been mutated in-place
+///      in a_unit it should be mutated in-place in b_unit).
 ///
 ///   3. An exception thrown from an instruction will be handled the same way
 ///
@@ -530,55 +529,24 @@ fn sem_diff_method(path: &CodePath<'_>, a: &Method, b: &Method) -> Result<()> {
     Ok(())
 }
 
-fn sem_diff_rule(path: &CodePath<'_>, a: &Rule, b: &Rule) -> Result<()> {
-    let Rule {
-        kind: a_kind,
-        name: a_name,
-    } = a;
-    let Rule {
-        kind: b_kind,
-        name: b_name,
-    } = b;
-
-    sem_diff_eq(&path.qualified("kind"), a_kind, b_kind)?;
-    sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    Ok(())
-}
-
 fn sem_diff_module(path: &CodePath<'_>, a: &Module, b: &Module) -> Result<()> {
     let Module {
         attributes: a_attributes,
         name: a_name,
         span: a_span,
         doc_comment: a_doc_comment,
-        exports: a_exports,
-        imports: a_imports,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
         doc_comment: b_doc_comment,
-        exports: b_exports,
-        imports: b_imports,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
-    sem_diff_option(
-        &path.qualified("exports"),
-        a_exports.as_ref().into_option(),
-        b_exports.as_ref().into_option(),
-        |c, a, b| sem_diff_slice(c, a, b, sem_diff_rule),
-    )?;
-    sem_diff_option(
-        &path.qualified("imports"),
-        a_imports.as_ref().into_option(),
-        b_imports.as_ref().into_option(),
-        |c, a, b| sem_diff_slice(c, a, b, sem_diff_rule),
-    )?;
     Ok(())
 }
 

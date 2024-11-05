@@ -595,8 +595,6 @@ Array populateModules(const rust::Vec<hackc::ExtDeclModule>& modules) {
   for (auto const& module : modules) {
     Array info = Array::CreateDict();
     info.set(s_name, rustToString(module.name));
-    maybeSet(info, module.imports, s_imports, populateStringArray);
-    maybeSet(info, module.exports, s_exports, populateStringArray);
     arr.append(info);
   }
   return arr.toArray();

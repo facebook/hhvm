@@ -26,7 +26,6 @@ aast_defs::FunVariadicity
 aast_defs::FunParamInfo
 aast_defs::GenCase
 aast_defs::HoleSource
-aast_defs::MdNameKind
 aast_defs::ParamKind
 aast_defs::Pattern
 aast_defs::Program
@@ -233,7 +232,6 @@ typing_defs::DestructureKind
 typing_defs::Exact
 typing_defs::FunTparamsKind
 typing_defs::InternalType
-typing_defs::ModuleReference
 typing_defs::ParamMode
 typing_defs::ParamMutability
 typing_defs::PosByteString

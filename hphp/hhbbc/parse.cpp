@@ -1082,8 +1082,6 @@ std::unique_ptr<php::Module> parse_module(const Module& m) {
     },
     m.attrs | AttrPersistent,
     m.userAttributes,
-    m.exports,
-    m.imports
   });
 }
 

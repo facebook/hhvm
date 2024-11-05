@@ -21,7 +21,6 @@
 open Hh_prelude
 open Decl_defs
 open Typing_deps
-open Typing_defs
 
 module VersionedNames = struct
   type t = {
@@ -534,24 +533,6 @@ let get_gconsts_deps ~ctx old_gconsts gconsts =
   in
   SSet.fold (get_gconst_deps ~ctx ~mode old_gconsts) kept (fanout, 0)
 
-let rule_changed rule1 rule2 =
-  match (rule1, rule2) with
-  | (MRGlobal, MRGlobal) -> false
-  | (MRExact m1, MRExact m2) -> not (String.equal m1 m2)
-  | (MRPrefix p1, MRPrefix p2) -> not (String.equal p1 p2)
-  | _ -> true
-
-let rules_changed rules1 rules2 =
-  match (rules1, rules2) with
-  | (None, None) -> false
-  | (_, None)
-  | (None, _) ->
-    true
-  | (Some rules_list1, Some rules_list2) ->
-    (match List.exists2 rules_list1 rules_list2 ~f:rule_changed with
-    | List.Or_unequal_lengths.Ok res -> res
-    | List.Or_unequal_lengths.Unequal_lengths -> true)
-
 let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
     : Fanout.t * int =
   match
@@ -568,15 +549,7 @@ let get_module_deps ~ctx ~mode old_modules mid (fanout_acc, old_modules_missing)
   | (_, None) ->
     let fanout_acc = add_module_fanout mode mid fanout_acc in
     (fanout_acc, old_modules_missing + 1)
-  | (Some module1, Some module2) ->
-    if
-      rules_changed module1.mdt_exports module2.mdt_exports
-      || rules_changed module1.mdt_imports module2.mdt_imports
-    then
-      let fanout_acc = add_module_fanout mode mid fanout_acc in
-      (fanout_acc, old_modules_missing)
-    else
-      (fanout_acc, old_modules_missing)
+  | (Some _, Some _) -> (fanout_acc, old_modules_missing)
 
 let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in

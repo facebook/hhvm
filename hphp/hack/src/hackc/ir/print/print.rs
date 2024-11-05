@@ -2159,8 +2159,6 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
                 name,
                 span,
                 doc_comment,
-                imports: _,
-                exports: _,
             } = module;
             print_top_level_span(w, Some(span))?;
             write!(

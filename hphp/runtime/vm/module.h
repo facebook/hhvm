@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/user-attributes.h"
 
-#include "hphp/runtime/vm/containers.h"
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -30,29 +28,6 @@ namespace HPHP {
  * This is the runtime representation of a module.
  */
 struct Module {
-  struct RuleSet {
-    struct NameRule {
-      bool prefix;
-      VMCompactVector<LowStringPtr> names;
-
-      template<class SerDe>
-      void serde(SerDe& sd) {
-        sd(prefix)
-          (names)
-          ;
-      }
-    };
-
-    bool global_rule;
-    VMCompactVector<NameRule> name_rules;
-
-    template<class SerDe>
-    void serde(SerDe& sd) {
-      sd(global_rule)
-        (name_rules)
-        ;
-    }
-  };
 
   LowStringPtr name;
   LowStringPtr docComment;
@@ -60,8 +35,6 @@ struct Module {
   int line1; // end line number on the src file
   Attr attrs;
   UserAttributeMap userAttributes;
-  Optional<RuleSet> exports;
-  Optional<RuleSet> imports;
 
   template<class SerDe>
   void serde(SerDe& sd) {
@@ -70,8 +43,6 @@ struct Module {
       (line1)
       (attrs)
       (userAttributes)
-      (exports)
-      (imports)
       ;
   }
 

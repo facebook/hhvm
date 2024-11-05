@@ -7,29 +7,10 @@ use error::Result;
 use ffi::Maybe;
 use hhbc::Module;
 use hhbc::ModuleName;
-use hhbc::Rule;
-use hhbc::RuleKind;
 use hhbc::Span;
 use oxidized::ast;
 
 use crate::emit_attribute;
-
-fn emit_rule(rule: &ast::MdNameKind) -> Rule {
-    match rule {
-        ast::MdNameKind::MDNameGlobal(_) => Rule {
-            kind: RuleKind::Global,
-            name: Maybe::Nothing,
-        },
-        ast::MdNameKind::MDNamePrefix(id) => Rule {
-            kind: RuleKind::Prefix,
-            name: Maybe::Just(hhbc::intern(&id.1)),
-        },
-        ast::MdNameKind::MDNameExact(id) => Rule {
-            kind: RuleKind::Exact,
-            name: Maybe::Just(hhbc::intern(&id.1)),
-        },
-    }
-}
 
 pub fn emit_module<'a, 'd>(
     emitter: &mut Emitter<'d>,
@@ -47,18 +28,6 @@ pub fn emit_module<'a, 'd>(
         doc_comment: doc_comment
             .map(|(_, comment)| comment.into_bytes().into())
             .into(),
-        exports: Maybe::from(
-            ast_module
-                .exports
-                .as_ref()
-                .map(|v| Vec::from_iter(v.iter().map(emit_rule)).into()),
-        ),
-        imports: Maybe::from(
-            ast_module
-                .imports
-                .as_ref()
-                .map(|v| Vec::from_iter(v.iter().map(emit_rule)).into()),
-        ),
     })
 }
 

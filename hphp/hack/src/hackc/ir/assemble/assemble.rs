@@ -235,8 +235,6 @@ impl UnitParser {
             name,
             span: src_loc.to_span(),
             doc_comment: doc_comment.map(|s| s.into()).into(),
-            imports: Default::default(),
-            exports: Default::default(),
         });
         Ok(())
     }

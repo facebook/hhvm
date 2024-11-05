@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b921979f0742b58b70d1330aed00de6>>
+// @generated SignedSource<<d4e4874901551dce2821497a07b608b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2335,31 +2335,6 @@ pub struct ModuleDef<Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub mode: file_info::Mode,
     pub doc_comment: Option<DocComment>,
-    pub exports: Option<Vec<MdNameKind>>,
-    pub imports: Option<Vec<MdNameKind>>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "transform.opaque")]
-#[repr(C, u8)]
-pub enum MdNameKind {
-    MDNameGlobal(Pos),
-    MDNamePrefix(Sid),
-    MDNameExact(Sid),
 }
 
 #[derive(

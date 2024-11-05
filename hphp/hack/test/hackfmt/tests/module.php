@@ -12,6 +12,3 @@ new module hackfmt.test2 {
 // un-collapsed definition isn't forcefully collapsed (yet?)
 new module hackfmt.test3 {
 }
-
-// all on one line to the right shape
-new module hackfmt.test4 {imports {a,b,c} exports {d,e,f}}

@@ -303,20 +303,6 @@ module Primary = struct
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
-      | Module_missing_import of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-          module_pos: Pos_or_decl.t;
-          current_module: string;
-          target_module_opt: string option;
-        }
-      | Module_missing_export of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-          module_pos: Pos_or_decl.t;
-          current_module_opt: string option;
-          target_module: string;
-        }
       | Module_cross_pkg_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;

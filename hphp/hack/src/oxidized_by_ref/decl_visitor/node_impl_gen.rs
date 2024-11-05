@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32d0815f2fff02434f0e3fc21d8d4ad9>>
+// @generated SignedSource<<c7f7466ae15c43ab9a71cd0cb3567c6a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -966,18 +966,6 @@ impl<'a> Node<'a> for FunElt<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ModuleReference<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_module_reference(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ModuleReference::MRGlobal => {}
-            ModuleReference::MRPrefix(ref __binding_0) => __binding_0.accept(v),
-            ModuleReference::MRExact(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
 impl<'a> Node<'a> for ModuleDefType<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_module_def_type(self)
@@ -985,18 +973,8 @@ impl<'a> Node<'a> for ModuleDefType<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             ModuleDefType {
-                pos: ref __binding_0,
-                exports: ref __binding_1,
-                imports: ref __binding_2,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                {
-                    __binding_1.accept(v)
-                }
-                { __binding_2.accept(v) }
-            }
+                mdt_pos: ref __binding_0,
+            } => __binding_0.accept(v),
         }
     }
 }

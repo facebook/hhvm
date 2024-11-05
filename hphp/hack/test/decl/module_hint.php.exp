@@ -1,16 +1,8 @@
 File root|module_hint.php--module_here.php
-[("here",
-  (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [2:12-16]; mdt_exports = None;
-       mdt_imports = None }))
-  ]
+[("here", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-16] }))]
 
 File root|module_hint.php--module_there.php
-[("there",
-  (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [2:12-17]; mdt_exports = None;
-       mdt_imports = None }))
-  ]
+[("there", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-17] }))]
 
 File root|module_hint.php--here.php
 [("\\C",

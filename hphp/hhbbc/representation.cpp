@@ -242,8 +242,6 @@ template <typename SerDe> void Module::serde(SerDe& sd) {
     (srcInfo)
     (attrs)
     (userAttributes)
-    (exports)
-    (imports)
     ;
 }
 

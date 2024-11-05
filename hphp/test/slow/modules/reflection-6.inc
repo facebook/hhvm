@@ -1,4 +1,0 @@
-<?hh
-
-new module a {
-}

@@ -2863,58 +2863,6 @@ StringData* parse_module_doccomment(AsmState& as) {
   return makeDocComment(doc);
 }
 
-void parse_rulename(AsmState& as, VMCompactVector<LowStringPtr>& names) {
-  std::string name;
-
-  if (!as.in.readword(name)) {
-    as.error("expected name for rule");
-  }
-
-  std::vector<std::string> str_names;
-  folly::split('.', name, str_names);
-
-  for (auto& s : str_names) {
-    names.push_back(makeStaticString(s));
-  }
-}
-
-Module::RuleSet parse_ruleset(AsmState& as) {
-  Module::RuleSet ruleset;
-
-  as.in.expectWs('[');
-  std::string kind;
-  while (as.in.readname(kind)) {
-    if (kind == "global") {
-      ruleset.global_rule = true;
-    } else if (kind == "prefix") {
-      as.in.expectWs('(');
-
-      Module::RuleSet::NameRule rule;
-      rule.prefix = true;
-      parse_rulename(as, rule.names);
-      ruleset.name_rules.push_back(rule);
-
-      as.in.expectWs(')');
-    } else if (kind == "exact") {
-      as.in.expectWs('(');
-
-      Module::RuleSet::NameRule rule;
-      rule.prefix = false;
-      parse_rulename(as, rule.names);
-      ruleset.name_rules.push_back(rule);
-
-      as.in.expectWs(')');
-    } else {
-      as.error("Unexpected rule kind '" + kind + "'.");
-    }
-  }
-
-  as.in.expectWs(']');
-  as.in.expectWs(';');
-
-  return ruleset;
-}
-
 /*
  * directive-module : attribute-list identifier '{}'
  *                  ;
@@ -2938,13 +2886,9 @@ void parse_module(AsmState& as) {
 
   StringData* docComment = nullptr;
   std::string directive;
-  Optional<Module::RuleSet> exports;
-  Optional<Module::RuleSet> imports;
 
   while (as.in.readword(directive)) {
     if (directive == ".doc") { docComment = parse_module_doccomment(as); continue; }
-    if (directive == ".exports") { exports = parse_ruleset(as); continue; }
-    if (directive == ".imports") { imports = parse_ruleset(as); continue; }
 
     as.error("unrecognized directive `" + directive + "' in module");
   }
@@ -2958,8 +2902,6 @@ void parse_module(AsmState& as) {
     line1,
     attrs,
     userAttrs,
-    exports,
-    imports
   }));
 }
 

@@ -170,8 +170,6 @@ mod ffi {
     #[derive(Debug, PartialEq)]
     pub struct ExtDeclModule {
         name: String,
-        exports: Vec<String>,
-        imports: Vec<String>,
     }
 
     #[derive(Debug, PartialEq)]

@@ -65,33 +65,33 @@ let find_candidate pos source_text positioned_tree =
          | Backslash | Binary | Bool | Boolean | Break | Case | Catch | Category
          | Children | Classname | Clone | Concurrent | Const | Construct
          | Continue | Ctx | Darray | Default | Dict | Do | Double | Echo | Else
-         | Empty | Endif | Eval | Exports | Extends | Fallthrough | Float | File
-         | Final | Finally | For | Foreach | Global | If | Implements | Imports
-         | Include | Include_once | Inout | Instanceof | Insteadof | Int
-         | Integer | Is | Isset | Keyset | Lateinit | List | Match | Mixed
-         | Module | Nameof | Namespace | New | Newctx | Noreturn | Num | Parent
-         | Print | Private | Protected | Public | Real | Reify | Require
-         | Require_once | Required | Resource | Return | Self | Shape | Static
-         | String | Super | Switch | This | Throw | Try | Tuple | Unset | Upcast
-         | Use | Using | Var | Varray | Vec | Void | With | Where | While
-         | Yield | NullLiteral | LeftBracket | RightBracket | LeftParen
-         | RightParen | LeftBrace | RightBrace | Dot | MinusGreaterThan
-         | PlusPlus | MinusMinus | StarStar | Star | Plus | Minus | Tilde
-         | Exclamation | Dollar | Slash | Percent | LessThanEqualGreaterThan
-         | LessThanLessThan | GreaterThanGreaterThan | LessThan | GreaterThan
-         | LessThanEqual | GreaterThanEqual | EqualEqual | EqualEqualEqual
-         | ExclamationEqual | ExclamationEqualEqual | Carat | Bar | Ampersand
-         | AmpersandAmpersand | BarBar | Question | QuestionAs | QuestionColon
-         | QuestionQuestion | QuestionQuestionEqual | Colon | Semicolon | Equal
-         | StarStarEqual | StarEqual | SlashEqual | PercentEqual | PlusEqual
-         | MinusEqual | DotEqual | LessThanLessThanEqual
-         | GreaterThanGreaterThanEqual | AmpersandEqual | CaratEqual | BarEqual
-         | Comma | At | ColonColon | EqualGreaterThan | EqualEqualGreaterThan
-         | QuestionMinusGreaterThan | DotDotDot | DollarDollar | BarGreaterThan
-         | SlashGreaterThan | LessThanSlash | LessThanQuestion | Backtick | XHP
-         | Hash | Readonly | Internal | Package | Let | ErrorToken | Name
-         | Variable | DecimalLiteral | OctalLiteral | HexadecimalLiteral
-         | BinaryLiteral | FloatingLiteral | SingleQuotedStringLiteral
+         | Empty | Endif | Eval | Extends | Fallthrough | Float | File | Final
+         | Finally | For | Foreach | Global | If | Implements | Include
+         | Include_once | Inout | Instanceof | Insteadof | Int | Integer | Is
+         | Isset | Keyset | Lateinit | List | Match | Mixed | Module | Nameof
+         | Namespace | New | Newctx | Noreturn | Num | Parent | Print | Private
+         | Protected | Public | Real | Reify | Require | Require_once | Required
+         | Resource | Return | Self | Shape | Static | String | Super | Switch
+         | This | Throw | Try | Tuple | Unset | Upcast | Use | Using | Var
+         | Varray | Vec | Void | With | Where | While | Yield | NullLiteral
+         | LeftBracket | RightBracket | LeftParen | RightParen | LeftBrace
+         | RightBrace | Dot | MinusGreaterThan | PlusPlus | MinusMinus
+         | StarStar | Star | Plus | Minus | Tilde | Exclamation | Dollar | Slash
+         | Percent | LessThanEqualGreaterThan | LessThanLessThan
+         | GreaterThanGreaterThan | LessThan | GreaterThan | LessThanEqual
+         | GreaterThanEqual | EqualEqual | EqualEqualEqual | ExclamationEqual
+         | ExclamationEqualEqual | Carat | Bar | Ampersand | AmpersandAmpersand
+         | BarBar | Question | QuestionAs | QuestionColon | QuestionQuestion
+         | QuestionQuestionEqual | Colon | Semicolon | Equal | StarStarEqual
+         | StarEqual | SlashEqual | PercentEqual | PlusEqual | MinusEqual
+         | DotEqual | LessThanLessThanEqual | GreaterThanGreaterThanEqual
+         | AmpersandEqual | CaratEqual | BarEqual | Comma | At | ColonColon
+         | EqualGreaterThan | EqualEqualGreaterThan | QuestionMinusGreaterThan
+         | DotDotDot | DollarDollar | BarGreaterThan | SlashGreaterThan
+         | LessThanSlash | LessThanQuestion | Backtick | XHP | Hash | Readonly
+         | Internal | Package | Let | ErrorToken | Name | Variable
+         | DecimalLiteral | OctalLiteral | HexadecimalLiteral | BinaryLiteral
+         | FloatingLiteral | SingleQuotedStringLiteral
          | DoubleQuotedStringLiteral | DoubleQuotedStringLiteralHead
          | StringLiteralBody | DoubleQuotedStringLiteralTail
          | HeredocStringLiteral | HeredocStringLiteralHead

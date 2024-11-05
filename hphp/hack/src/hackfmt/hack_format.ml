@@ -2681,8 +2681,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           module_declaration_module_keyword = mod_kw;
           module_declaration_name = name;
           module_declaration_left_brace = lb;
-          module_declaration_imports = imports;
-          module_declaration_exports = exports;
           module_declaration_right_brace = rb;
         } ->
       Concat
@@ -2695,28 +2693,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env name;
           Space;
-          braced_block_nest env lb rb [t env imports; t env exports];
-          Newline;
-        ]
-    | Syntax.ModuleExports
-        {
-          module_exports_exports_keyword = kw;
-          module_exports_left_brace = lb;
-          module_exports_exports = items;
-          module_exports_right_brace = rb;
-        }
-    | Syntax.ModuleImports
-        {
-          module_imports_imports_keyword = kw;
-          module_imports_left_brace = lb;
-          module_imports_imports = items;
-          module_imports_right_brace = rb;
-        } ->
-      Concat
-        [
-          t env kw;
-          Space;
-          transform_argish ~force_newlines:true env lb items rb;
+          braced_block_nest env lb rb [];
           Newline;
         ]
     | Syntax.ModuleMembershipDeclaration

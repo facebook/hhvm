@@ -1246,23 +1246,17 @@ fn cmp_module(a: &Module, b: &Module) -> Result {
         name: a_name,
         span: a_span,
         doc_comment: a_doc_comment,
-        imports: a_imports,
-        exports: a_exports,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
         doc_comment: b_doc_comment,
-        imports: b_imports,
-        exports: b_exports,
     } = b;
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_span(a_span, b_span).qualified("span")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
-    cmp_eq(a_imports, b_imports).qualified("imports")?;
-    cmp_eq(a_exports, b_exports).qualified("exports")?;
     Ok(())
 }
 

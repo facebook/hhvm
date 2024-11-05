@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fcc2581496b538001807abc8c409a4d8>>
+// @generated SignedSource<<31c7d3cdde77afa36db89ad0848746ec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1540,26 +1540,6 @@ impl<P: Params> NodeMut<P> for Lid {
         self.1.accept(c, v)
     }
 }
-impl<P: Params> NodeMut<P> for MdNameKind {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_md_name_kind(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            MdNameKind::MDNameGlobal(a0) => a0.accept(c, v),
-            MdNameKind::MDNamePrefix(a0) => a0.accept(c, v),
-            MdNameKind::MDNameExact(a0) => a0.accept(c, v),
-        }
-    }
-}
 impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1614,9 +1594,7 @@ impl<P: Params> NodeMut<P> for ModuleDef<P::Ex, P::En> {
         self.file_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
         self.mode.accept(c, v)?;
-        self.doc_comment.accept(c, v)?;
-        self.exports.accept(c, v)?;
-        self.imports.accept(c, v)
+        self.doc_comment.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for NastShapeInfo {

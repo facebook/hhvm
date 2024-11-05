@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<43ee19efd6f7c9eafd62ac38d5a73fe6>>
+// @generated SignedSource<<f106e01c08a5f89dcf3ec3d70d67111b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2165,8 +2165,6 @@ impl Transform for ModuleDef {
                 user_attributes: ref mut __binding_2,
                 file_attributes: ref mut __binding_3,
                 doc_comment: ref mut __binding_6,
-                exports: ref mut __binding_7,
-                imports: ref mut __binding_8,
                 ..
             } => {
                 {
@@ -2178,20 +2176,11 @@ impl Transform for ModuleDef {
                 {
                     __binding_3.transform(env, &mut pass.clone())
                 }
-                {
-                    __binding_6.transform(env, &mut pass.clone())
-                }
-                {
-                    __binding_7.transform(env, &mut pass.clone())
-                }
-                { __binding_8.transform(env, &mut pass.clone()) }
+                { __binding_6.transform(env, &mut pass.clone()) }
             }
         }
     }
 }
-const _: () = {
-    impl Transform for MdNameKind {}
-};
 impl Transform for Def {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();

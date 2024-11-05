@@ -66,7 +66,7 @@ fn parsed_file_to_file_info<'a>(file: ParsedFileWithHashes<'a>) -> FileInfo {
                 sort_text: None,
             }),
             Decl::Module(x) => info.ids.modules.push(Id {
-                pos: pos(x.pos),
+                pos: pos(x.mdt_pos),
                 name: name.into(),
                 decl_hash: Some(hash),
                 sort_text: None,

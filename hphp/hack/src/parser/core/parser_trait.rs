@@ -649,7 +649,7 @@ where
         }
 
         if root_is_default {
-            self.with_error(Errors::error1068, Vec::new());
+            self.with_error(Errors::error1066, Vec::new());
         }
 
         loop {
@@ -658,7 +658,7 @@ where
                 // The default module name is allowed with no dots. It's also defined already in modules.hhi,
                 // so user code won't be able to define it.
                 if next_token_kind == TokenKind::Default {
-                    self.with_error(Errors::error1068, Vec::new());
+                    self.with_error(Errors::error1066, Vec::new());
                     self.require_name_allow_all_keywords()
                 } else {
                     self.require_name_allow_non_reserved()
@@ -675,54 +675,6 @@ where
 
             if dot_is_missing {
                 break;
-            }
-        }
-
-        let pos = self.pos();
-        let list_node = self.sc_mut().make_list(parts, pos);
-        self.sc_mut().make_module_name(list_node)
-    }
-
-    fn require_qualified_referenced_module_name(&mut self) -> S::Output {
-        let mut parts = vec![];
-
-        if self.peek_token_kind() == TokenKind::Global {
-            let global = self.require_token(TokenKind::Global, Errors::error1004);
-            let pos = self.pos();
-            let missing = self.sc_mut().make_missing(pos);
-
-            parts.push(self.sc_mut().make_list_item(global, missing));
-        } else {
-            loop {
-                let next_token_kind = self.peek_token_kind();
-
-                if next_token_kind == TokenKind::Star {
-                    let star = self.require_token(TokenKind::Star, Errors::error1004);
-                    let pos = self.pos();
-                    let missing = self.sc_mut().make_missing(pos);
-
-                    parts.push(self.sc_mut().make_list_item(star, missing));
-                    break;
-                }
-
-                let name = if next_token_kind == TokenKind::SelfToken && parts.is_empty() {
-                    self.require_token(TokenKind::SelfToken, Errors::error1004)
-                } else {
-                    self.require_token(TokenKind::Name, Errors::error1004)
-                };
-
-                if name.is_missing() {
-                    break;
-                }
-
-                let dot = self.optional_token(TokenKind::Dot);
-                let dot_is_missing = dot.is_missing();
-
-                parts.push(self.sc_mut().make_list_item(name, dot));
-
-                if dot_is_missing {
-                    break;
-                }
             }
         }
 

@@ -704,8 +704,6 @@ struct Module {
   SrcInfo srcInfo;
   Attr attrs;
   UserAttributeMap userAttributes;
-  Optional<HPHP::Module::RuleSet> exports;
-  Optional<HPHP::Module::RuleSet> imports;
 
   template <typename SerDe> void serde(SerDe&);
 };

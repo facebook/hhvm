@@ -1382,52 +1382,9 @@ void translateRuleName(VMCompactVector<LowStringPtr>& names, StringId name) {
   }
 }
 
-Optional<HPHP::Module::RuleSet> translateRules(const Vector<hhbc::Rule>& rules) {
-  HPHP::Module::RuleSet result;
-  auto rules_ = range(rules);
-  for (auto const& r : rules_) {
-    switch (r.kind) {
-      case RuleKind::Global: {
-        result.global_rule = true;
-        break;
-      }
-      case RuleKind::Prefix: {
-        HPHP::Module::RuleSet::NameRule rule;
-        rule.prefix = true;
-        maybeThen(r.name,
-          [&](StringId s) {translateRuleName(rule.names, s);}
-        );
-        result.name_rules.push_back(rule);
-        break;
-      }
-      case RuleKind::Exact: {
-        HPHP::Module::RuleSet::NameRule rule;
-        rule.prefix = false;
-        maybeThen(r.name,
-          [&](StringId s) {translateRuleName(rule.names, s);}
-        );
-        result.name_rules.push_back(rule);
-        break;
-      }
-    }
-  }
-  return result;
-}
-
 void translateModule(TranslationState& ts, const hhbc::Module& m) {
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
-
-  Optional<HPHP::Module::RuleSet> exports = maybeOrNullOptional(m.exports,
-    [&](const Vector<hhbc::Rule>& export_lst) {
-      return translateRules(export_lst);
-    }
-  );
-  Optional<HPHP::Module::RuleSet> imports = maybeOrNullOptional(m.imports,
-    [&](const Vector<hhbc::Rule>& import_lst) {
-      return translateRules(import_lst);
-    }
-  );
 
   ts.ue->addModule(HPHP::Module{
     toStaticString(m.name._0),
@@ -1438,8 +1395,6 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
     static_cast<int>(m.span.line_end),
     Attr(AttrNone),
     userAttrs,
-    exports,
-    imports,
   });
 }
 

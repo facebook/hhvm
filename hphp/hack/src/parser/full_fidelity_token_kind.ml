@@ -55,7 +55,6 @@ type t =
   | Endif
   | Enum
   | Eval
-  | Exports
   | Extends
   | Fallthrough
   | Float
@@ -68,7 +67,6 @@ type t =
   | Global
   | If
   | Implements
-  | Imports
   | Include
   | Include_once
   | Inout
@@ -270,7 +268,6 @@ let from_string keyword ~only_reserved =
   | "endif" -> Some Endif
   | "enum" when not only_reserved -> Some Enum
   | "eval" -> Some Eval
-  | "exports" when not only_reserved -> Some Exports
   | "extends" -> Some Extends
   | "fallthrough" when not only_reserved -> Some Fallthrough
   | "float" when not only_reserved -> Some Float
@@ -283,7 +280,6 @@ let from_string keyword ~only_reserved =
   | "global" -> Some Global
   | "if" -> Some If
   | "implements" -> Some Implements
-  | "imports" when not only_reserved -> Some Imports
   | "include" -> Some Include
   | "include_once" -> Some Include_once
   | "inout" -> Some Inout
@@ -460,7 +456,6 @@ let to_string kind =
   | Endif -> "endif"
   | Enum -> "enum"
   | Eval -> "eval"
-  | Exports -> "exports"
   | Extends -> "extends"
   | Fallthrough -> "fallthrough"
   | Float -> "float"
@@ -473,7 +468,6 @@ let to_string kind =
   | Global -> "global"
   | If -> "if"
   | Implements -> "implements"
-  | Imports -> "imports"
   | Include -> "include"
   | Include_once -> "include_once"
   | Inout -> "inout"

@@ -2552,38 +2552,6 @@ let schema : schema_node list =
           ("module_keyword", Token);
           ("name", Aggregate Name);
           ("left_brace", Token);
-          ("imports", Just "ModuleImports");
-          ("exports", Just "ModuleExports");
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "ModuleExports";
-      type_name = "module_exports";
-      func_name = "module_exports";
-      description = "module_exports";
-      prefix = "module_exports";
-      aggregates = [];
-      fields =
-        [
-          ("exports_keyword", Token);
-          ("left_brace", Token);
-          ("exports", ZeroOrMore (Aggregate Name));
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "ModuleImports";
-      type_name = "module_imports";
-      func_name = "module_imports";
-      description = "module_imports";
-      prefix = "module_imports";
-      aggregates = [];
-      fields =
-        [
-          ("imports_keyword", Token);
-          ("left_brace", Token);
-          ("imports", ZeroOrMore (Aggregate Name));
           ("right_brace", Token);
         ];
     };

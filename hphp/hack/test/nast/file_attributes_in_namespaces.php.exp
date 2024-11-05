@@ -53,6 +53,5 @@
             ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
           }
          ];
-       md_span = [11:1-24]; md_mode = Mstrict; md_doc_comment = None; 
-       md_exports = None; md_imports = None })
+       md_span = [11:1-24]; md_mode = Mstrict; md_doc_comment = None })
   ]

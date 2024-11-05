@@ -206,8 +206,6 @@ pub enum SyntaxKind {
     ListItem,
     EnumClassLabelExpression,
     ModuleDeclaration,
-    ModuleExports,
-    ModuleImports,
     ModuleMembershipDeclaration,
     PackageExpression,
 
@@ -399,8 +397,6 @@ impl SyntaxKind {
             SyntaxKind::ListItem                                       => "list_item",
             SyntaxKind::EnumClassLabelExpression                       => "enum_class_label",
             SyntaxKind::ModuleDeclaration                              => "module_declaration",
-            SyntaxKind::ModuleExports                                  => "module_exports",
-            SyntaxKind::ModuleImports                                  => "module_imports",
             SyntaxKind::ModuleMembershipDeclaration                    => "module_membership_declaration",
             SyntaxKind::PackageExpression                              => "package_expression",
         }
@@ -591,10 +587,8 @@ impl SyntaxKind {
             SyntaxKind::ListItem => 179,
             SyntaxKind::EnumClassLabelExpression => 180,
             SyntaxKind::ModuleDeclaration => 181,
-            SyntaxKind::ModuleExports => 182,
-            SyntaxKind::ModuleImports => 183,
-            SyntaxKind::ModuleMembershipDeclaration => 184,
-            SyntaxKind::PackageExpression => 185,
+            SyntaxKind::ModuleMembershipDeclaration => 182,
+            SyntaxKind::PackageExpression => 183,
         }
     }
 }

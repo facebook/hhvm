@@ -1193,50 +1193,6 @@ static TypedValue HHVM_METHOD(ReflectionModule, getDocComment) {
   }
 }
 
-static Array get_module_ruleset(const Module::RuleSet& ruleset) {
-  VecInit arr((ruleset.global_rule ? 1 : 0) + ruleset.name_rules.size());
-
-  if (ruleset.global_rule) {
-    arr.append(make_tv<KindOfPersistentString>(makeStaticString("global")));
-  }
-
-  for (auto const& nr : ruleset.name_rules) {
-    std::vector<folly::StringPiece> names;
-
-    for (auto& n : nr.names) {
-      names.push_back(n->slice());
-    }
-
-    std::string name;
-    folly::join(".", names, name);
-
-    if (nr.prefix) name.append(".*");
-
-    arr.append(make_tv<KindOfPersistentString>(makeStaticString(name)));
-    name.clear();
-  }
-
-  return arr.toArray();
-}
-
-static Variant HHVM_METHOD(ReflectionModule, getExports) {
-  auto const module = ReflectionModuleHandle::GetModuleFor(this_);
-  assertx(module);
-
-  if (!module->exports) return init_null_variant;
-
-  return get_module_ruleset(*module->exports);
-}
-
-static Variant HHVM_METHOD(ReflectionModule, getImports) {
-  auto const module = ReflectionModuleHandle::GetModuleFor(this_);
-  assertx(module);
-
-  if (!module->imports) return init_null_variant;
-
-  return get_module_ruleset(*module->imports);
-}
-
 // ------------------------- class ReflectionFunction
 
 // helper for __construct
@@ -2416,8 +2372,6 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionModule, __init);
     HHVM_ME(ReflectionModule, getAttributesNamespaced);
     HHVM_ME(ReflectionModule, getDocComment);
-    HHVM_ME(ReflectionModule, getExports);
-    HHVM_ME(ReflectionModule, getImports);
 
     HHVM_ME(ReflectionTypeConstant, __init);
     HHVM_ME(ReflectionTypeConstant, getName);

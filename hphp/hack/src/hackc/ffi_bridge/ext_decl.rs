@@ -18,7 +18,6 @@ use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
 use oxidized_by_ref::shallow_decl_defs::ShallowProp;
 use oxidized_by_ref::shallow_decl_defs::ShallowTypeconst;
 use oxidized_by_ref::shallow_decl_defs::Typeconst;
-use oxidized_by_ref::typing_defs::ModuleReference;
 use oxidized_by_ref::typing_defs::TypedefTypeAssignment;
 use oxidized_by_ref::typing_defs_core::FunParams;
 use oxidized_by_ref::typing_defs_core::ShapeType;
@@ -106,10 +105,8 @@ pub fn get_file_modules(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDecl
         .decls
         .modules()
         .filter(|(cname, _)| name.is_empty() || cname == &name)
-        .map(|(cname, decl)| ExtDeclModule {
+        .map(|(cname, _)| ExtDeclModule {
             name: fmt_type(cname),
-            exports: extract_module_refs(decl.exports),
-            imports: extract_module_refs(decl.imports),
         })
         .collect()
 }
@@ -523,20 +520,6 @@ fn get_attributes(arr: &[&UserAttribute<'_>], name: &str) -> Vec<ExtDeclAttribut
             raw_val: str_or_empty(t.raw_val),
         })
         .collect()
-}
-
-fn extract_module_refs(refs: Option<&[ModuleReference<'_>]>) -> Vec<String> {
-    match refs {
-        Some(refs) => refs
-            .iter()
-            .map(|mref| match mref {
-                ModuleReference::MRGlobal => String::new(),
-                ModuleReference::MRPrefix(m) => m.to_string(),
-                ModuleReference::MRExact(m) => m.to_string(),
-            })
-            .collect(),
-        None => vec![],
-    }
 }
 
 fn get_signature(ty: Ty_<'_>) -> Vec<ExtDeclSignature> {

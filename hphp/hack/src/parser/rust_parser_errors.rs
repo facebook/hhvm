@@ -5450,11 +5450,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.type_refinement_errors(node);
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),
-            ModuleDeclaration(x) => {
-                if !x.exports.is_missing() || !x.imports.is_missing() {
-                    self.check_can_use_feature(node, &FeatureName::ModuleReferences);
-                }
-            }
+            ModuleDeclaration(_) => {}
             ModuleMembershipDeclaration(_) => {
                 self.in_module = true;
             }

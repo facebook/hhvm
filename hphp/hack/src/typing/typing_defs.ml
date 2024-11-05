@@ -132,18 +132,7 @@ type class_const = {
 }
 [@@deriving show]
 
-type module_reference =
-  | MRGlobal
-  | MRPrefix of string
-  | MRExact of string
-[@@deriving show]
-
-type module_def_type = {
-  mdt_pos: Pos_or_decl.t;
-  mdt_exports: module_reference list option;
-  mdt_imports: module_reference list option;
-}
-[@@deriving show]
+type module_def_type = { mdt_pos: Pos_or_decl.t } [@@deriving show]
 
 (** The position is that of the hint in the `use` / `implements` AST node
  * that causes a class to have this requirement applied to it. E.g.

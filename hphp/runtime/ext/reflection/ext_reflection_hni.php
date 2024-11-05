@@ -2611,12 +2611,6 @@ final class ReflectionModule implements Reflector {
   <<__Native>>
   public function getDocComment()[]: mixed;
 
-  <<__Native>>
-  public function getExports()[]: ?varray<string>;
-
-  <<__Native>>
-  public function getImports()[]: ?varray<string>;
-
   /**
    * Get the name of the file.
    *

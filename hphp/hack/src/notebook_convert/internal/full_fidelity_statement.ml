@@ -193,8 +193,6 @@ let is_statement =
     | ListItem _
     | EnumClassLabelExpression _
     | ModuleDeclaration _
-    | ModuleExports _
-    | ModuleImports _
     | ModuleMembershipDeclaration _
     | PackageExpression _ ->
       false)

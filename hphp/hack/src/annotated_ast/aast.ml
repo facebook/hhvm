@@ -112,11 +112,6 @@ let enum_includes_map ?(default = []) ~f includes =
 
 let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
 
-let module_name_kind_to_string = function
-  | MDNameExact md -> Ast_defs.get_id md
-  | MDNamePrefix md -> Ast_defs.get_id md ^ ".*"
-  | MDNameGlobal _ -> "global"
-
 (* Combinators for folding / iterating over all of a switch statement *)
 module GenCase : sig
   val map :

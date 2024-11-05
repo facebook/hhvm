@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c3bf7fe8e085140d6eb786e2a9989fb>>
+// @generated SignedSource<<27c2b55e4f634381609c05f27cb98d31>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2989,89 +2989,6 @@ impl TypedefAssignment {
     ) -> Option<(TypedefCaseTypeVariant, Vec<TypedefCaseTypeVariant>)> {
         match self {
             TypedefAssignment::CaseType(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-}
-impl MdNameKind {
-    pub fn mk_mdname_global(p0: Pos) -> Self {
-        MdNameKind::MDNameGlobal(p0)
-    }
-    pub fn mk_mdname_prefix(p0: Sid) -> Self {
-        MdNameKind::MDNamePrefix(p0)
-    }
-    pub fn mk_mdname_exact(p0: Sid) -> Self {
-        MdNameKind::MDNameExact(p0)
-    }
-    pub fn is_mdname_global(&self) -> bool {
-        match self {
-            MdNameKind::MDNameGlobal(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_mdname_prefix(&self) -> bool {
-        match self {
-            MdNameKind::MDNamePrefix(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_mdname_exact(&self) -> bool {
-        match self {
-            MdNameKind::MDNameExact(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_mdname_global(&self) -> Option<&Pos> {
-        match self {
-            MdNameKind::MDNameGlobal(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_prefix(&self) -> Option<&Sid> {
-        match self {
-            MdNameKind::MDNamePrefix(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_exact(&self) -> Option<&Sid> {
-        match self {
-            MdNameKind::MDNameExact(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_global_mut(&mut self) -> Option<&mut Pos> {
-        match self {
-            MdNameKind::MDNameGlobal(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_prefix_mut(&mut self) -> Option<&mut Sid> {
-        match self {
-            MdNameKind::MDNamePrefix(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_exact_mut(&mut self) -> Option<&mut Sid> {
-        match self {
-            MdNameKind::MDNameExact(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_global_into(self) -> Option<Pos> {
-        match self {
-            MdNameKind::MDNameGlobal(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_prefix_into(self) -> Option<Sid> {
-        match self {
-            MdNameKind::MDNamePrefix(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_mdname_exact_into(self) -> Option<Sid> {
-        match self {
-            MdNameKind::MDNameExact(p0) => Some(p0),
             _ => None,
         }
     }

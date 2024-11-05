@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<703ecca18a92b8d3f89ef09a9c4ece90>>
+// @generated SignedSource<<adf205fb2bbfcb4d6bb1e1dead07db38>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2934,42 +2934,9 @@ pub struct ModuleDef<'a, Ex, En> {
     pub mode: oxidized::file_info::Mode,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub exports: Option<&'a [MdNameKind<'a>]>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub imports: Option<&'a [MdNameKind<'a>]>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ModuleDef<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ModuleDef<'arena, Ex, En>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "transform.opaque")]
-#[repr(C, u8)]
-pub enum MdNameKind<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MDNameGlobal(&'a Pos<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MDNamePrefix(&'a Sid<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MDNameExact(&'a Sid<'a>),
-}
-impl<'a> TrivialDrop for MdNameKind<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(MdNameKind<'arena>);
 
 #[derive(
     Clone,

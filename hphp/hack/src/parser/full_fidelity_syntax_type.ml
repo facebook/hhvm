@@ -1213,21 +1213,7 @@ struct
         module_declaration_module_keyword: t;
         module_declaration_name: t;
         module_declaration_left_brace: t;
-        module_declaration_imports: t;
-        module_declaration_exports: t;
         module_declaration_right_brace: t;
-      }
-    | ModuleExports of {
-        module_exports_exports_keyword: t;
-        module_exports_left_brace: t;
-        module_exports_exports: t;
-        module_exports_right_brace: t;
-      }
-    | ModuleImports of {
-        module_imports_imports_keyword: t;
-        module_imports_left_brace: t;
-        module_imports_imports: t;
-        module_imports_right_brace: t;
       }
     | ModuleMembershipDeclaration of {
         module_membership_declaration_module_keyword: t;

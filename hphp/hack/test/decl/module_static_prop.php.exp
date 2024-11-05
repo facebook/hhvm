@@ -1,16 +1,8 @@
 File root|module_static_prop.php--module_A.php
-[("A",
-  (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [2:12-13]; mdt_exports = None;
-       mdt_imports = None }))
-  ]
+[("A", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-13] }))]
 
 File root|module_static_prop.php--module_B.php
-[("B",
-  (Shallow_decl_defs.Module
-     { Typing_defs.mdt_pos = [2:12-13]; mdt_exports = None;
-       mdt_imports = None }))
-  ]
+[("B", (Shallow_decl_defs.Module { Typing_defs.mdt_pos = [2:12-13] }))]
 
 File root|module_static_prop.php--A.php
 [("\\A",

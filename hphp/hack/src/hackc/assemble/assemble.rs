@@ -266,8 +266,6 @@ fn assemble_module(token_iter: &mut Lexer<'_>) -> Result<hhbc::Module> {
         name,
         span,
         doc_comment,
-        exports: Maybe::Nothing, // TODO: Add parsing
-        imports: Maybe::Nothing, // TODO: Add parsing
     })
 }
 

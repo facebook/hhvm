@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4a2bc9db9bebf9dcbe521e03c6f44b42>>
+// @generated SignedSource<<449db29ffbbedea65d05b6a9777dd605>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -246,7 +246,6 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
@@ -261,42 +260,10 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving show")]
-#[repr(C, u8)]
-pub enum ModuleReference<'a> {
-    MRGlobal,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MRPrefix(&'a str),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MRExact(&'a str),
-}
-impl<'a> TrivialDrop for ModuleReference<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ModuleReference<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving show")]
-#[rust_to_ocaml(prefix = "mdt_")]
 #[repr(C)]
 pub struct ModuleDefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub exports: Option<&'a [ModuleReference<'a>]>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub imports: Option<&'a [ModuleReference<'a>]>,
+    pub mdt_pos: &'a pos_or_decl::PosOrDecl<'a>,
 }
 impl<'a> TrivialDrop for ModuleDefType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ModuleDefType<'arena>);

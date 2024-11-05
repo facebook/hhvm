@@ -556,23 +556,10 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ConstDecl<'_>> for shallow::ConstD
     }
 }
 
-impl From<obr::typing_defs::ModuleReference<'_>> for ty::ModuleReference {
-    fn from(x: obr::typing_defs::ModuleReference<'_>) -> Self {
-        use obr::typing_defs::ModuleReference as Obr;
-        match x {
-            Obr::MRGlobal => Self::MRGlobal,
-            Obr::MRPrefix(m) => Self::MRPrefix(m.into()),
-            Obr::MRExact(m) => Self::MRExact(m.into()),
-        }
-    }
-}
-
 impl<R: Reason> From<&obr::shallow_decl_defs::ModuleDefType<'_>> for shallow::ModuleDecl<R> {
     fn from(x: &obr::shallow_decl_defs::ModuleDefType<'_>) -> Self {
         Self {
-            pos: x.pos.into(),
-            exports: x.exports.map(slice),
-            imports: x.imports.map(slice),
+            pos: x.mdt_pos.into(),
         }
     }
 }

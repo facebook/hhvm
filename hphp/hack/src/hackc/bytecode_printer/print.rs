@@ -42,8 +42,6 @@ use hhbc::ParamEntry;
 use hhbc::Property;
 use hhbc::Pseudo;
 use hhbc::Requirement;
-use hhbc::Rule;
-use hhbc::RuleKind;
 use hhbc::Span;
 use hhbc::SrcLoc;
 use hhbc::StringId;
@@ -179,7 +177,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
 
     newline(w)?;
     print_module_use(w, &prog.module_use)?;
-    concat(w, &adata.clone().finish(), |w, i, a| {
+    concat(w, adata.clone().finish(), |w, i, a| {
         print_adata_region(ctx, w, i, a)
     })?;
     concat(w, &prog.functions, |w, _, f| {
@@ -644,42 +642,6 @@ fn print_class_def(
     newline(w)
 }
 
-fn print_rules(w: &mut dyn Write, rules: &[Rule]) -> Result<()> {
-    let mut first = true;
-
-    for rule in rules.iter() {
-        if first {
-            first = false;
-        } else {
-            w.write_all(b" ")?;
-        }
-
-        match rule.kind {
-            RuleKind::Global => {
-                w.write_all(b"global")?;
-            }
-            RuleKind::Prefix => {
-                write_bytes!(w, "prefix({})", rule.name.unwrap().as_str())?;
-            }
-            RuleKind::Exact => {
-                write_bytes!(w, "exact({})", rule.name.unwrap().as_str())?;
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn print_named_rules(w: &mut dyn Write, name: &str, rules: Maybe<&Vector<Rule>>) -> Result<()> {
-    if let Just(v) = rules {
-        newline(w)?;
-        write!(w, ".{} [", name)?;
-        print_rules(w, v)?;
-        w.write_all(b"] ;")?;
-    }
-    Ok(())
-}
-
 fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -> Result<()> {
     newline(w)?;
     w.write_all(b".module ")?;
@@ -695,8 +657,6 @@ fn print_module_def(ctx: &Context<'_>, w: &mut dyn Write, module_def: &Module) -
     print_span(w, &module_def.span)?;
     w.write_all(b" {")?;
     print_doc_comment(ctx, w, module_def.doc_comment.as_ref())?;
-    print_named_rules(w, "exports", module_def.exports.as_ref())?;
-    print_named_rules(w, "imports", module_def.imports.as_ref())?;
     newline(w)?;
     w.write_all(b"}")?;
     newline(w)

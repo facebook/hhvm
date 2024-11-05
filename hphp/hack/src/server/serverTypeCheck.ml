@@ -306,20 +306,9 @@ let discard_warnings_if_public_rev env genv errors : env * Errors.t =
       (env, errors)
     else (
       match
-        try
-          Hg.is_public_without_local_changes
-            (ServerArgs.root genv.ServerEnv.options |> Path.to_string)
-          |> Future.get ~timeout:3
-        with
-        | Unix.Unix_error (Unix.EINVAL, fun_name, params) ->
-          (* TODO: T203733966 we currently have a file descriptor leak causing this exception at times.
-             Delete this exception handling once we've root-caused *)
-          HackEventLogger.invariant_violation_bug
-            (Printf.sprintf
-               "ServerTypeCheck.discard_warnings_if_public_rev: EINVAL %s %s"
-               fun_name
-               params);
-          Ok false
+        Hg.is_public_without_local_changes
+          (ServerArgs.root genv.ServerEnv.options |> Path.to_string)
+        |> Future.get ~timeout:3
       with
       | Ok false
       | Error _ ->

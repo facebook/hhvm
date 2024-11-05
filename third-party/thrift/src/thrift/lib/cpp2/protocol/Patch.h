@@ -103,6 +103,12 @@ ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
 /// map is not integer or string, it throws.
 ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch);
 
+// Constructs read and write Thrift Map Mask of a given patch originating from
+// the field, map entry, or type entry specified mask. YOU PROBABLY SHOULDN'T BE
+// CALLING THIS!
+ExtractedMasksFromPatch extractMapMaskFromPatch_DO_NOT_USE(
+    const protocol::Object& patch, const Mask& mask);
+
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
     const protocol::Object& patch, const folly::IOBuf& buf);

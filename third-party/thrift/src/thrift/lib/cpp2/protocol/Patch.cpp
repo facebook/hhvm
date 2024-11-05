@@ -857,13 +857,12 @@ void insertTypesToMask(
   }
 }
 
+// We cannot distinguish SetPatch::remove and MapPatch::remove without
+// additional schema information. However, we can disambiguate if the same
+// patch contains other map operations which is tracked by `isMap`.
 ExtractedMasksFromPatch extractMaskFromPatch(
-    const protocol::Object& patch, bool view) {
+    const protocol::Object& patch, bool view, bool isMap = false) {
   ExtractedMasksFromPatch masks = {noneMask(), noneMask()};
-  // We cannot distinguish SetPatch::remove and MapPatch::remove without
-  // additional schema information. However, we can disambiguate if the same
-  // patch contains other map operations.
-  bool isMap = false;
 
   // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
@@ -1021,6 +1020,45 @@ int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
   return version;
 }
 
+ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
+    const protocol::Value& patch, const Mask& mask);
+ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
+    const protocol::Object& patch, const Mask& mask) {
+  if (isAllMask(mask)) {
+    return extractMaskFromPatch(patch, false, true);
+  }
+  std::vector<ExtractedMasksFromPatch> rwmasks;
+
+  // If there is an assign, we can short-circut the logic.
+  if (findOp(patch, PatchOp::Assign)) {
+    return {noneMask(), allMask()};
+  }
+
+  if (mask.includes_ref()) {
+    folly::throw_exception<std::runtime_error>("not implemented");
+  } else if (mask.includes_map_ref()) {
+    folly::throw_exception<std::runtime_error>("not implemented");
+  } else if (mask.includes_string_map_ref()) {
+    folly::throw_exception<std::runtime_error>("not implemented");
+  } else if (mask.includes_type_ref()) {
+    folly::throw_exception<std::runtime_error>("not implemented");
+  } else {
+    folly::throw_exception<std::runtime_error>("Invalid mask");
+  }
+
+  ExtractedMasksFromPatch ret;
+  for (const auto& rwmask : rwmasks) {
+    ret.read = ret.read | rwmask.read;
+    ret.write = ret.write | rwmask.write;
+  }
+  return ret;
+}
+
+ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
+    const protocol::Value& patch, const Mask& mask) {
+  return extractMapMaskFromPatchImpl(patch.as_object(), mask);
+}
+
 } // namespace detail
 
 ExtractedMasksFromPatch extractMaskViewFromPatch(
@@ -1032,6 +1070,13 @@ ExtractedMasksFromPatch extractMaskViewFromPatch(
 ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch) {
   detail::checkNotSafePatch(patch);
   return detail::extractMaskFromPatch(patch, false);
+}
+
+ExtractedMasksFromPatch extractMapMaskFromPatch_DO_NOT_USE(
+    const protocol::Object& patch, const Mask& mask) {
+  detail::validateSinglePath(mask);
+  auto masks = detail::extractMapMaskFromPatchImpl(patch, mask);
+  return masks;
 }
 
 template <type::StandardProtocol Protocol>

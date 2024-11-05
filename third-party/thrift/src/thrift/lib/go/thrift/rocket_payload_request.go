@@ -125,7 +125,19 @@ func (r *requestPayload) Headers() map[string]string {
 	if r.metadata == nil {
 		return nil
 	}
-	return r.metadata.GetOtherMetadata()
+
+	headersMap := make(map[string]string)
+	maps.Copy(headersMap, r.metadata.GetOtherMetadata())
+	if r.metadata.IsSetClientId() {
+		headersMap["client_id"] = r.metadata.GetClientId()
+	}
+	if r.metadata.IsSetLoadMetric() {
+		headersMap["load"] = r.metadata.GetLoadMetric()
+	}
+	if r.metadata.IsSetClientTimeoutMs() {
+		headersMap["client_timeout"] = fmt.Sprintf("%d", r.metadata.GetClientTimeoutMs())
+	}
+	return headersMap
 }
 
 func protocolIDToRPCProtocolID(protocolID types.ProtocolID) (rpcmetadata.ProtocolId, error) {

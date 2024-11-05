@@ -144,7 +144,7 @@ constexpr int kStackCheckReenterPadding = 9;
 
 ALWAYS_INLINE
 int stackCheckPadding() {
-  return RO::EvalStackCheckLeafPadding + kStackCheckReenterPadding;
+  return Cfg::Eval::StackCheckLeafPadding + kStackCheckReenterPadding;
 }
 
 // Interpreter evaluation stack.

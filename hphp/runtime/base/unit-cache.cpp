@@ -1268,7 +1268,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
   assertx(rpath->isStatic());
 
   auto const& options = RepoOptions::forFile(rpath->data());
-  if (UNLIKELY(!RO::EvalLoadFilepathFromUnitCache)) {
+  if (UNLIKELY(!Cfg::Eval::LoadFilepathFromUnitCache)) {
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
 
@@ -1325,7 +1325,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     );
   }();
 
-  if (UNLIKELY(RO::EvalLoadFilepathFromUnitCache && cu.unit)) {
+  if (UNLIKELY(Cfg::Eval::LoadFilepathFromUnitCache && cu.unit)) {
     auto const origFileoptions = RepoOptions::forFile(
       cu.unit->origFilepath()->data()
     );

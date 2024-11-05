@@ -149,18 +149,18 @@ void moduleInit() {
   auto db = RuntimeOption::EvalDumpBytecode;
   auto rp = Cfg::Server::AlwaysUseRelativePath;
   auto sf = Cfg::Server::SafeFileAccess;
-  auto ah = RuntimeOption::EvalAllowHhas;
+  auto ah = Cfg::Eval::AllowHhas;
 
   RuntimeOption::EvalDumpBytecode &= ~1;
   Cfg::Server::AlwaysUseRelativePath = false;
   Cfg::Server::SafeFileAccess = false;
-  RuntimeOption::EvalAllowHhas = true;
+  Cfg::Eval::AllowHhas = true;
 
   SCOPE_EXIT {
     RuntimeOption::EvalDumpBytecode = db;
     Cfg::Server::AlwaysUseRelativePath = rp;
     Cfg::Server::SafeFileAccess = sf;
-    RuntimeOption::EvalAllowHhas = ah;
+    Cfg::Eval::AllowHhas = ah;
   };
 
   assertx(s_sorted);

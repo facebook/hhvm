@@ -36,6 +36,8 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/match.h"
 
 namespace HPHP {
@@ -387,7 +389,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
 void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
-  if (RuntimeOption::EvalDisassemblerDocComments) {
+  if (Cfg::Eval::DisassemblerDocComments) {
     if (func->docComment() && !func->docComment()->empty()) {
       out.fmtln(".doc {};", escaped_long(func->docComment()));
     }
@@ -677,8 +679,8 @@ template<class T>
 void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
     opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
-    RuntimeOption::EvalDisassemblerDocComments &&
-    RuntimeOption::EvalDisassemblerPropDocComments
+    Cfg::Eval::DisassemblerDocComments &&
+    Cfg::Eval::DisassemblerPropDocComments
       ? opt_escaped_long(f.docComment())
       : std::string(""),
     type_info(f.userType(), f.typeConstraints()),
@@ -768,7 +770,7 @@ void print_requirement(Output& out, const PreClass::ClassRequirement& req) {
 }
 
 void print_cls_directives(Output& out, const PreClass* cls) {
-  if (RuntimeOption::EvalDisassemblerDocComments) {
+  if (Cfg::Eval::DisassemblerDocComments) {
     if (cls->docComment() && !cls->docComment()->empty()) {
       out.fmtln(".doc {};", escaped_long(cls->docComment()));
     }
@@ -887,7 +889,7 @@ void print_module(Output& out, const Module& m) {
             m.name,
             m.line0,
             m.line1);
-  if (RuntimeOption::EvalDisassemblerDocComments) {
+  if (Cfg::Eval::DisassemblerDocComments) {
     if (m.docComment && !m.docComment->empty()) {
       out.fmtln(".doc {};", escaped_long(m.docComment));
     }

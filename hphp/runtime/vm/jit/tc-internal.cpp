@@ -155,7 +155,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
   if (maxTransTime >= 0 &&
       RuntimeOption::ServerExecutionMode() &&
-      !RuntimeOption::EvalEnableAsyncJIT) {
+      !Cfg::Eval::EnableAsyncJIT) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
       if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {

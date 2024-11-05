@@ -33,7 +33,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 NameValueTable::NameValueTable() {
-  allocate(folly::nextPowTwo(RuntimeOption::EvalVMInitialGlobalTableSize));
+  allocate(folly::nextPowTwo(Cfg::Eval::VMInitialGlobalTableSize));
 }
 
 NameValueTable::~NameValueTable() {

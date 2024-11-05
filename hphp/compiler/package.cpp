@@ -341,7 +341,7 @@ Package::parseRun(const std::string& content,
   auto const& fileName = meta.m_filename;
 
   try {
-    if (RO::EvalAllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
+    if (Cfg::Eval::AllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
       auto ue = assemble_string(
         content.data(),
         content.size(),
@@ -1117,7 +1117,7 @@ Package::UnitDecls IndexJob::run(
     return bail("not indexing symlink");
   }
 
-  if (RO::EvalAllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
+  if (Cfg::Eval::AllowHhas && folly::StringPiece(fileName).endsWith(".hhas")) {
     return bail("cannot index hhas");
   }
 

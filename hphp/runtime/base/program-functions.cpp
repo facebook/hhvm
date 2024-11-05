@@ -1954,7 +1954,7 @@ static int execute_program_impl(int argc, char** argv) {
     });
     LightProcess::Initialize(Cfg::Server::LightProcessFilePrefix,
                              Cfg::Server::LightProcessCount,
-                             RuntimeOption::EvalRecordSubprocessTimes,
+                             Cfg::Eval::RecordSubprocessTimes,
                              inherited_fds);
   }
 

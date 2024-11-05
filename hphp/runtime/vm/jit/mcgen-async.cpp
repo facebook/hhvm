@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/trace.h"
@@ -76,7 +77,7 @@ std::atomic<size_t> s_rejectPrologue;
 std::atomic<size_t> s_activePrologue;
 
 InitFiniNode s_logJitStats([]{
-  if (!RO::EvalEnableAsyncJIT ||
+  if (!Cfg::Eval::EnableAsyncJIT ||
       !isStandardRequest() ||
       !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
   StructuredLogEntry ent;
@@ -291,8 +292,8 @@ using AsyncTranslationDispatcher = JobQueueDispatcher<AsyncTranslationWorker>;
 AsyncTranslationDispatcher& dispatcher() {
   static const auto dispatcher = [] {
     auto d = std::make_unique<AsyncTranslationDispatcher>(
-      RuntimeOption::EvalAsyncJitWorkerThreads,
-      RuntimeOption::EvalAsyncJitWorkerThreads, 0, false, nullptr
+      Cfg::Eval::AsyncJitWorkerThreads,
+      Cfg::Eval::AsyncJitWorkerThreads, 0, false, nullptr
     );
     d->start();
     return d;

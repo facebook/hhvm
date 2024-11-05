@@ -265,7 +265,7 @@ Class* vm_decode_class_from_name(
         cls = ar->getClass();
       }
       if (flags != DecodeFlags::NoWarn && cls) {
-        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+        if (Cfg::Eval::WarnOnSkipFrameLookup) {
           raise_warning(
             "vm_decode_function() used to decode a LSB class "
             "method on %s",
@@ -316,7 +316,7 @@ const Func* vm_decode_func_from_name(
         cls = obj->getVMClass();
       }
       if (flags != DecodeFlags::NoWarn && this_) {
-        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+        if (Cfg::Eval::WarnOnSkipFrameLookup) {
           raise_warning(
             "vm_decode_function() used to decode a method on $this, an "
             "instance of %s, from the caller, %s",
@@ -360,7 +360,7 @@ const Func* vm_decode_func_from_name(
     }
 
     if (flags != DecodeFlags::NoWarn && fwdCls) {
-      if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+      if (Cfg::Eval::WarnOnSkipFrameLookup) {
         raise_warning(
           "vm_decode_function() forwarded the calling context, %s",
           fwdCls->name()->data()
@@ -370,7 +370,7 @@ const Func* vm_decode_func_from_name(
   }
 
   if (flags != DecodeFlags::NoWarn && !f->isPublic()) {
-    if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+    if (Cfg::Eval::WarnOnSkipFrameLookup) {
       raise_warning(
         "vm_decode_function() used to decode a %s method: %s",
         f->attrs() & AttrPrivate ? "private" : "protected",
@@ -579,7 +579,7 @@ vm_decode_function(const_variant_ref function,
           }
         }
         if (flags != DecodeFlags::NoWarn && cc) {
-          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          if (Cfg::Eval::WarnOnSkipFrameLookup) {
             raise_warning(
               "vm_decode_function() used to decode a LSB class "
               "method on %s",

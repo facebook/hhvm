@@ -127,7 +127,7 @@ struct FatalUnitError {
 namespace {
 
 StringData* makeDocComment(const String& s) {
-  if (RuntimeOption::EvalGenerateDocComments) return makeStaticString(s);
+  if (Cfg::Eval::GenerateDocComments) return makeStaticString(s);
   return staticEmptyString();
 }
 

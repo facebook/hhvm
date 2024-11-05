@@ -93,12 +93,9 @@ Unit* lookupSyslibUnit(StringData* path);
  */
 
 #define UNITCACHEFLAGS()                        \
-  R(EvalGenerateDocComments)                    \
   R(EnableXHP)                                  \
-  R(EvalLoadFilepathFromUnitCache)              \
   R(EvalAssemblerFoldDefaultValues)             \
   R(RepoDebugInfo)                              \
-  R(EvalAllowHhas)                              \
   R(EvalAssemblerMaxScalarSize)                 \
   R(EvalEnableDecl)                             \
 

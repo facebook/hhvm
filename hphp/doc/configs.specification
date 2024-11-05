@@ -275,6 +275,35 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- uint64_t Eval.VMStackElms, UNKNOWN
+
+  Maximum number of elements on the VM execution stack.
+
+- int Eval.StackCheckLeafPadding = 100, UNKNOWN
+
+- bool Eval.EnableAsyncJIT = false, UNKNOWN
+
+- int Eval.AsyncJitWorkerThreads = 4, UNKNOWN
+
+- uint32_t Eval.VMInitialGlobalTableSize = 512, UNKNOWN
+
+  Initial space reserved for the global variable environment (in
+  number of global variables).
+
+- bool Eval.RecordSubprocessTimes = false, UNKNOWN
+
+- bool Eval.AllowHhas = false, UNKNOWN, unitcacheflag
+
+- bool Eval.GenerateDocComments = true, UNKNOWN, unitcacheflag|compileroption(GenerateDocComments)
+
+- bool Eval.DisassemblerDocComments = true, UNKNOWN
+
+- bool Eval.DisassemblerPropDocComments = true, UNKNOWN
+
+- bool Eval.LoadFilepathFromUnitCache = false, UNKNOWN, unitcacheflag
+
+- bool Eval.WarnOnSkipFrameLookup = true, UNKNOWN
+
 - uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
 
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN

@@ -839,16 +839,6 @@ std::string RuntimeOption::getTraceOutputFile() {
                         RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
 }
 
-const uint64_t kEvalVMStackElmsDefault =
-#if defined(VALGRIND) && !FOLLY_SANITIZE
- 0x800
-#else
- 0x4000
-#endif
- ;
-
-constexpr uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
-
 using std::string;
 #define F(type, name, def) \
   type RuntimeOption::Eval ## name = type(def);

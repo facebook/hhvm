@@ -21,6 +21,14 @@
 
 namespace HPHP::Cfg {
 
+uint64_t EvalLoader::VMStackElmsDefault() {
+#if defined(VALGRIND) && !FOLLY_SANITIZE
+ return 0x800;
+#else
+ return 0x4000;
+#endif
+}
+
 uint32_t EvalLoader::UnixServerWorkersDefault() {
   return Process::GetCPUCount();
 }

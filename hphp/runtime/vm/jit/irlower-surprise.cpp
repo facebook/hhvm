@@ -101,7 +101,7 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const stackMask = int32_t{
-    cellsToBytes(RuntimeOption::EvalVMStackElms) - 1
+    cellsToBytes(Cfg::Eval::VMStackElms) - 1
   };
   auto const depth = cellsToBytes(callee->maxStackCells()) +
                      cellsToBytes(stackCheckPadding()) +

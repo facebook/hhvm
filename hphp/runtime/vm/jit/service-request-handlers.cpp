@@ -159,7 +159,7 @@ TranslationResult getTranslation(SrcKey sk) {
   }
 
   auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
-  if (RuntimeOption::EvalEnableAsyncJIT) {
+  if (Cfg::Eval::EnableAsyncJIT) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(args.kind == TransKind::Live);
     mcgen::enqueueAsyncTranslateRequest(ctx, 0);
@@ -198,7 +198,7 @@ JitResumeAddr getFuncEntry(const Func* func) {
     return JitResumeAddr::transFuncEntry(addr);
   }
 
-  if (RuntimeOption::EvalEnableAsyncJIT) {
+  if (Cfg::Eval::EnableAsyncJIT) {
     // JIT will be enqueued in handleResume
     return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
   }
@@ -320,7 +320,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
   auto const isProfile = tc::profileFunc(sk.func());
   auto const context = getContext(sk, isProfile);
-  if (RuntimeOption::EvalEnableAsyncJIT) {
+  if (Cfg::Eval::EnableAsyncJIT) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(!isProfile);
     auto const res = shouldEnqueueForRetranslate(context);
@@ -360,7 +360,7 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const isProfile = tc::profileFunc(sk.func());
   auto const context = getContext(sk, isProfile);
-  if (RuntimeOption::EvalEnableAsyncJIT) {
+  if (Cfg::Eval::EnableAsyncJIT) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(!isProfile);
     auto const res = shouldEnqueueForRetranslate(context);
@@ -641,7 +641,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     // If background jit is enabled, enqueueing a new translation request
     // after every basic block may generate too many overlapping translations
     // because no thread takes a function-level lease.
-    if (RuntimeOption::EvalEnableAsyncJIT) flags = flags.noTranslate();
+    if (Cfg::Eval::EnableAsyncJIT) flags = flags.noTranslate();
     do {
       INC_TPC(interp_bb);
       if (auto const retAddr = HPHP::dispatchBB()) {

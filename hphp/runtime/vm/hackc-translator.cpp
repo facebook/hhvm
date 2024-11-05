@@ -228,7 +228,7 @@ StringData* toNamedLocalStaticString(StringId id) {
 }
 
 StringData* makeDocComment(const Vector<uint8_t>& str) {
-  if (RuntimeOption::EvalGenerateDocComments) return toStaticString(str);
+  if (Cfg::Eval::GenerateDocComments) return toStaticString(str);
   return staticEmptyString();
 }
 

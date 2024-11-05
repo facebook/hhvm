@@ -1020,7 +1020,7 @@ bool process(CompilerOptions &po) {
 #ifndef _MSC_VER
   LightProcess::Initialize(Cfg::Server::LightProcessFilePrefix,
                            Cfg::Server::LightProcessCount,
-                           RuntimeOption::EvalRecordSubprocessTimes,
+                           Cfg::Eval::RecordSubprocessTimes,
                            {});
 #endif
 

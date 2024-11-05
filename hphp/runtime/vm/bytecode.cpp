@@ -347,8 +347,8 @@ struct StackElms {
   ~StackElms() { free(m_elms); }
   TypedValue* elms() {
     if (m_elms == nullptr) {
-      // RuntimeOption::EvalVMStackElms-sized and -aligned.
-      size_t algnSz = RuntimeOption::EvalVMStackElms * sizeof(TypedValue);
+      // Cfg::Eval::VMStackElms-sized and -aligned.
+      size_t algnSz = Cfg::Eval::VMStackElms * sizeof(TypedValue);
       if (posix_memalign((void**)&m_elms, algnSz, algnSz) != 0) {
         throw std::runtime_error(
           std::string("VM stack initialization failed: ") +
@@ -360,7 +360,7 @@ struct StackElms {
   }
   void flush() {
     if (m_elms != nullptr) {
-      size_t algnSz = RuntimeOption::EvalVMStackElms * sizeof(TypedValue);
+      size_t algnSz = Cfg::Eval::VMStackElms * sizeof(TypedValue);
       madvise(m_elms, algnSz, MADV_DONTNEED);
     }
   }
@@ -382,17 +382,17 @@ const uint32_t Stack::sMinStackElms =
   2 * sSurprisePageSize / sizeof(TypedValue);
 
 void Stack::ValidateStackSize() {
-  if (RuntimeOption::EvalVMStackElms < sMinStackElms) {
+  if (Cfg::Eval::VMStackElms < sMinStackElms) {
     throw std::runtime_error(folly::sformat(
       "VM stack size of {:#x} is below the minimum of {:#x}",
-      RuntimeOption::EvalVMStackElms,
+      Cfg::Eval::VMStackElms,
       sMinStackElms
     ));
   }
-  if (!folly::isPowTwo(RuntimeOption::EvalVMStackElms)) {
+  if (!folly::isPowTwo(Cfg::Eval::VMStackElms)) {
     throw std::runtime_error(folly::sformat(
       "VM stack size of {:#x} is not a power of 2",
-      RuntimeOption::EvalVMStackElms
+      Cfg::Eval::VMStackElms
     ));
   }
 }
@@ -409,8 +409,8 @@ void Stack::requestInit() {
   m_elms = t_se->elms();
   // Burn one element of the stack, to satisfy the constraint that
   // valid m_top values always have the same high-order (>
-  // log(RuntimeOption::EvalVMStackElms)) bits.
-  m_top = m_base = m_elms + RuntimeOption::EvalVMStackElms - 1;
+  // log(Cfg::Eval::VMStackElms)) bits.
+  m_top = m_base = m_elms + Cfg::Eval::VMStackElms - 1;
 
   auto const limit = reinterpret_cast<uintptr_t>(
     reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
@@ -423,7 +423,7 @@ void Stack::requestInit() {
   // additional 256 elements which must be taken into account when checking for
   // overflow.
   UNUSED size_t maxelms =
-    RuntimeOption::EvalVMStackElms - sSurprisePageSize / sizeof(TypedValue);
+    Cfg::Eval::VMStackElms - sSurprisePageSize / sizeof(TypedValue);
   assertx(!wouldOverflow(maxelms - 1));
   assertx(wouldOverflow(maxelms));
 }
@@ -706,7 +706,7 @@ bool Stack::wouldOverflow(int numCells) const {
   // can be hardcoded, and m_top is wired into a register,
   // so the expression requires no loads.
   intptr_t truncatedTop = intptr_t(m_top) / sizeof(TypedValue);
-  truncatedTop &= RuntimeOption::EvalVMStackElms - 1;
+  truncatedTop &= Cfg::Eval::VMStackElms - 1;
   intptr_t diff = truncatedTop - numCells -
     sSurprisePageSize / sizeof(TypedValue);
   return diff < 0;

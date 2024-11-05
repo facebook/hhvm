@@ -320,7 +320,7 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
    * All stack checks are inflated by stackCheckPadding() to ensure
    * there is space both for calling leaf functions /and/ for
    * re-entry.  (See kStackCheckReenterPadding and
-   * RuntimeOption::EvalStackCheckLeafPadding.)
+   * Cfg::Eval::StackCheckLeafPadding.)
    */
   auto limit = f->maxStackCells() + stackCheckPadding() + extraCells;
   if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;

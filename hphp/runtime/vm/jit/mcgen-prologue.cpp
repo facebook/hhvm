@@ -29,6 +29,7 @@
 
 #include "hphp/runtime/vm/resumable.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
@@ -160,7 +161,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
 
   tc::PrologueTranslator translator(func, nPassed);
 
-  if (RuntimeOption::EvalEnableAsyncJIT) {
+  if (Cfg::Eval::EnableAsyncJIT) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(!tc::profileFunc(func));
     FTRACE_MOD(Trace::async_jit, 2,

@@ -110,7 +110,7 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
   std::unique_ptr<UnitEmitter> ue;
   // Check if this file contains raw HHAS instead of Hack source code.
   // This is dictated by a special file extension.
-  if (RuntimeOption::EvalAllowHhas &&
+  if (Cfg::Eval::AllowHhas &&
       folly::StringPiece(filename).endsWith(".hhas")) {
     auto const& contents = loader.contents();
     ue = assemble_string(

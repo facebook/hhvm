@@ -903,7 +903,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           (m_fatalMsg);
       }
 
-      if (!is_systemlib && RO::EvalLoadFilepathFromUnitCache) {
+      if (!is_systemlib && Cfg::Eval::LoadFilepathFromUnitCache) {
         assertx(!RO::RepoAuthoritative);
         /* May be different than the unit origin: e.g. for hhas files. */
         sd(m_filepath);

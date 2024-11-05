@@ -434,26 +434,6 @@ struct RuntimeOption {
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \
-   * Maximum number of elements on the VM execution stack.              \
-   */                                                                   \
-  F(uint64_t, VMStackElms, kEvalVMStackElmsDefault)                     \
-  F(int, StackCheckLeafPadding, 100)                                    \
-  F(bool, EnableAsyncJIT, false)                                        \
-  F(int, AsyncJitWorkerThreads, 4)                                      \
-  /*                                                                    \
-   * Initial space reserved for the global variable environment (in     \
-   * number of global variables).                                       \
-   */                                                                   \
-  F(uint32_t, VMInitialGlobalTableSize,                                 \
-    kEvalVMInitialGlobalTableSizeDefault)                               \
-  F(bool, RecordSubprocessTimes,       false)                           \
-  F(bool, AllowHhas,                   false)                           \
-  F(bool, GenerateDocComments,         true)                            \
-  F(bool, DisassemblerDocComments,     true)                            \
-  F(bool, DisassemblerPropDocComments, true)                            \
-  F(bool, LoadFilepathFromUnitCache,   false)                           \
-  F(bool, WarnOnSkipFrameLookup,       true)                            \
-  /*                                                                    \
    *  0 - Code coverage cannot be enabled through request param         \
    *  1 - Code coverage can be enabled through request param            \
    *  2 - Code coverage enabled                                         \

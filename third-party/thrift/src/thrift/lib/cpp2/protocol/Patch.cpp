@@ -979,6 +979,62 @@ int32_t calculateMinSafePatchVersion(const protocol::Object& patch) {
 ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     const protocol::Value& patch, const Mask& mask);
 ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
+    const protocol::Object& patch, const Mask& mask);
+
+template <typename K>
+ExtractedMasksFromPatch extractMapMaskFromPatchMapImpl(
+    const protocol::Object& patch, const K& k, const Mask& v) {
+  if (auto* removeSet = findOp(patch, PatchOp::Remove)) {
+    const auto& set = removeSet->as_set();
+    if (!set.empty()) {
+      if (set.contains(getValueAs(k, *set.begin()))) {
+        return {noneMask(), allMask()};
+      }
+    }
+  }
+
+  ExtractedMasksFromPatch rwmask = {noneMask(), noneMask()};
+  std::optional<Value> key;
+  if (auto* putMap = findOp(patch, PatchOp::Put)) {
+    const auto& map = putMap->as_map();
+    if (!map.empty()) {
+      key = getValueAs(k, map.begin()->first);
+      if (map.contains(*key)) {
+        rwmask = {noneMask(), allMask()};
+      }
+    }
+  }
+
+  for (auto patchOp : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
+    if (auto* itemPatch = findOp(patch, patchOp)) {
+      const auto& map = itemPatch->as_map();
+      if (!map.empty()) {
+        if (!key.has_value()) {
+          key = getValueAs(k, map.begin()->first);
+        }
+        if (map.contains(*key)) {
+          rwmask = rwmask | extractMapMaskFromPatchImpl(map.at(*key), v);
+        }
+      }
+    }
+  }
+
+  if (auto* ensureMap = findOp(patch, PatchOp::EnsureStruct)) {
+    const auto& map = ensureMap->as_map();
+    if (!map.empty()) {
+      if (!key.has_value()) {
+        key = getValueAs(k, map.begin()->first);
+      }
+      if (map.contains(*key)) {
+        rwmask.read = rwmask.read & allMask();
+        rwmask.write = rwmask.write & allMask();
+      }
+    }
+  }
+  return rwmask;
+}
+
+ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     const protocol::Object& patch, const Mask& mask) {
   if (isAllMask(mask)) {
     return extractMaskFromPatch(patch, false, true);
@@ -1025,56 +1081,10 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     }
   } else if (mask.includes_map_ref()) {
     const auto& [k, v] = *mask.includes_map_ref()->begin();
-    std::optional<Value> key;
-
-    // If there is a MapPatch::remove, we can short-circuit the logic.
-    if (auto* removeSet = findOp(patch, PatchOp::Remove)) {
-      const auto& set = removeSet->as_set();
-      if (!set.empty()) {
-        if (set.contains(getValueAs(MapId{k}, *set.begin()))) {
-          return {noneMask(), allMask()};
-        }
-      }
-    }
-
-    if (auto* putMap = findOp(patch, PatchOp::Put)) {
-      const auto& map = putMap->as_map();
-      if (!map.empty()) {
-        key = getValueAs(MapId{k}, map.begin()->first);
-        if (map.contains(*key)) {
-          rwmask = {noneMask(), allMask()};
-        }
-      }
-    }
-
-    for (auto patchOp : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
-      if (auto* itemPatch = findOp(patch, patchOp)) {
-        const auto& map = itemPatch->as_map();
-        if (!map.empty()) {
-          if (!key.has_value()) {
-            key = getValueAs(MapId{k}, map.begin()->first);
-          }
-          if (map.contains(*key)) {
-            rwmask = rwmask | extractMapMaskFromPatchImpl(map.at(*key), v);
-          }
-        }
-      }
-    }
-
-    if (auto* ensureMap = findOp(patch, PatchOp::EnsureStruct)) {
-      const auto& map = ensureMap->as_map();
-      if (!map.empty()) {
-        if (!key.has_value()) {
-          key = getValueAs(MapId{k}, map.begin()->first);
-        }
-        if (map.contains(*key)) {
-          rwmask.read = rwmask.read & allMask();
-          rwmask.write = rwmask.write & allMask();
-        }
-      }
-    }
+    return extractMapMaskFromPatchMapImpl(patch, MapId{k}, v);
   } else if (mask.includes_string_map_ref()) {
-    folly::throw_exception<std::runtime_error>("not implemented");
+    const auto& [k, v] = *mask.includes_string_map_ref()->begin();
+    return extractMapMaskFromPatchMapImpl(patch, k, v);
   } else if (mask.includes_type_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
   } else {

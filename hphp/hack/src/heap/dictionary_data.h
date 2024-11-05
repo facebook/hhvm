@@ -6,11 +6,7 @@
 * LICENSE file in the "hack" directory of this source tree.
 *
 */
-
-#ifndef DICTIONARY_DATA_H
-#define DICTIONARY_DATA_H
+#pragma once
 
 extern const unsigned char dictionary_data[];
 extern const unsigned int dictionary_data_len;
-
-#endif // DICTIONARY_DATA_H

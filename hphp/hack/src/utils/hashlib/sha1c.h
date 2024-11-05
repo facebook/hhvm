@@ -15,8 +15,7 @@
  *
  * SHA1 implementation as describe in wikipedia.
  */
-#ifndef SHA1_C_H
-#define SHA1_C_H
+#pragma once
 
 struct sha1_ctx
 {
@@ -33,5 +32,3 @@ void sha1_update(struct sha1_ctx *ctx, unsigned char *data, int len);
 void sha1_finalize(struct sha1_ctx *ctx, sha1_digest *out);
 void sha1_to_bin(sha1_digest *digest, char *out);
 void sha1_to_hex(sha1_digest *digest, char *out);
-
-#endif // SHA1_C_H

@@ -1,5 +1,4 @@
-#ifndef incl_THIRD_PARTY_MCROUTER_CONFIG_H
-#define incl_THIRD_PARTY_MCROUTER_CONFIG_H
+#pragma once
 
 #ifndef HAVE_CONFIG_H
 # define HAVE_CONFIG_H
@@ -9,5 +8,3 @@
 #endif
 
 #include "mcrouter/mcrouter_config.h"
-
-#endif // incl_THIRD_PARTY_MCROUTER_CONFIG_H

@@ -1436,7 +1436,7 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
             "Can't use return value in write context",
         )),
         ast::Expr_::List(es) => {
-            let (preamble, load_values) = emit_load_list_elements(
+            let load_values = emit_load_list_elements(
                 e,
                 env,
                 vec![instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any)],
@@ -1446,7 +1446,7 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
                 InstrSeq::gather(load_values.into_iter().rev().collect()),
                 instr::unset_l(local),
             ];
-            Ok((preamble, load_values))
+            Ok((vec![], load_values))
         }
         _ => {
             let (lhs, rhs, set_op) = emit_expr::emit_lval_op_nonlist_steps(
@@ -1473,8 +1473,8 @@ fn emit_load_list_elements<'a, 'd>(
     env: &mut Env<'a>,
     path: Vec<InstrSeq>,
     es: &[ast::Expr],
-) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
-    let (preamble, load_value): (Vec<Vec<InstrSeq>>, Vec<Vec<InstrSeq>>) = es
+) -> Result<Vec<InstrSeq>> {
+    let load_value = es
         .iter()
         .enumerate()
         .map(|(i, x)| {
@@ -1486,13 +1486,8 @@ fn emit_load_list_elements<'a, 'd>(
                 x,
             )
         })
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .unzip();
-    Ok((
-        preamble.into_iter().flatten().collect(),
-        load_value.into_iter().flatten().collect(),
-    ))
+        .collect::<Result<Vec<_>>>()?;
+    Ok(load_value.into_iter().flatten().collect())
 }
 
 fn emit_load_list_element<'a, 'd>(
@@ -1501,7 +1496,7 @@ fn emit_load_list_element<'a, 'd>(
     mut path: Vec<InstrSeq>,
     i: usize,
     elem: &ast::Expr,
-) -> Result<(Vec<InstrSeq>, Vec<InstrSeq>)> {
+) -> Result<Vec<InstrSeq>> {
     let query_value = |path| {
         InstrSeq::gather(vec![
             InstrSeq::gather(path),
@@ -1515,7 +1510,7 @@ fn emit_load_list_element<'a, 'd>(
                 instr::set_l(e.named_local(local_id::get_name(&lid.1))),
                 instr::pop_c(),
             ]);
-            (vec![], vec![load_value])
+            vec![load_value]
         }
         ast::Expr_::List(es) => {
             let instr_dim = instr::dim(MOpMode::Warn, MemberKey::EI(i as i64, ReadonlyOp::Any));
@@ -1535,7 +1530,7 @@ fn emit_load_list_element<'a, 'd>(
                 false, // TODO readonly load list elements
             )?;
             let load_value = InstrSeq::gather(vec![set_instrs, instr::pop_c()]);
-            (vec![], vec![load_value])
+            vec![load_value]
         }
     })
 }

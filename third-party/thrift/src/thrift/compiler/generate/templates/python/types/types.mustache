@@ -78,14 +78,14 @@ Until we resolve the above error, register the class as virtual subclass of the 
         ),
         {{/struct:fields_ordered_by_id}}
     ){{!
-    }}{{#struct:union?}}{{!
     }}{{#program:generate_unified_thrift_python_type_hints?}}{{!
+    }}{{#struct:union?}}{{!
     }}
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.{{struct:py_name}}.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct:py_name}}
     {{!
-    }}{{/program:generate_unified_thrift_python_type_hints?}}{{!
-    }}{{/struct:union?}}
+    }}{{/struct:union?}}{{!
+    }}{{/program:generate_unified_thrift_python_type_hints?}}
 
 
     @staticmethod

@@ -1325,7 +1325,7 @@ class Onion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.Onion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Onion
 
 
     @staticmethod

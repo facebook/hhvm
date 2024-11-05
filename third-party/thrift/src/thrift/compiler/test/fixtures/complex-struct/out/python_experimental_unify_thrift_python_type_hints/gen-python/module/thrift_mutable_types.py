@@ -1094,7 +1094,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.MyUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnion
 
 
     @staticmethod
@@ -1179,7 +1179,7 @@ class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.Mutable
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnionFloatFieldThrowExp
 
 
     @staticmethod

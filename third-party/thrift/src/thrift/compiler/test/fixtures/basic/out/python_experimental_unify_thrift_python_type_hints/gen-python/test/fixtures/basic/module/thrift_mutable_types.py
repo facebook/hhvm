@@ -315,7 +315,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.MyUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnion
 
 
     @staticmethod
@@ -587,7 +587,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.UnionToBeRenamed.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.UnionToBeRenamed
 
 
     @staticmethod

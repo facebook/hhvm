@@ -91,7 +91,7 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.ComplexUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ComplexUnion
 
 
     @staticmethod
@@ -154,7 +154,7 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.ListUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ListUnion
 
 
     @staticmethod
@@ -217,7 +217,7 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.DataUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.DataUnion
 
 
     @staticmethod
@@ -351,7 +351,7 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.ValUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ValUnion
 
 
     @staticmethod
@@ -414,7 +414,7 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.VirtualComplexUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.VirtualComplexUnion
 
 
     @staticmethod
@@ -515,7 +515,7 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
         ),
     )
 
-    _fbthrift_union_field_enum = _fbthrift_abstract_types.NonCopyableUnion.FbThriftUnionFieldEnum
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.NonCopyableUnion
 
 
     @staticmethod

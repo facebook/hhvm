@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 #include <limits>
@@ -124,7 +125,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
 
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {
-      if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+      if (Cfg::Eval::NoticeOnCollectionToBool) {
         return callToBoolean(v);
       }
       auto const sf = emitIsCollection(v, src);

@@ -1825,7 +1825,7 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   if (src->isA(TObj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak())) {
-      if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+      if (Cfg::Eval::NoticeOnMethCallerHelperIsObject) {
         if (cls == SystemLib::getMethCallerHelperClass()) {
           notice(s_isObjectMethCaller.get());
         }
@@ -1843,7 +1843,7 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   auto checkClass = [&] (SSATmp* obj) {
     auto cls = gen(env, LdObjClass, obj);
 
-    if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+    if (Cfg::Eval::NoticeOnMethCallerHelperIsObject) {
       auto const c = SystemLib::getMethCallerHelperClass();
       ifThen(
         env,

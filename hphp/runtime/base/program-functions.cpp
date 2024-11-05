@@ -1108,8 +1108,8 @@ static int start_server(const std::string &username) {
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 
-  if (!RuntimeOption::EvalUnixServerPath.empty()) {
-    init_cli_server(RuntimeOption::EvalUnixServerPath.c_str());
+  if (!Cfg::Eval::UnixServerPath.empty()) {
+    init_cli_server(Cfg::Eval::UnixServerPath.c_str());
   }
 
   // Before we start the webserver, make sure the entire
@@ -1212,7 +1212,7 @@ static int start_server(const std::string &username) {
   }
   HttpServer::CheckMemAndWait(true); // Final wait
 
-  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+  if (!Cfg::Eval::UnixServerPath.empty()) {
     start_cli_server();
   }
 
@@ -2154,8 +2154,8 @@ static int execute_program_impl(int argc, char** argv) {
       return HPHP_EXIT_FAILURE;
     }
 
-    if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
-        !RuntimeOption::EvalUnixServerPath.empty() &&
+    if (Cfg::Eval::UseRemoteUnixServer != "no" &&
+        !Cfg::Eval::UnixServerPath.empty() &&
         (!po.file.empty() || !po.args.empty()) && po.mode != ExecutionMode::EVAL) {
       // CLI server clients use a wacky delayed initialization scheme for
       // RDS, and therefore requires RDS_LOCALS be outside RDS.
@@ -2167,9 +2167,9 @@ static int execute_program_impl(int argc, char** argv) {
       }
       args.insert(args.end(), po.args.begin(), po.args.end());
       run_command_on_cli_server(
-        RuntimeOption::EvalUnixServerPath.c_str(), args, po.count
+        Cfg::Eval::UnixServerPath.c_str(), args, po.count
       );
-      if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
+      if (Cfg::Eval::UseRemoteUnixServer == "only") {
         Logger::Error("Failed to connect to unix server.");
         exit(HPHP_EXIT_FAILURE);
       }
@@ -2888,7 +2888,7 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
                      true /* once */,
                      warmupOnly,
                      false /* richErrorMsg */,
-                     RuntimeOption::EvalPreludePath);
+                     Cfg::Eval::PreludePath);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,

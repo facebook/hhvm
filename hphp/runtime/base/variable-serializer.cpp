@@ -669,9 +669,9 @@ const StaticString
 
 void VariableSerializer::write(const Object& v) {
   if (!v.isNull() && m_type == Type::JSON) {
-    if (RO::EvalForbidMethCallerHelperSerialize &&
+    if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
         v.get()->getVMClass() == SystemLib::getMethCallerHelperClass()) {
-      if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+      if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
         raise_warning("Serializing MethCallerHelper");
       } else {
         SystemLib::throwInvalidOperationExceptionObject(
@@ -927,13 +927,13 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         m_buf->append("array (\n");
         break;
       case ArrayKind::VArray: {
-        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarray = Cfg::Eval::HackArrDVArrVarExport ||
                              m_type == Type::PHPOutput;
         m_buf->append(dvarray ? "varray [\n" : "array (\n");
         break;
       }
       case ArrayKind::DArray: {
-        auto const dvarray = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarray = Cfg::Eval::HackArrDVArrVarExport ||
                              m_type == Type::PHPOutput;
         m_buf->append(dvarray ? "darray [\n" : "array (\n");
         break;
@@ -1163,7 +1163,7 @@ void VariableSerializer::writeArrayKey(
     indent();
     if (kind == AK::Vec || kind == AK::Keyset) return;
     if ((kind == AK::VArray || kind == AK::MarkedVArray) &&
-        (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+        (Cfg::Eval::HackArrDVArrVarExport || m_type == Type::PHPOutput)) {
       return;
     }
     write(key, true);
@@ -1289,7 +1289,7 @@ void VariableSerializer::writeArrayValue(
     m_keyPrinted = [&]{
       if (kind == ArrayKind::Vec || kind == ArrayKind::Keyset) return false;
       if ((kind == ArrayKind::VArray || kind == ArrayKind::MarkedVArray) &&
-          (RO::EvalHackArrDVArrVarExport || m_type == Type::PHPOutput)) {
+          (Cfg::Eval::HackArrDVArrVarExport || m_type == Type::PHPOutput)) {
         return false;
       }
       return true;
@@ -1368,7 +1368,7 @@ void VariableSerializer::writeArrayFooter(
         break;
       case ArrayKind::VArray:
       case ArrayKind::DArray: {
-        auto const dvarrays = RO::EvalHackArrDVArrVarExport ||
+        auto const dvarrays = Cfg::Eval::HackArrDVArrVarExport ||
                               m_type == Type::PHPOutput;
         m_buf->append(dvarrays ? ']' : ')');
         break;
@@ -1594,7 +1594,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      if (RuntimeOption::EvalClassAsStringVarExport) {
+      if (Cfg::Eval::ClassAsStringVarExport) {
         write(StrNR(cls->name()));
       } else {
         m_buf->append(cls->name());
@@ -1602,7 +1602,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
       }
       break;
     case Type::VarDump:
-      if (RuntimeOption::EvalClassAsStringVarDump) {
+      if (Cfg::Eval::ClassAsStringVarDump) {
         write(StrNR(cls->name()));
         break;
       }
@@ -1614,7 +1614,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
-      if (RuntimeOption::EvalClassAsStringPrintR) {
+      if (Cfg::Eval::ClassAsStringPrintR) {
         write(StrNR(cls->name()));
         break;
       }
@@ -1646,7 +1646,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:
-      if (RuntimeOption::EvalClassAsStringVarExport) {
+      if (Cfg::Eval::ClassAsStringVarExport) {
         write(StrNR(lcls.name()));
       } else {
         m_buf->append(lcls.name());
@@ -1654,7 +1654,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       }
       break;
     case Type::VarDump:
-      if (RuntimeOption::EvalClassAsStringVarDump) {
+      if (Cfg::Eval::ClassAsStringVarDump) {
         write(StrNR(lcls.name()));
         break;
       }
@@ -1666,7 +1666,7 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
-      if (RuntimeOption::EvalClassAsStringPrintR) {
+      if (Cfg::Eval::ClassAsStringPrintR) {
         write(StrNR(lcls.name()));
         break;
       }
@@ -2254,11 +2254,11 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     return;
   }
 
-  if (RO::EvalForbidMethCallerHelperSerialize &&
+  if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
       (type == Type::Serialize || type == Type::Internal ||
        type == Type::DebuggerSerialize || type == Type::JSON) &&
       obj->getVMClass() == SystemLib::getMethCallerHelperClass()) {
-    if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+    if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
       raise_warning("Serializing MethCallerHelper");
     } else {
       SystemLib::throwInvalidOperationExceptionObject(
@@ -2305,9 +2305,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     }
     if (type == VariableSerializer::Type::APCSerialize) {
       if (cls == SystemLib::getMethCallerHelperClass()) {
-        if (RO::EvalForbidMethCallerAPCSerialize == 1) {
+        if (Cfg::Eval::ForbidMethCallerAPCSerialize == 1) {
           raise_warning("Storing meth_caller in APC");
-        } else if (RO::EvalForbidMethCallerAPCSerialize > 1) {
+        } else if (Cfg::Eval::ForbidMethCallerAPCSerialize > 1) {
           SystemLib::throwInvalidOperationExceptionObject(
             VarNR{s_invalidMethCallerAPC.get()}
           );

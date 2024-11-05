@@ -420,11 +420,11 @@ void HttpServer::runOrExitProcess() {
         Logger::Warning("ignored runtime option Server.Forking.Log=true");
       }
     }
-    if (RuntimeOption::EvalServerOOMAdj < 0) {
+    if (Cfg::Eval::ServerOOMAdj < 0) {
       // Avoid HHVM getting killed when a forked process uses too much memory.
       // A positive adjustment makes it more likely for the server to be killed,
       // and that's not what we want.
-      Process::OOMScoreAdj(RuntimeOption::EvalServerOOMAdj);
+      Process::OOMScoreAdj(Cfg::Eval::ServerOOMAdj);
     }
     createPid();
     Lock lock(this);

@@ -207,12 +207,12 @@ void throwInvalidClassName() {
 }
 
 void warnOrThrowUnknownClass(const String& clsName) {
-  if (RuntimeOption::EvalForbidUnserializeIncompleteClass) {
+  if (Cfg::Eval::ForbidUnserializeIncompleteClass) {
     auto const msg = folly::sformat(
       "Attempted to unserialize class named '{}' but it doesn't exist",
       clsName.toCppString()
     );
-    if (RuntimeOption::EvalForbidUnserializeIncompleteClass > 1) {
+    if (Cfg::Eval::ForbidUnserializeIncompleteClass > 1) {
       throw_object("Exception", make_vec_array(msg));
     } else {
       raise_warning(msg);

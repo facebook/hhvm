@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/object-data.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/configs/eval.h"
 
 namespace HPHP {
 
@@ -114,7 +115,7 @@ const Func* lookupMethodCtx(const Class* cls,
   bool accessible = true;
 
   // Check module boundary
-  if (RO::EvalEnforceModules &&
+  if (Cfg::Eval::EnforceModules &&
       raise != MethodLookupErrorOptions::NoErrorOnModule &&
       will_symbol_raise_module_boundary_violation(method, &callCtx)) {
     if (!shouldRaise(raise)) return nullptr;

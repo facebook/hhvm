@@ -1086,7 +1086,7 @@ bool IniSetting::Get(const String& name, String& value) {
 }
 
 static bool shouldHideSetting(const String& name) {
-  for (auto& sub : RuntimeOption::EvalIniGetHide) {
+  for (auto& sub : Cfg::Eval::IniGetHide) {
     if (name.find(sub) != -1) {
       return true;
     }

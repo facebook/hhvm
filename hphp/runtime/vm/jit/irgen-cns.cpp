@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,7 +164,7 @@ void exactClsCns(IRGS& env,
       // and if our runtime Class* matches the jit-time Class*, we may 
       // be able to push the literal directly, without doing the boundary
       // check in InitClsCns.
-      if (RO::EvalEnforceModules) return getCnsWithType(TInitCell);
+      if (Cfg::Eval::EnforceModules) return getCnsWithType(TInitCell);
 
       // If we have a Class* at jit-time, but cannot trust it, we can emit
       // a check to confirm the runtime Class* matches and then use the 

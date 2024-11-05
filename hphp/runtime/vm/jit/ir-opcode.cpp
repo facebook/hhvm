@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/runtime.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP::jit {
@@ -244,7 +245,7 @@ bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
   case IsTypeStruct:
   case IsTypeStructShallow:
-    return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
+    return Cfg::Eval::IsExprEnableUnresolvedWarning ||
            Cfg::Eval::IsVecNotices ||
            RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 

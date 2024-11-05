@@ -30,6 +30,7 @@
 
 #include "common/serialize/FBSerialize.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/htonll.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/array-init.h"
@@ -593,10 +594,10 @@ static int fb_compact_serialize_variant(
     }
 
     case KindOfObject:
-      if (RO::EvalForbidMethCallerHelperSerialize &&
+      if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
           var.asCObjRef().get()->getVMClass() ==
             SystemLib::getMethCallerHelperClass()) {
-        if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+        if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
           fb_compact_serialize_code(sb, FB_CS_NULL);
           raise_warning("Serializing MethCallerHelper");
         } else {

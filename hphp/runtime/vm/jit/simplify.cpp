@@ -53,6 +53,7 @@
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/overflow.h"
 #include "hphp/util/trace.h"
 
@@ -2506,7 +2507,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   if (ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
-    if (RuntimeOption::EvalNoticeOnCollectionToBool) return nullptr;
+    if (Cfg::Eval::NoticeOnCollectionToBool) return nullptr;
     return gen(env, ColIsNEmpty, inst->src(0));
   }
   return nullptr;
@@ -4048,7 +4049,7 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
 
   if (auto ret = simplifyGetMemoKeyScalar(env, inst)) return ret;
   if (src->isA(TUncounted|TStr) &&
-      !RuntimeOption::EvalClassMemoNotices) {
+      !Cfg::Eval::ClassMemoNotices) {
     return gen(env, GetMemoKeyScalar, src);
   }
   return nullptr;

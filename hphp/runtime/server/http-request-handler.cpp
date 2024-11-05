@@ -43,6 +43,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/proxy.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
@@ -475,7 +476,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                     true /* once */,
                     false /* warmupOnly */,
                     false /* richErrorMessage */,
-                    RuntimeOption::EvalPreludePath,
+                    Cfg::Eval::PreludePath,
                     true /* allowDynCallNoPointer */);
 
   if (ret) {
@@ -501,7 +502,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                         true /* once */,
                         false /* warmupOnly */,
                         false /* richErrorMessage */,
-                        RuntimeOption::EvalPreludePath,
+                        Cfg::Eval::PreludePath,
                         true /* allowDynCallNoPointer */);
       if (ret) {
         String content = context->obDetachContents();

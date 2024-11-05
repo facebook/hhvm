@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
 #include <cassert>
@@ -318,7 +319,7 @@ handleStaticCall(const Class* cls, const StringData* name,
         // If we raised a warning, do not cache/smash the func
         return func;
       }
-      if (RO::EvalEnforceDeployment &&
+      if (Cfg::Eval::EnforceDeployment &&
           packageInfo.violatesDeploymentBoundary(*func)) {
         // If we raised an exception, do not cache/smash the func.
         return func;
@@ -354,7 +355,7 @@ handleStaticCall(const Class* cls, const StringData* name,
       // If we raised a warning, do not cache the func
       return func;
     }
-    if (RO::EvalEnforceDeployment &&
+    if (Cfg::Eval::EnforceDeployment &&
         packageInfo.violatesDeploymentBoundary(*cls)) {
       // If we raised an exception, do not cache the func.
       return func;

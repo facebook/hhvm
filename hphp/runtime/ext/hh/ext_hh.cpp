@@ -173,14 +173,14 @@ bool HHVM_FUNCTION(could_include, const String& file) {
 namespace {
 
 inline const StringData* classToMemoKeyHelper(const Class* cls) {
-  if (RuntimeOption::EvalClassMemoNotices) {
+  if (Cfg::Eval::ClassMemoNotices) {
    raise_class_to_memokey_conversion_warning();
  }
  return cls->name();
 }
 
 const StringData* lazyClassToMemoKeyHelper(const LazyClassData& lclass) {
-  if (RuntimeOption::EvalClassMemoNotices) {
+  if (Cfg::Eval::ClassMemoNotices) {
     raise_class_to_memokey_conversion_warning();
   }
   return lclass.name();

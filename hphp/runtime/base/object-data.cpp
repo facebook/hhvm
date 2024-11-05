@@ -243,7 +243,7 @@ bool ObjectData::toBooleanImpl() const noexcept {
   // Note: if you add more cases here, hhbbc/class-util.cpp also needs
   // to be changed.
   if (isCollection()) {
-    if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+    if (Cfg::Eval::NoticeOnCollectionToBool) {
       raise_notice(
         "%s to boolean cast",
         collections::typeToString((CollectionType)m_kind)->data()
@@ -255,7 +255,7 @@ bool ObjectData::toBooleanImpl() const noexcept {
   if (instanceof(SimpleXMLElementLoader::classof())) {
     // SimpleXMLElement is the only non-collection class that has custom bool
     // casting.
-    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement to boolean cast");
     }
     return SimpleXMLElement_objectCast(this, KindOfBoolean).toBoolean();
@@ -269,7 +269,7 @@ int64_t ObjectData::toInt64() const {
   if (LIKELY(!instanceof(SimpleXMLElementLoader::classof()))) {
     throwObjToIntException(classname_cstr());
   }
-  if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+  if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
     raise_notice("SimpleXMLElement to integer cast");
   }
   return SimpleXMLElement_objectCast(this, KindOfInt64).toInt64();
@@ -280,7 +280,7 @@ double ObjectData::toDouble() const {
   if (LIKELY(!instanceof(SimpleXMLElementLoader::classof()))) {
     throwObjToDoubleException(classname_cstr());
   }
-  if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+  if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
     raise_notice("SimpleXMLElement to double cast");
   }
   return SimpleXMLElement_objectCast(this, KindOfDouble).toDouble();
@@ -312,7 +312,7 @@ Object ObjectData::iterableObject(bool& isIterable,
     obj.reset(o);
   }
   if (!isIterator() && obj->instanceof(SimpleXMLElementLoader::classof())) {
-    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement used as iterator");
     }
     isIterable = true;
@@ -364,7 +364,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
   if (m_cls->forbidsDynamicProps()) {
     throw_object_forbids_dynamic_props(getClassName().data());
   }
-  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+  if (Cfg::Eval::NoticeOnCreateDynamicProp) {
     IterateKV(newArr.get(), [&] (TypedValue k, TypedValue v) {
       auto const key = tvCastToString(k);
       raiseCreateDynamicProp(key.get());
@@ -380,7 +380,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
 }
 
 tv_lval ObjectData::makeDynProp(const StringData* key) {
-  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+  if (Cfg::Eval::NoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
   if (!reserveProperties().exists(StrNR(key))) {
@@ -390,7 +390,7 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
 }
 
 void ObjectData::setDynProp(const StringData* key, TypedValue val) {
-  if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
+  if (Cfg::Eval::NoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
   reserveProperties().set(StrNR(key), val, true);
@@ -514,7 +514,7 @@ void ObjectData::o_getArray(Array& props,
   // Fast path for classes with no declared properties
   if (!m_cls->numDeclProperties() && getAttribute(HasDynPropArr)) {
     props = dynPropArray();
-    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+    if (Cfg::Eval::NoticeOnReadDynamicProp) {
       IterateKV(props.get(), [&](TypedValue k, TypedValue) {
         auto const key = tvCastToString(k);
         raiseReadDynamicProp(key.get());
@@ -550,7 +550,7 @@ void ObjectData::o_getArray(Array& props,
     },
     [&](TypedValue key_tv, TypedValue val) {
       props.set(key_tv, val, true);
-      if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      if (Cfg::Eval::NoticeOnReadDynamicProp) {
         auto const key = tvCastToString(key_tv);
         raiseReadDynamicProp(key.get());
       }
@@ -575,7 +575,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
     assertx(instanceof(SimpleXMLElementLoader::classof()));
-    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement to array cast");
     }
     return SimpleXMLElement_darrayCast(this);
@@ -622,7 +622,7 @@ Array ObjectData::o_toIterArray(const Class* ctx) {
   if (!m_cls->numDeclProperties()) {
     if (getAttribute(HasDynPropArr)) {
       auto const props = dynPropArray();
-      if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      if (Cfg::Eval::NoticeOnReadDynamicProp) {
         IterateKV(props.get(), [&](TypedValue k, TypedValue) {
           auto const key = tvCastToString(k);
           raiseReadDynamicProp(key.get());
@@ -681,7 +681,7 @@ Array ObjectData::o_toIterArray(const Class* ctx) {
       auto const key = ad->nvGetKey(iter);
       iter = ad->iter_advance(iter);
 
-      if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      if (Cfg::Eval::NoticeOnReadDynamicProp) {
         auto const k = tvCastToString(key);
         raiseReadDynamicProp(k.get());
       }
@@ -846,7 +846,7 @@ bool ObjectData::equal(const ObjectData& other) const {
   }
   if (getVMClass() != other.getVMClass()) return false;
   if (UNLIKELY(instanceof(SimpleXMLElementLoader::classof()))) {
-    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement equality comparison");
     }
     // Compare the whole object (including native data), not just props
@@ -938,7 +938,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     not_reached();
   }
   if (UNLIKELY(instanceof(SimpleXMLElementLoader::classof()))) {
-    if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
+    if (Cfg::Eval::NoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement comparison");
     }
     // Compare the whole object (including native data), not just props
@@ -1234,7 +1234,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
     auto& arr = dynPropArray();
     if (arr->exists(key)) {
-      if (forRead && RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      if (forRead && Cfg::Eval::NoticeOnReadDynamicProp) {
         raiseReadDynamicProp(key);
       }
       // Returning a non-declared property. We know that it is accessible and
@@ -1692,7 +1692,7 @@ Variant ObjectData::invokeDebugInfo(RuntimeCoeffects provided) {
 }
 
 String ObjectData::invokeToString() {
-  if (RuntimeOption::EvalFatalOnConvertObjectToString) {
+  if (Cfg::Eval::FatalOnConvertObjectToString) {
     raise_convert_object_to_string(classname_cstr());
   }
 
@@ -1708,7 +1708,7 @@ String ObjectData::invokeToString() {
     // we return the empty string.
     return empty_string();
   }
-  if (RuntimeOption::EvalNoticeOnImplicitInvokeToString) {
+  if (Cfg::Eval::NoticeOnImplicitInvokeToString) {
     raiseImplicitInvokeToString();
   }
   CoeffectsAutoGuard _;

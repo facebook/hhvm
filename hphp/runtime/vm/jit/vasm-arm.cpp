@@ -85,6 +85,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
@@ -2180,7 +2181,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
       VasmBlockCounters::profileGuidedUpdate(unit);
 
-      if (RuntimeOption::EvalUseGraphColor &&
+      if (Cfg::Eval::UseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {

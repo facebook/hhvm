@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/file-util.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP::Eval {
@@ -112,7 +113,7 @@ void DummySandbox::run() {
           bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
                                  nullptr, "", "", error, errorMsg, true,
-                                 false, true, RuntimeOption::EvalPreludePath);
+                                 false, true, Cfg::Eval::PreludePath);
           if (!ret || error) {
             msg += "Unable to pre-load " + doc;
             if (!errorMsg.empty()) {

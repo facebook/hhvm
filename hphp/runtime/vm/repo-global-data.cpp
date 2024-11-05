@@ -37,7 +37,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
 
   if (!Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {
-    RO::EvalNoticeOnMethCallerHelperIsObject = false;
+    Cfg::Eval::NoticeOnMethCallerHelperIsObject = false;
   }
 
   if (loadConstantFuncs) {

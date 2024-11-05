@@ -66,7 +66,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isNull()) {
     return s_NULL;
   }
-  if (RuntimeOption::EvalClassAsStringGetType &&
+  if (Cfg::Eval::ClassAsStringGetType &&
       (v.isLazyClass() || v.isClass())) {
     return s_string;
   }

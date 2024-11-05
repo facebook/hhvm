@@ -4370,7 +4370,7 @@ void Class::setInstanceMemoCacheInfo() {
     }
   );
 
-  // We only want to assign up to EvalNonSharedInstanceMemoCaches non-shared
+  // We only want to assign up to Eval.NonSharedInstanceMemoCaches non-shared
   // caches. With the remaining non-assigned slots, we give preference to the
   // parameter-less methods first. This is because there's a greater benefit to
   // giving parameter-less methods non-shared slots (they can just be a
@@ -4383,10 +4383,10 @@ void Class::setInstanceMemoCacheInfo() {
 
   // How many non-shared slots do we have left to allocate?
   auto slotsLeft =
-    RuntimeOption::EvalNonSharedInstanceMemoCaches -
+    Cfg::Eval::NonSharedInstanceMemoCaches -
     std::min(
       m_extra->m_nextMemoSlot,
-      RuntimeOption::EvalNonSharedInstanceMemoCaches
+      Cfg::Eval::NonSharedInstanceMemoCaches
     );
 
   if (methNoKeys > 0) {
@@ -5147,12 +5147,12 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
 
 namespace {
 void handleModuleBoundaryViolation(const Class* cls, const Func* caller) {
-  if (!RO::EvalEnforceModules || !cls || !caller) return;
+  if (!Cfg::Eval::EnforceModules || !cls || !caller) return;
   if (will_symbol_raise_module_boundary_violation(cls, caller)) {
     raiseModuleBoundaryViolation(cls, caller->moduleName());
   }
   auto const& packageInfo = g_context->getPackageInfo();
-  if (RO::EvalEnforceDeployment &&
+  if (Cfg::Eval::EnforceDeployment &&
       caller->moduleName() != cls->moduleName() &&
       !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
       packageInfo.violatesDeploymentBoundary(*cls)) {

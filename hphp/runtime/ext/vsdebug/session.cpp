@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/process.h"
 
 namespace HPHP {
@@ -112,7 +113,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
                          true,
                          false,
                          true,
-                         RuntimeOption::EvalPreludePath);
+                         Cfg::Eval::PreludePath);
 
   if (!ret || error) {
     if (errorMsg == "") {

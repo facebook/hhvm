@@ -24,6 +24,9 @@
 #include "hphp/runtime/base/datatype.h"
 
 #include "hphp/runtime/ext/extension.h"
+
+#include "hphp/util/configs/eval.h"
+
 #include "common/serialize/FBSerialize.h"
 
 #include <algorithm>
@@ -95,10 +98,10 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:
-        if (RO::EvalForbidMethCallerHelperSerialize &&
+        if (Cfg::Eval::ForbidMethCallerHelperSerialize &&
             obj.asCObjRef().get()->getVMClass() ==
               SystemLib::getMethCallerHelperClass()) {
-          if (RO::EvalForbidMethCallerHelperSerialize == 1) {
+          if (Cfg::Eval::ForbidMethCallerHelperSerialize == 1) {
             raise_warning("Serializing MethCallerHelper");
           } else {
             throw HPHP::serialize::MethCallerSerializeError();

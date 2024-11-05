@@ -729,104 +729,13 @@ struct RuntimeOption {
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \
   F(uint64_t, BespokeArraySinkSideExitMinSampleCount, 4)                \
-  /* When this flag is on, var_export outputs d/varrays. */             \
-  F(bool, HackArrDVArrVarExport, false)                                 \
-  /* Raise a notice when the result of appending to a dict or darray    \
-   * is affected by removing keys from that array-like. */              \
-  F(bool, DictDArrayAppendNotices, true)                                \
-  /* Warn if is expression are used with type aliases that cannot be    |
-   * resolved */                                                        \
-  F(bool, IsExprEnableUnresolvedWarning, false)                         \
-  /* Raise a notice if a Class type is used as a memo key */            \
-  F(bool, ClassMemoNotices, false)                                      \
-  /*  Raise a notice if a ClsMeth type is passed to a function that
-   *  expects a vec/varray */                                           \
-  F(bool, VecHintNotices, false)                                        \
-  /* Switches on miscellaneous junk. */                                 \
-  F(bool, NoticeOnCreateDynamicProp, false)                             \
-  F(bool, NoticeOnReadDynamicProp, false)                               \
-  F(bool, NoticeOnImplicitInvokeToString, false)                        \
-  F(bool, FatalOnConvertObjectToString, false)                          \
-  /* When this flag is on, var_dump for
-   * classes and lazy classes outputs string(...). */                   \
-  F(bool, ClassAsStringVarDump, true)                                   \
-  /* When this flag is on, var_export for
-   * classes and lazy classes outputs a string. */                      \
-  F(bool, ClassAsStringVarExport, false)                                \
-  /* When this flag is on, gettype for
-   * classes and lazy classes outputs string. */                        \
-  F(bool, ClassAsStringPrintR, false)                                   \
-  /* When this flag is on, print_r for
-   * classes and lazy classes outputs a string. */                      \
-  F(bool, ClassAsStringGetType, true)                                   \
-  /* trigger E_USER_WARNING error when getClassName()/getMethodName()
-   * is used on __SystemLib\MethCallerHelper */                         \
-  F(bool, NoticeOnMethCallerHelperUse, false)                           \
-  /*                                                                    \
-   * Control dynamic calls to functions and dynamic constructs of       \
-   * classes which haven't opted into being called that way.            \
-   *                                                                    \
-   * 0 - Do nothing                                                     \
-   * 1 - Warn if meth_caller is apc serialized                          \
-   * 2 - Throw exception if meth_caller is apc serialized               \
-   */                                                                   \
-  F(int32_t, ForbidMethCallerAPCSerialize, 0)                           \
-  F(int32_t, ForbidMethCallerHelperSerialize, 0)                        \
-  F(bool, NoticeOnMethCallerHelperIsObject, false)                      \
-  F(bool, NoticeOnCollectionToBool, false)                              \
-  F(bool, NoticeOnSimpleXMLBehavior, false)                             \
-  /*                                                                    \
-   * Don't allow unserializing to __PHP_Incomplete_Class                \
-   * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Throw exception                                                \
-   */                                                                   \
-  F(int32_t, ForbidUnserializeIncompleteClass, 0)                       \
   /*                                                                    \
    * Map from coeffect name to enforcement level                        \
    * e.g. {'pure' => 2, 'rx' => 1}                                      \
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
-  /*                                                                    \
-   * Enforce deployment boundaries.                                     \
-   */                                                                   \
-  F(bool, EnforceDeployment, false)                                     \
-  F(uint32_t, DeploymentViolationWarningSampleRate, 1)                  \
-  /*
-   * Enforce top level and method level internal keyword                \
-   * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Throw exception                                                \
-   */                                                                   \
-  F(uint32_t, EnforceModules, 0)                                        \
-  /*                                                                    \
-   * Controls behavior on reflection to default value expressions       \
-   * that throw during evaluation                                       \
-   * 0 - Nothing                                                        \
-   * 1 - Warn and retain current behavior                               \
-   * 2 - Return null for parameter value                                \
-   */                                                                   \
-  F(int32_t, FixDefaultArgReflection, 2)                                \
-  F(int32_t, ServerOOMAdj, 0)                                           \
-  F(std::string, PreludePath, "")                                       \
-  F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \
-  F(bool, UseGraphColor, true)                                          \
-  F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
-  F(std::string, UseRemoteUnixServer, "no")                             \
-  F(std::string, UnixServerPath, "")                                    \
   F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
-  F(bool, UnixServerFailWhenBusy, false)                                \
-  F(std::vector<std::string>, UnixServerAllowedUsers,                   \
-                                            std::vector<std::string>()) \
-  F(std::vector<std::string>, UnixServerAllowedGroups,                  \
-                                            std::vector<std::string>()) \
-  F(bool, UnixServerRunPSPInBackground, true)                           \
-  F(bool, UnixServerProxyXbox, true)                                    \
-  F(bool, UnixServerAssumeRepoReadable, true)                           \
-  F(bool, UnixServerAssumeRepoRealpath, true)                           \
-  /* Options for testing */                                             \
-  F(bool, TrashFillOnRequestExit, false)                                \
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   F(bool, CrashOnStaticAnalysisError, debug)                            \

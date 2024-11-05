@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/jit.h"
 
@@ -485,7 +486,7 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, SSATmp* objOrClass) {
   }
   // Classes are converted to strings before storing to memo caches.
   // Bail out if we need to raise warning for class to string conversation.
-  if (RuntimeOption::EvalClassMemoNotices) return false;
+  if (Cfg::Eval::ClassMemoNotices) return false;
   if (objOrClass &&
       (!objOrClass->hasConstVal(TCls) ||
        !objOrClass->clsVal()->isPersistent())) {
@@ -1281,7 +1282,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 } // namespace
 
 void emitDeploymentBoundaryCheck(IRGS& env, SSATmp* symbol) {
-  if (!RO::EvalEnforceDeployment) return;
+  if (!Cfg::Eval::EnforceDeployment) return;
   auto const caller = curFunc(env);
   if (env.unit.packageInfo().violatesDeploymentBoundary(*caller)) return;
   ifThen(
@@ -1345,7 +1346,7 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
 }
 
 void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
-  if (!RO::EvalEnforceModules) return;
+  if (!Cfg::Eval::EnforceModules) return;
   auto const caller = curFunc(env);
   if (symbol->hasConstVal()) {
     if (func) {

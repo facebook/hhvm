@@ -155,6 +155,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/configs/errorhandling.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/configs/xbox.h"
 #include "hphp/util/job-queue.h"
@@ -459,7 +460,7 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
 
     int fd = fdNetworkSocket.toFd();
 
-    if (RuntimeOption::EvalUnixServerFailWhenBusy) {
+    if (Cfg::Eval::UnixServerFailWhenBusy) {
       if (m_dispatcher->getActiveWorker() >=
           m_dispatcher->getTargetNumWorkers()) {
         Logger::Info("Queue is full, refusing CLI connection");
@@ -931,7 +932,7 @@ void runInContext(CLIContext&& ctx,
   auto const prelude = get_setting_string(
     shared->ini,
     "hhvm.prelude_path",
-    RO::EvalPreludePath
+    Cfg::Eval::PreludePath
   );
 
   for (auto& a : shared->argv) argv.emplace_back(a.data());
@@ -2058,7 +2059,7 @@ CLIContext CLIContext::initFromClient(int client) {
     "hhvm.unix_server_assume_repo_readable"
   );
 
-  if (assume_readable && RO::EvalUnixServerAssumeRepoReadable) {
+  if (assume_readable && Cfg::Eval::UnixServerAssumeRepoReadable) {
     shared.flags = static_cast<Flags>(
       shared.flags | Flags::AssumeRepoReadable
     );
@@ -2069,7 +2070,7 @@ CLIContext CLIContext::initFromClient(int client) {
     "hhvm.unix_server_assume_repo_realpath"
   );
 
-  if (assume_realpath && RO::EvalUnixServerAssumeRepoRealpath) {
+  if (assume_realpath && Cfg::Eval::UnixServerAssumeRepoRealpath) {
     shared.flags = static_cast<Flags>(
       shared.flags | Flags::AssumeRepoRealpath
     );
@@ -2084,7 +2085,7 @@ CLIContext CLIContext::initFromClient(int client) {
 void init_cli_server(const char* socket_path) {
   if (RuntimeOption::RepoAuthoritative) return;
 
-  for (auto user : RuntimeOption::EvalUnixServerAllowedUsers) {
+  for (auto user : Cfg::Eval::UnixServerAllowedUsers) {
     try {
       UserInfo info(user.c_str());
       s_allowedUsers.emplace(info.pw->pw_uid);
@@ -2096,7 +2097,7 @@ void init_cli_server(const char* socket_path) {
     }
   }
 
-  for (auto group : RuntimeOption::EvalUnixServerAllowedGroups) {
+  for (auto group : Cfg::Eval::UnixServerAllowedGroups) {
     try {
       GroupInfo info(group.c_str());
       s_allowedGroups.emplace(info.gr->gr_gid);
@@ -2269,7 +2270,7 @@ bool cli_supports_clone() {
 void run_command_on_cli_server(const char* sock_path,
                                const std::vector<std::string>& args,
                                int& count) {
-  if (RO::EvalUnixServerRunPSPInBackground) moveToBackground(count);
+  if (Cfg::Eval::UnixServerRunPSPInBackground) moveToBackground(count);
 
   int ret = 0;
   auto const finish = [&] {

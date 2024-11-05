@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
@@ -1059,7 +1060,7 @@ ArrayData* VanillaDict::AppendMove(ArrayData* ad, TypedValue v) {
   }
   auto const nextKI = int64_t(uint64_t(maxIntKey) + 1);
 
-  if (nextKI != a->m_nextKI && RO::EvalDictDArrayAppendNotices) {
+  if (nextKI != a->m_nextKI && Cfg::Eval::DictDArrayAppendNotices) {
     // Try to eliminate the internal index used for "append", replacing it
     // with a simple set of the key equal to the array's size. If we can make
     // this change now, we can drop appends completely as a follow-up.

@@ -125,7 +125,7 @@ inline bool is_object(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   if (!tvIsObject(c)) return false;
   auto const cls = val(c).pobj->getVMClass();
-  if (RO::EvalNoticeOnMethCallerHelperIsObject) {
+  if (Cfg::Eval::NoticeOnMethCallerHelperIsObject) {
     if (cls == SystemLib::getMethCallerHelperClass()) {
       raise_notice("is_object() called on MethCaller");
     }

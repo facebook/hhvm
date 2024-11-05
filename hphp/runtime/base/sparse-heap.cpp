@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 #include <folly/portability/SysMman.h>
@@ -37,7 +38,7 @@ void SparseHeap::reset() {
         tl_heap_id, m_pooled_slabs.size(), m_bigs.countBlocks());
 #if !FOLLY_SANITIZE
   // trash fill is redundant with ASAN
-  if (RuntimeOption::EvalTrashFillOnRequestExit) {
+  if (Cfg::Eval::TrashFillOnRequestExit) {
     m_bigs.iterate([&](HeapObject* h, size_t size) {
       memset(h, kSmallFreeFill, size);
     });

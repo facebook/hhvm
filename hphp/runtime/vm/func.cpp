@@ -50,6 +50,7 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
@@ -912,12 +913,12 @@ Func* Func::load(const StringData* name) {
 
 namespace {
 void handleModuleBoundaryViolation(const Func* callee, const Func* caller) {
-  if (!RO::EvalEnforceModules || !callee || !caller) return;
+  if (!Cfg::Eval::EnforceModules || !callee || !caller) return;
   if (will_symbol_raise_module_boundary_violation(callee, caller)) {
     raiseModuleBoundaryViolation(nullptr, callee, caller->moduleName());
   }
   auto const& packageInfo = g_context->getPackageInfo();
-  if (RO::EvalEnforceDeployment &&
+  if (Cfg::Eval::EnforceDeployment &&
       caller->moduleName() != callee->moduleName() &&
       !packageInfo.violatesDeploymentBoundary(caller->moduleName()) &&
       packageInfo.violatesDeploymentBoundary(*callee)) {

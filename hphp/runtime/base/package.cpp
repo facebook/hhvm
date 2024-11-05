@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/func.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <re2/re2.h>
 #include "hphp/util/rds-local.h"
 
@@ -339,7 +341,7 @@ bool PackageInfo::isModuleSoftDeployed(const StringData* module) const {
 }
 
 bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
-  if (!RO::EvalEnforceDeployment) return false;
+  if (!Cfg::Eval::EnforceDeployment) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
     if (RO::RepoAuthoritative) {
       std::shared_lock lock(s_mutex);
@@ -358,7 +360,7 @@ bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
 }
 
 bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
-  if (!RO::EvalEnforceDeployment) return false;
+  if (!Cfg::Eval::EnforceDeployment) return false;
   if (RO::RepoAuthoritative) {
     return callee.unit()->isSoftDeployedRepoOnly();
   }
@@ -366,7 +368,7 @@ bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
 }
 
 bool PackageInfo::violatesDeploymentBoundary(const Class& cls) const {
-  if (!RO::EvalEnforceDeployment) return false;
+  if (!Cfg::Eval::EnforceDeployment) return false;
   if (RO::RepoAuthoritative) {
     return cls.preClass()->unit()->isSoftDeployedRepoOnly();
   }

@@ -432,7 +432,7 @@ void moduleBoundaryViolationImpl(
   const StringData* fromModule,
   bool soft
 ) {
-  assertx(RO::EvalEnforceModules);
+  assertx(Cfg::Eval::EnforceModules);
   // Internal symbols must always have a module
   assertx(symbolModule != nullptr);
   assertx(fromModule != nullptr);
@@ -449,7 +449,7 @@ void moduleBoundaryViolationImpl(
       ? "the default module"
       : folly::sformat("module {}", fromModule)
   );
-  if (RO::EvalEnforceModules > 1 && !soft) {
+  if (Cfg::Eval::EnforceModules > 1 && !soft) {
     SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
   }
   raise_warning(errMsg);
@@ -463,7 +463,7 @@ void raiseModulePropertyViolation(
   const StringData* callerModule,
   bool is_static = false
 ) {
-  if (!RO::EvalEnforceModules) return;
+  if (!Cfg::Eval::EnforceModules) return;
   assertx(cls);
   assertx(prop);
   auto const attrs = [&] {
@@ -489,7 +489,7 @@ void raiseModulePropertyViolation(
 void raiseModuleBoundaryViolation(const Class* ctx,
                                   const Func* callee,
                                   const StringData* callerModule) {
-  if (!RO::EvalEnforceModules) return;
+  if (!Cfg::Eval::EnforceModules) return;
 
   assertx(callee);
   assertx(IMPLIES(callee->isMethod(), ctx));
@@ -506,7 +506,7 @@ void raiseModuleBoundaryViolation(const Class* ctx,
 
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const StringData* callerModule) {
-  if (!RO::EvalEnforceModules) return;
+  if (!Cfg::Eval::EnforceModules) return;
 
   assertx(cls);
   assertx(cls->isInternal());
@@ -521,7 +521,7 @@ void raiseModuleBoundaryViolation(const Class* cls,
 }
 
 void raiseDeploymentBoundaryViolation(const Func* callee) {
-  if (!RO::EvalEnforceDeployment) return;
+  if (!Cfg::Eval::EnforceDeployment) return;
   auto const& packageInfo = g_context->getPackageInfo();
   assertx(callee && !callee->isMethod());
   auto const soft = packageInfo.moduleInASoftPackage(callee->moduleName());
@@ -530,14 +530,14 @@ void raiseDeploymentBoundaryViolation(const Func* callee) {
     "Calling {} outside the active deployment is not allowed",
     calleeName);
   if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
-  if (auto const rate = RO::EvalDeploymentViolationWarningSampleRate) {
+  if (auto const rate = Cfg::Eval::DeploymentViolationWarningSampleRate) {
     if (folly::Random::rand32(rate) != 0) return;
     raise_warning(errMsg);
   }
 }
 
 void raiseDeploymentBoundaryViolation(const Class* cls) {
-  if (!RO::EvalEnforceDeployment) return;
+  if (!Cfg::Eval::EnforceDeployment) return;
   auto const& packageInfo = g_context->getPackageInfo();
   auto const soft = packageInfo.moduleInASoftPackage(cls->moduleName());
   auto const symbolType =
@@ -548,7 +548,7 @@ void raiseDeploymentBoundaryViolation(const Class* cls) {
     symbolType,
     clsName);
   if (!soft) SystemLib::throwDeploymentBoundaryViolationExceptionObject(errMsg);
-  if (auto const rate = RO::EvalDeploymentViolationWarningSampleRate) {
+  if (auto const rate = Cfg::Eval::DeploymentViolationWarningSampleRate) {
     if (folly::Random::rand32(rate) != 0) return;
     raise_warning(errMsg);
   }

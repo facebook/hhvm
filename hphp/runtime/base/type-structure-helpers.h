@@ -68,7 +68,7 @@ bool verifyReifiedLocalType(
  * type.
  * If suppress is not set, will raise an error if the type structure cannot be
  * resolved.
- * Otherwise, if suppress and RuntimeOption::EvalIsExprEnableUnresolvedWarning
+ * Otherwise, if suppress and Cfg::Eval::IsExprEnableUnresolvedWarning
  * are set, will raise a warning instead.
  *
  * Because the type structure might contain unresolved nested structures, we

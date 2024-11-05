@@ -27,6 +27,8 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -328,7 +330,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   if (obj &&
       UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&
       obj->dynPropArray()->exists(property.get())) {
-    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+    if (Cfg::Eval::NoticeOnReadDynamicProp) {
       obj->raiseReadDynamicProp(property.get());
     }
     return true;

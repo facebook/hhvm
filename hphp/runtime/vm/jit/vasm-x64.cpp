@@ -1303,7 +1303,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
       doPass("VOPT_BLOCK_WEIGHTS", VasmBlockCounters::profileGuidedUpdate);
 
-      if (RuntimeOption::EvalUseGraphColor &&
+      if (Cfg::Eval::UseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {

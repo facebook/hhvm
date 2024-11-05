@@ -1144,7 +1144,7 @@ Array resolveAndVerifyTypeStructure(
   assertx(ts.isDict());
   auto const handleResolutionException = [&](auto const& errMsg) {
     if (!suppress || !IsOrAsOp) raise_error(errMsg);
-    if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
+    if (Cfg::Eval::IsExprEnableUnresolvedWarning) raise_warning(errMsg);
     auto unresolved = Array::CreateDict();
     TypeStructure::setKind(unresolved, TypeStructure::Kind::T_unresolved);
     unresolved.set(s_classname, Variant(s_unresolved));

@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
@@ -230,7 +231,7 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
                       true /* once */,
                       false /* warmupOnly */,
                       false /* richErrorMessage */,
-                      RuntimeOption::EvalPreludePath,
+                      Cfg::Eval::PreludePath,
                       true /* allowDynCallNoPointer */);
   }
   if (ret) {

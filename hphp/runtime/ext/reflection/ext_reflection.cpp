@@ -178,10 +178,10 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
   } catch (const Exception&) {
     return on_eval_exn();
   } catch (const Object&) {
-    if (RO::EvalFixDefaultArgReflection > 1) {
+    if (Cfg::Eval::FixDefaultArgReflection > 1) {
       return on_eval_exn();
     } else {
-      if (RO::EvalFixDefaultArgReflection > 0) {
+      if (Cfg::Eval::FixDefaultArgReflection > 0) {
         raise_notice("Evaluation of default arg initializer in func=%s, arg=%s "
                      "threw a PHP exception--this reflection call won't throw "
                      "in future HHVMs!",
@@ -1851,7 +1851,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
   auto const dynPropArray = obj_data->dynPropArray();
   DictInit ret{dynPropArray->size()};
   IterateKV(dynPropArray.get(), [&](TypedValue k, TypedValue) {
-    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+    if (Cfg::Eval::NoticeOnReadDynamicProp) {
       auto const key = tvCastToString(k);
       obj_data->raiseReadDynamicProp(key.get());
     }
@@ -2050,7 +2050,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
         obj->dynPropArray().exists(
           obj->dynPropArray().convertKey<IntishCast::Cast>(prop_name))
         ){
-      if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      if (Cfg::Eval::NoticeOnReadDynamicProp) {
         obj->raiseReadDynamicProp(prop_name.get());
       }
       data->setDynamicProp();

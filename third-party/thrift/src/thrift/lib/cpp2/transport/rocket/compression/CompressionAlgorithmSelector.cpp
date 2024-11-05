@@ -16,6 +16,7 @@
 
 #include <folly/compression/Compression.h>
 
+#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -32,6 +33,13 @@ CompressionAlgorithm fromZlibConfig(
     case ZlibCompressionLevelPreset::MORE:
       return CompressionAlgorithm::ZLIB_MORE;
   };
+
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown {} enum value: {}",
+          TEnumTraits<ZlibCompressionLevelPreset>::typeName(),
+          zlibConfig.levelPreset().value()));
 }
 
 CompressionAlgorithm fromZstdConfig(
@@ -45,6 +53,13 @@ CompressionAlgorithm fromZstdConfig(
     case ZstdCompressionLevelPreset::MORE:
       return CompressionAlgorithm::ZSTD_MORE;
   };
+
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown {} enum value: {}",
+          TEnumTraits<ZstdCompressionLevelPreset>::typeName(),
+          zstdConfig.levelPreset().value()));
 }
 
 CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
@@ -57,6 +72,13 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
     case Lz4CompressionLevelPreset::MORE:
       return CompressionAlgorithm::LZ4_MORE;
   };
+
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown {} enum value: {}",
+          TEnumTraits<Lz4CompressionLevelPreset>::typeName(),
+          lz4Config.levelPreset().value()));
 }
 
 CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
@@ -73,6 +95,11 @@ CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
     case CodecConfig::Type::__EMPTY__:
       return CompressionAlgorithm::NONE;
   };
+
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown CodecConfig::Type value: {}", codecConfig.getType()));
 }
 
 std::pair<folly::io::CodecType, int>
@@ -137,5 +164,12 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
           folly::io::COMPRESSION_LEVEL_DEFAULT};
   };
   // clang-format on
+
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown {} enum value: {}",
+          TEnumTraits<CompressionAlgorithm>::typeName(),
+          compressionAlgorithm));
 }
 } // namespace apache::thrift::rocket

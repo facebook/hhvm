@@ -1027,31 +1027,56 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
   if (isAllMask(mask)) {
     return extractMaskFromPatch(patch, false, true);
   }
-  std::vector<ExtractedMasksFromPatch> rwmasks;
 
-  // If there is an assign, we can short-circut the logic.
+  // If there is an assign or clear, we can short-circut the logic.
   if (findOp(patch, PatchOp::Assign)) {
     return {noneMask(), allMask()};
   }
+  if (auto* clear = findOp(patch, PatchOp::Clear)) {
+    if (!isIntrinsicDefault(*clear)) {
+      return {noneMask(), allMask()};
+    }
+  }
 
   if (mask.includes_ref()) {
-    folly::throw_exception<std::runtime_error>("not implemented");
+    const auto& [id, v] = *mask.includes_ref()->begin();
+    ExtractedMasksFromPatch rwmask = {noneMask(), noneMask()};
+
+    // If there is a StructPatch::remove, we can short-circuit the logic.
+    if (auto* value = findOp(patch, PatchOp::Remove)) {
+      if (std::find(
+              value->as_list().begin(),
+              value->as_list().end(),
+              asValueStruct<type::i16_t>(id)) != value->as_list().end()) {
+        return {noneMask(), allMask()};
+      }
+    }
+
+    for (auto patchOp : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
+      if (auto* fieldPatch = findOp(patch, patchOp)) {
+        if (fieldPatch->as_object().contains(FieldId{id})) {
+          rwmask = rwmask |
+              extractMapMaskFromPatchImpl(
+                       fieldPatch->as_object().at(FieldId{id}), v);
+        }
+      }
+    }
+
+    if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
+      if (ensureStruct->as_object().contains(FieldId{id})) {
+        rwmask.read = rwmask.read & allMask();
+        rwmask.write = rwmask.write & allMask();
+      }
+    }
+    return rwmask;
   } else if (mask.includes_map_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
   } else if (mask.includes_string_map_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
   } else if (mask.includes_type_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
-  } else {
-    folly::throw_exception<std::runtime_error>("Invalid mask");
   }
-
-  ExtractedMasksFromPatch ret;
-  for (const auto& rwmask : rwmasks) {
-    ret.read = ret.read | rwmask.read;
-    ret.write = ret.write | rwmask.write;
-  }
-  return ret;
+  folly::throw_exception<std::runtime_error>("Invalid mask");
 }
 
 ExtractedMasksFromPatch extractMapMaskFromPatchImpl(

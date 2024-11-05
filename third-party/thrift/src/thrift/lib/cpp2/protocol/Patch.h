@@ -87,6 +87,14 @@ struct ExtractedMasksFromPatch {
   Mask write; // write mask from patch
 };
 
+inline ExtractedMasksFromPatch operator|(
+    const ExtractedMasksFromPatch& lhs, const ExtractedMasksFromPatch& rhs) {
+  ExtractedMasksFromPatch ret;
+  ret.read = lhs.read | rhs.read;
+  ret.write = lhs.write | rhs.write;
+  return ret;
+}
+
 /// Constructs read and write Thrift Mask that only contain fields that are
 /// modified by the Patch. It will construct nested Mask for map and object
 /// patches. For map, it uses the address of Value key as the key for the

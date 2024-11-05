@@ -3860,7 +3860,7 @@ TEST(FieldMaskTest, ValidateSinglePathValidNested) {
   }
 }
 
-TEST(FieldMaskTest, getValueFromMapIdAs) {
+TEST(FieldMaskTest, getValueAsMapId) {
   auto byteVal = protocol::asValueStruct<type::byte_t>(1);
   auto i16Val = protocol::asValueStruct<type::i16_t>(1);
   auto i32Val = protocol::asValueStruct<type::i32_t>(1);
@@ -3869,17 +3869,17 @@ TEST(FieldMaskTest, getValueFromMapIdAs) {
 
   // Valid
   for (const auto& as : {byteVal, i16Val, i32Val, i64Val}) {
-    auto v = getValueFromMapIdAs(MapId{1}, as);
+    auto v = getValueAs(MapId{1}, as);
     EXPECT_EQ(v, as);
   }
 
   // Invalid `as`
-  EXPECT_THROW(getValueFromMapIdAs(MapId{1}, stringVal), std::runtime_error);
+  EXPECT_THROW(getValueAs(MapId{1}, stringVal), std::runtime_error);
 
   // Overflow
   for (const auto& as : {byteVal, i16Val, i32Val}) {
     EXPECT_THROW(
-        getValueFromMapIdAs(
+        getValueAs(
             MapId{
                 static_cast<int64_t>(std::numeric_limits<std::int32_t>::max()) +
                 1},
@@ -3888,19 +3888,19 @@ TEST(FieldMaskTest, getValueFromMapIdAs) {
   }
 }
 
-TEST(FieldMaskTest, getValueFromStringAs) {
+TEST(FieldMaskTest, getValueAsString) {
   auto byteVal = protocol::asValueStruct<type::byte_t>(1);
   auto stringVal = protocol::asValueStruct<type::string_t>("1");
   auto binaryVal = protocol::asValueStruct<type::binary_t>("1");
 
   // Valid
   for (const auto& as : {stringVal, binaryVal}) {
-    auto v = getValueFromStringAs("1", as);
+    auto v = getValueAs("1", as);
     EXPECT_EQ(v, as);
   }
 
   // Invalid `as`
-  EXPECT_THROW(getValueFromStringAs("1", byteVal), std::runtime_error);
+  EXPECT_THROW(getValueAs("1", byteVal), std::runtime_error);
 }
 
 } // namespace apache::thrift::test

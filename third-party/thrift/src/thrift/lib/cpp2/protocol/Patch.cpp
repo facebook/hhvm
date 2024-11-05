@@ -1031,7 +1031,7 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     if (auto* removeSet = findOp(patch, PatchOp::Remove)) {
       const auto& set = removeSet->as_set();
       if (!set.empty()) {
-        if (set.contains(getValueFromMapIdAs(MapId{k}, *set.begin()))) {
+        if (set.contains(getValueAs(MapId{k}, *set.begin()))) {
           return {noneMask(), allMask()};
         }
       }
@@ -1040,7 +1040,7 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     if (auto* putMap = findOp(patch, PatchOp::Put)) {
       const auto& map = putMap->as_map();
       if (!map.empty()) {
-        key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+        key = getValueAs(MapId{k}, map.begin()->first);
         if (map.contains(*key)) {
           rwmask = {noneMask(), allMask()};
         }
@@ -1052,7 +1052,7 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
         const auto& map = itemPatch->as_map();
         if (!map.empty()) {
           if (!key.has_value()) {
-            key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+            key = getValueAs(MapId{k}, map.begin()->first);
           }
           if (map.contains(*key)) {
             rwmask = rwmask | extractMapMaskFromPatchImpl(map.at(*key), v);
@@ -1065,7 +1065,7 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
       const auto& map = ensureMap->as_map();
       if (!map.empty()) {
         if (!key.has_value()) {
-          key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+          key = getValueAs(MapId{k}, map.begin()->first);
         }
         if (map.contains(*key)) {
           rwmask.read = rwmask.read & allMask();

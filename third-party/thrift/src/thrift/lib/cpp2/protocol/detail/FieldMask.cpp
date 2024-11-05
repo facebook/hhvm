@@ -117,7 +117,7 @@ std::string getStringFromValue(const Value& v) {
       "Value contains a non-string key.");
 }
 
-Value getValueFromMapIdAs(MapId id, const Value& as) {
+Value getValueAs(MapId id, const Value& as) {
   auto key = static_cast<int64_t>(id);
   if (as.is_byte()) {
     if (key > std::numeric_limits<int8_t>::max() ||
@@ -150,7 +150,7 @@ Value getValueFromMapIdAs(MapId id, const Value& as) {
       "Provided value contains a non-integer.");
 }
 
-Value getValueFromStringAs(std::string key, const Value& as) {
+Value getValueAs(std::string key, const Value& as) {
   if (as.is_binary()) {
     return asValueStruct<type::binary_t>(key);
   }

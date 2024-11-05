@@ -158,11 +158,11 @@ std::string getStringFromValue(const Value& v);
 
 // Returns the Value of the given MapId with the corresponding type. If the
 // given type contains a non-integer value, it throws.
-Value getValueFromMapIdAs(MapId id, const Value& as);
+Value getValueAs(MapId id, const Value& as);
 
 // Returns the Value of the given string with the corresponding type. If the
 // given type contains a non-integer value, it throws.
-Value getValueFromStringAs(std::string key, const Value& as);
+Value getValueAs(std::string key, const Value& as);
 
 // Returns the MapId in map mask of the given Value key.
 // If it doesn't exist, it returns the new MapId (pointer to the key).

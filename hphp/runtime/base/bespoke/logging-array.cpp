@@ -176,13 +176,13 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad, LoggingProfile* profile) {
 
   auto const shouldEmitBespoke = [&]{
     if (shouldTestBespokeArrayLikes()) return true;
-    if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
-    if (RO::EvalEmitLoggingArraySampleRate == 1) return true;
+    if (Cfg::Eval::EmitLoggingArraySampleRate == 0) return false;
+    if (Cfg::Eval::EmitLoggingArraySampleRate == 1) return true;
 
     // We want the first sample to be vanilla and the second to be logged.
     auto const skCount = profile->data->sampleCount++;
     FTRACE(5, "Observe SrcKey count: {}\n", skCount);
-    return skCount % RO::EvalEmitLoggingArraySampleRate == 1;
+    return skCount % Cfg::Eval::EmitLoggingArraySampleRate == 1;
   }();
 
   if (!shouldEmitBespoke) {

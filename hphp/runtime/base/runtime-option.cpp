@@ -2141,7 +2141,7 @@ void RuntimeOption::Load(
 
   // Bespoke array-likes
 
-  auto const enable_logging = RO::EvalBespokeArrayLikeMode != 0;
+  auto const enable_logging = Cfg::Eval::BespokeArrayLikeMode != 0;
   bespoke::setLoggingEnabled(enable_logging);
   specializeVanillaDestructors();
 

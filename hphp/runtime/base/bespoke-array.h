@@ -25,14 +25,16 @@
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 inline bool allowBespokeArrayLikes() {
-  return RO::EvalBespokeArrayLikeMode > 0;
+  return Cfg::Eval::BespokeArrayLikeMode > 0;
 }
 
 inline bool shouldTestBespokeArrayLikes() {
-  return RO::EvalBespokeArrayLikeMode == 1;
+  return Cfg::Eval::BespokeArrayLikeMode == 1;
 }
 
 inline bool arrayTypeCouldBeBespoke(DataType t) {

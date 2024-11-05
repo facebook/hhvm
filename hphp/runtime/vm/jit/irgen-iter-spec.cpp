@@ -407,7 +407,7 @@ struct BespokeAccessor : public Accessor {
     auto const mayActuallyContainTombstones = [&] {
       // We don't yet support fast iteration over bespoke arrays with
       // tombstones. Currently only the MonotypeDict may contain them.
-      if (!RO::EvalEmitBespokeMonotypes) return false;
+      if (!Cfg::Eval::EmitBespokeMonotypes) return false;
       if (arrType() <= TVec) return false;
       if (arrType().arrSpec().is_struct()) return false;
       if (arrType().arrSpec().is_type_structure()) return false;

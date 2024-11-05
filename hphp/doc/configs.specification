@@ -275,6 +275,98 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- int32_t Eval.BespokeArrayLikeMode = 2, UNKNOWN
+
+  Controls emitting checks for bespoke arrays and using logging
+  arrays at runtime.
+  0 - Disable bespokes. We assume that all array-likes have their
+  standard (aka "vanilla") layouts.
+  1 - Test bespokes. We emit checks for vanilla layouts and produce
+  logging arrays based on the request ID. If rid % 2 == 1, then
+  a logging array is generated.
+  2 - Production bespokes. We emit checks as in (1), and produce
+  logging arrays based on per creation site sampling with the
+  sample rate specified by EmitLoggingArraySampleRate. If the
+  sample rate is 0, logging arrays are never constructed.
+  Logging arrays are only created before RTA has begun.
+
+- uint64_t Eval.BespokeEscalationSampleRate = 0, UNKNOWN
+
+- uint64_t Eval.EmitLoggingArraySampleRate = 17, UNKNOWN
+
+- std::string Eval.ExportLoggingArrayDataPath = "", UNKNOWN
+
+- bool Eval.EmitBespokeStructDicts = true, UNKNOWN
+
+  Should we use structs?
+  If so, how many layouts and how big can they get?
+
+- uint16_t Eval.BespokeMaxNumStructLayouts = 1 << 14, UNKNOWN
+
+- uint16_t Eval.BespokeStructDictMaxNumKeys = 2048, UNKNOWN
+
+  Do not use! Use StructLayout::maxNumKeys instead
+
+- double Eval.BespokeStructDictKeyCoverageThreshold = 95.0, UNKNOWN
+
+- uint8_t Eval.BespokeStructDictMinKeys = 128, UNKNOWN
+
+- double Eval.BespokeStructDictMaxSizeRatio = 2.0, UNKNOWN
+
+- uint64_t Eval.BespokeMaxTrackedKeys = 2048, UNKNOWN
+
+  What is the maximum number of keys to track in key order
+  profiles?
+
+- bool Eval.EmitAPCBespokeArrays = true, UNKNOWN
+
+- bool Eval.EmitBespokeMonotypes = false, UNKNOWN
+
+  Should we use monotypes?
+
+- int64_t Eval.ObjProfMaxNesting = 2000, UNKNOWN
+
+- int32_t Eval.BespokeArraySpecializationMode = 0, UNKNOWN
+
+  Choice of layout selection algorithms:
+  0 - Default layout selection algorithm based on profiling.
+  May use a mix of vanilla and bespoke array-likes.
+  1 - Specialize all sources and sinks on vanilla layouts.
+  2 - Specialize sources on vanilla, but sinks on top.
+
+- double Eval.BespokeArraySourceSpecializationThreshold = 95.0, UNKNOWN
+
+  We will use specialized layouts for a given array if they cover
+  the given percent of operations logged during profiling.
+  We can generate code for a bespoke sink in three ways:
+  1. We can do "top codegen" that handles any array layout.
+  2. We can specialize layouts and fall back to top codegen.
+  3. We can specialize layouts and side-exit on guard failure.
+  We use a couple heuristics to choose between these options. If we
+  see one layout that covers `SideExitThreshold` percent cases, and
+  we saw at most `SideExitMaxSources` sources reach this sink, with
+  at least `SideExitMinSampleCount` samples each, we'll side-exit.
+  Else, if multiple layouts cover SpecializationThreshold and at at
+  least one of them covers SpecializationMinThreshold we will
+  specialize to both layouts and fall back to top codegen. If one
+  layout covers `SpecializationThreshold` percent, we will
+  specialize and fall back to top codegen. Otherwise, we'll do top
+  codegen.
+
+- double Eval.BespokeArraySinkSpecializationThreshold = 95.0, UNKNOWN
+
+- double Eval.BespokeArraySinkIteratorSpecializationThreshold = 92.0, UNKNOWN
+
+- double Eval.BespokeArraySinkSpecializationMinThreshold = 85.0, UNKNOWN
+
+- double Eval.BespokeArraySinkMultiLayoutThreshold = 0.999, UNKNOWN
+
+- double Eval.BespokeArraySinkSideExitThreshold = 95.0, UNKNOWN
+
+- uint64_t Eval.BespokeArraySinkSideExitMaxSources = 64, UNKNOWN
+
+- uint64_t Eval.BespokeArraySinkSideExitMinSampleCount = 4, UNKNOWN
+
 - bool Eval.HackArrDVArrVarExport = false, UNKNOWN
 
   When this flag is on, var_export outputs d/varrays.

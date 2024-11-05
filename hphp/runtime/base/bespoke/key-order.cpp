@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <sstream>
 
 namespace HPHP::bespoke {
@@ -52,7 +54,7 @@ KeyOrder KeyOrder::insert(const StringData* k) const {
   if (!k->isStatic() || !m_keys) return KeyOrder::MakeInvalid();
   if (isTooLong() || contains(k)) return *this;
   KeyOrderData newOrder{*m_keys};
-  auto const full = m_keys->size() == RO::EvalBespokeMaxTrackedKeys;
+  auto const full = m_keys->size() == Cfg::Eval::BespokeMaxTrackedKeys;
   newOrder.push_back(full ? s_extraKey.get() : k);
   return Make(newOrder);
 }
@@ -92,8 +94,8 @@ KeyOrder::KeyOrder(const KeyOrderData* keys)
 
 KeyOrderData KeyOrder::trimKeyOrder(const KeyOrderData& ko) {
   KeyOrderData res{ko};
-  if (res.size() > RO::EvalBespokeMaxTrackedKeys) {
-    res.resize(RO::EvalBespokeMaxTrackedKeys);
+  if (res.size() > Cfg::Eval::BespokeMaxTrackedKeys) {
+    res.resize(Cfg::Eval::BespokeMaxTrackedKeys);
     res.push_back(s_extraKey.get());
   }
   return res;
@@ -136,7 +138,7 @@ KeyOrder KeyOrder::MakeInvalid() {
 
 bool KeyOrder::isTooLong() const {
   assertx(m_keys);
-  return m_keys->size() > RO::EvalBespokeMaxTrackedKeys;
+  return m_keys->size() > Cfg::Eval::BespokeMaxTrackedKeys;
 }
 
 size_t KeyOrder::size() const {
@@ -188,11 +190,11 @@ KeyOrder collectKeyOrder(const KeyOrderMap& keyOrderMap) {
 
   auto const weightedAvg = (double)weightedSizeSum / weight;
   auto const scale =
-    (keys.size() + RO::EvalBespokeStructDictMinKeys) /
-    (weightedAvg + RO::EvalBespokeStructDictMinKeys);
+    (keys.size() + Cfg::Eval::BespokeStructDictMinKeys) /
+    (weightedAvg + Cfg::Eval::BespokeStructDictMinKeys);
   // If the final merged key size is significantly larger than the average
   // key order size, creating a StructDict will waste memory.
-  if (scale > RO::EvalBespokeStructDictMaxSizeRatio) {
+  if (scale > Cfg::Eval::BespokeStructDictMaxSizeRatio) {
     return KeyOrder::MakeInvalid();
   }
 

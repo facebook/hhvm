@@ -374,7 +374,7 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
-  if (!RO::EvalEmitBespokeMonotypes) return;
+  if (!Cfg::Eval::EmitBespokeMonotypes) return;
   // Hold the read mutex for the duration of the mutation so that profiling
   // cannot be interrupted until the mutation is complete.
   std::shared_lock lock{s_profilingLock};
@@ -1069,7 +1069,7 @@ void freeProfileData() {
 }
 
 void startExportProfiles() {
-  if (RO::EvalExportLoggingArrayDataPath.empty()) {
+  if (Cfg::Eval::ExportLoggingArrayDataPath.empty()) {
     freeProfileData();
     return;
   }
@@ -1079,7 +1079,7 @@ void startExportProfiles() {
 
     auto const sources = sortProfileData();
     auto const sinks = sortSinkData();
-    auto const file = fopen(RO::EvalExportLoggingArrayDataPath.c_str(), "w");
+    auto const file = fopen(Cfg::Eval::ExportLoggingArrayDataPath.c_str(), "w");
     if (!file) return;
 
     SCOPE_EXIT { fclose(file); };

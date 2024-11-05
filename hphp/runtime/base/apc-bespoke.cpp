@@ -344,7 +344,7 @@ APCBespoke initAPCBespoke(ArrayData* ad) {
     DecRefUncountedArray(ad);
     return result;
   }();
-  if (!RO::EvalEmitAPCBespokeArrays) return { ad, nullptr };
+  if (!Cfg::Eval::EmitAPCBespokeArrays) return { ad, nullptr };
 
   // Check if we need to do logging for this array. We'll need to do so if it
   // supports bespoke layouts, *or if any of its recursive subarrays does*.
@@ -406,7 +406,7 @@ ArrayData* readAPCBespoke(const APCTypedValue* tv) {
   // Before layout selection, use sample counts to choose whether to log.
   // TODO(kshaunak): Should we also gate on g_emitLoggingArrays here?
   auto const count = data->count++;
-  if (count % RO::EvalEmitLoggingArraySampleRate != 1) {
+  if (count % Cfg::Eval::EmitLoggingArraySampleRate != 1) {
     for (auto i = 0; i < data->num_logging_arrays; i++) {
       data->logging[i]->sampleCount++;
     }

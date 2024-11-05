@@ -196,7 +196,7 @@ const StructLayout* StructLayout::GetLayout(
   auto const it = s_fieldVectorToIdx.find(fv);
   if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
 
-  if (s_numStructLayoutsCreated == RO::EvalBespokeMaxNumStructLayouts) {
+  if (s_numStructLayoutsCreated == Cfg::Eval::BespokeMaxNumStructLayouts) {
     return nullptr;
   }
 
@@ -966,8 +966,8 @@ TopStructLayout::TopStructLayout()
 {
   assertx(!s_hashTableSet);
   // There are 14 bits available for StructDict indices. See layout.h.
-  assertx(RO::EvalBespokeMaxNumStructLayouts <= 1 << 14);
-  auto colorTableLen = indexRaw(RO::EvalBespokeMaxNumStructLayouts);
+  assertx(Cfg::Eval::BespokeMaxNumStructLayouts <= 1 << 14);
+  auto colorTableLen = indexRaw(Cfg::Eval::BespokeMaxNumStructLayouts);
   s_hashTableSet = (StructLayout::PerfectHashTable*) vm_malloc(
       sizeof(StructLayout::PerfectHashTable) * colorTableLen);
 }

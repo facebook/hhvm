@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
@@ -1331,7 +1332,7 @@ jit::ArrayLayout guardToLayout(
     return type.arrSpec().layout();
   }
 
-  if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+  if (sinkLayouts.sideExit && !Cfg::Eval::BespokeEscalationSampleRate) {
     checkType(env, loc, target, makeExit(env));
     return sl.layout;
   }
@@ -1359,7 +1360,7 @@ jit::ArrayLayout guardToLayout(
 
       // Side exit or do codegen as needed. Use emitVanilla if we have it.
       if (sinkLayouts.sideExit) {
-        assertx(RO::EvalBespokeEscalationSampleRate);
+        assertx(Cfg::Eval::BespokeEscalationSampleRate);
         auto const arr = loadLocation(env, loc);
         gen(env, LogGuardFailure, target, arr);
         gen(env, Jmp, makeExit(env));
@@ -1410,7 +1411,7 @@ void guardToMultipleLayoutsAndEmit(
       return;
     }
 
-    if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
+    if (sinkLayouts.sideExit && !Cfg::Eval::BespokeEscalationSampleRate) {
       checkType(env, loc, target, makeExit(env));
       emitTranslation(sl.layout.vanilla());
       return;
@@ -1435,7 +1436,7 @@ void guardToMultipleLayoutsAndEmit(
 
     // Side exit or do codegen as needed. Use emitVanilla if we have it.
     if (sinkLayouts.sideExit) {
-      assertx(RO::EvalBespokeEscalationSampleRate);
+      assertx(Cfg::Eval::BespokeEscalationSampleRate);
       auto const arr = loadLocation(env, loc);
       gen(env, LogGuardFailure, target, arr);
       gen(env, Jmp, makeExit(env, curSrcKey(env)));

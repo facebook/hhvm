@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/union-find.h"
 
 namespace HPHP::bespoke {
@@ -167,7 +168,7 @@ struct StructAnalysisResult {
 };
 
 double keyCoverageThreshold() {
-  return RO::EvalBespokeStructDictKeyCoverageThreshold / 100;
+  return Cfg::Eval::BespokeStructDictKeyCoverageThreshold / 100;
 }
 
 template <typename T, typename I, typename F>
@@ -506,7 +507,7 @@ StructLayout::FieldVector collectFieldVector(
 // only ones at which we'll JIT struct access code.
 bool mergeStructsAtSink(const SinkProfile& profile, const StructAnalysis& sa) {
   // 1. We must have sufficient LoggingArray coverage for the given sink.
-  auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySinkSpecializationThreshold / 100;
   auto const p_sampled = probabilityOfSampled(profile);
   if (p_sampled < p_cutoff) return false;
 
@@ -579,7 +580,7 @@ void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
 }
 
 StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
-  auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySourceSpecializationThreshold / 100;
   auto groups = std::vector<StructGroup>{};
 
   // Sort groups by weight to preferentially create hot struct layouts.
@@ -685,7 +686,7 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 ArrayLayout selectSourceLayout(
     LoggingProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
-  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  auto const mode = Cfg::Eval::BespokeArraySpecializationMode;
   if (mode == 1 || mode == 2) return ArrayLayout::Vanilla();
 
   // 1. Use a struct layout if the union-find algorithm chose one.
@@ -705,7 +706,7 @@ ArrayLayout selectSourceLayout(
 
   // 2. If we aren't emitting monotypes, use a vanilla layout.
 
-  if (!RO::EvalEmitBespokeMonotypes) return ArrayLayout::Vanilla();
+  if (!Cfg::Eval::EmitBespokeMonotypes) return ArrayLayout::Vanilla();
 
   // 3. If the array is a runtime source, use a vanilla layout.
   // TODO(mcolavita): We can eventually support more general runtime sources.
@@ -714,7 +715,7 @@ ArrayLayout selectSourceLayout(
 
   // 4. If we escalate too often, use a vanilla layout.
 
-  auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
+  auto const p_cutoff = Cfg::Eval::BespokeArraySourceSpecializationThreshold / 100;
   auto const p_escalated = probabilityOfEscalation(profile);
   if (p_escalated > 1 - p_cutoff) return ArrayLayout::Vanilla();
 
@@ -746,7 +747,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     const SinkProfile& profile, const StructAnalysisResult& sar) {
   assertx(profile.data);
   using DAL = Decision<ArrayLayout>;
-  auto const mode = RO::EvalBespokeArraySpecializationMode;
+  auto const mode = Cfg::Eval::BespokeArraySpecializationMode;
   if (mode == 1) return {{ArrayLayout::Vanilla(), 1.0}};
   if (mode == 2) return {{ArrayLayout::Top(), 1.0}};
 
@@ -783,10 +784,10 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
   }
 
   auto const p_cutoff = isIteratorBaseAccess(profile.key.second.op()) ?
-    RO::EvalBespokeArraySinkIteratorSpecializationThreshold / 100 :
-    RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+    Cfg::Eval::BespokeArraySinkIteratorSpecializationThreshold / 100 :
+    Cfg::Eval::BespokeArraySinkSpecializationThreshold / 100;
 
-  auto const layoutThreshold = RO::EvalBespokeArraySinkMultiLayoutThreshold;
+  auto const layoutThreshold = Cfg::Eval::BespokeArraySinkMultiLayoutThreshold;
 
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 
@@ -906,7 +907,7 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     // Require at least 1 of the layouts to be above the min threshold to gate
     // multiple layouts to only those that have a significant skew.
     auto const minThreshold =
-      RO::EvalBespokeArraySinkSpecializationMinThreshold / 100;
+      Cfg::Eval::BespokeArraySinkSpecializationMinThreshold / 100;
     if (p1 < minThreshold && p2 < minThreshold) return false;
 
     return true;
@@ -978,14 +979,14 @@ SinkLayouts selectSinkLayouts(
       }
     );
 
-    if (coverage < RO::EvalBespokeArraySinkSideExitThreshold / 100) {
+    if (coverage < Cfg::Eval::BespokeArraySinkSideExitThreshold / 100) {
       return false;
     }
 
     auto const count = profile.data->sources.size();
-    if (count > RO::EvalBespokeArraySinkSideExitMaxSources) return false;
+    if (count > Cfg::Eval::BespokeArraySinkSideExitMaxSources) return false;
 
-    auto const min_samples = RO::EvalBespokeArraySinkSideExitMinSampleCount;
+    auto const min_samples = Cfg::Eval::BespokeArraySinkSideExitMinSampleCount;
     for (auto const& it : profile.data->sources) {
       if (it.second < min_samples) return false;
     }
@@ -1083,7 +1084,7 @@ void selectBespokeLayouts() {
   setLoggingEnabled(false);
 
   auto const sar = []{
-    if (!RO::EvalEmitBespokeStructDicts) return StructAnalysisResult();
+    if (!Cfg::Eval::EmitBespokeStructDicts) return StructAnalysisResult();
     StructAnalysis sa;
     eachSource([&](auto const& x) { initStructAnalysis(x, sa); });
     eachSink([&](auto const& x) { updateStructAnalysis(x, sa); });

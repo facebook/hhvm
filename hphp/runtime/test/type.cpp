@@ -867,7 +867,7 @@ TEST(Type, BespokeVec) {
 }
 
 TEST(Type, BespokeVecRAT) {
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyLayout("foo", {ArrayLayout::Bespoke()})
   };
@@ -930,7 +930,7 @@ TEST(Type, BespokeHierarchy) {
    *  |   \   / \
    * bar  bat(L) ter
    */
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})
@@ -1104,7 +1104,7 @@ TEST(Type, BespokeRanges) {
    *  |
    * qop
    */
-  RO::EvalBespokeArrayLikeMode = 2;
+  Cfg::Eval::BespokeArrayLikeMode = 2;
   bespoke::Layout::ClearHierarchy();
   auto const foo_layout = ArrayLayout{
     bespoke::testing::makeDummyAbstractLayout("foo", {ArrayLayout::Bespoke()})

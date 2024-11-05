@@ -192,7 +192,7 @@ std::pair<int, double> sizeOfArray(
     return std::make_pair(0, 0);
   }
 
-  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
+  if (env.val_stack.size() >= Cfg::Eval::ObjProfMaxNesting) {
     env.deferred_warnings.push_back(
       "objprof: data structure is too deep, pruning traversal"
     );
@@ -491,7 +491,7 @@ std::pair<int, double> getObjSize(
     return std::make_pair(0, 0);
   }
 
-  if (env.val_stack.size() >= RuntimeOption::EvalObjProfMaxNesting) {
+  if (env.val_stack.size() >= Cfg::Eval::ObjProfMaxNesting) {
     env.deferred_warnings.push_back(
       "objprof: data structure is too deep, pruning traversal"
     );

@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/bespoke/struct-data-layout.h"
 #include "hphp/runtime/base/string-data.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::bespoke {
 
 struct StructLayout;
@@ -236,7 +238,7 @@ struct StructLayout : public ConcreteLayout {
 
   static size_t maxNumKeys() {
     return std::min<size_t>(
-      RuntimeOption::EvalBespokeStructDictMaxNumKeys,
+      Cfg::Eval::BespokeStructDictMaxNumKeys,
       std::numeric_limits<StructDataLayout::PosType>::max()
     );
   }

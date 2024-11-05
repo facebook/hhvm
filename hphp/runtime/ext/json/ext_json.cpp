@@ -23,10 +23,12 @@
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/util/stack-trace.h"
 #include "hphp/runtime/vm/bytecode.h"
 
 #include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 
@@ -141,7 +143,7 @@ TypedValue json_encode_impl(const Variant& value, int64_t options,
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
-  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     StructuredLog::logSerDes("json", "ser", json, value);
   }
 
@@ -212,7 +214,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   Variant z;
   const auto ok =
     JSON_parser(z, json.data(), json.size(), assoc, depth, parser_options);
-  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     StructuredLog::logSerDes("json", "des", json, z);
   }
   if (ok) {

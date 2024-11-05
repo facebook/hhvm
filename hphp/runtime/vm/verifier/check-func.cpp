@@ -175,7 +175,7 @@ struct FuncChecker {
 const StaticString s_invoke("__invoke");
 
 bool checkNativeFunc(const FuncEmitter* func, ErrorMode mode) {
-  if (!RuntimeOption::EvalVerifySystemLibHasNativeImpl) {
+  if (!Cfg::Eval::VerifySystemLibHasNativeImpl) {
     return true;
   }
 

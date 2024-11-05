@@ -275,6 +275,97 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Synchronize class loading between threads
 
+- uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
+
+- uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN
+
+- uint32_t Eval.Num2MPagesForReqHeap = 0, UNKNOWN
+
+- uint32_t Eval.NumReservedSlabs = 0, UNKNOWN
+
+- uint32_t Eval.NumReservedMBForSlabs = 0, UNKNOWN
+
+- uint32_t Eval.Num1GPagesForA0 = 0, UNKNOWN
+
+- uint32_t Eval.Num2MPagesForA0 = 0, UNKNOWN
+
+- bool Eval.BigAllocUseLocalArena = true, UNKNOWN
+
+- bool Eval.JsonParserUseLocalArena = true, UNKNOWN
+
+- bool Eval.XmlParserUseLocalArena = true, UNKNOWN
+
+- bool Eval.RecycleAProf = true, UNKNOWN
+
+- int64_t Eval.HeapPurgeWindowSize = 5 * 1000000, UNKNOWN
+
+- uint64_t Eval.HeapPurgeThreshold = 128 * 1024 * 1024, UNKNOWN
+
+- bool Eval.AbortBuildOnVerifyError = true, UNKNOWN, globaldata|unitcacheflag|compileroption(AbortBuildOnVerifyError)
+
+- bool Eval.AbortBuildOnCompilerError = true, UNKNOWN, unitcacheflag
+
+- bool Eval.VerifySystemLibHasNativeImpl = true, UNKNOWN
+
+- uint32_t Eval.StaticContentsLogRate = 100, UNKNOWN
+
+- uint32_t Eval.LogUnitLoadRate = 0, UNKNOWN
+
+- uint32_t Eval.MaxDeferredErrors = 50, UNKNOWN
+
+- uint32_t Eval.SerDesSampleRate = 0, UNKNOWN
+
+- int32_t Eval.SimpleJsonMaxLength = 2 << 20, UNKNOWN
+
+- uint32_t Eval.TraceServerRequestRate = 0, UNKNOWN
+
+- uint32_t Eval.TracingSampleRate = 0, UNKNOWN
+
+  Base tracing sample rate for all requests
+
+- uint32_t Eval.TracingPerRequestCount = 0, UNKNOWN
+
+  Tracing sample rate for first N requests
+
+- uint32_t Eval.TracingPerRequestSampleRate = 0, UNKNOWN
+
+- uint32_t Eval.TracingFirstRequestsCount = 0, UNKNOWN
+
+  Tracing sample rate for first N requests per URL
+
+- uint32_t Eval.TracingFirstRequestsSampleRate = 0, UNKNOWN
+
+- std::string Eval.ArtilleryTracePolicy = "", UNKNOWN
+
+  Empty string disables any Artillery tracing
+
+- std::string Eval.TracingTagId = "", UNKNOWN
+
+  Opaque tag to add to each trace. Useful for aggregation
+
+- bool Eval.EnableCompactBacktrace = true, UNKNOWN
+
+- bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
+
+- bool Eval.LogServerRestartStats = false, UNKNOWN
+
+- uint32_t Eval.ReusableTCPadding = 128, UNKNOWN
+
+  Extra bytes added to each area (Hot/Cold/Frozen) of a translation.
+  If we don't end up using a reusable TC, we'll drop the padding.
+
+- int64_t Eval.StressUnitCacheFreq = 0, UNKNOWN
+
+- int64_t Eval.PerfWarningSampleRate = 1, UNKNOWN
+
+  Perf warning sampling rates. The SelectHotCFG warning is noisy.
+
+- int64_t Eval.SelectHotCFGSampleRate = 100, UNKNOWN
+
+- int64_t Eval.FunctionCallSampleRate = 0, UNKNOWN
+
+- double Eval.InitialLoadFactor = 1.0, UNKNOWN
+
 - int32_t Eval.BespokeArrayLikeMode = 2, UNKNOWN
 
   Controls emitting checks for bespoke arrays and using logging

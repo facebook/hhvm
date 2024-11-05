@@ -40,7 +40,7 @@ void StaticContentCache::load() {
       Cfg::Server::FileCache, Cfg::Server::SourceRoot);
 
     if (StructuredLog::enabled() &&
-        StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
+        StructuredLog::coinflip(Cfg::Eval::StaticContentsLogRate)) {
       TheFileCache->setLogger([](const std::string& path) {
         auto record = StructuredLogEntry{};
         record.setStr("file", path);

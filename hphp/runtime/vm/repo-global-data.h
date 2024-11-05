@@ -38,11 +38,6 @@ struct RepoGlobalData {
 #undef C
 
   /*
-   * Should HHBBC do build time verification?
-   */
-  bool AbortBuildOnVerifyError = false;
-
-  /*
    * Should we display function arguments in backtraces?
    */
   bool EnableArgsInBacktraces = false;
@@ -73,7 +68,6 @@ struct RepoGlobalData {
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(Signature)
-      (AbortBuildOnVerifyError)
       (EnableArgsInBacktraces)
       (ConstantFunctions)
       (EvalCoeffectEnforcementLevels, std::less<std::string>{})

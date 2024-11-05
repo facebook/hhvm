@@ -861,7 +861,7 @@ struct json_parser {
     if (UNLIKELY(length >= sb_cap)) {
       // No decoded string in the output can use more bytes than input size.
       const auto new_cap = length + 1;
-      size_t bufSize = length <= RuntimeOption::EvalSimpleJsonMaxLength ?
+      size_t bufSize = length <= Cfg::Eval::SimpleJsonMaxLength ?
         SimpleParser::BufferBytesForLength(length) :
         new_cap * 2;
       if (tl_buffer.raw) {
@@ -895,14 +895,14 @@ struct json_parser {
   }
  private:
   static void* json_malloc(size_t size) {
-    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+    if (Cfg::Eval::JsonParserUseLocalArena) {
       return local_malloc(size);
     } else {
       return malloc(size);
     }
   }
   static void json_free(void* ptr) {
-    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+    if (Cfg::Eval::JsonParserUseLocalArena) {
       return local_free(ptr);
     } else {
       return free(ptr);
@@ -1259,7 +1259,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                              k_JSON_FB_HACK_ARRAYS |
                              k_JSON_FB_THRIFT_SIMPLE_JSON)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
-      length <= RuntimeOption::EvalSimpleJsonMaxLength &&
+      length <= Cfg::Eval::SimpleJsonMaxLength &&
       SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
                              get_container_type_from_options(options),
                              options & k_JSON_FB_THRIFT_SIMPLE_JSON)) {

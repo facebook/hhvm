@@ -33,7 +33,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   Cfg::LoadFromGlobalData(*this);
 
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
-  RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
 
   if (!Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {
@@ -59,7 +58,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 std::string show(const RepoGlobalData& gd) {
   std::string out;
 #define SHOW(x) fmt::format_to(std::back_inserter(out), "  {}: {}\n", #x, gd.x);
-  SHOW(AbortBuildOnVerifyError)
   SHOW(EnableArgsInBacktraces)
   SHOW(Signature)
 #undef SHOW

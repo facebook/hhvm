@@ -1275,7 +1275,7 @@ void whole_program(WholeProgramInput inputs,
   auto stats = allocate_stats();
   auto const emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);
-    if (RO::EvalAbortBuildOnVerifyError && !ue->check(false)) {
+    if (Cfg::Eval::AbortBuildOnVerifyError && !ue->check(false)) {
       fprintf(
         stderr,
         "The optimized unit for %s did not pass verification, "

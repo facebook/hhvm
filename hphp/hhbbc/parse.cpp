@@ -1131,7 +1131,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
     return staticEmptyString();
   }();
 
-  if (RO::EvalAbortBuildOnVerifyError && !ue.check(false)) {
+  if (Cfg::Eval::AbortBuildOnVerifyError && !ue.check(false)) {
     // Record a FatalInfo without a location. This represents a
     // verifier failure.
     php::FatalInfo fi{

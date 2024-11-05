@@ -339,7 +339,7 @@ void VariableUnserializer::set(const char* buf, const char* end) {
 Variant VariableUnserializer::unserialize() {
   Variant v;
   unserializeVariant(v.asTypedValue());
-  if (UNLIKELY(StructuredLog::coinflip(RuntimeOption::EvalSerDesSampleRate))) {
+  if (UNLIKELY(StructuredLog::coinflip(Cfg::Eval::SerDesSampleRate))) {
     String ser(m_begin, m_end - m_begin, CopyString);
     auto const fmt = folly::sformat("VU{}", (int)m_type);
     StructuredLog::logSerDes(fmt.c_str(), "des", ser, v);

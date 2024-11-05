@@ -1665,7 +1665,7 @@ void RuntimeOption::Load(
     }
 
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
-    if (!EvalEnableReusableTC) EvalReusableTCPadding = 0;
+    if (!EvalEnableReusableTC) Cfg::Eval::ReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
       EvalEnableNuma = false;
     }
@@ -1676,7 +1676,7 @@ void RuntimeOption::Load(
     if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().
       low_2m_pages(EvalMaxLowMemHugePages);
-      high_2m_pages(EvalMaxHighArenaHugePages);
+      high_2m_pages(Cfg::Eval::MaxHighArenaHugePages);
     }
 #if USE_JEMALLOC_EXTENT_HOOKS
     g_useTHPUponHugeTLBFailure =

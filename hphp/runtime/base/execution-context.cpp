@@ -844,7 +844,7 @@ void ExecutionContext::handleError(const std::string& msg,
     // list.
     if (getErrorState() == ErrorState::ExecutingUserHandler) {
       auto& deferred = m_deferredErrors;
-      if (deferred.size() < RuntimeOption::EvalMaxDeferredErrors) {
+      if (deferred.size() < Cfg::Eval::MaxDeferredErrors) {
         auto fileAndLine = ee.getFileAndLine();
         deferred.append(
           make_dict_array(

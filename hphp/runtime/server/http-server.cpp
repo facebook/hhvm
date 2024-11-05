@@ -150,7 +150,7 @@ static void exit_on_timeout(int sig) {
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer() {
-  LoadFactor = RuntimeOption::EvalInitialLoadFactor;
+  LoadFactor = Cfg::Eval::InitialLoadFactor;
 
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
@@ -741,7 +741,7 @@ void HttpServer::CheckMemAndWait(bool final) {
 }
 
 void HttpServer::MarkShutdownStat(ShutdownEvent event) {
-  if (!RuntimeOption::EvalLogServerRestartStats) return;
+  if (!Cfg::Eval::LogServerRestartStats) return;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
   Process::GetMemoryInfo(mem, RO::EvalMemInfoCheckCgroup2);
@@ -760,7 +760,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
 }
 
 void HttpServer::LogShutdownStats() {
-  if (!RuntimeOption::EvalLogServerRestartStats) return;
+  if (!Cfg::Eval::LogServerRestartStats) return;
   StructuredLogEntry entry;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   if (ShutdownStats.empty()) return;

@@ -368,8 +368,8 @@ Package::parseRun(const std::string& content,
       mangleUnitSha1(string_sha1(content), fileName, repoOptions)
     };
     auto const mode =
-      RO::EvalAbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
-      RO::EvalAbortBuildOnVerifyError   ? CompileAbortMode::VerifyErrors :
+      Cfg::Eval::AbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
+      Cfg::Eval::AbortBuildOnVerifyError   ? CompileAbortMode::VerifyErrors :
       CompileAbortMode::OnlyICE;
 
     std::unique_ptr<UnitEmitter> ue;

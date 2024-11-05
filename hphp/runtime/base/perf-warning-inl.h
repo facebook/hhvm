@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/eval.h"
 
 #include <folly/Random.h>
 
@@ -23,7 +23,7 @@ namespace HPHP {
 template<typename F>
 void logPerfWarningImpl(folly::StringPiece event, int64_t priority,
                         int64_t rate, F fillCols) {
-  auto const effectiveRate = rate * RuntimeOption::EvalPerfWarningSampleRate;
+  auto const effectiveRate = rate * Cfg::Eval::PerfWarningSampleRate;
   if (effectiveRate > std::numeric_limits<uint32_t>::max()) return;
   if (!StructuredLog::coinflip(effectiveRate)) return;
 

@@ -101,7 +101,7 @@ struct CodeReuseBlock {
     auto cold = &src.cold();
     auto frozen = &src.frozen();
 
-    auto const pad = RuntimeOption::EvalReusableTCPadding;
+    auto const pad = Cfg::Eval::ReusableTCPadding;
     size_t mainSize   = range.main.size() + pad;
     size_t coldSize   = range.cold.size() + pad;
     size_t frozenSize = range.frozen.size() + pad;

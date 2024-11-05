@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/rds-local.h"
 
 #include <libxml/parserInternals.h>
@@ -877,7 +878,7 @@ char* local_strdup(const char* str) {
 
 void processInitLibXML() {
   // Use request-local allocator functions.
-  if (RuntimeOption::EvalXmlParserUseLocalArena) {
+  if (Cfg::Eval::XmlParserUseLocalArena) {
     xmlMemSetup(checked_local_free,
                 checked_local_malloc,
                 checked_local_realloc,

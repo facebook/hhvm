@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
@@ -46,7 +45,7 @@ void SparseHeap::reset() {
 #endif
   auto const do_free =
     [this] (void* ptr, size_t size) {
-      if (RuntimeOption::EvalBigAllocUseLocalArena) {
+      if (Cfg::Eval::BigAllocUseLocalArena) {
         if (size) local_sized_free(ptr, size);
       } else {
 #ifdef USE_JEMALLOC
@@ -121,7 +120,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   }
 #ifdef USE_JEMALLOC
   auto const flags = MALLOCX_ALIGN(kSlabAlign) |
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto slab = mallocx(kSlabSize, flags);
   // this is the expected behavior of jemalloc 5 and above;
   // if the allocation size differs, HHVM
@@ -141,7 +140,7 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
 void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
   int flags = (zero ? MALLOCX_ZERO : 0) |
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto n = static_cast<HeapObject*>(mallocx(bytes, flags));
   auto cap = sallocx(n, flags);
 #else
@@ -174,7 +173,7 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 #ifdef USE_JEMALLOC
-  if (RuntimeOption::EvalBigAllocUseLocalArena) {
+  if (Cfg::Eval::BigAllocUseLocalArena) {
     assertx(nallocx(cap, local_arena_flags) == sallocx(ptr, local_arena_flags));
     local_sized_free(ptr, cap);
   } else {
@@ -197,7 +196,7 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
   auto old_cap = m_bigs.get(old);
 #ifdef USE_JEMALLOC
   auto const flags =
-    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+    (Cfg::Eval::BigAllocUseLocalArena ? local_arena_flags : 0);
   auto const newNode = static_cast<HeapObject*>(
     rallocx(ptr, new_size, flags)
   );

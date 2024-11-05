@@ -1224,16 +1224,16 @@ static int start_server(const std::string &username) {
 
 #ifdef USE_JEMALLOC
   auto const reqHeapSpec = PageSpec{
-    RuntimeOption::EvalNum1GPagesForReqHeap,
-    RuntimeOption::EvalNum2MPagesForReqHeap
+    Cfg::Eval::Num1GPagesForReqHeap,
+    Cfg::Eval::Num2MPagesForReqHeap
   };
-  unsigned nSlabs = RO::EvalNumReservedMBForSlabs * (1ull << 20) / kSlabSize;
+  unsigned nSlabs = Cfg::Eval::NumReservedMBForSlabs * (1ull << 20) / kSlabSize;
   if (nSlabs == 0) {
     // We are in the process of migrating from Eval.NumReservedSlabs to
     // Eval.NumReservedMBForSlabs. Currently, when NumReservedMBForSlabs is set,
     // we ignore NumReservedSlabs; otherwise, we adjust NumReservedSlabs, which
     // is needed because the option assumes 2M slab size.
-    nSlabs = RO::EvalNumReservedSlabs * (2ull << 20) / kSlabSize;
+    nSlabs = Cfg::Eval::NumReservedSlabs * (2ull << 20) / kSlabSize;
   }
   setup_local_arenas(reqHeapSpec, nSlabs);
 
@@ -1961,8 +1961,8 @@ static int execute_program_impl(int argc, char** argv) {
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (RuntimeOption::ServerExecutionMode()) {
     purge_all();
-    setup_arena0({RuntimeOption::EvalNum1GPagesForA0,
-                  RuntimeOption::EvalNum2MPagesForA0});
+    setup_arena0({Cfg::Eval::Num1GPagesForA0,
+                  Cfg::Eval::Num2MPagesForA0});
   }
   if (RuntimeOption::EvalFileBackedColdArena) {
     set_cold_file_dir(RuntimeOption::EvalColdArenaFileDir.c_str());

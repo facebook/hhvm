@@ -88,8 +88,6 @@ struct Package {
       #define C(Config, Name, ...) c.Name = Config;
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
-      c.EvalAbortBuildOnCompilerError = RO::EvalAbortBuildOnCompilerError;
-      c.EvalAbortBuildOnVerifyError = RO::EvalAbortBuildOnVerifyError;
       c.IncludeRoots = RO::IncludeRoots;
       c.coeffects = CoeffectsConfig::exportForParse();
       c.CoreDump = coredump;
@@ -103,8 +101,6 @@ struct Package {
       #define C(Config, Name, ...) Config = Name;
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
-      RO::EvalAbortBuildOnCompilerError = EvalAbortBuildOnCompilerError;
-      RO::EvalAbortBuildOnVerifyError = EvalAbortBuildOnVerifyError;
       RO::IncludeRoots = IncludeRoots;
       CoeffectsConfig::importForParse(coeffects);
     }
@@ -116,9 +112,7 @@ struct Package {
       #define C(_, Name, ...) sd(Name);
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
-      sd(EvalAbortBuildOnCompilerError)
-        (EvalAbortBuildOnVerifyError)
-        (IncludeRoots)
+      sd(IncludeRoots)
         (coeffects)
         (CoreDump)
         ;
@@ -133,8 +127,6 @@ struct Package {
     #define C(_, Name, Type) Type Name;
     CONFIGS_FOR_UNITCACHEFLAGS()
     #undef C
-    bool EvalAbortBuildOnCompilerError;
-    bool EvalAbortBuildOnVerifyError;
     decltype(RO::IncludeRoots) IncludeRoots;
     CoeffectsConfig coeffects;
   };

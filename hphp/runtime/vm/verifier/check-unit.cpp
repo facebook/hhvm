@@ -136,7 +136,7 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls) {
 }
 
 bool UnitChecker::checkNativeData(const PreClassEmitter* cls) {
-  if (!RuntimeOption::EvalVerifySystemLibHasNativeImpl) {
+  if (!Cfg::Eval::VerifySystemLibHasNativeImpl) {
     return true;
   }
 

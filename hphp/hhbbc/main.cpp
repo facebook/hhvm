@@ -223,7 +223,6 @@ RepoGlobalData get_global_data() {
 
   Cfg::StoreToGlobalData(gd);
 
-  gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.SourceRootForFileBC = options.SourceRootForFileBC;

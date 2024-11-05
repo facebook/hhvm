@@ -40,6 +40,8 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 
@@ -432,9 +434,9 @@ void RequestInjectionData::onSessionInit() {
   if (open_basedir_val) {
     setAllowedDirectories(*open_basedir_val);
   }
-  m_logFunctionCalls = RuntimeOption::EvalFunctionCallSampleRate > 0 &&
+  m_logFunctionCalls = Cfg::Eval::FunctionCallSampleRate > 0 &&
     folly::Random::rand32(
-      RuntimeOption::EvalFunctionCallSampleRate
+      Cfg::Eval::FunctionCallSampleRate
     ) == 0;
   reset();
 }

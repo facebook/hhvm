@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
@@ -555,9 +556,9 @@ void Clusterizer::splitHotColdClusters() {
   }
 
   // Also, for correctness, if we're padding the TC, put the entry in main.
-  if (RO::EvalReusableTCPadding && entryAvgWgt < hotThreshold) {
+  if (Cfg::Eval::ReusableTCPadding && entryAvgWgt < hotThreshold) {
     FTRACE(3, "TC includes {} padding bytes => put entry in main\n",
-           RO::EvalReusableTCPadding);
+           Cfg::Eval::ReusableTCPadding);
     hotThreshold  = std::min(hotThreshold, entryAvgWgt);
     coldThreshold = std::min(coldThreshold, entryAvgWgt);
   }
@@ -622,7 +623,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   // If we're padding TC entries, we require that entries are in Main.
   assertx(!labels.empty());
   assertx(labels[0] == unit.entry);
-  assertx(!RuntimeOption::EvalReusableTCPadding ||
+  assertx(!Cfg::Eval::ReusableTCPadding ||
           unit.blocks[unit.entry].area_idx == AreaIndex::Main);
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {

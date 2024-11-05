@@ -448,9 +448,9 @@ Optional<SHA1> getHashForFile(const std::string& relPath,
 uint64_t g_units_seen_count = 0;
 
 bool stressUnitCache() {
-  if (RuntimeOption::EvalStressUnitCacheFreq <= 0) return false;
-  if (RuntimeOption::EvalStressUnitCacheFreq == 1) return true;
-  return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
+  if (Cfg::Eval::StressUnitCacheFreq <= 0) return false;
+  if (Cfg::Eval::StressUnitCacheFreq == 1) return true;
+  return ++g_units_seen_count % Cfg::Eval::StressUnitCacheFreq == 0;
 }
 
 /*
@@ -1637,7 +1637,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
 
   OptLog ent;
   if (!RuntimeOption::RepoAuthoritative &&
-      StructuredLog::coinflip(RuntimeOption::EvalLogUnitLoadRate)) {
+      StructuredLog::coinflip(Cfg::Eval::LogUnitLoadRate)) {
     ent.emplace();
   }
 

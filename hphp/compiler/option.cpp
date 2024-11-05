@@ -142,10 +142,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                  RuntimeOption::RepoDebugInfo);
   }
 
-  Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
-               ini, config, "AbortBuildOnVerifyError",
-               RuntimeOption::EvalAbortBuildOnVerifyError);
-
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);
 

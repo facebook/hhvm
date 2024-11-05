@@ -589,21 +589,8 @@ struct RuntimeOption {
   F(string, ColdArenaFileDir,          "/tmp")                          \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
-  F(uint32_t, MaxHighArenaHugePages,   0)                               \
-  F(uint32_t, Num1GPagesForReqHeap,    0)                               \
-  F(uint32_t, Num2MPagesForReqHeap,    0)                               \
-  F(uint32_t, NumReservedSlabs,        0)                               \
-  F(uint32_t, NumReservedMBForSlabs,   0)                               \
-  F(uint32_t, Num1GPagesForA0,         0)                               \
-  F(uint32_t, Num2MPagesForA0,         0)                               \
-  F(bool, BigAllocUseLocalArena,       true)                            \
-  F(bool, JsonParserUseLocalArena,     true)                            \
-  F(bool, XmlParserUseLocalArena,      true)                            \
   F(bool, LowStaticArrays,             (!use_lowptr ||                  \
                                         !ServerExecutionMode()))        \
-  F(bool, RecycleAProf,                true)                            \
-  F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
-  F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
   /* GC Options: See heap-collect.cpp for more details */               \
   F(bool, EagerGC,                     eagerGcDefault())                \
   F(bool, FilterGCPoints,              true)                            \
@@ -625,42 +612,8 @@ struct RuntimeOption {
   F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
   F(bool, VerifyOnly,                  false)                           \
   F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
-  F(bool, AbortBuildOnVerifyError,     true)                            \
-  F(bool, AbortBuildOnCompilerError,   true)                            \
-  F(bool, VerifySystemLibHasNativeImpl, true)                           \
-  F(uint32_t, StaticContentsLogRate,   100)                             \
-  F(uint32_t, LogUnitLoadRate,         0)                               \
-  F(uint32_t, MaxDeferredErrors,       50)                              \
-  F(uint32_t, SerDesSampleRate,            0)                           \
-  F(int, SimpleJsonMaxLength,        2 << 20)                           \
-  F(uint32_t, TraceServerRequestRate,      0)                           \
-  /* Tracing Options */                                                 \
-  /* Base tracing sample rate for all requests */                       \
-  F(uint32_t, TracingSampleRate,              0)                        \
-  /* Tracing sample rate for first N requests */                        \
-  F(uint32_t, TracingPerRequestCount,         0)                        \
-  F(uint32_t, TracingPerRequestSampleRate,    0)                        \
-  /* Tracing sample rate for first N requests per URL */                \
-  F(uint32_t, TracingFirstRequestsCount,      0)                        \
-  F(uint32_t, TracingFirstRequestsSampleRate, 0)                        \
-  /* Empty string disables any Artillery tracing */                     \
-  F(std::string, ArtilleryTracePolicy, "")                              \
-  /* Opaque tag to add to each trace. Useful for aggregation */         \
-  F(std::string, TracingTagId, "")                                      \
-  F(bool, EnableCompactBacktrace, true)                                 \
   F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
-  F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
-  F(bool, LogServerRestartStats, false)                                 \
-  /* Extra bytes added to each area (Hot/Cold/Frozen) of a translation. \
-   * If we don't end up using a reusable TC, we'll drop the padding. */ \
-  F(uint32_t, ReusableTCPadding, 128)                                   \
-  F(int64_t,  StressUnitCacheFreq, 0)                                   \
-  /* Perf warning sampling rates. The SelectHotCFG warning is noisy. */ \
-  F(int64_t, PerfWarningSampleRate, 1)                                  \
-  F(int64_t, SelectHotCFGSampleRate, 100)                               \
-  F(int64_t, FunctionCallSampleRate, 0)                                 \
-  F(double, InitialLoadFactor, 1.0)                                     \
   /*                                                                    \
    * Map from coeffect name to enforcement level                        \
    * e.g. {'pure' => 2, 'rx' => 1}                                      \

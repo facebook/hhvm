@@ -35,6 +35,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
@@ -76,7 +77,7 @@ void Transport::onRequestStart(const timespec &queueTime) {
   HardwareCounter::Reset();
   m_instructions = HardwareCounter::GetInstructionCount();
 
-  auto const rate = RuntimeOption::EvalTraceServerRequestRate;
+  auto const rate = Cfg::Eval::TraceServerRequestRate;
   if (rate && folly::Random::rand32(rate) == 0) forceInitRequestTrace();
 }
 

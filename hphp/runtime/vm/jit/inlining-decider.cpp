@@ -191,7 +191,7 @@ bool isInlinableCPPBuiltin(const Func* f) {
 
   // The callee needs to be callable with FCallBuiltin, because NativeImpl
   // requires a frame.
-  if (!RuntimeOption::EvalEnableCallBuiltin ||
+  if (!Cfg::Eval::EnableCallBuiltin ||
       (f->attrs() & AttrNoFCallBuiltin) ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
       !f->nativeFuncPtr()) {

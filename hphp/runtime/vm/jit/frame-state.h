@@ -274,11 +274,6 @@ struct FrameStateMgr final {
   FrameStateMgr& operator=(FrameStateMgr&&) = default;
 
   /*
-   * Called when we are manually creating diamonds in the CFG.
-   */
-  void clearForUnprocessedPred();
-
-  /*
    * Update state by computing the effects of an instruction.
    */
   void update(const IRInstruction*);
@@ -542,6 +537,11 @@ private:
    */
   void clearCtx();
   void clearLocals();
+
+  /*
+   * Called when starting a block with unprocessed predecessors.
+   */
+  void clearForUnprocessedPred();
 
   /*
    * MTempBase update helpers.

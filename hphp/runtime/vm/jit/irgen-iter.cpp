@@ -104,16 +104,6 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base) {
   return true;
 }
 
-// For profiling tracelets, we deliberately widen the types of locals used
-// as a local iterator base to make it easier to merge tracelets later.
-//
-// This pessimization only affects region formation. We still track types
-// precisely when we optimize the IRUnit.
-void widenLocalIterBase(IRGS& env, int baseLocalId) {
-  if (env.context.kind != TransKind::Profile) return;
-  env.irb->fs().clearForUnprocessedPred();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }  // namespace
@@ -265,7 +255,6 @@ void emitIterInit(IRGS& env, IterArgs ita,
 
   auto const op = base->isA(TArrLike) ? IterInitArr : IterInitObj;
   auto const result = gen(env, op, IterData(ita), base, fp(env));
-  widenLocalIterBase(env, baseLocalId);
   implIterInitJmp(env, doneOffset, result, ita.iterId);
 }
 
@@ -279,7 +268,6 @@ void emitIterNext(IRGS& env, IterArgs ita,
 
   auto const op = base->isA(TArrLike) ? IterNextArr : IterNextObj;
   auto const result = gen(env, op, IterData(ita), base, fp(env));
-  widenLocalIterBase(env, baseLocalId);
   implIterNextJmp(env, bodyOffset, result, ita.iterId);
 }
 

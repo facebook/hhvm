@@ -65,7 +65,6 @@ def load(fp, mutable: bool = True, value_encoding=None, value_errors=None):
     if read_len < len(header):
         return None
 
-    # pyre-fixme[16]: Module `pywatchman` has no attribute `bser`.
     total_len = bser.pdu_len(buf)
     if total_len > len(buf):
         ctypes.resize(buf, total_len)
@@ -75,7 +74,6 @@ def load(fp, mutable: bool = True, value_encoding=None, value_errors=None):
     if read_len < len(body):
         raise RuntimeError("bser data ended early")
 
-    # pyre-fixme[16]: Module `pywatchman` has no attribute `bser`.
     return bser.loads(
         (ctypes.c_char * total_len).from_buffer(buf, 0),
         mutable,

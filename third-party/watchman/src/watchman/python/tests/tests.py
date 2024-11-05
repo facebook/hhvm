@@ -28,10 +28,13 @@ from pywatchman import (
 )
 
 
+# pyre-fixme[16]: Module `pywatchman` has no attribute `bser`.
 if os.path.basename(bser.__file__) == "pybser.py":
     raise Exception(
         "bser module resolved to pybser! Something is broken in your build. __file__={!r}, sys.path={!r}".format(
-            bser.__file__, sys.path
+            # pyre-fixme[16]: Module `pywatchman` has no attribute `bser`.
+            bser.__file__,
+            sys.path,
         )
     )
 
@@ -433,6 +436,7 @@ class TestBSERDump(unittest.TestCase):
             try:
                 document = b"\x00\x01\x05" + struct.pack("@i", len(ex)) + ex
                 print("encoded", document)
+                # pyre-fixme[16]: `TestBSERDump` has no attribute `bser_mod`.
                 self.bser_mod.loads(document)
             except Exception:
                 # Exceptions are okay - abort is not.

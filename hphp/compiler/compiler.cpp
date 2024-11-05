@@ -908,7 +908,7 @@ std::unique_ptr<UnitIndex> computeIndex(
     coro::blockingWait(coro::collectAll(
       indexPackage.index(indexUnit),
       coro::co_invoke([&]() -> coro::Task<bool> {
-        if (RO::EvalEnableDecl) {
+        if (Cfg::Eval::EnableDecl) {
           co_return co_await
             indexBuiltinSymbolDecls(indexUnit, executor, client);
         }
@@ -1055,7 +1055,7 @@ bool process(CompilerOptions &po) {
   sample.setStr("push_phases", po.push_phases);
   sample.setStr("matched_overrides", po.matched_overrides);
   sample.setStr("use_hphpc", "true");
-  sample.setStr("use_hhbbc", RO::EvalUseHHBBC ? "true" : "false");
+  sample.setStr("use_hhbbc", Cfg::Eval::UseHHBBC ? "true" : "false");
 
   // Track the unit-emitters created for system during
   // hphp_process_init().
@@ -1098,7 +1098,7 @@ bool process(CompilerOptions &po) {
   // HHBBC specific state (if we're going to run it).
   Optional<WPI> hhbbcInputs;
   Optional<CoroAsyncValue<Ref<HHBBC::Config>>> hhbbcConfig;
-  if (RO::EvalUseHHBBC) {
+  if (Cfg::Eval::UseHHBBC) {
     hhbbcInputs.emplace();
     // We want to do this as early as possible
     hhbbcConfig.emplace(
@@ -1161,7 +1161,7 @@ bool process(CompilerOptions &po) {
 
     if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
       auto old_repo_auth = RuntimeOption::RepoAuthoritative;
-      RuntimeOption::RepoAuthoritative = RuntimeOption::EvalUseHHBBC;
+      RuntimeOption::RepoAuthoritative = Cfg::Eval::UseHHBBC;
       SCOPE_EXIT { RuntimeOption::RepoAuthoritative = old_repo_auth; };
       genText(*ue, po.outputDir);
     }
@@ -1170,7 +1170,7 @@ bool process(CompilerOptions &po) {
 
     ++numUnits;
 
-    if (!RO::EvalUseHHBBC) {
+    if (!Cfg::Eval::UseHHBBC) {
       // HHBBC assigns m_sn and the SHA1, but we have to do it ourself
       // if we're not running it.
       auto const sn = nextSn++;
@@ -1192,7 +1192,7 @@ bool process(CompilerOptions &po) {
 
   // Process unit-emitters produced locally (usually systemlib stuff).
   auto const emitLocalUnit = [&] (Package::UEVec ues) -> coro::Task<void> {
-    if (RO::EvalUseHHBBC) {
+    if (Cfg::Eval::UseHHBBC) {
       // If we're using HHBBC, turn them into WholeProgramInput
       // key/values (after checking uniqueness), upload the values,
       // and store them in the WholeProgramInput.
@@ -1230,7 +1230,7 @@ bool process(CompilerOptions &po) {
                                     std::vector<Package::FileData> files,
                                     Client::ExecMetadata metadata)
     -> coro::Task<Package::ParseMetaVec> {
-    if (RO::EvalUseHHBBC) {
+    if (Cfg::Eval::UseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
       // key/values.
       auto hhbbcConfigRef = co_await hhbbcConfig->getCopy();
@@ -1331,7 +1331,7 @@ bool process(CompilerOptions &po) {
       return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
     };
 
-    if (RO::EvalUseHHBBC) {
+    if (Cfg::Eval::UseHHBBC) {
       // Retrieve HHBBC WPI (Key, Ref<Value>) pairs that were already parsed.
       // No Async I/O is necessary in this case.
       for (size_t i = 0, n = rpaths.size(); i < n; ++i) {
@@ -1459,7 +1459,7 @@ bool process(CompilerOptions &po) {
     Timer emitTimer(Timer::WallTime, "emit");
     addInputsToPackage(*package, po);
 
-    if (!RO::EvalUseHHBBC && Option::GenerateBinaryHHBC) {
+    if (!Cfg::Eval::UseHHBBC && Option::GenerateBinaryHHBC) {
       // Initialize autoload and repo for emitUnit() to populate
       autoload.emplace();
       repo.emplace(outputFile);
@@ -1522,7 +1522,7 @@ bool process(CompilerOptions &po) {
 
   auto const logSample = [&] {
     // Only log big builds.
-    if (numUnits >= RO::EvalHHBBCMinUnitsToLog) {
+    if (numUnits >= Cfg::Eval::HHBBCMinUnitsToLog) {
       sample.force_init = true;
       StructuredLog::log("hhvm_whole_program", sample);
     }
@@ -1537,7 +1537,7 @@ bool process(CompilerOptions &po) {
     repo->finish(getGlobalData(), *autoload, packageInfo);
     return true;
   };
-  if (!RO::EvalUseHHBBC) {
+  if (!Cfg::Eval::UseHHBBC) {
     logSample();
     dispose(std::move(executor), std::move(client));
     return finish();

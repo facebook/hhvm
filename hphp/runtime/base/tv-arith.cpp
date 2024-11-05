@@ -31,6 +31,8 @@
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -246,7 +248,7 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
 }
 
 void raiseIncDecInvalidType(tv_lval cell) {
-  switch (RuntimeOption::EvalWarnOnIncDecInvalidType) {
+  switch (Cfg::Eval::WarnOnIncDecInvalidType) {
     case 0:
       break;
     case 1:

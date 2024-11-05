@@ -26,11 +26,13 @@
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/conv-10.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 
 #include <folly/tracing/StaticTracepoint.h>
 #include <folly/Random.h>
@@ -320,7 +322,7 @@ void throwMissingArgument(const Func* func, int got) {
 void raiseTooManyArguments(const Func* func, int got) {
   assertx(!func->hasVariadicCaptureParam());
 
-  if (!RuntimeOption::EvalWarnOnTooManyArguments && !func->isCPPBuiltin()) {
+  if (!Cfg::Eval::WarnOnTooManyArguments && !func->isCPPBuiltin()) {
     return;
   }
 
@@ -329,7 +331,7 @@ void raiseTooManyArguments(const Func* func, int got) {
   auto const amount = func->numRequiredParams() < total ? "at most" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
 
-  if (RuntimeOption::EvalWarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
+  if (Cfg::Eval::WarnOnTooManyArguments > 1 || func->isCPPBuiltin()) {
     SystemLib::throwRuntimeExceptionObject(Variant(errMsg));
   } else {
     raise_warning(errMsg);

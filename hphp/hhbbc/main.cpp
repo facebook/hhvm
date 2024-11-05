@@ -52,6 +52,7 @@
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/php7.h"
 #include "hphp/util/logger.h"
@@ -536,7 +537,7 @@ void compile_repo() {
   repo.finish(get_global_data(), autoload, packageInfo);
 
   // Only log big builds.
-  if (numUnits >= RO::EvalHHBBCMinUnitsToLog) {
+  if (numUnits >= Cfg::Eval::HHBBCMinUnitsToLog) {
     sample.force_init = true;
     StructuredLog::log("hhvm_whole_program", sample);
   }

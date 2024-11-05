@@ -46,7 +46,7 @@ bool isCoercibleToInteger(const TypedValue *cell, int64_t &num, const char* call
     return false;
   }
 
-  switch (RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue) {
+  switch (Cfg::Eval::WarnOnImplicitCoercionOfEnumValue) {
     case 0:
       return true;
     case 1:

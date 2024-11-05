@@ -97,7 +97,6 @@ Unit* lookupSyslibUnit(StringData* path);
   R(EvalAssemblerFoldDefaultValues)             \
   R(RepoDebugInfo)                              \
   R(EvalAssemblerMaxScalarSize)                 \
-  R(EvalEnableDecl)                             \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

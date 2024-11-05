@@ -19,6 +19,8 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/unit-parser.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/stack-trace.h"
 
 namespace HPHP {
@@ -67,19 +69,19 @@ bool log_impl(const char* event, uint32_t rate,
 
 bool tsame_log(const StringData* input, const StringData* arg) {
   FTRACE(1, "tsame collision {} != {}\n", input->slice(), arg->slice());
-  return log_impl("tsame", RO::EvalTsameCollisionSampleRate, input->slice(),
+  return log_impl("tsame", Cfg::Eval::TsameCollisionSampleRate, input->slice(),
                   arg->slice());
 }
 
 int tstrcmp_log(const char* s1, const char* s2) {
   FTRACE(1, "tstrcmp collision {} != {}\n", s1, s2);
-  log_impl("tstrcmp", RO::EvalTsameCollisionSampleRate, s1, s2);
+  log_impl("tstrcmp", Cfg::Eval::TsameCollisionSampleRate, s1, s2);
   return 0;
 }
 
 int tstrcmp_log_slice(folly::StringPiece s1, folly::StringPiece s2) {
   FTRACE(1, "tstrcmp_slice collision {} != {}\n", s1, s2);
-  log_impl("tstrcmp_slice", RO::EvalTsameCollisionSampleRate, s1, s2);
+  log_impl("tstrcmp_slice", Cfg::Eval::TsameCollisionSampleRate, s1, s2);
   return 0;
 }
 }

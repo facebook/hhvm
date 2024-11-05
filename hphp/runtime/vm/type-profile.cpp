@@ -81,8 +81,8 @@ void profileRequestStart() {
   rl_typeProfileLocals->requestKind = getRequestKind();
 
   auto const codeCoverageForceInterp = []{
-    if (RuntimeOption::EvalEnableCodeCoverage > 1) return true;
-    if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+    if (Cfg::Eval::EnableCodeCoverage > 1) return true;
+    if (Cfg::Eval::EnableCodeCoverage == 1) {
       if (RuntimeOption::RepoAuthoritative) return false;
       return isEnableCodeCoverageReqParamTrue();
     }
@@ -91,8 +91,8 @@ void profileRequestStart() {
 
   auto const shouldUsePerFileCoverage = []{
     if (RO::RepoAuthoritative) return false;
-    if (RO::EvalEnablePerFileCoverage > 1) return true;
-    return RO::EvalEnablePerFileCoverage == 1 &&
+    if (Cfg::Eval::EnablePerFileCoverage > 1) return true;
+    return Cfg::Eval::EnablePerFileCoverage == 1 &&
       isEnablePerFileCoverageReqParamTrue();
   }();
 

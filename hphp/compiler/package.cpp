@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit-parser.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/extern-worker.h"
 #include "hphp/util/hash.h"
@@ -385,7 +386,7 @@ Package::parseRun(const std::string& content,
         /* forDebuggerEval */ false,
         repoOptions,
         mode,
-        RO::EvalEnableDecl ? &provider : nullptr
+        Cfg::Eval::EnableDecl ? &provider : nullptr
       );
     } catch (const CompilerAbort& exn) {
       ParseMeta meta;
@@ -1136,7 +1137,7 @@ Package::UnitDecls IndexJob::run(
   auto symbols = hackc::decls_to_symbols(*decls.decls);
   auto summary = summary_of_symbols(symbols);
   s_indexMetas.emplace_back(summary);
-  if (!RO::EvalEnableDecl) {
+  if (!Cfg::Eval::EnableDecl) {
     // If decl-directed bytecode is disabled, parseRun() will not need
     // these decls, so don't bother storing them.
     return Package::UnitDecls{};
@@ -1163,7 +1164,7 @@ coro::Task<bool> Package::index(const IndexCallback& callback) {
 coro::Task<void> Package::indexAll(const IndexCallback& callback) {
   // If EnableDecl==true, all source files should be included in the
   // index, not just ondemand-eligible files.
-  auto const filterFiles = !RO::EvalEnableDecl;
+  auto const filterFiles = !Cfg::Eval::EnableDecl;
   auto const filterDirs = false;
 
   // Compute the groups to index

@@ -490,9 +490,9 @@ enum class UnitChange {
  * Iterate over the dependencies of `u` and check if the hash of any of those
  * dependencies on disk differs from the hash recorded in the unit.
  * See `changeReason` for more details. This functions asserts that either:
- * - `RO::EvalEnableDecl` is false
+ * - `Cfg::Eval::EnableDecl` is false
  * - `u->deps()` is empty.
- * If `RO::EvalEnableDecl` is true and `u->deps()` is non-empty, then we are in
+ * If `Cfg::Eval::EnableDecl` is true and `u->deps()` is non-empty, then we are in
  * an invalid state: tracking declarations despite not having decl driven
  * bytecode enabled.
  *
@@ -504,7 +504,7 @@ bool anyDepsChanged(
   Stream::Wrapper* wrapper
 ) {
   assertx(u);
-  assertx(RO::EvalEnableDecl || u->deps().empty());
+  assertx(Cfg::Eval::EnableDecl || u->deps().empty());
   for (auto& [file, hash] : u->deps()) {
     if (getHashForFile(file, wrapper, options.dir()) != hash) {
       return true;
@@ -1272,7 +1272,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
     g_context->onLoadWithOptions(requestedPath->data(), options);
   }
 
-  if (RuntimeOption::EvalEnableDecl || Cfg::Eval::AutoloadInitEarly) {
+  if (Cfg::Eval::EnableDecl || Cfg::Eval::AutoloadInitEarly) {
     // Initialize AutoloadHandler before we parse the file so HhvmDeclProvider
     // can respond to queries from HackC.
     AutoloadHandler::s_instance.getCheck();

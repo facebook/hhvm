@@ -52,7 +52,7 @@ SymbolMap s_modules;
 
 void registerBuiltinSymbols(const std::string& serialized_decls) {
   // We should *never* call this function unless decl driven bytecode is enabled
-  assertx(RuntimeOption::EvalEnableDecl);
+  assertx(Cfg::Eval::EnableDecl);
 
   auto decls = hackc::binary_to_decls_and_blob(serialized_decls);
 
@@ -85,7 +85,7 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   };
   // We should only ever call this if `EnableDecl` is set, and asserting on
   // `symbol` here is a smoke check
-  assertx(RuntimeOption::EvalEnableDecl && symbol);
+  assertx(Cfg::Eval::EnableDecl && symbol);
   switch (kind) {
     case AutoloadMap::KindOf::Type:
     case AutoloadMap::KindOf::TypeAlias:
@@ -102,7 +102,7 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
 }
 
 hphp_fast_set<const hackc::DeclsAndBlob*> getAllBuiltinDecls() {
-  assertx(RuntimeOption::EvalEnableDecl);
+  assertx(Cfg::Eval::EnableDecl);
   hphp_fast_set<const hackc::DeclsAndBlob*> res;
   for (const auto& it: s_types) {
     res.emplace(it.second.get());

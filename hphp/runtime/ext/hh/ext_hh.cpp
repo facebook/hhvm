@@ -1023,16 +1023,16 @@ void check_coverage_flags() {
   if (RO::RepoAuthoritative) {
     throw_invalid_operation_exception(s_no_repo_mode.get());
   }
-  if (RO::EvalEnableCodeCoverage == 2) {
+  if (Cfg::Eval::EnableCodeCoverage == 2) {
     throw_invalid_operation_exception(s_no_code_cov_2.get());
   }
   if (isEnableCodeCoverageReqParamTrue()) {
     throw_invalid_operation_exception(s_plain_cov_req_param_set.get());
   }
-  if (RO::EvalEnablePerFileCoverage == 0) {
+  if (Cfg::Eval::EnablePerFileCoverage == 0) {
     throw_invalid_operation_exception(s_no_flag_set.get());
   }
-  if (RO::EvalEnablePerFileCoverage == 1) {
+  if (Cfg::Eval::EnablePerFileCoverage == 1) {
     if (!isEnablePerFileCoverageReqParamTrue()) {
       throw_invalid_operation_exception(s_no_req_param_set.get());
     }

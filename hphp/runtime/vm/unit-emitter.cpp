@@ -49,6 +49,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/blob-encoder.h"
 #include "hphp/util/configs/debugger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/sha1.h"
@@ -503,10 +504,10 @@ Id UnitEmitter::addModule(const Module& m) {
 
 void UnitEmitter::logDeclInfo() const {
   if ((m_errorSyms.empty() && m_missingSyms.empty()) ||
-      !StructuredLog::coinflip(RO::EvalLogDeclErrors)) return;
+      !StructuredLog::coinflip(Cfg::Eval::LogDeclErrors)) return;
 
   StructuredLogEntry ent;
-  ent.setInt("sample_rate", RO::EvalLogDeclErrors);
+  ent.setInt("sample_rate", Cfg::Eval::LogDeclErrors);
   ent.setInt("num_deps", m_deps.size());
 
   std::vector<std::string> errors;

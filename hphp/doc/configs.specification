@@ -304,6 +304,96 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.WarnOnSkipFrameLookup = true, UNKNOWN
 
+- uint32_t Eval.EnableCodeCoverage = 0, UNKNOWN
+
+  0 - Code coverage cannot be enabled through request param
+  1 - Code coverage can be enabled through request param
+  2 - Code coverage enabled
+
+- uint32_t Eval.EnablePerFileCoverage = 0, UNKNOWN
+
+  0 - Per-file coverage cannot be enabled through request param
+  1 - Per-file coverage can be enabled through request param
+  2 - Per-file coverage enabled
+
+- bool Eval.EnableFuncCoverage = false, UNKNOWN
+
+- uint64_t Eval.FactsWorkers, UNKNOWN
+
+  The number of worker threads to spawn for facts extraction.
+
+- bool Eval.FactsExcludeModuleMembership = false, UNKNOWN
+
+  Whether to force the old Facts SQLite DB format.
+
+- bool Eval.HackCompilerInheritConfig = true, UNKNOWN
+
+  Whether the HackC compiler should inherit the compiler config of the
+  HHVM process that launches it.
+
+- bool Eval.EnableDecl = false, UNKNOWN, unitcacheflag
+
+  enable decl-directed bytecode compilation
+
+- uint32_t Eval.LogDeclDeps = 0, UNKNOWN
+
+- uint32_t Eval.LogDeclErrors = 0, UNKNOWN
+
+- bool Eval.LogAllDeclTearing = false, UNKNOWN
+
+- std::string Eval.EmbeddedDataExtractPath = "/var/run/hhvm_%{type}_%{buildid}", UNKNOWN, postprocess
+
+  When using embedded data, extract it to the ExtractPath or the
+  ExtractFallback.
+
+- std::string Eval.EmbeddedDataFallbackPath = "/tmp/hhvm_%{type}_%{buildid}_XXXXXX", UNKNOWN, postprocess
+
+  See Eval.EmbeddedDataExtractPath
+
+- bool Eval.EmbeddedDataTrustExtract = true, UNKNOWN
+
+  Whether to trust existing versions of extracted embedded data.
+
+- bool Eval.LogThreadCreateBacktraces = false, UNKNOWN
+
+- bool Eval.FailJitPrologs = false, UNKNOWN
+
+- bool Eval.UseHHBBC, UNKNOWN, compileroption(UseHHBBC)
+
+- uint32_t Eval.HHBBCMinUnitsToLog = 1000, UNKNOWN
+
+  Threshold number of units to log to hhvm_whole_program table.
+  systemlib has around 200 units, so use a larger default to avoid
+  logging for unit tests.
+
+- bool Eval.CachePerRepoOptionsPath = true, UNKNOWN
+
+- bool Eval.LogHackcMemStats = false, UNKNOWN
+
+- uint32_t Eval.TsameCollisionSampleRate = 1, UNKNOWN
+
+- uint32_t Eval.WarnOnTooManyArguments = 0, emil
+
+  0 -> no warning, 1 -> warning, 2 -> exception
+
+- uint32_t Eval.GetClassBadArgument = 0, emil
+
+  0 -> no warning, 1 -> warning, 2 -> exception
+
+- uint32_t Eval.WarnOnIncDecInvalidType = 0, UNKNOWN
+
+  0 - No restrictions on types that can be incremented or decremented
+  1 - Warn when incrementing or decrementing non numeric types
+  2 - Throw when incrementing or decrementing non numeric types
+
+- uint32_t Eval.WarnOnImplicitCoercionOfEnumValue = 0, UNKNOWN
+
+  This flag exists to control behaviour when implicit coercion is
+  taking place on an enum value.
+  0 - No warning
+  1 - Warning
+  2 - Do not do implicit coercion
+
 - uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
 
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN

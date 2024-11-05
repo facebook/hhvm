@@ -153,9 +153,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ForceEnableSymbolRefs, ini, config,
                "ForceEnableSymbolRefs", false);
 
-  Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
-               RuntimeOption::EvalUseHHBBC);
-
   Config::Bind(ParserGroupSize, ini, config,
                "ParserGroupSize", kDefaultParserGroupSize);
   Config::Bind(ParserDirGroupSizeLimit, ini, config,

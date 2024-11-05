@@ -1991,14 +1991,14 @@ static int execute_program_impl(int argc, char** argv) {
   try {
     type_scan::init(
       addTypeToEmbeddedPath(
-        RuntimeOption::EvalEmbeddedDataExtractPath,
+        Cfg::Eval::EmbeddedDataExtractPath,
         "type_scanners"
       ),
       addTypeToEmbeddedPath(
-        RuntimeOption::EvalEmbeddedDataFallbackPath,
+        Cfg::Eval::EmbeddedDataFallbackPath,
         "type_scanners"
       ),
-      RuntimeOption::EvalEmbeddedDataTrustExtract
+      Cfg::Eval::EmbeddedDataTrustExtract
     );
   } catch (const type_scan::InitException& exn) {
     Logger::Error("Unable to initialize GC type-scanners: %s", exn.what());
@@ -2009,14 +2009,14 @@ static int execute_program_impl(int argc, char** argv) {
   // It's okay if this fails.
   init_member_reflection(
     addTypeToEmbeddedPath(
-      RuntimeOption::EvalEmbeddedDataExtractPath,
+      Cfg::Eval::EmbeddedDataExtractPath,
       "member_reflection"
     ),
     addTypeToEmbeddedPath(
-      RuntimeOption::EvalEmbeddedDataFallbackPath,
+      Cfg::Eval::EmbeddedDataFallbackPath,
       "member_reflection"
     ),
-    RuntimeOption::EvalEmbeddedDataTrustExtract
+    Cfg::Eval::EmbeddedDataTrustExtract
   );
 
   if (!ShmCounters::initialize(true, Logger::Error)) {
@@ -2566,7 +2566,7 @@ void hphp_process_init(bool skipExtensions) {
 
   jit::mcgen::processInit();
   jit::processInitProfData();
-  if (RuntimeOption::EvalEnableDecl) {
+  if (Cfg::Eval::EnableDecl) {
     if (!skipExtensions) {
       ExtensionRegistry::moduleDeclInit();
     }

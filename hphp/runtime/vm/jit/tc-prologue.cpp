@@ -83,7 +83,7 @@ uint32_t PrologueTranslator::paramIndexHelper(const Func* f, uint32_t passed) {
 }
 
 Optional<TranslationResult> PrologueTranslator::getCached() {
-  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) {
+  if (UNLIKELY(Cfg::Eval::FailJitPrologs)) {
     return TranslationResult::failTransiently();
   }
 

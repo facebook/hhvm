@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP::jit::irgen {
@@ -340,7 +341,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
-  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
   if (callee->isNoInjection() || callee->isMethCaller()) return;
 
   ifThen(

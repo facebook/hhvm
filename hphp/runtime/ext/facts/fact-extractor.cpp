@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"
@@ -122,7 +123,7 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
     const std::vector<PathAndOptionalHash>& pathsAndHashes) {
   folly::CPUThreadPoolExecutor exec{
       std::min(
-          RuntimeOption::EvalFactsWorkers,
+          Cfg::Eval::FactsWorkers,
           static_cast<uint64_t>(pathsAndHashes.size())),
       make_thread_factory("FactExtractor")};
 

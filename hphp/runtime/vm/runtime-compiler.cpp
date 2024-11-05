@@ -296,7 +296,7 @@ std::unique_ptr<UnitEmitter> compile_systemlib_string_to_ue(
     CodeSource::Systemlib,
     fname,
     extension,
-    RuntimeOption::EvalEnableDecl ? &empty_map : nullptr,
+    Cfg::Eval::EnableDecl ? &empty_map : nullptr,
     nullptr,
     true,
     false

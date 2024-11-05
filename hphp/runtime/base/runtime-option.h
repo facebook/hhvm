@@ -433,69 +433,6 @@ struct RuntimeOption {
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
-  /*                                                                    \
-   *  0 - Code coverage cannot be enabled through request param         \
-   *  1 - Code coverage can be enabled through request param            \
-   *  2 - Code coverage enabled                                         \
-   */                                                                   \
-  F(uint32_t, EnableCodeCoverage,      0)                               \
-  /*                                                                    \
-   *  0 - Per-file coverage cannot be enabled through request param     \
-   *  1 - Per-file coverage can be enabled through request param        \
-   *  2 - Per-file coverage enabled                                     \
-   */                                                                   \
-  F(uint32_t, EnablePerFileCoverage, 0)                                 \
-  F(bool, EnableFuncCoverage,          false)                           \
-  /* The number of worker threads to spawn for facts extraction. */     \
-  F(uint64_t, FactsWorkers,            Process::GetCPUCount())          \
-  /* Whether to force the old Facts SQLite DB format. */                \
-  F(bool, FactsExcludeModuleMembership,            false)               \
-  /* Whether the HackC compiler should inherit the compiler config of the
-     HHVM process that launches it. */                                  \
-  F(bool, HackCompilerInheritConfig,   true)                            \
-  /* enable decl-directed bytecode compilation */                       \
-  F(bool, EnableDecl, false)                                            \
-  F(uint32_t, LogDeclDeps, 0)                                           \
-  F(uint32_t, LogDeclErrors, 0)                                         \
-  F(bool, LogAllDeclTearing, false)                                     \
-  /* When using embedded data, extract it to the ExtractPath or the
-   * ExtractFallback. */                                                \
-  F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \
-  F(string, EmbeddedDataFallbackPath,  "/tmp/hhvm_%{type}_%{buildid}_XXXXXX") \
-  /* Whether to trust existing versions of extracted embedded data. */  \
-  F(bool, EmbeddedDataTrustExtract,    true)                            \
-  F(bool, LogThreadCreateBacktraces,   false)                           \
-  F(bool, FailJitPrologs,              false)                           \
-  F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
-  /* Threshold number of units to log to hhvm_whole_program table.
-     systemlib has around 200 units, so use a larger default to avoid
-     logging for unit tests. */                                         \
-  F(uint32_t, HHBBCMinUnitsToLog,      1000)                            \
-  F(bool, CachePerRepoOptionsPath,     true)                            \
-  F(bool, LogHackcMemStats,            false)                           \
-  F(uint32_t, TsameCollisionSampleRate, 1)                              \
-  /* WarnOnTooManyArguments:
-   * 0 -> no warning, 1 -> warning, 2 -> exception
-   */                                                                   \
-  F(uint32_t, WarnOnTooManyArguments,  0)                               \
-  /* GetClassBadArgument:
-   * 0 -> no warning, 1 -> warning, 2 -> exception
-   */                                                                   \
-  F(uint32_t, GetClassBadArgument,     0)                               \
-  /* WarnOnIncDecInvalidType:
-   * 0 - No restrictions on types that can be incremented or decremented
-   * 1 - Warn when incrementing or decrementing non numeric types
-   * 2 - Throw when incrementing or decrementing non numeric types
-   */                                                                   \
-  F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
-  /* WarnOnImplicitCoercionOfEnumValue
-   * This flag exists to control behaviour when implicit coercion is
-   * taking place on an enum value.
-   * 0 - No warning
-   * 1 - Warning
-   * 2 - Do not do implicit coercion
-   */                                                                   \
-  F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
   F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, MemInfoCheckCgroup2,         true)                            \

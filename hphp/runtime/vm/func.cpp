@@ -1207,7 +1207,7 @@ private:
 
 EmbeddedCoverageLinkMap s_covLinks;
 static InitFiniNode s_covLinksReinit([]{
-  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
   s_covLinks.emplace(RO::EvalFuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
@@ -1225,7 +1225,7 @@ rds::Handle Func::GetCoverageIndex() {
 }
 
 rds::Handle Func::getCoverageHandle() const {
-  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!RO::RepoAuthoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!isNoInjection() && !isMethCaller());
 
   CoverageLinkMap::const_accessor cnsAcc;
@@ -1253,7 +1253,7 @@ void Func::EnableCoverage() {
       "Cannot enable function call coverage in repo authoritative mode"
     );
   }
-  if (!RO::EvalEnableFuncCoverage) {
+  if (!Cfg::Eval::EnableFuncCoverage) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Cannot enable function call coverage (you must set "
       "Eval.EnableFuncCoverage = true)"
@@ -1311,7 +1311,7 @@ Array Func::GetCoverage() {
 }
 
 void Func::recordCall() const {
-  if (RO::RepoAuthoritative || !RO::EvalEnableFuncCoverage) return;
+  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
   if (tl_called_functions.isNull()) return;
   if (isNoInjection() || isMethCaller()) return;
 
@@ -1323,7 +1323,7 @@ void Func::recordCall() const {
 }
 
 void Func::recordCallNoCheck() const {
-  assertx(!RO::RepoAuthoritative && RO::EvalEnableFuncCoverage);
+  assertx(!RO::RepoAuthoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!tl_called_functions.isNull());
   assertx(tl_called_functions->isDict());
   assertx(!isNoInjection() && !isMethCaller());

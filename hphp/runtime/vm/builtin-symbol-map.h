@@ -31,7 +31,7 @@ namespace HPHP::Native {
 
 /**
  * Record all declarations in file `name` with source code `contents`.
- * @precondition: RuntimeOption::EvalEnableDecl is true
+ * @precondition: Cfg::Eval::EnableDecl is true
  * @precondition: `name` and `contents` represent PHP that is shipped with HHVM
  */
 void registerBuiltinSymbols(const std::string& serialized_decls);

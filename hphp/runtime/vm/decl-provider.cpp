@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/decl-provider.h"
+
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/sha1.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -33,7 +35,7 @@ std::unique_ptr<HhvmDeclProvider>
 HhvmDeclProvider::create(AutoloadMap* map,
                          const RepoOptionsFlags& options,
                          const std::filesystem::path& repoRoot) {
-  if (!RuntimeOption::EvalEnableDecl) {
+  if (!Cfg::Eval::EnableDecl) {
     return {nullptr};
   }
   if (!map) {

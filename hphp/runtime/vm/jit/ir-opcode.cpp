@@ -247,7 +247,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsTypeStructShallow:
     return Cfg::Eval::IsExprEnableUnresolvedWarning ||
            Cfg::Eval::IsVecNotices ||
-           RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
+           Cfg::Eval::WarnOnImplicitCoercionOfEnumValue;
 
   case StaticAnalysisError:
     return !Cfg::Eval::CrashOnStaticAnalysisError;

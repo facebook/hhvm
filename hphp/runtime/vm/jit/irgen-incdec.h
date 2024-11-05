@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
+#include "hphp/util/configs/eval.h"
+
 namespace HPHP::jit::irgen {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +32,7 @@ namespace HPHP::jit::irgen {
 inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
   // Old behavior handles non int/double types.  New behavior warns/fatals for
   // non int/double types.
-  if (RuntimeOption::EvalWarnOnIncDecInvalidType == 0) {
+  if (Cfg::Eval::WarnOnIncDecInvalidType == 0) {
     if (src->isA(TNull)) {
       if (isInc(op)) PUNT(Inc-Null);
       return src;

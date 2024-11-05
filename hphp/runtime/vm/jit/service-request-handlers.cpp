@@ -144,7 +144,7 @@ TranslationResult getTranslation(SrcKey sk) {
   }
 
   if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
-    assertx(RO::EvalEnablePerFileCoverage);
+    assertx(Cfg::Eval::EnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
     return TranslationResult::failTransiently();
   }

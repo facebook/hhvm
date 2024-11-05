@@ -137,7 +137,7 @@ auto const next_ip_saved = r15;  // used when next_ip needs to be moved to a
 Offset compile_cti(Func* func, PC unitpc) {
   auto const needsCoverageCheck =
     !RuntimeOption::RepoAuthoritative &&
-    RuntimeOption::EvalEnableCodeCoverage > 0;
+    Cfg::Eval::EnableCodeCoverage > 0;
   std::lock_guard<std::mutex> lock(g_mutex);
   auto cti_entry = func->ctiEntry();
   if (cti_entry) return cti_entry; // we lost the compile race

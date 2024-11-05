@@ -1511,7 +1511,7 @@ void ExecutionContext::requestExit() {
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
   if (!RO::RepoAuthoritative) m_requestStartForTearing.reset();
-  if (RO::EvalLogDeclDeps) m_loadedRdepMap.clear();
+  if (Cfg::Eval::LogDeclDeps) m_loadedRdepMap.clear();
 }
 
 /**

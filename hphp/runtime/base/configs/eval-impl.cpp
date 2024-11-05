@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/configs/eval-loader.h"
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/process-cpu.h"
 
@@ -29,12 +30,28 @@ uint64_t EvalLoader::VMStackElmsDefault() {
 #endif
 }
 
+uint64_t EvalLoader::FactsWorkersDefault() {
+  return Process::GetCPUCount();
+}
+
+bool EvalLoader::UseHHBBCDefault() {
+  return !getenv("HHVM_DISABLE_HHBBC");
+}
+
 uint32_t EvalLoader::UnixServerWorkersDefault() {
   return Process::GetCPUCount();
 }
 
 bool EvalLoader::CrashOnStaticAnalysisErrorDefault() {
   return debug;
+}
+
+void EvalLoader::EmbeddedDataExtractPathPostProcess(std::string& path) {
+  replacePlaceholders(path);
+}
+
+void EvalLoader::EmbeddedDataFallbackPathPostProcess(std::string& path) {
+  replacePlaceholders(path);
 }
 
 }

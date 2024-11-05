@@ -323,7 +323,7 @@ public:
   /*
    * Enable or disable the coverage map for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   * Pre: !RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage
    */
   void enableCoverage();
   void disableCoverage();
@@ -350,7 +350,7 @@ public:
    * Return an RDS handle that when initialized indicates that coverage is
    * enabled for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   * Pre: !RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage
    */
   rds::Handle coverageDataHandle() const;
 

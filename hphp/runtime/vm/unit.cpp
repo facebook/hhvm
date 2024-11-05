@@ -209,7 +209,7 @@ bool Unit::isCoverageEnabled() const {
 }
 void Unit::enableCoverage() {
   if (!m_coverage.bound()) {
-    assertx(!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage);
+    assertx(!RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage);
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
@@ -400,7 +400,7 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+  if (!RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage) {
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
@@ -441,7 +441,7 @@ void Unit::merge() {
     }
   }
 
-  if (RO::EvalLogDeclDeps) {
+  if (Cfg::Eval::LogDeclDeps) {
     logDeclInfo();
 
     auto const thisPath = filepath();
@@ -520,8 +520,8 @@ void Unit::logTearing(int64_t nsecs) {
 }
 
 void Unit::logDeclInfo() const {
-  if (!RO::EvalLogAllDeclTearing &&
-      !StructuredLog::coinflip(RO::EvalLogDeclDeps)) return;
+  if (!Cfg::Eval::LogAllDeclTearing &&
+      !StructuredLog::coinflip(Cfg::Eval::LogDeclDeps)) return;
 
   auto const thisPath = filepath();
   auto const& options = RepoOptions::forFile(thisPath->data());
@@ -578,12 +578,12 @@ void Unit::logDeclInfo() const {
   logVec("torn_rdeps", tears);
   logVec("loaded_rdeps", non_tears);
 
-  if ((RO::EvalLogAllDeclTearing && (!rev_tears.empty() || !tears.empty()))) {
+  if ((Cfg::Eval::LogAllDeclTearing && (!rev_tears.empty() || !tears.empty()))) {
     ent.setInt("sample_rate", 1);
     StructuredLog::log("hhvm_decl_logging", ent);
-  } else if(!RO::EvalLogAllDeclTearing ||
-            StructuredLog::coinflip(RO::EvalLogDeclDeps)) {
-    ent.setInt("sample_rate", RO::EvalLogDeclDeps);
+  } else if(!Cfg::Eval::LogAllDeclTearing ||
+            StructuredLog::coinflip(Cfg::Eval::LogDeclDeps)) {
+    ent.setInt("sample_rate", Cfg::Eval::LogDeclDeps);
     StructuredLog::log("hhvm_decl_logging", ent);
   }
 }

@@ -414,7 +414,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
   //          configs that may be added. Since we expect to see a single config
   //          per repository we expect that this will be a reasonably safe,
   //          optimization.
-  if (RuntimeOption::EvalCachePerRepoOptionsPath) {
+  if (Cfg::Eval::CachePerRepoOptionsPath) {
     if (!s_lastSeenRepoConfig->empty() &&
         isParentOf(*s_lastSeenRepoConfig, path)) {
       if (auto const r = test(*s_lastSeenRepoConfig)) return *r;
@@ -1675,9 +1675,6 @@ void RuntimeOption::Load(
 #endif
     s_enable_static_arena =
       Config::GetBool(ini, config, "Eval.UseTLStaticArena", true);
-
-    replacePlaceholders(EvalEmbeddedDataExtractPath);
-    replacePlaceholders(EvalEmbeddedDataFallbackPath);
 
     if (!jit::mcgen::retranslateAllEnabled()) {
       Cfg::Jit::WorkerThreads = 0;

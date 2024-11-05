@@ -1213,12 +1213,12 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
   }
-  if (RuntimeOption::EvalEnableCodeCoverage == 0) {
+  if (Cfg::Eval::EnableCodeCoverage == 0) {
     SystemLib::throwRuntimeExceptionObject(
       "Calling fb_enable_code_coverage without enabling the setting "
       "Eval.EnableCodeCoverage");
   }
-  if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+  if (Cfg::Eval::EnableCodeCoverage == 1) {
     if (!isEnableCodeCoverageReqParamTrue()) {
       SystemLib::throwRuntimeExceptionObject(
         "Calling fb_enable_code_coverage without adding "
@@ -1230,7 +1230,7 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
       "Calling fb_enable_code_coverage with "
       "'enable_per_file_coverage' in request params");
   }
-  if (RuntimeOption::EvalEnablePerFileCoverage == 2) {
+  if (Cfg::Eval::EnablePerFileCoverage == 2) {
     SystemLib::throwRuntimeExceptionObject(
       "Calling fb_enable_code_coverage with "
       "Eval.EnablePerFileCoverage=2");

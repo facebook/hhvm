@@ -136,7 +136,7 @@ CompilerResult hackc_compile(
   options.initAliasedNamespaces(native_env);
   options.initHhbcFlags(native_env.hhbc_flags);
   options.initParserFlags(native_env.parser_flags);
-  if (RO::EvalHackCompilerInheritConfig) {
+  if (Cfg::Eval::HackCompilerInheritConfig) {
     for (auto& [k, v] : RO::IncludeRoots) {
       native_env.include_roots.emplace_back(hackc::StringMapEntry{k, v});
     }

@@ -280,6 +280,10 @@ tv_lval EmptyMonotypeDict::ElemStr(
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
+ArrayData* EmptyMonotypeDict::SetPosMove(Self*, ssize_t, TypedValue) {
+  // Empty dict doesn't have a valid pos.
+  always_assert(false);
+}
 ArrayData* EmptyMonotypeDict::SetIntMove(Self* ad, int64_t k, TypedValue v) {
   auto const mad = MonotypeDict<int64_t>::MakeReserve(
       ad->isLegacyArray(), 1, type(v));
@@ -716,6 +720,16 @@ arr_lval MonotypeDict<Key>::elemImpl(Key key, K k, bool throwOnMissing) {
   auto const type_ptr = reinterpret_cast<DataType*>(&mad->m_layout_index.raw);
   assertx(*type_ptr == mad->type());
   return arr_lval{mad, type_ptr, const_cast<Value*>(&elm->val)};
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::setPosImpl(ssize_t pos, TypedValue v) {
+  // This could be improved, but monotype dicts are not being used.
+  auto const ad = escalateWithCapacity(size(), __func__);
+  auto const result = ad->setPosMove(pos, v);
+  assertx(ad == result);
+  if (decReleaseCheck()) Release(this);
+  return result;
 }
 
 template <typename Key> template <typename K>
@@ -1305,6 +1319,11 @@ tv_lval MonotypeDict<Key>::ElemStr(
     if (madIn->decReleaseCheck()) Release(madIn);
   }
   return lval;
+}
+
+template <typename Key>
+ArrayData* MonotypeDict<Key>::SetPosMove(Self* mad, ssize_t pos, TypedValue v) {
+  return mad->setPosImpl(pos, v);
 }
 
 template <typename Key>

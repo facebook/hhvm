@@ -204,6 +204,7 @@ namespace HPHP {
   O(IterBase,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(IterGetKey,      TWO(ITA,LA),      NOV,             ONE(CV),    NF) \
   O(IterGetValue,    TWO(ITA,LA),      NOV,             ONE(CV),    NF) \
+  O(IterSetValue,    TWO(ITA,LA),      ONE(CV),         NOV,        NF) \
   O(IterInit,        THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterNext,        THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \

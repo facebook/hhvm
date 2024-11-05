@@ -104,6 +104,7 @@ struct ArrayLayout {
   // The array's new layout after a mutating operation.
   ArrayLayout appendType(Type val) const;
   ArrayLayout removeType(Type key) const;
+  ArrayLayout setType(Type val) const;
   ArrayLayout setType(Type key, Type val) const;
 
   // The second element of the pair is true if the key is definitely present.

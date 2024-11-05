@@ -1406,6 +1406,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::IterGetValue(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)
+            | Opcode::IterSetValue(..)
             | Opcode::JmpNZ(..)
             | Opcode::JmpZ(..)
             | Opcode::LockObj
@@ -1656,6 +1657,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
 
         Opcode::IterGetKey(_, _) => Opcode::IterGetKey(IterArgs::default(), Local::INVALID),
         Opcode::IterGetValue(_, _) => Opcode::IterGetValue(IterArgs::default(), Local::INVALID),
+        Opcode::IterSetValue(_, _) => Opcode::IterSetValue(IterArgs::default(), Local::INVALID),
 
         Opcode::BareThis(_)
         | Opcode::CGetS(_)

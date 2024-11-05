@@ -228,6 +228,12 @@ tv_lval EmptyMonotypeVec::ElemStr(
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
+ArrayData* EmptyMonotypeVec::SetPosMove(EmptyMonotypeVec*, ssize_t,
+                                        TypedValue) {
+  // Empty vec doesn't have a valid pos.
+  always_assert(false);
+}
+
 ArrayData* EmptyMonotypeVec::SetIntMove(EmptyMonotypeVec* eadIn, int64_t k,
                                         TypedValue) {
   throwOOBArrayKeyException(k, eadIn);
@@ -606,10 +612,7 @@ tv_lval MonotypeVec::ElemStr(tv_lval lval, StringData* k, bool throwOnMissing) {
 
 ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   assertx(cowCheck() || notCyclic(v));
-
-  if (UNLIKELY(size_t(k) >= size())) {
-    throwOOBArrayKeyException(k, this);
-  }
+  assertx(size_t(k) < size());
 
   auto const dt = type();
   if (!equivDataTypes(dt, v.type())) {
@@ -631,7 +634,16 @@ ArrayData* MonotypeVec::setIntImpl(int64_t k, TypedValue v) {
   return mad;
 }
 
+ArrayData* MonotypeVec::SetPosMove(MonotypeVec* madIn, ssize_t pos, TypedValue v) {
+  assertx(PosIsValid(madIn, pos));
+  return madIn->setIntImpl(pos, v);
+}
+
 ArrayData* MonotypeVec::SetIntMove(MonotypeVec* madIn, int64_t k, TypedValue v) {
+  if (UNLIKELY(size_t(k) >= madIn->size())) {
+    throwOOBArrayKeyException(k, madIn);
+  }
+
   return madIn->setIntImpl(k, v);
 }
 

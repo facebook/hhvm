@@ -674,7 +674,7 @@ impl FunctionParser<'_> {
     }
 
     fn parse_iterator(&mut self, tokenizer: &mut Tokenizer<'_>, loc: LocId) -> Result<Instr> {
-        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "get_key":"get_key"; "get_value":"get_value"; "next":"next"; "init":"init"]>);
+        parse!(tokenizer, "^" <iter_id:parse_usize> <op:["free":"free"; "get_key":"get_key"; "get_value":"get_value"; "set_value":"set_value"; "next":"next"; "init":"init"]>);
         let iter_id = IterId::new(iter_id);
         Ok(match op.identifier() {
             "free" => Instr::Hhbc(Hhbc::IterFree(iter_id, loc)),
@@ -687,6 +687,17 @@ impl FunctionParser<'_> {
                 let flags = self.parse_iterator_flags(tokenizer)?;
                 parse!(tokenizer, "from" <lid:self.lid>);
                 Instr::Hhbc(Hhbc::IterGetValue(IterArgs { iter_id, flags }, lid, loc))
+            }
+            "set_value" => {
+                let flags = self.parse_iterator_flags(tokenizer)?;
+                parse!(tokenizer, "from" <lid:self.lid>);
+                parse!(tokenizer, "value" <vid:self.vid>);
+                Instr::Hhbc(Hhbc::IterSetValue(
+                    vid,
+                    IterArgs { iter_id, flags },
+                    lid,
+                    loc,
+                ))
             }
             "init" => {
                 let flags = self.parse_iterator_flags(tokenizer)?;

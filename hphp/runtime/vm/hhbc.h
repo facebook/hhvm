@@ -641,6 +641,7 @@ constexpr bool isIteratorBaseAccess(Op op) {
   switch (op) {
     case Op::IterGetKey:
     case Op::IterGetValue:
+    case Op::IterSetValue:
     case Op::IterInit:
     case Op::IterNext:
       return true;

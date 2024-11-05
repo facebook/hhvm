@@ -511,6 +511,10 @@ ArrayLayout Layout::removeType(Type key) const {
   return ArrayLayout::Top();
 }
 
+ArrayLayout Layout::setType(Type val) const {
+  return ArrayLayout::Top();
+}
+
 ArrayLayout Layout::setType(Type key, Type val) const {
   return ArrayLayout::Top();
 }

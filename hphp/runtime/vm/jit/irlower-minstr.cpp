@@ -812,6 +812,17 @@ void cgLdPtrIterVal(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), elm[0]);
 }
 
+void cgStPtrIterVal(IRLS& env, const IRInstruction* inst) {
+  static_assert(VanillaDictElm::dataOff() == 0, "");
+  static_assert(TVOFF(m_data) == 0, "");
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const elm = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+  storeTV(v, elm[0], srcLoc(env, inst, 2), inst->src(2));
+  v << copy{arr, dst};
+}
+
 void cgEqPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();

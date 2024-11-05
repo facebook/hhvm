@@ -2849,6 +2849,12 @@ ReqBindJmp and CallFuncEntry.
   T is used to type the result. For LdPtrIterKey, it must be a valid type for
   the array's keys - i.e., a subtype of TInt|TStr.
 
+| StPtrIterVal, DofS(0), S(Dict) S(PtrToElem) S(InitCell), CRc|PRc
+
+  Store the val S2 to the element of the dict S0 pointed to by S1. S1 must be
+  a valid elm. Expects S0 to have a refcount of 1. Consumes S0 and replaces it
+  with D. Consumes S2 and moves it to the dict.
+
 | EqPtrIter, D(Bool), S(PtrToElem) S(PtrToElem), NF
 
   Compares two pointer iterators for equality.
@@ -3203,6 +3209,11 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in the array S0, which may have an arbitrary layout.
   This op has SetMove semantics; it consumes a refcount on the input array and
   produces one on the output, and does no refcounting to the value S2.
+
+| BespokeSetPos, DArrLikeSetPos, S(Vec,Dict) S(Int) S(InitCell), LA|PRc|CRc
+
+  Set element in the array S0 at a valid position S1 to S2. The array might have
+  an arbitrary layout.
 
 | BespokeUnset, DArrLikeUnset, S(Vec,Dict,Keyset) S(Int,Str), LA|PRc|CRc
 

@@ -827,6 +827,15 @@ tv_lval TypeStructure::ElemStr(
   return lval;
 }
 
+ArrayData* TypeStructure::SetPosMove(
+    TypeStructure* tad, ssize_t pos, TypedValue v) {
+  auto const vad = tad->escalateWithCapacity(tad->size(), __func__);
+  auto const res = VanillaDict::SetPosMove(vad, pos, v);
+  assertx(vad == res);
+  if (tad->decReleaseCheck()) Release(tad);
+  return res;
+}
+
 ArrayData* TypeStructure::SetIntMove(
     TypeStructure* tad, int64_t k, TypedValue v) {
   auto const vad = tad->escalateWithCapacity(tad->size() + 1, __func__);

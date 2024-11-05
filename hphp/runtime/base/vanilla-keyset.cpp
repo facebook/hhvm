@@ -547,6 +547,10 @@ arr_lval VanillaKeyset::LvalStr(ArrayData*, StringData*) {
   throwInvalidKeysetOperation();
 }
 
+ArrayData* VanillaKeyset::SetPosMove(ArrayData*, ssize_t, TypedValue) {
+  throwInvalidKeysetOperation();
+}
+
 ArrayData* VanillaKeyset::SetIntMove(ArrayData*, int64_t, TypedValue) {
   throwInvalidKeysetOperation();
 }

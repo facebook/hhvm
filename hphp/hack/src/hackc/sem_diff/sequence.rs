@@ -405,6 +405,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::IterGetValue(..)
             | Opcode::IterInit(..)
             | Opcode::IterNext(..)
+            | Opcode::IterSetValue(..)
             | Opcode::LateBoundCls
             | Opcode::LockObj
             | Opcode::MemoSet(..)

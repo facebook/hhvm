@@ -1217,6 +1217,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdPtrIterVal:
     return PureLoad { AElemAny };
 
+  case StPtrIterVal:
+    return PureStore { AElemAny, inst.src(2), inst.src(0) };
+
   case BespokeIterGetVal:
   case CheckPtrIterTombstone:
     return may_load_store(AElemAny, AEmpty);
@@ -1992,6 +1995,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case HandleRequestSurprise:
   case BespokeEscalateToVanilla:
     return may_load_store(AHeapAny, AHeapAny);
+
+  case BespokeSetPos:
+    return may_load_store(AElemAny, AElemAny);
 
   case AddNewElemVec:
   case RaiseErrorOnInvalidIsAsExpressionType:

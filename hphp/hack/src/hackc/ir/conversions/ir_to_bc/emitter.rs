@@ -519,6 +519,10 @@ impl<'b> InstrEmitter<'b> {
                 let local = self.lookup_local(base_lid);
                 Opcode::IterGetValue(iter_args, local)
             }
+            Hhbc::IterSetValue(_, iter_args, base_lid, _) => {
+                let local = self.lookup_local(base_lid);
+                Opcode::IterSetValue(iter_args, local)
+            }
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
             Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,

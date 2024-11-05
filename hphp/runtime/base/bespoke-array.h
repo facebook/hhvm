@@ -172,6 +172,7 @@ public:
   static tv_lval ElemStr(tv_lval lvalIn, StringData* key, bool throwOnMissing);
 
   // insertion
+  static ArrayData* SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData* ad, int64_t key, TypedValue v);
   static ArrayData* SetStrMove(ArrayData* ad, StringData* key, TypedValue v);
 

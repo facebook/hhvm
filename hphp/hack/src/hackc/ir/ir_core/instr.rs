@@ -505,6 +505,7 @@ pub enum Hhbc {
     IterGetKey(IterArgs, LocalId, LocId),
     #[has_operands(none)]
     IterGetValue(IterArgs, LocalId, LocId),
+    IterSetValue(ValueId, IterArgs, LocalId, LocId),
     LateBoundCls(LocId),
     LazyClassFromClass(ValueId, LocId),
     LockObj(ValueId, LocId),

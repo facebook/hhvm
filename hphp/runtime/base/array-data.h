@@ -392,6 +392,14 @@ public:
   TypedValue get(const Variant& k, bool error = false) const;
 
   /*
+   * Set the element at position `pos' to `v'. `v' must be a TInitCell.
+   *
+   * Returns `this' if copy/escalation are not needed, or a copied/escalated
+   * array data if they are.
+   */
+  ArrayData* setPosMove(ssize_t pos, TypedValue v);
+
+  /*
    * Set the element at key `k' to `v'. `v' must be a TInitCell.
    *
    * Semantically, setMove() methods 1) do a set, 2) dec-ref the value, and
@@ -760,6 +768,7 @@ struct ArrayFunctions {
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);
   TypedValue (*getPosVal[NK])(const ArrayData*, ssize_t pos);
   bool (*posIsValid[NK])(const ArrayData*, ssize_t pos);
+  ArrayData* (*setPosMove[NK])(ArrayData*, ssize_t pos, TypedValue v);
   ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
   bool (*isVectorData[NK])(const ArrayData*);

@@ -113,6 +113,12 @@ EntryTypes EntryTypes::ForArray(const ArrayData* ad) {
   return state;
 }
 
+EntryTypes EntryTypes::with(TypedValue v) const {
+  auto const valuePair = valueTypesForValue(v, valueTypes, valueDatatype);
+
+  return EntryTypes(keyTypes, valuePair.first, valuePair.second);
+}
+
 EntryTypes EntryTypes::with(TypedValue k, TypedValue v) const {
   auto const newKeyTypes = keyTypesForKey(k, keyTypes);
   auto const valuePair = valueTypesForValue(v, valueTypes, valueDatatype);

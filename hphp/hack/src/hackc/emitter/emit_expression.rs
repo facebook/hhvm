@@ -970,14 +970,13 @@ fn inline_map_async_call<'a, 'd>(
                     instr::pop_l(func_local),
                 ]);
 
-                let inner = emit_liter(e, &arr_local, |val_local, key_local| {
+                let inner = emit_iter_map(e, &arr_local, with_key, |val_local, key_local_opt| {
                     InstrSeq::gather(vec![
                         instr::null_uninit(),
                         instr::null_uninit(),
-                        if with_key {
-                            instr::c_get_l(key_local)
-                        } else {
-                            instr::empty()
+                        match key_local_opt {
+                            None => instr::empty(),
+                            Some(key_local) => instr::c_get_l(key_local),
                         },
                         instr::push_l(val_local),
                         instr::c_get_l(func_local),
@@ -990,9 +989,6 @@ fn inline_map_async_call<'a, 'd>(
                             None,
                             None,
                         )),
-                        instr::base_l(arr_local, MOpMode::Define, ReadonlyOp::Any),
-                        instr::set_m(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
-                        instr::pop_c(),
                     ])
                 })?;
 
@@ -1027,18 +1023,8 @@ fn inline_map_async_call<'a, 'd>(
             // foreach ($arr as $k => $v) {
             //   $arr[$k] = HH\Asio\result($v);
             // }
-            emit_liter(e, &arr_local, |val_local, key_local| {
-                InstrSeq::gather(vec![
-                    instr::push_l(val_local),
-                    instr::wh_result(),
-                    instr::base_l(
-                        arr_local,
-                        MOpMode::Define,
-                        ReadonlyOp::Any, // TODO, handle await assignment statements correctly
-                    ),
-                    instr::set_m(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
-                    instr::pop_c(),
-                ])
+            emit_iter_map(e, &arr_local, false, |val_local, _| {
+                InstrSeq::gather(vec![instr::push_l(val_local), instr::wh_result()])
             })?,
             instr::jmp(done_label),
             instr::label(empty_label),
@@ -1052,21 +1038,28 @@ fn inline_map_async_call<'a, 'd>(
     })
 }
 
-fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
+fn emit_iter_map<F: FnOnce(Local, Option<Local>) -> InstrSeq>(
     e: &mut Emitter<'_>,
     collection: &Local,
+    with_key: bool,
     f: F,
 ) -> Result<InstrSeq> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
         let iter_id = e.iterator_mut().gen_iter();
+        let flags = if with_key {
+            IterArgsFlags::WithKeys
+        } else {
+            IterArgsFlags::None
+        };
         let val_id = e.local_gen_mut().get_unnamed();
-        let key_id = e.local_gen_mut().get_unnamed();
+        let key_id_opt = if with_key {
+            Some(e.local_gen_mut().get_unnamed())
+        } else {
+            None
+        };
         let loop_end = e.label_gen_mut().next_regular();
         let loop_next = e.label_gen_mut().next_regular();
-        let iter_args = IterArgs {
-            iter_id,
-            flags: IterArgsFlags::WithKeys, // base is being modified by key
-        };
+        let iter_args = IterArgs { iter_id, flags };
         let iter_init = InstrSeq::gather(vec![instr::iter_init(
             iter_args.clone(),
             *collection,
@@ -1076,14 +1069,23 @@ fn emit_liter<F: FnOnce(Local, Local) -> InstrSeq>(
             instr::label(loop_next),
             instr::iter_get_value(iter_args.clone(), *collection),
             instr::pop_l(val_id),
-            instr::iter_get_key(iter_args.clone(), *collection),
-            instr::pop_l(key_id),
-            f(val_id, key_id),
+            match key_id_opt {
+                None => instr::empty(),
+                Some(key_id) => InstrSeq::gather(vec![
+                    instr::iter_get_key(iter_args.clone(), *collection),
+                    instr::pop_l(key_id),
+                ]),
+            },
+            f(val_id, key_id_opt),
+            instr::iter_set_value(iter_args.clone(), *collection),
             instr::iter_next(iter_args, *collection, loop_next),
         ]);
         let iter_done = InstrSeq::gather(vec![
             instr::unset_l(val_id),
-            instr::unset_l(key_id),
+            match key_id_opt {
+                None => instr::empty(),
+                Some(key_id) => instr::unset_l(key_id),
+            },
             instr::label(loop_end),
         ]);
         Ok((iter_init, iterate, iter_done))

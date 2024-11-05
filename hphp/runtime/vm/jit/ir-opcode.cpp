@@ -58,11 +58,12 @@ TRACE_SET_MOD(hhir);
 #define DIterVal       HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
+#define DKeysetElem    HasDest
 #define DModified(n)   HasDest
 #define DArrLikeSet    HasDest
+#define DArrLikeSetPos HasDest
 #define DArrLikeUnset  HasDest
 #define DArrLikeAppend HasDest
-#define DKeysetElem    HasDest
 #define DEscalateToVanilla HasDest
 #define DVecKey           HasDest
 #define DFirstElem        HasDest
@@ -139,6 +140,11 @@ OpInfo g_opInfo[] = {
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
+#undef DModified
+#undef DArrLikeSet
+#undef DArrLikeSetPos
+#undef DArrLikeUnset
+#undef DArrLikeAppend
 #undef DEscalateToVanilla
 #undef DVecFirstElem
 #undef DVecLastElem
@@ -509,6 +515,7 @@ bool opcodeMayRaise(Opcode opc) {
   case BespokeIterGetKey:
   case BespokeIterGetVal:
   case BespokeIterLastPos:
+  case BespokeSetPos:
   case CallViolatesDeploymentBoundary:
   case CallViolatesModuleBoundary:
   case Ceil:
@@ -927,6 +934,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StMemMeta:
   case StOutValue:
   case StPtrAt:
+  case StPtrIterVal:
   case StStk:
   case StStkMeta:
   case StStkRange:

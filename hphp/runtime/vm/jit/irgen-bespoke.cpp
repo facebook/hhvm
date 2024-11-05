@@ -1189,6 +1189,7 @@ void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
   switch (ni.op()) {
     case Op::IterGetKey:
     case Op::IterGetValue:
+    case Op::IterSetValue:
     case Op::IterInit:
     case Op::IterNext:
     case Op::UnsetM:
@@ -1273,6 +1274,7 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     // Local iterators constrain the local base.
     case Op::IterGetKey:
     case Op::IterGetValue:
+    case Op::IterSetValue:
     case Op::IterInit:
     case Op::IterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;

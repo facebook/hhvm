@@ -1014,6 +1014,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::IterFree => simple!(Hhbc::IterFree),
         Opcode::IterGetKey => simple!(Hhbc::IterGetKey),
         Opcode::IterGetValue => simple!(Hhbc::IterGetValue),
+        Opcode::IterSetValue => simple!(Hhbc::IterSetValue),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
         Opcode::LazyClass => simple!(Immediate::LazyClass),
         Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),

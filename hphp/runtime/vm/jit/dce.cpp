@@ -482,6 +482,7 @@ bool canDCE(const IRInstruction& inst) {
   case StLocMeta:
   case StLocRange:
   case StPtrAt:
+  case StPtrIterVal:
   case StVMFP:
   case StVMSP:
   case StVMPC:
@@ -641,6 +642,7 @@ bool canDCE(const IRInstruction& inst) {
   case MapSet:
   case VectorSet:
   case BespokeSet:
+  case BespokeSetPos:
   case BespokeUnset:
   case StructDictUnset:
   case BespokeAppend:

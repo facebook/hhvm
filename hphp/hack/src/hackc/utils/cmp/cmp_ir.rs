@@ -683,6 +683,10 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             cmp_eq(x0, x1).qualified("IterGetValue param x")?;
             cmp_eq(y0, y1).qualified("IterGetValue param y")?;
         }
+        (Hhbc::IterSetValue(_, x0, y0, _), Hhbc::IterSetValue(_, x1, y1, _)) => {
+            cmp_eq(x0, x1).qualified("IterSetValue param x")?;
+            cmp_eq(y0, y1).qualified("IterSetValue param y")?;
+        }
         (Hhbc::NewDictArray(x0, _), Hhbc::NewDictArray(x1, _)) => {
             cmp_eq(x0, x1).qualified("NewDictArray param x")?;
         }
@@ -870,6 +874,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
             | Hhbc::IterFree(..)
             | Hhbc::IterGetKey(..)
             | Hhbc::IterGetValue(..)
+            | Hhbc::IterSetValue(..)
             | Hhbc::NewDictArray(..)
             | Hhbc::NewObjD(..)
             | Hhbc::NewObjS(..)

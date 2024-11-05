@@ -57,9 +57,10 @@ impl LocalInfo {
                 LocalInfo::Write(*local)
             }
 
-            Opcode::SetOpL(local, _) | Opcode::IncDecL(local, _) | Opcode::PushL(local) => {
-                LocalInfo::Mutate(*local)
-            }
+            Opcode::SetOpL(local, _)
+            | Opcode::IncDecL(local, _)
+            | Opcode::PushL(local)
+            | Opcode::IterSetValue(_, local) => LocalInfo::Mutate(*local),
 
             Opcode::Silence(local, SilenceOp::Start) => LocalInfo::Write(*local),
             Opcode::Silence(local, SilenceOp::End) => LocalInfo::Read(*local),

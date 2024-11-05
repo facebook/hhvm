@@ -88,6 +88,12 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
   return Variant::wrap(nvGetVal(pos));
 }
 
+inline ArrayData* ArrayData::setPosMove(ssize_t pos, TypedValue v) {
+  assertx(tvIsPlausible(v));
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.setPosMove[kind()](this, pos, v);
+}
+
 inline ArrayData* ArrayData::setMove(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));

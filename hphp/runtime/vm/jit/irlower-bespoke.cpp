@@ -233,6 +233,21 @@ void cgBespokeSet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
+void cgBespokeSetPos(IRLS& env, const IRInstruction* inst) {
+  auto const setPosMove = CallSpec::method(&ArrayData::setPosMove);
+
+  auto const arr = inst->src(0)->type();
+  auto const target = CALL_TARGET(arr, SetPosMove, setPosMove);
+
+  auto const syncMode = maybeLogging(arr)
+    ? SyncOptions::Sync
+    : SyncOptions::None;
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+  cgCallHelper(v, env, target, callDest(env, inst), syncMode, args);
+}
+
 void cgBespokeUnset(IRLS &env, const IRInstruction *inst) {
   using UnsetInt = ArrayData* (ArrayData::*)(int64_t);
   using UnsetStr = ArrayData* (ArrayData::*)(const StringData*);

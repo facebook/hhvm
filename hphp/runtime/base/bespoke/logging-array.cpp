@@ -647,6 +647,12 @@ tv_lval LoggingArray::ElemStr(
               mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
+ArrayData* LoggingArray::SetPosMove(LoggingArray* lad, ssize_t pos, TypedValue v) {
+  auto const ms = lad->entryTypes.with(v);
+  logEvent(lad, ms, ArrayOp::SetPos, v);
+  return mutateMove(lad, ms, lad->keyOrder,
+                    [&](ArrayData* w) { return w->setPosMove(pos, v); });
+}
 ArrayData* LoggingArray::SetIntMove(LoggingArray* lad, int64_t k, TypedValue v) {
   auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
   auto const ko = KeyOrder::MakeInvalid();

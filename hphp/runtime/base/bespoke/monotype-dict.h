@@ -191,6 +191,7 @@ private:
   arr_lval lvalDispatch(int64_t k);
   arr_lval lvalDispatch(StringData* k);
   ArrayData* appendImpl(TypedValue v);
+  ArrayData* setPosImpl(ssize_t pos, TypedValue v);
   template <typename K>
   ArrayData* setImpl(Key key, K k, TypedValue v);
 

@@ -83,6 +83,7 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool PosIsValid(const ArrayData*, ssize_t pos);
+  static ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static bool IsVectorData(const ArrayData*) { return true; }

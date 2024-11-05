@@ -184,6 +184,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Consumes the reference to its input array, and moves input value
       return move == Consume && (srcNo == 0 || srcNo == 2);
 
+    case BespokeSetPos:
+      // Consumes the reference to its input array, and moves input value
+      return (move == Consume && srcNo == 0) || srcNo == 2;
+
     case BespokeUnset:
     case StructDictUnset:
       // Only consumes the reference to its input array
@@ -220,6 +224,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
 
     case InitVecElemLoop:
       return srcNo > 0;
+
+    case StPtrIterVal:
+      return (move == Consume && srcNo == 0) || srcNo == 2;
 
     case NewPair:
     case NewColFromArray:
@@ -627,6 +634,18 @@ Type arrLikeSetReturn(const IRInstruction* inst) {
   return base.narrowToLayout(layout);
 }
 
+Type arrLikeSetPosReturn(const IRInstruction* inst) {
+  assertx(inst->is(BespokeSetPos));
+  auto const arr = inst->src(0)->type();
+  auto const val = inst->src(2)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  auto const base = arr.modified() & TCounted;
+  auto const layout = arr.arrSpec().layout().setType(val);
+  return base.narrowToLayout(layout);
+}
+
 Type arrLikeUnsetReturn(const IRInstruction* inst) {
   assertx(inst->is(BespokeUnset, StructDictUnset));
   auto const arr = inst->src(0)->type();
@@ -822,6 +841,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DModified(n)      return inst->src(n)->type().modified();
 #define DArrLikeSet       return arrLikeSetReturn(inst);
+#define DArrLikeSetPos    return arrLikeSetPosReturn(inst);
 #define DArrLikeUnset     return arrLikeUnsetReturn(inst);
 #define DArrLikeAppend    return arrLikeAppendReturn(inst);
 #define DStructDict     return structDictReturn(inst);
@@ -876,6 +896,11 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DFirstKey
 #undef DLastKey
 #undef DLoggingArrLike
+#undef DModified
+#undef DArrLikeSet
+#undef DArrLikeSetPos
+#undef DArrLikeUnset
+#undef DArrLikeAppend
 #undef DStructDict
 #undef DTypeStructElem
 #undef DCol
@@ -913,7 +938,8 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
 
     // CPGO profiling
     case BespokeEscalateToVanilla:
-    case BespokeGet: {
+    case BespokeGet:
+    case BespokeSetPos: {
       auto const loggingLayout =
         ArrayLayout(bespoke::LoggingArray::GetLayoutIndex());
       auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);

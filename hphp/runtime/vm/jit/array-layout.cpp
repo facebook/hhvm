@@ -250,6 +250,12 @@ ArrayLayout ArrayLayout::removeType(Type key) const {
   return bespokeLayout()->removeType(key);
 }
 
+ArrayLayout ArrayLayout::setType(Type val) const {
+  if (vanilla()) return ArrayLayout::Vanilla();
+  if (isBasicSort(sort)) return ArrayLayout::Top();
+  return bespokeLayout()->setType(val);
+}
+
 ArrayLayout ArrayLayout::setType(Type key, Type val) const {
   if (vanilla()) return ArrayLayout::Vanilla();
   if (isBasicSort(sort)) return ArrayLayout::Top();

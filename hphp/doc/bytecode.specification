@@ -624,8 +624,8 @@ i by calling IterFree.
 
 9) The iterator variable referenced by IterInit must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
-IterGetKey, IterGetValue, IterNext and IterFree instructions must be in
-the "iter-initialized" state. Note that IterInit conditionally initialize
+IterGetKey, IterGetValue, IterSetValue, IterNext and IterFree instructions must
+be in the "iter-initialized" state. Note that IterInit conditionally initialize
 the iterator variable, and IterNext conditionally free the iterator variable.
 
 10) Each EH table must follow all of the rules specified in the "Exception
@@ -2780,6 +2780,15 @@ IterGetValue  <IterArgs> <local id>    []  ->  [C]
 
   If %2 is an object that implements Iterator, the current value is obtained by
   calling %2->current().
+
+IterSetValue  <IterArgs> <local id>    [C]  ->  []
+
+  Move the value on the evaluation stack to the current position of iterator
+  with the ID given in %1 using a base in %2.
+
+  The base %2 must be a vec or dict.
+
+  This instruction requires "BaseConst" flag to not be set in %1.
 
 IterFree <iterator id>    []  ->  []
 

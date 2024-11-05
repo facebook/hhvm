@@ -723,6 +723,14 @@ tv_lval StructDict::ElemStr(tv_lval lvalIn, StringData* k, bool throwOnMissing) 
   return lval;
 }
 
+ArrayData* StructDict::SetPosMove(StructDict* sad, ssize_t pos, TypedValue v) {
+  auto const vad = sad->escalateWithCapacity(sad->size(), __func__);
+  auto const res = VanillaDict::SetPosMove(vad, pos, v);
+  assertx(vad == res);
+  if (sad->decReleaseCheck()) Release(sad);
+  return res;
+}
+
 ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
   auto const vad = sad->escalateWithCapacity(sad->size() + 1, __func__);
   auto const res = VanillaDict::SetIntMove(vad, k, v);

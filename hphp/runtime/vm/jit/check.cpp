@@ -548,6 +548,7 @@ using TypeNames::TCA;
 #define DDictElem
 #define DModified(n)
 #define DArrLikeSet
+#define DArrLikeSetPos
 #define DArrLikeUnset
 #define DArrLikeAppend
 #define DKeysetElem
@@ -617,6 +618,7 @@ using TypeNames::TCA;
 #undef DDictElem
 #undef DModified
 #undef DArrLikeSet
+#undef DArrLikeSetPos
 #undef DArrLikeUnset
 #undef DArrLikeAppend
 #undef DKeysetElem

@@ -385,6 +385,16 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(PosIsValid)
 
   /*
+   * ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v)
+   *
+   *   Set a value in the array at the given position, which must be valid.
+   *   If copy / escalation is necessary, this operation will dec-ref the
+   *   array and return a new one; else, it'll return the original array.
+   *   It does not inc-ref the value.
+   */
+  DISPATCH(SetPosMove)
+
+  /*
    * ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v)
    *
    *   Set a value in the array for an integer key. If copy / escalation is

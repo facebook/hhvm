@@ -1643,6 +1643,7 @@ void dce(Env& env, const bc::IsUnsetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterInit& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterNext& op) { no_dce(env, op); }
+void dce(Env& env, const bc::IterSetValue& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpZ& op) { no_dce(env, op); }

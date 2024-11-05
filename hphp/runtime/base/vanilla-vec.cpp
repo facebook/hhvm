@@ -548,6 +548,16 @@ tv_lval VanillaVec::LvalNewInPlace(ArrayData* ad) {
   return lval;
 }
 
+ArrayData* VanillaVec::SetPosMove(ArrayData* adIn, ssize_t pos, TypedValue v) {
+  assertx(PosIsValid(adIn, pos));
+  assertx(v.m_type != KindOfUninit);
+  assertx(adIn->cowCheck() || adIn->notCyclic(v));
+  auto const ad = adIn->cowCheck() ? VanillaVec::Copy(adIn) : adIn;
+  tvMove(v, LvalUncheckedInt(ad, pos));
+  if (adIn != ad && adIn->decReleaseCheck()) VanillaVec::Release(adIn);
+  return ad;
+}
+
 ArrayData* VanillaVec::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(adIn->cowCheck() || adIn->notCyclic(v));

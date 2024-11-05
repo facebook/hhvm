@@ -297,6 +297,7 @@ public:
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static arr_lval LvalInt(ArrayData* ad, int64_t k);
   static arr_lval LvalStr(ArrayData* ad, StringData* k);
+  static ArrayData* SetPosMove(ArrayData*, ssize_t pos, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetIntMoveSkipConflict(ArrayData* ad, int64_t k, TypedValue v);

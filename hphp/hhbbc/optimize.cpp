@@ -534,6 +534,9 @@ struct OptimizeIterState {
         case Op::IterGetValue:
           fixupFromState(op.IterGetValue.ita.iterId);
           break;
+        case Op::IterSetValue:
+          fixupFromState(op.IterSetValue.ita.iterId);
+          break;
         case Op::IterInit:
           assertx(opIdx == blk->hhbcs.size() - 1);
           fixupForInit(findIterBaseLoc(state, func, op.IterInit.loc2));
@@ -635,6 +638,14 @@ void optimize_iterators(VisitContext& visit) {
         if (updateFlags(args) && op.IterGetValue.loc2 == fixup.base) continue;
         newOps = {
           bc_with_loc(op.srcLoc, bc::IterGetValue{args, fixup.base})
+        };
+        break;
+      }
+      case Op::IterSetValue: {
+        auto args = op.IterSetValue.ita;
+        if (updateFlags(args) && op.IterSetValue.loc2 == fixup.base) continue;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::IterSetValue{args, fixup.base})
         };
         break;
       }

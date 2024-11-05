@@ -242,6 +242,54 @@ void emitIterGetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
   pushIncRef(env, gen(env, IterGetValArr, IterData(ita), base, pos));
 }
 
+void emitIterSetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
+  auto const base = ldLoc(env, baseLocalId, DataTypeSpecific);
+  auto const val = popC(env, DataTypeGeneric);
+  assertx(base->type().subtypeOfAny(TVec, TDict));
+  assertx(!has_flag(ita.flags, IterArgs::Flags::BaseConst));
+
+  auto const pos = gen(env, LdIterPos, IterId(ita.iterId), fp(env));
+
+  if (!allowBespokeArrayLikes() || base->type().arrSpec().vanilla()) {
+    auto const cow = [&] {
+      return cond(
+        env,
+        [&] (Block* taken) { return gen(env, CheckArrayCOW, taken, base); },
+        [&] (SSATmp* single) {
+          gen(env, StLocMeta, LocalId(baseLocalId), fp(env), single);
+          return single;
+        },
+        [&] {
+          decRefNZ(env, base);
+          auto const copy = gen(env, CopyArray, base);
+          stLocRaw(env, baseLocalId, fp(env), copy);
+          return copy;
+        }
+      );
+    };
+
+    if (base->isA(TVec)) {
+      auto const oldVal = gen(env, LdVecElem, base, pos);
+      auto const cowBase = cow();
+      decRef(env, oldVal);
+      auto const cowElm = gen(env, LdVecElemAddr, cowBase, pos, base);
+      gen(env, StMem, cowElm, val);
+    } else {
+      assertx(base->isA(TDict));
+      auto const oldElm = gen(env, GetDictPtrIter, base, pos);
+      auto const oldVal = gen(env, LdPtrIterVal, TInitCell, base, oldElm);
+      auto const cowBase = cow();
+      decRef(env, oldVal);
+      auto const cowElm = gen(env, GetDictPtrIter, cowBase, pos);
+      auto const updatedBase = gen(env, StPtrIterVal, cowBase, cowElm, val);
+      gen(env, StLocMeta, LocalId(baseLocalId), fp(env), updatedBase);
+    }
+    return;
+  }
+
+  stLocRaw(env, baseLocalId, fp(env), gen(env, BespokeSetPos, base, pos, val));
+}
+
 void emitIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneRelOffset) {
   auto const doneOffset = bcOff(env) + doneRelOffset;

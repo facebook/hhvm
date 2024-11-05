@@ -4865,6 +4865,19 @@ void in(ISS& env, const bc::IterGetValue& op) {
   push(env, li.types.value);
 }
 
+void in(ISS& env, const bc::IterSetValue& op) {
+  assertx(!iterIsDead(env, op.ita.iterId));
+  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  auto const base = locAsCell(env, op.loc2);
+  auto const key = intersection_of(li.types.key, TArrKey);
+  auto const set = array_like_set(base, key, popC(env));
+  // Safe to ignore set.second, as IterSetValue is guaranteed to never throw.
+  nothrow(env);
+  // This will kill base local iter equivalence and stop BaseConst optimization,
+  // but we don't care, as all IterSetValue loops are already optimized.
+  setLoc(env, op.loc2, set.first, NoLocalId);
+}
+
 void in(ISS& env, const bc::IterInit& op) {
   auto const ita = op.ita;
   auto const baseLoc = op.loc2;

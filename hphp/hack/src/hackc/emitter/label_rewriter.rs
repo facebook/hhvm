@@ -288,6 +288,7 @@ where
             | Opcode::IterFree(..)
             | Opcode::IterGetKey(..)
             | Opcode::IterGetValue(..)
+            | Opcode::IterSetValue(..)
             | Opcode::Keyset(..)
             | Opcode::LateBoundCls
             | Opcode::LazyClass(..)

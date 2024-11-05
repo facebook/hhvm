@@ -4432,6 +4432,16 @@ OPTBLD_INLINE void iopIterGetValue(const IterArgs& ita, TypedValue* base) {
   tvCopy(value, *vmStack().allocTV());
 }
 
+OPTBLD_INLINE void iopIterSetValue(const IterArgs& ita, TypedValue* base) {
+  assertx(isArrayLikeType(type(base)));
+  assertx(!has_flag(ita.flags, IterArgs::Flags::BaseConst));
+
+  auto it = frame_iter(vmfp(), ita.iterId);
+  type(base) = dt_with_rc(type(base));
+  val(base).parr = val(base).parr->setPosMove(it->getPos(), *vmStack().topC());
+  vmStack().discard();
+}
+
 OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita,
                                TypedValue* base, PC targetpc) {
   assertx(isArrayLikeType(type(base)) || isObjectType(type(base)));

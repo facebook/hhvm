@@ -194,6 +194,9 @@ tv_lval BespokeArray::ElemStr(
 }
 
 // insertion
+ArrayData* BespokeArray::SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v) {
+  return g_layout_funcs.fnSetPosMove[getVtableIndex(ad)](ad, pos, v);
+}
 ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
   return g_layout_funcs.fnSetIntMove[getVtableIndex(ad)](ad, key, v);
 }

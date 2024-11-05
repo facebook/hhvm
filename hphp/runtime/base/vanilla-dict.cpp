@@ -935,6 +935,16 @@ void VanillaDict::AppendTombstoneInPlace(ArrayData* ad) {
   a->m_used++;
 }
 
+ArrayData* VanillaDict::SetPosMove(ArrayData* ad, ssize_t pos, TypedValue v) {
+  assertx(PosIsValid(ad, pos));
+  assertx(v.m_type != KindOfUninit);
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const result = ad->cowCheck() ? VanillaDict::Copy(ad) : ad;
+  tvMove(v, as(result)->data()[pos].data);
+  if (ad != result && ad->decReleaseCheck()) VanillaDict::Release(ad);
+  return result;
+}
+
 ArrayData* VanillaDict::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(v.m_type != KindOfUninit);
   assertx(ad->cowCheck() || ad->notCyclic(v));

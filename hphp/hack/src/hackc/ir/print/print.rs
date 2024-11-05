@@ -979,6 +979,16 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             print_iter_args_flags(w, iter_args.flags)?;
             write!(w, " from {}", FmtLid(base_lid))?;
         }
+        Hhbc::IterSetValue(vid, iter_args, base_lid, _loc) => {
+            write!(w, "iterator ^{} set_value", iter_args.iter_id)?;
+            print_iter_args_flags(w, iter_args.flags)?;
+            write!(
+                w,
+                " from {} value {}",
+                FmtLid(base_lid),
+                FmtVid(func, vid, ctx.verbose)
+            )?;
+        }
         Hhbc::LateBoundCls(_) => {
             write!(w, "late_bound_cls")?;
         }

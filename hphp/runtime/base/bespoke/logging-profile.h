@@ -53,6 +53,7 @@ struct LoggingArray;
   X(LvalStr,            false) \
   X(ElemInt,            false) \
   X(ElemStr,            false) \
+  X(SetPos,             false) \
   X(SetInt,             false) \
   X(SetStr,             false) \
   X(ConstructInt,       false) \

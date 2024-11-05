@@ -131,6 +131,19 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   serverdbginfo::RequestPileDbgInfo getDbgInfo() const override;
 
+  /*
+   * addInternalPriorities updates RoundRobinRequestPile::Options to work with
+   * internal priorities. It does this by doubling the number of priorities
+   * while keeping the number of buckets per priority the same. For example, if
+   * the original shape was {1, 2} (high priority with 1 bucket and low priority
+   * with 2 buckets), the new shape will be {1, 1, 2, 2}. Requests with LO_PRI
+   * internal priority will be placed in the second corresponding priority.
+   * Internal priority is used by interactions to prioritize requests for
+   * existing interactions over other requests.
+   */
+  static RoundRobinRequestPile::Options addInternalPriorities(
+      RoundRobinRequestPile::Options opts);
+
  private:
   // we choose 1KB as segment size to minimize allocations
   using RetrievalIndexQueue = folly::UMPMCQueue<

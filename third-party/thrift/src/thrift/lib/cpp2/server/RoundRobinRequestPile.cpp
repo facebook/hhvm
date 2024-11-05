@@ -252,4 +252,59 @@ std::vector<std::vector<uint64_t>> RoundRobinRequestPile::getRequestCounts()
   return res;
 }
 
+namespace {
+/*
+ * augmentWithInternalPriorities takes a PileSelectionFunction and updates it to
+ * work with internal priorities. The updated PileSelectionFunction will return
+ * a priority that is twice as large as the original priority, and will add 1 to
+ * the priority if the internal priority is LO_PRI.
+ *
+ * The updated function will return the same bucket as the original.
+ */
+RoundRobinRequestPile::PileSelectionFunction augmentWithInternalPriorities(
+    RoundRobinRequestPile::PileSelectionFunction&& func) {
+  return [originalFunc = std::move(func)](const ServerRequest& req)
+             -> std::pair<
+                 RoundRobinRequestPile::Priority,
+                 RoundRobinRequestPile::Bucket> {
+    unsigned pri = 0, bucket = 0;
+    if (originalFunc) {
+      std::tie(pri, bucket) = originalFunc(req);
+    }
+    pri *= 2;
+    if (detail::ServerRequestHelper::internalPriority(req) ==
+        folly::Executor::LO_PRI) {
+      pri += 1;
+    }
+    return {pri, bucket};
+  };
+}
+} // namespace
+
+/*static*/ RoundRobinRequestPile::Options
+RoundRobinRequestPile::addInternalPriorities(
+    RoundRobinRequestPile::Options opts) {
+  if (opts.numBucketsPerPriority.size() >
+      std::numeric_limits<RoundRobinRequestPile::Priority>::max() / 2) {
+    LOG(WARNING) << "Too many priorities, additional internal priorities "
+                 << "will not be added.";
+    return opts;
+  }
+
+  // Double the number of priorities
+  std::vector<unsigned int> numBucketsPerPriority;
+  numBucketsPerPriority.reserve(opts.numBucketsPerPriority.size() * 2);
+  for (auto numBuckets : opts.numBucketsPerPriority) {
+    // See comment on addInternalPriorities declaration for why we do this
+    numBucketsPerPriority.push_back(numBuckets);
+    numBucketsPerPriority.push_back(numBuckets);
+  }
+  opts.numBucketsPerPriority = std::move(numBucketsPerPriority);
+
+  // Update pileSelectionFunction
+  opts.pileSelectionFunction =
+      augmentWithInternalPriorities(std::move(opts.pileSelectionFunction));
+  return opts;
+}
+
 } // namespace apache::thrift

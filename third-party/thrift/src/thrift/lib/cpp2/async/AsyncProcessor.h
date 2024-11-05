@@ -585,7 +585,7 @@ class ServerRequest {
     return sr.resourcePool_ ? sr.resourcePool_ : nullptr;
   }
 
-  static InternalPriority internalPriority(ServerRequest& sr) {
+  static InternalPriority internalPriority(const ServerRequest& sr) {
     return sr.priority_;
   }
 

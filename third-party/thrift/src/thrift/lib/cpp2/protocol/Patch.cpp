@@ -994,10 +994,9 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
     }
   }
 
+  ExtractedMasksFromPatch rwmask = {noneMask(), noneMask()};
   if (mask.includes_ref()) {
     const auto& [id, v] = *mask.includes_ref()->begin();
-    ExtractedMasksFromPatch rwmask = {noneMask(), noneMask()};
-
     // If there is a StructPatch::remove, we can short-circuit the logic.
     if (auto* value = findOp(patch, PatchOp::Remove)) {
       if (std::find(
@@ -1024,15 +1023,64 @@ ExtractedMasksFromPatch extractMapMaskFromPatchImpl(
         rwmask.write = rwmask.write & allMask();
       }
     }
-    return rwmask;
   } else if (mask.includes_map_ref()) {
-    folly::throw_exception<std::runtime_error>("not implemented");
+    const auto& [k, v] = *mask.includes_map_ref()->begin();
+    std::optional<Value> key;
+
+    // If there is a MapPatch::remove, we can short-circuit the logic.
+    if (auto* removeSet = findOp(patch, PatchOp::Remove)) {
+      const auto& set = removeSet->as_set();
+      if (!set.empty()) {
+        if (set.contains(getValueFromMapIdAs(MapId{k}, *set.begin()))) {
+          return {noneMask(), allMask()};
+        }
+      }
+    }
+
+    if (auto* putMap = findOp(patch, PatchOp::Put)) {
+      const auto& map = putMap->as_map();
+      if (!map.empty()) {
+        key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+        if (map.contains(*key)) {
+          rwmask = {noneMask(), allMask()};
+        }
+      }
+    }
+
+    for (auto patchOp : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
+      if (auto* itemPatch = findOp(patch, patchOp)) {
+        const auto& map = itemPatch->as_map();
+        if (!map.empty()) {
+          if (!key.has_value()) {
+            key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+          }
+          if (map.contains(*key)) {
+            rwmask = rwmask | extractMapMaskFromPatchImpl(map.at(*key), v);
+          }
+        }
+      }
+    }
+
+    if (auto* ensureMap = findOp(patch, PatchOp::EnsureStruct)) {
+      const auto& map = ensureMap->as_map();
+      if (!map.empty()) {
+        if (!key.has_value()) {
+          key = getValueFromMapIdAs(MapId{k}, map.begin()->first);
+        }
+        if (map.contains(*key)) {
+          rwmask.read = rwmask.read & allMask();
+          rwmask.write = rwmask.write & allMask();
+        }
+      }
+    }
   } else if (mask.includes_string_map_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
   } else if (mask.includes_type_ref()) {
     folly::throw_exception<std::runtime_error>("not implemented");
+  } else {
+    folly::throw_exception<std::runtime_error>("Invalid mask");
   }
-  folly::throw_exception<std::runtime_error>("Invalid mask");
+  return rwmask;
 }
 
 ExtractedMasksFromPatch extractMapMaskFromPatchImpl(

@@ -59,6 +59,7 @@
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
+#include "hphp/util/configs/log.h"
 #include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
@@ -1382,7 +1383,7 @@ void RuntimeOption::Load(
                  config, "Log.PeriodMultiplier", 0);
     if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-        ErrorLogFileData(LogFile, LogFileSymLink, LogFilePeriodMultiplier);
+        ErrorLogFileData(Cfg::Log::BaseDirectory, LogFile, LogFileSymLink, LogFilePeriodMultiplier);
     }
     if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
       Logger::SetTheLogger(Logger::DEFAULT, std::make_unique<ExtendedLogger>());
@@ -1434,7 +1435,7 @@ void RuntimeOption::Load(
           auto periodMultiplier = Config::GetUInt16(ini_pl, hdf_pl,
                                                     "PeriodMultiplier",
                                                     0, false);
-          logs[logName] = AccessLogFileData(fname, symlink,
+          logs[logName] = AccessLogFileData(Cfg::Log::BaseDirectory, fname, symlink,
                                             format, periodMultiplier);
 
 

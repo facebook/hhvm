@@ -1544,3 +1544,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Xbox.ServerInfo.RequestInitDocument = "", UNKNOWN
 - bool Xbox.ServerInfo.LogInfo = false, UNKNOWN
 - std::string Xbox.ProcessMessageFunc = "xbox_process_message", UNKNOWN
+
+# Log
+
+- std::string Log.BaseDirectory = "", UNKNOWN
+
+  Base directory for all logfiles

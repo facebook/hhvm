@@ -44,6 +44,13 @@ Mutex AccessLogFileData::m_lock;
 std::unordered_map<std::string, AccessLogFileData::factory_t>
 AccessLogFileData::m_factories;
 
+AccessLogFileData::AccessLogFileData(const std::string& baseDir,
+                                     const std::string& fil,
+                                     const std::string& lnk,
+                                     const std::string& fmt,
+                                     int mpl)
+  : AccessLogFileData(PATH_CONCAT(baseDir, fil), PATH_CONCAT(baseDir, lnk), fmt, mpl) {}
+
 AccessLogFileData::AccessLogFileData(const std::string& fil,
                                      const std::string& lnk,
                                      const std::string& fmt,
@@ -122,6 +129,14 @@ void AccessLog::init(const std::string &defaultFormat,
     writer->init(username, m_fGetThreadData);
     m_files.push_back(writer);
   }
+}
+
+void AccessLog::init(const std::string &format,
+                     const std::string &baseDir,
+                     const std::string &symLink,
+                     const std::string &file,
+                     const std::string &username) {
+  init(format, PATH_CONCAT(baseDir, symLink), PATH_CONCAT(baseDir, file), username);
 }
 
 void AccessLog::init(const std::string &format,

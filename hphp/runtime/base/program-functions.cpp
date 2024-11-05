@@ -105,6 +105,7 @@
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/log.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/exception.h"
@@ -1154,7 +1155,7 @@ static int start_server(const std::string &username) {
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
      username);
   AdminRequestHandler::GetAccessLog().init
-    (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
+    (RuntimeOption::AdminLogFormat, Cfg::Log::BaseDirectory, RuntimeOption::AdminLogSymLink,
      RuntimeOption::AdminLogFile,
      username);
   XboxRequestHandler::GetAccessLog().init

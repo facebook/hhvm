@@ -19,12 +19,15 @@
 #include <atomic>
 #include <chrono>
 #include <cstdarg>
+#include <filesystem>
 #include <string>
 
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/thread-local.h"
+
+#define PATH_CONCAT(base, file) (std::filesystem::path(base) / file).string()
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,6 +37,8 @@ struct Exception;
 
 struct ErrorLogFileData {
   ErrorLogFileData() {}
+  ErrorLogFileData(const std::string& baseDir, const std::string& file, const std::string& symlink, int mpl)
+    : ErrorLogFileData(PATH_CONCAT(baseDir, file), PATH_CONCAT(baseDir, symlink), mpl) {}
   ErrorLogFileData(const std::string& file, const std::string& symlink, int mpl)
     : logFile(file)
     , symLink(symlink)

@@ -575,8 +575,8 @@ void CLIServer::start() {
   if (getState() != State::READY) return;
 
   m_dispatcher = std::make_unique<JobQueue>(
-    RuntimeOption::EvalUnixServerWorkers,
-    RuntimeOption::EvalUnixServerWorkers,
+    Cfg::Eval::UnixServerWorkers,
+    Cfg::Eval::UnixServerWorkers,
     Cfg::Server::ThreadDropCacheTimeoutSeconds,
     Cfg::Server::ThreadDropStack,
     nullptr

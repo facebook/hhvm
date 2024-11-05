@@ -620,10 +620,8 @@ struct RuntimeOption {
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
-  F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
   F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
   F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
-  F(bool, CrashOnStaticAnalysisError, debug)                            \
   /* */
 
 private:

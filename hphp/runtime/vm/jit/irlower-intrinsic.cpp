@@ -1056,7 +1056,7 @@ void cgDirFromFilepath(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgStaticAnalysisError(IRLS& env, const IRInstruction* inst) {
-  if (RO::EvalCrashOnStaticAnalysisError) {
+  if (Cfg::Eval::CrashOnStaticAnalysisError) {
     auto& v = vmain(env);
     v << trap{TRAP_REASON, makeFixup(inst->marker(), SyncOptions::Sync)};
     return;

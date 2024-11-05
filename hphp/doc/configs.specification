@@ -574,6 +574,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::string Eval.UnixServerPath = "", UNKNOWN
 
+- uint32_t Eval.UnixServerWorkers, UNKNOWN
+
 - bool Eval.UnixServerFailWhenBusy = false, UNKNOWN
 
 - std::vector<std::string> Eval.UnixServerAllowedUsers = {}, UNKNOWN
@@ -748,6 +750,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   fb_intercept2
 
 - bool Eval.LogHttpServerSignalSource = true, UNKNOWN
+
+- bool Eval.CrashOnStaticAnalysisError, UNKNOWN
 
 - bool Eval.ReplaceTrivialBuiltins = false, UNKNOWN
 

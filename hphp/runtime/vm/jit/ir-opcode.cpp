@@ -250,7 +250,7 @@ bool opcodeMayRaise(Opcode opc) {
            RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 
   case StaticAnalysisError:
-    return !RO::EvalCrashOnStaticAnalysisError;
+    return !Cfg::Eval::CrashOnStaticAnalysisError;
 
   case AFWHPrepareChild:
   case AKExistsObj:

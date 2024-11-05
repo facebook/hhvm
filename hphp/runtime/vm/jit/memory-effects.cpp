@@ -1880,7 +1880,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case StaticAnalysisError:
-    if (RO::EvalCrashOnStaticAnalysisError) return IrrelevantEffects{};
+    if (Cfg::Eval::CrashOnStaticAnalysisError) return IrrelevantEffects{};
     return may_load_store(AHeapAny, AHeapAny);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

@@ -1879,7 +1879,7 @@ OPTBLD_INLINE void iopFatal(FatalOp kind_char) {
 }
 
 OPTBLD_INLINE void iopStaticAnalysisError() {
-  always_assert(!RO::EvalCrashOnStaticAnalysisError);
+  always_assert(!Cfg::Eval::CrashOnStaticAnalysisError);
 
   jit::raiseStaticAnalysisError();
 }

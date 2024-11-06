@@ -537,6 +537,11 @@ TypedValue serialize_memoize_param_lazycls(LazyClassData lcls) {
     const_cast<StringData*>(lazyClassToMemoKeyHelper(lcls)));
 }
 
+TypedValue serialize_memoize_param_cls(Class* cls) {
+  return serialize_memoize_string_top(
+    const_cast<StringData*>(classToMemoKeyHelper(cls)));
+}
+
 TypedValue serialize_memoize_param_dbl(double val) {
   StringBuffer sb;
   serialize_memoize_code(sb, SER_MC_DOUBLE);
@@ -562,6 +567,10 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
     return serialize_memoize_string_top(
       const_cast<StringData*>(
         lazyClassToMemoKeyHelper(param.m_data.plazyclass)));
+  } else if (isClassType(type)) {
+    return serialize_memoize_string_top(
+      const_cast<StringData*>(
+        classToMemoKeyHelper(param.m_data.pclass)));
   } else if (type == KindOfBoolean) {
     assertx((uint8_t)s_trueMemoKey.data()[0] == (kCodePrefix | SER_MC_TRUE));
     assertx((uint8_t)s_falseMemoKey.data()[0] == (kCodePrefix | SER_MC_FALSE));

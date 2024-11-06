@@ -1,0 +1,16 @@
+===== classname<C> =====
+** Called a
+string(1) "C"
+string(1) "C"
+string(1) "C"
+string(1) "C"
+** Called b
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+** Called c
+class(C)
+class(C)
+class(C)
+class(C)

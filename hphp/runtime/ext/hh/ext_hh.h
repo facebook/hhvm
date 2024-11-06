@@ -30,6 +30,7 @@ TypedValue serialize_memoize_param_obj(ObjectData*);
 TypedValue serialize_memoize_param_col(ObjectData*);
 TypedValue serialize_memoize_param_str(StringData*);
 TypedValue serialize_memoize_param_lazycls(LazyClassData);
+TypedValue serialize_memoize_param_cls(Class*);
 TypedValue serialize_memoize_param_dbl(double);
 
 // Temporarily to be used in ext_implicit_context

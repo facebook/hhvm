@@ -823,7 +823,14 @@ end = struct
         | Case _
         | Enum _ ->
           []
-        | Option ty -> [Primitive Primitive.Null; ty]
+        | Option ty ->
+          (* The parser hates ??ty, so we don't return `Option (driver renv ty)`
+             here *)
+          [Primitive Primitive.Null; ty]
+        | Like ty ->
+          (* TODO: dynamic here when it is supported *)
+          let ty = driver renv ty in
+          [ty; Like ty]
         | Awaitable ty ->
           let ty = driver REnv.{ renv with for_alias_def = false } ty in
           [Awaitable ty]
@@ -909,9 +916,6 @@ end = struct
             | Some ty -> Some ty
           in
           [Function { parameters; variadic; return_ }]
-        | Like ty ->
-          (* TODO: dynamic here when it is supported *)
-          [driver renv ty]
       end
     and driver renv candidate =
       try

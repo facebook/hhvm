@@ -213,7 +213,7 @@ struct HashTable : HashTableCommon {
   ArrayType* staticAlloc(uint32_t scale, size_t extra = 0) {
     extra = (extra + 15) & ~15ull;
     auto const size = computeAllocBytes(scale) + extra;
-    auto const mem = RuntimeOption::EvalLowStaticArrays
+    auto const mem = Cfg::Eval::LowStaticArrays
       ? lower_malloc(size)
       : uncounted_malloc(size);
     return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);

@@ -341,7 +341,7 @@ MonotypeVec* MonotypeVec::MakeReserve(
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
     auto const size = MemoryManager::sizeIndex2Size(index);
-    return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+    return Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
   }();
 
   auto const mad = static_cast<MonotypeVec*>(alloc);

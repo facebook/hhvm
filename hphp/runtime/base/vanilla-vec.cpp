@@ -79,7 +79,7 @@ namespace {
 
 inline ArrayData* alloc_packed_static(const ArrayData* ad) {
   auto const size = VanillaVec::capacityToSizeBytes(ad->size());
-  auto const ret = RuntimeOption::EvalLowStaticArrays
+  auto const ret = Cfg::Eval::LowStaticArrays
     ? low_malloc(size)
     : uncounted_malloc(size);
   return reinterpret_cast<ArrayData*>(reinterpret_cast<char*>(ret));

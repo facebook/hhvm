@@ -197,7 +197,7 @@ TypeStructure* TypeStructure::MakeReserve(bool legacy, Kind kind) {
   auto const size = MemoryManager::sizeIndex2Size(index);
   auto const alloc = [&]{
     if (!Static) return tl_heap->objMallocIndex(index);
-    return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+    return Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
   }();
 
   auto const tad = static_cast<TypeStructure*>(alloc);
@@ -462,7 +462,7 @@ TypeStructure* TypeStructure::copy() const {
   auto const heapSize = MemoryManager::sizeIndex2Size(sizeIdx);
   auto const mem = [&]{
     if (!Static) return tl_heap->objMallocIndex(sizeIdx);
-    return RO::EvalLowStaticArrays ? low_malloc(heapSize) : uncounted_malloc(heapSize);
+    return Cfg::Eval::LowStaticArrays ? low_malloc(heapSize) : uncounted_malloc(heapSize);
   }();
   auto const ad = static_cast<TypeStructure*>(mem);
 

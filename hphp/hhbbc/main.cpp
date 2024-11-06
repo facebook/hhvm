@@ -583,7 +583,7 @@ void process_init(const Options& o,
   RO::Load(ini, config);
   RO::RepoAuthoritative                     = false;
   Cfg::Jit::Enabled                         = false;
-  RO::EvalLowStaticArrays                   = false;
+  Cfg::Eval::LowStaticArrays                   = false;
   RO::RepoDebugInfo                         = false;
   Logger::LogLevel                          = Logger::LogError;
 

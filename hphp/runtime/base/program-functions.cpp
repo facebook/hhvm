@@ -999,7 +999,7 @@ static void pagein_self(void) {
   auto mapped_huge = false;
   auto const try_map_huge =
     hugePagesSupported() &&
-    RuntimeOption::EvalMaxHotTextHugePages > 0 &&
+    Cfg::Eval::MaxHotTextHugePages > 0 &&
     (char*)__hot_start != nullptr && (char*)__hot_end != nullptr &&
     nThreads <= 1;
 
@@ -1049,7 +1049,7 @@ static void pagein_self(void) {
           char* to = hotEnd + (hugePageBytes - 1);
           to -= (intptr_t)to & (hugePageBytes - 1);
           const size_t maxHugeHotTextBytes =
-            RuntimeOption::EvalMaxHotTextHugePages * hugePageBytes;
+            Cfg::Eval::MaxHotTextHugePages * hugePageBytes;
           if (to - from >  maxHugeHotTextBytes) {
             to = from + maxHugeHotTextBytes;
           }
@@ -1206,7 +1206,7 @@ static int start_server(const std::string &username) {
 
   if (Cfg::Server::StopOld) HttpServer::StopOldServer();
 
-  if (RuntimeOption::EvalEnableNuma) {
+  if (Cfg::Eval::EnableNuma) {
     purge_all();
     enable_numa();
     BootStats::mark("enable_numa");
@@ -1869,7 +1869,7 @@ static int execute_program_impl(int argc, char** argv) {
     if (po.mode == ExecutionMode::DUMPHHAS) {
       Cfg::Eval::DumpHhas = true;
     } else if (po.mode != ExecutionMode::DUMPCOVERAGE) {
-      RuntimeOption::EvalVerifyOnly = true;
+      Cfg::Eval::VerifyOnly = true;
     }
 
     auto const& defaults = RepoOptions::defaults();
@@ -1966,7 +1966,7 @@ static int execute_program_impl(int argc, char** argv) {
                   Cfg::Eval::Num2MPagesForA0});
   }
   if (RuntimeOption::EvalFileBackedColdArena) {
-    set_cold_file_dir(RuntimeOption::EvalColdArenaFileDir.c_str());
+    set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());
     enable_high_cold_file();
   }
 #endif

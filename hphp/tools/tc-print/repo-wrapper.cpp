@@ -60,7 +60,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Cfg::Eval::AllowHhas = true;
   RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
   RuntimeOption::RepoAuthoritative = true;
-  RuntimeOption::EvalLowStaticArrays = false; // save some low mem
+  Cfg::Eval::LowStaticArrays = false; // save some low mem
   Cfg::Eval::VerifySystemLibHasNativeImpl = false;
 
   if (hasRepo) {

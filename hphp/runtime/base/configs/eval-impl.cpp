@@ -16,8 +16,12 @@
 
 #include "hphp/runtime/base/configs/eval-loader.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/server.h"
+#include "hphp/util/low-ptr.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/process-cpu.h"
 
 namespace HPHP::Cfg {
@@ -40,6 +44,27 @@ bool EvalLoader::UseHHBBCDefault() {
 
 bool EvalLoader::DumpTCAnnotationsForAllTransDefault() {
   return debug;
+}
+
+uint32_t EvalLoader::MaxHotTextHugePagesDefault() {
+  if (!Cfg::Server::Mode) return 0;
+  return arch() == Arch::ARM ? 12 : 8;
+}
+
+uint32_t EvalLoader::MaxLowMemHugePagesDefault() {
+  return Cfg::Server::Mode ? 8 : 0;
+}
+
+bool EvalLoader::LowStaticArraysDefault() {
+  return !use_lowptr || !Cfg::Server::Mode;
+}
+
+bool EvalLoader::VerifyDefault() {
+  return getenv("HHVM_VERIFY");
+}
+
+bool EvalLoader::EnableNumaDefault() {
+  return (numa_num_nodes > 1) && Cfg::Server::Mode;
 }
 
 uint32_t EvalLoader::UnixServerWorkersDefault() {

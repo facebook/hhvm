@@ -321,7 +321,7 @@ StructDict* StructDict::MakeReserve(const StructLayout* layout, bool legacy) {
   auto const alloc = [&] {
     if (!Static) return tl_heap->objMallocIndex(sizeIdx);
     auto const size = MemoryManager::sizeIndex2Size(sizeIdx);
-    return RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
+    return Cfg::Eval::LowStaticArrays ? low_malloc(size) : uncounted_malloc(size);
   }();
 
   auto const sad = static_cast<StructDict*>(alloc);

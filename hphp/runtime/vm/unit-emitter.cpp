@@ -611,8 +611,8 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   tracing::BlockNoTrace _{"unit-create"};
 
-  static const bool kVerify = debug || RuntimeOption::EvalVerify ||
-    RuntimeOption::EvalVerifyOnly;
+  static const bool kVerify = debug || Cfg::Eval::Verify ||
+    Cfg::Eval::VerifyOnly;
   static const bool kVerifyVerboseSystem =
     getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
   static const bool kVerifyVerbose =
@@ -659,7 +659,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
           m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
         );
       }
-      if (RuntimeOption::EvalVerifyOnly) {
+      if (Cfg::Eval::VerifyOnly) {
         if (!isSystemLib) {
           std::fflush(stdout);
           _Exit(1);
@@ -673,7 +673,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
         )->create();
       }
     }
-    if (!isSystemLib && RuntimeOption::EvalVerifyOnly) {
+    if (!isSystemLib && Cfg::Eval::VerifyOnly) {
       std::fflush(stdout);
       _Exit(0);
     }

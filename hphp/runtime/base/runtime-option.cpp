@@ -1647,7 +1647,7 @@ void RuntimeOption::Load(
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
     if (!EvalEnableReusableTC) Cfg::Eval::ReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
-      EvalEnableNuma = false;
+      Cfg::Eval::EnableNuma = false;
     }
 
     // Fast method intercept is currently unsupported on ARM.
@@ -1655,7 +1655,7 @@ void RuntimeOption::Load(
 
     if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().
-      low_2m_pages(EvalMaxLowMemHugePages);
+      low_2m_pages(Cfg::Eval::MaxLowMemHugePages);
       high_2m_pages(Cfg::Eval::MaxHighArenaHugePages);
     }
 #if USE_JEMALLOC_EXTENT_HOOKS

@@ -1103,7 +1103,7 @@ void freeStaticArray(ArrayData* ad) {
   assertx(ad->isStatic());
   auto const extra = uncountedAllocExtra(ad, /*apc_tv=*/false);
   auto const alloc = reinterpret_cast<char*>(ad) - extra;
-  RO::EvalLowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
+  Cfg::Eval::LowStaticArrays ? low_free(alloc) : uncounted_free(alloc);
 }
 
 bool shouldLogAtSrcKey(SrcKey sk) {

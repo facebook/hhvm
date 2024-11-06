@@ -534,6 +534,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.NewTHPHotText = false, UNKNOWN
 
+- std::string Eval.ColdArenaFileDir = "/tmp", UNKNOWN
+
+- uint32_t Eval.MaxHotTextHugePages, UNKNOWN
+
+- uint32_t Eval.MaxLowMemHugePages, UNKNOWN
+
 - uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
 
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN
@@ -554,11 +560,17 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.XmlParserUseLocalArena = true, UNKNOWN
 
+- bool Eval.LowStaticArrays, UNKNOWN
+
 - bool Eval.RecycleAProf = true, UNKNOWN
 
 - int64_t Eval.HeapPurgeWindowSize = 5 * 1000000, UNKNOWN
 
 - uint64_t Eval.HeapPurgeThreshold = 128 * 1024 * 1024, UNKNOWN
+
+- bool Eval.Verify, UNKNOWN
+
+- bool Eval.VerifyOnly = false, UNKNOWN
 
 - bool Eval.AbortBuildOnVerifyError = true, UNKNOWN, globaldata|unitcacheflag|compileroption(AbortBuildOnVerifyError)
 
@@ -605,6 +617,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.EnableCompactBacktrace = true, UNKNOWN
 
 - bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
+
+- bool Eval.EnableNuma, UNKNOWN
 
 - bool Eval.LogServerRestartStats = false, UNKNOWN
 

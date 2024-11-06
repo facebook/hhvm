@@ -704,7 +704,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::RepoPath = "";
   Cfg::Jit::Enabled = false;
-  RuntimeOption::EvalLowStaticArrays = false;
+  Cfg::Eval::LowStaticArrays = false;
 
   std::vector<std::string> badnodes;
   config.lint(badnodes);

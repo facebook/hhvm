@@ -436,15 +436,7 @@ struct RuntimeOption {
   /* F(type, name, defaultVal) */                                       \
   F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
-  F(string, ColdArenaFileDir,          "/tmp")                          \
-  F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
-  F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
-  F(bool, LowStaticArrays,             (!use_lowptr ||                  \
-                                        !ServerExecutionMode()))        \
-  F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
-  F(bool, VerifyOnly,                  false)                           \
   F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
-  F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   /*                                                                    \
    * Map from coeffect name to enforcement level                        \

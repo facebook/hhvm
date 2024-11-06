@@ -58,6 +58,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/configs/log.h"
 #include "hphp/util/current-executable.h" // @donotremove
@@ -738,18 +739,6 @@ static inline bool pgoDefault() {
 #else
   return true;
 #endif
-}
-
-static inline bool eagerGcDefault() {
-#ifdef HHVM_EAGER_GC
-  return true;
-#else
-  return false;
-#endif
-}
-
-static inline bool enableGcDefault() {
-  return RuntimeOption::EvalEagerGC;
 }
 
 static inline uint64_t pgoThresholdDefault() {
@@ -1690,7 +1679,7 @@ void RuntimeOption::Load(
       DumpPreciseProfData = false;
     }
     Cfg::Jit::PGOUseAddrCountedCheck &= addr_encodes_persistency;
-    if (EvalSanitizeReqHeap) {
+    if (Cfg::GC::SanitizeReqHeap) {
       HeapObjectSanitizer::install_signal_handler();
     }
 
@@ -1710,9 +1699,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableSmallAllocator, ini, config,
                  "Eval.DisableSmallAllocator", DisableSmallAllocator);
     SetArenaSlabAllocBypass(DisableSmallAllocator);
-    EvalSlabAllocAlign = folly::nextPowTwo(EvalSlabAllocAlign);
-    EvalSlabAllocAlign = std::min(EvalSlabAllocAlign,
-                                  decltype(EvalSlabAllocAlign){4096});
+    Cfg::GC::SlabAllocAlign = folly::nextPowTwo(Cfg::GC::SlabAllocAlign);
+    Cfg::GC::SlabAllocAlign = std::min(Cfg::GC::SlabAllocAlign,
+                                  decltype(Cfg::GC::SlabAllocAlign){4096});
 
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,

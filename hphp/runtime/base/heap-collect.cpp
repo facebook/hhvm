@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/ptr-map.h"
 #include "hphp/util/rds-local.h"
@@ -345,7 +346,7 @@ void Collector::collect() {
   return;
 #endif
   init();
-  if (type_scan::hasNonConservative() && RuntimeOption::EvalTwoPhaseGC) {
+  if (type_scan::hasNonConservative() && Cfg::GC::TwoPhase) {
     traceConservative();
     traceExact();
   } else {
@@ -462,9 +463,9 @@ NEVER_INLINE void Collector::sweep() {
   auto const t0 = cpu_ns();
   auto const usage0 = mm.currentUsage();
   MemoryManager::FreelistArray quarantine;
-  if (RuntimeOption::EvalQuarantine) quarantine = mm.beginQuarantine();
+  if (Cfg::GC::Quarantine) quarantine = mm.beginQuarantine();
   SCOPE_EXIT {
-    if (RuntimeOption::EvalQuarantine) mm.endQuarantine(std::move(quarantine));
+    if (Cfg::GC::Quarantine) mm.endQuarantine(std::move(quarantine));
     freed_bytes_ = usage0 - mm.currentUsage();
     sweep_ns_ = cpu_ns() - t0;
     assertx(freed_bytes_ >= 0);
@@ -615,7 +616,7 @@ void logCollection(const char* phase, const Collector& collector) {
 
 void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   VMRegAnchor _;
-  if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
+  if (t_eager_gc && Cfg::GC::FilterPoints) {
     t_eager_gc = false;
     auto const pc = vmpc();
     if (rl_gcdata->t_surprise_filter.test(pc)) return;
@@ -627,7 +628,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   }
   if (rl_gcdata->t_gc_num == 0) {
     rl_gcdata->t_enable_samples =
-      StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+      StructuredLog::coinflip(Cfg::GC::SampleRate);
   }
   rl_gcdata->t_pre_stats =
     tl_heap->getStatsCopy(); // don't check or trigger OOM
@@ -655,13 +656,13 @@ void MemoryManager::resetGC() {
 }
 
 void MemoryManager::resetEagerGC() {
-  if (RuntimeOption::EvalEagerGC && RuntimeOption::EvalFilterGCPoints) {
+  if (Cfg::GC::Eager && Cfg::GC::FilterPoints) {
     rl_gcdata->t_surprise_filter.clear();
   }
 }
 
 void MemoryManager::requestEagerGC() {
-  if (RuntimeOption::EvalEagerGC && rds::header()) {
+  if (Cfg::GC::Eager && rds::header()) {
     t_eager_gc = true;
     setSurpriseFlag(PendingGCFlag);
   }
@@ -700,8 +701,8 @@ void MemoryManager::updateNextGc() {
     stats.auxUsage() - stats.mmUsage();
 
   int64_t delta = clearance > std::numeric_limits<int64_t>::max() ?
-    0 : clearance * RuntimeOption::EvalGCTriggerPct;
-  delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
+    0 : clearance * Cfg::GC::TriggerPct;
+  delta = std::max(delta, Cfg::GC::MinTrigger);
   m_nextGC = stats.mmUsage() + delta;
   updateMMDebt();
 }

@@ -1081,6 +1081,71 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Disables PHP's constant function
   Valid values are 0 => enabled (default), 1 => warning, 2 => error
 
+# GC (Eval.)
+
+- bool GC.Enabled, UNKNOWN, lookuppath(Eval.EnableGC)
+
+  Default value of the per-request MemoryManager::m_gc_enabled
+  flag. This flag can be dynamically set/cleared by PHP via
+  ini_set("zend.enable_gc"). In turn, m_gc_enabled enables automatic background
+  garbage collection. If not enabled, gc_collect_cycles() won't run.
+
+- bool GC.Eager, UNKNOWN, lookuppath(Eval.EagerGC)
+
+  If set, trigger collection after every allocation, in debug
+  builds. Has no effect in opt builds or when m_gc_enabled == false.
+
+- bool GC.FilterPoints = true, UNKNOWN, lookuppath(Eval.FilterGCPoints)
+
+  If true, use a bloom filter to only do an eager
+  collection once per unique VMPC. This makes eager mode fast enough to be
+  usable for unit tests, and almost tolerable for large integration tests.
+
+- bool GC.Quarantine, UNKNOWN
+
+  If true, objects swept by GC will be trash filled and
+  leaked, never reallocated.
+
+- bool GC.SanitizeReqHeap = false, UNKNOWN
+
+- bool GC.HeapAllocSampleNativeStack = false, UNKNOWN
+
+- bool GC.LogKilledRequests = true, UNKNOWN
+
+- uint32_t GC.SampleRate = 0, UNKNOWN, lookuppath(Eval.GCSampleRate)
+
+  per *request* sample rate to enable GC logging.
+  If coinflip is true, every GC for the current request will be logged.
+  Note this is not the per-collection sample rate: we do one coinflip per
+  request.
+
+- uint32_t GC.HeapAllocSampleRequests = 0, UNKNOWN
+
+- uint32_t GC.HeapAllocSampleBytes = 256 * 1024, UNKNOWN
+
+- uint32_t GC.SlabAllocAlign = GC.SlabAllocAlign, UNKNOWN, staticdefault(64)
+
+  The value is used before we load the config so we have to use staticdefault
+
+- uint32_t GC.MemTrackStart = 3500, UNKNOWN
+
+- uint32_t GC.MemTrackEnd = 3700, UNKNOWN
+
+- int64_t GC.MinTrigger = 64LL << 20, UNKNOWN, lookuppath(Eval.GCMinTrigger)
+
+  Minimum heap growth, in bytes since the last collection,
+  before triggering the next collection. See MemoryManager::updateNextGc().
+
+- double GC.TriggerPct = 0.5, UNKNOWN, lookuppath(Eval.GCTriggerPct)
+
+  Minimum heap growth, as a percent of remaining heap
+  space, before triggering the next collection. see updateNextGC().
+
+- bool GC.TwoPhase = false, UNKNOWN, lookuppath(Eval.TwoPhaseGC)
+
+  EXPERIMENTAL: perform tracing in two phases, the second of which
+  must only encounter exactly-scanned pointers, to enable object copying.
+
 # HHIR (Eval.HHIR)
 
 - bool HHIR.Simplification = true, UNKNOWN

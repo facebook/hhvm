@@ -180,8 +180,8 @@ TEST(MemoryManager, ContainsAnySize) {
 }
 
 static void testLeak(size_t alloc_size) {
-  RuntimeOption::EvalGCTriggerPct = 0.50;
-  RuntimeOption::EvalGCMinTrigger = 4 << 20;
+  Cfg::GC::TriggerPct = 0.50;
+  Cfg::GC::MinTrigger = 4 << 20;
 
   tl_heap->collect("testLeak");
   tl_heap->setGCEnabled(true);

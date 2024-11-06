@@ -465,7 +465,7 @@ void install_crash_reporter() {
   CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));
   CHECK_ERR(sigaction(SIGILL,  &sa, &osa));
   CHECK_ERR(sigaction(SIGFPE,  &sa, &osa));
-  if (!RO::EvalSanitizeReqHeap) {
+  if (!Cfg::GC::SanitizeReqHeap) {
     // SIGSEGV is handled by the request heap sanitizer when it is enabled.
     CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
   }

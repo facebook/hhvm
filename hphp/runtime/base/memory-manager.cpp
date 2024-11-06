@@ -32,6 +32,7 @@
 #include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
@@ -373,7 +374,7 @@ void MemoryManager::resetAllocator() {
   tl_sweeping = false;
   m_exiting = false;
   resetAllStats();
-  setGCEnabled(RuntimeOption::EvalEnableGC);
+  setGCEnabled(Cfg::GC::Enabled);
   resetGC();
   if (debug) resetEagerGC();
 }
@@ -1044,11 +1045,11 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 void MemoryManager::requestInit() {
   tl_heap->m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
-  if (RuntimeOption::EvalHeapAllocSampleRequests > 0 &&
-      RuntimeOption::EvalHeapAllocSampleBytes > 0) {
-    if (!folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleRequests)) {
+  if (Cfg::GC::HeapAllocSampleRequests > 0 &&
+      Cfg::GC::HeapAllocSampleBytes > 0) {
+    if (!folly::Random::rand32(Cfg::GC::HeapAllocSampleRequests)) {
       tl_heap->m_nextSample =
-        folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleBytes);
+        folly::Random::rand32(Cfg::GC::HeapAllocSampleBytes);
     }
   }
 

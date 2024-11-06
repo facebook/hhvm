@@ -224,7 +224,7 @@ HttpServer::HttpServer() {
         queued_requests > Cfg::Server::HighQueueingThreshold;
 
       // Temporary counter that is available only during a short uptime window.
-      if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
+      if (uptime > Cfg::GC::MemTrackStart && uptime < Cfg::GC::MemTrackEnd) {
         counters["windowed_rss"] = ProcStatus::adjustedRssKb();
         counters["windowed_low_mem"] = alloc::getLowMapped();
         counters["windowed_units"] = MemoryStats::Count(AllocKind::Unit);

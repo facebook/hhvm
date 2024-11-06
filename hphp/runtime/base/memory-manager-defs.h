@@ -44,7 +44,9 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
+
 #include "hphp/util/bitset-utils.h"
+#include "hphp/util/configs/gc.h"
 
 #include <algorithm>
 
@@ -103,7 +105,7 @@ struct Slab : HeapObject {
 
   static char* align(const void* addr) {
     auto const a = reinterpret_cast<intptr_t>(addr);
-    auto const mask = RO::EvalSlabAllocAlign - 1;
+    auto const mask = Cfg::GC::SlabAllocAlign - 1;
     assertx((mask & (mask + 1)) == 0);
     return reinterpret_cast<char*>(a + (-a & mask));
   }

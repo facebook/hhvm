@@ -36,6 +36,7 @@
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/autoload.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/configs/hacklang.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/php7.h"
@@ -263,7 +264,7 @@ struct RuntimeOption {
   }
 
   static bool GcSamplingEnabled() {
-    return EvalGCSampleRate > 0;
+    return Cfg::GC::SampleRate > 0;
   }
 
   static bool JitSamplingEnabled() {
@@ -440,24 +441,6 @@ struct RuntimeOption {
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(bool, LowStaticArrays,             (!use_lowptr ||                  \
                                         !ServerExecutionMode()))        \
-  /* GC Options: See heap-collect.cpp for more details */               \
-  F(bool, EagerGC,                     eagerGcDefault())                \
-  F(bool, FilterGCPoints,              true)                            \
-  F(bool, Quarantine,                  eagerGcDefault())                \
-  F(bool, SanitizeReqHeap,             false)                           \
-  F(bool, HeapAllocSampleNativeStack,  false)                           \
-  F(bool, LogKilledRequests,           true)                            \
-  F(uint32_t, GCSampleRate,            0)                               \
-  F(uint32_t, HeapAllocSampleRequests, 0)                               \
-  F(uint32_t, HeapAllocSampleBytes,    256 * 1024)                      \
-  F(uint32_t, SlabAllocAlign,          64)                              \
-  F(uint32_t, MemTrackStart,           3500)                            \
-  F(uint32_t, MemTrackEnd,             3700)                            \
-  F(int64_t, GCMinTrigger,             64L<<20)                         \
-  F(double, GCTriggerPct,              0.5)                             \
-  F(bool, TwoPhaseGC,                  false)                           \
-  F(bool, EnableGC,                    enableGcDefault())               \
-  /* End of GC Options */                                               \
   F(bool, Verify,                      getenv("HHVM_VERIFY"))           \
   F(bool, VerifyOnly,                  false)                           \
   F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \

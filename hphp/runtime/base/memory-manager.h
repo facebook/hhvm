@@ -966,7 +966,7 @@ struct MemoryManager {
 
   /*
    * Compute the usage threshold to trigger the next gc, as a function
-   * of RuntimeOption::EvalGCMinTrigger and EvalGCTriggerPct.
+   * of Cfg::GC::MinTrigger and Cfg::GC::TriggerPct.
    */
   void updateNextGc();
 
@@ -1074,7 +1074,7 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
-  bool m_gc_enabled{RuntimeOption::EvalEnableGC};
+  bool m_gc_enabled{Cfg::GC::Enabled};
   bool m_enableStatsSync{false};
   GCBits m_mark_version{GCBits(0)};
 

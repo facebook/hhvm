@@ -5900,27 +5900,11 @@ fn emit_array_get_fixed(
             .map(|(i, ix)| {
                 // We traverse the indices in order, but they are numbered in reverse, so that the
                 // innermost is numbered 0
-                let mk = match ix {
-                    VecDictIndex::V(ix) => {
-                        Ok::<_, Error>(MemberKey::EI(*ix as i64, ReadonlyOp::Any))
-                    }
-                    VecDictIndex::D(sf) => {
-                        let field_expr = ast::Expr(
-                            (),
-                            outer_pos.clone(),
-                            extract_shape_field_name_pstring(env, outer_pos, sf)?,
-                        );
-                        match constant_folder::expr_to_typed_value(e, &env.scope, &field_expr) {
-                            Ok(TypedValue::Int(i)) => Ok(MemberKey::EI(i, ReadonlyOp::Any)),
-                            Ok(TypedValue::String(s)) => Ok(MemberKey::ET(s, ReadonlyOp::Any)),
-                            _ => {
-                                index_exprs.push(emit_expr(e, env, &field_expr)?);
-                                stack_count += 1;
-                                Ok(MemberKey::EC(stack_count - 1, ReadonlyOp::Any))
-                            }
-                        }
-                    }
-                }?;
+                let (initial, mk) = ix.index_to_mem_key(e, env, outer_pos, stack_count)?;
+                if let Some(field_expr) = initial {
+                    stack_count += 1;
+                    index_exprs.push(emit_expr(e, env, &field_expr)?)
+                }
                 Ok::<_, Error>(InstrSeq::gather(vec![if i == 0 {
                     instr::query_m(stack_count, QueryMOp::CGet, mk)
                 } else {
@@ -5941,6 +5925,52 @@ fn emit_array_get_fixed(
 pub enum VecDictIndex<'a> {
     V(isize),
     D(&'a ast_defs::ShapeFieldName),
+}
+
+impl<'a> VecDictIndex<'a> {
+    pub fn add_indices_to_lval_exp(expr: &'a ast::Expr_) -> Vec<(VecDictIndex<'a>, &'a ast::Expr)> {
+        match expr {
+            ast::Expr_::List(exprs) => exprs
+                .iter()
+                .enumerate()
+                .map(|(i, e)| (VecDictIndex::V(i as isize), e))
+                .collect(),
+            ast::Expr_::Shape(fields) => fields
+                .iter()
+                .map(|(sf, e)| (VecDictIndex::D(sf), e))
+                .collect(),
+            _ => vec![],
+        }
+    }
+
+    pub fn index_to_mem_key(
+        &self,
+        e: &mut Emitter<'_>,
+        env: &Env<'_>,
+        pos: &Pos,
+        stack_count: u32,
+    ) -> Result<(Option<ast::Expr>, MemberKey)> {
+        match self {
+            VecDictIndex::V(ix) => {
+                Ok::<_, Error>((None, MemberKey::EI(*ix as i64, ReadonlyOp::Any)))
+            }
+            VecDictIndex::D(sf) => {
+                let field_expr = ast::Expr(
+                    (),
+                    pos.clone(),
+                    extract_shape_field_name_pstring(env, pos, sf)?,
+                );
+                match constant_folder::expr_to_typed_value(e, &env.scope, &field_expr) {
+                    Ok(TypedValue::Int(i)) => Ok((None, MemberKey::EI(i, ReadonlyOp::Any))),
+                    Ok(TypedValue::String(s)) => Ok((None, MemberKey::ET(s, ReadonlyOp::Any))),
+                    _ => Ok((
+                        Some(field_expr),
+                        MemberKey::EC(stack_count, ReadonlyOp::Any),
+                    )),
+                }
+            }
+        }
+    }
 }
 
 // Generate code for each lvalue assignment in a list destructuring expression.
@@ -5969,18 +5999,7 @@ pub fn emit_lval_op_list<'a, 'd>(
     let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
         Expr_::List(_) | Expr_::Shape(_) => {
-            let indexed_exprs = match &expr.2 {
-                Expr_::List(exprs) => exprs
-                    .iter()
-                    .enumerate()
-                    .map(|(i, e)| (VecDictIndex::V(i as isize), e))
-                    .collect(),
-                Expr_::Shape(fields) => fields
-                    .iter()
-                    .map(|(sf, e)| (VecDictIndex::D(sf), e))
-                    .collect(),
-                _ => vec![],
-            };
+            let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&expr.2);
             let last_non_omitted = if last_usage {
                 // last usage of the local will happen when processing last non-omitted
                 // element in the list - find it

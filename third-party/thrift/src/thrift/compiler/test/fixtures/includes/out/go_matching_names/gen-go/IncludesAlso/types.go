@@ -50,9 +50,9 @@ func (x *Also) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {

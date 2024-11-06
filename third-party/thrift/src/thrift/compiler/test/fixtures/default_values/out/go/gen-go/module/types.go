@@ -94,9 +94,9 @@ func (x *TrivialStruct) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -105,7 +105,7 @@ func (x *TrivialStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // int_value
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "int_value")):  // int_value
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -505,9 +505,9 @@ func (x *StructWithNoCustomDefaultValues) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -516,17 +516,17 @@ func (x *StructWithNoCustomDefaultValues) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // unqualified_integer
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "unqualified_integer")):  // unqualified_integer
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.I32):  // optional_integer
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "optional_integer")):  // optional_integer
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.I32):  // required_integer
+        case ((id == 3 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "required_integer")):  // required_integer
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.STRUCT):  // unqualified_struct
+        case ((id == 4 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "unqualified_struct")):  // unqualified_struct
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.STRUCT):  // optional_struct
+        case ((id == 5 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "optional_struct")):  // optional_struct
             fieldReadErr = x.readField5(p)
-        case (id == 6 && wireType == thrift.STRUCT):  // required_struct
+        case ((id == 6 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "required_struct")):  // required_struct
             fieldReadErr = x.readField6(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -929,9 +929,9 @@ func (x *StructWithCustomDefaultValues) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -940,17 +940,17 @@ func (x *StructWithCustomDefaultValues) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // unqualified_integer
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "unqualified_integer")):  // unqualified_integer
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.I32):  // optional_integer
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "optional_integer")):  // optional_integer
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.I32):  // required_integer
+        case ((id == 3 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "required_integer")):  // required_integer
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.STRUCT):  // unqualified_struct
+        case ((id == 4 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "unqualified_struct")):  // unqualified_struct
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.STRUCT):  // optional_struct
+        case ((id == 5 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "optional_struct")):  // optional_struct
             fieldReadErr = x.readField5(p)
-        case (id == 6 && wireType == thrift.STRUCT):  // required_struct
+        case ((id == 6 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "required_struct")):  // required_struct
             fieldReadErr = x.readField6(p)
         default:
             fieldReadErr = p.Skip(wireType)

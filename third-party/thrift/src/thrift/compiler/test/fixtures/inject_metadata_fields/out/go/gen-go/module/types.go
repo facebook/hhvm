@@ -96,9 +96,9 @@ func (x *Fields) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -107,7 +107,7 @@ func (x *Fields) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 100 && wireType == thrift.STRING):  // injected_field
+        case ((id == 100 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_field")):  // injected_field
             fieldReadErr = x.readField100(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -215,9 +215,9 @@ func (x *FieldsInjectedToEmptyStruct) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -226,7 +226,7 @@ func (x *FieldsInjectedToEmptyStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == -1100 && wireType == thrift.STRING):  // injected_field
+        case ((id == -1100 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_field")):  // injected_field
             fieldReadErr = x.readField_1100(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -378,9 +378,9 @@ func (x *FieldsInjectedToStruct) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -389,9 +389,9 @@ func (x *FieldsInjectedToStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == -1100 && wireType == thrift.STRING):  // injected_field
+        case ((id == -1100 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_field")):  // injected_field
             fieldReadErr = x.readField_1100(p)
-        case (id == 1 && wireType == thrift.STRING):  // string_field
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "string_field")):  // string_field
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -656,9 +656,9 @@ func (x *FieldsInjectedWithIncludedStruct) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -667,13 +667,13 @@ func (x *FieldsInjectedWithIncludedStruct) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == -1102 && wireType == thrift.STRING):  // injected_unstructured_annotation_field
+        case ((id == -1102 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_unstructured_annotation_field")):  // injected_unstructured_annotation_field
             fieldReadErr = x.readField_1102(p)
-        case (id == -1101 && wireType == thrift.STRING):  // injected_structured_annotation_field
+        case ((id == -1101 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_structured_annotation_field")):  // injected_structured_annotation_field
             fieldReadErr = x.readField_1101(p)
-        case (id == -1100 && wireType == thrift.STRING):  // injected_field
+        case ((id == -1100 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "injected_field")):  // injected_field
             fieldReadErr = x.readField_1100(p)
-        case (id == 1 && wireType == thrift.STRING):  // string_field
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "string_field")):  // string_field
             fieldReadErr = x.readField1(p)
         default:
             fieldReadErr = p.Skip(wireType)

@@ -602,9 +602,9 @@ func (x *Internship) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -613,15 +613,15 @@ func (x *Internship) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // weeks
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "weeks")):  // weeks
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.STRING):  // title
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "title")):  // title
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.I32):  // employer
+        case ((id == 3 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "employer")):  // employer
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.DOUBLE):  // compensation
+        case ((id == 4 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "compensation")):  // compensation
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.STRING):  // school
+        case ((id == 5 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "school")):  // school
             fieldReadErr = x.readField5(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -774,9 +774,9 @@ func (x *Range) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -785,9 +785,9 @@ func (x *Range) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // min
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "min")):  // min
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.I32):  // max
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "max")):  // max
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -940,9 +940,9 @@ func (x *Struct1) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -951,9 +951,9 @@ func (x *Struct1) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // a
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "a")):  // a
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.STRING):  // b
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "b")):  // b
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1250,9 +1250,9 @@ func (x *Struct2) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1261,13 +1261,13 @@ func (x *Struct2) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // a
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "a")):  // a
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.STRING):  // b
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "b")):  // b
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.STRUCT):  // c
+        case ((id == 3 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "c")):  // c
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.LIST):  // d
+        case ((id == 4 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "d")):  // d
             fieldReadErr = x.readField4(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1486,9 +1486,9 @@ func (x *Struct3) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1497,11 +1497,11 @@ func (x *Struct3) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.STRING):  // a
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "a")):  // a
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.I32):  // b
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "b")):  // b
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.STRUCT):  // c
+        case ((id == 3 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "c")):  // c
             fieldReadErr = x.readField3(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1724,9 +1724,9 @@ func (x *Struct4) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1735,11 +1735,11 @@ func (x *Struct4) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // a
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "a")):  // a
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.DOUBLE):  // b
+        case ((id == 2 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "b")):  // b
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.BYTE):  // c
+        case ((id == 3 && wireType == thrift.BYTE) || (id == thrift.NO_FIELD_ID && fieldName == "c")):  // c
             fieldReadErr = x.readField3(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1933,9 +1933,9 @@ func (x *Union1) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1944,9 +1944,9 @@ func (x *Union1) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // i
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i")):  // i
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.DOUBLE):  // d
+        case ((id == 2 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "d")):  // d
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -2273,9 +2273,9 @@ func (x *Union2) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -2284,13 +2284,13 @@ func (x *Union2) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I32):  // i
+        case ((id == 1 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i")):  // i
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.DOUBLE):  // d
+        case ((id == 2 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "d")):  // d
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.STRUCT):  // s
+        case ((id == 3 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "s")):  // s
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.STRUCT):  // u
+        case ((id == 4 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "u")):  // u
             fieldReadErr = x.readField4(p)
         default:
             fieldReadErr = p.Skip(wireType)

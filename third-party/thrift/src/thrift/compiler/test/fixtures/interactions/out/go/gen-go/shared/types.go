@@ -138,9 +138,9 @@ func (x *DoSomethingResult) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -149,9 +149,9 @@ func (x *DoSomethingResult) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.STRING):  // s_res
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "s_res")):  // s_res
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.I32):  // i_res
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "i_res")):  // i_res
             fieldReadErr = x.readField2(p)
         default:
             fieldReadErr = p.Skip(wireType)

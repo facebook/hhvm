@@ -25,9 +25,9 @@ func (x *{{struct:go_name}}) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -38,7 +38,7 @@ func (x *{{struct:go_name}}) Read(p thrift.Decoder) error {
         switch {
         {{#struct:fields_sorted}}
         {{#field:type}}
-        case (id == {{field:key}} && wireType == {{> common/ttype}}):  // {{field:name}}
+        case ((id == {{field:key}} && wireType == {{> common/ttype}}) || (id == thrift.NO_FIELD_ID && fieldName == "{{field:name}}")):  // {{field:name}}
             fieldReadErr = x.readField{{field:key_str}}(p)
         {{/field:type}}
         {{/struct:fields_sorted}}

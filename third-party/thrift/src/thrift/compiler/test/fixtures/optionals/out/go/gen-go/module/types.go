@@ -295,9 +295,9 @@ func (x *Color) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -306,13 +306,13 @@ func (x *Color) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.DOUBLE):  // red
+        case ((id == 1 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "red")):  // red
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.DOUBLE):  // green
+        case ((id == 2 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "green")):  // green
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.DOUBLE):  // blue
+        case ((id == 3 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "blue")):  // blue
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.DOUBLE):  // alpha
+        case ((id == 4 && wireType == thrift.DOUBLE) || (id == thrift.NO_FIELD_ID && fieldName == "alpha")):  // alpha
             fieldReadErr = x.readField4(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -667,9 +667,9 @@ func (x *Vehicle) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -678,15 +678,15 @@ func (x *Vehicle) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.STRUCT):  // color
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "color")):  // color
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.STRING):  // licensePlate
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "licensePlate")):  // licensePlate
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.STRING):  // description
+        case ((id == 3 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "description")):  // description
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.STRING):  // name
+        case ((id == 4 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "name")):  // name
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.BOOL):  // hasAC
+        case ((id == 5 && wireType == thrift.BOOL) || (id == thrift.NO_FIELD_ID && fieldName == "hasAC")):  // hasAC
             fieldReadErr = x.readField5(p)
         default:
             fieldReadErr = p.Skip(wireType)
@@ -1402,9 +1402,9 @@ func (x *Person) Read(p thrift.Decoder) error {
     }
 
     for {
-        _, wireType, id, err := p.ReadFieldBegin()
+        fieldName, wireType, id, err := p.ReadFieldBegin()
         if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
         }
 
         if wireType == thrift.STOP {
@@ -1413,25 +1413,25 @@ func (x *Person) Read(p thrift.Decoder) error {
 
         var fieldReadErr error
         switch {
-        case (id == 1 && wireType == thrift.I64):  // id
+        case ((id == 1 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "id")):  // id
             fieldReadErr = x.readField1(p)
-        case (id == 2 && wireType == thrift.STRING):  // name
+        case ((id == 2 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "name")):  // name
             fieldReadErr = x.readField2(p)
-        case (id == 3 && wireType == thrift.I16):  // age
+        case ((id == 3 && wireType == thrift.I16) || (id == thrift.NO_FIELD_ID && fieldName == "age")):  // age
             fieldReadErr = x.readField3(p)
-        case (id == 4 && wireType == thrift.STRING):  // address
+        case ((id == 4 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "address")):  // address
             fieldReadErr = x.readField4(p)
-        case (id == 5 && wireType == thrift.STRUCT):  // favoriteColor
+        case ((id == 5 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "favoriteColor")):  // favoriteColor
             fieldReadErr = x.readField5(p)
-        case (id == 6 && wireType == thrift.SET):  // friends
+        case ((id == 6 && wireType == thrift.SET) || (id == thrift.NO_FIELD_ID && fieldName == "friends")):  // friends
             fieldReadErr = x.readField6(p)
-        case (id == 7 && wireType == thrift.I64):  // bestFriend
+        case ((id == 7 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "bestFriend")):  // bestFriend
             fieldReadErr = x.readField7(p)
-        case (id == 8 && wireType == thrift.MAP):  // petNames
+        case ((id == 8 && wireType == thrift.MAP) || (id == thrift.NO_FIELD_ID && fieldName == "petNames")):  // petNames
             fieldReadErr = x.readField8(p)
-        case (id == 9 && wireType == thrift.I32):  // afraidOfAnimal
+        case ((id == 9 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "afraidOfAnimal")):  // afraidOfAnimal
             fieldReadErr = x.readField9(p)
-        case (id == 10 && wireType == thrift.LIST):  // vehicles
+        case ((id == 10 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "vehicles")):  // vehicles
             fieldReadErr = x.readField10(p)
         default:
             fieldReadErr = p.Skip(wireType)

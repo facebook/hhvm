@@ -9,6 +9,11 @@ function thrift_protocol_write_binary(\HH\object $transportobj,
                                       bool $strict_write,
                                       bool $oneway = false): void;
 
+
+<<__Native>>
+function thrift_protocol_write_binary_struct(\HH\object $transportobj,
+                                      \HH\object $request_struct): void;
+
 <<__Native>>
 function thrift_protocol_read_binary(\HH\object $transportobj,
                                      string $obj_typename,
@@ -38,6 +43,11 @@ function thrift_protocol_write_compact2(\HH\object $transportobj,
                                         \HH\object $request_struct,
                                         int $seqid,
                                         bool $oneway = false,
+                                        int $version = 2): void;
+
+<<__Native>>
+function thrift_protocol_write_compact_struct(\HH\object $transportobj,
+                                        \HH\object $request_struct,
                                         int $version = 2): void;
 
 <<__Native>>

@@ -51,6 +51,11 @@ void HHVM_FUNCTION(
     bool strict_write,
     bool oneway = false);
 
+void HHVM_FUNCTION(
+    thrift_protocol_write_binary_struct,
+    const Object& transportobj,
+    const Object& request_struct);
+
 Object HHVM_FUNCTION(
     thrift_protocol_read_binary,
     const Object& transportobj,
@@ -83,6 +88,12 @@ void HHVM_FUNCTION(
     const Object& request_struct,
     int64_t seqid,
     bool oneway = false,
+    int64_t version = 2);
+
+void HHVM_FUNCTION(
+    thrift_protocol_write_compact_struct,
+    const Object& transportobj,
+    const Object& request_struct,
     int64_t version = 2);
 
 Variant HHVM_FUNCTION(

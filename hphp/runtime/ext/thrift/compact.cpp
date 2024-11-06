@@ -1519,6 +1519,24 @@ void HHVM_FUNCTION(thrift_protocol_write_compact2,
   }
 }
 
+
+void HHVM_FUNCTION(thrift_protocol_write_compact_struct,
+                   const Object& transportobj,
+                   const Object& request_struct,
+                   int64_t version) {
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  PHPOutputTransport transport(transportobj);
+
+  CompactWriter writer(&transport);
+  writer.setWriteVersion(version);
+  writer.write(request_struct);
+  transport.flush();
+}
+
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename,

@@ -757,6 +757,20 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
   }
 }
 
+void HHVM_FUNCTION(thrift_protocol_write_binary_struct,
+                   const Object& transportobj,
+                   const Object& request_struct) {
+  CoeffectsAutoGuard _;
+  VMRegAnchor _2;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+  PHPOutputTransport transport(transportobj);
+  const Object& obj_request_struct = request_struct;
+  binary_serialize_struct(obj_request_struct, transport);
+  transport.flush();
+}
+
 Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
                      const String& obj_typename,

@@ -91,6 +91,12 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.enums.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.SomeStruct, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -172,6 +178,12 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.enums.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.MyStruct, self)
 
     def _to_py_deprecated(self):
         import importlib

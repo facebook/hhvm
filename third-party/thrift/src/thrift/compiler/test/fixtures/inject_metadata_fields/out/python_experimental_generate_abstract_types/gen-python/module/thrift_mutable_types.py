@@ -60,6 +60,12 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Fields, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -108,6 +114,12 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedToEmptyStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -168,6 +180,12 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedToStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -250,6 +268,12 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedWithIncludedStruct, self)
 
     def _to_py_deprecated(self):
         import importlib

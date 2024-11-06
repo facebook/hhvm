@@ -63,6 +63,12 @@ class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Fiery, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -117,6 +123,12 @@ class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Serious, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -184,6 +196,12 @@ class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ComplexFieldNames, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -249,6 +267,12 @@ class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.CustomFieldNames, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -316,6 +340,12 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ExceptionWithPrimitiveField, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -382,6 +412,12 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_excep
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ExceptionWithStructuredAnnotation, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -418,6 +454,12 @@ class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Banal, self)
 
     def _to_py_deprecated(self):
         import importlib

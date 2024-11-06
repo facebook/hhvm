@@ -111,6 +111,12 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ComplexUnion, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -170,6 +176,12 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ListUnion, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -228,6 +240,12 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.DataUnion, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -299,6 +317,12 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Val, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -357,6 +381,12 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ValUnion, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -417,6 +447,12 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.VirtualComplexUnion, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -465,6 +501,12 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.NonCopyableStruct, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -512,6 +554,12 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.NonCopyableUnion, self)
 
     def _to_py_deprecated(self):
         import importlib

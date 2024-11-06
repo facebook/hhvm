@@ -58,6 +58,12 @@ class Mixin1(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Mixin1, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -118,6 +124,12 @@ class Mixin2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Mixin2, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter
@@ -166,6 +178,12 @@ class Mixin3Base(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Mixin3Base, self)
 
     def _to_py_deprecated(self):
         import importlib
@@ -237,6 +255,12 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Foo, self)
 
     def _to_py_deprecated(self):
         import importlib

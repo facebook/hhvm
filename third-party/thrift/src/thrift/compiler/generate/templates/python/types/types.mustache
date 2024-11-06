@@ -153,6 +153,7 @@ Until we resolve the above error, register the class as virtual subclass of the 
         mutable_types = importlib.import_module("{{program:module_path}}.thrift_mutable_types")
         return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
 {{/program:generate_to_mutable_python_conversion_methods?}}
+{{/program:generate_immutable_types}}
 
     def _to_py3(self):
     {{^program:py3_auto_migrate?}}
@@ -164,7 +165,6 @@ Until we resolve the above error, register the class as virtual subclass of the 
     {{#program:py3_auto_migrate?}}
         return self
     {{/program:py3_auto_migrate?}}
-{{/program:generate_immutable_types}}
 
     def _to_py_deprecated(self):
         import importlib

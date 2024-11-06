@@ -69,6 +69,12 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
     def _to_mutable_python(self):
         return self
 
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.CustomException, self)
+
     def _to_py_deprecated(self):
         import importlib
         import thrift.util.converter

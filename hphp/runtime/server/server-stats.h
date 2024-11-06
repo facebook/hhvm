@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/server/writer.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/thread-local.h"
@@ -160,7 +161,7 @@ private:
 
   static uint32_t curr() {
     auto const now = static_cast<uint64_t>(time(nullptr));
-    return now / RuntimeOption::StatsSlotDuration;
+    return now / Cfg::Stats::SlotDuration;
   }
 
   static void Merge(CounterMap& dest, const CounterMap& src,

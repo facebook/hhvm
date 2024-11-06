@@ -828,7 +828,7 @@ void Transport::sendRawInternal(const char *data, int size,
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Processing);
 
   ServerStats::LogBytes(size);
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::Web) {
     ServerStats::Log("network.uncompressed", size);
     ServerStats::Log("network.compressed", response.size());
   }

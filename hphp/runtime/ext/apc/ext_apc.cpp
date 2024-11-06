@@ -193,7 +193,7 @@ Variant apc_store_impl(const Variant& key_or_array,
         return Variant(false);
       }
       apc_store().set(strKey, v, ttl, bump_ttl, pure);
-      if (RuntimeOption::EnableAPCStats) {
+      if (Cfg::Stats::APC) {
         ServerStats::Log("apc.write", 1);
       }
     }
@@ -215,7 +215,7 @@ Variant apc_store_impl(const Variant& key_or_array,
     return Variant(false);
   }
   apc_store().set(strKey, var, ttl, bump_ttl, pure);
-  if (RuntimeOption::EnableAPCStats) {
+  if (Cfg::Stats::APC) {
     ServerStats::Log("apc.write", 1);
   }
   return Variant(true);
@@ -288,7 +288,7 @@ Variant apc_add_impl(const Variant& key_or_array,
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return false;
   }
-  if (RuntimeOption::EnableAPCStats) {
+  if (Cfg::Stats::APC) {
     ServerStats::Log("apc.write", 1);
   }
   return apc_store().add(strKey, var, ttl, bump_ttl, pure);
@@ -334,7 +334,7 @@ TypedValue apc_fetch_impl(const Variant& key, bool& success, bool pure) {
       }
       auto strKey = k.asCStrRef();
       if (apc_store().get(strKey, v, pure)) {
-        if (RuntimeOption::EnableAPCStats) {
+        if (Cfg::Stats::APC) {
           ServerStats::Log("apc.hit", 1);
         }
         tmp = true;
@@ -347,13 +347,13 @@ TypedValue apc_fetch_impl(const Variant& key, bool& success, bool pure) {
 
   if (apc_store().get(key.toString(), v, pure)) {
     success = true;
-    if (RuntimeOption::EnableAPCStats) {
+    if (Cfg::Stats::APC) {
       ServerStats::Log("apc.hit", 1);
     }
   } else {
     success = false;
     v = false;
-    if (RuntimeOption::EnableAPCStats) {
+    if (Cfg::Stats::APC) {
       ServerStats::Log("apc.miss", 1);
     }
   }

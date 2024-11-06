@@ -1770,6 +1770,28 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Server.LogTierOverwriteInputs = false, ffledgling
 
+# Stats
+
+- bool Stats.Enable = false, UNKNOWN
+- bool Stats.APC = false, UNKNOWN
+- bool Stats.Web = false, UNKNOWN
+- bool Stats.Memory = false, UNKNOWN
+- bool Stats.SQL = false, UNKNOWN
+- bool Stats.SQLTable = false, UNKNOWN
+- bool Stats.NetworkIO = false, UNKNOWN
+- std::string Stats.XSL = "", UNKNOWN
+- std::string Stats.XSLProxy = "", UNKNOWN
+- uint32_t Stats.SlotDuration = 10 * 60, UNKNOWN, postprocess
+- uint32_t Stats.MaxSlot = Stats.MaxSlot, UNKNOWN, postprocess|staticdefault(12 * 6)
+
+  12 hours. Read before config is loaded so has to use staticdefault
+
+- std::vector<std::string> Stats.TrackedKeys = {}, UNKNOWN
+- int32_t Stats.ProfilerTraceBuffer = 2000000, UNKNOWN
+- double Stats.ProfilerTraceExpansion = 1.2, UNKNOWN
+- int32_t Stats.ProfilerMaxTraceBuffer = 0, UNKNOWN
+- bool Stats.TrackPerUnitMemory = false, UNKNOWN
+
 # Xbox
 
 - int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN

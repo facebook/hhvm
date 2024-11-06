@@ -45,6 +45,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
@@ -165,7 +166,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
 
   auto const create = [] (std::unique_ptr<UnitEmitter> ue) {
 #ifdef USE_JEMALLOC
-    if (RuntimeOption::TrackPerUnitMemory) {
+    if (Cfg::Stats::TrackPerUnitMemory) {
       size_t len = sizeof(uint64_t*);
       uint64_t* alloc;
       uint64_t* del;

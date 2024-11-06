@@ -258,7 +258,7 @@ APCStats::APCStats() : m_valueSize(nullptr)
   m_uncountedEntries = ServiceData::createCounter("apc.uncounted_entries");
   m_uncountedBlocks =
     ServiceData::createCounter("apc.uncounted_blocks.mayNotBeAPCValues");
-  if (RuntimeOption::EnableAPCStats) {
+  if (Cfg::Stats::APC) {
     m_detailedStats = new APCDetailedStats();
   }
 }

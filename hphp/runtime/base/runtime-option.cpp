@@ -690,19 +690,6 @@ int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
 std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
 std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
 
-bool RuntimeOption::EnableStats = false;
-bool RuntimeOption::EnableAPCStats = false;
-bool RuntimeOption::EnableWebStats = false;
-bool RuntimeOption::EnableMemoryStats = false;
-bool RuntimeOption::EnableSQLStats = false;
-bool RuntimeOption::EnableSQLTableStats = false;
-bool RuntimeOption::EnableNetworkIOStatus = false;
-std::string RuntimeOption::StatsXSL;
-std::string RuntimeOption::StatsXSLProxy;
-uint32_t RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
-uint32_t RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
-std::vector<std::string> RuntimeOption::StatsTrackedKeys;
-
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
 
@@ -867,10 +854,6 @@ std::string RuntimeOption::MailForceExtraParameters;
 
 bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
 
-int RuntimeOption::ProfilerTraceBuffer = 2000000;
-double RuntimeOption::ProfilerTraceExpansion = 1.2;
-int RuntimeOption::ProfilerMaxTraceBuffer = 0;
-
 #ifdef HHVM_FACEBOOK
 
 int RuntimeOption::ThriftFBServerThriftServerIOWorkerThreads = 1;
@@ -899,8 +882,6 @@ bool RuntimeOption::XenonForceAlwaysOn = false;
 bool RuntimeOption::XenonTrackActiveWorkers = false;
 
 bool RuntimeOption::StrobelightEnabled = false;
-
-bool RuntimeOption::TrackPerUnitMemory = false;
 
 bool RuntimeOption::SetProfileNullThisObject = true;
 
@@ -1860,33 +1841,6 @@ void RuntimeOption::Load(
                  "Debug.RemoteTraceOutputDir", "/tmp");
     Config::Bind(TraceFunctions, ini, config,
                  "Debug.TraceFunctions", TraceFunctions);
-  }
-  {
-    // Stats
-    Config::Bind(EnableStats, ini, config, "Stats.Enable",
-                 false); // main switch
-    Config::Bind(EnableAPCStats, ini, config, "Stats.APC", false);
-    Config::Bind(EnableWebStats, ini, config, "Stats.Web");
-    Config::Bind(EnableMemoryStats, ini, config, "Stats.Memory");
-    Config::Bind(EnableSQLStats, ini, config, "Stats.SQL");
-    Config::Bind(EnableSQLTableStats, ini, config, "Stats.SQLTable");
-    Config::Bind(EnableNetworkIOStatus, ini, config, "Stats.NetworkIO");
-    Config::Bind(StatsXSL, ini, config, "Stats.XSL");
-    Config::Bind(StatsXSLProxy, ini, config, "Stats.XSLProxy");
-    Config::Bind(StatsSlotDuration, ini, config, "Stats.SlotDuration", 10 * 60);
-    Config::Bind(StatsMaxSlot, ini, config, "Stats.MaxSlot",
-                 12 * 6); // 12 hours
-    StatsSlotDuration = std::max(1u, StatsSlotDuration);
-    StatsMaxSlot = std::max(2u, StatsMaxSlot);
-    Config::Bind(StatsTrackedKeys, ini, config, "Stats.TrackedKeys");
-    Config::Bind(ProfilerTraceBuffer, ini, config, "Stats.ProfilerTraceBuffer",
-                 2000000);
-    Config::Bind(ProfilerTraceExpansion, ini, config,
-                 "Stats.ProfilerTraceExpansion", 1.2);
-    Config::Bind(ProfilerMaxTraceBuffer, ini, config,
-                 "Stats.ProfilerMaxTraceBuffer", 0);
-    Config::Bind(TrackPerUnitMemory, ini, config,
-                 "Stats.TrackPerUnitMemory", false);
   }
   {
     Config::Bind(ServerVariables, ini, config, "ServerVariables");

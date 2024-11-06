@@ -419,8 +419,8 @@ TEST(COUNTERS, profiling_and_optimized_funcs) {
 }
 
 TEST(COUNTERS, server_stats) {
-  RuntimeOption::EnableWebStats = true;
-  RuntimeOption::EnableStats = true;
+  Cfg::Stats::Web = true;
+  Cfg::Stats::Enable = true;
   HttpServer::Server = std::make_shared<HttpServer>();
   ServerStats::Log("MyKey", 45);
   ServerStats::LogPage("yup_this_page", 42);

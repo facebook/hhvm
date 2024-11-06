@@ -23,7 +23,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/stats.h"
 
 namespace HPHP{
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,10 +93,10 @@ struct XMLWriter : Writer {
 
   void writeFileHeader() override {
     m_out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    if (!RuntimeOption::StatsXSL.empty()) {
+    if (!Cfg::Stats::XSL.empty()) {
       m_out << "<?xml-stylesheet type=\"text/xsl\" href=\""
-            << RuntimeOption::StatsXSL << "\"?>\n";
-    } else if (!RuntimeOption::StatsXSLProxy.empty()) {
+            << Cfg::Stats::XSL << "\"?>\n";
+    } else if (!Cfg::Stats::XSLProxy.empty()) {
       m_out << "<?xml-stylesheet type=\"text/xsl\" href=\"stats.xsl\"?>\n";
     }
   }
@@ -346,4 +346,3 @@ private:
   }
 };
 }
-

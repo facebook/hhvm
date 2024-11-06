@@ -13,34 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/server/server-worker.h"
-#include "hphp/util/timer.h"
 
-namespace HPHP {
+#include "hphp/runtime/base/configs/stats-loader.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// ServerJob
+namespace HPHP::Cfg {
 
-ServerJob::ServerJob() {
-  Timer::GetMonotonicTime(start);
+void StatsLoader::SlotDurationPostProcess(uint32_t& value) {
+  value = std::max(1u, value);
 }
 
-void ServerJob::stopTimer(const struct timespec &reqStart) {
-  if (Cfg::Stats::Enable && Cfg::Stats::Web) {
-    // This measures [enqueue:dequeue]
-    timespec end;
-    Timer::GetMonotonicTime(end);
-    time_t dsec = end.tv_sec - start.tv_sec;
-    long dnsec = end.tv_nsec - start.tv_nsec;
-    int64_t dusec = dsec * 1000000 + dnsec / 1000;
-    ServerStats::Log("page.wall.queuing", dusec);
-
-    // This measures [request start:dequeue]
-    dsec = start.tv_sec - reqStart.tv_sec;
-    dnsec = start.tv_nsec - reqStart.tv_nsec;
-    dusec = dsec * 1000000 + dnsec / 1000;
-    ServerStats::Log("page.wall.request_read_time", dusec);
-  }
+void StatsLoader::MaxSlotPostProcess(uint32_t& value) {
+  value = std::max(2u, value);
 }
 
 }

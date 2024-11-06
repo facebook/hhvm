@@ -59,6 +59,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
@@ -1231,12 +1232,12 @@ bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,
 bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "stats-on") {
-    RuntimeOption::EnableStats = true;
+    Cfg::Stats::Enable = true;
     transport->sendString("OK\n");
     return true;
   }
   if (cmd == "stats-off") {
-    RuntimeOption::EnableStats = false;
+    Cfg::Stats::Enable = false;
     transport->sendString("OK\n");
     return true;
   }
@@ -1247,14 +1248,14 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   }
 
   if (cmd == "stats-web") {
-    return toggle_switch(transport, RuntimeOption::EnableWebStats);
+    return toggle_switch(transport, Cfg::Stats::Web);
   }
   if (cmd == "stats-mem") {
-    toggle_switch(transport, RuntimeOption::EnableMemoryStats);
+    toggle_switch(transport, Cfg::Stats::Memory);
     return true;
   }
   if (cmd == "stats-sql") {
-    return toggle_switch(transport, RuntimeOption::EnableSQLStats);
+    return toggle_switch(transport, Cfg::Stats::SQL);
   }
   if (cmd == "stats-mutex") {
     int sampling = transport->getIntParam("sampling");
@@ -1274,9 +1275,9 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
 
   if (cmd == "stats.xsl") {
     string xsl;
-    if (!RuntimeOption::StatsXSLProxy.empty()) {
+    if (!Cfg::Stats::XSLProxy.empty()) {
       StringBuffer response;
-      if (HttpClient().get(RuntimeOption::StatsXSLProxy.c_str(), response) ==
+      if (HttpClient().get(Cfg::Stats::XSLProxy.c_str(), response) ==
           200) {
         xsl = response.data();
         if (!xsl.empty()) {

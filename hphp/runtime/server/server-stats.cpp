@@ -24,6 +24,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/writer.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/stats.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-util.h"
@@ -91,32 +92,32 @@ bool ServerStats::s_profile_network = false;
 THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const std::string& url, int code) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->logPage(url, code);
   }
 }
 
 void ServerStats::Log(const std::string& name, int64_t value) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->log(name, value);
   }
 }
 
 void ServerStats::LogBytes(int64_t bytes) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->logBytes(bytes);
   }
 }
 
 void ServerStats::StartRequest(const char* url, const char* clientIP,
                                const char* vhost) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->startRequest(url, clientIP, vhost);
   }
 }
 
 void ServerStats::SetEndpoint(const char* endpoint) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     ServerStats::s_logger->setEndpoint(endpoint);
   }
 }
@@ -242,7 +243,7 @@ std::string ServerStats::ReportString(const std::string& keys,
 ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
 
   auto const beginTime = static_cast<uint64_t>(time(nullptr));
-  auto const SlotDuration = RuntimeOption::StatsSlotDuration;
+  auto const SlotDuration = Cfg::Stats::SlotDuration;
   auto const now = beginTime / SlotDuration;
 
   TimeSlot ts{};
@@ -253,7 +254,7 @@ ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
   // process takes less than StatsSlotDuration seconds.
   VisitAllSlots(
     [&wantedKeys, now, &ts] (TimeSlot& slot) {
-      if (slot.m_time <= now + 1u - RuntimeOption::StatsMaxSlot) {
+      if (slot.m_time <= now + 1u - Cfg::Stats::MaxSlot) {
         // We are not going to need the old data in future.
         slot.clear();
         return;
@@ -266,9 +267,9 @@ ServerStats::CounterMap ServerStats::ReportImpl(const KeyMap& wantedKeys) {
   // Total amount of time over which the stats were written.  We try to estimate
   // the time between starting and ending time of the collection process by
   // taking some averages.
-  uint32_t sec = SlotDuration * (RuntimeOption::StatsMaxSlot - 2u);
+  uint32_t sec = SlotDuration * (Cfg::Stats::MaxSlot - 2u);
   auto const endTime = static_cast<uint64_t>(time(nullptr));
-  if (endTime / RuntimeOption::StatsSlotDuration != now) {
+  if (endTime / Cfg::Stats::SlotDuration != now) {
     sec += (beginTime % SlotDuration + SlotDuration + 1) / 2;
   } else {
     sec += ((beginTime + endTime + 1) % (2 * SlotDuration)) / 2;
@@ -573,11 +574,11 @@ ServerStats::ThreadStatus::ThreadStatus() {
 }
 
 ServerStats::ServerStats() {
-  assertx(RuntimeOption::StatsMaxSlot >= 2);
-  if (RuntimeOption::StatsMaxSlot < 2) {
-    RuntimeOption::StatsMaxSlot = 2;
+  assertx(Cfg::Stats::MaxSlot >= 2);
+  if (Cfg::Stats::MaxSlot < 2) {
+    Cfg::Stats::MaxSlot = 2;
   }
-  m_slots.resize(RuntimeOption::StatsMaxSlot);
+  m_slots.resize(Cfg::Stats::MaxSlot);
   Lock lock(s_lock, false);
   s_loggers.push_back(this);
 }
@@ -625,7 +626,7 @@ void ServerStats::logPage(const std::string& /*url*/, int /*code*/) {
   gettimeofday(&m_threadStatus.m_done, 0);
   Lock lock(m_lock, false);
   auto const now = curr();
-  auto const slot = now % RuntimeOption::StatsMaxSlot;
+  auto const slot = now % Cfg::Stats::MaxSlot;
   auto& ts = m_slots[slot];
   if (ts.m_time != now) {
     ts.clear();
@@ -696,7 +697,7 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
   if (!starting || usWallTime >= 0) {
     m_threadStatus.m_ioInProcess = false;
 
-    if (RuntimeOption::EnableNetworkIOStatus || s_profile_network) {
+    if (Cfg::Stats::NetworkIO || s_profile_network) {
       int64_t wt = usWallTime;
       if (wt < 0) {
         timespec now;
@@ -707,7 +708,7 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
       const char* ioName = m_threadStatus.m_ioName;
       const char* ioAddr = m_threadStatus.m_ioAddr;
 
-      if (RuntimeOption::EnableNetworkIOStatus) {
+      if (Cfg::Stats::NetworkIO) {
         std::string key = ioName;
         if (*ioAddr) {
           key += ' '; key += ioAddr;
@@ -757,7 +758,7 @@ Array ServerStats::getThreadIOStatuses() {
 ServerStatsHelper::ServerStatsHelper(const char* section,
                                      uint32_t track /* = false */)
   : m_section(section), m_instStart(0), m_track(track) {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     Timer::GetMonotonicTime(m_wallStart);
 #ifdef CLOCK_THREAD_CPUTIME_ID
     gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
@@ -769,7 +770,7 @@ ServerStatsHelper::ServerStatsHelper(const char* section,
 }
 
 ServerStatsHelper::~ServerStatsHelper() {
-  if (RuntimeOption::EnableWebStats && RuntimeOption::EnableStats) {
+  if (Cfg::Stats::Web && Cfg::Stats::Enable) {
     timespec wallEnd;
     Timer::GetMonotonicTime(wallEnd);
 #ifdef CLOCK_THREAD_CPUTIME_ID
@@ -815,7 +816,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
                                int port /* = 0 */)
   : m_exeProfiler(RequestInfo::NetworkIO) {
   assertx(name && *name);
-  if (RuntimeOption::EnableWebStats || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web || ServerStats::s_profile_network) {
     std::string msg;
     if (address) {
       msg = address;
@@ -829,7 +830,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
 }
 
 IOStatusHelper::~IOStatusHelper() {
-  if (RuntimeOption::EnableWebStats || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web || ServerStats::s_profile_network) {
     ServerStats::SetThreadIOStatus(nullptr, nullptr);
   }
 }
@@ -866,7 +867,7 @@ namespace {
 ServiceData::ExpensiveCounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
     const auto stats =
-      ServerStats::Report(RuntimeOption::StatsTrackedKeys, "admin.server_stats");
+      ServerStats::Report(Cfg::Stats::TrackedKeys, "admin.server_stats");
     counters.insert(begin(stats), end(stats));
   }
 );

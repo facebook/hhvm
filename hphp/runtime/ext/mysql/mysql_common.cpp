@@ -317,7 +317,7 @@ bool MySQL::connect(const String& host, int port, const String& socket,
     MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                  connect_timeout);
   }
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
     ServerStats::Log("sql.conn", 1);
   }
   IOStatusHelper io("mysql::connect", host.data(), port);
@@ -357,7 +357,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
       MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                    connect_timeout);
     }
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_new", 1);
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
@@ -366,7 +366,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
                              (database.empty() ? nullptr : database.data()),
                              port, socket.data(), client_flags);
   } else if (m_state == MySQLState::CONNECTED && !mysql_ping(m_conn)) {
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_ok", 1);
     }
     if (!database.empty()) {
@@ -378,7 +378,7 @@ bool MySQL::reconnect(const String& host, int port, const String& socket,
       MySQLUtil::set_mysql_timeout(m_conn, MySQLUtil::ConnectTimeout,
                                    connect_timeout);
     }
-    if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+    if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
       ServerStats::Log("sql.reconn_old", 1);
     }
     IOStatusHelper io("mysql::connect", host.data(), port);
@@ -1203,7 +1203,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
   MYSQL* conn = MySQL::GetConn(link_id, &rconn);
   if (!conn || !rconn) return MySQLQueryReturn::FAIL;
 
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
+  if (Cfg::Stats::Enable && Cfg::Stats::SQL) {
     ServerStats::Log("sql.query", 1);
 
     // removing comments, which can be wrong actually if some string field's
@@ -1231,7 +1231,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
         table = table.substr(1, table.length() - 2);
       }
       ServerStats::Log(std::string("sql.query.") + table + "." + verb, 1);
-      if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+      if (Cfg::Stats::Enable && Cfg::Stats::SQLTable) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
           preg_match("/([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]/",
@@ -1258,7 +1258,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
         rconn->m_xaction_count = ((verb == "begin" ||
                                    verb == "start transaction") ? 1 : 0);
         ServerStats::Log(std::string("sql.query.") + verb, 1);
-        if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
+        if (Cfg::Stats::Enable && Cfg::Stats::SQLTable) {
           MySqlStats::Record(verb);
         }
       } else {

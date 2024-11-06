@@ -380,23 +380,6 @@ struct RuntimeOption {
   static std::string RemoteTraceOutputDir;
   static std::set<std::string, stdltistr> TraceFunctions;
 
-  static bool EnableStats;
-  static bool EnableAPCStats;
-  static bool EnableWebStats;
-  static bool EnableMemoryStats;
-  static bool EnableSQLStats;
-  static bool EnableSQLTableStats;
-  static bool EnableNetworkIOStatus;
-  static std::string StatsXSL;
-  static std::string StatsXSLProxy;
-  static uint32_t StatsSlotDuration;
-  static uint32_t StatsMaxSlot;
-  static std::vector<std::string> StatsTrackedKeys;
-
-  static int32_t ProfilerTraceBuffer;
-  static double ProfilerTraceExpansion;
-  static int32_t ProfilerMaxTraceBuffer;
-
   static int64_t MaxSQLRowCount;
   static int64_t SocketDefaultTimeout;
 
@@ -486,7 +469,6 @@ public:
   static bool HHProfActive;
   static bool HHProfAccum;
   static bool HHProfRequest;
-  static bool TrackPerUnitMemory;
 
   // Mail options
   static std::string SendmailPath;

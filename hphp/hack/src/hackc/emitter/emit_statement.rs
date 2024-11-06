@@ -19,7 +19,6 @@ use hhbc::IterArgsFlags;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::MOpMode;
-use hhbc::MemberKey;
 use hhbc::MethodName;
 use hhbc::QueryMOp;
 use hhbc::ReadonlyOp;
@@ -44,6 +43,7 @@ use crate::emit_expression::emit_await;
 use crate::emit_expression::emit_expr;
 use crate::emit_expression::LValOp;
 use crate::emit_expression::SetRange;
+use crate::emit_expression::VecDictIndex;
 use crate::emit_expression::{self as emit_expr};
 use crate::emit_fatal;
 use crate::try_finally_rewriter as tfr;
@@ -1041,6 +1041,9 @@ fn check_l_iter<'a, 'd>(
                     *name == *self.arr_loc || self.is_key(name)
                 }
                 ast::Expr_::List(exprs) => exprs.iter().any(|expr| self.check_lval(expr, is_unset)),
+                ast::Expr_::Shape(exprs) => exprs
+                    .iter()
+                    .any(|(_, expr)| self.check_lval(expr, is_unset)),
                 ast::Expr_::ArrayGet(box (base, Some(index))) => {
                     let ast::Expr(_, _, b) = base;
                     let ast::Expr(_, _, i) = index;
@@ -1435,12 +1438,16 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
             &lvalue.1,
             "Can't use return value in write context",
         )),
-        ast::Expr_::List(es) => {
+        ast::Expr_::List(_) | ast::Expr_::Shape(_) => {
+            let idx_exps = VecDictIndex::add_indices_to_lval_exp(&lvalue.2);
             let load_values = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any)],
-                es,
+                instr::base_l(local, MOpMode::Warn, ReadonlyOp::Any),
+                vec![],
+                vec![],
+                0,
+                &idx_exps,
             )?;
             let load_values = vec![
                 InstrSeq::gather(load_values.into_iter().rev().collect()),
@@ -1471,17 +1478,22 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
 fn emit_load_list_elements<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &mut Env<'a>,
+    base: InstrSeq,
+    index_prefix: Vec<InstrSeq>,
     path: Vec<InstrSeq>,
-    es: &[ast::Expr],
+    stack_count: u32,
+    es: &[(VecDictIndex<'_>, &ast::Expr)],
 ) -> Result<Vec<InstrSeq>> {
     let load_value = es
         .iter()
-        .enumerate()
         .map(|(i, x)| {
             emit_load_list_element(
                 e,
                 env,
+                base.clone(),
+                index_prefix.iter().map(InstrSeq::clone).collect::<Vec<_>>(),
                 path.iter().map(InstrSeq::clone).collect::<Vec<_>>(),
+                stack_count,
                 i,
                 x,
             )
@@ -1493,29 +1505,48 @@ fn emit_load_list_elements<'a, 'd>(
 fn emit_load_list_element<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &mut Env<'a>,
+    base: InstrSeq,
+    mut index_prefix: Vec<InstrSeq>,
     mut path: Vec<InstrSeq>,
-    i: usize,
+    mut stack_count: u32,
+    i: &VecDictIndex<'_>,
     elem: &ast::Expr,
 ) -> Result<Vec<InstrSeq>> {
-    let query_value = |path| {
+    let (initial_exp, mk) = i.index_to_mem_key(e, env, &elem.1, stack_count)?;
+    if let Some(field_expr) = initial_exp {
+        stack_count += 1;
+        index_prefix.push(emit_expr(e, env, &field_expr)?)
+    }
+    let query_value = |path, index_prefix: Vec<InstrSeq>| {
         InstrSeq::gather(vec![
+            InstrSeq::gather(index_prefix.into_iter().rev().collect()),
+            base.clone(),
             InstrSeq::gather(path),
-            instr::query_m(0, QueryMOp::CGet, MemberKey::EI(i as i64, ReadonlyOp::Any)),
+            instr::query_m(stack_count, QueryMOp::CGet, mk),
         ])
     };
     Ok(match &elem.2 {
         ast::Expr_::Lvar(lid) => {
             let load_value = InstrSeq::gather(vec![
-                query_value(path),
+                query_value(path, index_prefix),
                 instr::set_l(e.named_local(local_id::get_name(&lid.1))),
                 instr::pop_c(),
             ]);
             vec![load_value]
         }
-        ast::Expr_::List(es) => {
-            let instr_dim = instr::dim(MOpMode::Warn, MemberKey::EI(i as i64, ReadonlyOp::Any));
+        ast::Expr_::List(_) | ast::Expr_::Shape(_) => {
+            let instr_dim = instr::dim(MOpMode::Warn, mk);
             path.push(instr_dim);
-            emit_load_list_elements(e, env, path, es)?
+            let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&elem.2);
+            emit_load_list_elements(
+                e,
+                env,
+                base.clone(),
+                index_prefix,
+                path,
+                stack_count,
+                &indexed_exprs,
+            )?
         }
         _ => {
             let set_instrs = emit_expr::emit_lval_op_nonlist(
@@ -1524,7 +1555,7 @@ fn emit_load_list_element<'a, 'd>(
                 &elem.1,
                 LValOp::Set,
                 elem,
-                query_value(path),
+                query_value(path, index_prefix),
                 1,
                 false,
                 false, // TODO readonly load list elements

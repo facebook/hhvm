@@ -436,7 +436,7 @@ void HttpServer::runOrExitProcess() {
 
     // Play extended warmup requests after server starts running. This works on
     // jumpstart seeders, and on sandboxes.
-    if (isJitSerializing() || !RO::RepoAuthoritative) {
+    if (isJitSerializing() || !Cfg::Repo::Authoritative) {
       replayExtendedWarmupRequests();
     }
     // continously running until /stop is received on admin server

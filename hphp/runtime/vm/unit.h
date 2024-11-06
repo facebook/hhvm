@@ -202,7 +202,7 @@ public:
   /*
    * Was this unit soft deployed in the current package?
    * Only available in repo mode
-   * Invariant: RO::RepoAuthorative
+   * Invariant: Cfg::Repo::Authoritative
    */
   bool isSoftDeployedRepoOnly() const;
 
@@ -323,7 +323,7 @@ public:
   /*
    * Enable or disable the coverage map for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage
+   * Pre: !Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage
    */
   void enableCoverage();
   void disableCoverage();
@@ -350,7 +350,7 @@ public:
    * Return an RDS handle that when initialized indicates that coverage is
    * enabled for this unit.
    *
-   * Pre: !RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage
+   * Pre: !Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage
    */
   rds::Handle coverageDataHandle() const;
 

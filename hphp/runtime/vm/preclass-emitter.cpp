@@ -222,7 +222,7 @@ const StaticString
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
-      !RuntimeOption::RepoAuthoritative && !ue().isASystemLib()) {
+      !Cfg::Repo::Authoritative && !ue().isASystemLib()) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 

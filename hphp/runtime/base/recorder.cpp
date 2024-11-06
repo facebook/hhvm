@@ -884,7 +884,7 @@ std::vector<char> Recorder::toRecording() const {
     nativeEvents.append(make_vec_array(static_cast<std::int64_t>(type), value));
   }
   Array unitSns{empty_dict_array()};
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     for (const auto& path : g_systemlibs) {
       unitSns.set(StrNR{path}, lookupSyslibUnit(StrNR{path}.get())->sn());
     }
@@ -919,7 +919,7 @@ std::vector<char> Recorder::toRecording() const {
   ).serde(encoder);
   auto recording{encoder.take()};
   const auto recordingSize{recording.size()};
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     const std::string repoPath{std::tmpnam(nullptr)};
     RepoAutoloadMapBuilder autoload;
     RepoFileBuilder builder{repoPath};

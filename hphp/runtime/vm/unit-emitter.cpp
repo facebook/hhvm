@@ -273,7 +273,7 @@ Id UnitEmitter::mergeRATArray(const RepoAuthType::Array* a) {
 const StringData* UnitEmitter::loadLitstrFromRepo(int64_t unitSn,
                                                   RepoFile::Token token,
                                                   bool makeStatic) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   // Reset tl_unitEmitter or tl_unit (if set). We're loading a string
   // for the unit's string table, so the encoder shouldn't access the
@@ -322,7 +322,7 @@ const StringData* UnitEmitter::loadLitstrFromRepo(int64_t unitSn,
 const ArrayData* UnitEmitter::loadLitarrayFromRepo(int64_t unitSn,
                                                    RepoFile::Token token,
                                                    bool makeStatic) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   auto const oldDefer = BlobEncoderHelper<const ArrayData*>::tl_defer;
   BlobEncoderHelper<const ArrayData*>::tl_defer = true;
@@ -383,7 +383,7 @@ const ArrayData* UnitEmitter::loadLitarrayFromPtr(const char* ptr,
 const RepoAuthType::Array*
 UnitEmitter::loadRATArrayFromRepo(int64_t unitSn,
                                   RepoFile::Token token) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   assertx(BlobEncoderHelper<const StringData*>::tl_unit ||
           BlobEncoderHelper<const StringData*>::tl_unitEmitter);
 
@@ -635,7 +635,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
         p.first->setBcToken(p.second, p.first->bcPos());
       }
     };
-    if (RO::RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       for (auto& fe : m_fes) {
         auto const token = fe->loadBc();
         if (!token) continue;
@@ -680,7 +680,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   }
 
   std::unique_ptr<Unit> u {
-    RuntimeOption::RepoAuthoritative && !Cfg::Sandbox::Mode ?
+    Cfg::Repo::Authoritative && !Cfg::Sandbox::Mode ?
       new Unit : new UnitExtended
   };
 
@@ -717,18 +717,18 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_litstrs.reserve(m_litstrs.size());
   for (auto const& s : m_litstrs) {
     assertx(s->isToken() || !s->ptr() || s->ptr()->isStatic());
-    assertx(IMPLIES(s->isToken(), RO::RepoAuthoritative));
+    assertx(IMPLIES(s->isToken(), Cfg::Repo::Authoritative));
     u->m_litstrs.emplace_back(s);
   }
   u->m_arrays.reserve(m_arrays.size());
   for (auto const& a : m_arrays) {
     assertx(a->isToken() || a->ptr()->isStatic());
-    assertx(IMPLIES(a->isToken(), RO::RepoAuthoritative));
+    assertx(IMPLIES(a->isToken(), Cfg::Repo::Authoritative));
     u->m_arrays.emplace_back(a);
   }
   u->m_rats.reserve(m_rats.size());
   for (auto const& a : m_rats) {
-    assertx(IMPLIES(a->isToken(), RO::RepoAuthoritative));
+    assertx(IMPLIES(a->isToken(), Cfg::Repo::Authoritative));
     u->m_rats.emplace_back(a);
   }
 
@@ -749,7 +749,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     // the prefetcher can claim them. Reset the atomic flag to mark
     // them available. Otherwise set the atomic flag was already
     // claimed as a shortcut.
-    if (!RO::RepoAuthoritative && unitPrefetchingEnabled()) {
+    if (!Cfg::Repo::Authoritative && unitPrefetchingEnabled()) {
       ux->m_symbolRefsForPrefetch = m_symbol_refs;
       ux->m_symbolRefsPrefetched.clear();
     } else {
@@ -789,7 +789,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
 template <typename SerDe>
 void UnitEmitter::serde(SerDe& sd, bool lazy) {
-  assertx(IMPLIES(lazy, RO::RepoAuthoritative));
+  assertx(IMPLIES(lazy, Cfg::Repo::Authoritative));
   assertx(IMPLIES(!SerDe::deserializing, !lazy));
 
   MemoryManager::SuppressOOM so{*tl_heap};
@@ -905,7 +905,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       }
 
       if (!is_systemlib && Cfg::Eval::LoadFilepathFromUnitCache) {
-        assertx(!RO::RepoAuthoritative);
+        assertx(!Cfg::Repo::Authoritative);
         /* May be different than the unit origin: e.g. for hhas files. */
         sd(m_filepath);
       }

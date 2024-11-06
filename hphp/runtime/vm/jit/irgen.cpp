@@ -225,7 +225,7 @@ void checkCoverage(IRGS& env) {
 }
 
 void checkDebuggerIntr(IRGS& env, SrcKey sk) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Debugger::EnableVSDebugger);
   assertx(Cfg::Eval::EmitDebuggerIntrCheck);
   assertx(curFunc(env) == sk.func());
@@ -248,7 +248,7 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
 }
 
 void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Debugger::EnableVSDebugger);
   assertx(Cfg::Eval::EmitDebuggerIntrCheck);
 

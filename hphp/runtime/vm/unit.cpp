@@ -41,6 +41,7 @@
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
@@ -209,7 +210,7 @@ bool Unit::isCoverageEnabled() const {
 }
 void Unit::enableCoverage() {
   if (!m_coverage.bound()) {
-    assertx(!RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage);
+    assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage);
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
@@ -400,7 +401,7 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  if (!RO::RepoAuthoritative && Cfg::Eval::EnablePerFileCoverage) {
+  if (!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage) {
     m_coverage.bind(
       rds::Mode::Normal,
       rds::LinkName{"UnitCoverage", origFilepath()}
@@ -434,10 +435,10 @@ void Unit::merge() {
   if (mergeState == MergeState::NeedsNonPersistentMerged) {
     if (isSystemLib()) {
       mergeImpl<true /* mergeOnlyNonPersistentFuncs */>();
-      assertx(!RO::RepoAuthoritative && Cfg::Jit::EnableRenameFunction);
+      assertx(!Cfg::Repo::Authoritative && Cfg::Jit::EnableRenameFunction);
     } else {
       mergeImpl<false>();
-      assertx(!RO::RepoAuthoritative);
+      assertx(!Cfg::Repo::Authoritative);
     }
   }
 
@@ -459,7 +460,7 @@ void Unit::merge() {
     }
   }
 
-  if (RuntimeOption::RepoAuthoritative ||
+  if (Cfg::Repo::Authoritative ||
     (isSystemLib() && !Cfg::Jit::EnableRenameFunction)) {
     m_mergeState.store(MergeState::Merged, std::memory_order_release);
   } else {
@@ -468,7 +469,7 @@ void Unit::merge() {
 }
 
 void Unit::logTearing(int64_t nsecs) {
-  assertx(!RO::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::SampleRequestTearing);
 
   auto const repoOptions = g_context->getRepoOptionsForRequest();
@@ -633,7 +634,7 @@ void Unit::mergeImpl() {
     Stats::inc(Stats::UnitMerge_mergeable_define);
 
     assertx((!!(constant.attrs & AttrPersistent)) ==
-        (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+        (this->isSystemLib() || Cfg::Repo::Authoritative));
     Constant::def(&constant);
   }
 
@@ -641,7 +642,7 @@ void Unit::mergeImpl() {
     Stats::inc(Stats::UnitMerge_mergeable);
     Stats::inc(Stats::UnitMerge_mergeable_define);
 
-    assertx(IMPLIES(RO::RepoAuthoritative, module.attrs & AttrPersistent));
+    assertx(IMPLIES(Cfg::Repo::Authoritative, module.attrs & AttrPersistent));
     Module::def(&module);
   }
 
@@ -662,7 +663,7 @@ void Unit::mergeImpl() {
           return true;
         }
         assertx(preClass->isPersistent() ==
-                (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+                (this->isSystemLib() || Cfg::Repo::Authoritative));
         return Class::def(preClass.get(), failIsFatal) != nullptr;
       });
 
@@ -672,7 +673,7 @@ void Unit::mergeImpl() {
       Stats::UnitMerge_mergeable_typealias,
       [&](const PreTypeAlias& typeAlias) {
         assertx(typeAlias.isPersistent() ==
-              (this->isSystemLib() || RuntimeOption::RepoAuthoritative));
+              (this->isSystemLib() || Cfg::Repo::Authoritative));
         return TypeAlias::def(&typeAlias, failIsFatal);
       });
 

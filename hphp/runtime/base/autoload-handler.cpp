@@ -110,7 +110,7 @@ void AutoloadHandler::requestInit() {
   assertx(!m_map);
   assertx(!m_facts);
   m_facts = getFactsForRequest();
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     m_map = s_repoAutoloadMap.get();
     assertx(m_map);
   } else {
@@ -371,7 +371,7 @@ bool AutoloadHandler::autoloadTypeOrTypeAlias(const String& clsName) {
 }
 
 void AutoloadHandler::setRepoAutoloadMap(std::unique_ptr<RepoAutoloadMap> map) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   assertx(!s_repoAutoloadMap);
   s_repoAutoloadMap = std::move(map);
 }

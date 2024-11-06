@@ -791,7 +791,7 @@ inline const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, con
   // may be de-duplication on load. This may mean that while the func is
   // available it is not immutable in the current compilation unit. The order
   // of the de-duplication can also differ between requests.
-  if (func->isMethCaller() && !RO::RepoAuthoritative) return Func::none();
+  if (func->isMethCaller() && !Cfg::Repo::Authoritative) return Func::none();
   assertx(!func->cls());
   if (func->isPersistent()) return Func::exact(func);
   if (func->unit() == unit) return Func::exact(func);

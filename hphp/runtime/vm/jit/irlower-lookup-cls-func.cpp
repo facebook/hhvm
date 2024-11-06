@@ -136,7 +136,7 @@ void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup,
                  callDest(out), SyncOptions::None, args);
   };
 
-  if (!RO::RepoAuthoritative) return fallback(vmain(env), dst);
+  if (!Cfg::Repo::Authoritative) return fallback(vmain(env), dst);
 
   auto& v = vmain(env);
   auto& vc = vcold(env);

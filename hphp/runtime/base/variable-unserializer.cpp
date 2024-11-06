@@ -570,7 +570,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
   }
 
   unserializePropertyValue(t, nProp);
-  if (!RuntimeOption::RepoAuthoritative) return;
+  if (!Cfg::Repo::Authoritative) return;
 
   /*
    * We assume for performance reasons in repo authoriative mode that
@@ -1054,7 +1054,7 @@ void VariableUnserializer::unserializeVariant(
 
           Variant serializedNativeData = init_null();
           bool hasSerializedNativeData = false;
-          bool checkRepoAuthType = RO::RepoAuthoritative;
+          bool checkRepoAuthType = Cfg::Repo::Authoritative;
           Class* objCls = obj->getVMClass();
           // Try fast case.
           if (remainingProps >= objCls->numDeclProperties() -

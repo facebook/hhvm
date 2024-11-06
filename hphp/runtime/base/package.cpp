@@ -173,7 +173,7 @@ std::string PackageInfo::mangleForCacheKey() const {
 static RDS_LOCAL_NO_CHECK(const PackageInfo::Deployment*, s_requestActiveDeployment);
 
 const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
-  if (RO::RepoAuthoritative || !RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Repo::Authoritative || !RuntimeOption::ServerExecutionMode()) {
     auto const it = deployments().find(Cfg::Eval::ActiveDeployment);
     if (it == end(deployments())) return nullptr;
     return &it->second;
@@ -316,7 +316,7 @@ bool PackageInfo::moduleInDeployment(const StringData* module,
 
 bool PackageInfo::moduleInASoftPackage(const StringData* module) const {
   assertx(module && !module->empty());
-  if (RO::RepoAuthoritative) return isModuleSoftDeployed(module);
+  if (Cfg::Repo::Authoritative) return isModuleSoftDeployed(module);
   for (auto& [_, deployment] : deployments()) {
     if (moduleInDeployment(module, deployment, DeployKind::Soft)) {
       return true;
@@ -343,14 +343,14 @@ bool PackageInfo::isModuleSoftDeployed(const StringData* module) const {
 bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
   if (!Cfg::Eval::EnforceDeployment) return false;
   if (auto const activeDeployment = getActiveDeployment()) {
-    if (RO::RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       std::shared_lock lock(s_mutex);
       auto it = m_moduleInActiveDeployment.find(module);
       if (it != m_moduleInActiveDeployment.end()) return !it->second;
     }
     auto const inActiveDeployment = moduleInDeployment(
       module, *activeDeployment, DeployKind::Hard);
-    if (RO::RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       std::unique_lock lock(s_mutex);
       m_moduleInActiveDeployment.emplace(module, inActiveDeployment);
     }
@@ -361,7 +361,7 @@ bool PackageInfo::violatesDeploymentBoundary(const StringData* module) const {
 
 bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
   if (!Cfg::Eval::EnforceDeployment) return false;
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     return callee.unit()->isSoftDeployedRepoOnly();
   }
   return violatesDeploymentBoundary(callee.moduleName());
@@ -369,7 +369,7 @@ bool PackageInfo::violatesDeploymentBoundary(const Func& callee) const {
 
 bool PackageInfo::violatesDeploymentBoundary(const Class& cls) const {
   if (!Cfg::Eval::EnforceDeployment) return false;
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     return cls.preClass()->unit()->isSoftDeployedRepoOnly();
   }
   return violatesDeploymentBoundary(cls.moduleName());

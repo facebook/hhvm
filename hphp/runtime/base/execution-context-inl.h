@@ -221,7 +221,7 @@ inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
 }
 
 inline const PackageInfo& ExecutionContext::getPackageInfo() const {
-  if (RO::RepoAuthoritative) return RepoFile::packageInfo();
+  if (Cfg::Repo::Authoritative) return RepoFile::packageInfo();
   if (auto const opts = getRepoOptionsForRequest()) {
     return opts->packageInfo();
   }

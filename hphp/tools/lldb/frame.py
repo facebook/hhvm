@@ -318,7 +318,7 @@ def php_line_number_from_repo(func: lldb.SBValue, pc: int) -> typing.Optional[in
         line_table_type = utils.Type("HPHP::LineTable", func.target).GetPointerType()
         line_table = utils.TokenOrPtr.get_ptr(line_table).Cast(line_table_type)
     else:
-        rauth = utils.Global("HPHP::RuntimeOption::RepoAuthoritative", func.target)
+        rauth = utils.Global("HPHP::Cfg::Repo::Authoritative", func.target)
         assert (
             rauth.unsigned != 0
         ), "php_line_number_from_repo: expected to be in repo authoritative mode"

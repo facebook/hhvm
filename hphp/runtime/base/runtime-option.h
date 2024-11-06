@@ -408,7 +408,7 @@ struct RuntimeOption {
   /* F(type, name, defaultVal) */                                       \
   F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
-  F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
+  F(bool, FatalOnVerifyError,          !Cfg::Repo::Authoritative)       \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   /*                                                                    \
    * Map from coeffect name to enforcement level                        \
@@ -438,8 +438,7 @@ public:
   static std::string RepoPath;
   static bool RepoLitstrLazyLoad;
   static bool RepoDebugInfo;
-  static bool RepoAuthoritative;
-
+  
   // These are (functionally) unused
   static RepoMode RepoLocalMode;
   static std::string RepoLocalPath;

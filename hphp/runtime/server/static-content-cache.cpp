@@ -35,7 +35,7 @@ void StaticContentCache::load() {
   BootStats::Block timer("loading static content",
                          RuntimeOption::ServerExecutionMode());
 
-  if (RuntimeOption::RepoAuthoritative && !Cfg::Server::FileCache.empty()) {
+  if (Cfg::Repo::Authoritative && !Cfg::Server::FileCache.empty()) {
     TheFileCache = std::make_shared<VirtualFileSystem>(
       Cfg::Server::FileCache, Cfg::Server::SourceRoot);
 

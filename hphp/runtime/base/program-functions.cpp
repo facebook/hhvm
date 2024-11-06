@@ -1096,7 +1096,7 @@ static void set_execution_mode(ExecutionMode mode) {
 }
 
 static void init_repo_file() {
-  if (!RO::RepoAuthoritative) return;
+  if (!Cfg::Repo::Authoritative) return;
   assertx(!RO::RepoPath.empty());
   RepoFile::init(RO::RepoPath);
 }
@@ -1239,7 +1239,7 @@ static int start_server(const std::string &username) {
   }
   setup_local_arenas(reqHeapSpec, nSlabs);
 
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     setup_swappable_readonly_arena(Cfg::Eval::HHBCArenaChunkSize);
   }
 #endif
@@ -2027,7 +2027,7 @@ static int execute_program_impl(int argc, char** argv) {
 
   if (vm.count("check-repo")) {
     hphp_thread_init();
-    always_assert(RO::RepoAuthoritative);
+    always_assert(Cfg::Repo::Authoritative);
     init_repo_file();
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
@@ -2604,7 +2604,7 @@ void hphp_process_init(bool skipExtensions) {
 
   StaticContentCache::load();
 
-  if (RuntimeOption::RepoAuthoritative &&
+  if (Cfg::Repo::Authoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
@@ -2908,7 +2908,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   // Make sure we have the right current working directory within the repo
   // based on what server.source_root was set to (current process directory
   // being the default)
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     context->setCwd(Cfg::Server::SourceRoot);
   }
 
@@ -3035,7 +3035,7 @@ void hphp_session_exit() {
   jit::mcgen::checkSerializeOptProf();
   jit::tc::requestExit();
 
-  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !Cfg::Repo::Authoritative) {
     // Update the timestamp of any Unit we touched in this request. We
     // defer this until the end of the request to prevent Units from
     // being considered "expired" while a request is still using it.

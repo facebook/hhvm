@@ -652,7 +652,7 @@ bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
 
 void releaseFromHashCache(Unit* unit) {
   assertx(unit);
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(unit->hasPerRequestFilepath());
 
@@ -1019,7 +1019,7 @@ tbb::concurrent_hash_map<
 > s_prefetchTimestamps;
 
 folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
-  assertx(!RO::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(unitPrefetchingEnabled());
 
   // Executor compatible thread factory which sets up the HPHP thread
@@ -1080,7 +1080,7 @@ folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
 // which will ignore any symbols defined in that unit.
 void prefetchSymbolRefs(SymbolRefs symbols, const Unit* loadingUnit) {
   if (!unitPrefetchingEnabled()) return;
-  assertx(!RO::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
 
   // If there's no autoloader associated with this request, we can't
   // resolve the symbols, so there's nothing to do.
@@ -1387,7 +1387,7 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
   // really going to call stat.
   s->st_mode = 0;
 
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     return lookupUnitRepoAuth(path, nullptr).unit != nullptr;
   }
 
@@ -1554,12 +1554,12 @@ Optional<std::string> getHashFromEden(const char* path,
 }
 
 size_t numLoadedUnits() {
-  if (RuntimeOption::RepoAuthoritative) return s_repoUnitCache.size();
+  if (Cfg::Repo::Authoritative) return s_repoUnitCache.size();
   return s_nonRepoUnitCache.size();
 }
 
 Unit* getLoadedUnit(StringData* path) {
-  if (!RuntimeOption::RepoAuthoritative) {
+  if (!Cfg::Repo::Authoritative) {
     auto const rpath = resolveRequestedPath(path, false);
     NonRepoUnitCache::const_accessor accessor;
     if (s_nonRepoUnitCache.find(accessor, rpath) ) {
@@ -1571,7 +1571,7 @@ Unit* getLoadedUnit(StringData* path) {
 }
 
 std::vector<Unit*> loadedUnitsRepoAuth() {
-  always_assert(RuntimeOption::RepoAuthoritative);
+  always_assert(Cfg::Repo::Authoritative);
   std::vector<Unit*> units;
   units.reserve(s_repoUnitCache.size());
   for (auto const& elm : s_repoUnitCache) {
@@ -1585,7 +1585,7 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
 }
 
 void invalidateUnit(StringData* path) {
-  always_assert(!RuntimeOption::RepoAuthoritative);
+  always_assert(!Cfg::Repo::Authoritative);
 
   path = makeStaticString(path);
 
@@ -1637,7 +1637,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   tracing::BlockNoTrace _{"lookup-unit"};
 
   OptLog ent;
-  if (!RuntimeOption::RepoAuthoritative &&
+  if (!Cfg::Repo::Authoritative &&
       StructuredLog::coinflip(Cfg::Eval::LogUnitLoadRate)) {
     ent.emplace();
   }
@@ -1678,7 +1678,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
     if (it != eContext->m_evaledFiles.end()) {
       // In RepoAuthoritative mode we assume that the files are unchanged.
       initial = false;
-      if (RuntimeOption::RepoAuthoritative ||
+      if (Cfg::Repo::Authoritative ||
           forAutoload ||
           (it->second.ts_sec > s.st_mtime) ||
           ((it->second.ts_sec == s.st_mtime) &&
@@ -1691,7 +1691,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
   FileLoadFlags flags = FileLoadFlags::kHitMem;
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = RuntimeOption::RepoAuthoritative
+  auto const cunit = Cfg::Repo::Authoritative
     ? lookupUnitRepoAuth(spath.get(), info)
     : lookupUnitNonRepoAuth(spath.get(), s, ent, extension, flags,
                             alreadyRealpath, forPrefetch, forAutoload);
@@ -1728,7 +1728,7 @@ Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
 }
 
 Unit* lookupSyslibUnit(StringData* path) {
-  assertx(RuntimeOption::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   return lookupUnitRepoAuth(path, nullptr).unit;
 }
 
@@ -1737,7 +1737,7 @@ Unit* lookupSyslibUnit(StringData* path) {
 void prefetchUnit(StringData* requestedPath,
                   std::shared_ptr<folly::atomic_uint_fast_wait_t> gate,
                   const Unit* loadingUnit) {
-  assertx(!RO::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(unitPrefetchingEnabled());
   assertx(requestedPath->isStatic());
   assertx(!loadingUnit || loadingUnit->filepath()->isStatic());
@@ -1984,7 +1984,7 @@ void unitCacheClearSync() {
 
 namespace {
 bool dirtyUnit(StringData* path) {
-  always_assert(!RuntimeOption::RepoAuthoritative);
+  always_assert(!Cfg::Repo::Authoritative);
   assertx(path->isStatic());
 
   NonRepoUnitCache::const_accessor acc;
@@ -2194,7 +2194,7 @@ Unit* compileEvalString(const StringData* code, const char* evalFilename) {
       g_context->getRepoOptionsForCurrentFrame()
     );
   }
-  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+  if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !Cfg::Repo::Authoritative) {
     // Mark this Unit like we do for normal Units
     acc->second->setLastTouchRequest(Treadmill::getRequestStartTime());
     g_context->m_touchedUnits.emplace(acc->second);
@@ -2447,7 +2447,7 @@ private:
 
   void run() {
     assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
-    assertx(!RO::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
 
     hphp_thread_init();
     SCOPE_EXIT { hphp_thread_exit(); };
@@ -2485,7 +2485,7 @@ UnitReaper* s_unit_reaper = nullptr;
 InitFiniNode s_unit_reaper_init(
   [] {
     assertx(!s_unit_reaper);
-    if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !RO::RepoAuthoritative) {
+    if (Cfg::Eval::IdleUnitTimeoutSecs > 0 && !Cfg::Repo::Authoritative) {
       s_unit_reaper = new UnitReaper();
     }
   },
@@ -2499,7 +2499,7 @@ InitFiniNode s_unit_reaper_init(
 void shutdownUnitReaper() {
   if (!s_unit_reaper) return;
   assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
-  assertx(!RO::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   delete s_unit_reaper;
   s_unit_reaper = nullptr;
 }
@@ -2528,7 +2528,7 @@ void clearUnitCacheForExit() {
 }
 
 void shutdownUnitPrefetcher() {
-  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
+  if (Cfg::Repo::Authoritative || !unitPrefetchingEnabled()) return;
   getPrefetchExecutor().join();
 }
 

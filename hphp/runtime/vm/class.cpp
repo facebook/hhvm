@@ -329,7 +329,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = RO::RepoAuthoritative ? static_alloc(size)
+  auto const mem = Cfg::Repo::Authoritative ? static_alloc(size)
                                          : lower_malloc(size);
   MemoryStats::LogAlloc(AllocKind::Class, size);
   auto const classPtr = reinterpret_cast<void*>(
@@ -339,7 +339,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    if (RO::RepoAuthoritative) static_try_free(mem, size);
+    if (Cfg::Repo::Authoritative) static_try_free(mem, size);
     else lower_sized_free(mem, size);
     throw;
   }
@@ -427,7 +427,7 @@ Class* Class::rescope(Class* ctx) {
   fermeture->m_scoped = true;
 
   if (ctx != nullptr &&
-      !RuntimeOption::RepoAuthoritative &&
+      !Cfg::Repo::Authoritative &&
       !classHasPersistentRDS(ctx)) {
     // If the context Class might be destroyed, we need to do extra accounting
     // so that we can drop all clones scoped to it at the time of destruction.
@@ -524,7 +524,7 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  if (!RuntimeOption::RepoAuthoritative) {
+  if (!Cfg::Repo::Authoritative) {
     lower_free(mallocPtr());
   }
 }
@@ -748,7 +748,7 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
 
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     if (m_preClass->usedTraits().size()) {
       int numIfaces = m_interfaces.size();
       for (int i = 0; i < numIfaces; i++) {
@@ -1431,7 +1431,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
     );
 
     if (sProp->m_type != KindOfUninit) {
-      if (RuntimeOption::RepoAuthoritative) {
+      if (Cfg::Repo::Authoritative) {
         auto const repoTy = staticPropRepoAuthType(lookup.slot);
         always_assert(tvMatchesRepoAuthType(*sProp, repoTy));
       }
@@ -1815,7 +1815,7 @@ Slot Class::clsCnsSlot(
 void Class::verifyPersistence() const {
   if (!debug) return;
   if (!isPersistent()) return;
-  assertx(preClass()->unit()->isSystemLib() || RO::RepoAuthoritative);
+  assertx(preClass()->unit()->isSystemLib() || Cfg::Repo::Authoritative);
   assertx(!m_parent || classHasPersistentRDS(m_parent.get()));
   for (DEBUG_ONLY int i = 0; i < m_interfaces.size(); i++) {
     assertx(classHasPersistentRDS(m_interfaces[i]));
@@ -3972,7 +3972,7 @@ void Class::setInterfaces() {
 void Class::setInterfaceVtables() {
   // We only need to set interface vtables for classes with callable methods
   // that implement more than 0 interfaces.
-  if (!RuntimeOption::RepoAuthoritative ||
+  if (!Cfg::Repo::Authoritative ||
       !isNormalClass(this) || m_interfaces.empty()) return;
 
   size_t totalMethods = 0;
@@ -4991,7 +4991,7 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       }
       return nullptr;
     }
-    assertx(!RO::RepoAuthoritative ||
+    assertx(!Cfg::Repo::Authoritative ||
             (cls->isPersistent() && classHasPersistentRDS(cls)));
     return cls;
   }
@@ -5010,7 +5010,7 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
       if (LIKELY(avail == Class::Avail::True)) {
         cur->setCached();
         DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(cur));
-        assertx(!RO::RepoAuthoritative ||
+        assertx(!Cfg::Repo::Authoritative ||
                 (cur->isPersistent() && classHasPersistentRDS(cur)));
         return cur;
       }
@@ -5067,7 +5067,7 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
     }
 
     DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass));
-    assertx(!RO::RepoAuthoritative ||
+    assertx(!Cfg::Repo::Authoritative ||
             (newClass->isPersistent() &&
              classHasPersistentRDS(newClass)));
 
@@ -5092,7 +5092,7 @@ Class* Class::defClosure(const PreClass* preClass, bool cache) {
   auto const nameList = preClass->namedType();
 
   auto const find = [&] () -> Class* {
-    if (RO::RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       // In repo mode the cached class slot in the NamedType should
       // be authoritative. Closure names are unique in repo mode so
       // there should only ever be one pre-class with the same

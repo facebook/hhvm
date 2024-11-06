@@ -1177,7 +1177,7 @@ bool AdminRequestHandler::handleStatusRequest(const std::string &cmd,
 
 bool AdminRequestHandler::handleInvalidateUnitRequest(const std::string &cmd,
                                                       Transport *transport) {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     transport->sendString("Cannot invalidate units in repo authoritative mode\n", 400);
     return true;
   }

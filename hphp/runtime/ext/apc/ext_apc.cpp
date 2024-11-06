@@ -114,7 +114,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   IniSetting::Bind(this, IniSetting::Mode::Config, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::Mode::Config, "apc.stat",
-                   RuntimeOption::RepoAuthoritative ? "0" : "1", &Stat);
+                   Cfg::Repo::Authoritative ? "0" : "1", &Stat);
   IniSetting::Bind(this, IniSetting::Mode::Config, "apc.enable_cli",
                    &EnableCLI);
 }

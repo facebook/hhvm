@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/repo.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,7 +192,7 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
     tc.verifyProperty(val, m_cls, prop.cls, prop.name);
   }
 
-  if (debug && RuntimeOption::RepoAuthoritative) {
+  if (debug && Cfg::Repo::Authoritative) {
     // The fact that uninitialized LateInit props are uninit isn't
     // reflected in the repo-auth-type.
     if (type(val) != KindOfUninit || !(prop.attrs & AttrLateInit)) {

@@ -33,7 +33,7 @@ namespace HPHP {
 static std::atomic<bool> s_foundHHConfig(false);
 void checkHHConfig(const Unit* unit) {
 
-  if (RuntimeOption::RepoAuthoritative ||
+  if (Cfg::Repo::Authoritative ||
       !Cfg::HackLang::LookForTypechecker ||
       s_foundHHConfig ||
       isDebuggerAttached()) {
@@ -98,7 +98,7 @@ void autoTypecheckRequestExit() {
 }
 
 void autoTypecheck(const Unit* unit) {
-  if (RuntimeOption::RepoAuthoritative ||
+  if (Cfg::Repo::Authoritative ||
       !Cfg::HackLang::AutoTypecheck ||
       *tl_doneAutoTypecheck ||
       isDebuggerAttached()) {

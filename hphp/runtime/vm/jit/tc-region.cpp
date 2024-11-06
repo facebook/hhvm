@@ -80,7 +80,7 @@ bool checkLimit(TransKind kind, const size_t numTrans) {
 }
 
 void invalidateSrcKey(SrcKey sk, SBInvOffset spOff) {
-  assertx(!RuntimeOption::RepoAuthoritative || Cfg::Jit::PGO);
+  assertx(!Cfg::Repo::Authoritative || Cfg::Jit::PGO);
   /*
    * Reroute existing translations for SrcKey to an as-yet indeterminate
    * new one.

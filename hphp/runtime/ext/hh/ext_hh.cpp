@@ -812,7 +812,7 @@ void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
     }
   );
 
-  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) {
+  if (Cfg::Repo::Authoritative || !unitPrefetchingEnabled()) {
     // Unit prefetching isn't enabled. If the caller has specified
     // that this is a hint, just do nothing (since this is advisory).
     if (hint) return;
@@ -988,7 +988,7 @@ TypedValue HHVM_FUNCTION(dynamic_fun, StringArg fun) {
 }
 
 TypedValue HHVM_FUNCTION(dynamic_fun_force, StringArg fun) {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
   return dynamicFun<DynamicAttr::Ignore>(fun.get());
@@ -1000,7 +1000,7 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
 
 TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
                          StringArg meth) {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
   return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
@@ -1020,7 +1020,7 @@ const StaticString
   s_plain_cov_req_param_set("Using Per File Coverage with 'enable_code_coverage' in request params");
 
 void check_coverage_flags() {
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     throw_invalid_operation_exception(s_no_repo_mode.get());
   }
   if (Cfg::Eval::EnableCodeCoverage == 2) {

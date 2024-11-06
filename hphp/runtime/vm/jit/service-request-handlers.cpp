@@ -139,11 +139,11 @@ TranslationResult getTranslation(SrcKey sk) {
   }
 
   if (UNLIKELY(Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck)) {
-    assertx(!RO::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     sk.func()->ensureDebuggerIntrSetLinkBound();
   }
 
-  if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
+  if (UNLIKELY(!Cfg::Repo::Authoritative && sk.unit()->isCoverageEnabled())) {
     assertx(Cfg::Eval::EnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
     return TranslationResult::failTransiently();
@@ -160,7 +160,7 @@ TranslationResult getTranslation(SrcKey sk) {
 
   auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
   if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(args.kind == TransKind::Live);
     mcgen::enqueueAsyncTranslateRequest(ctx, 0);
     return TranslationResult::failTransiently();
@@ -321,7 +321,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   auto const isProfile = tc::profileFunc(sk.func());
   auto const context = getContext(sk, isProfile);
   if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(!isProfile);
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {
@@ -361,7 +361,7 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   auto const isProfile = tc::profileFunc(sk.func());
   auto const context = getContext(sk, isProfile);
   if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(!isProfile);
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {

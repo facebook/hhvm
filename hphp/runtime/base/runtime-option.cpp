@@ -60,6 +60,7 @@
 #include "hphp/util/configs/adminserver.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/gc.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/sandbox.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/configs/log.h"
@@ -725,11 +726,11 @@ static inline uint64_t pgoThresholdDefault() {
 }
 
 static inline bool reuseTCDefault() {
-  return hhvm_reuse_tc && !RuntimeOption::RepoAuthoritative;
+  return hhvm_reuse_tc && !Cfg::Repo::Authoritative;
 }
 
 static inline bool useFileBackedArenaDefault() {
-  return RuntimeOption::RepoAuthoritative &&
+  return Cfg::Repo::Authoritative &&
     RuntimeOption::ServerExecutionMode();
 }
 
@@ -831,8 +832,6 @@ bool RuntimeOption::RepoAllowFallbackPath = true;
 bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
 bool RuntimeOption::RepoLitstrLazyLoad = true;
-// Missing: RuntimeOption::RepoAuthoritative's physical location is
-// perf-sensitive.
 uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
@@ -1517,8 +1516,6 @@ void RuntimeOption::Load(
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", RepoDebugInfo);
     Config::Bind(RepoLitstrLazyLoad, ini, config, "Repo.LitstrLazyLoad",
                  RepoLitstrLazyLoad);
-    Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
-                 RepoAuthoritative);
     Config::Bind(RepoBusyTimeoutMS, ini, config,
                  "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
 
@@ -1532,7 +1529,7 @@ void RuntimeOption::Load(
         replacePlaceholders(RepoPath);
       } else {
         always_assert_flog(
-          !RepoAuthoritative,
+          !Cfg::Repo::Authoritative,
           "Either Repo.Path, Repo.LocalPath, or Repo.CentralPath "
           "must be set in RepoAuthoritative mode"
         );
@@ -1668,12 +1665,12 @@ void RuntimeOption::Load(
                  "Eval.CodeCoverageOutputFile");
     // NB: after we know the value of RepoAuthoritative.
     Config::Bind(EnableArgsInBacktraces, ini, config,
-                 "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
+                 "Eval.EnableArgsInBacktraces", !Cfg::Repo::Authoritative);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
 
     Config::Bind(CheckCLIClientCommands, ini, config, "Eval.CheckCLIClientCommands", 1);
-    if (RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       EvalAuthoritativeMode = true;
     }
   }
@@ -2018,9 +2015,9 @@ void RuntimeOption::Load(
 
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 
-  if (Cfg::Jit::EnableRenameFunction && RO::RepoAuthoritative) {
+  if (Cfg::Jit::EnableRenameFunction && Cfg::Repo::Authoritative) {
       throw std::runtime_error("Can't use Eval.JitEnableRenameFunction if "
-                               " RepoAuthoritative is turned on");
+                               " Repo.Authoritative is turned on");
   }
 
   // Bespoke array-likes

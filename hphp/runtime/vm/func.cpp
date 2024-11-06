@@ -522,7 +522,7 @@ uint32_t Func::numClosureUseLocals() const {
 // Persistence.
 
 bool Func::isImmutableFrom(const Class* cls) const {
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
   assertx(cls && cls->lookupMethod(name()) == this);
   if (attrs() & AttrNoOverride) {
     return true;
@@ -806,7 +806,7 @@ void Func::def(Func* func) {
     if (Cfg::Eval::LockFreeFuncDef) {
       auto const persistent = func->isPersistent();
       assertx(!persistent ||
-              (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
+              (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
 
       // Binding an RDS handle is an atomic operation. For persistent handles an
       // initial value can ve specified when binding succeeds which is also
@@ -828,7 +828,7 @@ void Func::def(Func* func) {
       f = ne->getCachedFunc();
       if (f == nullptr) {
         auto const persistent = func->isPersistent();
-        assertx(!persistent || (RuntimeOption::RepoAuthoritative || func->unit()->isSystemLib()));
+        assertx(!persistent || (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
 
         if (!ne->m_cachedFunc.bound()) {
           ne->m_cachedFunc.bind(
@@ -852,7 +852,7 @@ void Func::def(Func* func) {
 
   // Otherwise check if we match or show the right error message
   if (f == func) {
-    assertx(!RO::RepoAuthoritative ||
+    assertx(!Cfg::Repo::Authoritative ||
             (f->isPersistent() && ne->m_cachedFunc.isPersistent()));
     return;
   }
@@ -955,7 +955,7 @@ void Func::setLineTable(LineTable lineTable) {
 }
 
 void Func::setLineTable(LineTablePtr::Token token) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto& table = shared()->m_lineTable;
   auto lock = table.lock_for_update();
   assertx(table.copy().isPtr() && !table.copy().ptr());
@@ -1026,7 +1026,7 @@ const LineTable* Func::getLineTable() const {
 const LineTable& Func::getOrLoadLineTable() const {
   if (auto const table = getLineTable()) return *table;
 
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   auto& wrapper = shared()->m_lineTable;
   auto lock = wrapper.lock_for_update();
@@ -1047,7 +1047,7 @@ LineTable Func::getOrLoadLineTableCopy() const {
     assertx(table.ptr());
     return *table.ptr();
   }
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   return FuncEmitter::loadLineTableFromRepo(m_unit->sn(), table.token());
 }
 
@@ -1136,7 +1136,7 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 
 void freeBCRegion(const unsigned char* bc, size_t bclen) {
   // Can't free bytecode arena memory.
-  if (RuntimeOption::RepoAuthoritative) return;
+  if (Cfg::Repo::Authoritative) return;
 
   if (debug) {
     // poison released bytecode
@@ -1147,7 +1147,7 @@ void freeBCRegion(const unsigned char* bc, size_t bclen) {
 }
 
 PC Func::loadBytecode() {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto& wrapper = shared()->m_bc;
   auto lock = wrapper.lock_for_update();
   auto const bc = wrapper.copy();
@@ -1207,7 +1207,7 @@ private:
 
 EmbeddedCoverageLinkMap s_covLinks;
 static InitFiniNode s_covLinksReinit([]{
-  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
+  if (Cfg::Repo::Authoritative || !Cfg::Eval::EnableFuncCoverage) return;
   s_covLinks.emplace(Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
@@ -1225,7 +1225,7 @@ rds::Handle Func::GetCoverageIndex() {
 }
 
 rds::Handle Func::getCoverageHandle() const {
-  assertx(!RO::RepoAuthoritative && Cfg::Eval::EnableFuncCoverage);
+  assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!isNoInjection() && !isMethCaller());
 
   CoverageLinkMap::const_accessor cnsAcc;
@@ -1248,7 +1248,7 @@ rds::Handle Func::getCoverageHandle() const {
 void Func::EnableCoverage() {
   assertx(g_context);
 
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Cannot enable function call coverage in repo authoritative mode"
     );
@@ -1311,7 +1311,7 @@ Array Func::GetCoverage() {
 }
 
 void Func::recordCall() const {
-  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
+  if (Cfg::Repo::Authoritative || !Cfg::Eval::EnableFuncCoverage) return;
   if (tl_called_functions.isNull()) return;
   if (isNoInjection() || isMethCaller()) return;
 
@@ -1323,7 +1323,7 @@ void Func::recordCall() const {
 }
 
 void Func::recordCallNoCheck() const {
-  assertx(!RO::RepoAuthoritative && Cfg::Eval::EnableFuncCoverage);
+  assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnableFuncCoverage);
   assertx(!tl_called_functions.isNull());
   assertx(tl_called_functions->isDict());
   assertx(!isNoInjection() && !isMethCaller());

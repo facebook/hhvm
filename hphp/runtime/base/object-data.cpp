@@ -119,7 +119,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
     return true;
   }
 
-  if (debug && RuntimeOption::RepoAuthoritative) {
+  if (debug && Cfg::Repo::Authoritative) {
     // The fact that uninitialized LateInit props are uninit isn't
     // reflected in the repo-auth-type.
     if (prop.type() != KindOfUninit || !(propDecl.attrs & AttrLateInit)) {

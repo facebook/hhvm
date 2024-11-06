@@ -341,7 +341,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
-  if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
+  if (Cfg::Repo::Authoritative || !Cfg::Eval::EnableFuncCoverage) return;
   if (callee->isNoInjection() || callee->isMethCaller()) return;
 
   ifThen(

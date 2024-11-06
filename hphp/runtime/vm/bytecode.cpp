@@ -127,10 +127,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(bcinterp);
 
-// RepoAuthoritative has been raptured out of runtime_option.cpp. It needs
-// to be closer to other bytecode.cpp data.
-bool RuntimeOption::RepoAuthoritative = false;
-
 using jit::JitResumeAddr;
 using jit::TCA;
 
@@ -3925,7 +3921,7 @@ JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
   auto const ctx = [&] {
     if (!fca.context) return arGetContextClass(vmfp());
     if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
-      if (RO::RepoAuthoritative) {
+      if (Cfg::Repo::Authoritative) {
         raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
       }
       return cls;
@@ -4184,7 +4180,7 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
     if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
-      if (RO::RepoAuthoritative) {
+      if (Cfg::Repo::Authoritative) {
         raise_error("Cannot use dynamic_meth_caller_force() in repo-mode");
       }
       return cls;
@@ -4787,13 +4783,13 @@ OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, const StringData* name) {
   // (except if we're in a trait).
   assertx(
     IMPLIES(
-      RO::RepoAuthoritative &&
+      Cfg::Repo::Authoritative &&
         !(func->preClass() && func->preClass()->attrs() & AttrTrait),
       cls == c
     )
   );
 
-  auto obj = RuntimeOption::RepoAuthoritative
+  auto obj = Cfg::Repo::Authoritative
     ? createClosureRepoAuth(cls) : createClosure(cls);
   c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);

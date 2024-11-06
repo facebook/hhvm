@@ -356,7 +356,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, const StringData* name) {
   // (except if we're in a trait).
   assertx(
     IMPLIES(
-      RO::RepoAuthoritative &&
+      Cfg::Repo::Authoritative &&
         !(curFunc(env)->preClass() &&
           curFunc(env)->preClass()->attrs() & AttrTrait),
       cls == templateCls

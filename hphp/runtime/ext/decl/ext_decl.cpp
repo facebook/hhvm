@@ -143,7 +143,7 @@ const StaticString s_is_no_auto_likes("is_no_auto_likes");
 const StaticString s_is_no_dynamic("is_no_auto_dynamic");
 
 void assertEnv() {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     SystemLib::throwInvalidOperationExceptionObject(
         "Cannot use FileDecls in RepoAuthoritative mode");
   }

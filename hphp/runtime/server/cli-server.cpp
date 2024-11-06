@@ -1786,7 +1786,7 @@ void CLIXboxWorker::doJob(int fd) {
 Optional<int> run_client(const char* sock_path,
                          const std::vector<std::string>& args,
                          bool ignore_bg) {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     Logger::Warning("Unable to use CLI server to run script in "
                     "repo-auth mode.");
     return std::nullopt;
@@ -2083,7 +2083,7 @@ CLIContext CLIContext::initFromClient(int client) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void init_cli_server(const char* socket_path) {
-  if (RuntimeOption::RepoAuthoritative) return;
+  if (Cfg::Repo::Authoritative) return;
 
   for (auto user : Cfg::Eval::UnixServerAllowedUsers) {
     try {

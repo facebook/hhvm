@@ -1461,7 +1461,7 @@ void ExecutionContext::requestInit() {
   // merged.
   autoTypecheckRequestInit();
 
-  if (!RO::RepoAuthoritative && Cfg::Eval::SampleRequestTearing) {
+  if (!Cfg::Repo::Authoritative && Cfg::Eval::SampleRequestTearing) {
     if (StructuredLog::coinflip(Cfg::Eval::SampleRequestTearing)) {
       m_requestStartForTearing.emplace();
       Timer::GetRealtimeTime(*m_requestStartForTearing);
@@ -1510,7 +1510,7 @@ void ExecutionContext::requestExit() {
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(nullptr);
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
-  if (!RO::RepoAuthoritative) m_requestStartForTearing.reset();
+  if (!Cfg::Repo::Authoritative) m_requestStartForTearing.reset();
   if (Cfg::Eval::LogDeclDeps) m_loadedRdepMap.clear();
 }
 
@@ -2005,7 +2005,7 @@ const StaticString
 
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
-  always_assert(!RuntimeOption::RepoAuthoritative);
+  always_assert(!Cfg::Repo::Authoritative);
 
   // Do not JIT this unit, we are using it exactly once.
   unit->setInterpretOnly();

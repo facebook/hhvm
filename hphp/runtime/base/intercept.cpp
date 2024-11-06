@@ -163,7 +163,7 @@ bool register_intercept(const String& name, const Variant& callback) {
    * blocklist in the config.
    */
   if (!(interceptedFunc->isInterceptable())) {
-    if (RO::RepoAuthoritative) {
+    if (Cfg::Repo::Authoritative) {
       raise_error("fb_intercept2 was used on a non-interceptable function (%s) "
                   "in RepoAuthoritative mode", interceptedFunc->fullName()->data());
     } else {

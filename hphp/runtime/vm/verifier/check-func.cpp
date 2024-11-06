@@ -1200,7 +1200,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       // we may end up knowing that $this is never null. The verifier doesn't
       // currently support this type of sophisticated tracking and it's doubtful
       // there would be much value in adding it.
-      if (!RuntimeOption::RepoAuthoritative && !cur->guaranteedThis) {
+      if (!Cfg::Repo::Authoritative && !cur->guaranteedThis) {
         ferror("{} required that $this be guaranteed to be non-null\n",
         opcodeToName(op));
         return false;

@@ -60,7 +60,7 @@ std::vector<RepoFileBuilder::EncodedUE> s_encodedUEs;
 RepoAutoloadMapBuilder s_autoload;
 
 void onLoadUE(std::unique_ptr<UnitEmitter>& ue) {
-  if (RO::RepoAuthoritative || !jit::tc::dumpEnabled()) return;
+  if (Cfg::Repo::Authoritative || !jit::tc::dumpEnabled()) return;
 
   std::lock_guard lock{s_encodedUELock};
   ue->m_sn = s_encodedUEs.size();
@@ -251,7 +251,7 @@ Unit* get_systemlib(const std::string& path, const Extension* extension) {
     Recorder::onCompileSystemlibString(path.c_str());
   }
 
-  if (RuntimeOption::RepoAuthoritative &&
+  if (Cfg::Repo::Authoritative &&
       !(Cfg::Eval::RecordReplay && Cfg::Eval::Replay)) {
     if (auto u = lookupSyslibUnit(makeStaticString(path))) {
       return u;

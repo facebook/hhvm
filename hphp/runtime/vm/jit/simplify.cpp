@@ -1824,7 +1824,7 @@ SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
   }
 
   // If spec2 is an interface and we've assigned it a vtable slot, use that.
-  if (spec2.exact() && isInterface(cls2) && RO::RepoAuthoritative) {
+  if (spec2.exact() && isInterface(cls2) && Cfg::Repo::Authoritative) {
     auto const slot = cls2->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot) {
       auto const data = InstanceOfIfaceVtableData{spec2.cls(), true};

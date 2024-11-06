@@ -41,7 +41,7 @@ static auto ne_counter = ServiceData::createCounter("admin.named-entities");
 
 rds::Handle NamedFunc::getFuncHandle(const StringData* name) const {
   auto const mode =
-    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+    Cfg::Repo::Authoritative ? rds::Mode::Persistent : rds::Mode::Normal;
   m_cachedFunc.bind(mode, rds::LinkName{"NEFunc", name});
   return m_cachedFunc.handle();
 }
@@ -55,7 +55,7 @@ void NamedFunc::setCachedFunc(Func* f) {
 
 rds::Handle NamedType::getClassHandle(const StringData* name) const {
   auto const mode =
-    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+    Cfg::Repo::Authoritative ? rds::Mode::Persistent : rds::Mode::Normal;
   m_cachedClass.bind(mode, rds::LinkName{"NEClass", name});
   return m_cachedClass.handle();
 }

@@ -368,7 +368,7 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
       Cfg::Server::AllowedFiles.end()) {
       return true;
     }
-    if (RuntimeOption::RepoAuthoritative &&
+    if (Cfg::Repo::Authoritative &&
       !Cfg::Server::EnableStaticContentFromDisk) {
       return false;
     }

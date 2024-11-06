@@ -498,7 +498,7 @@ void emitDir(IRGS& env) {
   auto const unit = curUnit(env);
   auto const handle = unit->perRequestFilepathHandle();
   if (handle != rds::kUninitHandle) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(Cfg::Eval::ReuseUnitsByHash);
     auto const filepath =
       gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle });
@@ -518,7 +518,7 @@ void emitFile(IRGS& env) {
   auto const unit = curUnit(env);
   auto const handle = unit->perRequestFilepathHandle();
   if (handle != rds::kUninitHandle) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(Cfg::Eval::ReuseUnitsByHash);
     assertx(!curFunc(env)->originalFilename());
     push(env, gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle }));

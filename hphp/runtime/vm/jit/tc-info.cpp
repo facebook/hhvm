@@ -143,7 +143,7 @@ bool dump(bool ignoreLease /* = false */) {
     if (!dumpTCCode(Cfg::Eval::DumpTCPath + "/tc_dump")) return false;
   }
 
-  if (!RO::RepoAuthoritative) {
+  if (!Cfg::Repo::Authoritative) {
     dump_compiled_units(Cfg::Eval::DumpTCPath + "/hhvm.hhbc");
   }
 

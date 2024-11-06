@@ -213,7 +213,7 @@ const StaticString
 
 namespace {
   bool is_interceptable(const PreClass* preClass, const StringData* name, Attr attrs) {
-    if (RO::RepoAuthoritative) return false;
+    if (Cfg::Repo::Authoritative) return false;
     auto fullname = [&]() {
       auto n = name->toCppString();
       if (!preClass) {
@@ -236,7 +236,7 @@ namespace {
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto attrs = this->attrs;
 
-  auto persistent = RO::RepoAuthoritative || (ue().isASystemLib() && (!RO::funcIsRenamable(name) || preClass));
+  auto persistent = Cfg::Repo::Authoritative || (ue().isASystemLib() && (!RO::funcIsRenamable(name) || preClass));
   assertx(IMPLIES(attrs & AttrPersistent, persistent));
   attrSetter(attrs, persistent, AttrPersistent);
 
@@ -366,7 +366,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   std::vector<Func::ParamInfo> fParams = params;
   auto const originalFullName =
     (!originalFilename ||
-     !RuntimeOption::RepoAuthoritative ||
+     !Cfg::Repo::Authoritative ||
      FileUtil::isAbsolutePath(originalFilename->slice())) ?
     originalFilename :
     makeStaticString(Cfg::Server::SourceRoot +
@@ -421,7 +421,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   } else if (m_lineTable.isPtr()) {
     f->setLineTable(*m_lineTable.ptr());
   } else {
-    assertx(RO::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     f->setLineTable(m_lineTable.token());
   }
 
@@ -634,7 +634,7 @@ void FuncEmitter::setBcToken(Func::BCPtr::Token token, size_t bclen) {
 
 Optional<Func::BCPtr::Token> FuncEmitter::loadBc() {
   if (m_bc.isPtr()) return std::nullopt;
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto const old = m_bc.token();
   auto bc = (unsigned char*)malloc(m_bclen);
   RepoFile::readRawFromUnit(m_ue.m_sn, old, bc, m_bclen);
@@ -739,7 +739,7 @@ template void FuncEmitter::serdeMetaData<>(BlobEncoder&);
 
 template<class SerDe>
 void FuncEmitter::serde(SerDe& sd, bool lazy) {
-  assertx(IMPLIES(lazy, RO::RepoAuthoritative));
+  assertx(IMPLIES(lazy, Cfg::Repo::Authoritative));
   assertx(IMPLIES(!SerDe::deserializing, !lazy));
 
   serdeMetaData(sd);
@@ -818,7 +818,7 @@ void FuncEmitter::deserializeLineTable(BlobDecoder& decoder,
 
 LineTable FuncEmitter::loadLineTableFromRepo(int64_t unitSn,
                                              RepoFile::Token token) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
   always_assert(remaining >= sizeof(uint64_t));

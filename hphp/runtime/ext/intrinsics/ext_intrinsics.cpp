@@ -358,7 +358,7 @@ int64_t HHVM_FUNCTION(dummy_int_upper_bound) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
   auto const c = Class::load(cls.get());
@@ -393,7 +393,7 @@ bool HHVM_FUNCTION(is_unit_loaded, StringArg path) {
 }
 
 void HHVM_FUNCTION(drain_unit_prefetcher) {
-  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
+  if (Cfg::Repo::Authoritative || !unitPrefetchingEnabled()) return;
   drainUnitPrefetcher();
 }
 

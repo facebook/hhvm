@@ -187,7 +187,7 @@ inline int SrcKey::lineNumber() const {
 }
 
 inline const PackageInfo* SrcKey::packageInfo() const {
-  if (RO::RepoAuthoritative) return &RepoFile::packageInfo();
+  if (Cfg::Repo::Authoritative) return &RepoFile::packageInfo();
   auto const file = unit()->filepath();
   assertx(file);
   return &RepoOptions::forFile(file->data()).packageInfo();

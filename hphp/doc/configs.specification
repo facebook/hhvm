@@ -1498,6 +1498,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::vector<std::string> Proxy.ProxyPatterns = {}, UNKNOWN
 
+# Repo
+
+- bool Repo.Authoritative = false, UNKNOWN
+
 # Sandbox
 
 - bool Sandbox.Mode = false, UNKNOWN, lookuppath(Sandbox.SandboxMode)

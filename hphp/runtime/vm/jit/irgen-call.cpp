@@ -61,7 +61,7 @@ const StaticString s_attr_Deprecated("__Deprecated");
 const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
   if (!fca.context) return curClass(env);
   if (fca.context->tsame(s_DynamicContextOverrideUnsafe.get())) {
-    if (RO::RepoAuthoritative) PUNT(Bad-Dyn-Override);
+    if (Cfg::Repo::Authoritative) PUNT(Bad-Dyn-Override);
     return cls;
   }
   return lookupKnownWithUnit(env, fca.context);
@@ -389,7 +389,7 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
 template<class TKnown, class TUnknown>
 void callProfiledFunc(IRGS& env, SSATmp* callee,
                       TKnown callKnown, TUnknown callUnknown) {
-  if (!RuntimeOption::RepoAuthoritative) return callUnknown(false);
+  if (!Cfg::Repo::Authoritative) return callUnknown(false);
 
   auto profile = TargetProfile<CallTargetProfile>(
     env.context, env.irb->curMarker(), callTargetProfileKey());
@@ -1176,7 +1176,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   };
 
   // If the method has reified generics, we can't burn the value in the JIT
-  if (!RuntimeOption::RepoAuthoritative || !methodName->hasConstVal() ||
+  if (!Cfg::Repo::Authoritative || !methodName->hasConstVal() ||
       fca.hasGenerics()) {
     return emitFCall();
   }
@@ -1864,7 +1864,7 @@ void emitFCallClsMethodD(IRGS& env,
     }
     case Class::ClassLookupResult::Maybe: {
       auto const cls = lookup.cls;
-      assertx(!RO::RepoAuthoritative);
+      assertx(!Cfg::Repo::Authoritative);
       assertx(!lookup.cls->isPersistent());
       assertx(!lookup.cls->classId().isInvalid());
       auto const callCtx =
@@ -2157,7 +2157,7 @@ void fcallClsMethodCommon(IRGS& env,
   auto const methodName = methVal->strVal();
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
     // clsHint is added by HHBBC. Will be empty if not in repo mode.
-    assertx(IMPLIES(!clsHint->empty(), RO::RepoAuthoritative));
+    assertx(IMPLIES(!clsHint->empty(), Cfg::Repo::Authoritative));
     if (!clsHint->empty()) {
       auto const cls = lookupKnown(env, clsHint);
       if (cls && isNormalClass(cls)) return std::make_pair(cls, true);
@@ -2185,7 +2185,7 @@ void fcallClsMethodCommon(IRGS& env,
   }
 
   // If the method has reified generics, we can't burn the value in the JIT
-  if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward ||
+  if (!Cfg::Repo::Authoritative || clsVal->hasConstVal() || forward ||
       fca.hasGenerics()) {
     emitFCall();
     return;

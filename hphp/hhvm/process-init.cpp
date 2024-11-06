@@ -41,7 +41,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ProcessInit() {
-  if (RuntimeOption::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }

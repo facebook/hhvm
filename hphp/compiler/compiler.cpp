@@ -690,7 +690,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // compile_systemlib_string to actually parse the file instead of
   // trying to load it from repo (which is the case when
   // RepoAuthoritative is true).
-  RuntimeOption::RepoAuthoritative = true;
+  Cfg::Repo::Authoritative = true;
   // Set RepoPath to satisfy assertions (we need a path set in
   // RepoAuthoritative). It will never actually be used.
   RuntimeOption::RepoPath = "/tmp/dummy.hhbc";
@@ -701,7 +701,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   RuntimeOption::RepoDebugInfo = false;
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
-  RuntimeOption::RepoAuthoritative = false;
+  Cfg::Repo::Authoritative = false;
   RuntimeOption::RepoPath = "";
   Cfg::Jit::Enabled = false;
   Cfg::Eval::LowStaticArrays = false;
@@ -1160,9 +1160,9 @@ bool process(CompilerOptions &po) {
             Option::GenerateHhasHHBC);
 
     if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
-      auto old_repo_auth = RuntimeOption::RepoAuthoritative;
-      RuntimeOption::RepoAuthoritative = Cfg::Eval::UseHHBBC;
-      SCOPE_EXIT { RuntimeOption::RepoAuthoritative = old_repo_auth; };
+      auto old_repo_auth = Cfg::Repo::Authoritative;
+      Cfg::Repo::Authoritative = Cfg::Eval::UseHHBBC;
+      SCOPE_EXIT { Cfg::Repo::Authoritative = old_repo_auth; };
       genText(*ue, po.outputDir);
     }
 

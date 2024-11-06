@@ -200,7 +200,7 @@ void smashCall(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jmp into a direct one, for
     // which possiblySmashableJmp returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -217,7 +217,7 @@ void smashCall(TCA inst, TCA target) {
   // target is a stub, since they're just a temporary target that we later want
   // to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && !svcreq::isStub(target) &&
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
       is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
@@ -234,7 +234,7 @@ void smashJmp(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jmp into a direct one, for
     // which possiblySmashableJmp returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -258,7 +258,7 @@ void smashJmp(TCA inst, TCA target) {
   // target is a stub, since they're just a temporary target that we later want
   // to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && !svcreq::isStub(target) &&
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
       is_int28(offset)) {
     CodeBlock cb;
     uint32_t newInst;
@@ -280,7 +280,7 @@ void smashJcc(TCA inst, TCA target) {
     // In repo authoritative mode only, the optimization performed at the end of
     // this function may have turned a smashable jcc into a direct one, for
     // which possiblySmashableJcc returns false.
-    assertx(RuntimeOption::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     return;
   }
 
@@ -297,7 +297,7 @@ void smashJcc(TCA inst, TCA target) {
   // the target is a stub, since they're just a temporary target that we later
   // want to replace with a permanent one.
   int64_t offset = target - inst;
-  if (RuntimeOption::RepoAuthoritative && !svcreq::isStub(target) &&
+  if (Cfg::Repo::Authoritative && !svcreq::isStub(target) &&
       is_int21(offset)) {
     CodeBlock cb;
     uint32_t newInst;
@@ -385,7 +385,7 @@ bool optimizeSmashedJcc(TCA inst) {
 
   // Notice that this optimization prevents a debugger guard from being
   // installed later, so we only perform it in repo authoritative mode.
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
 
   auto const b = Instruction::Cast(inst);
   auto const target = smashableJccTarget(inst);

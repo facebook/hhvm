@@ -23,6 +23,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/service-data.h"
 
@@ -118,7 +119,7 @@ void setCommonFields(StructuredLogEntry& entry) {
 #endif
     v["debug"] = debug ? "true" : "false";
     v["lowptr"] = use_lowptr ? "true" : "false";
-    v["repo_auth"] = RuntimeOption::RepoAuthoritative ? "true" : "false";
+    v["repo_auth"] = Cfg::Repo::Authoritative ? "true" : "false";
     v["is_server"] = RuntimeOption::ServerExecutionMode() ? "true" : "false";
     v["is_cli_server"] = is_cli_server_mode() ? "true" : "false";
     v["use_jit"] = Cfg::Jit::Enabled ? "true" : "false";

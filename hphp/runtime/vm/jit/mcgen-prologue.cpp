@@ -162,7 +162,7 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
   tc::PrologueTranslator translator(func, nPassed);
 
   if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!RuntimeOption::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     assertx(!tc::profileFunc(func));
     FTRACE_MOD(Trace::async_jit, 2,
                "Attempting async prologue generation for func {}\n", func->name());

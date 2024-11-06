@@ -257,7 +257,7 @@ void SrcRec::replaceOldTranslations(TCA transStub) {
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
-  assertx(!RuntimeOption::RepoAuthoritative || Cfg::Jit::PGO);
+  assertx(!Cfg::Repo::Authoritative || Cfg::Jit::PGO);
   patchIncomingBranches(transStub);
 
   // Now that we've smashed all the IBs for these translations they should be

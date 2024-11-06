@@ -66,7 +66,7 @@ std::atomic<bool> g_profileDoneFlag{false};
 
 void profile(const Class* c) {
   assertx(c);
-  if (!RuntimeOption::RepoAuthoritative ||
+  if (!Cfg::Repo::Authoritative ||
       g_profileDoneFlag.load(std::memory_order_acquire)) {
     return;
   }
@@ -95,7 +95,7 @@ void initImpl(F&& func) {
   // Stop profiling before reading the counters.
   g_profileDoneFlag.store(true, std::memory_order_release);
 
-  if (!RuntimeOption::RepoAuthoritative) {
+  if (!Cfg::Repo::Authoritative) {
     g_initFlag.store(true, std::memory_order_release);
     return;
   }

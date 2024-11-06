@@ -92,7 +92,7 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
 
 // Quickly determine if a debugger is attached to the current thread.
 bool HHVM_FUNCTION(hphp_debugger_attached) {
-  if (RO::RepoAuthoritative) return false;
+  if (Cfg::Repo::Authoritative) return false;
   if (Cfg::Debugger::EnableHphpd && (Debugger::GetProxy() != nullptr)) return true;
 
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
@@ -100,7 +100,7 @@ bool HHVM_FUNCTION(hphp_debugger_attached) {
 }
 
 bool HHVM_FUNCTION(hphp_was_interrupted_by_debugger) {
-  if (RO::RepoAuthoritative || !Cfg::Debugger::EnableVSDebugger) return false;
+  if (Cfg::Repo::Authoritative || !Cfg::Debugger::EnableVSDebugger) return false;
   return RID().wasInterruptedByDebugger();
 }
 

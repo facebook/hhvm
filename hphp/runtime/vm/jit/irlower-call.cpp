@@ -562,7 +562,7 @@ namespace {
       auto const func = srcLoc(env, inst, 0).reg();
       auto const targetModule = v.makeReg();
 
-      if (RO::RepoAuthoritative) {
+      if (Cfg::Repo::Authoritative) {
         auto const shared = v.makeReg();
         auto const sfExtra = v.makeReg();
         v << load{func[Func::sharedOff()], shared};
@@ -610,7 +610,7 @@ void cgCallViolatesModuleBoundary(IRLS& env, const IRInstruction* inst) {
 
 void cgCallViolatesDeploymentBoundary(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     auto const dst = dstLoc(env, inst, 0).reg();
     auto const unit = v.makeReg();
     if (inst->src(0)->isA(TFunc)) {

@@ -1016,7 +1016,7 @@ void cgCheckCold(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgLdUnitPerRequestFilepath(IRLS& env, const IRInstruction* inst) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReuseUnitsByHash);
 
   auto const handle = inst->extra<LdUnitPerRequestFilepath>()->handle;

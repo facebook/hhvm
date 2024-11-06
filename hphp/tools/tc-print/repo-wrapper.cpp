@@ -18,8 +18,9 @@
 #include <cstdio>
 
 #include "hphp/hhvm/process-init.h"
-#include "hphp/util/hdf.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/repo.h"
+#include "hphp/util/hdf.h"
 #include "hphp/compiler/option.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -59,7 +60,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Cfg::Server::SafeFileAccess = false;
   Cfg::Eval::AllowHhas = true;
   Cfg::Sandbox::Mode = true; // So we get Unit::m_funcTable
-  RuntimeOption::RepoAuthoritative = true;
+  Cfg::Repo::Authoritative = true;
   Cfg::Eval::LowStaticArrays = false; // save some low mem
   Cfg::Eval::VerifySystemLibHasNativeImpl = false;
 

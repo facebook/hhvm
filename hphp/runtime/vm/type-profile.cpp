@@ -83,14 +83,14 @@ void profileRequestStart() {
   auto const codeCoverageForceInterp = []{
     if (Cfg::Eval::EnableCodeCoverage > 1) return true;
     if (Cfg::Eval::EnableCodeCoverage == 1) {
-      if (RuntimeOption::RepoAuthoritative) return false;
+      if (Cfg::Repo::Authoritative) return false;
       return isEnableCodeCoverageReqParamTrue();
     }
     return false;
   }();
 
   auto const shouldUsePerFileCoverage = []{
-    if (RO::RepoAuthoritative) return false;
+    if (Cfg::Repo::Authoritative) return false;
     if (Cfg::Eval::EnablePerFileCoverage > 1) return true;
     return Cfg::Eval::EnablePerFileCoverage == 1 &&
       isEnablePerFileCoverageReqParamTrue();

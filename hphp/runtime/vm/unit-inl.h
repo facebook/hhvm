@@ -69,7 +69,7 @@ inline bool Unit::isICE() const {
 }
 
 inline bool Unit::isSoftDeployedRepoOnly() const {
-  assertx(RuntimeOption::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   return m_softDeployedRepoOnly;
 }
 
@@ -85,7 +85,7 @@ inline const StringData* Unit::perRequestFilepath() const {
   if (!m_extended) return nullptr;
   auto const u = getExtended();
   if (!u->m_perRequestFilepath.bound()) return nullptr;
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReuseUnitsByHash);
   if (!u->m_perRequestFilepath.isInit()) return nullptr;
   return *u->m_perRequestFilepath;
@@ -108,7 +108,7 @@ inline bool Unit::hasPerRequestFilepath() const {
 inline void Unit::bindPerRequestFilepath(const StringData* p) {
   assertx(p);
   assertx(p->isStatic());
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
@@ -118,7 +118,7 @@ inline void Unit::bindPerRequestFilepath(const StringData* p) {
 }
 
 inline void Unit::makeFilepathPerRequest() {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReuseUnitsByHash);
   assertx(m_extended);
   auto u = getExtended();
@@ -130,32 +130,32 @@ inline void Unit::makeFilepathPerRequest() {
 // Unit cache ref-counting
 
 inline void Unit::acquireCacheRefCount() {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   ++getExtended()->m_cacheRefCount;
 }
 
 inline bool Unit::releaseCacheRefCount() {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   assertx(getExtended()->m_cacheRefCount > 0);
   return !(--getExtended()->m_cacheRefCount);
 }
 
 inline bool Unit::hasCacheRef() const {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   return getExtended()->m_cacheRefCount > 0;
 }
 
 inline Unit* Unit::nextCachedByHash() const {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   return getExtended()->m_nextCachedByHash.load(std::memory_order_acquire);
 }
 
 inline void Unit::setNextCachedByHash(Unit* u) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(m_extended);
   assertx(!u || u->sha1() == sha1());
   return getExtended()->m_nextCachedByHash.store(u, std::memory_order_release);
@@ -166,7 +166,7 @@ inline void Unit::setNextCachedByHash(Unit* u) {
 
 inline void
 Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(requestStartTime != Treadmill::kNoStartTime);
   assertx(m_extended);
@@ -182,7 +182,7 @@ Unit::setLastTouchRequest(Treadmill::Clock::time_point requestStartTime) {
 }
 
 inline void Unit::setLastTouchTime(TouchClock::time_point now) {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto u = getExtended();
@@ -194,7 +194,7 @@ inline void Unit::setLastTouchTime(TouchClock::time_point now) {
 
 inline std::pair<Treadmill::Clock::time_point, Unit::TouchClock::time_point>
 Unit::getLastTouch() const {
-  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(!Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::IdleUnitTimeoutSecs > 0);
   assertx(m_extended);
   auto const u = getExtended();

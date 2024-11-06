@@ -894,7 +894,7 @@ size_t doHash(IniSetting::OptionData& data) {
 }
 
 void logSettings() {
-  if (RO::RepoAuthoritative) return;
+  if (Cfg::Repo::Authoritative) return;
   if (!StructuredLog::coinflip(Cfg::Eval::StartOptionLogRate)) return;
 
   auto const hash = IniSetting::HashAll(Cfg::Eval::StartOptionLogOptions,

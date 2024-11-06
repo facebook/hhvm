@@ -275,7 +275,7 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
   auto const funcVal = reinterpret_cast<uintptr_t>(func);
   auto const cacheable =
-    RuntimeOption::RepoAuthoritative &&
+    Cfg::Repo::Authoritative &&
     funcVal &&
     clsVal < std::numeric_limits<uint32_t>::max() &&
     funcVal < std::numeric_limits<uint32_t>::max();

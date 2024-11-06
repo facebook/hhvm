@@ -375,7 +375,7 @@ extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
  */
 void retranslateAll(bool skipSerialize) {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
-  const bool serialize = RuntimeOption::RepoAuthoritative &&
+  const bool serialize = Cfg::Repo::Authoritative &&
                          !RuntimeOption::EvalJitSerdesFile.empty() &&
                          isJitSerializing();
   const bool serializeOpt = serialize && serializeOptProfEnabled();
@@ -733,7 +733,7 @@ void checkSerializeOptProf() {
     return;
   }
 
-  assertx(RuntimeOption::RepoAuthoritative &&
+  assertx(Cfg::Repo::Authoritative &&
           !RuntimeOption::EvalJitSerdesFile.empty() &&
           isJitSerializing());
 

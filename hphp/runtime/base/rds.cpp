@@ -591,7 +591,7 @@ void processInit() {
   addNewPersistentChunk(allocSize);
 
   // Attempt to load any RDS preassignments from the profiling file.
-  if (RO::RepoAuthoritative &&
+  if (Cfg::Repo::Authoritative &&
       Cfg::Eval::ReorderRDS &&
       !RO::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
@@ -785,7 +785,7 @@ bool isValidHandle(Handle handle) {
 
 Handle profileForHandle(Handle h) {
   assertx(shouldProfileAccesses());
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   auto const it = s_profiling.find(h);
   if (it == s_profiling.end()) return kUninitHandle;
   assertx(isLocalHandle(it->second.countHandle));
@@ -803,7 +803,7 @@ void markAccess(Handle h) {
 // symbols.
 Ordering profiledOrdering() {
   assertx(shouldProfileAccesses());
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
 
   Guard g(s_allocMutex);
 
@@ -913,7 +913,7 @@ Ordering profiledOrdering() {
 
 // Assign offsets to symbols that were ordered in the profiling file.
 void setPreAssignments(const Ordering& ordering) {
-  assertx(RO::RepoAuthoritative);
+  assertx(Cfg::Repo::Authoritative);
   assertx(Cfg::Eval::ReorderRDS);
   assertx(s_settingPreAssignments);
 

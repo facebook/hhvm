@@ -114,7 +114,7 @@ size_t compute_size(const Func* func) {
 }
 
 inline bool isNop(Op opcode) {
-  if (!RuntimeOption::RepoAuthoritative) return false;
+  if (!Cfg::Repo::Authoritative) return false;
   return opcode == OpNop ||
          opcode == OpCGetCUNop ||
          opcode == OpUGetCUNop ||
@@ -136,7 +136,7 @@ auto const next_ip_saved = r15;  // used when next_ip needs to be moved to a
 
 Offset compile_cti(Func* func, PC unitpc) {
   auto const needsCoverageCheck =
-    !RuntimeOption::RepoAuthoritative &&
+    !Cfg::Repo::Authoritative &&
     Cfg::Eval::EnableCodeCoverage > 0;
   std::lock_guard<std::mutex> lock(g_mutex);
   auto cti_entry = func->ctiEntry();
@@ -149,7 +149,7 @@ Offset compile_cti(Func* func, PC unitpc) {
     inner_block.emplace();
     inner_block->init(mem, cti_size, "");
   }
-  auto cti_table = RuntimeOption::RepoAuthoritative ? cti_ops : ctid_ops;
+  auto cti_table = Cfg::Repo::Authoritative ? cti_ops : ctid_ops;
   X64Assembler a{mem ? *inner_block : cti_code()};
   auto cti_base = a.frontier();
   PatchTable patches(func, unitpc, cti_base);

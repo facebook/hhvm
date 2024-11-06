@@ -111,7 +111,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   if (isInterface(knownCls)) {
     auto const slot = knownCls->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot) {
-      assertx(RO::RepoAuthoritative);
+      assertx(Cfg::Repo::Authoritative);
       return gen(env,
                  InstanceOfIfaceVtable,
                  InstanceOfIfaceVtableData{knownCls, true},
@@ -192,7 +192,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
   auto const genFail = [&](SSATmp* val, SSATmp* thisCls = nullptr) {
     if (thisCls == nullptr) thisCls = genThisCls();
 
-    auto const failHard = RuntimeOption::RepoAuthoritative
+    auto const failHard = Cfg::Repo::Authoritative
       && !tc.isSoft()
       && !tc.isThis();
     fail(val, thisCls, failHard);

@@ -244,7 +244,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
       if (!failIsFatal) return nullptr;
       raiseIncompatible();
     }
-    assertx(!RO::RepoAuthoritative);
+    assertx(!Cfg::Repo::Authoritative);
     return current;
   }
 

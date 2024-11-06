@@ -132,7 +132,7 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
   // c_Closure is not allowed to use the fast path, as the constructor will
   // throw immediately.  No other closure's constructor is able to throw, so we
   // are able to make some optimizations that would be unsafe if unwinding.
-  if (!RuntimeOption::RepoAuthoritative || cls == c_Closure::classof()) {
+  if (!Cfg::Repo::Authoritative || cls == c_Closure::classof()) {
     auto const args = argGroup(env, inst).immPtr(cls);
     cgCallHelper(vmain(env), env, CallSpec::direct(createClosure),
                  callDest(dst), SyncOptions::None, args);

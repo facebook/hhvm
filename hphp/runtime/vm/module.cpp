@@ -42,7 +42,7 @@ void Module::prettyPrint(std::ostream& out) const {
 
 Module* Module::lookup(const StringData* name) {
   assertx(name->isStatic());
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     auto const link = rds::attachModuleCache<rds::Mode::Persistent>(name);
     return link.bound() ? *link : nullptr;
   }
@@ -62,7 +62,7 @@ Module* Module::load(const StringData* name) {
 
 void Module::def(Module* m) {
   assertx(m->name->isStatic());
-  if (RO::RepoAuthoritative) {
+  if (Cfg::Repo::Authoritative) {
     auto const link = rds::bindModuleCache<rds::Mode::Persistent>(m->name);
     assertx(m->attrs & AttrPersistent);
     always_assert(*link == nullptr);

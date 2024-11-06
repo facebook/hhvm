@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/named-entity.h"
 
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/sandbox.h"
 
 namespace HPHP {
@@ -235,7 +236,7 @@ inline bool Class::classof(const Class* cls) const {
   if (UNLIKELY(isInterface(cls))) {
     auto const slot = cls->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot && isConcreteNormalClass(this)) {
-      assertx(RO::RepoAuthoritative);
+      assertx(Cfg::Repo::Authoritative);
       auto const ok = slot < m_vtableVecLen && m_vtableVec[slot].iface == cls;
       assertx(ok == (m_interfaces.lookupDefault(cls->name(), nullptr) == cls));
       return ok;

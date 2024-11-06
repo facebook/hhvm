@@ -316,7 +316,7 @@ void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const sf = v.makeReg();
   #ifdef USE_LOWPTR
-    assertx(RO::RepoAuthoritative);
+    assertx(Cfg::Repo::Authoritative);
     emitCmpLowPtr(v, sf, funcPtr, func);
   #else
     auto const funcId = funcPtr->getFuncId();

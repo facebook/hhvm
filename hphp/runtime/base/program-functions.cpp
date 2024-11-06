@@ -1239,7 +1239,7 @@ static int start_server(const std::string &username) {
   setup_local_arenas(reqHeapSpec, nSlabs);
 
   if (RuntimeOption::RepoAuthoritative) {
-    setup_swappable_readonly_arena(RuntimeOption::EvalHHBCArenaChunkSize);
+    setup_swappable_readonly_arena(Cfg::Eval::HHBCArenaChunkSize);
   }
 #endif
 
@@ -3161,7 +3161,7 @@ static struct SetThreadInitFini {
     AsyncFuncImpl::SetThreadInitFunc(
       [] (void*) {
 #if defined(_GNU_SOURCE)
-        if (RuntimeOption::EvalPerfDataMap) {
+        if (Cfg::Eval::PerfDataMap) {
           pthread_t threadId = pthread_self();
           pthread_attr_t attr;
           pthread_getattr_np(threadId, &attr);

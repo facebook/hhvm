@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/portability.h"
 
@@ -68,14 +69,14 @@ DebugInfo* DebugInfo::Get() {
 
 DebugInfo::DebugInfo() {
   m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
-  if (RuntimeOption::EvalPerfPidMap) {
+  if (Cfg::Eval::PerfPidMap) {
     m_perfMap = fopen(m_perfMapName.c_str(), "w");
   }
-  if (RuntimeOption::EvalPerfJitDump) {
+  if (Cfg::Eval::PerfJitDump) {
     initPerfJitDump();
   }
   m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
   }
   generatePidMapOverlay();
@@ -84,21 +85,21 @@ DebugInfo::DebugInfo() {
 DebugInfo::~DebugInfo() {
   if (m_perfMap) {
     fclose(m_perfMap);
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_perfMapName.c_str());
     }
   }
 
   if (m_perfJitDump) {
     closePerfJitDump();
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_perfJitDumpName.c_str());
     }
   }
 
   if (m_dataMap) {
     fclose(m_dataMap);
-    if (!RuntimeOption::EvalKeepPerfPidMap) {
+    if (!Cfg::Eval::KeepPerfPidMap) {
       unlink(m_dataMapName.c_str());
     }
   }
@@ -224,10 +225,10 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
 
 void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, std::string name) {
   if (!m_perfMap) return;
-  if (RuntimeOption::EvalProfileBC) return;
+  if (Cfg::Eval::ProfileBC) return;
   if (name.empty()) {
     name = lookupFunction(sk.func(), sk.prologue(),
-                          RuntimeOption::EvalPerfPidMapIncludeFilePath);
+                          Cfg::Eval::PerfPidMapIncludeFilePath);
   }
   fprintf(m_perfMap, "%lx %x %s\n",
     reinterpret_cast<uintptr_t>(range.begin()),
@@ -258,7 +259,7 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
   };
 
 
-  if (RuntimeOption::EvalProfileBC) {
+  if (Cfg::Eval::ProfileBC) {
     if (!m_perfMap) return;
     const char* name;
     if (op < Op_count) {

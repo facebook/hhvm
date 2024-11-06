@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/service-data.h"
@@ -60,7 +61,7 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
         sk
       );
     }
-    if (RuntimeOption::EvalPerfPidMap) {
+    if (Cfg::Eval::PerfPidMap) {
       Debug::DebugInfo::Get()->recordPerfMap(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk

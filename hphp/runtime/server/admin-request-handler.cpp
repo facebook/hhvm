@@ -58,6 +58,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
@@ -584,7 +585,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::Info("Got admin port prepare-to-stop request from %s",
                    transport->getRemoteHost());
       MemInfo info, newInfo;
-      Process::GetMemoryInfo(info, RO::EvalMemInfoCheckCgroup2);
+      Process::GetMemoryInfo(info, Cfg::Eval::MemInfoCheckCgroup2);
       HttpServer::PrepareToStop();
 
       // We may consider purge_all() here, too.  But since requests
@@ -598,7 +599,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       // t.detach();
 
       transport->sendString("OK\n");
-      Process::GetMemoryInfo(newInfo, RO::EvalMemInfoCheckCgroup2);
+      Process::GetMemoryInfo(newInfo, Cfg::Eval::MemInfoCheckCgroup2);
       Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
                     info.freeMb, info.cachedMb, info.buffersMb,
                     newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);
@@ -1371,7 +1372,7 @@ bool AdminRequestHandler::handleDumpStaticStringsRequest(folly::File& file) {
   for (auto item : list) {
     auto const line = formatStaticString(item);
     folly::writeFull(file.fd(), line.data(), line.size());
-    if (RuntimeOption::EvalPerfDataMap) {
+    if (Cfg::Eval::PerfDataMap) {
       auto const len = std::min<size_t>(item->size(), 255);
       std::string str(item->data(), len);
       // Only print the first line (up to 255 characters). Since we want '\0' in

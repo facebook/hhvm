@@ -433,31 +433,6 @@ struct RuntimeOption {
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
-  F(bool, EnableLogBridge,             true)                            \
-  F(bool, MoreAccurateMemStats,        true)                            \
-  F(bool, MemInfoCheckCgroup2,         true)                            \
-  F(bool, SpinOnCrash,                 false)                           \
-  F(uint32_t, DumpRingBufferOnCrash,   0)                               \
-  F(bool, PerfPidMap,                  true)                            \
-  F(bool, PerfPidMapIncludeFilePath,   true)                            \
-  F(bool, PerfJitDump,                 false)                           \
-  F(string, PerfJitDumpDir,            "/tmp")                          \
-  F(bool, PerfDataMap,                 false)                           \
-  F(bool, KeepPerfPidMap,              false)                           \
-  F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
-  F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
-  F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
-  F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
-  F(uint32_t, RDSSize,                 64 << 20)                        \
-  F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
-  F(bool, ProfileBC,                   false)                           \
-  F(bool, ProfileHeapAcrossRequests,   false)                           \
-  F(bool, ProfileHWEnable,             true)                            \
-  F(string, ProfileHWEvents,           std::string(""))                 \
-  F(bool, ProfileHWExcludeKernel,      false)                           \
-  F(bool, ProfileHWFastReads,          false)                           \
-  F(bool, ProfileHWStructLog,          false)                           \
-  F(int32_t, ProfileHWExportInterval,  30)                              \
   F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, ReorderRDS,                  true)                            \
   F(double, RDSReorderThreshold,       0.0005)                          \

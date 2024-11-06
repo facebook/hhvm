@@ -833,7 +833,7 @@ constexpr ssize_t kOOMCheckThreshold = 65536;
 
 // Return whether it OOMed, also safe to call in non-VM threads.
 inline bool checkOOM(size_t size) {
-  if (!RuntimeOption::EvalMoreAccurateMemStats) return false;
+  if (!Cfg::Eval::MoreAccurateMemStats) return false;
   if (tl_heap) return tl_heap->preAllocOOM(size);
   return false;
 }

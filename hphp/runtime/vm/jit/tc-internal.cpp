@@ -455,13 +455,13 @@ LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
     fakeStart += mxSz;
     start += sz;
   };
-  initBlock(m_main, RuntimeOption::EvalThreadTCMainBufferSize,
+  initBlock(m_main, Cfg::Eval::ThreadTCMainBufferSize,
             "thread local main");
-  initBlock(m_cold, RuntimeOption::EvalThreadTCColdBufferSize,
+  initBlock(m_cold, Cfg::Eval::ThreadTCColdBufferSize,
             "thread local cold");
-  initBlock(m_frozen, RuntimeOption::EvalThreadTCFrozenBufferSize,
+  initBlock(m_frozen, Cfg::Eval::ThreadTCFrozenBufferSize,
             "thread local frozen");
-  initBlock(m_data, RuntimeOption::EvalThreadTCDataBufferSize,
+  initBlock(m_data, Cfg::Eval::ThreadTCDataBufferSize,
             "thread local data");
 }
 

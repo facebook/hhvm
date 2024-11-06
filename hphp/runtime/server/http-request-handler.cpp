@@ -531,7 +531,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
 
   StructuredLogEntry* entry = nullptr;
-  if (RuntimeOption::EvalProfileHWStructLog) {
+  if (Cfg::Eval::ProfileHWStructLog) {
     entry = transport->createStructuredLogEntry();
     entry->setInt("response_code", code);
     auto queueBegin = transport->getQueueTime();
@@ -554,7 +554,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   context->onShutdownPostSend();
   Eval::Debugger::InterruptPSPEnded(transport->getUrl());
 
-  if (RuntimeOption::EvalProfileHWStructLog) {
+  if (Cfg::Eval::ProfileHWStructLog) {
     // We now reuse the same entry created previously for non-psp, with updates
     // on certain metrics (memory and hardware counters).
     entry->setInt("response_code", transport->getResponseCode());

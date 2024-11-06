@@ -27,6 +27,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
@@ -90,10 +91,10 @@ CodeCache::CodeCache() {
   // can short jump/point between them. Thus we allocate one slab and divide it
   // between the various blocks.
   auto const thread_local_size = ru<size2m>(
-    RuntimeOption::EvalThreadTCMainBufferSize +
-    RuntimeOption::EvalThreadTCColdBufferSize +
-    RuntimeOption::EvalThreadTCFrozenBufferSize +
-    RuntimeOption::EvalThreadTCDataBufferSize
+    Cfg::Eval::ThreadTCMainBufferSize +
+    Cfg::Eval::ThreadTCColdBufferSize +
+    Cfg::Eval::ThreadTCFrozenBufferSize +
+    Cfg::Eval::ThreadTCDataBufferSize
   );
 
   auto const kASize         = ru<size2m>(CodeCache::ASize);

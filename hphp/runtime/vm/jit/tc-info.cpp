@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/build-info.h"
 
@@ -169,19 +170,19 @@ std::vector<UsageInfo> getUsageInfo() {
   tcUsageInfo.emplace_back(UsageInfo{
     "RDS",
     rds::usedBytes(),
-    RuntimeOption::EvalRDSSize * 3 / 4,
+    Cfg::Eval::RDSSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "RDSLocal",
     rds::usedLocalBytes(),
-    RuntimeOption::EvalRDSSize * 3 / 4,
+    Cfg::Eval::RDSSize * 3 / 4,
     false
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "persistentRDS",
     rds::usedPersistentBytes(),
-    RuntimeOption::EvalRDSSize / 4,
+    Cfg::Eval::RDSSize / 4,
     false
   });
   return tcUsageInfo;

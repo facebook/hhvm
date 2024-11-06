@@ -30,6 +30,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
@@ -574,18 +575,18 @@ static size_t s_bits_to_go;
 
 void processInit() {
   assertx(!s_local_base);
-  if (RuntimeOption::EvalRDSSize > 1u << 30) {
+  if (Cfg::Eval::RDSSize > 1u << 30) {
     // The encoding of RDS handles require that the normal and local regions
     // together be smaller than 1G.
-    RuntimeOption::EvalRDSSize = 1u << 30;
+    Cfg::Eval::RDSSize = 1u << 30;
   }
-  s_local_base = RuntimeOption::EvalRDSSize * 3 / 4;
+  s_local_base = Cfg::Eval::RDSSize * 3 / 4;
   s_local_frontier = s_local_base;
 
 #if RDS_FIXED_PERSISTENT_BASE
   auto constexpr allocSize = kPersistentChunkSize;
 #else
-  auto const allocSize = RuntimeOption::EvalRDSSize / 4;
+  auto const allocSize = Cfg::Eval::RDSSize / 4;
 #endif
   addNewPersistentChunk(allocSize);
 
@@ -969,7 +970,7 @@ void threadInit(bool shouldRegister) {
     s_tlBaseList.push_back(tl_base);
   }
 
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
       (char*)tl_base + s_local_base,
@@ -995,7 +996,7 @@ void threadExit(bool shouldUnregister) {
     }
   }
 
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     Debug::DebugInfo::recordDataMap(
       tl_base,
       (char*)tl_base + s_local_base,
@@ -1023,7 +1024,7 @@ bool isFullyInitialized() {
 
 void recordRds(Handle h, size_t size,
                folly::StringPiece type, folly::StringPiece msg) {
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     if (isNormalHandle(h)) {
       h = genNumberHandleFrom(h);
       size += sizeof(GenNumber);
@@ -1036,7 +1037,7 @@ void recordRds(Handle h, size_t size,
 }
 
 void recordRds(Handle h, size_t size, const Symbol& sym) {
-  if (RuntimeOption::EvalPerfDataMap) {
+  if (Cfg::Eval::PerfDataMap) {
     recordRds(h, size, symbol_kind(sym), symbol_rep(sym));
   }
 }

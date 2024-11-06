@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/pcre.h"
 #include "hphp/util/concurrent-scalable-cache.h"
@@ -935,7 +936,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       }
       if ((!Cfg::Jit::NoGdb ||
            Cfg::Jit::UseVtuneAPI ||
-           RuntimeOption::EvalPerfPidMap) &&
+           Cfg::Eval::PerfPidMap) &&
           extra &&
           extra->executable_jit != nullptr) {
         size_t size;
@@ -952,7 +953,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
         if (Cfg::Jit::UseVtuneAPI) {
           HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
         }
-        if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
+        if (Cfg::Eval::PerfPidMap && jit::mcgen::initialized()) {
           std::string escaped_name;
           folly::json::escapeString(name, escaped_name,
                                     folly::json::serialization_opts());

@@ -1694,13 +1694,13 @@ void RuntimeOption::Load(
       HeapObjectSanitizer::install_signal_handler();
     }
 
-    HardwareCounter::Init(EvalProfileHWEnable,
-                          url_decode(EvalProfileHWEvents.data(),
-                                     EvalProfileHWEvents.size()).toCppString(),
+    HardwareCounter::Init(Cfg::Eval::ProfileHWEnable,
+                          url_decode(Cfg::Eval::ProfileHWEvents.data(),
+                                     Cfg::Eval::ProfileHWEvents.size()).toCppString(),
                           false,
-                          EvalProfileHWExcludeKernel,
-                          EvalProfileHWFastReads,
-                          EvalProfileHWExportInterval);
+                          Cfg::Eval::ProfileHWExcludeKernel,
+                          Cfg::Eval::ProfileHWFastReads,
+                          Cfg::Eval::ProfileHWExportInterval);
 
     Config::Bind(RecordCodeCoverage, ini, config, "Eval.RecordCodeCoverage");
     if (Cfg::Jit::Enabled && RecordCodeCoverage) {

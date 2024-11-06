@@ -70,6 +70,7 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
@@ -1474,7 +1475,7 @@ void UniqueStubs::add(const char* name,
                           start,
                           end);
     }
-    if (RuntimeOption::EvalPerfPidMap) {
+    if (Cfg::Eval::PerfPidMap) {
       dbg.recordPerfMap(Debug::TCRange(start, end, &cb == &code.cold()),
                         SrcKey{},
                         folly::sformat("HHVM::{}", name));

@@ -154,13 +154,13 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
     case CrashReportStage::DumpRingBuffer:
       s_crash_report_stage = CrashReportStage::SpinOnCrash;
 
-      if (RuntimeOption::EvalDumpRingBufferOnCrash) {
-        Trace::dumpRingBuffer(RuntimeOption::EvalDumpRingBufferOnCrash, 0);
+      if (Cfg::Eval::DumpRingBufferOnCrash) {
+        Trace::dumpRingBuffer(Cfg::Eval::DumpRingBufferOnCrash, 0);
       }
       [[fallthrough]];
     case CrashReportStage::SpinOnCrash:
       s_crash_report_stage = CrashReportStage::CheckFD;
-      if (RuntimeOption::EvalSpinOnCrash) {
+      if (Cfg::Eval::SpinOnCrash) {
         char buf[128];
         snprintf(buf, 127,
                  "Crashed. Waiting for debugger to attach pid %d\n", getpid());
@@ -375,7 +375,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       }
       auto const& stacktraceFile = RuntimeOption::StackTraceFilename;
       mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
-      if (RuntimeOption::EvalPerfPidMap) {
+      if (Cfg::Eval::PerfPidMap) {
         if (auto const debugInfo = Debug::DebugInfo::Get()) {
           mapFileIn(debugInfo->perfMapName(), s_perfmap_start, s_perfmap_end);
         }

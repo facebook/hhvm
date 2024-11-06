@@ -732,7 +732,7 @@ void RegionTranslator::publishMetaImpl() {
   auto const srcRec = srcDB().find(sk);
   always_assert(srcRec);
 
-  if (RuntimeOption::EvalProfileBC) {
+  if (Cfg::Eval::ProfileBC) {
     TransBCMapping prev{};
     for (auto& cur : fixups.bcMap) {
       if (!cur.aStart) continue;

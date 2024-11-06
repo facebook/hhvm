@@ -394,6 +394,58 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   1 - Warning
   2 - Do not do implicit coercion
 
+- bool Eval.EnableLogBridge = true, UNKNOWN
+
+- bool Eval.MoreAccurateMemStats = true, UNKNOWN
+
+- bool Eval.MemInfoCheckCgroup2 = true, UNKNOWN
+
+- bool Eval.SpinOnCrash = false, UNKNOWN
+
+- uint32_t Eval.DumpRingBufferOnCrash = 0, UNKNOWN
+
+- bool Eval.PerfPidMap = true, UNKNOWN
+
+- bool Eval.PerfPidMapIncludeFilePath = true, UNKNOWN
+
+- bool Eval.PerfJitDump = false, UNKNOWN
+
+- std::string Eval.PerfJitDumpDir = "/tmp", UNKNOWN
+
+- bool Eval.PerfDataMap = false, UNKNOWN
+
+- bool Eval.KeepPerfPidMap = false, UNKNOWN
+
+- uint32_t Eval.ThreadTCMainBufferSize = 6 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCColdBufferSize = 6 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCFrozenBufferSize = 4 << 20, UNKNOWN
+
+- uint32_t Eval.ThreadTCDataBufferSize = 256 << 10, UNKNOWN
+
+- uint32_t Eval.RDSSize = Eval.RDSSize, UNKNOWN, staticdefault(64 << 20)
+
+  The value is used before we load the config so we have to use staticdefault
+
+- uint32_t Eval.HHBCArenaChunkSize = 10 << 20, UNKNOWN
+
+- bool Eval.ProfileBC = false, UNKNOWN
+
+- bool Eval.ProfileHeapAcrossRequests = false, UNKNOWN
+
+- bool Eval.ProfileHWEnable = true, UNKNOWN
+
+- std::string Eval.ProfileHWEvents = "", UNKNOWN
+
+- bool Eval.ProfileHWExcludeKernel = false, UNKNOWN
+
+- bool Eval.ProfileHWFastReads = false, UNKNOWN
+
+- bool Eval.ProfileHWStructLog = false, UNKNOWN
+
+- int32_t Eval.ProfileHWExportInterval = 30, UNKNOWN
+
 - uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
 
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN

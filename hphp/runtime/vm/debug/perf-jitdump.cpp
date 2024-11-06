@@ -25,8 +25,9 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/oprof-jitdump.h"
-#include "hphp/util/logger.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/cycles.h"
+#include "hphp/util/logger.h"
 
 #include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
@@ -105,7 +106,7 @@ static bool checkJitdumpDir(const char* dirName) {
 
 void DebugInfo::initPerfJitDump() {
   /* create and open the jitdump file*/
-  auto const jitdump_dir = RuntimeOption::EvalPerfJitDumpDir.data();
+  auto const jitdump_dir = Cfg::Eval::PerfJitDumpDir.data();
 
   if (checkJitdumpDir(jitdump_dir)) {
     m_perfJitDumpName = folly::sformat("{}/jit-{}.dump", jitdump_dir, getpid());

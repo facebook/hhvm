@@ -179,12 +179,7 @@ Until we resolve the above error, register the class as virtual subclass of the 
 {{#struct:has_adapter?}}
 
 
-{{#program:generate_immutable_types}}
 {{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
-raise NotImplementedError("Adapted struct not yet supported in thrift-python: {{> structs/unadapted_name}}")
-{{/program:generate_mutable_types}}
 {{/struct:has_adapter?}}{{!
 }}{{/program:structs}}
 

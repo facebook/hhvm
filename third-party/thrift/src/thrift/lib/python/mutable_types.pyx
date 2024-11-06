@@ -348,6 +348,7 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef _fbthrift_set_field_value(self, int16_t index, object value):
         cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
         cdef FieldInfo field_info = mutable_struct_info.fields[index]
+        cdef TypeInfoBase field_type_info = mutable_struct_info.type_infos[index]
 
         try:
             if field_info.adapter_info is not None:
@@ -358,13 +359,16 @@ cdef class MutableStruct(MutableStructOrUnion):
                     self,
                     transitive_annotation=transitive_annotation(),
                 )
+                if field_type_info.is_container():
+                    # If an adapter is applied to a container field, wrap the
+                    # value with `_ThriftContainerWrapper`, otherwise the
+                    # container's type-checker will reject the value.
+                    value = _ThriftContainerWrapper(value)
 
             set_mutable_struct_field(
                 self._fbthrift_data,
                 index,
-                (
-                    <TypeInfoBase>mutable_struct_info.type_infos[index]
-                ).to_internal_data(value),
+                field_type_info.to_internal_data(value),
             )
         except Exception as exc:
             raise type(exc)(

@@ -16,5 +16,5 @@ python_capi_with_containers: mstch_python_capi src/with_containers.thrift
 rust: mstch_rust src/module.thrift
 java: mstch_java src/module.thrift
 py: py:json src/module.thrift
-python_experimental_unify_thrift_python_type_hints: mstch_python:experimental_unify_thrift_python_type_hints,experimental_generate_mutable_types src/module.thrift
+python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types src/module.thrift

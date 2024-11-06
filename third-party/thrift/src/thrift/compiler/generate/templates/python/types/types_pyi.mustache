@@ -26,9 +26,9 @@ import enum
 
 {{/program:unions?}}
 import folly.iobuf as _fbthrift_iobuf
-{{#program:generate_unified_thrift_python_type_hints?}}
+{{#program:enable_abstract_types?}}
 import {{program:module_path}}.thrift_abstract_types
-{{/program:generate_unified_thrift_python_type_hints?}}
+{{/program:enable_abstract_types?}}
 import {{program:base_library_package}}.types as _fbthrift_python_types
 {{#program:generate_immutable_types}}
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
@@ -56,9 +56,9 @@ class _fbthrift_compatible_with_{{enum:name}}:
 class {{enum:name}}(_fbthrift_python_types.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
         }}{{^enum:flags?}}Enum, int{{/enum:flags?}}{{!
-        }}{{#program:generate_unified_thrift_python_type_hints?}}{{!
+        }}{{#program:enable_abstract_types?}}{{!
         }}, {{program:module_path}}.thrift_abstract_types.{{enum:name}}{{!
-        }}{{/program:generate_unified_thrift_python_type_hints?}}{{!
+        }}{{/program:enable_abstract_types?}}{{!
         }}, _fbthrift_compatible_with_{{enum:name}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
@@ -83,9 +83,9 @@ class {{> structs/unadapted_name}}({{!
         }}{{^struct:exception?}}{{> types/struct_base }}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}, _fbthrift_compatible_with_{{> structs/unadapted_name}}{{!
-        }}{{#program:generate_unified_thrift_python_type_hints?}}{{!
+        }}{{#program:enable_abstract_types?}}{{!
         }}, {{program:module_path}}.thrift_abstract_types.{{struct:py_name}}{{!
-        }}{{/program:generate_unified_thrift_python_type_hints?}}{{!
+        }}{{/program:enable_abstract_types?}}{{!
         }}):
     {{#program:generate_immutable_types}}{{!
     }}{{#struct:fields_ordered_by_id}}
@@ -120,7 +120,7 @@ class {{> structs/unadapted_name}}({{!
     {{/struct:plain?}}
     {{#struct:union?}}
 
-{{^program:generate_unified_thrift_python_type_hints?}}
+{{^program:enable_abstract_types?}}
 {{#program:generate_immutable_types}}
     class Type(enum.Enum):
         EMPTY: {{> structs/unadapted_name}}.Type = ...
@@ -139,12 +139,12 @@ class {{> structs/unadapted_name}}({{!
 {{#program:generate_immutable_types}}
     FbThriftUnionFieldEnum = Type
 {{/program:generate_immutable_types}}
-{{/program:generate_unified_thrift_python_type_hints?}}
-{{#program:generate_unified_thrift_python_type_hints?}}
+{{/program:enable_abstract_types?}}
+{{#program:enable_abstract_types?}}
 {{#program:generate_immutable_types}}
     Type = FbThriftUnionFieldEnum
 {{/program:generate_immutable_types}}
-{{/program:generate_unified_thrift_python_type_hints?}}
+{{/program:enable_abstract_types?}}
 
 {{#program:generate_immutable_types}}
     @classmethod

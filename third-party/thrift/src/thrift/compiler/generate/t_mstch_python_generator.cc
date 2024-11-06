@@ -159,8 +159,8 @@ class python_mstch_program : public mstch_program {
             {"program:generate_to_mutable_python_conversion_methods?",
              &python_mstch_program::
                  generate_to_mutable_python_conversion_methods},
-            {"program:generate_unified_thrift_python_type_hints?",
-             &python_mstch_program::generate_unified_thrift_python_type_hints},
+            {"program:enable_abstract_types?",
+             &python_mstch_program::enable_abstract_types},
         });
     register_has_option("program:import_static?", "import_static");
     gather_included_program_namespaces();
@@ -247,8 +247,8 @@ class python_mstch_program : public mstch_program {
     return !get_option("generate_to_mutable_python_conversion_methods").empty();
   }
 
-  mstch::node generate_unified_thrift_python_type_hints() {
-    return !get_option("generate_unified_thrift_python_type_hints").empty();
+  mstch::node enable_abstract_types() {
+    return !get_option("enable_abstract_types").empty();
   }
 
  protected:
@@ -1287,17 +1287,15 @@ void t_mstch_python_generator::generate_file(
 void t_mstch_python_generator::generate_types() {
   const bool experimental_generate_mutable_types =
       has_option("experimental_generate_mutable_types");
-  const bool experimental_unify_thrift_python_type_hints =
-      has_option("experimental_unify_thrift_python_type_hints");
+  const bool experimental_generate_abstract_types =
+      has_option("experimental_generate_abstract_types");
 
   mstch_context_.set_or_erase_option(
       experimental_generate_mutable_types,
       "generate_to_mutable_python_conversion_methods",
       "true");
   mstch_context_.set_or_erase_option(
-      experimental_unify_thrift_python_type_hints,
-      "generate_unified_thrift_python_type_hints",
-      "true");
+      experimental_generate_abstract_types, "enable_abstract_types", "true");
   generate_file(
       "thrift_types.py",
       IsTypesFile::Yes,
@@ -1309,7 +1307,7 @@ void t_mstch_python_generator::generate_types() {
       TypeKind::Immutable,
       generate_root_path_);
 
-  if (experimental_unify_thrift_python_type_hints) {
+  if (experimental_generate_abstract_types) {
     generate_file(
         "thrift_abstract_types.py",
         IsTypesFile::Yes,
@@ -1330,7 +1328,7 @@ void t_mstch_python_generator::generate_types() {
         TypeKind::Mutable,
         generate_root_path_);
   }
-  mstch_context_.options.erase("generate_unified_thrift_python_type_hints");
+  mstch_context_.options.erase("enable_abstract_types");
 }
 
 void t_mstch_python_generator::generate_metadata() {
@@ -1429,7 +1427,7 @@ THRIFT_REGISTER_GENERATOR(
     "      option) should be considered UNSTABLE and is subject to arbitrary\n"
     "      (backwards incompatible) changes and undefined behavior.\n"
     "      NEVER ENABLE THIS OPTION in production environments.\n"
-    "    experimental_unify_thrift_python_type_hints:\n"
+    "    experimental_generate_abstract_types:\n"
     "      DO NOT USE. Enables the experimental generation of symbols\n"
     "      that provide type-hints for thrift-python types. This is for local\n"
     "      experimentation, development and testing ONLY. When this option is\n"

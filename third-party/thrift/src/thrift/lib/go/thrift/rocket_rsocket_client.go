@@ -125,13 +125,6 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 	return nil, nil, err
 }
 
-var rsocketBlock func(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) = func(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) {
-	mono := client.RequestResponse(request)
-	val, err := mono.Block(ctx)
-	val = payload.Clone(val)
-	return val, err
-}
-
 func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) error {
 	r.resetDeadline()
 	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, zstd, dataBytes)

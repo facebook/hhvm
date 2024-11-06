@@ -25,14 +25,12 @@ import (
 	"github.com/rsocket/rsocket-go/rx"
 )
 
-// DO NOT USE: ExperimentalRSocketBlock is a temporary experiment with a new blocking implementation for RSocketClient.
-func ExperimentalRSocketBlock() {
-	rsocketBlock = func(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) {
-		mono := client.RequestResponse(request)
-		s := newSubscriber(ctx)
-		mono.SubscribeWith(ctx, s)
-		return s.Block()
-	}
+func rsocketBlock(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) {
+	mono := client.RequestResponse(request)
+	// This implementation of subscriber avoids race conditions on close that is present in the default implementation in the rsocket library.
+	s := newSubscriber(ctx)
+	mono.SubscribeWith(ctx, s)
+	return s.Block()
 }
 
 type subsriber struct {

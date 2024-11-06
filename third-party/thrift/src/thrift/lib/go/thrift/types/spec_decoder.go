@@ -34,23 +34,25 @@ func ReadStructSpec(d Decoder, dstStruct Struct, spec *StructSpec) error {
 	}
 
 	for {
-		_, wireType, fieldID, err := d.ReadFieldBegin()
+		fieldName, wireType, fieldID, err := d.ReadFieldBegin()
 		if err != nil {
-			return PrependError(fmt.Sprintf("%s field %d read error: ", structReflectType.Name(), fieldID), err)
+			return PrependError(fmt.Sprintf("%s field %d ('%s') read error: ", structReflectType.Name(), fieldID, fieldName), err)
 		}
 
 		if wireType == STOP {
 			break
 		}
 
-		var fieldReadErr error
 		var fieldSpec *FieldSpec
-		fieldSpecIndex, found := spec.FieldSpecIDToIndex[fieldID]
-		if found {
+		if fieldSpecIndex, found := spec.FieldSpecIDToIndex[fieldID]; found {
 			fieldSpec = &spec.FieldSpecs[fieldSpecIndex]
+		} else if fieldSpecIndex, found := spec.FieldSpecNameToIndex[fieldName]; found && fieldID == NO_FIELD_ID && fieldName != "" {
+			fieldSpec = &spec.FieldSpecs[fieldSpecIndex]
+			wireType = fieldSpec.WireType
 		}
 
-		if !found || wireType != fieldSpec.WireType {
+		var fieldReadErr error
+		if fieldSpec == nil || wireType != fieldSpec.WireType {
 			fieldReadErr = d.Skip(wireType)
 		} else {
 			fieldDstValue := dstConcreteValue.Field(fieldSpec.ReflectIndex)

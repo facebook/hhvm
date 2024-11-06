@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"thrift/lib/go/thrift"
+	"thrift/test/go/if/reflecttest"
 	"thrift/test/go/if/thrifttest"
 )
 
@@ -183,5 +184,26 @@ func TestFieldSerializationOrderDeterminism(t *testing.T) {
 	actualJSON := string(buf)
 	if actualJSON != expectedJSON {
 		t.Fatalf("actual json is not as expected: %s", actualJSON)
+	}
+}
+
+func TestSimpleJSONSerialization(t *testing.T) {
+	writeTarget := reflecttest.ReflectCodecTestStructConst1
+
+	serializer := thrift.NewSimpleJSONSerializer()
+	data, err := serializer.Write(writeTarget)
+	if err != nil {
+		t.Fatalf("failed to serialize struct: %v", err)
+	}
+
+	readTarget := &reflecttest.ReflectCodecTestStruct{}
+	deserializer := thrift.NewSimpleJSONDeserializer()
+	err = deserializer.Read(readTarget, data)
+	if err != nil {
+		t.Fatalf("failed to deserialize struct: %v", err)
+	}
+
+	if writeTarget.String() != readTarget.String() {
+		t.Fatalf("values are not equal")
 	}
 }

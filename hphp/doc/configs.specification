@@ -1810,3 +1810,17 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Log.BaseDirectory = "", UNKNOWN
 
   Base directory for all logfiles
+
+# AdminServer
+
+  Has to be after Server because we depend on values from Server
+
+- std::string AdminServer.IP = Server.IP, UNKNOWN
+- int AdminServer.Port = 0, UNKNOWN
+- int AdminServer.ThreadCount = 1, UNKNOWN
+- bool AdminServer.EnableSSLWithPlainText = false, UNKNOWN
+- bool AdminServer.StatsNeedPassword = true, UNKNOWN
+- std::string AdminServer.Password = "", UNKNOWN, nobind
+- std::set<std::string> AdminServer.Passwords = {}, UNKNOWN, nobind
+- std::set<std::string> AdminServer.HashedPasswords = {}, UNKNOWN, nobind
+- std::string AdminServer.DumpPath = "/tmp/hhvm_admin_dump", UNKNOWN

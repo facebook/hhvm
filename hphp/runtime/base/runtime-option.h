@@ -353,17 +353,6 @@ struct RuntimeOption {
   static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
 
-  static std::string AdminServerIP;
-  static int AdminServerPort;
-  static int AdminThreadCount;
-  static bool AdminServerEnableSSLWithPlainText;
-  static bool AdminServerStatsNeedPassword;
-  static std::string AdminPassword;
-  static std::set<std::string> AdminPasswords;
-  static std::set<std::string> HashedAdminPasswords;
-
-  static std::string AdminDumpPath;
-
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
 

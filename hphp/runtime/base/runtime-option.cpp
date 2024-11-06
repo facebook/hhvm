@@ -57,6 +57,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/adminserver.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/gc.h"
 #include "hphp/util/configs/sandbox.h"
@@ -658,16 +659,6 @@ std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
-
-std::string RuntimeOption::AdminServerIP;
-int RuntimeOption::AdminServerPort = 0;
-int RuntimeOption::AdminThreadCount = 1;
-bool RuntimeOption::AdminServerEnableSSLWithPlainText = false;
-bool RuntimeOption::AdminServerStatsNeedPassword = true;
-std::string RuntimeOption::AdminPassword;
-std::set<std::string> RuntimeOption::AdminPasswords;
-std::set<std::string> RuntimeOption::HashedAdminPasswords;
-std::string RuntimeOption::AdminDumpPath;
 
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
@@ -1791,19 +1782,12 @@ void RuntimeOption::Load(
   }
   {
     // Admin Server
-    Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", Cfg::Server::IP);
-    Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
-    Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
-    Config::Bind(AdminServerEnableSSLWithPlainText, ini, config,
-                 "AdminServer.EnableSSLWithPlainText", false);
-    Config::Bind(AdminServerStatsNeedPassword, ini, config,
-                 "AdminServer.StatsNeedPassword", AdminServerStatsNeedPassword);
-    AdminPassword = Config::GetString(ini, config, "AdminServer.Password");
-    AdminPasswords = Config::GetSet(ini, config, "AdminServer.Passwords");
-    HashedAdminPasswords =
-      Config::GetSet(ini, config, "AdminServer.HashedPasswords");
-    Config::Bind(AdminDumpPath, ini, config,
-                 "AdminServer.DumpPath", "/tmp/hhvm_admin_dump");
+    // Until we support these get things we leave it here
+    // And the reason these are doing get is that we don't want these values to be able
+    // to be fetched using ini_get
+    Cfg::AdminServer::Password = Config::GetString(ini, config, "AdminServer.Password");
+    Cfg::AdminServer::Passwords = Config::GetSet(ini, config, "AdminServer.Passwords");
+    Cfg::AdminServer::HashedPasswords = Config::GetSet(ini, config, "AdminServer.HashedPasswords");
   }
   {
     // Http

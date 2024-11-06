@@ -58,6 +58,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/configs/adminserver.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/stats.h"
 #include "hphp/util/hphp-config.h"
@@ -282,7 +283,7 @@ struct DumpFile {
 };
 
 Optional<DumpFile> dump_file(const char* name) {
-  auto const path = folly::sformat("{}/{}", RO::AdminDumpPath, name);
+  auto const path = folly::sformat("{}/{}", Cfg::AdminServer::DumpPath, name);
 
   // mkdir -p the directory prefix of `path`
   if (FileUtil::mkdir(path) != 0) return std::nullopt;
@@ -505,7 +506,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
                           ;
     // When configured, we allow read-only stats to be read without a password.
-    if (needs_password && !RuntimeOption::AdminServerStatsNeedPassword) {
+    if (needs_password && !Cfg::AdminServer::StatsNeedPassword) {
       if ((strncmp(cmd.c_str(), "memory.", 7) == 0) ||
           (strncmp(cmd.c_str(), "stats.", 6) == 0) ||
           (strncmp(cmd.c_str(), "check-", 6) == 0) ||
@@ -517,11 +518,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       }
     }
 
-    if (needs_password && !RuntimeOption::HashedAdminPasswords.empty()) {
+    if (needs_password && !Cfg::AdminServer::HashedPasswords.empty()) {
       bool matched = false;
 #ifdef HAVE_CRYPTO_PWHASH_STR
       const auto password = transport->getParam("auth");
-      for (const std::string& hash : RuntimeOption::HashedAdminPasswords) {
+      for (const std::string& hash : Cfg::AdminServer::HashedPasswords) {
         if (crypto_pwhash_str_verify(hash.data(),
                                      password.data(),
                                      password.size()) == 0) {
@@ -534,16 +535,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("Unauthorized", 401);
         break;
       }
-    } else if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
+    } else if (needs_password && !Cfg::AdminServer::Passwords.empty()) {
       std::set<std::string>::const_iterator iter =
-        RuntimeOption::AdminPasswords.find(transport->getParam("auth"));
-      if (iter == RuntimeOption::AdminPasswords.end()) {
+        Cfg::AdminServer::Passwords.find(transport->getParam("auth"));
+      if (iter == Cfg::AdminServer::Passwords.end()) {
         transport->sendString("Unauthorized", 401);
         break;
       }
     } else {
-      if (needs_password && !RuntimeOption::AdminPassword.empty() &&
-          RuntimeOption::AdminPassword != transport->getParam("auth")) {
+      if (needs_password && !Cfg::AdminServer::Password.empty() &&
+          Cfg::AdminServer::Password != transport->getParam("auth")) {
         transport->sendString("Unauthorized", 401);
         break;
       }

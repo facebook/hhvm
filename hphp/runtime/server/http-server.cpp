@@ -40,6 +40,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/adminserver.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
@@ -198,13 +199,13 @@ HttpServer::HttpServer() {
     m_pageServer->enableSSLWithPlainText();
   }
 
-  ServerOptions admin_options(RuntimeOption::AdminServerIP,
-                              RuntimeOption::AdminServerPort,
-                              RuntimeOption::AdminThreadCount);
+  ServerOptions admin_options(Cfg::AdminServer::IP,
+                              Cfg::AdminServer::Port,
+                              Cfg::AdminServer::ThreadCount);
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     Cfg::Server::RequestTimeoutSeconds);
-  if (RuntimeOption::AdminServerEnableSSLWithPlainText) {
+  if (Cfg::AdminServer::EnableSSLWithPlainText) {
     m_adminServer->enableSSLWithPlainText();
   }
 
@@ -278,7 +279,7 @@ void HttpServer::onServerShutdown() {
 
   // When a new instance of HPHP has taken over our page server socket, stop our
   // admin server so it can acquire those ports.
-  if (RuntimeOption::AdminServerPort) {
+  if (Cfg::AdminServer::Port) {
     m_adminServer->stop();
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");
@@ -335,7 +336,7 @@ void HttpServer::startupFailure(const std::string& msg) {
 
 
 void HttpServer::runAdminServerOrExitProcess() {
-  if (RuntimeOption::AdminServerPort) {
+  if (Cfg::AdminServer::Port) {
     if (!startServer(false)) {
       startupFailure("Unable to start admin server");
       not_reached();
@@ -469,7 +470,7 @@ void HttpServer::waitForServers() {
   if (Cfg::Server::Port) {
     m_pageServer->waitForEnd();
   }
-  if (RuntimeOption::AdminServerPort) {
+  if (Cfg::AdminServer::Port) {
     m_adminServer->waitForEnd();
   }
   // all other servers invoke waitForEnd on stop
@@ -615,24 +616,24 @@ void HttpServer::killPid() {
 }
 
 static bool sendAdminCommand(const char* cmd) {
-  if (RuntimeOption::AdminServerPort <= 0) return false;
-  std::string host = RuntimeOption::AdminServerIP;
+  if (Cfg::AdminServer::Port <= 0) return false;
+  std::string host = Cfg::AdminServer::IP;
   if (host.empty()) host = "localhost";
-  auto passwords = RuntimeOption::AdminPasswords;
-  if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
-    passwords.insert(RuntimeOption::AdminPassword);
+  auto passwords = Cfg::AdminServer::Passwords;
+  if (passwords.empty() && !Cfg::AdminServer::Password.empty()) {
+    passwords.insert(Cfg::AdminServer::Password);
   }
   auto passwordIter = passwords.begin();
   do {
     std::string url;
     if (passwordIter != passwords.end()) {
       url = folly::sformat("http://{}:{}/{}?auth={}", host,
-                           RuntimeOption::AdminServerPort,
+                           Cfg::AdminServer::Port,
                            cmd, *passwordIter);
       ++passwordIter;
     } else {
       url = folly::sformat("http://{}:{}/{}", host,
-                           RuntimeOption::AdminServerPort, cmd);
+                           Cfg::AdminServer::Port, cmd);
     }
     if (CURL* curl = curl_easy_init()) {
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -795,7 +796,7 @@ void HttpServer::LogShutdownStats() {
 
 bool HttpServer::startServer(bool pageServer) {
   int port = pageServer ?
-    Cfg::Server::Port : RuntimeOption::AdminServerPort;
+    Cfg::Server::Port : Cfg::AdminServer::Port;
 
   // 1. try something nice
   for (unsigned int i = 0; i < 60; i++) {

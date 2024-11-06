@@ -101,6 +101,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/configs/adminserver.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
@@ -1913,7 +1914,7 @@ static int execute_program_impl(int argc, char** argv) {
     inherited_fds.push_back(po.sslportfd);
   }
   if (po.admin_port != -1) {
-    RuntimeOption::AdminServerPort = po.admin_port;
+    Cfg::AdminServer::Port = po.admin_port;
   }
   if (po.noSafeAccessCheck) {
     Cfg::Server::SafeFileAccess = false;

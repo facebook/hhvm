@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/util/configs/eval.h"
+
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
@@ -312,7 +314,7 @@ hphp_fast_map<
 }
 
 bool shouldProfileGlobals() {
-  return isJitSerializing() && RO::EvalProfileGlobalsLimit > 0;
+  return isJitSerializing() && Cfg::Eval::ProfileGlobalsLimit > 0;
 }
 
 void profileGlobal(const StringData* name) {
@@ -380,7 +382,7 @@ void writeGlobalProfiles(jit::ProfDataSerializer& ser) {
   // Only write out the first EvalProfileGlobalsLimit entries. These
   // will be the hottest.
   auto const size =
-    std::min<uint32_t>(RO::EvalProfileGlobalsLimit, sorted.size());
+    std::min<uint32_t>(Cfg::Eval::ProfileGlobalsLimit, sorted.size());
   jit::write_raw(ser, uint32_t{size});
   for (uint32_t i = 0; i < size; ++i) {
     jit::write_string(ser, sorted[i].name);
@@ -388,7 +390,7 @@ void writeGlobalProfiles(jit::ProfDataSerializer& ser) {
     // Record whether this global was present enough to side-exit for
     // the missing case.
     auto const success = sorted[i].meta.present / double(sorted[i].meta.count);
-    jit::write_raw(ser, success >= RO::EvalProfileGlobalsSlowExitThreshold);
+    jit::write_raw(ser, success >= Cfg::Eval::ProfileGlobalsSlowExitThreshold);
 
     auto type = sorted[i].meta.type;
     // TBottom means it was never present. Nothing to guard on this
@@ -405,7 +407,7 @@ void readGlobalProfiles(jit::ProfDataDeserializer& ser) {
     auto const name = jit::read_string(ser);
     auto const mainlyPresent = jit::read_raw<bool>(ser);
     auto const type = jit::Type::deserialize(ser);
-    if (RO::EvalProfileGlobalsLimit <= 0) continue;
+    if (Cfg::Eval::ProfileGlobalsLimit <= 0) continue;
     auto const link = rds::alloc<TypedValue, rds::Mode::Normal>();
     s_prealloc.emplace(name, PreAllocElem{link, type, mainlyPresent});
   }

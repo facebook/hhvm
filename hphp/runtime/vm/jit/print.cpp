@@ -139,17 +139,17 @@ struct InstAreaRange {
 
 bool dumpPrettyIR(int level) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
-         (RuntimeOption::EvalDumpIR >= level);
+         (Cfg::Eval::DumpIR >= level);
 }
 
 bool dumpJsonIR(int level) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level) ||
-         (RuntimeOption::EvalDumpIRJson >= level);
+         (Cfg::Eval::DumpIRJson >= level);
 }
 
 bool dumpRuntimeIR(int level) {
-  return RuntimeOption::EvalDumpIR >= level ||
-         RuntimeOption::EvalDumpIRJson >= level;
+  return Cfg::Eval::DumpIR >= level ||
+         Cfg::Eval::DumpIRJson >= level;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -977,7 +977,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies || (RuntimeOption::EvalDumpHHIRInLoops && isBlockInLoop(block))) {
+    if (dotBodies || (Cfg::Eval::DumpHHIRInLoops && isBlockInLoop(block))) {
       if (block->hint() != Block::Hint::Unlikely &&
           block->hint() != Block::Hint::Unused) {
         // Include the IR in the body of the node

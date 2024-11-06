@@ -446,6 +446,94 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - int32_t Eval.ProfileHWExportInterval = 30, UNKNOWN
 
+- bool Eval.ReorderRDS = true, UNKNOWN
+
+- double Eval.RDSReorderThreshold = 0.0005, UNKNOWN
+
+- uint32_t Eval.ProfileGlobalsLimit = 200, UNKNOWN
+
+- double Eval.ProfileGlobalsSlowExitThreshold = 0.98, UNKNOWN
+
+- uint32_t Eval.GdbSyncChunks = 128, UNKNOWN
+
+- bool Eval.TraceCommandLineRequest = true, UNKNOWN
+
+- bool Eval.EmitDebuggerIntrCheck = true, UNKNOWN
+
+- bool Eval.LogArrayAccessProfile = false, UNKNOWN
+
+  Log the profile used to optimize array-like gets and sets.
+
+- bool Eval.LogClsSpeculation = false, UNKNOWN
+
+- double Eval.CoeffectFunParamProfileThreshold = 0.10, UNKNOWN
+
+- bool Eval.AssemblerFoldDefaultValues = true, UNKNOWN, unitcacheflag
+
+- uint64_t Eval.AssemblerMaxScalarSize = 2147483648, UNKNOWN, unitcacheflag
+
+  2GB
+
+- uint64_t Eval.FuncCountHint = 10000, UNKNOWN
+
+- uint64_t Eval.PGOFuncCountHint = 1000, UNKNOWN
+
+- bool Eval.RegionRelaxGuards = true, UNKNOWN
+
+- bool Eval.WorkloadAwareMaturity = true, UNKNOWN
+
+- int32_t Eval.DumpBytecode = 0, UNKNOWN
+
+  DumpBytecode =1 dumps user php, =2 dumps systemlib & user php
+
+- int32_t Eval.DumpHhas = 0, UNKNOWN
+
+  DumpHhas =1 dumps user php, =2 dumps systemlib & user php
+
+- std::string Eval.DumpHhasToFile = "", UNKNOWN
+
+- bool Eval.DumpTC = false, UNKNOWN
+
+- std::string Eval.DumpTCPath = "/tmp", UNKNOWN
+
+- bool Eval.DumpTCAnchors = false, UNKNOWN
+
+- uint32_t Eval.DumpIR = 0, UNKNOWN
+
+- uint32_t Eval.DumpIRJson = 0, UNKNOWN
+
+- bool Eval.DumpTCAnnotationsForAllTrans, UNKNOWN
+
+- uint32_t Eval.DumpInlDecision = 0, UNKNOWN
+
+  0=none ; 1=refuses ; 2=refuses+accepts
+
+- uint32_t Eval.DumpRegion = 0, UNKNOWN
+
+- bool Eval.DumpCallTargets = false, UNKNOWN
+
+- bool Eval.DumpLayoutCFG = false, UNKNOWN
+
+- bool Eval.DumpHHIRInLoops = false, UNKNOWN
+
+- bool Eval.DumpVBC = false, UNKNOWN
+
+- bool Eval.DumpArrAccProf = false, UNKNOWN
+
+- bool Eval.DumpCoeffectFunParamProf = false, UNKNOWN
+
+- bool Eval.DumpAst = false, UNKNOWN
+
+- bool Eval.DumpTargetProfiles = false, UNKNOWN
+
+- bool Eval.DumpJitProfileStats = false, UNKNOWN
+
+- bool Eval.DumpJitEnableRenameFunctionStats = false, UNKNOWN
+
+- bool Eval.MapTgtCacheHuge = false, UNKNOWN
+
+- bool Eval.NewTHPHotText = false, UNKNOWN
+
 - uint32_t Eval.MaxHighArenaHugePages = 0, UNKNOWN
 
 - uint32_t Eval.Num1GPagesForReqHeap = 0, UNKNOWN

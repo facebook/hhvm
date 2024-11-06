@@ -179,7 +179,7 @@ struct TargetProfile {
       }
     }
 
-    if (RuntimeOption::EvalDumpTargetProfiles) {
+    if (Cfg::Eval::DumpTargetProfiles) {
       for (auto const& key : m_keys) {
         detail::addTargetProfileInfo(key, detail::call_tostring(out, size));
       }

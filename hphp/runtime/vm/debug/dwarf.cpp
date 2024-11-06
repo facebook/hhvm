@@ -181,7 +181,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
       chunk = new DwarfChunk();
       m_dwarfChunks.push_back(chunk);
     } else if (m_dwarfChunks[0]->m_functions.size()
-                 < RuntimeOption::EvalGdbSyncChunks) {
+                 < Cfg::Eval::GdbSyncChunks) {
       // reuse first chunk
       chunk = m_dwarfChunks[0];
       chunk->clearSynced();
@@ -194,7 +194,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     f->m_chunk = chunk;
   }
 
-  if (f->m_chunk->m_functions.size() >= RuntimeOption::EvalGdbSyncChunks) {
+  if (f->m_chunk->m_functions.size() >= Cfg::Eval::GdbSyncChunks) {
     ElfWriter e = ElfWriter(f->m_chunk);
   }
 

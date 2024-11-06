@@ -140,7 +140,7 @@ void exactClsCns(IRGS& env,
     }
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
-        if (RO::EvalLogClsSpeculation) {
+        if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, clsNameStr));
@@ -181,14 +181,14 @@ void exactClsCns(IRGS& env,
                 gen(env, JmpZero, taken, isEqual);
               },
               [&] {
-                if (RO::EvalLogClsSpeculation) {
+                if (Cfg::Eval::LogClsSpeculation) {
                   gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
                 }
                 push(env, cns(env, *val));
               },
               [&] {
                 hint(env, Block::Hint::Unlikely);
-                if (RO::EvalLogClsSpeculation) {
+                if (Cfg::Eval::LogClsSpeculation) {
                   gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
                 }
                 getCnsWithType(TInitCell);

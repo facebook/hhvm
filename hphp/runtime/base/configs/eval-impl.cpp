@@ -38,6 +38,10 @@ bool EvalLoader::UseHHBBCDefault() {
   return !getenv("HHVM_DISABLE_HHBBC");
 }
 
+bool EvalLoader::DumpTCAnnotationsForAllTransDefault() {
+  return debug;
+}
+
 uint32_t EvalLoader::UnixServerWorkersDefault() {
   return Process::GetCPUCount();
 }

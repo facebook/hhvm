@@ -163,7 +163,7 @@ struct DwarfInfo {
   std::vector<DwarfChunk*> m_dwarfChunks;
   /* Array of chunks indexed by lg(#functions in chunk) + 1.
    * i.e. m_dwarfChunk[i] = pointer to chunk with
-   * 2^(i-1) * RuntimeOption::EvalGdbSyncChunks functions, or NULL if
+   * 2^(i-1) * Cfg::Eval::GdbSyncChunks functions, or NULL if
    * there is no such chunk. The first chunk m_dwarfChunks[0] is special in
    * that it can be partially full. All other chunks are completely full.
    */

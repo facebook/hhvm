@@ -1607,7 +1607,7 @@ String parse_maybe_long_string(AsmState& as) {
 }
 
 Variant checkSize(Variant val) {
-  auto avail = RuntimeOption::EvalAssemblerMaxScalarSize;
+  auto avail = Cfg::Eval::AssemblerMaxScalarSize;
   checkSize(*val.asTypedValue(), avail);
   return val;
 }
@@ -3205,7 +3205,7 @@ void parse(AsmState& as) {
     }
   }
 
-  if (RuntimeOption::EvalAssemblerFoldDefaultValues) {
+  if (Cfg::Eval::AssemblerFoldDefaultValues) {
     for (auto& fe : as.ue->fevec()) fixup_default_values(as, fe.get());
     for (auto const pce : as.ue->preclasses()) {
       for (auto fe : pce->methods()) fixup_default_values(as, fe);

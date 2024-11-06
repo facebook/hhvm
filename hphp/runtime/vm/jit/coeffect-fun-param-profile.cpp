@@ -30,7 +30,7 @@ CoeffectFunParamProfile::order() const {
 
   auto const add = [&] (uint32_t val, OptType t) {
     double d = (double) val / m_total;
-    if (d < RO::EvalCoeffectFunParamProfileThreshold) return;
+    if (d < Cfg::Eval::CoeffectFunParamProfileThreshold) return;
     elems.push_back({d, t});
   };
   add(m_null, OptType::Null);

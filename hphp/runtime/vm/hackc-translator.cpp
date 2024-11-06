@@ -311,7 +311,7 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
     }
     not_reached();
   }();
-  auto avail = RuntimeOption::EvalAssemblerMaxScalarSize;
+  auto avail = Cfg::Eval::AssemblerMaxScalarSize;
   checkSize(hphp_tv, avail);
   return hphp_tv;
 }

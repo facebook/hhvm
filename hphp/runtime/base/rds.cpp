@@ -592,7 +592,7 @@ void processInit() {
 
   // Attempt to load any RDS preassignments from the profiling file.
   if (RO::RepoAuthoritative &&
-      RO::EvalReorderRDS &&
+      Cfg::Eval::ReorderRDS &&
       !RO::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     s_settingPreAssignments = true;
@@ -897,7 +897,7 @@ Ordering profiledOrdering() {
       assertx(mapIt != map.end());
       assertx(mapIt->second > 0);
       auto const percentage = (double)mapIt->second / total;
-      if (percentage < RO::EvalRDSReorderThreshold) break;
+      if (percentage < Cfg::Eval::RDSReorderThreshold) break;
       ++trimIt;
     }
     ordered.erase(trimIt, ordered.end());
@@ -914,7 +914,7 @@ Ordering profiledOrdering() {
 // Assign offsets to symbols that were ordered in the profiling file.
 void setPreAssignments(const Ordering& ordering) {
   assertx(RO::RepoAuthoritative);
-  assertx(RO::EvalReorderRDS);
+  assertx(Cfg::Eval::ReorderRDS);
   assertx(s_settingPreAssignments);
 
   Guard g(s_allocMutex);
@@ -958,7 +958,7 @@ void threadInit(bool shouldRegister) {
   numa_bind_to(tl_base, s_local_base, s_numaNode);
 #ifdef NDEBUG
   // A huge-page RDS is incompatible with VMProtect in vm-regs.cpp
-  if (RuntimeOption::EvalMapTgtCacheHuge) {
+  if (Cfg::Eval::MapTgtCacheHuge) {
     hintHuge(tl_base, s_local_base);
   }
 #endif

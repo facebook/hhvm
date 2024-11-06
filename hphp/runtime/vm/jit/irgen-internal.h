@@ -749,7 +749,7 @@ inline SSATmp* ldCls(IRGS& env,
       case Class::ClassLookupResult::Exact:
         return cns(env, lookup.cls);
       case Class::ClassLookupResult::None:
-        if (RO::SandboxSpeculate && RO::EvalLogClsSpeculation) {
+        if (RO::SandboxSpeculate && Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);
@@ -763,7 +763,7 @@ inline SSATmp* ldCls(IRGS& env,
           },
           [&] {
             updateStackOffset(env);
-            if (RO::EvalLogClsSpeculation) {
+            if (Cfg::Eval::LogClsSpeculation) {
               gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
             }
             return cns(env, lookup.cls);
@@ -771,7 +771,7 @@ inline SSATmp* ldCls(IRGS& env,
           [&] {
             hint(env, Block::Hint::Unlikely);
             updateStackOffset(env);
-            if (RO::EvalLogClsSpeculation) {
+            if (Cfg::Eval::LogClsSpeculation) {
               gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
             }
             // Side-exit to not pessimize exact class returned

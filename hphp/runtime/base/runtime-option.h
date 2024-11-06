@@ -434,49 +434,6 @@ struct RuntimeOption {
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   F(string, ReorderProps,              reorderPropsDefault())           \
-  F(bool, ReorderRDS,                  true)                            \
-  F(double, RDSReorderThreshold,       0.0005)                          \
-  F(uint32_t, ProfileGlobalsLimit,     200)                             \
-  F(double, ProfileGlobalsSlowExitThreshold, 0.98)                      \
-  F(uint32_t, GdbSyncChunks,           128)                             \
-  F(bool, TraceCommandLineRequest,     true)                            \
-  F(bool, EmitDebuggerIntrCheck,       true)                            \
-  /* Log the profile used to optimize array-like gets and sets. */      \
-  F(bool, LogArrayAccessProfile,      false)                            \
-  F(bool, LogClsSpeculation,          false)                            \
-  F(double, CoeffectFunParamProfileThreshold, 0.10)                     \
-  F(bool, AssemblerFoldDefaultValues,  true)                            \
-  F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \
-  F(uint64_t, FuncCountHint,           10000)                           \
-  F(uint64_t, PGOFuncCountHint,        1000)                            \
-  F(bool, RegionRelaxGuards,           true)                            \
-  F(bool, WorkloadAwareMaturity,       true)                            \
-  /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
-  F(int32_t, DumpBytecode,             0)                               \
-  /* DumpHhas =1 dumps user php, =2 dumps systemlib & user php */       \
-  F(int32_t, DumpHhas,                 0)                               \
-  F(string, DumpHhasToFile,            "")                              \
-  F(bool, DumpTC,                      false)                           \
-  F(string, DumpTCPath,                "/tmp")                          \
-  F(bool, DumpTCAnchors,               false)                           \
-  F(uint32_t, DumpIR,                  0)                               \
-  F(uint32_t, DumpIRJson,             0)                               \
-  F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
-  /* DumpInlDecision 0=none ; 1=refuses ; 2=refuses+accepts */          \
-  F(uint32_t, DumpInlDecision,         0)                               \
-  F(uint32_t, DumpRegion,              0)                               \
-  F(bool,     DumpCallTargets,         false)                           \
-  F(bool,     DumpLayoutCFG,           false)                           \
-  F(bool,     DumpHHIRInLoops,         false)                           \
-  F(bool,     DumpVBC,                 false)                           \
-  F(bool,     DumpArrAccProf,          false)                           \
-  F(bool,     DumpCoeffectFunParamProf,false)                           \
-  F(bool, DumpAst,                     false)                           \
-  F(bool, DumpTargetProfiles,          false)                           \
-  F(bool, DumpJitProfileStats,         false)                           \
-  F(bool, DumpJitEnableRenameFunctionStats, false)                      \
-  F(bool, MapTgtCacheHuge,             false)                           \
-  F(bool, NewTHPHotText,               false)                           \
   F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
   F(string, ColdArenaFileDir,          "/tmp")                          \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \

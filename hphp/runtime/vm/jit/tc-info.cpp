@@ -69,7 +69,7 @@ bool dumpTCCode(folly::StringPiece filename) {
 }
 
 bool dumpTCData() {
-  auto const dataPath = RuntimeOption::EvalDumpTCPath + "/tc_data.txt.gz";
+  auto const dataPath = Cfg::Eval::DumpTCPath + "/tc_data.txt.gz";
   gzFile tcDataFile = gzopen(dataPath.c_str(), "w");
   if (!tcDataFile) return false;
   SCOPE_EXIT { gzclose(tcDataFile); };
@@ -120,13 +120,13 @@ bool dumpTCData() {
 }
 
 bool dumpEnabled() {
-  return RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpRegion ||
-         RuntimeOption::EvalDumpInlDecision ||
-         RuntimeOption::EvalDumpCallTargets ||
-         RuntimeOption::EvalDumpLayoutCFG ||
-         RuntimeOption::EvalDumpVBC;
+  return Cfg::Eval::DumpTC ||
+         Cfg::Eval::DumpIR ||
+         Cfg::Eval::DumpRegion ||
+         Cfg::Eval::DumpInlDecision ||
+         Cfg::Eval::DumpCallTargets ||
+         Cfg::Eval::DumpLayoutCFG ||
+         Cfg::Eval::DumpVBC;
 }
 
 bool dump(bool ignoreLease /* = false */) {
@@ -140,11 +140,11 @@ bool dump(bool ignoreLease /* = false */) {
       metaLock = lockMetadata();
     }
     if (!dumpTCData()) return false;
-    if (!dumpTCCode(RO::EvalDumpTCPath + "/tc_dump")) return false;
+    if (!dumpTCCode(Cfg::Eval::DumpTCPath + "/tc_dump")) return false;
   }
 
   if (!RO::RepoAuthoritative) {
-    dump_compiled_units(RO::EvalDumpTCPath + "/hhvm.hhbc");
+    dump_compiled_units(Cfg::Eval::DumpTCPath + "/hhvm.hhbc");
   }
 
   return true;

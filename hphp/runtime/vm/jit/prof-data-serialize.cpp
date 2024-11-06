@@ -812,7 +812,7 @@ rds::Ordering::Item read_rds_ordering_item(ProfDataDeserializer& des) {
 
 void write_rds_ordering(ProfDataSerializer& ser) {
   rds::Ordering order;
-  if (RO::EvalReorderRDS) order = rds::profiledOrdering();
+  if (Cfg::Eval::ReorderRDS) order = rds::profiledOrdering();
   write_container(ser, order.persistent, write_rds_ordering_item);
   write_container(ser, order.local, write_rds_ordering_item);
   write_container(ser, order.normal, write_rds_ordering_item);
@@ -1938,7 +1938,7 @@ std::string deserializeProfData(const std::string& filename,
     pd->setDeserialized(buildHost, tag, buildTime);
 
     // Optionally log function info from jit profile
-    if (RuntimeOption::EvalDumpJitProfileStats) {
+    if (Cfg::Eval::DumpJitProfileStats) {
       auto const logFunc = [&](auto const& func) {
         StructuredLogEntry entry;
         entry.force_init = true;

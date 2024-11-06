@@ -83,7 +83,7 @@ static std::atomic<FuncId::Int> s_nextFuncId{1};
 AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicLowPtrVector(
-    Func::s_funcVec, RuntimeOption::EvalFuncCountHint);
+    Func::s_funcVec, Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 #endif
 
@@ -1208,7 +1208,7 @@ private:
 EmbeddedCoverageLinkMap s_covLinks;
 static InitFiniNode s_covLinksReinit([]{
   if (RO::RepoAuthoritative || !Cfg::Eval::EnableFuncCoverage) return;
-  s_covLinks.emplace(RO::EvalFuncCountHint);
+  s_covLinks.emplace(Cfg::Eval::FuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
 InitFiniNode s_clear_called_functions([]{

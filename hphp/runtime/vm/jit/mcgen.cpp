@@ -30,6 +30,7 @@
 
 #include "hphp/runtime/vm/debug/debug.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -73,7 +74,7 @@ bool initialized() { return s_inited; }
 int64_t jitInitTime() { return s_startTime; }
 
 bool dumpTCAnnotation(TransKind transKind) {
-  if (RuntimeOption::EvalDumpTCAnnotationsForAllTrans) return true;
+  if (Cfg::Eval::DumpTCAnnotationsForAllTrans) return true;
   if (transKind != TransKind::Optimize && transKind != TransKind::OptPrologue) {
     return false;
   }

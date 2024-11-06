@@ -182,7 +182,7 @@ void annotCoeffectFunParamProfile(
     SSATmp* tv,
     const CoeffectFunParamProfile& profile,
     const std::vector<CoeffectFunParamProfile::OptType>& order) {
-  if (!RuntimeOption::EvalDumpCoeffectFunParamProf) return;
+  if (!Cfg::Eval::DumpCoeffectFunParamProf) return;
 
   auto const fnName = curFunc(env)->fullName()->data();
 

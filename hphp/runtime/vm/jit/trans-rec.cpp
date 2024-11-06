@@ -102,7 +102,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   static jit::fast_map<std::string, size_t> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
-                   RuntimeOption::EvalDumpTCPath,
+                   Cfg::Eval::DumpTCPath,
                    compress ? ".gz" : ""),
     0,
     0

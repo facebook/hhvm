@@ -456,7 +456,7 @@ std::string getTCAddrs();
 bool dumpEnabled();
 
 /*
- * Dump the translation cache to files in RuntimeOption::EvalDumpTCPath
+ * Dump the translation cache to files in Cfg::Eval::DumpTCPath
  * (default: /tmp), returning success.
  */
 bool dump(bool ignoreLease = false);

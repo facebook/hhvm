@@ -739,7 +739,7 @@ void init_command_line_session(int argc, char** argv) {
   hphp_session_init(Treadmill::SessionKind::CLISession);
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
-  if (RuntimeOption::EvalTraceCommandLineRequest) {
+  if (Cfg::Eval::TraceCommandLineRequest) {
     tl_cmdTrace.destroy();
     context->setRequestTrace(tl_cmdTrace.getCheck());
   }
@@ -884,7 +884,7 @@ hugifyText(char* from, char* to) {
     if (version.m_minor > 2) return true;
       return false;
   };
-  if (RO::EvalNewTHPHotText && hasKernelSupport()) {
+  if (Cfg::Eval::NewTHPHotText && hasKernelSupport()) {
     // The new way doesn't work if the region is locked. Note that this means
     // Server.LockCodeMemory won't be applied to the region--there is no
     // guarantee that the region would stay in memory, especially if the kernel
@@ -1867,7 +1867,7 @@ static int execute_program_impl(int argc, char** argv) {
     SCOPE_EXIT { hphp_thread_exit(); };
 
     if (po.mode == ExecutionMode::DUMPHHAS) {
-      RuntimeOption::EvalDumpHhas = true;
+      Cfg::Eval::DumpHhas = true;
     } else if (po.mode != ExecutionMode::DUMPCOVERAGE) {
       RuntimeOption::EvalVerifyOnly = true;
     }
@@ -1943,7 +1943,7 @@ static int execute_program_impl(int argc, char** argv) {
   // lose a light process, stop the server instead of proceeding in an
   // uncertain state. Don't start them in DumpHhas mode because
   // it _Exit()s after loading the first non-systemlib unit.
-  if (!RuntimeOption::EvalDumpHhas) {
+  if (!Cfg::Eval::DumpHhas) {
     LightProcess::SetLostChildHandler([](pid_t /*child*/) {
       if (!HttpServer::Server) return;
       if (!HttpServer::Server->isStopped()) {
@@ -2560,7 +2560,7 @@ void hphp_process_init(bool skipExtensions) {
   ImplicitContext::emptyCtx
     .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::emptyCtx"});
 
-  if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+  if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck) {
     DebuggerHook::s_exceptionBreakpointIntr
       .bind(rds::Mode::Normal, rds::LinkID{"ExceptionBreakpointIntr"});
   }

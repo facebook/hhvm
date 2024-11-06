@@ -358,7 +358,7 @@ void emitThrow(IRGS& env) {
   if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
 
   auto slowExit = makeExitSlow(env);
-  if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck) {
+  if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck) {
     irgen::checkDebuggerExceptionIntr(env, slowExit);
   }
 

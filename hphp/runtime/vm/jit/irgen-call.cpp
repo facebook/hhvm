@@ -321,7 +321,7 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
     // If the call is the last bytecode of the region, there is no need to
     // insert the debugger interrupt check as it will be checked at the
     // beginning of next translation.
-    if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+    if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck &&
         curSrcKey(env) != env.region->lastSrcKey()) {
       irgen::checkDebuggerIntr(env, nextSk);
     }
@@ -409,7 +409,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   }
 
   // Dump annotations if requested.
-  if (RuntimeOption::EvalDumpCallTargets) {
+  if (Cfg::Eval::DumpCallTargets) {
     auto const fnName = curFunc(env)->fullName()->data();
     env.unit.annotationData->add(
       "CallTargets",
@@ -1412,7 +1412,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
 
   switch (lookup.tag) {
     case Func::FuncLookupResult::None:
-      if (RO::SandboxSpeculate && RO::EvalLogClsSpeculation) {
+      if (RO::SandboxSpeculate && Cfg::Eval::LogClsSpeculation) {
         gen(env, LogClsSpeculation, data(nullptr, false));
       }
       return slow();
@@ -1427,7 +1427,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
         },
         [&] {
           updateStackOffset(env);
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, true));
           }
           fast();
@@ -1436,7 +1436,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
         [&] {
           hint(env, Block::Hint::Unlikely);
           updateStackOffset(env);
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, false));
           }
           emitModuleBoundaryCheck(env, loadedFunc);
@@ -1614,7 +1614,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     case Class::ClassLookupResult::Exact: return knownClass();
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
-        if (RO::EvalLogClsSpeculation) {
+        if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
@@ -1634,14 +1634,14 @@ void emitNewObjD(IRGS& env, const StringData* className) {
           gen(env, JmpZero, taken, isEqual);
         },
         [&] {
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
           }
           push(env, allocObjFast(env, cls));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
           }
           slow();
@@ -1851,7 +1851,7 @@ void emitFCallClsMethodD(IRGS& env,
     }
     case Class::ClassLookupResult::None: {
       if (RO::SandboxSpeculate) {
-        if (RO::EvalLogClsSpeculation) {
+        if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(nullptr, ClassId::Invalid, false));
         }
         gen(env, LdClsCached, LdClsFallbackData::Fatal(), cns(env, className));
@@ -1882,7 +1882,7 @@ void emitFCallClsMethodD(IRGS& env,
           updateStackOffset(env);
           auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
           emitModuleBoundaryCheckKnown(env, cls);
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(callCtx.cls(),
                                              lookup.cls->classId().id(),
                                              true));
@@ -1892,7 +1892,7 @@ void emitFCallClsMethodD(IRGS& env,
         [&] {
           hint(env, Block::Hint::Unlikely);
           updateStackOffset(env);
-          if (RO::EvalLogClsSpeculation) {
+          if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(callCtx.cls(),
                                              lookup.cls->classId().id(),
                                              false));

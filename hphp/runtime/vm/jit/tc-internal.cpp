@@ -373,7 +373,7 @@ void processExit() {
 }
 
 void recordWorkloadChange() {
-  if (RO::EvalWorkloadAwareMaturity && getJitMaturity() < g_maxJitMaturity) {
+  if (Cfg::Eval::WorkloadAwareMaturity && getJitMaturity() < g_maxJitMaturity) {
     g_maxJitMaturity = 99;
   }
 }

@@ -634,7 +634,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
     FTRACE(1, "\n");
   }
 
-  if (RuntimeOption::EvalDumpLayoutCFG) {
+  if (Cfg::Eval::DumpLayoutCFG) {
     unit.annotations.emplace_back("LayoutCFG", Scale(unit, labels).toString());
   }
 

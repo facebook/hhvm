@@ -142,7 +142,7 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
     // all named locals need to be sync'ed.
     auto const numLocals =
       Cfg::Debugger::EnableVSDebugger &&
-      RuntimeOption::EvalEmitDebuggerIntrCheck ?
+      Cfg::Eval::EmitDebuggerIntrCheck ?
       func->numNamedLocals() : func->numParams();
 
     if (func->hasReifiedGenerics()) {

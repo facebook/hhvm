@@ -138,7 +138,7 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult::failTransiently();
   }
 
-  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck)) {
+  if (UNLIKELY(Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck)) {
     assertx(!RO::RepoAuthoritative);
     sk.func()->ensureDebuggerIntrSetLinkBound();
   }

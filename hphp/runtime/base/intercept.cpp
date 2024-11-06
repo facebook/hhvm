@@ -181,7 +181,7 @@ bool register_intercept(const String& name, const Variant& callback) {
     }
   }
 
-  if (RO::EvalDumpJitEnableRenameFunctionStats &&
+  if (Cfg::Eval::DumpJitEnableRenameFunctionStats &&
       StructuredLog::coinflip(Cfg::Jit::InterceptFunctionLogRate)) {
     StructuredLogEntry entry;
     entry.setStr("intercepted_func", interceptedFunc->fullName()->data());
@@ -259,7 +259,7 @@ void rename_function(const String& old_name, const String& new_name) {
   }
 
   if (StructuredLog::enabled() &&
-    RuntimeOption::EvalDumpJitEnableRenameFunctionStats) {
+    Cfg::Eval::DumpJitEnableRenameFunctionStats) {
     StructuredLogEntry entry;
     entry.setStr("old_function_name", old->data());
     entry.setStr("new_function_name", n3w->data());

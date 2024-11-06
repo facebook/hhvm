@@ -268,7 +268,7 @@ void emitGuards(irgen::IRGS& irgs,
       irgen::checkCoverage(irgs);
     }
 
-    if (Cfg::Debugger::EnableVSDebugger && RO::EvalEmitDebuggerIntrCheck &&
+    if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck &&
         !sk.trivialDVFuncEntry()) {
       irgen::checkDebuggerIntr(irgs, curSrcKey(irgs));
     }
@@ -459,7 +459,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
          show(irgs.context.kind), profFactor, show(region));
 
-  if (RuntimeOption::EvalDumpRegion &&
+  if (Cfg::Eval::DumpRegion &&
       mcgen::dumpTCAnnotation(irgs.context.kind)) {
     irgs.unit.annotationData->add("RegionDesc", show(region));
   }

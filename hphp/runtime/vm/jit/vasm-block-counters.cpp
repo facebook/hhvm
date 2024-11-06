@@ -217,7 +217,7 @@ void setWeights(Vunit& unit, const T& key) {
     }
   }
 
-  if (RuntimeOption::EvalDumpVBC) {
+  if (Cfg::Eval::DumpVBC) {
     unit.annotations.emplace_back("VasmBlockCounters",
                                   errorMsg != "" ? errorMsg :
                                   enoughProfile ? "matches" :

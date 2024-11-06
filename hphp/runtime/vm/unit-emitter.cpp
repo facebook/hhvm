@@ -600,7 +600,7 @@ bool UnitEmitter::check(bool verbose) const {
 
 bool needs_extended_line_table() {
   return RuntimeOption::RepoDebugInfo &&
-    (RuntimeOption::EvalDumpHhas ||
+    (Cfg::Eval::DumpHhas ||
      Cfg::Debugger::EnableHphpd ||
      Cfg::Debugger::EnableVSDebugger ||
      Cfg::Debugger::EnableServer);
@@ -757,9 +757,9 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     }
   }
 
-  if (RuntimeOption::EvalDumpHhas > 1 ||
-    (!isASystemLib() && RuntimeOption::EvalDumpHhas == 1)) {
-    auto const& hhaspath = RuntimeOption::EvalDumpHhasToFile;
+  if (Cfg::Eval::DumpHhas > 1 ||
+    (!isASystemLib() && Cfg::Eval::DumpHhas == 1)) {
+    auto const& hhaspath = Cfg::Eval::DumpHhasToFile;
     if (!hhaspath.empty()) {
       static std::atomic<bool> first_unit{true};
       auto const flags = O_WRONLY | O_CREAT | (first_unit ? O_TRUNC : O_APPEND);
@@ -777,7 +777,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     }
   }
 
-  if (RuntimeOption::EvalDumpBytecode) {
+  if (Cfg::Eval::DumpBytecode) {
     // Dump human-readable bytecode.
     Trace::traceRelease("%s", u->toString().c_str());
   }

@@ -70,7 +70,7 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
   auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
-  if (annotations && RuntimeOption::EvalDumpInlDecision > 0) {
+  if (annotations && Cfg::Eval::DumpInlDecision > 0) {
     annotations->inliningDecisions.emplace_back(false, bcOff, caller, callee,
                                                 why);
   }
@@ -477,7 +477,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       "jit.inline.accepts", {ServiceData::StatsType::COUNT});
     inlineAccepts->addValue(1);
 
-    if (annotationsPtr && RuntimeOption::EvalDumpInlDecision >= 2) {
+    if (annotationsPtr && Cfg::Eval::DumpInlDecision >= 2) {
       auto const decision = AnnotationData::InliningDecision{
         true, callerSk.offset(), callerSk.func(), callee, why
       };

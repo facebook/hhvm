@@ -21,6 +21,7 @@
 
 #include <folly/MapUtil.h>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/logger.h"
 
@@ -80,17 +81,17 @@ ProfData::ProfData()
   : m_counters(RuntimeOption::ServerExecutionMode()
                  ? std::numeric_limits<int64_t>::max()
                  : Cfg::Jit::PGOThreshold)
-  , m_profilingFuncs(RuntimeOption::EvalPGOFuncCountHint,
+  , m_profilingFuncs(Cfg::Eval::PGOFuncCountHint,
                      makeAHMConfig<decltype(m_profilingFuncs)>())
-  , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
+  , m_optimizedSKs(Cfg::Eval::PGOFuncCountHint,
                    makeAHMConfig<decltype(m_optimizedSKs)>())
-  , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+  , m_proflogueDB(Cfg::Eval::PGOFuncCountHint * 2,
                   makeAHMConfig<decltype(m_proflogueDB)>())
-  , m_dvFuncletDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+  , m_dvFuncletDB(Cfg::Eval::PGOFuncCountHint * 2,
                   makeAHMConfig<decltype(m_dvFuncletDB)>())
-  , m_jmpToTransID(RuntimeOption::EvalPGOFuncCountHint * 10,
+  , m_jmpToTransID(Cfg::Eval::PGOFuncCountHint * 10,
                    makeAHMConfig<decltype(m_jmpToTransID)>())
-  , m_blockEndOffsets(RuntimeOption::EvalPGOFuncCountHint,
+  , m_blockEndOffsets(Cfg::Eval::PGOFuncCountHint,
                       makeAHMConfig<decltype(m_blockEndOffsets)>())
 {}
 

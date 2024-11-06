@@ -2214,7 +2214,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
                            MOpMode mode, const ArrayAccessProfile& profile) {
   // We generate code for many accesses each time we call retranslateAll.
   // We don't want production webservers to log when they do so.
-  if (!RO::EvalLogArrayAccessProfile) return;
+  if (!Cfg::Eval::LogArrayAccessProfile) return;
   if (env.inlineState.conjure) return;
 
   auto const marker  = makeMarker(env, curSrcKey(env));
@@ -2250,7 +2250,7 @@ void annotArrayAccessProfile(IRGS& env,
                              SSATmp* key,
                              const ArrayAccessProfile& profile,
                              const ArrayAccessProfile::Result& result) {
-  if (!RuntimeOption::EvalDumpArrAccProf) return;
+  if (!Cfg::Eval::DumpArrAccProf) return;
 
   auto const fnName = curFunc(env)->fullName()->data();
 

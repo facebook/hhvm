@@ -409,7 +409,7 @@ inline void uninitHandle(Handle handle) {
 ////////////////////////////////////////////////////////////////////////////////
 
 inline bool shouldProfileAccesses() {
-  return isJitSerializing() && RO::EvalReorderRDS && isFullyInitialized() &&
+  return isJitSerializing() && Cfg::Eval::ReorderRDS && isFullyInitialized() &&
     isStandardRequest();
 }
 

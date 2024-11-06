@@ -227,7 +227,7 @@ void checkCoverage(IRGS& env) {
 void checkDebuggerIntr(IRGS& env, SrcKey sk) {
   assertx(!RuntimeOption::RepoAuthoritative);
   assertx(Cfg::Debugger::EnableVSDebugger);
-  assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
+  assertx(Cfg::Eval::EmitDebuggerIntrCheck);
   assertx(curFunc(env) == sk.func());
   if (sk.func()->isBuiltin()) return;
   auto const handle = RDSHandleData { curFunc(env)->debuggerIntrSetHandle() };
@@ -250,7 +250,7 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
 void checkDebuggerExceptionIntr(IRGS& env, Block* slowExit) {
   assertx(!RuntimeOption::RepoAuthoritative);
   assertx(Cfg::Debugger::EnableVSDebugger);
-  assertx(RuntimeOption::EvalEmitDebuggerIntrCheck);
+  assertx(Cfg::Eval::EmitDebuggerIntrCheck);
 
   auto const& link = DebuggerHook::s_exceptionBreakpointIntr;
   assertx(link.bound());

@@ -17,6 +17,7 @@
 #include <memory>
 #include <algorithm>
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/trace.h"
 
@@ -520,7 +521,7 @@ RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
   region->chainRetransBlocks();
 
   // Relax the region guards.
-  if (RuntimeOption::EvalRegionRelaxGuards) {
+  if (Cfg::Eval::RegionRelaxGuards) {
     ITRACE(3, "selectHotCFG: before optimizeProfiledGuards:\n{}\n",
            show(*region));
     optimizeProfiledGuards(*region, *ctx.profData);

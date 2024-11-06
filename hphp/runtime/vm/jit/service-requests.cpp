@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/util/arch.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/hash-map.h"
@@ -157,7 +158,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   assertx(view.cold().frontier() != coldStart);
   assertx(view.frozen().frontier() == frozenStart);
 
-  if (RuntimeOption::EvalDumpTCAnchors) {
+  if (Cfg::Eval::DumpTCAnchors) {
     auto metaLock = tc::lockMetadata();
     auto const transID = profData() && transdb::enabled()
       ? profData()->allocTransID() : kInvalidTransID;

@@ -935,6 +935,26 @@ void testMergeMovedPatch(T t) {
 
   p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
   p2.customVisit(badge, checkAssign);
+
+  DynamicPatch dp{std::move(p2)};
+  dp.visitPatch(
+      badge,
+      folly::overload(
+          [&](const DynamicListPatch& patch) {
+            patch.customVisit(badge, checkAssign);
+          },
+          [&](const DynamicSetPatch& patch) {
+            patch.customVisit(badge, checkAssign);
+          },
+          [&](const DynamicMapPatch& patch) {
+            patch.customVisit(badge, checkAssign);
+          },
+          [&](const DynamicStructPatch& patch) {
+            patch.customVisit(badge, checkAssign);
+          },
+          [&](const auto&) {
+            folly::throw_exception<std::runtime_error>("not reachable.");
+          }));
 }
 
 TEST(DynamicPatchTest, MergeMovedListPatch) {

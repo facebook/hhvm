@@ -576,6 +576,17 @@ class DynamicPatch {
       detail::Badge, Other&&);
 
  private:
+  template <class Self, class Visitor>
+  void visitPatchImpl(Self&& self, detail::Badge, Visitor&& visitor) {
+    std::visit(
+        std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
+  }
+
+ public:
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      visitPatch, visitPatchImpl);
+
+ private:
   using Patch = std::variant<
       DynamicUnknownPatch,
       op::BoolPatch,

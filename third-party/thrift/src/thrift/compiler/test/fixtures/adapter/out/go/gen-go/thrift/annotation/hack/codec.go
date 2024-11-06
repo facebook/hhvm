@@ -36,42 +36,49 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_hack_FieldWrapper = &thrift.TypeSpec{
+        FullName: "hack.FieldWrapper",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewFieldWrapper() },
 },
 
     }
     premadeCodecTypeSpec_hack_Wrapper = &thrift.TypeSpec{
+        FullName: "hack.Wrapper",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewWrapper() },
 },
 
     }
     premadeCodecTypeSpec_hack_Adapter = &thrift.TypeSpec{
+        FullName: "hack.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAdapter() },
 },
 
     }
     premadeCodecTypeSpec_hack_SkipCodegen = &thrift.TypeSpec{
+        FullName: "hack.SkipCodegen",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSkipCodegen() },
 },
 
     }
     premadeCodecTypeSpec_hack_Name = &thrift.TypeSpec{
+        FullName: "hack.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
@@ -79,30 +86,35 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_hack_UnionEnumAttributes = &thrift.TypeSpec{
+        FullName: "hack.UnionEnumAttributes",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewUnionEnumAttributes() },
 },
 
     }
     premadeCodecTypeSpec_hack_StructTrait = &thrift.TypeSpec{
+        FullName: "hack.StructTrait",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStructTrait() },
 },
 
     }
     premadeCodecTypeSpec_hack_Attributes = &thrift.TypeSpec{
+        FullName: "hack.Attributes",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAttributes() },
 },
 
     }
     premadeCodecTypeSpec_hack_StructAsTrait = &thrift.TypeSpec{
+        FullName: "hack.StructAsTrait",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStructAsTrait() },
 },
 
     }
     premadeCodecTypeSpec_hack_ModuleInternal = &thrift.TypeSpec{
+        FullName: "hack.ModuleInternal",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewModuleInternal() },
 },
@@ -348,36 +360,23 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.FieldWrapper", premadeCodecTypeSpec_hack_FieldWrapper })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Wrapper", premadeCodecTypeSpec_hack_Wrapper })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Adapter", premadeCodecTypeSpec_hack_Adapter })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.SkipCodegen", premadeCodecTypeSpec_hack_SkipCodegen })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Name", premadeCodecTypeSpec_hack_Name })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.UnionEnumAttributes", premadeCodecTypeSpec_hack_UnionEnumAttributes })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.StructTrait", premadeCodecTypeSpec_hack_StructTrait })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.Attributes", premadeCodecTypeSpec_hack_Attributes })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.StructAsTrait", premadeCodecTypeSpec_hack_StructAsTrait })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "hack.ModuleInternal", premadeCodecTypeSpec_hack_ModuleInternal })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_FieldWrapper.FullName] = premadeCodecTypeSpec_hack_FieldWrapper
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Wrapper.FullName] = premadeCodecTypeSpec_hack_Wrapper
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Adapter.FullName] = premadeCodecTypeSpec_hack_Adapter
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_SkipCodegen.FullName] = premadeCodecTypeSpec_hack_SkipCodegen
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Name.FullName] = premadeCodecTypeSpec_hack_Name
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_UnionEnumAttributes.FullName] = premadeCodecTypeSpec_hack_UnionEnumAttributes
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructTrait.FullName] = premadeCodecTypeSpec_hack_StructTrait
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Attributes.FullName] = premadeCodecTypeSpec_hack_Attributes
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructAsTrait.FullName] = premadeCodecTypeSpec_hack_StructAsTrait
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_ModuleInternal.FullName] = premadeCodecTypeSpec_hack_ModuleInternal
         return fbthriftTypeSpecsMap
     },
 )

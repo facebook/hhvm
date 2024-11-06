@@ -36,18 +36,21 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
@@ -55,6 +58,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_map_i32_list_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, list<i32>>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_list_i32,
@@ -64,6 +68,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
+        FullName: "set<i32>",
         CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
@@ -71,6 +76,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, set<i32>>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_set_i32,
@@ -80,6 +86,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_i32,
@@ -89,6 +96,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "list<map<i32, i32>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_map_i32_i32,
@@ -96,6 +104,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_set_i32 = &thrift.TypeSpec{
+        FullName: "list<set<i32>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.SET,
 	ElementTypeSpec: premadeCodecTypeSpec_set_i32,
@@ -103,6 +112,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, map<i32, set<i32>>>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_map_i32_set_i32,
@@ -112,6 +122,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "list<map<i32, map<i32, set<i32>>>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_map_i32_map_i32_set_i32,
@@ -119,6 +130,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_list_map_i32_map_i32_set_i32 = &thrift.TypeSpec{
+        FullName: "list<list<map<i32, map<i32, set<i32>>>>>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.LIST,
 	ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_map_i32_set_i32,
@@ -305,27 +317,14 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
         return fbthriftTypeSpecsMap
     },
 )

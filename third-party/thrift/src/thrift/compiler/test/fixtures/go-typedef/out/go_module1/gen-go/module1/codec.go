@@ -50,30 +50,35 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_module1_Plate = &thrift.TypeSpec{
+        FullName: "module1.Plate",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_module1_Year = &thrift.TypeSpec{
+        FullName: "module1.Year",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
@@ -81,18 +86,21 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module1_Drivers = &thrift.TypeSpec{
+        FullName: "module1.Drivers",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
 },
 
     }
     premadeCodecTypeSpec_module1_Accessory = &thrift.TypeSpec{
+        FullName: "module1.Accessory",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
 },
 
     }
     premadeCodecTypeSpec_list_module1_Accessory = &thrift.TypeSpec{
+        FullName: "list<module1.Accessory>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
 	ElementTypeSpec: premadeCodecTypeSpec_module1_Accessory,
@@ -100,12 +108,14 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module1_PartName = &thrift.TypeSpec{
+        FullName: "module1.PartName",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
 },
 
     }
     premadeCodecTypeSpec_map_i32_module1_PartName = &thrift.TypeSpec{
+        FullName: "map<i32, module1.PartName>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_module1_PartName,
@@ -115,24 +125,28 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
+        FullName: "module1.Automobile",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAutomobile() },
 },
 
     }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
     }
     premadeCodecTypeSpec_module1_MapKey = &thrift.TypeSpec{
+        FullName: "module1.MapKey",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMapKey() },
 },
 
     }
     premadeCodecTypeSpec_map_module1_MapKey_string = &thrift.TypeSpec{
+        FullName: "map<module1.MapKey, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_module1_MapKey,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
@@ -142,24 +156,28 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module1_MapContainer = &thrift.TypeSpec{
+        FullName: "module1.MapContainer",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMapContainer() },
 },
 
     }
     premadeCodecTypeSpec_module1_Car = &thrift.TypeSpec{
+        FullName: "module1.Car",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
 },
 
     }
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
+        FullName: "module1.Pair",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewPair() },
 },
 
     }
     premadeCodecTypeSpec_list_module1_Automobile = &thrift.TypeSpec{
+        FullName: "list<module1.Automobile>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
 	ElementTypeSpec: premadeCodecTypeSpec_module1_Automobile,
@@ -167,6 +185,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_module1_Car = &thrift.TypeSpec{
+        FullName: "list<module1.Car>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRUCT,
 	ElementTypeSpec: premadeCodecTypeSpec_module1_Car,
@@ -174,18 +193,21 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module1_Collection = &thrift.TypeSpec{
+        FullName: "module1.Collection",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewCollection() },
 },
 
     }
     premadeCodecTypeSpec_module1_State = &thrift.TypeSpec{
+        FullName: "module1.State",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
     }
     premadeCodecTypeSpec_module1_Enum = &thrift.TypeSpec{
+        FullName: "module1.Enum",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
 },
@@ -533,41 +555,28 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Plate", premadeCodecTypeSpec_module1_Plate })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Year", premadeCodecTypeSpec_module1_Year })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Drivers", premadeCodecTypeSpec_module1_Drivers })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Accessory", premadeCodecTypeSpec_module1_Accessory })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.PartName", premadeCodecTypeSpec_module1_PartName })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Automobile", premadeCodecTypeSpec_module1_Automobile })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.MapKey", premadeCodecTypeSpec_module1_MapKey })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.MapContainer", premadeCodecTypeSpec_module1_MapContainer })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Car", premadeCodecTypeSpec_module1_Car })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Pair", premadeCodecTypeSpec_module1_Pair })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Collection", premadeCodecTypeSpec_module1_Collection })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.State", premadeCodecTypeSpec_module1_State })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module1.Enum", premadeCodecTypeSpec_module1_Enum })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Plate.FullName] = premadeCodecTypeSpec_module1_Plate
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Year.FullName] = premadeCodecTypeSpec_module1_Year
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Drivers.FullName] = premadeCodecTypeSpec_module1_Drivers
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Accessory.FullName] = premadeCodecTypeSpec_module1_Accessory
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_PartName.FullName] = premadeCodecTypeSpec_module1_PartName
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Automobile.FullName] = premadeCodecTypeSpec_module1_Automobile
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapKey.FullName] = premadeCodecTypeSpec_module1_MapKey
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapContainer.FullName] = premadeCodecTypeSpec_module1_MapContainer
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Car.FullName] = premadeCodecTypeSpec_module1_Car
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Pair.FullName] = premadeCodecTypeSpec_module1_Pair
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Collection.FullName] = premadeCodecTypeSpec_module1_Collection
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_State.FullName] = premadeCodecTypeSpec_module1_State
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Enum.FullName] = premadeCodecTypeSpec_module1_Enum
         return fbthriftTypeSpecsMap
     },
 )

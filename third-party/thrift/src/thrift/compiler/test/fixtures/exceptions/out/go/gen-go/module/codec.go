@@ -34,60 +34,70 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_module_Fiery = &thrift.TypeSpec{
+        FullName: "module.Fiery",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewFiery() },
 },
 
     }
     premadeCodecTypeSpec_module_Serious = &thrift.TypeSpec{
+        FullName: "module.Serious",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSerious() },
 },
 
     }
     premadeCodecTypeSpec_module_ComplexFieldNames = &thrift.TypeSpec{
+        FullName: "module.ComplexFieldNames",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewComplexFieldNames() },
 },
 
     }
     premadeCodecTypeSpec_module_CustomFieldNames = &thrift.TypeSpec{
+        FullName: "module.CustomFieldNames",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewCustomFieldNames() },
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = &thrift.TypeSpec{
+        FullName: "module.ExceptionWithPrimitiveField",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewExceptionWithPrimitiveField() },
 },
 
     }
     premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = &thrift.TypeSpec{
+        FullName: "module.ExceptionWithStructuredAnnotation",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
 },
 
     }
     premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
+        FullName: "module.Banal",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewBanal() },
 },
 
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
@@ -463,35 +473,22 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Fiery", premadeCodecTypeSpec_module_Fiery })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Serious", premadeCodecTypeSpec_module_Serious })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ComplexFieldNames", premadeCodecTypeSpec_module_ComplexFieldNames })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.CustomFieldNames", premadeCodecTypeSpec_module_CustomFieldNames })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ExceptionWithPrimitiveField", premadeCodecTypeSpec_module_ExceptionWithPrimitiveField })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ExceptionWithStructuredAnnotation", premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Banal", premadeCodecTypeSpec_module_Banal })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Fiery.FullName] = premadeCodecTypeSpec_module_Fiery
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Serious.FullName] = premadeCodecTypeSpec_module_Serious
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexFieldNames.FullName] = premadeCodecTypeSpec_module_ComplexFieldNames
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomFieldNames.FullName] = premadeCodecTypeSpec_module_CustomFieldNames
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ExceptionWithPrimitiveField.FullName] = premadeCodecTypeSpec_module_ExceptionWithPrimitiveField
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation.FullName] = premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Banal.FullName] = premadeCodecTypeSpec_module_Banal
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
         return fbthriftTypeSpecsMap
     },
 )

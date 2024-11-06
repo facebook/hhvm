@@ -39,34 +39,40 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_MyEnum = &thrift.TypeSpec{
+        FullName: "module.MyEnum",
         CodecEnumSpec: &thrift.CodecEnumSpec{},
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_module_MyStructNestedAnnotation = &thrift.TypeSpec{
+        FullName: "module.MyStructNestedAnnotation",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMyStructNestedAnnotation() },
 },
 
     }
     premadeCodecTypeSpec_module_MyUnion = &thrift.TypeSpec{
+        FullName: "module.MyUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMyUnion() },
 },
 
     }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
@@ -74,54 +80,63 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module_list_string_6884 = &thrift.TypeSpec{
+        FullName: "module.list_string_6884",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
 },
 
     }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
+        FullName: "module.MyStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMyStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_SecretStruct = &thrift.TypeSpec{
+        FullName: "module.SecretStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSecretStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_MyException = &thrift.TypeSpec{
+        FullName: "module.MyException",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMyException() },
 },
 
     }
     premadeCodecTypeSpec_module_AwesomeStruct = &thrift.TypeSpec{
+        FullName: "module.AwesomeStruct",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
 },
 
     }
     premadeCodecTypeSpec_module_FantasticStruct = &thrift.TypeSpec{
+        FullName: "module.FantasticStruct",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
 },
 
     }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
@@ -763,39 +778,26 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyEnum", premadeCodecTypeSpec_module_MyEnum })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyStructNestedAnnotation", premadeCodecTypeSpec_module_MyStructNestedAnnotation })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyUnion", premadeCodecTypeSpec_module_MyUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.list_string_6884", premadeCodecTypeSpec_module_list_string_6884 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyStruct", premadeCodecTypeSpec_module_MyStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.SecretStruct", premadeCodecTypeSpec_module_SecretStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.MyException", premadeCodecTypeSpec_module_MyException })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.AwesomeStruct", premadeCodecTypeSpec_module_AwesomeStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.FantasticStruct", premadeCodecTypeSpec_module_FantasticStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "void", premadeCodecTypeSpec_void })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum.FullName] = premadeCodecTypeSpec_module_MyEnum
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStructNestedAnnotation.FullName] = premadeCodecTypeSpec_module_MyStructNestedAnnotation
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyUnion.FullName] = premadeCodecTypeSpec_module_MyUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_list_string_6884.FullName] = premadeCodecTypeSpec_module_list_string_6884
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SecretStruct.FullName] = premadeCodecTypeSpec_module_SecretStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyException.FullName] = premadeCodecTypeSpec_module_MyException
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AwesomeStruct.FullName] = premadeCodecTypeSpec_module_AwesomeStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FantasticStruct.FullName] = premadeCodecTypeSpec_module_FantasticStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
         return fbthriftTypeSpecsMap
     },
 )

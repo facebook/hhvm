@@ -41,18 +41,21 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_list_i64 = &thrift.TypeSpec{
+        FullName: "list<i64>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I64,
 	ElementTypeSpec: premadeCodecTypeSpec_i64,
@@ -60,6 +63,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
@@ -67,12 +71,14 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
+        FullName: "i16",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I16,
 },
 
     }
     premadeCodecTypeSpec_map_i16_string = &thrift.TypeSpec{
+        FullName: "map<i16, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i16,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
@@ -82,66 +88,77 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_module_containerTypedef = &thrift.TypeSpec{
+        FullName: "module.containerTypedef",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i16_string,
 },
 
     }
     premadeCodecTypeSpec_module_ComplexUnion = &thrift.TypeSpec{
+        FullName: "module.ComplexUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewComplexUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_ListUnion = &thrift.TypeSpec{
+        FullName: "module.ListUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewListUnion() },
 },
 
     }
     premadeCodecTypeSpec_binary = &thrift.TypeSpec{
+        FullName: "binary",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
 },
 
     }
     premadeCodecTypeSpec_module_DataUnion = &thrift.TypeSpec{
+        FullName: "module.DataUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewDataUnion() },
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_module_Val = &thrift.TypeSpec{
+        FullName: "module.Val",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewVal() },
 },
 
     }
     premadeCodecTypeSpec_module_ValUnion = &thrift.TypeSpec{
+        FullName: "module.ValUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewValUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_VirtualComplexUnion = &thrift.TypeSpec{
+        FullName: "module.VirtualComplexUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewVirtualComplexUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_NonCopyableStruct = &thrift.TypeSpec{
+        FullName: "module.NonCopyableStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewNonCopyableStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_NonCopyableUnion = &thrift.TypeSpec{
+        FullName: "module.NonCopyableUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewNonCopyableUnion() },
 },
@@ -443,39 +460,26 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i64", premadeCodecTypeSpec_i64 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i16", premadeCodecTypeSpec_i16 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.containerTypedef", premadeCodecTypeSpec_module_containerTypedef })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ComplexUnion", premadeCodecTypeSpec_module_ComplexUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ListUnion", premadeCodecTypeSpec_module_ListUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "binary", premadeCodecTypeSpec_binary })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.DataUnion", premadeCodecTypeSpec_module_DataUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.Val", premadeCodecTypeSpec_module_Val })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.ValUnion", premadeCodecTypeSpec_module_ValUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.VirtualComplexUnion", premadeCodecTypeSpec_module_VirtualComplexUnion })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.NonCopyableStruct", premadeCodecTypeSpec_module_NonCopyableStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.NonCopyableUnion", premadeCodecTypeSpec_module_NonCopyableUnion })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_containerTypedef.FullName] = premadeCodecTypeSpec_module_containerTypedef
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexUnion.FullName] = premadeCodecTypeSpec_module_ComplexUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListUnion.FullName] = premadeCodecTypeSpec_module_ListUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DataUnion.FullName] = premadeCodecTypeSpec_module_DataUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Val.FullName] = premadeCodecTypeSpec_module_Val
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ValUnion.FullName] = premadeCodecTypeSpec_module_ValUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualComplexUnion.FullName] = premadeCodecTypeSpec_module_VirtualComplexUnion
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableStruct.FullName] = premadeCodecTypeSpec_module_NonCopyableStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableUnion.FullName] = premadeCodecTypeSpec_module_NonCopyableUnion
         return fbthriftTypeSpecsMap
     },
 )

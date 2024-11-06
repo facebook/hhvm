@@ -28,24 +28,28 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_module_TrivialStruct = &thrift.TypeSpec{
+        FullName: "module.TrivialStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewTrivialStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues = &thrift.TypeSpec{
+        FullName: "module.StructWithNoCustomDefaultValues",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStructWithNoCustomDefaultValues() },
 },
 
     }
     premadeCodecTypeSpec_module_StructWithCustomDefaultValues = &thrift.TypeSpec{
+        FullName: "module.StructWithCustomDefaultValues",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStructWithCustomDefaultValues() },
 },
@@ -227,29 +231,16 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.TrivialStruct", premadeCodecTypeSpec_module_TrivialStruct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.StructWithNoCustomDefaultValues", premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "module.StructWithCustomDefaultValues", premadeCodecTypeSpec_module_StructWithCustomDefaultValues })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialStruct.FullName] = premadeCodecTypeSpec_module_TrivialStruct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithCustomDefaultValues.FullName] = premadeCodecTypeSpec_module_StructWithCustomDefaultValues
         return fbthriftTypeSpecsMap
     },
 )

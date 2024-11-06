@@ -50,6 +50,7 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     {{#program:thrift_metadata_types}}
     {{type:codec_type_spec_name}} = &thrift.TypeSpec{
+        FullName: "{{type:full_name}}",
         {{> spec/codec_type_spec_setter}}: {{> spec/codec_type_spec_instance}}
     }
     {{/program:thrift_metadata_types}}
@@ -79,30 +80,17 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     {{/program:services}}
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         {{#program:thrift_metadata_types}}
         {{#type:named?}}
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "{{type:full_name}}", {{type:codec_type_spec_name}} })
+        fbthriftTypeSpecsMap[{{type:codec_type_spec_name}}.FullName] = {{type:codec_type_spec_name}}
         {{/type:named?}}
         {{/program:thrift_metadata_types}}
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
         return fbthriftTypeSpecsMap
     },
 )

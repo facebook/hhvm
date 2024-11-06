@@ -105,4 +105,7 @@ type TypeSpec struct {
 	CodecMapSpec       *CodecMapSpec
 	CodecTypedefSpec   *CodecTypedefSpec
 	CodecStructSpec    *CodecStructSpec
+
+	// Type spec full name. Always set.
+	FullName string
 }

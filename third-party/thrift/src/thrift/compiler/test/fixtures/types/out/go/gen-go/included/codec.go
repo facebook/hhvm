@@ -30,18 +30,21 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_map_i32_string = &thrift.TypeSpec{
+        FullName: "map<i32, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
@@ -51,12 +54,14 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_included_SomeMap = &thrift.TypeSpec{
+        FullName: "included.SomeMap",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i32_string,
 },
 
     }
     premadeCodecTypeSpec_list_included_SomeMap = &thrift.TypeSpec{
+        FullName: "list<included.SomeMap>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.MAP,
 	ElementTypeSpec: premadeCodecTypeSpec_included_SomeMap,
@@ -64,6 +69,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_included_SomeListOfTypeMap = &thrift.TypeSpec{
+        FullName: "included.SomeListOfTypeMap",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_included_SomeMap,
 },
@@ -79,29 +85,16 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "included.SomeMap", premadeCodecTypeSpec_included_SomeMap })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "included.SomeListOfTypeMap", premadeCodecTypeSpec_included_SomeListOfTypeMap })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_included_SomeMap.FullName] = premadeCodecTypeSpec_included_SomeMap
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_included_SomeListOfTypeMap.FullName] = premadeCodecTypeSpec_included_SomeListOfTypeMap
         return fbthriftTypeSpecsMap
     },
 )

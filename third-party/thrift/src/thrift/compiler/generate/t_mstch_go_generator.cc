@@ -767,7 +767,7 @@ class mstch_go_type : public mstch_type {
   std::string metadata_name_() {
     return "premadeThriftType_" + sanitized_full_name_();
   }
-  mstch::node codec_type_spec_name_() {
+  std::string codec_type_spec_name_() {
     return "premadeCodecTypeSpec_" + sanitized_full_name_();
   }
   std::string sanitized_full_name_() {

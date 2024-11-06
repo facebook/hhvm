@@ -32,48 +32,56 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_python_Py3Hidden = &thrift.TypeSpec{
+        FullName: "python.Py3Hidden",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewPy3Hidden() },
 },
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_python_PyDeprecatedHidden = &thrift.TypeSpec{
+        FullName: "python.PyDeprecatedHidden",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewPyDeprecatedHidden() },
 },
 
     }
     premadeCodecTypeSpec_python_Flags = &thrift.TypeSpec{
+        FullName: "python.Flags",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewFlags() },
 },
 
     }
     premadeCodecTypeSpec_python_Name = &thrift.TypeSpec{
+        FullName: "python.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_python_Adapter = &thrift.TypeSpec{
+        FullName: "python.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAdapter() },
 },
 
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
     }
     premadeCodecTypeSpec_python_UseCAPI = &thrift.TypeSpec{
+        FullName: "python.UseCAPI",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewUseCAPI() },
 },
@@ -211,33 +219,20 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.Py3Hidden", premadeCodecTypeSpec_python_Py3Hidden })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.PyDeprecatedHidden", premadeCodecTypeSpec_python_PyDeprecatedHidden })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.Flags", premadeCodecTypeSpec_python_Flags })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.Name", premadeCodecTypeSpec_python_Name })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.Adapter", premadeCodecTypeSpec_python_Adapter })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "python.UseCAPI", premadeCodecTypeSpec_python_UseCAPI })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3Hidden.FullName] = premadeCodecTypeSpec_python_Py3Hidden
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_PyDeprecatedHidden.FullName] = premadeCodecTypeSpec_python_PyDeprecatedHidden
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Flags.FullName] = premadeCodecTypeSpec_python_Flags
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Name.FullName] = premadeCodecTypeSpec_python_Name
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Adapter.FullName] = premadeCodecTypeSpec_python_Adapter
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
         return fbthriftTypeSpecsMap
     },
 )

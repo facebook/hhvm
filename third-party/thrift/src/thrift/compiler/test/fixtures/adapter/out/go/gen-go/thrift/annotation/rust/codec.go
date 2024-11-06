@@ -41,90 +41,105 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_rust_Name = &thrift.TypeSpec{
+        FullName: "rust.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_rust_Copy = &thrift.TypeSpec{
+        FullName: "rust.Copy",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewCopy() },
 },
 
     }
     premadeCodecTypeSpec_rust_RequestContext = &thrift.TypeSpec{
+        FullName: "rust.RequestContext",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewRequestContext() },
 },
 
     }
     premadeCodecTypeSpec_rust_Arc = &thrift.TypeSpec{
+        FullName: "rust.Arc",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewArc() },
 },
 
     }
     premadeCodecTypeSpec_rust_Box = &thrift.TypeSpec{
+        FullName: "rust.Box",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewBox() },
 },
 
     }
     premadeCodecTypeSpec_rust_Exhaustive = &thrift.TypeSpec{
+        FullName: "rust.Exhaustive",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewExhaustive() },
 },
 
     }
     premadeCodecTypeSpec_rust_Ord = &thrift.TypeSpec{
+        FullName: "rust.Ord",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewOrd() },
 },
 
     }
     premadeCodecTypeSpec_rust_NewType = &thrift.TypeSpec{
+        FullName: "rust.NewType",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewNewType_() },
 },
 
     }
     premadeCodecTypeSpec_rust_Type = &thrift.TypeSpec{
+        FullName: "rust.Type",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewType() },
 },
 
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
     }
     premadeCodecTypeSpec_rust_Serde = &thrift.TypeSpec{
+        FullName: "rust.Serde",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSerde() },
 },
 
     }
     premadeCodecTypeSpec_rust_Mod = &thrift.TypeSpec{
+        FullName: "rust.Mod",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMod() },
 },
 
     }
     premadeCodecTypeSpec_rust_Adapter = &thrift.TypeSpec{
+        FullName: "rust.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAdapter() },
 },
 
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
@@ -132,12 +147,14 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_rust_Derive = &thrift.TypeSpec{
+        FullName: "rust.Derive",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewDerive() },
 },
 
     }
     premadeCodecTypeSpec_rust_ServiceExn = &thrift.TypeSpec{
+        FullName: "rust.ServiceExn",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewServiceExn() },
 },
@@ -391,41 +408,28 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Name", premadeCodecTypeSpec_rust_Name })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Copy", premadeCodecTypeSpec_rust_Copy })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.RequestContext", premadeCodecTypeSpec_rust_RequestContext })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Arc", premadeCodecTypeSpec_rust_Arc })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Box", premadeCodecTypeSpec_rust_Box })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Exhaustive", premadeCodecTypeSpec_rust_Exhaustive })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Ord", premadeCodecTypeSpec_rust_Ord })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.NewType", premadeCodecTypeSpec_rust_NewType })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Type", premadeCodecTypeSpec_rust_Type })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Serde", premadeCodecTypeSpec_rust_Serde })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Mod", premadeCodecTypeSpec_rust_Mod })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Adapter", premadeCodecTypeSpec_rust_Adapter })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.Derive", premadeCodecTypeSpec_rust_Derive })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "rust.ServiceExn", premadeCodecTypeSpec_rust_ServiceExn })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Name.FullName] = premadeCodecTypeSpec_rust_Name
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Copy.FullName] = premadeCodecTypeSpec_rust_Copy
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_RequestContext.FullName] = premadeCodecTypeSpec_rust_RequestContext
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Arc.FullName] = premadeCodecTypeSpec_rust_Arc
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Box.FullName] = premadeCodecTypeSpec_rust_Box
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Exhaustive.FullName] = premadeCodecTypeSpec_rust_Exhaustive
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Ord.FullName] = premadeCodecTypeSpec_rust_Ord
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_NewType.FullName] = premadeCodecTypeSpec_rust_NewType
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Type.FullName] = premadeCodecTypeSpec_rust_Type
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Serde.FullName] = premadeCodecTypeSpec_rust_Serde
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Mod.FullName] = premadeCodecTypeSpec_rust_Mod
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Adapter.FullName] = premadeCodecTypeSpec_rust_Adapter
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Derive.FullName] = premadeCodecTypeSpec_rust_Derive
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_ServiceExn.FullName] = premadeCodecTypeSpec_rust_ServiceExn
         return fbthriftTypeSpecsMap
     },
 )

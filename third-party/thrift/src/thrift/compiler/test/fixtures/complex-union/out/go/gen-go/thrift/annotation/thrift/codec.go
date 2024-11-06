@@ -47,22 +47,26 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_RpcPriority = &thrift.TypeSpec{
+        FullName: "thrift.RpcPriority",
         CodecEnumSpec: &thrift.CodecEnumSpec{},
 
     }
     premadeCodecTypeSpec_thrift_Experimental = &thrift.TypeSpec{
+        FullName: "thrift.Experimental",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewExperimental() },
 },
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
     }
     premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
         CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I32,
 	ElementTypeSpec: premadeCodecTypeSpec_i32,
@@ -70,6 +74,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i32,
 	ValueTypeSpec: premadeCodecTypeSpec_i32,
@@ -79,90 +84,105 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_thrift_ReserveIds = &thrift.TypeSpec{
+        FullName: "thrift.ReserveIds",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewReserveIds() },
 },
 
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
     }
     premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility = &thrift.TypeSpec{
+        FullName: "thrift.RequiresBackwardCompatibility",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewRequiresBackwardCompatibility() },
 },
 
     }
     premadeCodecTypeSpec_thrift_TerseWrite = &thrift.TypeSpec{
+        FullName: "thrift.TerseWrite",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewTerseWrite() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Box = &thrift.TypeSpec{
+        FullName: "thrift.Box",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewBox() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Mixin = &thrift.TypeSpec{
+        FullName: "thrift.Mixin",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewMixin() },
 },
 
     }
     premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder = &thrift.TypeSpec{
+        FullName: "thrift.SerializeInFieldIdOrder",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSerializeInFieldIdOrder() },
 },
 
     }
     premadeCodecTypeSpec_thrift_BitmaskEnum = &thrift.TypeSpec{
+        FullName: "thrift.BitmaskEnum",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewBitmaskEnum() },
 },
 
     }
     premadeCodecTypeSpec_thrift_ExceptionMessage = &thrift.TypeSpec{
+        FullName: "thrift.ExceptionMessage",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewExceptionMessage() },
 },
 
     }
     premadeCodecTypeSpec_thrift_InternBox = &thrift.TypeSpec{
+        FullName: "thrift.InternBox",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewInternBox() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Serial = &thrift.TypeSpec{
+        FullName: "thrift.Serial",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewSerial() },
 },
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
     }
     premadeCodecTypeSpec_thrift_Uri = &thrift.TypeSpec{
+        FullName: "thrift.Uri",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewUri() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Priority = &thrift.TypeSpec{
+        FullName: "thrift.Priority",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewPriority() },
 },
 
     }
     premadeCodecTypeSpec_map_string_string = &thrift.TypeSpec{
+        FullName: "map<string, string>",
         CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_string,
 	ValueTypeSpec: premadeCodecTypeSpec_string,
@@ -172,18 +192,21 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 
     }
     premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations = &thrift.TypeSpec{
+        FullName: "thrift.DeprecatedUnvalidatedAnnotations",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewDeprecatedUnvalidatedAnnotations() },
 },
 
     }
     premadeCodecTypeSpec_thrift_AllowReservedIdentifier = &thrift.TypeSpec{
+        FullName: "thrift.AllowReservedIdentifier",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAllowReservedIdentifier() },
 },
 
     }
     premadeCodecTypeSpec_thrift_AllowReservedFilename = &thrift.TypeSpec{
+        FullName: "thrift.AllowReservedFilename",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewAllowReservedFilename() },
 },
@@ -451,45 +474,32 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.RpcPriority", premadeCodecTypeSpec_thrift_RpcPriority })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Experimental", premadeCodecTypeSpec_thrift_Experimental })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "i32", premadeCodecTypeSpec_i32 })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.ReserveIds", premadeCodecTypeSpec_thrift_ReserveIds })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "bool", premadeCodecTypeSpec_bool })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.RequiresBackwardCompatibility", premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.TerseWrite", premadeCodecTypeSpec_thrift_TerseWrite })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Box", premadeCodecTypeSpec_thrift_Box })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Mixin", premadeCodecTypeSpec_thrift_Mixin })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.SerializeInFieldIdOrder", premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.BitmaskEnum", premadeCodecTypeSpec_thrift_BitmaskEnum })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.ExceptionMessage", premadeCodecTypeSpec_thrift_ExceptionMessage })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.InternBox", premadeCodecTypeSpec_thrift_InternBox })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Serial", premadeCodecTypeSpec_thrift_Serial })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "string", premadeCodecTypeSpec_string })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Uri", premadeCodecTypeSpec_thrift_Uri })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.Priority", premadeCodecTypeSpec_thrift_Priority })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.DeprecatedUnvalidatedAnnotations", premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.AllowReservedIdentifier", premadeCodecTypeSpec_thrift_AllowReservedIdentifier })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "thrift.AllowReservedFilename", premadeCodecTypeSpec_thrift_AllowReservedFilename })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RpcPriority.FullName] = premadeCodecTypeSpec_thrift_RpcPriority
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Experimental.FullName] = premadeCodecTypeSpec_thrift_Experimental
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ReserveIds.FullName] = premadeCodecTypeSpec_thrift_ReserveIds
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility.FullName] = premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_TerseWrite.FullName] = premadeCodecTypeSpec_thrift_TerseWrite
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Box.FullName] = premadeCodecTypeSpec_thrift_Box
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Mixin.FullName] = premadeCodecTypeSpec_thrift_Mixin
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder.FullName] = premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_BitmaskEnum.FullName] = premadeCodecTypeSpec_thrift_BitmaskEnum
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ExceptionMessage.FullName] = premadeCodecTypeSpec_thrift_ExceptionMessage
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_InternBox.FullName] = premadeCodecTypeSpec_thrift_InternBox
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Serial.FullName] = premadeCodecTypeSpec_thrift_Serial
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Uri.FullName] = premadeCodecTypeSpec_thrift_Uri
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Priority.FullName] = premadeCodecTypeSpec_thrift_Priority
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations.FullName] = premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedIdentifier.FullName] = premadeCodecTypeSpec_thrift_AllowReservedIdentifier
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedFilename.FullName] = premadeCodecTypeSpec_thrift_AllowReservedFilename
         return fbthriftTypeSpecsMap
     },
 )

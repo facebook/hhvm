@@ -41,102 +41,119 @@ var (
 // Premade codec specs initializer
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_scope_Transitive = &thrift.TypeSpec{
+        FullName: "scope.Transitive",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewTransitive() },
 },
 
     }
     premadeCodecTypeSpec_scope_Program = &thrift.TypeSpec{
+        FullName: "scope.Program",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewProgram() },
 },
 
     }
     premadeCodecTypeSpec_scope_Struct = &thrift.TypeSpec{
+        FullName: "scope.Struct",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStruct() },
 },
 
     }
     premadeCodecTypeSpec_scope_Union = &thrift.TypeSpec{
+        FullName: "scope.Union",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewUnion() },
 },
 
     }
     premadeCodecTypeSpec_scope_Exception = &thrift.TypeSpec{
+        FullName: "scope.Exception",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewException() },
 },
 
     }
     premadeCodecTypeSpec_scope_Field = &thrift.TypeSpec{
+        FullName: "scope.Field",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewField() },
 },
 
     }
     premadeCodecTypeSpec_scope_Typedef = &thrift.TypeSpec{
+        FullName: "scope.Typedef",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewTypedef() },
 },
 
     }
     premadeCodecTypeSpec_scope_Service = &thrift.TypeSpec{
+        FullName: "scope.Service",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewService() },
 },
 
     }
     premadeCodecTypeSpec_scope_Interaction = &thrift.TypeSpec{
+        FullName: "scope.Interaction",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewInteraction() },
 },
 
     }
     premadeCodecTypeSpec_scope_Function = &thrift.TypeSpec{
+        FullName: "scope.Function",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewFunction() },
 },
 
     }
     premadeCodecTypeSpec_scope_EnumValue = &thrift.TypeSpec{
+        FullName: "scope.EnumValue",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewEnumValue() },
 },
 
     }
     premadeCodecTypeSpec_scope_Const = &thrift.TypeSpec{
+        FullName: "scope.Const",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewConst() },
 },
 
     }
     premadeCodecTypeSpec_scope_Enum = &thrift.TypeSpec{
+        FullName: "scope.Enum",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewEnum() },
 },
 
     }
     premadeCodecTypeSpec_scope_Structured = &thrift.TypeSpec{
+        FullName: "scope.Structured",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewStructured() },
 },
 
     }
     premadeCodecTypeSpec_scope_Interface = &thrift.TypeSpec{
+        FullName: "scope.Interface",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewInterface() },
 },
 
     }
     premadeCodecTypeSpec_scope_RootDefinition = &thrift.TypeSpec{
+        FullName: "scope.RootDefinition",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewRootDefinition() },
 },
 
     }
     premadeCodecTypeSpec_scope_Definition = &thrift.TypeSpec{
+        FullName: "scope.Definition",
         CodecStructSpec: &thrift.CodecStructSpec{
     NewFunc: func() thrift.Struct { return NewDefinition() },
 },
@@ -356,42 +373,29 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
-// Helper type to allow us to store codec specs in a slice at compile time,
-// and put them in a map at runtime. See comment at the top of template
-// about a compilation limitation that affects map literals.
-type codecSpecWithFullName struct {
-    fullName string
-    typeSpec *thrift.TypeSpec
-}
-
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization
         premadeCodecSpecsInitOnce()
 
-        codecSpecsWithFullName := make([]codecSpecWithFullName, 0)
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Transitive", premadeCodecTypeSpec_scope_Transitive })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Program", premadeCodecTypeSpec_scope_Program })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Struct", premadeCodecTypeSpec_scope_Struct })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Union", premadeCodecTypeSpec_scope_Union })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Exception", premadeCodecTypeSpec_scope_Exception })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Field", premadeCodecTypeSpec_scope_Field })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Typedef", premadeCodecTypeSpec_scope_Typedef })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Service", premadeCodecTypeSpec_scope_Service })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Interaction", premadeCodecTypeSpec_scope_Interaction })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Function", premadeCodecTypeSpec_scope_Function })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.EnumValue", premadeCodecTypeSpec_scope_EnumValue })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Const", premadeCodecTypeSpec_scope_Const })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Enum", premadeCodecTypeSpec_scope_Enum })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Structured", premadeCodecTypeSpec_scope_Structured })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Interface", premadeCodecTypeSpec_scope_Interface })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.RootDefinition", premadeCodecTypeSpec_scope_RootDefinition })
-        codecSpecsWithFullName = append(codecSpecsWithFullName, codecSpecWithFullName{ "scope.Definition", premadeCodecTypeSpec_scope_Definition })
-
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec, len(codecSpecsWithFullName))
-        for _, value := range codecSpecsWithFullName {
-            fbthriftTypeSpecsMap[value.fullName] = value.typeSpec
-        }
+        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Transitive.FullName] = premadeCodecTypeSpec_scope_Transitive
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Program.FullName] = premadeCodecTypeSpec_scope_Program
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Struct.FullName] = premadeCodecTypeSpec_scope_Struct
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Union.FullName] = premadeCodecTypeSpec_scope_Union
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Exception.FullName] = premadeCodecTypeSpec_scope_Exception
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Field.FullName] = premadeCodecTypeSpec_scope_Field
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Typedef.FullName] = premadeCodecTypeSpec_scope_Typedef
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Service.FullName] = premadeCodecTypeSpec_scope_Service
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interaction.FullName] = premadeCodecTypeSpec_scope_Interaction
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Function.FullName] = premadeCodecTypeSpec_scope_Function
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_EnumValue.FullName] = premadeCodecTypeSpec_scope_EnumValue
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Const.FullName] = premadeCodecTypeSpec_scope_Const
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Enum.FullName] = premadeCodecTypeSpec_scope_Enum
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Structured.FullName] = premadeCodecTypeSpec_scope_Structured
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interface.FullName] = premadeCodecTypeSpec_scope_Interface
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_RootDefinition.FullName] = premadeCodecTypeSpec_scope_RootDefinition
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Definition.FullName] = premadeCodecTypeSpec_scope_Definition
         return fbthriftTypeSpecsMap
     },
 )

@@ -316,28 +316,13 @@ func (p *simpleJSONFormat) ReadFieldBegin() (string, types.Type, int16, error) {
 		case types.JSON_QUOTE:
 			p.reader.ReadByte()
 			name, err := p.ParseStringBody()
-			// simplejson is not meant to be read back into thrift
-			// - see http://wiki.apache.org/thrift/ThriftUsageJava
-			// - use JSON instead
 			if err != nil {
 				return name, types.STOP, 0, err
 			}
-			return name, types.STOP, -1, p.ParsePostValue()
-			/*
-			   if err = p.ParsePostValue(); err != nil {
-			     return name, STOP, 0, err
-			   }
-			   if isNull, err := p.ParseListBegin(); isNull || err != nil {
-			     return name, STOP, 0, err
-			   }
-			   bType, err := p.ReadByte()
-			   thetype := Type(bType)
-			   if err != nil {
-			     return name, thetype, 0, err
-			   }
-			   id, err := p.ReadI16()
-			   return name, thetype, id, err
-			*/
+			// In SimpleJSON - we only have field name when reading.
+			// For field type - use VOID as placeholder.
+			// For field ID - use NO_FIELD_ID as placeholder.
+			return name, types.VOID, types.NO_FIELD_ID, p.ParsePostValue()
 		}
 		e := fmt.Errorf("Expected \"}\" or '\"', but found: '%s'", string(b))
 		return "", types.STOP, 0, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)

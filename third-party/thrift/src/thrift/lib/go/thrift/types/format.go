@@ -19,6 +19,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 type ProtocolID int16
@@ -54,6 +55,8 @@ func (p ProtocolID) String() string {
 const (
 	VERSION_MASK = 0xffff0000
 	VERSION_1    = 0x80010000
+	// Used by SimpleJSON protocol to denote that no field ID is available.
+	NO_FIELD_ID = math.MinInt16
 )
 
 // Format is the interface that must be implemented by all serialization formats.

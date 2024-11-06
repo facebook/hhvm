@@ -67,10 +67,6 @@ type server struct {
 
 	stats *thriftstats.ServerStats
 
-	// base server context
-	context context.Context
-	cancel  context.CancelFunc
-
 	connContext ConnContextFunc
 }
 
@@ -95,8 +91,6 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 		pipeliningEnabled: opts.pipeliningEnabled,
 		numWorkers:        opts.numWorkers,
 		stats:             opts.serverStats,
-		context:           context.Background(),
-		cancel:            func() {},
 		connContext:       opts.connContext,
 	}
 
@@ -123,7 +117,7 @@ var tooBusyResponse ApplicationException = NewApplicationException(
 	"server is too busy",
 )
 
-func (tf *server) serve() error {
+func (tf *server) serve(ctx context.Context) error {
 	// add self
 	tf.wg.Add(1)
 	defer tf.wg.Done()
@@ -143,7 +137,10 @@ func (tf *server) serve() error {
 		}
 	}
 
-	// accept loop
+	return tf.acceptLoop(ctx)
+}
+
+func (tf *server) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := tf.ln.Accept()
 		if err != nil {
@@ -154,22 +151,19 @@ func (tf *server) serve() error {
 			}
 			return nil
 		}
-		// XXX: check max connections here and early loadshed
-		go tf.handle(conn)
+		// add connection info to ctx.
+		ctx = tf.connContext(ctx, conn)
+		go tf.processRequests(ctx, conn)
 	}
-
-	// XXX: do we want to wait for our children?  outside in the rain?
-
 }
 
 // ServeContext enters the accept loop and processes requests.
 func (tf *server) ServeContext(ctx context.Context) error {
-	tf.context = ctx
 	go func() {
 		<-ctx.Done()
 		tf.stop()
 	}()
-	return tf.serve()
+	return tf.serve(ctx)
 }
 
 func (tf *server) stop() error {
@@ -179,7 +173,6 @@ func (tf *server) stop() error {
 	if err := tf.ln.Close(); err != nil {
 		return err
 	}
-	tf.cancel()
 
 	// at least wait for our workers to clock out?
 	if tf.workCh != nil {
@@ -238,16 +231,13 @@ func (tf *server) recordNewConnAndDefer(conn net.Conn) func() {
 }
 
 // reader is a dedicated goroutine handler per connection.
-func (tf *server) handle(conn net.Conn) {
+func (tf *server) processRequests(ctx context.Context, conn net.Conn) {
 	defer tf.recordNewConnAndDefer(conn)()
 
 	// create a cancellable ctx for this conn. any protocol error will cancel
 	// and cleanup the reader and writer
-	ctx, cancel := context.WithCancel(tf.context)
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-
-	// add connection info to ctx.
-	ctx = tf.connContext(ctx, conn)
 
 	// if pipelining, launch up a single writer goroutine to sequence responses to the conn
 	// buffer this channel to ease the contention on heavy write spikes

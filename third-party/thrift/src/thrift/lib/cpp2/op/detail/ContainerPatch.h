@@ -181,11 +181,6 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     erase_all(*data_.remove(), keys);
     assignOr(*data_.add()).insert(keys.begin(), keys.end());
   }
-  /// Emplaces the set.
-  template <typename... Args>
-  void emplace(Args&&... args) {
-    insert({std::forward<Args>(args)...});
-  }
   /// Adds a key.
   template <typename U = typename T::value_type>
   void insert(U&& val) {

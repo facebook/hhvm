@@ -444,8 +444,6 @@ struct RuntimeOption {
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
-  F(hphp_fast_string_set, StartOptionLogOptions, {})                    \
-  F(hphp_fast_string_set, StartOptionLogExcludeOptions, {})             \
   /* */
 
 private:

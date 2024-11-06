@@ -226,6 +226,35 @@ impl Config {
     }
 }
 
+pub struct Include {
+    pub name: String,
+    pub user_defined: bool,
+}
+
+impl Include {
+    fn user(name: &str) -> Include {
+        Include {
+            name: name.to_owned(),
+            user_defined: true,
+        }
+    }
+
+    fn library(name: &str) -> Include {
+        Include {
+            name: name.to_owned(),
+            user_defined: false,
+        }
+    }
+
+    fn str(&self) -> String {
+        if self.user_defined {
+            format!("#include \"{}\"", self.name)
+        } else {
+            format!("#include <{}>", self.name)
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum ConfigType {
     Bool,
@@ -244,6 +273,7 @@ pub enum ConfigType {
     StdSetStdString,
     StdMapStdStringStdString,
     BoostFlatSetStdString,
+    HphpFastStringSet,
 }
 
 impl ConfigType {
@@ -265,10 +295,11 @@ impl ConfigType {
             ConfigType::StdSetStdString => "std::set<std::string>",
             ConfigType::StdMapStdStringStdString => "std::map<std::string,std::string>",
             ConfigType::BoostFlatSetStdString => "boost::container::flat_set<std::string>",
+            ConfigType::HphpFastStringSet => "hphp_fast_string_set",
         }
     }
 
-    fn includes(&self) -> Vec<&str> {
+    fn includes(&self) -> Vec<Include> {
         match *self {
             ConfigType::Bool | ConfigType::Double | ConfigType::Int => vec![],
             ConfigType::Int8t
@@ -278,14 +309,24 @@ impl ConfigType {
             | ConfigType::UInt8t
             | ConfigType::UInt16t
             | ConfigType::UInt32t
-            | ConfigType::UInt64t => vec!["cstdint"],
-            ConfigType::StdString => vec!["string"],
-            ConfigType::StdVectorStdString => vec!["vector", "string"],
-            ConfigType::StdSetStdString => vec!["set", "string"],
-            ConfigType::StdMapStdStringStdString => vec!["map", "string"],
-            ConfigType::BoostFlatSetStdString => {
-                vec!["boost/container/flat_set.hpp", "string"]
+            | ConfigType::UInt64t => vec![Include::library("cstdint")],
+            ConfigType::StdString => vec![Include::library("string")],
+            ConfigType::StdVectorStdString => {
+                vec![Include::library("vector"), Include::library("string")]
             }
+            ConfigType::StdSetStdString => {
+                vec![Include::library("set"), Include::library("string")]
+            }
+            ConfigType::StdMapStdStringStdString => {
+                vec![Include::library("map"), Include::library("string")]
+            }
+            ConfigType::BoostFlatSetStdString => {
+                vec![
+                    Include::library("boost/container/flat_set.hpp"),
+                    Include::library("string"),
+                ]
+            }
+            ConfigType::HphpFastStringSet => vec![Include::user("hphp/util/hash-set.h")],
         }
     }
 
@@ -307,6 +348,7 @@ impl ConfigType {
             ConfigType::StdSetStdString => "{}",
             ConfigType::StdMapStdStringStdString => "{}",
             ConfigType::BoostFlatSetStdString => "{}",
+            ConfigType::HphpFastStringSet => "{}",
         }
     }
 
@@ -364,6 +406,7 @@ fn parse_type<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Co
                 ConfigType::BoostFlatSetStdString,
                 tag("boost::container::flat_set<std::string>"),
             ),
+            value(ConfigType::HphpFastStringSet, tag("hphp_fast_string_set")),
         )),
     )(input)
 }
@@ -741,14 +784,11 @@ pub fn generate_defs(sections: Vec<ConfigSection>, output_dir: PathBuf) {
 
         let mut unique_includes = includes
             .into_iter()
+            .map(|p| p.str())
             .collect::<HashSet<_>>()
             .into_iter()
             .collect::<Vec<_>>();
         unique_includes.sort();
-        let unique_include_paths = unique_includes
-            .into_iter()
-            .map(|p| format!("#include <{}>", p))
-            .collect::<Vec<_>>();
 
         let h_content = format!(
             r#"#pragma once
@@ -770,7 +810,7 @@ private:
 
 }} // namespace HPHP::Cfg
 "#,
-            unique_include_paths.join("\n"),
+            unique_includes.join("\n"),
             section_shortname,
             section_shortname,
             public_defs.join("\n"),

@@ -980,6 +980,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - uint64_t Eval.StartOptionLogWindow = 86400, UNKNOWN
 
+- hphp_fast_string_set Eval.StartOptionLogOptions = {}, UNKNOWN
+
+- hphp_fast_string_set Eval.StartOptionLogExcludeOptions = {}, UNKNOWN
+
 - bool Eval.RecordReplay = false, UNKNOWN
 
 - std::string Eval.RecordSampleFilter = "", UNKNOWN

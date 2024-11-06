@@ -897,8 +897,8 @@ void logSettings() {
   if (RO::RepoAuthoritative) return;
   if (!StructuredLog::coinflip(Cfg::Eval::StartOptionLogRate)) return;
 
-  auto const hash = IniSetting::HashAll(RO::EvalStartOptionLogOptions,
-                                        RO::EvalStartOptionLogExcludeOptions);
+  auto const hash = IniSetting::HashAll(Cfg::Eval::StartOptionLogOptions,
+                                        Cfg::Eval::StartOptionLogExcludeOptions);
   if (!Cfg::Eval::StartOptionLogCache.empty()) {
     auto name = Cfg::Eval::StartOptionLogCache;
     replacePlaceholders(name, {{"%{hash}", folly::to<std::string>(hash)}});
@@ -924,8 +924,8 @@ void logSettings() {
   ent.setInt("hash", hash);
   ent.setProcessUuid("hhvm_uuid");
   IniSetting::Log(ent,
-                  RO::EvalStartOptionLogOptions,
-                  RO::EvalStartOptionLogExcludeOptions);
+                  Cfg::Eval::StartOptionLogOptions,
+                  Cfg::Eval::StartOptionLogExcludeOptions);
   StructuredLog::log("hhvm_runtime_options", ent);
 }
 

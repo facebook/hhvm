@@ -338,6 +338,8 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   ///       template<class Id> void ensure(const op::get_native_type<Id>&);
   ///       // For non-optional fields in structs
   ///       template<class Id> void ensure();
+  ///       // For optional fields in structs and fields in unions
+  ///       template<class Id> void remove();
   ///     }
   ///
   /// For example, let's assume you have the following thrift struct:

@@ -69,7 +69,7 @@ OptResource HHVM_FUNCTION(pagelet_server_task_start,
 
   if (transport) {
     remote_host = transport->getRemoteHost();
-    if (!headers.exists(s_Host) && RuntimeOption::SandboxMode) {
+    if (!headers.exists(s_Host) && Cfg::Sandbox::Mode) {
       Array tmp = headers;
       tmp.set(s_Host, transport->getHeader("Host"));
       return PageletServer::TaskStart(url, tmp, remote_host,

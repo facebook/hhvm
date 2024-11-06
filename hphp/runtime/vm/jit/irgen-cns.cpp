@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/sandbox.h"
 
 namespace HPHP::jit::irgen {
 
@@ -139,7 +140,7 @@ void exactClsCns(IRGS& env,
       return;
     }
     case Class::ClassLookupResult::None: {
-      if (RO::SandboxSpeculate) {
+      if (Cfg::Sandbox::Speculate) {
         if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }

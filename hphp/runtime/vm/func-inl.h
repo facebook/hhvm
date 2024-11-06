@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/sandbox.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -794,7 +795,7 @@ inline const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, con
   assertx(!func->cls());
   if (func->isPersistent()) return Func::exact(func);
   if (func->unit() == unit) return Func::exact(func);
-  return RO::SandboxSpeculate ? Func::maybe(func) : Func::none();
+  return Cfg::Sandbox::Speculate ? Func::maybe(func) : Func::none();
 }
 
 inline const Func* Func::lookupKnown(const StringData* name, const Unit* unit) {

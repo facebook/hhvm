@@ -1197,7 +1197,7 @@ static Variant invoke_file(const String& s,
 Variant include_impl_invoke(const String& file, bool once,
                             const char *currentDir, bool callByHPHPInvoke) {
   if (FileUtil::isAbsolutePath(file.toCppString())) {
-    if (RuntimeOption::SandboxMode || !Cfg::Server::AlwaysUseRelativePath) {
+    if (Cfg::Sandbox::Mode || !Cfg::Server::AlwaysUseRelativePath) {
       try {
         return invoke_file(file, once, currentDir, callByHPHPInvoke);
       } catch(PhpFileDoesNotExistException& ) {}

@@ -680,7 +680,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   }
 
   std::unique_ptr<Unit> u {
-    RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode ?
+    RuntimeOption::RepoAuthoritative && !Cfg::Sandbox::Mode ?
       new Unit : new UnitExtended
   };
 

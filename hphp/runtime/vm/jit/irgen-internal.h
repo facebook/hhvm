@@ -21,8 +21,6 @@
 #include <algorithm>
 #include <utility>
 
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -37,6 +35,9 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/util/configs/sandbox.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP::jit::irgen {
 
@@ -749,7 +750,7 @@ inline SSATmp* ldCls(IRGS& env,
       case Class::ClassLookupResult::Exact:
         return cns(env, lookup.cls);
       case Class::ClassLookupResult::None:
-        if (RO::SandboxSpeculate && Cfg::Eval::LogClsSpeculation) {
+        if (Cfg::Sandbox::Speculate && Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
         return gen(env, LdClsCached, LdClsFallbackData { fallback }, clsName);

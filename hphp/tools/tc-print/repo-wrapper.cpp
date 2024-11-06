@@ -58,7 +58,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Cfg::Server::AlwaysUseRelativePath = false;
   Cfg::Server::SafeFileAccess = false;
   Cfg::Eval::AllowHhas = true;
-  RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
+  Cfg::Sandbox::Mode = true; // So we get Unit::m_funcTable
   RuntimeOption::RepoAuthoritative = true;
   Cfg::Eval::LowStaticArrays = false; // save some low mem
   Cfg::Eval::VerifySystemLibHasNativeImpl = false;

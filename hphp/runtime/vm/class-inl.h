@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/vm/named-entity.h"
 
+#include "hphp/util/configs/sandbox.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -833,7 +835,7 @@ inline Class::ClassLookup Class::lookupKnownMaybe(const Class* cls,
     if (UNLIKELY(cls == nullptr)) return Class::ClassLookupResult::None;
     if (cls->attrs() & AttrPersistent) return Class::ClassLookupResult::Exact;
     if (ctx && ctx->classof(cls)) return Class::ClassLookupResult::Exact;
-    if (RO::SandboxSpeculate) return ClassLookupResult::Maybe;
+    if (Cfg::Sandbox::Speculate) return ClassLookupResult::Maybe;
     return Class::ClassLookupResult::None;
   }();
   return Class::ClassLookup { tag, cls };

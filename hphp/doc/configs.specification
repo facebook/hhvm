@@ -1494,6 +1494,21 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - std::vector<std::string> Proxy.ProxyPatterns = {}, UNKNOWN
 
+# Sandbox
+
+- bool Sandbox.Mode = false, UNKNOWN, lookuppath(Sandbox.SandboxMode)
+- bool Sandbox.Speculate = false, UNKNOWN, lookuppath(Sandbox.SandboxSpeculate)
+- std::string Sandbox.Pattern = "", UNKNOWN, postprocess
+- std::string Sandbox.Home = "", UNKNOWN
+- std::string Sandbox.Fallback = "", UNKNOWN
+- std::string Sandbox.ConfFile = "", UNKNOWN
+- std::map<std::string,std::string> Sandbox.ServerVariables = {}, UNKNOWN
+- bool Sandbox.FromCommonRoot = false, UNKNOWN
+- std::string Sandbox.DirectoriesRoot = "", UNKNOWN
+- std::string Sandbox.LogsRoot = "", UNKNOWN
+- std::string Sandbox.DefaultUserFile = "", UNKNOWN
+- std::string Sandbox.HostAlias = "", UNKNOWN
+
 # Server
 
 - bool Server.Mode = false, UNKNOWN, nobind

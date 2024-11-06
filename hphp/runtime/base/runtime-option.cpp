@@ -59,6 +59,7 @@
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/gc.h"
+#include "hphp/util/configs/sandbox.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/configs/log.h"
 #include "hphp/util/current-executable.h" // @donotremove
@@ -774,13 +775,13 @@ Optional<std::filesystem::path> RuntimeOption::GetHomePath(
     const folly::StringPiece user) {
   namespace fs = std::filesystem;
 
-  auto homePath = fs::path{RO::SandboxHome} / fs::path{std::string{user}};
+  auto homePath = fs::path{Cfg::Sandbox::Home} / fs::path{std::string{user}};
   if (fs::is_directory(homePath)) {
     return make_optional(std::move(homePath));
   }
 
-  if (!RuntimeOption::SandboxFallback.empty()) {
-    homePath = fs::path{RO::SandboxFallback} / fs::path{std::string{user}};
+  if (!Cfg::Sandbox::Fallback.empty()) {
+    homePath = fs::path{Cfg::Sandbox::Fallback} / fs::path{std::string{user}};
     if (fs::is_directory(homePath)) {
       return make_optional(std::move(homePath));
     }
@@ -801,9 +802,9 @@ bool RuntimeOption::funcIsRenamable(const StringData* name) {
 }
 
 std::string RuntimeOption::GetDefaultUser() {
-  if (SandboxDefaultUserFile.empty()) return {};
+  if (Cfg::Sandbox::DefaultUserFile.empty()) return {};
 
-  std::filesystem::path file{RO::SandboxDefaultUserFile};
+  std::filesystem::path file{Cfg::Sandbox::DefaultUserFile};
   if (!std::filesystem::is_regular_file(file)) return {};
 
   std::string user;
@@ -860,19 +861,6 @@ bool RuntimeOption::HHProfEnabled = false;
 bool RuntimeOption::HHProfActive = false;
 bool RuntimeOption::HHProfAccum = false;
 bool RuntimeOption::HHProfRequest = false;
-
-bool RuntimeOption::SandboxMode = false;
-bool RuntimeOption::SandboxSpeculate = false;
-std::string RuntimeOption::SandboxPattern;
-std::string RuntimeOption::SandboxHome;
-std::string RuntimeOption::SandboxFallback;
-std::string RuntimeOption::SandboxConfFile;
-std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
-bool RuntimeOption::SandboxFromCommonRoot = false;
-std::string RuntimeOption::SandboxDirectoriesRoot;
-std::string RuntimeOption::SandboxLogsRoot;
-std::string RuntimeOption::SandboxDefaultUserFile;
-std::string RuntimeOption::SandboxHostAlias;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1903,25 +1891,6 @@ void RuntimeOption::Load(
   {
     Config::Bind(ServerVariables, ini, config, "ServerVariables");
     Config::Bind(EnvVariables, ini, config, "EnvVariables");
-  }
-  {
-    // Sandbox
-    Config::Bind(SandboxMode, ini, config, "Sandbox.SandboxMode");
-    Config::Bind(SandboxSpeculate, ini, config, "Sandbox.SandboxSpeculate");
-    Config::Bind(SandboxPattern, ini, config, "Sandbox.Pattern");
-    SandboxPattern = format_pattern(SandboxPattern, true);
-    Config::Bind(SandboxHome, ini, config, "Sandbox.Home");
-    Config::Bind(SandboxFallback, ini, config, "Sandbox.Fallback");
-    Config::Bind(SandboxConfFile, ini, config, "Sandbox.ConfFile");
-    Config::Bind(SandboxFromCommonRoot, ini, config, "Sandbox.FromCommonRoot");
-    Config::Bind(SandboxDirectoriesRoot, ini, config,
-                 "Sandbox.DirectoriesRoot");
-    Config::Bind(SandboxLogsRoot, ini, config, "Sandbox.LogsRoot");
-    Config::Bind(SandboxServerVariables, ini, config,
-                 "Sandbox.ServerVariables");
-    Config::Bind(SandboxDefaultUserFile, ini, config,
-                 "Sandbox.DefaultUserFile");
-    Config::Bind(SandboxHostAlias, ini, config, "Sandbox.HostAlias");
   }
   {
     // Mail

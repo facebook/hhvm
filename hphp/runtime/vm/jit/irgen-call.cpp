@@ -45,6 +45,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/sandbox.h"
 
 namespace HPHP::jit::irgen {
 
@@ -1412,7 +1413,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
 
   switch (lookup.tag) {
     case Func::FuncLookupResult::None:
-      if (RO::SandboxSpeculate && Cfg::Eval::LogClsSpeculation) {
+      if (Cfg::Sandbox::Speculate && Cfg::Eval::LogClsSpeculation) {
         gen(env, LogClsSpeculation, data(nullptr, false));
       }
       return slow();
@@ -1613,7 +1614,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
   switch (lookup.tag) {
     case Class::ClassLookupResult::Exact: return knownClass();
     case Class::ClassLookupResult::None: {
-      if (RO::SandboxSpeculate) {
+      if (Cfg::Sandbox::Speculate) {
         if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(ClassId::Invalid, false));
         }
@@ -1850,7 +1851,7 @@ void emitFCallClsMethodD(IRGS& env,
       return prepareAndCallKnown(env, func, fca, ctx, false, false);
     }
     case Class::ClassLookupResult::None: {
-      if (RO::SandboxSpeculate) {
+      if (Cfg::Sandbox::Speculate) {
         if (Cfg::Eval::LogClsSpeculation) {
           gen(env, LogClsSpeculation, data(nullptr, ClassId::Invalid, false));
         }

@@ -130,7 +130,7 @@ Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot) {
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
 
-  auto confFileName = (*homePath) / RO::SandboxConfFile;
+  auto confFileName = (*homePath) / Cfg::Sandbox::ConfFile;
   if (!RO::ReadPerUserSettings(confFileName, ini, config)) {
     return def(user);
   }

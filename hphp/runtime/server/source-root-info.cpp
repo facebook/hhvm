@@ -61,12 +61,12 @@ InitFiniNode r_debug_destroy_info(
 #endif
 
 bool createFromCommonRoot(Info* info, const String& sandboxName) {
-  auto sroot = RO::SandboxDirectoriesRoot;
+  auto sroot = Cfg::Sandbox::DirectoriesRoot;
   auto sname = sandboxName.toCppString();
 
   info->user = "";
   info->sandbox = sname;
-  String logsRoot(RO::SandboxLogsRoot);
+  String logsRoot(Cfg::Sandbox::LogsRoot);
 
   if (!sroot.empty() && sroot.back() != '/') sroot += '/';
   if (!sname.empty() && sname.back() != '/') sname += '/';
@@ -95,7 +95,7 @@ bool createFromUserConfig(Info* info) {
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   bool success = RuntimeOption::ReadPerUserSettings(
-      (*maybeHomePath) / RO::SandboxConfFile, ini, config
+      (*maybeHomePath) / Cfg::Sandbox::ConfFile, ini, config
   );
   if (!success) {
     info->sandboxOn = false;
@@ -183,7 +183,7 @@ std::string parseServerVariable(const Info* info, const std::string& format) {
 
 bool Init(Transport* transport) {
   auto info = tl_info.getCheck();
-  info->sandboxOn = info->hasDocRoot = RO::SandboxMode;
+  info->sandboxOn = info->hasDocRoot = Cfg::Sandbox::Mode;
 
   auto documentRoot = transport->getDocumentRoot();
   if (!documentRoot.empty()) {
@@ -196,11 +196,11 @@ bool Init(Transport* transport) {
     return true;
   }
 
-  if (!RO::SandboxMode) return true;
+  if (!Cfg::Sandbox::Mode) return true;
 
   auto host = transport->getHeader("Host");
   Variant matches;
-  Variant r = preg_match(RO::SandboxPattern, host, &matches);
+  Variant r = preg_match(Cfg::Sandbox::Pattern, host, &matches);
   if (!same(r, static_cast<int64_t>(1))) {
     auto const user = RO::GetDefaultUser();
     if (!user.empty()) {
@@ -213,13 +213,13 @@ bool Init(Transport* transport) {
     return true;
   }
 
-  auto const alias = RO::SandboxHostAlias;
+  auto const alias = Cfg::Sandbox::HostAlias;
   auto const name = tvCastToString(matches.toArray().lookup(1));
   if (!alias.empty() && !strcmp(name.data(), alias.data())) {
     info->sandboxOn = false;
     info->hasDocRoot = false;
     return true;
-  } else if (RuntimeOption::SandboxFromCommonRoot) {
+  } else if (Cfg::Sandbox::FromCommonRoot) {
     return createFromCommonRoot(info, name);
   } else {
     Array pair = StringUtil::Explode(name, "-", 2).toArray();
@@ -239,8 +239,8 @@ bool Init(Transport* transport) {
 
 bool Init(const std::string& user, const std::string& sandbox) {
   auto info = tl_info.getCheck();
-  info->sandboxOn = info->hasDocRoot = RO::SandboxMode;
-  if (!RO::SandboxMode) return true;
+  info->sandboxOn = info->hasDocRoot = Cfg::Sandbox::Mode;
+  if (!Cfg::Sandbox::Mode) return true;
   info->user = user;
   info->sandbox = sandbox;
   info->sandboxOn = true;
@@ -269,7 +269,7 @@ Array SetServerVariables(Array server) {
   if (!SandboxOn()) return server;
   auto const info = tl_info.get();
 
-  for (auto const& it : RO::SandboxServerVariables) {
+  for (auto const& it : Cfg::Sandbox::ServerVariables) {
     String idx(it.first);
     const auto arrkey = server.convertKey<IntishCast::Cast>(idx);
     String str(parseServerVariable(info, it.second));

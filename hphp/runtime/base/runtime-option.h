@@ -490,20 +490,6 @@ public:
   static bool HHProfRequest;
   static bool TrackPerUnitMemory;
 
-  // Sandbox options
-  static bool SandboxMode;
-  static bool SandboxSpeculate;
-  static std::string SandboxPattern;
-  static std::string SandboxHome;
-  static std::string SandboxFallback;
-  static std::string SandboxConfFile;
-  static std::map<std::string, std::string> SandboxServerVariables;
-  static bool SandboxFromCommonRoot;
-  static std::string SandboxDirectoriesRoot;
-  static std::string SandboxLogsRoot;
-  static std::string SandboxDefaultUserFile;
-  static std::string SandboxHostAlias;
-
   // Mail options
   static std::string SendmailPath;
   static std::string MailForceExtraParameters;

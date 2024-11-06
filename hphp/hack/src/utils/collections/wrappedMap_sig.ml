@@ -79,4 +79,6 @@ module type S = sig
 
   val make_yojson_of_t :
     (key -> string) -> ('a -> Yojson.Safe.t) -> 'a t -> Yojson.Safe.t
+
+  val find_one_opt : 'a t -> f:(key -> bool) -> 'a option
 end

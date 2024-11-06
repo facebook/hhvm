@@ -200,4 +200,14 @@ module Make (Ord : Stdlib.Map.OrderedType) : S with type key = Ord.t = struct
     `Assoc
       (bindings map
       |> List.map ~f:(fun (key, value) -> (show_ord key, yojson_of_a value)))
+
+  (** Find an element that satisfies some boolean predicate.
+      No other guarantees are given (decidability, ordering, ...).  *)
+  let find_one_opt (type a) (map : a t) ~f =
+    let exception FoundFirst of a in
+    try
+      iter (fun key value -> if f key then raise (FoundFirst value)) map;
+      None
+    with
+    | FoundFirst value -> Some value
 end

@@ -494,6 +494,9 @@ and Type : sig
 
   val mk : ReadOnlyEnvironment.t -> Environment.t -> Environment.t * t
 end = struct
+  module Env = Environment
+  module REnv = ReadOnlyEnvironment
+
   type field = {
     key: string;
     ty: t;
@@ -728,7 +731,7 @@ end = struct
       None
 
   let ty_filter
-      ReadOnlyEnvironment.
+      REnv.
         {
           pick_immediately_inhabited;
           for_option_ty;
@@ -759,8 +762,8 @@ end = struct
       have some subtype that is inhabited, e.g., if one passes an abstract class
       without a concrete class extending it somewhere down the hierarchy.
       *)
-  let subtype_of (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty =
-    ReadOnlyEnvironment.debug
+  let subtype_of (renv : REnv.t) (env : Env.t) ty =
+    REnv.debug
       ~level:1
       renv
       ~start:(lazy (Format.sprintf "subtype_of: %s" (Type.show ty)))
@@ -769,15 +772,13 @@ end = struct
     (* select_step makes sure we don't get into infinite loops by randomly being
        an identity function and otherwise recursive via step. *)
     let rec subfield_of renv { key; ty; optional } =
-      ReadOnlyEnvironment.debug
+      REnv.debug
         ~level:3
         renv
         ~start:(lazy (Format.sprintf "subfield_of %s: %s" key (Type.show ty)))
         ~end_:show_field
       @@ fun renv ->
-      let ty =
-        driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
-      in
+      let ty = driver REnv.{ renv with for_alias_def = false } ty in
       let optional =
         if optional then
           select [true; false]
@@ -786,7 +787,7 @@ end = struct
       in
       { key; ty; optional }
     and step renv ty =
-      ReadOnlyEnvironment.debug
+      REnv.debug
         ~level:3
         renv
         ~start:(lazy (Format.sprintf "step: %s" (Type.show ty)))
@@ -798,7 +799,7 @@ end = struct
       if Random.bool () then
         ty
         :: begin
-             Environment.get_subtypes env ty
+             Env.get_subtypes env ty
              @
              match ty with
              | Mixed -> List.map ~f:(fun prim -> Primitive prim) Primitive.all
@@ -824,49 +825,46 @@ end = struct
           []
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable ty ->
-          let ty =
-            driver ReadOnlyEnvironment.{ renv with for_alias_def = false } ty
-          in
+          let ty = driver REnv.{ renv with for_alias_def = false } ty in
           [Awaitable ty]
         | Vec ty ->
           let renv =
-            ReadOnlyEnvironment.
-              {
-                renv with
-                pick_immediately_inhabited = false;
-                for_alias_def = false;
-              }
+            let open REnv in
+            {
+              renv with
+              pick_immediately_inhabited = false;
+              for_alias_def = false;
+            }
           in
           let ty = driver renv ty in
           [Vec ty]
         | Dict { key; value } ->
           let renv =
-            ReadOnlyEnvironment.
-              {
-                renv with
-                pick_immediately_inhabited = false;
-                for_alias_def = false;
-              }
+            let open REnv in
+            {
+              renv with
+              pick_immediately_inhabited = false;
+              for_alias_def = false;
+            }
           in
           let key = driver renv key in
           let value = driver renv value in
           [Dict { key; value }]
         | Keyset ty ->
           let renv =
-            ReadOnlyEnvironment.
-              {
-                renv with
-                pick_immediately_inhabited = false;
-                for_alias_def = false;
-              }
+            let open REnv in
+            {
+              renv with
+              pick_immediately_inhabited = false;
+              for_alias_def = false;
+            }
           in
           let ty = driver renv ty in
           [Keyset ty]
         | Tuple { conjuncts; open_ } ->
           let conjuncts =
             List.map
-              ~f:
-                (driver ReadOnlyEnvironment.{ renv with for_alias_def = false })
+              ~f:(driver REnv.{ renv with for_alias_def = false })
               conjuncts
           in
           let open_ =
@@ -891,21 +889,19 @@ end = struct
           [Shape { fields; open_ }]
         | Function { parameters; variadic; return_ } ->
           let return_ =
-            driver
-              ReadOnlyEnvironment.{ renv with for_alias_def = false }
-              return_
+            driver REnv.{ renv with for_alias_def = false } return_
           in
           let variadic =
             match variadic with
             | None ->
               let variadic_subtype =
                 let renv =
-                  ReadOnlyEnvironment.
-                    {
-                      renv with
-                      pick_immediately_inhabited = false;
-                      for_alias_def = false;
-                    }
+                  let open REnv in
+                  {
+                    renv with
+                    pick_immediately_inhabited = false;
+                    for_alias_def = false;
+                  }
                 in
                 lazy (Some (driver renv Mixed))
               in
@@ -919,7 +915,7 @@ end = struct
       end
     and driver renv candidate =
       try
-        ReadOnlyEnvironment.debug
+        REnv.debug
           ~level:2
           renv
           ~start:(lazy (Format.sprintf "driver: %s" (Type.show candidate)))
@@ -957,8 +953,8 @@ end = struct
     in
     retry ()
 
-  let are_disjoint (renv : ReadOnlyEnvironment.t) (env : Environment.t) ty ty' =
-    ReadOnlyEnvironment.debug
+  let are_disjoint (renv : REnv.t) (env : Env.t) ty ty' =
+    REnv.debug
       ~level:1
       renv
       ~start:
@@ -980,7 +976,7 @@ end = struct
        we pay the price.
     *)
     let weaken_for_disjointness ty : t list =
-      ReadOnlyEnvironment.debug
+      REnv.debug
         ~level:2
         renv
         ~start:
@@ -988,7 +984,7 @@ end = struct
         ~end_:show_tys
       @@ fun renv ->
       let step ty =
-        ReadOnlyEnvironment.debug
+        REnv.debug
           ~level:4
           renv
           ~start:
@@ -1006,7 +1002,7 @@ end = struct
         | TypeConst _
         | Newtype _
         | Case _ ->
-          Environment.get_subtypes env ty
+          Env.get_subtypes env ty
         | Option ty -> [Primitive Primitive.Null; ty]
         | Awaitable _ -> [Awaitable Mixed]
         | Enum _ -> Primitive.[Primitive Int; Primitive String]
@@ -1033,7 +1029,7 @@ end = struct
         | Like _ -> [Mixed]
       in
       let rec driver acc =
-        ReadOnlyEnvironment.debug
+        REnv.debug
           ~level:3
           renv
           ~start:
@@ -1076,11 +1072,8 @@ end = struct
        || List.mem subtypes' Mixed ~equal
        || have_overlapping_types (subtypes, subtypes'))
 
-  let inhabitant_of
-      (renv : ReadOnlyEnvironment.t) (env : Environment.t) (ty : t) =
-    let renv =
-      ReadOnlyEnvironment.{ renv with pick_immediately_inhabited = true }
-    in
+  let inhabitant_of (renv : REnv.t) (env : Env.t) (ty : t) =
+    let renv = REnv.{ renv with pick_immediately_inhabited = true } in
     let subtype = subtype_of renv env ty in
     let inhabitant = expr_of subtype in
     match inhabitant with
@@ -1092,19 +1085,17 @@ end = struct
            ^ show ty
            ^ " but it is uninhabitaed. This indicates bug in `milner`.")
 
-  let mk_arraykey (renv : ReadOnlyEnvironment.t) (env : Environment.t) =
-    let renv =
-      ReadOnlyEnvironment.{ renv with pick_immediately_inhabited = false }
-    in
+  let mk_arraykey (renv : REnv.t) (env : Env.t) =
+    let renv = REnv.{ renv with pick_immediately_inhabited = false } in
     subtype_of renv env (Primitive Primitive.Arraykey)
 
   let rec mk_classish
-      (renv : ReadOnlyEnvironment.t)
-      (env : Environment.t)
+      (renv : REnv.t)
+      (env : Env.t)
       ~(parent : (Kind.classish * string * generic option) option)
       ~(complexity : int)
       ~(depth : int) =
-    ReadOnlyEnvironment.debug
+    REnv.debug
       ~level:2
       renv
       ~start:(lazy "mk_classish")
@@ -1131,7 +1122,7 @@ end = struct
              let (env, child) =
                mk_classish renv env ~parent ~complexity ~depth
              in
-             Environment.record_subtype env ~super ~sub:child)
+             Env.record_subtype env ~super ~sub:child)
     in
     let (name, num_of_children) =
       match kind with
@@ -1164,15 +1155,14 @@ end = struct
         in
         let (env, instantiation) =
           let renv =
-            ReadOnlyEnvironment.
-              {
-                renv with
-                for_option_ty = false;
-                for_reified_ty =
-                  is_reified || renv.ReadOnlyEnvironment.for_reified_ty;
-                for_alias_def = false;
-                for_enum_def = false;
-              }
+            let open REnv in
+            {
+              renv with
+              for_option_ty = false;
+              for_reified_ty = is_reified || renv.for_reified_ty;
+              for_alias_def = false;
+              for_enum_def = false;
+            }
           in
           mk renv env ~complexity ~depth:(Some depth)
         in
@@ -1182,25 +1172,22 @@ end = struct
     in
     let env = gen_children env ~parent:(kind, name, generic) num_of_children in
     let env =
-      Environment.add_definition env
+      Env.add_definition env
       @@ Definition.classish kind ~name ~parent ~generic ~members:[]
     in
     (env, Classish { kind; name; generic })
 
-  and mk
-      (renv : ReadOnlyEnvironment.t)
-      (env : Environment.t)
-      ~(complexity : int)
-      ~(depth : int option) : Environment.t * t =
+  and mk (renv : REnv.t) (env : Env.t) ~(complexity : int) ~(depth : int option)
+      : Env.t * t =
     let depth = Option.value ~default:0 depth in
     let kind = Kind.pick ~complexity renv in
     let mk ?(for_alias_def = false) renv env =
-      mk ReadOnlyEnvironment.{ renv with for_alias_def } env ~depth:(Some depth)
+      mk REnv.{ renv with for_alias_def } env ~depth:(Some depth)
     in
     let subtype_of ?(for_alias_def = false) renv env =
-      subtype_of ReadOnlyEnvironment.{ renv with for_alias_def } env
+      subtype_of REnv.{ renv with for_alias_def } env
     in
-    ReadOnlyEnvironment.debug
+    REnv.debug
       ~level:1
       renv
       ~start:(lazy (Format.sprintf "mk %s" (Kind.show kind)))
@@ -1214,7 +1201,7 @@ end = struct
         match
           mk
             ~complexity:(complexity - 1)
-            ReadOnlyEnvironment.{ renv with for_option_ty = true }
+            REnv.{ renv with for_option_ty = true }
             env
         with
         | (_, Mixed) -> candidate ()
@@ -1229,7 +1216,7 @@ end = struct
       let (env, ty) =
         mk
           ~complexity:(complexity - 1)
-          ReadOnlyEnvironment.{ renv with for_option_ty = false }
+          REnv.{ renv with for_option_ty = false }
           env
       in
       (env, Awaitable ty)
@@ -1240,10 +1227,8 @@ end = struct
       let (env, aliased) =
         mk ~complexity:default_complexity renv env ~for_alias_def:true
       in
-      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
-      let env =
-        Environment.add_definition env @@ Definition.alias ~name aliased
-      in
+      let env = Env.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.add_definition env @@ Definition.alias ~name aliased in
       (env, ty)
     | Kind.Newtype ->
       let name = fresh "N" in
@@ -1259,10 +1244,9 @@ end = struct
           in
           (env, aliased, None)
       in
-      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.record_subtype env ~super:ty ~sub:aliased in
       let env =
-        Environment.add_definition env
-        @@ Definition.newtype ~name ~bound aliased
+        Env.add_definition env @@ Definition.newtype ~name ~bound aliased
       in
       (env, ty)
     | Kind.TypeConst ->
@@ -1272,9 +1256,9 @@ end = struct
       let class_name = fresh "CTC" in
       let qualified_name = Format.sprintf "%s::%s" class_name tc_name in
       let ty = TypeConst { name = qualified_name } in
-      let env = Environment.record_subtype env ~super:ty ~sub:aliased in
+      let env = Env.record_subtype env ~super:ty ~sub:aliased in
       let env =
-        Environment.add_definition env
+        Env.add_definition env
         @@ Definition.classish
              ~name:class_name
              ~parent:None
@@ -1312,7 +1296,7 @@ end = struct
              discard it if disjointness fails. *)
           let (env_with_disjunct, disjunct) = mk renv env in
           let env_with_disjunct =
-            Environment.record_subtype env_with_disjunct ~super:ty ~sub:disjunct
+            Env.record_subtype env_with_disjunct ~super:ty ~sub:disjunct
           in
           if
             List.for_all
@@ -1324,15 +1308,14 @@ end = struct
             add_disjuncts (env, disjuncts)
       in
       let (env, disjunct) = mk renv env in
-      let env = Environment.record_subtype env ~super:ty ~sub:disjunct in
+      let env = Env.record_subtype env ~super:ty ~sub:disjunct in
       let (env, disjuncts) = add_disjuncts (env, [disjunct]) in
       let env =
-        Environment.add_definition env
-        @@ Definition.case_type ~name ~bound disjuncts
+        Env.add_definition env @@ Definition.case_type ~name ~bound disjuncts
       in
       let env =
         Option.fold bound ~init:env ~f:(fun env bound ->
-            Environment.record_subtype env ~super:bound ~sub:ty)
+            Env.record_subtype env ~super:bound ~sub:ty)
       in
       (env, ty)
     | Kind.Enum ->
@@ -1340,37 +1323,28 @@ end = struct
       let ty = Enum { name } in
       let (env, bound, underlying_ty, value) =
         if Random.bool () then
-          let bound =
-            mk_arraykey
-              ReadOnlyEnvironment.{ renv with for_enum_def = true }
-              env
-          in
+          let bound = mk_arraykey REnv.{ renv with for_enum_def = true } env in
           let underlying_ty =
-            subtype_of
-              ReadOnlyEnvironment.{ renv with for_enum_def = true }
-              env
-              bound
+            subtype_of REnv.{ renv with for_enum_def = true } env bound
           in
           let value = inhabitant_of renv env underlying_ty in
-          let env = Environment.record_subtype env ~super:bound ~sub:ty in
+          let env = Env.record_subtype env ~super:bound ~sub:ty in
           (env, Some bound, underlying_ty, value)
         else
           let underlying_ty =
-            mk_arraykey
-              ReadOnlyEnvironment.{ renv with for_enum_def = true }
-              env
+            mk_arraykey REnv.{ renv with for_enum_def = true } env
           in
           let value = inhabitant_of renv env underlying_ty in
-          let env = Environment.record_subtype env ~super:Mixed ~sub:ty in
+          let env = Env.record_subtype env ~super:Mixed ~sub:ty in
           (env, None, underlying_ty, value)
       in
       let env =
-        Environment.add_definition env
+        Env.add_definition env
         @@ Definition.enum ~name ~bound underlying_ty ~value
       in
       (env, ty)
     | Kind.Container -> begin
-      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
+      let renv = REnv.{ renv with for_option_ty = false } in
       match Container.pick () with
       | Container.Vec ->
         let (env, ty) = mk ~complexity:(complexity - 1) renv env in
@@ -1387,7 +1361,7 @@ end = struct
       (* Sadly, although nullary tuples can be generated with an expression,
          there is no corresponding denotable type. *)
       let n = geometric_between min_tuple_arity max_tuple_arity in
-      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
+      let renv = REnv.{ renv with for_option_ty = false } in
       let (env, conjuncts) =
         List.init n ~f:(fun _ -> ())
         |> List.fold_map ~init:env ~f:(fun env _ ->
@@ -1396,7 +1370,7 @@ end = struct
       (env, Tuple { conjuncts; open_ = false })
     | Kind.Shape ->
       let keys = choose_nondet shape_keys in
-      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
+      let renv = REnv.{ renv with for_option_ty = false } in
       let mk_field env key =
         let (env, ty) = mk ~complexity:(complexity - 1) renv env in
         let optional = Random.bool () in
@@ -1406,7 +1380,7 @@ end = struct
       let open_ = Random.bool () in
       (env, Shape { fields; open_ })
     | Kind.Function ->
-      let renv = ReadOnlyEnvironment.{ renv with for_option_ty = false } in
+      let renv = REnv.{ renv with for_option_ty = false } in
       let (env, parameters) =
         List.init (geometric_between 0 3) ~f:(fun _ -> ())
         |> List.fold_map ~init:env ~f:(fun env _ ->

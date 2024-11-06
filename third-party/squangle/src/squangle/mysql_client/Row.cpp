@@ -182,7 +182,6 @@ template <>
 bool RowBlock::getField(size_t row, size_t field_num) const {
   CHECK_LT(row, rows_.size());
   CHECK_LT(field_num, row_fields_info_->numFields());
-  CHECK(!isNull(row, field_num));
 
   return rows_[row].as<bool>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;
@@ -204,7 +203,6 @@ template <>
 int64_t RowBlock::getField(size_t row, size_t field_num) const {
   CHECK_LT(row, rows_.size());
   CHECK_LT(field_num, row_fields_info_->numFields());
-  CHECK(!isNull(row, field_num));
 
   if (isDate(row, field_num)) {
     return getDateField(row, field_num);
@@ -229,7 +227,6 @@ template <>
 uint64_t RowBlock::getField(size_t row, size_t field_num) const {
   CHECK_LT(row, rows_.size());
   CHECK_LT(field_num, row_fields_info_->numFields());
-  CHECK(!isNull(row, field_num));
 
   return rows_[row].as<uint64_t>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;
@@ -250,7 +247,6 @@ template <>
 double RowBlock::getField(size_t row, size_t field_num) const {
   CHECK_LT(row, rows_.size());
   CHECK_LT(field_num, row_fields_info_->numFields());
-  CHECK(!isNull(row, field_num));
 
   return rows_[row].as<double>(field_num, [&](const auto& arg) {
     using T = std::decay_t<decltype(arg)>;

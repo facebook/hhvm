@@ -85,7 +85,6 @@ class StorageRow {
   template <typename T, typename Func>
   T as(size_t column, Func&& func) const {
     DCHECK_LT(column, control_.size());
-    DCHECK(!isNull(column));
 
     Offsets offsets;
     auto data_type = readControl(column, &offsets);
@@ -96,9 +95,7 @@ class StorageRow {
 
     switch (data_type) {
       case dtNull:
-        DCHECK(false);
-        throw std::runtime_error(
-            "data type is null - this should have been checked earlier");
+        return func(folly::StringPiece());
 
       case dtBoolTrue:
         return func(true);

@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/accounting.h"
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/request-uri.h"
@@ -225,6 +226,8 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   ServerStats::Reset();
   SourceRootInfo::ResetLogging();
 
+  Accounting::onRequestEnd(transport);
+  
   if (is_hphp_session_initialized()) {
     hphp_session_exit();
   } else {

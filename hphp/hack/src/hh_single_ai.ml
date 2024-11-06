@@ -20,9 +20,6 @@ type options = {
   tcopt: GlobalOptions.t;
 }
 
-(* Canonical builtins from our hhi library *)
-let hhi_builtins = Hhi.get_raw_hhi_contents ()
-
 (* All of the stuff that hh_single_type_check relies on is sadly not contained
  * in the hhi library, so we include a very small number of magic builtins *)
 let magic_builtins =
@@ -245,7 +242,7 @@ let decl_and_run_mode
 
     (* Take the builtins (file, contents) array and create relative paths *)
     Array.fold
-      (Array.append magic_builtins hhi_builtins)
+      magic_builtins
       ~init:Relative_path.Map.empty
       ~f:(fun acc (f, src) ->
         let f = Path.concat hhi_root f |> Path.to_string in
@@ -326,7 +323,7 @@ let main_hack ({ tcopt; _ } as opts) (sharedmem_config : SharedMem.config) :
   Decl_store.set Ai_decl_heap.decl_store;
   Tempfile.with_tempdir (fun root ->
       Tempfile.with_tempdir (fun hhi_root ->
-          Hhi.set_hhi_root_for_unit_test hhi_root;
+          Hhi.set_custom_hhi_root hhi_root;
           Relative_path.set_path_prefix Relative_path.Root root;
           Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
           Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");

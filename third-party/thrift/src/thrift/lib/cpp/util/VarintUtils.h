@@ -53,6 +53,11 @@ uint32_t readVarint64(
 uint32_t writeVarint32(uint32_t n, uint8_t* pkt);
 
 /**
+ * Write an i64 as a varint. Results in 1-10 bytes on the wire.
+ */
+uint32_t writeVarint64(uint64_t n, uint8_t* pkt);
+
+/**
  * Convert n into a zigzag int. This allows negative numbers to be
  * represented compactly as a varint.
  */

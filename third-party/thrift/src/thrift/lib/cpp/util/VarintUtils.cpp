@@ -101,6 +101,28 @@ uint32_t writeVarint32(uint32_t n, uint8_t* pkt) {
   return wsize;
 }
 
+uint32_t writeVarint64(uint64_t n, uint8_t* pkt) {
+  uint8_t buf[10];
+  uint32_t wsize = 0;
+
+  while (true) {
+    if ((n & ~0x7F) == 0) {
+      buf[wsize++] = (int8_t)n;
+      break;
+    } else {
+      buf[wsize++] = (int8_t)((n & 0x7F) | 0x80);
+      n >>= 7;
+    }
+  }
+
+  // Caller will advance pkt.
+  for (auto i = 0u; i < wsize; i++) {
+    pkt[i] = buf[i];
+  }
+
+  return wsize;
+}
+
 namespace detail {
 [[noreturn]] void throwInvalidVarint() {
   throw std::out_of_range("invalid varint read");

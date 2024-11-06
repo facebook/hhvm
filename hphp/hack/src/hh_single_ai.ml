@@ -20,29 +20,6 @@ type options = {
   tcopt: GlobalOptions.t;
 }
 
-(* All of the stuff that hh_single_type_check relies on is sadly not contained
- * in the hhi library, so we include a very small number of magic builtins *)
-let magic_builtins =
-  [|
-    ( "hh_single_type_check_magic.hhi",
-      "<?hh\n"
-      ^ "namespace {\n"
-      ^ "async function gena<Tk as arraykey, Tv>(
-  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
-): Awaitable<darray<Tk, Tv>>;\n"
-      ^ "function hh_show(<<__AcceptDisposable>> $val) {}\n"
-      ^ "function hh_expect(<<__AcceptDisposable>> $val) {}\n"
-      ^ "function hh_expect_equivalent(<<__AcceptDisposable>> $val) {}\n"
-      ^ "function hh_show_env() {}\n"
-      ^ "function hh_log_level($key, $level) {}\n"
-      ^ "function hh_force_solve () {}"
-      ^ "}\n"
-      ^ "namespace HH\\Lib\\Tuple{\n"
-      ^ "function gen();\n"
-      ^ "function from_async();\n"
-      ^ "}\n" );
-  |]
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -219,12 +196,11 @@ let decl_and_run_mode
       in
       extra_builtins |> List.fold ~f:add_file_content ~init:[] |> Array.of_list
     in
-    let magic_builtins = Array.append magic_builtins extra_builtins in
     (* Check that magic_builtin filenames are unique *)
     let () =
-      let n_of_builtins = Array.length magic_builtins in
+      let n_of_builtins = Array.length extra_builtins in
       let n_of_unique_builtins =
-        Array.to_list magic_builtins
+        Array.to_list extra_builtins
         |> List.map ~f:fst
         |> SSet.of_list
         |> SSet.cardinal
@@ -232,7 +208,7 @@ let decl_and_run_mode
       if n_of_builtins <> n_of_unique_builtins then
         die "Multiple magic builtins share the same base name.\n"
     in
-    Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
+    Array.iter extra_builtins ~f:(fun (file_name, file_contents) ->
         let file_path = Path.concat hhi_root file_name in
         let file = Path.to_string file_path in
         Sys_utils.try_touch
@@ -242,7 +218,7 @@ let decl_and_run_mode
 
     (* Take the builtins (file, contents) array and create relative paths *)
     Array.fold
-      magic_builtins
+      extra_builtins
       ~init:Relative_path.Map.empty
       ~f:(fun acc (f, src) ->
         let f = Path.concat hhi_root f |> Path.to_string in

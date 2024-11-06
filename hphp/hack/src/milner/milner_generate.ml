@@ -898,21 +898,18 @@ end = struct
           let variadic =
             match variadic with
             | None ->
-              Lazy.force
-              @@ select
-                   [
-                     lazy None;
-                     lazy
-                       (Some
-                          (driver
-                             ReadOnlyEnvironment.
-                               {
-                                 renv with
-                                 pick_immediately_inhabited = false;
-                                 for_alias_def = false;
-                               }
-                             Mixed));
-                   ]
+              let variadic_subtype =
+                let renv =
+                  ReadOnlyEnvironment.
+                    {
+                      renv with
+                      pick_immediately_inhabited = false;
+                      for_alias_def = false;
+                    }
+                in
+                lazy (Some (driver renv Mixed))
+              in
+              Lazy.force @@ select [lazy None; variadic_subtype]
             | Some ty -> Some ty
           in
           [Function { parameters; variadic; return_ }]

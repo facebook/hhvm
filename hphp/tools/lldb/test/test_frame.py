@@ -1,8 +1,8 @@
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import unittest
 
-import hhvm_lldb.frame as frame
-import hhvm_lldb.utils as utils
+import hphp.tools.lldb.frame as frame
+import hphp.tools.lldb.utils as utils
 
 
 class FrameTestCase(base.TestHHVMBinary):

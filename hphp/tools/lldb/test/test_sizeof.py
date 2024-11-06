@@ -1,6 +1,6 @@
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
-import hhvm_lldb.sizeof as sizeof
-import hhvm_lldb.utils as utils
+import hphp.tools.lldb.sizeof as sizeof
+import hphp.tools.lldb.utils as utils
 
 
 class SizeofCommandHHVMTestCase(base.TestHHVMBinary):

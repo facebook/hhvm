@@ -18,10 +18,10 @@ try:
     # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
-    import hhvm_lldb.idx as idx
-    import hhvm_lldb.sizeof as sizeof
-    import hhvm_lldb.unit as unit
-    import hhvm_lldb.utils as utils
+    import hphp.tools.lldb.idx as idx
+    import hphp.tools.lldb.sizeof as sizeof
+    import hphp.tools.lldb.unit as unit
+    import hphp.tools.lldb.utils as utils
 
 
 # pyre-fixme[11]: Annotation `SBValue` is not defined as a type.

@@ -29,7 +29,7 @@ for path in [
 assert lldb_path, "Couldn't find lldb on host"
 
 sys.path.append(lldb_path)
-import hhvm_lldb.utils as utils
+import hphp.tools.lldb.utils as utils
 
 # pyre-fixme[21]: Could not find module `lldb`.
 import lldb

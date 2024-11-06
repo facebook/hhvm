@@ -14,7 +14,7 @@ try:
     # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
-    import hhvm_lldb.utils as utils
+    import hphp.tools.lldb.utils as utils
 
 # ------------------------------------------------------------------------------
 # Size accessors

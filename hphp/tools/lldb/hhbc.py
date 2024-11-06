@@ -18,9 +18,9 @@ try:
     # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
-    import hhvm_lldb.idx as idx
-    import hhvm_lldb.lookup as lookup
-    import hhvm_lldb.utils as utils
+    import hphp.tools.lldb.idx as idx
+    import hphp.tools.lldb.lookup as lookup
+    import hphp.tools.lldb.utils as utils
 
 """
 The hhx command essentially allows you to dump the bytecode contained

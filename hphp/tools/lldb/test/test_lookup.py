@@ -1,6 +1,6 @@
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
-import hhvm_lldb.lookup as lookup
-import hhvm_lldb.utils as utils
+import hphp.tools.lldb.lookup as lookup
+import hphp.tools.lldb.utils as utils
 
 
 class LookupCommandTestCase(base.TestHHVMBinary):

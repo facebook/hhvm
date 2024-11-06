@@ -1,8 +1,8 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
-import hhvm_lldb.hhbc as hhbc
-import hhvm_lldb.utils as utils
+import hphp.tools.lldb.hhbc as hhbc
+import hphp.tools.lldb.utils as utils
 
 
 # Only setting allocateBCRegion breakpoint

@@ -19,9 +19,9 @@ try:
     # pyre-fixme[21]: Could not find module `utils`.
     import utils
 except ModuleNotFoundError:
-    import hhvm_lldb.frame as frame
-    import hhvm_lldb.idx as idx
-    import hhvm_lldb.utils as utils
+    import hphp.tools.lldb.frame as frame
+    import hphp.tools.lldb.idx as idx
+    import hphp.tools.lldb.utils as utils
 
 # ------------------------------------------------------------------------------
 # Helpers.

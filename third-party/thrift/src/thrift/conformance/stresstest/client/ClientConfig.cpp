@@ -59,8 +59,66 @@ DEFINE_uint64(
     5,
     "interval in milliseconds used by the generated load");
 DEFINE_bool(enable_checksum, false, "Enable checksum validation using XXH3");
+DEFINE_string(
+    compression_config, "", "Compression config to use (ZSTD, ZLIB, LZ4)");
+DEFINE_string(
+    compression_level,
+    "",
+    "Compression level value to use. (DEFAULT, LESS, MORE)");
 
 namespace apache::thrift::stress {
+
+namespace detail {
+
+template <typename Config>
+Config createConfigFromFlags() {
+  Config config;
+  if (FLAGS_compression_level.empty()) {
+    return config;
+  }
+
+  typename std::remove_reference<decltype(Config().levelPreset().value())>::type
+      levelPreset;
+  if (TEnumTraits<typename std::remove_reference<
+          decltype(Config().levelPreset().value())>::type>()
+          .findValue(FLAGS_compression_level, &levelPreset)) {
+    config.levelPreset_ref() = levelPreset;
+    return config;
+  } else {
+    LOG(FATAL) << fmt::format(
+        "Unrecognized option for compression_level '{}'",
+        FLAGS_compression_level);
+  }
+}
+
+std::optional<CompressionConfig> createCompressionConfigFromFlags() {
+  if (FLAGS_compression_config.empty()) {
+    return std::nullopt;
+  }
+
+  CodecConfig codecConfig;
+  if (FLAGS_compression_config == "ZSTD") {
+    codecConfig.set_zstdConfig(
+        detail::createConfigFromFlags<ZstdCompressionCodecConfig>());
+  } else if (FLAGS_compression_config == "ZLIB") {
+    codecConfig.set_zlibConfig(
+        detail::createConfigFromFlags<ZlibCompressionCodecConfig>());
+  } else if (FLAGS_compression_config == "LZ4") {
+    codecConfig.set_lz4Config(
+        detail::createConfigFromFlags<Lz4CompressionCodecConfig>());
+  } else {
+    LOG(FATAL) << fmt::format(
+        "Unrecognized option for compression_config '{}'",
+        FLAGS_compression_config);
+  }
+
+  CompressionConfig compressionConfig;
+  compressionConfig.codecConfig_ref() = codecConfig;
+
+  return compressionConfig;
+}
+
+} // namespace detail
 
 /* static */ ClientConfig ClientConfig::createFromFlags() {
   ClientSecurity security;
@@ -81,6 +139,7 @@ namespace apache::thrift::stress {
   connCfg.serverHost = folly::SocketAddress(
       FLAGS_server_host, FLAGS_server_port, /* allowNameLookup */ true);
   connCfg.security = security;
+  connCfg.compressionConfigOpt = detail::createCompressionConfigFromFlags();
   connCfg.certPath = FLAGS_client_cert_path;
   connCfg.keyPath = FLAGS_client_key_path;
   connCfg.trustedCertsPath = FLAGS_client_ca_path;

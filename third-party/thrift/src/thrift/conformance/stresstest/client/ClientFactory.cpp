@@ -242,6 +242,11 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
 ClientFactory::createRocketClient(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto chan = RocketClientChannel::newChannel(createSocket(evb, cfg));
+
+  if (cfg.compressionConfigOpt) {
+    chan->setDesiredCompressionConfig(*cfg.compressionConfigOpt);
+  }
+
   return std::make_unique<StressTestAsyncClient>(std::move(chan));
 }
 

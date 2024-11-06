@@ -19,6 +19,7 @@
 #include <chrono>
 #include <gflags/gflags.h>
 #include <folly/SocketAddress.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 DECLARE_string(server_host);
 DECLARE_int32(server_port);
@@ -39,6 +40,8 @@ DECLARE_int64(warmup_s);
 DECLARE_uint32(target_qps);
 DECLARE_bool(gen_load);
 DECLARE_uint64(gen_load_interval);
+DECLARE_string(compression_config);
+DECLARE_string(compression_level);
 
 namespace apache::thrift::stress {
 
@@ -51,6 +54,7 @@ enum class ClientSecurity {
 struct ClientConnectionConfig {
   folly::SocketAddress serverHost;
   ClientSecurity security;
+  std::optional<CompressionConfig> compressionConfigOpt;
   std::string certPath;
   std::string keyPath;
   std::string trustedCertsPath;

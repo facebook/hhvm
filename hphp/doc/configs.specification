@@ -5,6 +5,265 @@ hphp/runtime/base/configs/TARGETS
 
 The format can be found in hphp/tools/configs/generate_configs.rs
 
+# Server
+
+  A lot of configs uses Server.Mode so put this first
+
+- bool Server.Mode = false, UNKNOWN, nobind
+- int Server.ThreadJobMaxQueuingMilliSeconds = -1, UNKNOWN
+- bool Server.ThreadDropStack = false, UNKNOWN
+- bool Server.HttpSafeMode = false, UNKNOWN
+- bool Server.FixPathInfo = false, UNKNOWN
+- bool Server.AddVaryEncoding = true, UNKNOWN
+- bool Server.LogSettingsOnStartup = false, UNKNOWN
+- bool Server.LogReorderProps = false, UNKNOWN
+- bool Server.WarmupConcurrently = false, UNKNOWN
+- bool Server.DedupeWarmupRequests = false, UNKNOWN
+- int Server.WarmupThreadCount = 1, UNKNOWN
+- int Server.ExtendedWarmup.ThreadCount = 1, UNKNOWN
+- int Server.ExtendedWarmup.DelaySeconds = 60, UNKNOWN
+- int Server.ExtendedWarmup.Repeat = 1, UNKNOWN
+- std::vector<std::string> Server.WarmupRequests = {}, UNKNOWN
+- std::vector<std::string> Server.ExtendedWarmup.Requests = {}, UNKNOWN
+- std::string Server.CleanupRequest = "", UNKNOWN
+- int Server.InternalWarmupThreads = 0, UNKNOWN
+- boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
+- bool Server.ExitOnBindFail = false, UNKNOWN
+- bool Server.LogBootStats = true, UNKNOWN
+- std::string Server.Host = "", UNKNOWN
+- int Server.Port = 80, UNKNOWN
+- int Server.PortFd = -1, UNKNOWN, nobind
+- std::string Server.DefaultServerNameSuffix = "", UNKNOWN
+- bool Server.AlwaysDecodePostDataDefault = true, UNKNOWN
+- bool Server.SetChunkedTransferEncoding = true, UNKNOWN
+- std::string Server.Type = "proxygen", UNKNOWN
+- std::string Server.IP = "", UNKNOWN
+- std::string Server.FileSocket = "", UNKNOWN
+- int Server.SchedPolicy = -1, UNKNOWN
+- int Server.SchedPriority = 0, UNKNOWN
+- int Server.Backlog = 128, UNKNOWN
+- int Server.ConnectionLimit = 0, UNKNOWN
+- int Server.ThreadCount, UNKNOWN
+- int Server.QueueCount = Server.ThreadCount, UNKNOWN
+- int Server.IOThreadCount = 1, UNKNOWN
+- int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
+- int Server.HugeThreadCount = 0, UNKNOWN
+
+  Number of worker threads with stack partially on huge pages
+
+- int Server.HugeStackSizeKb = 384, UNKNOWN
+- uint32_t Server.LoopSampleRate = 0, UNKNOWN
+- int Server.WarmupThrottleRequestCount = 0, UNKNOWN
+- int Server.WarmupThrottleThreadCount, UNKNOWN
+- int Server.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
+- int Server.RequestTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.MaxRequestAgeFactor = 0, UNKNOWN
+- int Server.PspTimeoutSeconds = 0, UNKNOWN
+- int Server.PspCpuTimeoutSeconds = 0, UNKNOWN
+- int64_t Server.RequestHugeMaxBytes = 24LL << 20, UNKNOWN
+
+  Approximate upper bound for thread heap that is backed by huge pages.
+  This doesn't include the first slab colocated with thread stack, if any.
+
+- int Server.GracefulShutdownWait = 0, UNKNOWN
+- bool Server.HarshShutdown = true, UNKNOWN
+- bool Server.KillOnTimeout = true, UNKNOWN
+- bool Server.EvilShutdown = true, UNKNOWN
+- int Server.PreShutdownWait = 0, UNKNOWN
+- int Server.ShutdownListenWait = 0, UNKNOWN
+- int Server.ShutdownEOMWait = 0, UNKNOWN
+- int Server.PrepareToStopTimeout = 240, UNKNOWN
+- int Server.PartialPostStatusCode = -1, UNKNOWN
+- bool Server.StopOld = false, UNKNOWN
+
+  If `StopOld` is set, we try to stop the old server running
+  on the local host earlier when we initialize, and we do not start
+  serving requests until we are confident that the system can give
+  the new server `RSSNeededMb` resident memory, or till `StopOldWait`
+  seconds passes after an effort to stop the old server is made.
+
+- int Server.StopOldWait = 30, UNKNOWN
+- int64_t Server.RSSNeededMb = 4096, UNKNOWN
+- int64_t Server.CriticalFreeMb = 512, UNKNOWN
+- int Server.CacheFreeFactor = 50, UNKNOWN, postprocess
+- bool Server.Five0ThreeOnShutdownAbort = false, UNKNOWN, lookuppath(Server.503OnShutdownAbort)
+- int Server.Five0ThreeRetryAfterSeconds = -1, UNKNOWN, lookuppath(Server.503RetryAfterSeconds)
+- std::vector<std::string> Server.SSLNextProtocols = {}, UNKNOWN
+- bool Server.EnableH2C = false, UNKNOWN
+- bool Server.EnableKeepAlive = true, UNKNOWN
+- bool Server.ExposeHPHP = true, UNKNOWN
+- bool Server.ExposeXFBServer = false, UNKNOWN
+- bool Server.ExposeXFBDebug = false, UNKNOWN
+- bool Server.ExposeLoadhint = false, UNKNOWN
+- std::string Server.XFBDebugSSLKey = "", UNKNOWN
+- int Server.ConnectionTimeoutSeconds = -1, UNKNOWN
+- bool Server.EnableOutputBuffering = false, UNKNOWN
+- std::string Server.OutputHandler = "", UNKNOWN
+- bool Server.ImplicitFlush = false, UNKNOWN
+- bool Server.EnableEarlyFlush = true, UNKNOWN
+- bool Server.ForceChunkedEncoding = false, UNKNOWN
+- int64_t Server.MaxPostSize = 100, UNKNOWN, postprocess
+- bool Server.AlwaysPopulateRawPostData = false, UNKNOWN
+- bool Server.ExpiresActive = true, UNKNOWN
+- int Server.ExpiresDefault = 2592000, UNKNOWN, postprocess
+- std::string Server.DefaultCharsetName = "", UNKNOWN
+- int64_t Server.RequestBodyReadLimit = -1, UNKNOWN
+
+  If a request has a body over this limit, switch to on-demand reading.
+  -1 for no limit.
+
+- bool Server.AllowNonBlockingPosts = true, UNKNOWN
+
+  Allow POST requests containing NonBlockingPost header to start execution
+  without waiting for the entire POST body.
+
+- bool Server.EnableSSL = false, UNKNOWN
+- int Server.SSLPort = 443, UNKNOWN
+- int Server.SSLPortFd = -1, UNKNOWN, nobind
+- std::string Server.SSLCertificateFile = "", UNKNOWN
+- std::string Server.SSLCertificateKeyFile = "", UNKNOWN
+- std::string Server.SSLCertificateDir = "", UNKNOWN
+- std::string Server.SSLTicketSeedFile = "", UNKNOWN
+- bool Server.TLSDisableTLS1_2 = false, UNKNOWN
+- std::string Server.TLSClientCipherSpec = "", UNKNOWN
+- bool Server.EnableSSLWithPlainText = false, UNKNOWN
+- int Server.SSLClientAuthLevel = 0, UNKNOWN, postprocess
+
+  Level of TLS client auth. Valid values are
+  0 => disabled (default)
+  1 => optional (verify if client presents a cert)
+  2 => required (client must present a valid cert)
+
+- std::string Server.SSLClientCAFile = "", UNKNOWN, postprocess
+
+  CA file to verify client cert against.
+
+- std::string Server.ClientAuthAclIdentity = "", UNKNOWN
+
+  Which ACL identity to check the client against.
+
+- std::string Server.ClientAuthAclAction = "", UNKNOWN
+
+  Which ACL action to check the client against.
+
+- bool Server.ClientAuthFailClose = false, UNKNOWN
+
+  If true, terminate connection immediately if a client fails ACL,
+  otherwise log it and let in.
+
+- uint32_t Server.ClientAuthLogSampleBase = 100, UNKNOWN, postprocess
+
+  On average, sample X connections per ClientAuthLogSampleBase connections,
+  where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
+  ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
+  disable sampling.
+  For example, if ClientAuthLogSampleBase = 100,
+  ClientAuthSuccessLogSampleRatio = 0, and
+  ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
+  and half (50/100) of client auth failures will be logged.
+
+- uint32_t Server.ClientAuthSuccessLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- uint32_t Server.ClientAuthFailureLogSampleRatio = 0, UNKNOWN, postprocess
+
+  See ClientAuthLogSampleBase
+
+- std::string Server.FileCache = "", UNKNOWN
+- std::string Server.DefaultDocument = "index.php", UNKNOWN
+- std::string Server.GlobalDocument = "", UNKNOWN
+- std::string Server.ErrorDocument404 = "", UNKNOWN, postprocess
+- bool Server.ForbiddenAs404 = false, UNKNOWN
+- std::string Server.ErrorDocument500 = "", UNKNOWN, postprocess
+- std::string Server.FatalErrorMessage = "", UNKNOWN
+- bool Server.EnableStaticContentFromDisk = true, UNKNOWN
+- bool Server.Utf8izeReplace = true, UNKNOWN
+- std::string Server.RequestInitFunction = "", UNKNOWN
+- std::string Server.RequestInitDocument = "", UNKNOWN
+- bool Server.ThreadJobLIFO = false, UNKNOWN
+- int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
+- std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
+- std::string Server.FontPath = "", UNKNOWN
+- uint64_t Server.RequestMemoryOOMKillBytes = 128ULL << 20, UNKNOWN
+- std::string Server.SourceRoot, UNKNOWN
+- bool Server.SafeFileAccess = false, UNKNOWN
+- std::vector<std::string> Server.AllowedDirectories = {}, UNKNOWN
+- bool Server.UnserializationWhitelistCheck = false, UNKNOWN
+- bool Server.UnserializationWhitelistCheckWarningOnly = true, UNKNOWN
+- int64_t Server.UnserializationBigMapThreshold = 1 << 16, UNKNOWN
+- std::set<std::string> Server.AllowedFiles = {}, UNKNOWN
+- std::set<std::string> Server.ForbiddenFileExtensions = {}, UNKNOWN
+- bool Server.LockCodeMemory = false, UNKNOWN
+- int Server.MaxArrayChain = INT_MAX, UNKNOWN, postprocess
+- bool Server.WarnOnCollectionToArray = false, UNKNOWN
+- bool Server.UseDirectCopy = false, UNKNOWN
+- bool Server.AlwaysUseRelativePath = false, UNKNOWN
+- bool Server.ApplySecondaryQueuePenalty = false, UNKNOWN
+
+  Loadhint queue penalty
+
+- bool Server.Forking.Enabled = true, UNKNOWN
+- bool Server.Forking.LogForkAttempts = false, UNKNOWN
+- std::string Server.LightProcessFilePrefix = "./lightprocess", UNKNOWN
+
+  The file name that is used by LightProcess to bind the socket
+  is the following prefix followed by the pid of the hphp process.
+
+- int Server.LightProcessCount = 0, UNKNOWN
+- bool Server.LightProcessStrictUser = false, UNKNOWN
+- bool Server.ForceServerNameToHeader = false, UNKNOWN
+- bool Server.PathDebug = false, UNKNOWN
+- std::string Server.User = "", UNKNOWN
+
+  Run server under this user account
+
+- bool Server.AllowRunAsRoot = false, UNKNOWN
+
+  Allow running hhvm as root
+
+- int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
+- int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind
+- int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
+- std::string Server.Upload.TmpDir = "/tmp", UNKNOWN, lookuppath(Server.Upload.UploadsTmpDir)
+- bool Server.Upload.EnableFileUploads = true, UNKNOWN
+- int64_t Server.Upload.MaxFileUploads = 20, UNKNOWN
+- bool Server.Upload.EnableUploadProgress = false, UNKNOWN
+- int Server.Upload.Rfc1867Freq = 256 * 1024, UNKNOWN, postprocess
+- std::string Server.Upload.Rfc1867Prefix = "vupload_", UNKNOWN
+- std::string Server.Upload.Rfc1867Name = "video_ptoken", UNKNOWN
+- int64_t Server.ImageMemoryMaxBytes = 0, UNKNOWN, postprocess
+- int Server.BrotliCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliChunkedCompressionEnabled = -1, UNKNOWN
+- int Server.BrotliCompressionLgWindowSize = 20, UNKNOWN
+
+  Base 2 logarithm of the sliding window size. Range is 10-24.
+
+- int Server.BrotliCompressionMode = 0, UNKNOWN
+- int Server.BrotliCompressionQuality = 6, UNKNOWN
+- bool Server.BrotliUseLocalArena = false, UNKNOWN
+- int Server.ZstdCompressionEnabled = -1, UNKNOWN
+- int Server.ZstdCompressionLevel = 3, UNKNOWN
+- int Server.ZstdWindowLog = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdTargetBlockSize = 0, UNKNOWN, nobind
+
+  For some reason you can't set this in hdf. I think that is just a mistake but
+  for now I'm keeping the behavior
+
+- int Server.ZstdChecksumRate = 0, UNKNOWN
+- bool Server.ZstdUseLocalArena = false, UNKNOWN
+- int Server.GzipCompressionLevel = 3, UNKNOWN
+- int Server.GzipMaxCompressionLevel = 9, UNKNOWN
+- bool Server.GzipUseLocalArena = false, UNKNOWN
+
+  Enable additional for config.hdf overwrite inputs to scuba:hhvm_config_hdf_logs (eg. machine, cpu, tier, tag etc)
+
+- bool Server.LogTierOverwriteInputs = false, ffledgling
+
 # Autoload
 
 - std::string Autoload.DB.Path = "", UNKNOWN
@@ -1516,263 +1775,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Sandbox.LogsRoot = "", UNKNOWN
 - std::string Sandbox.DefaultUserFile = "", UNKNOWN
 - std::string Sandbox.HostAlias = "", UNKNOWN
-
-# Server
-
-- bool Server.Mode = false, UNKNOWN, nobind
-- int Server.ThreadJobMaxQueuingMilliSeconds = -1, UNKNOWN
-- bool Server.ThreadDropStack = false, UNKNOWN
-- bool Server.HttpSafeMode = false, UNKNOWN
-- bool Server.FixPathInfo = false, UNKNOWN
-- bool Server.AddVaryEncoding = true, UNKNOWN
-- bool Server.LogSettingsOnStartup = false, UNKNOWN
-- bool Server.LogReorderProps = false, UNKNOWN
-- bool Server.WarmupConcurrently = false, UNKNOWN
-- bool Server.DedupeWarmupRequests = false, UNKNOWN
-- int Server.WarmupThreadCount = 1, UNKNOWN
-- int Server.ExtendedWarmup.ThreadCount = 1, UNKNOWN
-- int Server.ExtendedWarmup.DelaySeconds = 60, UNKNOWN
-- int Server.ExtendedWarmup.Repeat = 1, UNKNOWN
-- std::vector<std::string> Server.WarmupRequests = {}, UNKNOWN
-- std::vector<std::string> Server.ExtendedWarmup.Requests = {}, UNKNOWN
-- std::string Server.CleanupRequest = "", UNKNOWN
-- int Server.InternalWarmupThreads = 0, UNKNOWN
-- boost::container::flat_set<std::string> Server.HighPriorityEndPoints = {}, UNKNOWN
-- bool Server.ExitOnBindFail = false, UNKNOWN
-- bool Server.LogBootStats = true, UNKNOWN
-- std::string Server.Host = "", UNKNOWN
-- int Server.Port = 80, UNKNOWN
-- int Server.PortFd = -1, UNKNOWN, nobind
-- std::string Server.DefaultServerNameSuffix = "", UNKNOWN
-- bool Server.AlwaysDecodePostDataDefault = true, UNKNOWN
-- bool Server.SetChunkedTransferEncoding = true, UNKNOWN
-- std::string Server.Type = "proxygen", UNKNOWN
-- std::string Server.IP = "", UNKNOWN
-- std::string Server.FileSocket = "", UNKNOWN
-- int Server.SchedPolicy = -1, UNKNOWN
-- int Server.SchedPriority = 0, UNKNOWN
-- int Server.Backlog = 128, UNKNOWN
-- int Server.ConnectionLimit = 0, UNKNOWN
-- int Server.ThreadCount, UNKNOWN
-- int Server.QueueCount = Server.ThreadCount, UNKNOWN
-- int Server.IOThreadCount = 1, UNKNOWN
-- int Server.HighQueueingThreshold = 60, UNKNOWN, nobind
-- int Server.HugeThreadCount = 0, UNKNOWN
-
-  Number of worker threads with stack partially on huge pages
-
-- int Server.HugeStackSizeKb = 384, UNKNOWN
-- uint32_t Server.LoopSampleRate = 0, UNKNOWN
-- int Server.WarmupThrottleRequestCount = 0, UNKNOWN
-- int Server.WarmupThrottleThreadCount, UNKNOWN
-- int Server.ThreadDropCacheTimeoutSeconds = 0, UNKNOWN
-- int Server.RequestTimeoutSeconds = 0, UNKNOWN
-- int64_t Server.MaxRequestAgeFactor = 0, UNKNOWN
-- int Server.PspTimeoutSeconds = 0, UNKNOWN
-- int Server.PspCpuTimeoutSeconds = 0, UNKNOWN
-- int64_t Server.RequestHugeMaxBytes = 24LL << 20, UNKNOWN
-
-  Approximate upper bound for thread heap that is backed by huge pages.
-  This doesn't include the first slab colocated with thread stack, if any.
-
-- int Server.GracefulShutdownWait = 0, UNKNOWN
-- bool Server.HarshShutdown = true, UNKNOWN
-- bool Server.KillOnTimeout = true, UNKNOWN
-- bool Server.EvilShutdown = true, UNKNOWN
-- int Server.PreShutdownWait = 0, UNKNOWN
-- int Server.ShutdownListenWait = 0, UNKNOWN
-- int Server.ShutdownEOMWait = 0, UNKNOWN
-- int Server.PrepareToStopTimeout = 240, UNKNOWN
-- int Server.PartialPostStatusCode = -1, UNKNOWN
-- bool Server.StopOld = false, UNKNOWN
-
-  If `StopOld` is set, we try to stop the old server running
-  on the local host earlier when we initialize, and we do not start
-  serving requests until we are confident that the system can give
-  the new server `RSSNeededMb` resident memory, or till `StopOldWait`
-  seconds passes after an effort to stop the old server is made.
-
-- int Server.StopOldWait = 30, UNKNOWN
-- int64_t Server.RSSNeededMb = 4096, UNKNOWN
-- int64_t Server.CriticalFreeMb = 512, UNKNOWN
-- int Server.CacheFreeFactor = 50, UNKNOWN, postprocess
-- bool Server.Five0ThreeOnShutdownAbort = false, UNKNOWN, lookuppath(Server.503OnShutdownAbort)
-- int Server.Five0ThreeRetryAfterSeconds = -1, UNKNOWN, lookuppath(Server.503RetryAfterSeconds)
-- std::vector<std::string> Server.SSLNextProtocols = {}, UNKNOWN
-- bool Server.EnableH2C = false, UNKNOWN
-- bool Server.EnableKeepAlive = true, UNKNOWN
-- bool Server.ExposeHPHP = true, UNKNOWN
-- bool Server.ExposeXFBServer = false, UNKNOWN
-- bool Server.ExposeXFBDebug = false, UNKNOWN
-- bool Server.ExposeLoadhint = false, UNKNOWN
-- std::string Server.XFBDebugSSLKey = "", UNKNOWN
-- int Server.ConnectionTimeoutSeconds = -1, UNKNOWN
-- bool Server.EnableOutputBuffering = false, UNKNOWN
-- std::string Server.OutputHandler = "", UNKNOWN
-- bool Server.ImplicitFlush = false, UNKNOWN
-- bool Server.EnableEarlyFlush = true, UNKNOWN
-- bool Server.ForceChunkedEncoding = false, UNKNOWN
-- int64_t Server.MaxPostSize = 100, UNKNOWN, postprocess
-- bool Server.AlwaysPopulateRawPostData = false, UNKNOWN
-- bool Server.ExpiresActive = true, UNKNOWN
-- int Server.ExpiresDefault = 2592000, UNKNOWN, postprocess
-- std::string Server.DefaultCharsetName = "", UNKNOWN
-- int64_t Server.RequestBodyReadLimit = -1, UNKNOWN
-
-  If a request has a body over this limit, switch to on-demand reading.
-  -1 for no limit.
-
-- bool Server.AllowNonBlockingPosts = true, UNKNOWN
-
-  Allow POST requests containing NonBlockingPost header to start execution
-  without waiting for the entire POST body.
-
-- bool Server.EnableSSL = false, UNKNOWN
-- int Server.SSLPort = 443, UNKNOWN
-- int Server.SSLPortFd = -1, UNKNOWN, nobind
-- std::string Server.SSLCertificateFile = "", UNKNOWN
-- std::string Server.SSLCertificateKeyFile = "", UNKNOWN
-- std::string Server.SSLCertificateDir = "", UNKNOWN
-- std::string Server.SSLTicketSeedFile = "", UNKNOWN
-- bool Server.TLSDisableTLS1_2 = false, UNKNOWN
-- std::string Server.TLSClientCipherSpec = "", UNKNOWN
-- bool Server.EnableSSLWithPlainText = false, UNKNOWN
-- int Server.SSLClientAuthLevel = 0, UNKNOWN, postprocess
-
-  Level of TLS client auth. Valid values are
-  0 => disabled (default)
-  1 => optional (verify if client presents a cert)
-  2 => required (client must present a valid cert)
-
-- std::string Server.SSLClientCAFile = "", UNKNOWN, postprocess
-
-  CA file to verify client cert against.
-
-- std::string Server.ClientAuthAclIdentity = "", UNKNOWN
-
-  Which ACL identity to check the client against.
-
-- std::string Server.ClientAuthAclAction = "", UNKNOWN
-
-  Which ACL action to check the client against.
-
-- bool Server.ClientAuthFailClose = false, UNKNOWN
-
-  If true, terminate connection immediately if a client fails ACL,
-  otherwise log it and let in.
-
-- uint32_t Server.ClientAuthLogSampleBase = 100, UNKNOWN, postprocess
-
-  On average, sample X connections per ClientAuthLogSampleBase connections,
-  where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
-  ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
-  disable sampling.
-  For example, if ClientAuthLogSampleBase = 100,
-  ClientAuthSuccessLogSampleRatio = 0, and
-  ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
-  and half (50/100) of client auth failures will be logged.
-
-- uint32_t Server.ClientAuthSuccessLogSampleRatio = 0, UNKNOWN, postprocess
-
-  See ClientAuthLogSampleBase
-
-- uint32_t Server.ClientAuthFailureLogSampleRatio = 0, UNKNOWN, postprocess
-
-  See ClientAuthLogSampleBase
-
-- std::string Server.FileCache = "", UNKNOWN
-- std::string Server.DefaultDocument = "index.php", UNKNOWN
-- std::string Server.GlobalDocument = "", UNKNOWN
-- std::string Server.ErrorDocument404 = "", UNKNOWN, postprocess
-- bool Server.ForbiddenAs404 = false, UNKNOWN
-- std::string Server.ErrorDocument500 = "", UNKNOWN, postprocess
-- std::string Server.FatalErrorMessage = "", UNKNOWN
-- bool Server.EnableStaticContentFromDisk = true, UNKNOWN
-- bool Server.Utf8izeReplace = true, UNKNOWN
-- std::string Server.RequestInitFunction = "", UNKNOWN
-- std::string Server.RequestInitDocument = "", UNKNOWN
-- bool Server.ThreadJobLIFO = false, UNKNOWN
-- int Server.ThreadJobLIFOSwitchThreshold, UNKNOWN
-- std::vector<std::string> Server.IncludeSearchPaths = {}, UNKNOWN
-- std::string Server.FontPath = "", UNKNOWN
-- uint64_t Server.RequestMemoryOOMKillBytes = 128ULL << 20, UNKNOWN
-- std::string Server.SourceRoot, UNKNOWN
-- bool Server.SafeFileAccess = false, UNKNOWN
-- std::vector<std::string> Server.AllowedDirectories = {}, UNKNOWN
-- bool Server.UnserializationWhitelistCheck = false, UNKNOWN
-- bool Server.UnserializationWhitelistCheckWarningOnly = true, UNKNOWN
-- int64_t Server.UnserializationBigMapThreshold = 1 << 16, UNKNOWN
-- std::set<std::string> Server.AllowedFiles = {}, UNKNOWN
-- std::set<std::string> Server.ForbiddenFileExtensions = {}, UNKNOWN
-- bool Server.LockCodeMemory = false, UNKNOWN
-- int Server.MaxArrayChain = INT_MAX, UNKNOWN, postprocess
-- bool Server.WarnOnCollectionToArray = false, UNKNOWN
-- bool Server.UseDirectCopy = false, UNKNOWN
-- bool Server.AlwaysUseRelativePath = false, UNKNOWN
-- bool Server.ApplySecondaryQueuePenalty = false, UNKNOWN
-
-  Loadhint queue penalty
-
-- bool Server.Forking.Enabled = true, UNKNOWN
-- bool Server.Forking.LogForkAttempts = false, UNKNOWN
-- std::string Server.LightProcessFilePrefix = "./lightprocess", UNKNOWN
-
-  The file name that is used by LightProcess to bind the socket
-  is the following prefix followed by the pid of the hphp process.
-
-- int Server.LightProcessCount = 0, UNKNOWN
-- bool Server.LightProcessStrictUser = false, UNKNOWN
-- bool Server.ForceServerNameToHeader = false, UNKNOWN
-- bool Server.PathDebug = false, UNKNOWN
-- std::string Server.User = "", UNKNOWN
-
-  Run server under this user account
-
-- bool Server.AllowRunAsRoot = false, UNKNOWN
-
-  Allow running hhvm as root
-
-- int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
-- int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind
-- int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
-- std::string Server.Upload.TmpDir = "/tmp", UNKNOWN, lookuppath(Server.Upload.UploadsTmpDir)
-- bool Server.Upload.EnableFileUploads = true, UNKNOWN
-- int64_t Server.Upload.MaxFileUploads = 20, UNKNOWN
-- bool Server.Upload.EnableUploadProgress = false, UNKNOWN
-- int Server.Upload.Rfc1867Freq = 256 * 1024, UNKNOWN, postprocess
-- std::string Server.Upload.Rfc1867Prefix = "vupload_", UNKNOWN
-- std::string Server.Upload.Rfc1867Name = "video_ptoken", UNKNOWN
-- int64_t Server.ImageMemoryMaxBytes = 0, UNKNOWN, postprocess
-- int Server.BrotliCompressionEnabled = -1, UNKNOWN
-- int Server.BrotliChunkedCompressionEnabled = -1, UNKNOWN
-- int Server.BrotliCompressionLgWindowSize = 20, UNKNOWN
-
-  Base 2 logarithm of the sliding window size. Range is 10-24.
-
-- int Server.BrotliCompressionMode = 0, UNKNOWN
-- int Server.BrotliCompressionQuality = 6, UNKNOWN
-- bool Server.BrotliUseLocalArena = false, UNKNOWN
-- int Server.ZstdCompressionEnabled = -1, UNKNOWN
-- int Server.ZstdCompressionLevel = 3, UNKNOWN
-- int Server.ZstdWindowLog = 0, UNKNOWN, nobind
-
-  For some reason you can't set this in hdf. I think that is just a mistake but
-  for now I'm keeping the behavior
-
-- int Server.ZstdTargetBlockSize = 0, UNKNOWN, nobind
-
-  For some reason you can't set this in hdf. I think that is just a mistake but
-  for now I'm keeping the behavior
-
-- int Server.ZstdChecksumRate = 0, UNKNOWN
-- bool Server.ZstdUseLocalArena = false, UNKNOWN
-- int Server.GzipCompressionLevel = 3, UNKNOWN
-- int Server.GzipMaxCompressionLevel = 9, UNKNOWN
-- bool Server.GzipUseLocalArena = false, UNKNOWN
-
-  Enable additional for config.hdf overwrite inputs to scuba:hhvm_config_hdf_logs (eg. machine, cpu, tier, tag etc)
-
-- bool Server.LogTierOverwriteInputs = false, ffledgling
 
 # Stats
 

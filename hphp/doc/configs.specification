@@ -5,6 +5,16 @@ hphp/runtime/base/configs/TARGETS
 
 The format can be found in hphp/tools/configs/generate_configs.rs
 
+# Repo
+
+  A lot of configs default value depends on Repo.Authoritative so load
+  Repo first
+
+- bool Repo.Authoritative = Repo.Authoritative, UNKNOWN, staticdefault(false)
+
+  Need to use staticdefault because we sometimes changes the value between static
+  init and config load
+
 # Server
 
   A lot of configs uses Server.Mode so put this first
@@ -1756,10 +1766,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Loads from ProxyURLs and check if config is non-empty
 
 - std::vector<std::string> Proxy.ProxyPatterns = {}, UNKNOWN
-
-# Repo
-
-- bool Repo.Authoritative = false, UNKNOWN
 
 # Sandbox
 

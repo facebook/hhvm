@@ -93,12 +93,12 @@ func newRocketServerSocket(ctx context.Context, proc Processor, log func(format 
 	return &rocketServerSocket{ctx: ctx, proc: proc, log: log}
 }
 
-func (r *rocketServerSocket) metadataPush(msg payload.Payload) {
+func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
 	_ = decodeClientMetadataPush(msg)
 	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
 }
 
-func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	request, err := decodeRequestPayload(msg)
 	if err != nil {
 		return mono.Error(err)
@@ -107,7 +107,7 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err != nil {
 		return mono.Error(err)
 	}
-	if err := process(r.ctx, r.proc, protocol); err != nil {
+	if err := process(s.ctx, s.proc, protocol); err != nil {
 		return mono.Error(err)
 	}
 	response, err := encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
@@ -117,19 +117,19 @@ func (r *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	return mono.Just(response)
 }
 
-func (r *rocketServerSocket) fireAndForget(msg payload.Payload) {
+func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 	request, err := decodeRequestPayload(msg)
 	if err != nil {
-		r.log("rocketServer fireAndForget decode request payload error: %v", err)
+		s.log("rocketServer fireAndForget decode request payload error: %v", err)
 		return
 	}
 	protocol, err := newProtocolBufferFromRequest(request)
 	if err != nil {
-		r.log("rocketServer fireAndForget error creating protocol: %v", err)
+		s.log("rocketServer fireAndForget error creating protocol: %v", err)
 		return
 	}
-	if err := process(r.ctx, r.proc, protocol); err != nil {
-		r.log("rocketServer fireAndForget process error: %v", err)
+	if err := process(s.ctx, s.proc, protocol); err != nil {
+		s.log("rocketServer fireAndForget process error: %v", err)
 		return
 	}
 }

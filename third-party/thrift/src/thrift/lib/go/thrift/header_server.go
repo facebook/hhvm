@@ -50,12 +50,12 @@ func newHeaderServer(processor Processor, listener net.Listener, options *server
 
 // ServeContext starts listening on the transport and accepting new connections
 // and blocks until cancel is called via context or an error occurs.
-func (p *headerServer) ServeContext(ctx context.Context) error {
+func (s *headerServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
-		p.listener.Close()
+		s.listener.Close()
 	}()
-	err := p.acceptLoop(ctx)
+	err := s.acceptLoop(ctx)
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -63,9 +63,9 @@ func (p *headerServer) ServeContext(ctx context.Context) error {
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (p *headerServer) acceptLoop(ctx context.Context) error {
+func (s *headerServer) acceptLoop(ctx context.Context) error {
 	for {
-		conn, err := p.listener.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
 			select {
 			case <-ctx.Done():
@@ -79,19 +79,19 @@ func (p *headerServer) acceptLoop(ctx context.Context) error {
 		}
 
 		go func(ctx context.Context, conn net.Conn) {
-			ctx = p.connContext(ctx, conn)
-			if err := p.processRequests(ctx, conn); err != nil {
-				p.log("error processing request from %s: %s\n", conn.RemoteAddr(), err)
+			ctx = s.connContext(ctx, conn)
+			if err := s.processRequests(ctx, conn); err != nil {
+				s.log("error processing request from %s: %s\n", conn.RemoteAddr(), err)
 				cerror := conn.Close()
 				if cerror != nil {
-					p.log("error closing connection to %s: %s\n", conn.RemoteAddr(), cerror)
+					s.log("error closing connection to %s: %s\n", conn.RemoteAddr(), cerror)
 				}
 			}
 		}(ctx, conn)
 	}
 }
 
-func (p *headerServer) processRequests(ctx context.Context, conn net.Conn) error {
+func (s *headerServer) processRequests(ctx context.Context, conn net.Conn) error {
 	protocol, err := NewHeaderProtocol(conn)
 	if err != nil {
 		return err
@@ -99,12 +99,12 @@ func (p *headerServer) processRequests(ctx context.Context, conn net.Conn) error
 
 	defer func() {
 		if err := recover(); err != nil {
-			p.log("panic in processor: %v: %s", err, debug.Stack())
+			s.log("panic in processor: %v: %s", err, debug.Stack())
 		}
 	}()
 	defer protocol.Close()
 	for {
-		exc := process(ctx, p.processor, protocol)
+		exc := process(ctx, s.processor, protocol)
 		if isEOF(exc) {
 			break
 		}

@@ -947,6 +947,7 @@ class ast_builder : public parser_actions {
     auto const_value = t_const_value::make_map();
     const_value->set_ttype(new_type_ref(fmt::to_string(name), nullptr, range));
     const_value->set_ref_range(range);
+    const_value->set_is_struct_literal(true);
     return const_value;
   }
 

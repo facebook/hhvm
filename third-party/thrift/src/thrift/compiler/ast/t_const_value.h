@@ -222,6 +222,9 @@ class t_const_value {
   void set_ref_range(source_range rng) { ref_range_ = rng; }
   source_range ref_range() const { return ref_range_; }
 
+  void set_is_struct_literal(bool value = true) { is_struct_literal_ = value; }
+  bool is_struct_literal() const { return is_struct_literal_; }
+
   const t_program& program() const {
     check_kind(CV_IDENTIFIER);
     assert(program_);
@@ -295,6 +298,11 @@ class t_const_value {
   bool is_enum_ = false;
   const t_enum* enum_ = nullptr;
   const t_enum_value* enum_val_ = nullptr;
+
+  // This flag is set to true if the value is a struct literal, i.e. when field
+  // assignment using unquoted field names is used. For example:
+  //   const MyStruct s = MyStruct{a = 1, b = 2};
+  bool is_struct_literal_ = false;
 
   static std::string_view kind_to_string(t_const_value_kind kind) {
     switch (kind) {

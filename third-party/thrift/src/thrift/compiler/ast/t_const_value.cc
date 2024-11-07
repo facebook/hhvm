@@ -16,8 +16,6 @@
 
 #include "thrift/compiler/ast/t_const_value.h"
 
-#include <type_traits>
-
 namespace apache::thrift::compiler {
 
 const std::vector<t_const_value*>& t_const_value::get_list_or_empty_map()
